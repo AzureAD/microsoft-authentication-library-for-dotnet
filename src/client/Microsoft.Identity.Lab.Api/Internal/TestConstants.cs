@@ -10,8 +10,6 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Test.Common.Core.Mocks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit
 {
@@ -1100,15 +1098,67 @@ namespace Microsoft.Identity.Test.Unit
         {
             return new MsalTokenResponse
             {
-                IdToken = MockHelpers.CreateIdToken(UniqueId, DisplayableId, tenantId),
+                IdToken = CreateIdToken(UniqueId, DisplayableId, tenantId),
                 AccessToken = "access-token",
-                ClientInfo = MockHelpers.CreateClientInfo(),
+                ClientInfo = CreateClientInfo(),
                 ExpiresIn = 3599,
                 CorrelationId = "correlation-id",
                 RefreshToken = "refresh-token",
                 Scope = s_scope.AsSingleString(),
                 TokenType = "Bearer"
             };
+        }
+
+        /// <summary>
+        /// Creates a base64-encoded client info string using the provided UID and UTID, or returns a default client info if not specified. Optionally creates client info for S2S scenarios when specified.
+        /// </summary>
+        /// <param name="uid"></param>
+        /// <param name="utid"></param>
+        /// <param name="CreateClientInfoForS2S"></param>
+        /// <returns></returns>
+        public static string CreateClientInfo(string uid = TestConstants.Uid, string utid = TestConstants.Utid, bool CreateClientInfoForS2S = false)
+        {
+            if (CreateClientInfoForS2S)
+            {
+                return Base64UrlHelpers.Encode("{\"authz\":[\"value1\",\"value2\"]}");
+            }
+
+            return Base64UrlHelpers.Encode("{\"uid\":\"" + uid + "\",\"utid\":\"" + utid + "\"}");
+        }
+
+        /// <summary>
+        /// Creates an ID token using the default tenant identifier.
+        /// </summary>
+        /// <param name="uniqueId">The unique user/object identifier to include as the OID claim.</param>
+        /// <param name="displayableId">The displayable identifier to include as the preferred username claim.</param>
+        /// <returns>A serialized mock ID token string.</returns>
+        public static string CreateIdToken(string uniqueId, string displayableId)
+        {
+            return CreateIdToken(uniqueId, displayableId, TestConstants.Utid);
+        }
+
+        /// <summary>
+        /// Creates an ID token using the provided tenant identifier.
+        /// </summary>
+        /// <param name="uniqueId">The unique user/object identifier to include as the OID claim.</param>
+        /// <param name="displayableId">The displayable identifier to include as the preferred username claim.</param>
+        /// <param name="tenantId">The tenant identifier to include as the TID claim.</param>
+        /// <returns>A serialized mock ID token string.</returns>
+        public static string CreateIdToken(string uniqueId, string displayableId, string tenantId)
+        {
+            string id = "{\"aud\": \"e854a4a7-6c34-449c-b237-fc7a28093d84\"," +
+                        "\"iss\": \"https://login.microsoftonline.com/6c3d51dd-f0e5-4959-b4ea-a80c4e36fe5e/v2.0/\"," +
+                        "\"iat\": 1455833828," +
+                        "\"nbf\": 1455833828," +
+                        "\"exp\": 1455837728," +
+                        "\"ipaddr\": \"131.107.159.117\"," +
+                        "\"name\": \"Marrrrrio Bossy\"," +
+                        "\"oid\": \"" + uniqueId + "\"," +
+                        "\"preferred_username\": \"" + displayableId + "\"," +
+                        "\"sub\": \"K4_SGGxKqW1SxUAmhg6C1F6VPiFzcx-Qd80ehIEdFus\"," +
+                        "\"tid\": \"" + tenantId + "\"," +
+                        "\"ver\": \"2.0\"}";
+            return string.Format(CultureInfo.InvariantCulture, "someheader.{0}.somesignature", Base64UrlHelpers.Encode(id));
         }
 
         /// <summary>
@@ -1119,9 +1169,9 @@ namespace Microsoft.Identity.Test.Unit
         {
             return new MsalTokenResponse
             {
-                IdToken = MockHelpers.CreateIdToken(UniqueId, DisplayableId),
+                IdToken = CreateIdToken(UniqueId, DisplayableId),
                 AccessToken = "access-token",
-                ClientInfo = MockHelpers.CreateClientInfo(),
+                ClientInfo = CreateClientInfo(),
                 ExpiresIn = 3599,
                 CorrelationId = "correlation-id",
                 RefreshToken = "refresh-token",
