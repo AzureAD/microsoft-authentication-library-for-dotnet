@@ -1,0 +1,2 @@
+# Allow package-lock.json to be tracked so Dependabot can manage dependencies
+!package-lock.json
