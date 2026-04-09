@@ -430,7 +430,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
         [TestMethod]
-        public async Task Imds_ClientMetadataHeaders_AreSentWithRequest_Async()
+        public async Task ImdsClientMetadataHeadersAreSentWithRequestAsync()
         {
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
