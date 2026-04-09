@@ -13,6 +13,7 @@ using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.ManagedIdentity;
+using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
@@ -501,7 +502,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                     {
                         MsalIdParameter.Product,
                         MsalIdParameter.Version,
-                        "client-request-id"
+                        OAuth2Header.CorrelationId
                     };
                     break;
                 case ManagedIdentitySource.CloudShell:
