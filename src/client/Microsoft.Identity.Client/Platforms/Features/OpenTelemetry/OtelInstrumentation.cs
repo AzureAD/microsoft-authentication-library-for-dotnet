@@ -28,6 +28,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
         private const string DurationInL2CacheHistogramName = "MsalDurationInL2Cache.1A";
         private const string DurationInHttpHistogramName = "MsalDurationInHttp.1A";
         private const string DurationInExtensionInMsHistogram = "MsalDurationInExtensionInMs.1B";
+        private const string RemainingTokenLifetimeHistogramName = "MsalRemainingTokenLifetime.1A";
 
         /// <summary>
         /// Meter to hold the MSAL metrics.
@@ -87,6 +88,14 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             DurationInExtensionInMsHistogram,
             unit: "us",
             description: "Performance of token acquisition calls extension latency."));
+
+        /// <summary>
+        /// Histogram to record the remaining lifetime of acquired tokens in seconds.
+        /// </summary>
+        internal static readonly Lazy<Histogram<long>> s_remainingTokenLifetime = new(() => Meter.CreateHistogram<long>(
+            RemainingTokenLifetimeHistogramName,
+            unit: "s",
+            description: "Remaining lifetime of acquired tokens at the time of acquisition."));
 
         public OtelInstrumentation()
         {
@@ -216,6 +225,29 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                         new(TelemetryConstants.CallerSdkId, callerSdkId ?? string.Empty + "," + callerSdkVersion ?? string.Empty),
                         new(TelemetryConstants.CacheRefreshReason, cacheRefreshReason),
                         new(TelemetryConstants.TokenType, tokenType));
+            }
+        }
+
+        public void LogRemainingTokenLifetime(
+            string platform,
+            ApiEvent.ApiIds apiId,
+            TokenSource tokenSource,
+            CacheLevel cacheLevel,
+            CacheRefreshReason cacheRefreshReason,
+            int tokenType,
+            DateTimeOffset expiresOn)
+        {
+            if (s_remainingTokenLifetime.Value.Enabled)
+            {
+                long remainingSeconds = Math.Max(0, (long)(expiresOn - DateTimeOffset.UtcNow).TotalSeconds);
+
+                s_remainingTokenLifetime.Value.Record(remainingSeconds,
+                    new(TelemetryConstants.MsalVersionPlatform, $"{MsalIdHelper.GetMsalVersion()},{platform}"),
+                    new(TelemetryConstants.ApiId, apiId),
+                    new(TelemetryConstants.TokenSource, tokenSource),
+                    new(TelemetryConstants.CacheLevel, cacheLevel),
+                    new(TelemetryConstants.CacheRefreshReason, cacheRefreshReason),
+                    new(TelemetryConstants.TokenType, TelemetryTokenTypeConstants.ToDisplayString(tokenType)));
             }
         }
     }

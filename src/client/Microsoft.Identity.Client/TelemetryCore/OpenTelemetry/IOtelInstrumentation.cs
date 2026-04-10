@@ -38,5 +38,14 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             string callerSdkVersion,
             CacheRefreshReason cacheRefreshReason,
             int tokenType);
+
+        internal void LogRemainingTokenLifetime(
+            string platform,
+            ApiEvent.ApiIds apiId,
+            TokenSource tokenSource,
+            CacheLevel cacheLevel,
+            CacheRefreshReason cacheRefreshReason,
+            int tokenType,
+            DateTimeOffset expiresOn);
     }
 }

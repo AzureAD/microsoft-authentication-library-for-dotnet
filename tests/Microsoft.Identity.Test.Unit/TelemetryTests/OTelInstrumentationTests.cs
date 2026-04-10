@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Test.Unit
                 await AcquireTokenMsalClientExceptionAsync().ConfigureAwait(false);
 
                 s_meterProvider.ForceFlush();
-                VerifyMetrics(6, _exportedMetrics, 2, 2);
+                VerifyMetrics(7, _exportedMetrics, 2, 2);
             }
         }
 
@@ -91,7 +91,7 @@ namespace Microsoft.Identity.Test.Unit
                 await AcquireTokenMsalClientExceptionAsync().ConfigureAwait(false);
 
                 s_meterProvider.ForceFlush();
-                VerifyMetrics(6, _exportedMetrics, 2, 2);
+                VerifyMetrics(7, _exportedMetrics, 2, 2);
             }
         }
 
@@ -147,7 +147,7 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(CacheRefreshReason.NotApplicable, result.AuthenticationResultMetadata.CacheRefreshReason);
 
                 s_meterProvider.ForceFlush();
-                VerifyMetrics(5, _exportedMetrics, 4, 0);
+                VerifyMetrics(6, _exportedMetrics, 4, 0);
             }
         }
 
@@ -222,7 +222,7 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(CacheRefreshReason.NotApplicable, result.AuthenticationResultMetadata.CacheRefreshReason);
 
                 s_meterProvider.ForceFlush();
-                VerifyMetrics(5, _exportedMetrics, 4, 0);
+                VerifyMetrics(6, _exportedMetrics, 4, 0);
             }
         }
 
@@ -279,7 +279,7 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(CacheRefreshReason.NotApplicable, result.AuthenticationResultMetadata.CacheRefreshReason);
 
                 s_meterProvider.ForceFlush();
-                VerifyMetrics(5, _exportedMetrics, 4, 0);
+                VerifyMetrics(6, _exportedMetrics, 4, 0);
             }
         }
 
@@ -329,7 +329,7 @@ namespace Microsoft.Identity.Test.Unit
                 Thread.Sleep(1000);
 
                 s_meterProvider.ForceFlush();
-                VerifyMetrics(4, _exportedMetrics, 3, 1);
+                VerifyMetrics(5, _exportedMetrics, 3, 1);
             }
         }
 
@@ -570,6 +570,24 @@ namespace Microsoft.Identity.Test.Unit
                         expectedTags.Add(TelemetryConstants.ApiId);
                         expectedTags.Add(TelemetryConstants.TokenSource);
                         expectedTags.Add(TelemetryConstants.CacheLevel);
+                        expectedTags.Add(TelemetryConstants.TokenType);
+
+                        foreach (var metricPoint in exportedItem.GetMetricPoints())
+                        {
+                            AssertTags(metricPoint.Tags, expectedTags);
+                        }
+
+                        break;
+
+                    case "MsalRemainingTokenLifetime.1A":
+                        Trace.WriteLine("Verify the metrics captured for MsalRemainingTokenLifetime.1A histogram.");
+                        Assert.AreEqual(MetricType.Histogram, exportedItem.MetricType);
+
+                        expectedTags.Add(TelemetryConstants.MsalVersionPlatform);
+                        expectedTags.Add(TelemetryConstants.ApiId);
+                        expectedTags.Add(TelemetryConstants.TokenSource);
+                        expectedTags.Add(TelemetryConstants.CacheLevel);
+                        expectedTags.Add(TelemetryConstants.CacheRefreshReason);
                         expectedTags.Add(TelemetryConstants.TokenType);
 
                         foreach (var metricPoint in exportedItem.GetMetricPoints())
