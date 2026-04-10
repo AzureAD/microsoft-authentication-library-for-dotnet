@@ -21,5 +21,19 @@ namespace Microsoft.Identity.Client.Internal
         public const int Extension = 5;
 
         public const int MtlsPop = 6;
+
+        /// <summary>
+        /// Maps a telemetry token type integer to its human-readable string representation.
+        /// </summary>
+        internal static string ToDisplayString(int tokenType) => tokenType switch
+        {
+            Bearer => nameof(Bearer),
+            Pop => nameof(Pop),
+            SshCert => nameof(SshCert),
+            AtPop => "ExternalBoundToken",
+            Extension => nameof(Extension),
+            MtlsPop => nameof(MtlsPop),
+            _ => $"Unknown({tokenType})"
+        };
     }
 }

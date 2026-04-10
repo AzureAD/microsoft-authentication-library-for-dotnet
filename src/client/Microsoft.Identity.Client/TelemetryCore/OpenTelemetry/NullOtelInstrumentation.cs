@@ -51,5 +51,17 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
         {
             // No op
         }
+
+        public void LogRemainingTokenLifetime(
+            string platform,
+            ApiEvent.ApiIds apiId,
+            TokenSource tokenSource,
+            CacheLevel cacheLevel,
+            CacheRefreshReason cacheRefreshReason,
+            int tokenType,
+            DateTimeOffset expiresOn)
+        {
+            // No op
+        }
     }
 }

@@ -39,5 +39,14 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             CacheRefreshReason cacheRefreshReason,
             int tokenType,
             string rawStsErrorCode = null);
+
+        internal void LogRemainingTokenLifetime(
+            string platform,
+            ApiEvent.ApiIds apiId,
+            TokenSource tokenSource,
+            CacheLevel cacheLevel,
+            CacheRefreshReason cacheRefreshReason,
+            int tokenType,
+            DateTimeOffset expiresOn);
     }
 }
