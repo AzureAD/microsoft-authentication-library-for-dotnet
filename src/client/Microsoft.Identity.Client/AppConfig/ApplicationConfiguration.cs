@@ -112,6 +112,8 @@ namespace Microsoft.Identity.Client
 
         public bool ExperimentalFeaturesEnabled { get; set; } = false;
 
+        public bool EnableStsRawErrorCodeTelemetry { get; set; } = false;
+
         public IEnumerable<string> ClientCapabilities { get; set; }
         public bool SendX5C { get; internal set; } = false;
         public bool LegacyCacheCompatibilityEnabled { get; internal set; } = true;

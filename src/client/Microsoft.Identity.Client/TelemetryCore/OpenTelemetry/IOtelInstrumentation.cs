@@ -31,12 +31,13 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             ILoggerAdapter logger,
             int TokenType);
 
-        internal void LogFailureMetrics(string platform, 
-            string errorCode, 
+        internal void LogFailureMetrics(string platform,
+            string errorCode,
             ApiEvent.ApiIds apiId,
             string callerSdkId,
             string callerSdkVersion,
             CacheRefreshReason cacheRefreshReason,
-            int tokenType);
+            int tokenType,
+            string stsRawErrorCode = null);
     }
 }

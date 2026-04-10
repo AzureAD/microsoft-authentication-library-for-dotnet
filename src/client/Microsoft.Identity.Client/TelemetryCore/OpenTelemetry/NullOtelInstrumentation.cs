@@ -27,13 +27,14 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             // No op
         }
 
-        public void LogFailureMetrics(string platform, 
-            string errorCode, 
-            ApiEvent.ApiIds apiId, 
+        public void LogFailureMetrics(string platform,
+            string errorCode,
+            ApiEvent.ApiIds apiId,
             string callerSdkId,
             string callerSdkVersion,
             CacheRefreshReason cacheRefreshReason,
-            int tokenType)
+            int tokenType,
+            string stsRawErrorCode = null)
         {
             // No op
         }

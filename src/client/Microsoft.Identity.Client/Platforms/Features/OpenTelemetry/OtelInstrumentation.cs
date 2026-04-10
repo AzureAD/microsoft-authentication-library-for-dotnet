@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 using System;
+using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
@@ -204,19 +205,27 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             string callerSdkId,
             string callerSdkVersion,
             CacheRefreshReason cacheRefreshReason,
-            int tokenType)
+            int tokenType,
+            string stsRawErrorCode = null)
         {
-            if (s_failureCounter.Value.Enabled)
+            if (!s_failureCounter.Value.Enabled)
+                return;
+
+            var tags = new TagList
             {
-                s_failureCounter.Value.Add(1,
-                        new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
-                        new(TelemetryConstants.Platform, platform),
-                        new(TelemetryConstants.ErrorCode, errorCode),
-                        new(TelemetryConstants.ApiId, apiId),
-                        new(TelemetryConstants.CallerSdkId, callerSdkId ?? string.Empty + "," + callerSdkVersion ?? string.Empty),
-                        new(TelemetryConstants.CacheRefreshReason, cacheRefreshReason),
-                        new(TelemetryConstants.TokenType, tokenType));
-            }
+                { TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion() },
+                { TelemetryConstants.Platform, platform },
+                { TelemetryConstants.ErrorCode, errorCode },
+                { TelemetryConstants.ApiId, apiId },
+                { TelemetryConstants.CallerSdkId, callerSdkId ?? string.Empty + "," + callerSdkVersion ?? string.Empty },
+                { TelemetryConstants.CacheRefreshReason, cacheRefreshReason },
+                { TelemetryConstants.TokenType, tokenType }
+            };
+
+            if (!string.IsNullOrEmpty(stsRawErrorCode))
+                tags.Add(TelemetryConstants.StsRawErrorCode, stsRawErrorCode);
+
+            s_failureCounter.Value.Add(1, in tags);
         }
     }
 }

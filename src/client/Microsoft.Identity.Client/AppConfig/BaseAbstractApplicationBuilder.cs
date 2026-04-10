@@ -208,7 +208,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Allows usage of experimental features and APIs. If this flag is not set, experimental features 
+        /// Allows usage of experimental features and APIs. If this flag is not set, experimental features
         /// will throw an exception. For details see https://aka.ms/msal-net-experimental-features
         /// </summary>
         /// <remarks>
@@ -218,6 +218,19 @@ namespace Microsoft.Identity.Client
         public T WithExperimentalFeatures(bool enableExperimentalFeatures = true)
         {
             Config.ExperimentalFeaturesEnabled = enableExperimentalFeatures;
+            return (T)this;
+        }
+
+        /// <summary>
+        /// When enabled, the ESTS raw error code from the identity provider response is included as the
+        /// <c>StsRawErrorCode</c> tag on the <c>MsalFailure</c> OpenTelemetry counter. Opt-in only, because
+        /// ESTS error codes can be high-cardinality and may increase metric storage costs.
+        /// </summary>
+        /// <param name="enable">Set to <c>true</c> to include the tag; <c>false</c> to exclude it. Default is <c>true</c>.</param>
+        /// <returns>The builder to chain the .With methods</returns>
+        public T WithStsRawErrorCodeTelemetry(bool enable = true)
+        {
+            Config.EnableStsRawErrorCodeTelemetry = enable;
             return (T)this;
         }
 
