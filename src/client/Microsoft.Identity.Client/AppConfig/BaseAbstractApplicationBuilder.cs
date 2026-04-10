@@ -222,15 +222,15 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// When enabled, the ESTS raw error code from the identity provider response is included as the
-        /// <c>StsRawErrorCode</c> tag on the <c>MsalFailure</c> OpenTelemetry counter. Opt-in only, because
+        /// When enabled, the raw ESTS error code from the identity provider response is included as the
+        /// <c>RawStsErrorCode</c> tag on the <c>MsalFailure</c> OpenTelemetry counter. Opt-in only, because
         /// ESTS error codes can be high-cardinality and may increase metric storage costs.
         /// </summary>
         /// <param name="enable">Set to <c>true</c> to include the tag; <c>false</c> to exclude it. Default is <c>true</c>.</param>
         /// <returns>The builder to chain the .With methods</returns>
-        public T WithStsRawErrorCodeTelemetry(bool enable = true)
+        public T WithRawStsErrorCodeTelemetry(bool enable = true)
         {
-            Config.EnableStsRawErrorCodeTelemetry = enable;
+            Config.EnableRawStsErrorCodeTelemetry = enable;
             return (T)this;
         }
 

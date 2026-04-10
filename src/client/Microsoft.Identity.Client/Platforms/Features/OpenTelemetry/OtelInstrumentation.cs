@@ -206,7 +206,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             string callerSdkVersion,
             CacheRefreshReason cacheRefreshReason,
             int tokenType,
-            string stsRawErrorCode = null)
+            string rawStsErrorCode = null)
         {
             if (!s_failureCounter.Value.Enabled)
                 return;
@@ -222,8 +222,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                 { TelemetryConstants.TokenType, tokenType }
             };
 
-            if (!string.IsNullOrEmpty(stsRawErrorCode))
-                tags.Add(TelemetryConstants.StsRawErrorCode, stsRawErrorCode);
+            if (!string.IsNullOrEmpty(rawStsErrorCode))
+                tags.Add(TelemetryConstants.RawStsErrorCode, rawStsErrorCode);
 
             s_failureCounter.Value.Add(1, in tags);
         }

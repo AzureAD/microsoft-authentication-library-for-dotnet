@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             string callerSdkVersion,
             CacheRefreshReason cacheRefreshReason,
             int tokenType,
-            string stsRawErrorCode = null)
+            string rawStsErrorCode = null)
         {
             // No op
         }

@@ -415,7 +415,116 @@ namespace Microsoft.Identity.Test.Unit
                         .BuildConcrete();
         }
 
-        private void VerifyMetrics(int expectedMetricCount, List<Metric> exportedMetrics, 
+        [TestMethod]
+        public async Task MsalFailure_WithRawStsErrorCodeTelemetry_TagIncludedAsync()
+        {
+            using (_harness = CreateTestHarness())
+            {
+                CreateApplicationWithRawStsErrorCodeTelemetry();
+
+                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                _harness.HttpManager.AddTokenResponse(TokenResponseType.InvalidClient);
+
+                MsalServiceException ex = await AssertException.TaskThrowsAsync<MsalServiceException>(
+                    () => _cca.AcquireTokenForClient(TestConstants.s_scopeForAnotherResource)
+                        .WithExtraQueryParameters(extraQueryParams)
+                        .WithTenantId(TestConstants.Utid)
+                        .ExecuteAsync(CancellationToken.None)).ConfigureAwait(false);
+
+                Assert.IsNotNull(ex.ErrorCodes, "ErrorCodes should be populated from IDP response.");
+
+                s_meterProvider.ForceFlush();
+
+                var failureMetric = _exportedMetrics.First(m => m.Name == "MsalFailure");
+                foreach (var metricPoint in failureMetric.GetMetricPoints())
+                {
+                    var tags = GetTagDictionary(metricPoint.Tags);
+                    Assert.IsTrue(tags.ContainsKey(TelemetryConstants.RawStsErrorCode),
+                        "RawStsErrorCode tag should be present when opted in.");
+                    Assert.AreEqual(ex.ErrorCodes[0], tags[TelemetryConstants.RawStsErrorCode]);
+                }
+            }
+        }
+
+        [TestMethod]
+        public async Task MsalFailure_WithoutRawStsErrorCodeTelemetry_TagNotIncludedAsync()
+        {
+            using (_harness = CreateTestHarness())
+            {
+                CreateApplication(); // no WithRawStsErrorCodeTelemetry
+
+                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                _harness.HttpManager.AddTokenResponse(TokenResponseType.InvalidClient);
+
+                MsalServiceException ex = await AssertException.TaskThrowsAsync<MsalServiceException>(
+                    () => _cca.AcquireTokenForClient(TestConstants.s_scopeForAnotherResource)
+                        .WithExtraQueryParameters(extraQueryParams)
+                        .WithTenantId(TestConstants.Utid)
+                        .ExecuteAsync(CancellationToken.None)).ConfigureAwait(false);
+
+                Assert.IsNotNull(ex);
+
+                s_meterProvider.ForceFlush();
+
+                var failureMetric = _exportedMetrics.First(m => m.Name == "MsalFailure");
+                foreach (var metricPoint in failureMetric.GetMetricPoints())
+                {
+                    var tags = GetTagDictionary(metricPoint.Tags);
+                    Assert.IsFalse(tags.ContainsKey(TelemetryConstants.RawStsErrorCode),
+                        "RawStsErrorCode tag should not be present when not opted in.");
+                }
+            }
+        }
+
+        [TestMethod]
+        public async Task MsalFailure_WithRawStsErrorCodeTelemetry_ClientException_TagNotIncludedAsync()
+        {
+            using (_harness = CreateTestHarness())
+            {
+                CreateApplicationWithRawStsErrorCodeTelemetry();
+
+                // Null scope triggers MsalClientException before any HTTP call — no ErrorCodes
+                MsalClientException ex = await AssertException.TaskThrowsAsync<MsalClientException>(
+                    () => _cca.AcquireTokenForClient(null)
+                        .WithExtraQueryParameters(extraQueryParams)
+                        .WithTenantId(TestConstants.Utid)
+                        .ExecuteAsync(CancellationToken.None)).ConfigureAwait(false);
+
+                Assert.IsNotNull(ex);
+
+                s_meterProvider.ForceFlush();
+
+                var failureMetric = _exportedMetrics.First(m => m.Name == "MsalFailure");
+                foreach (var metricPoint in failureMetric.GetMetricPoints())
+                {
+                    var tags = GetTagDictionary(metricPoint.Tags);
+                    Assert.IsFalse(tags.ContainsKey(TelemetryConstants.RawStsErrorCode),
+                        "RawStsErrorCode tag should not be present for non-service exceptions.");
+                }
+            }
+        }
+
+        private void CreateApplicationWithRawStsErrorCodeTelemetry()
+        {
+            _cca = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithExperimentalFeatures()
+                .WithRawStsErrorCodeTelemetry()
+                .WithAuthority(TestConstants.AuthorityUtidTenant)
+                .WithClientSecret(TestConstants.ClientSecret)
+                .WithHttpManager(_harness.HttpManager)
+                .BuildConcrete();
+        }
+
+        private static IDictionary<string, object> GetTagDictionary(ReadOnlyTagCollection tags)
+        {
+            var dict = new Dictionary<string, object>();
+            foreach (var tag in tags)
+                dict[tag.Key] = tag.Value;
+            return dict;
+        }
+
+        private void VerifyMetrics(int expectedMetricCount, List<Metric> exportedMetrics,
             long expectedSuccessfulRequests, long expectedFailedRequests)
         {
             Assert.HasCount(expectedMetricCount, exportedMetrics, "Count of metrics recorded is not as expected.");

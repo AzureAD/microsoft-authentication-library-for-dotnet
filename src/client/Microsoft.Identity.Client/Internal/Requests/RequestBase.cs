@@ -108,7 +108,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 LogFailureTelemetryToOtel(
                     ex.ErrorCode, apiEvent, apiEvent.CacheInfo,
-                    ServiceBundle.Config.EnableStsRawErrorCodeTelemetry ? (ex as MsalServiceException)?.ErrorCodes?[0] : null);
+                    ServiceBundle.Config.EnableRawStsErrorCodeTelemetry ? (ex as MsalServiceException)?.ErrorCodes?[0] : null);
                 throw;
             }
             catch (Exception ex)
@@ -135,7 +135,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         AuthenticationRequestParameters.RequestContext.Logger);
         }
 
-        private void LogFailureTelemetryToOtel(string errorCodeToLog, ApiEvent apiEvent, CacheRefreshReason cacheRefreshReason, string stsRawErrorCode = null)
+        private void LogFailureTelemetryToOtel(string errorCodeToLog, ApiEvent apiEvent, CacheRefreshReason cacheRefreshReason, string rawStsErrorCode = null)
         {
             // Log metrics
             ServiceBundle.PlatformProxy.OtelInstrumentation.LogFailureMetrics(
@@ -146,7 +146,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         apiEvent.CallerSdkVersion,
                         cacheRefreshReason,
                         apiEvent.TokenType,
-                        stsRawErrorCode);
+                        rawStsErrorCode);
         }
 
         private Tuple<string, string> ParseScopesForTelemetry()
