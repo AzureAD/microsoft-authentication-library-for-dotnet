@@ -67,9 +67,6 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
             if ((conditions & SkipConditions.macOS) != 0 && RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 return "Skipped on macOS";
 
-            if ((conditions & SkipConditions.NotAzureDevOps) != 0 && string.IsNullOrEmpty(Environment.GetEnvironmentVariable("TF_BUILD")))
-                return "Skipped outside Azure DevOps";
-
 #if IGNORE_FEDERATED
             if ((conditions & SkipConditions.FederatedDisabled) != 0)
                 return "Skipped: federated tests disabled";
@@ -115,10 +112,8 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
         Windows           = 4,
         /// <summary>Skip when running on macOS.</summary>
         macOS             = 8,
-        /// <summary>Skip when not running inside an Azure DevOps pipeline (TF_BUILD env var absent).</summary>
-        NotAzureDevOps    = 16,
         /// <summary>Skip when built with the IGNORE_FEDERATED compile-time symbol.</summary>
-        FederatedDisabled = 32
+        FederatedDisabled = 16
     }
 
     public static class RunOnHelper
