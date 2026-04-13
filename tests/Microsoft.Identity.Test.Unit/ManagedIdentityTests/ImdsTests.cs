@@ -81,11 +81,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.AreEqual(NumRequests, requestsMade);
 
                 // Verify client metadata headers are forwarded to IMDS on the successful request
+                const string ExpectedSku = "MSAL.NetCore";
                 Assert.IsTrue(successHandler.ActualRequestHeaders.TryGetValues(MsalIdParameter.Product, out var skuValues));
-                Assert.AreEqual("MSAL.NetCore", skuValues.FirstOrDefault());
+                Assert.AreEqual(ExpectedSku, skuValues.FirstOrDefault());
                 Assert.IsTrue(successHandler.ActualRequestHeaders.TryGetValues(MsalIdParameter.Version, out var verValues));
                 Assert.IsFalse(string.IsNullOrEmpty(verValues.FirstOrDefault()));
-                Assert.IsTrue(successHandler.ActualRequestHeaders.TryGetValues(OAuth2Header.CorrelationId, out var corrIdValues));
+                Assert.IsTrue(successHandler.ActualRequestHeaders.TryGetValues(OAuth2Header.XMsCorrelationId, out var corrIdValues));
                 Assert.IsTrue(Guid.TryParse(corrIdValues.FirstOrDefault(), out _));
             }
         }

@@ -502,7 +502,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                     {
                         MsalIdParameter.Product,
                         MsalIdParameter.Version,
-                        OAuth2Header.CorrelationId
+                        OAuth2Header.XMsCorrelationId
                     };
                     break;
                 case ManagedIdentitySource.CloudShell:
