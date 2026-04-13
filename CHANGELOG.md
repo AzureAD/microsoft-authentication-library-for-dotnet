@@ -83,6 +83,7 @@ This release expands extensibility for confidential-client authentication (certi
 
 ### Bug Fixes
 * Updated the ConfidentialClientApplication's ROPC API to add WithSendX5C() during authentication requests.[#5637](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5637)
+* Removed HTTP response headers from `MsalException.ToString()` to avoid logging STS cookies (these are non-critical). [#5641](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5641)
 
 4.80.0
 ======
