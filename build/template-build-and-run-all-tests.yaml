@@ -1,146 +1,203 @@
 parameters:
   DataFileDirectory: 'Release'
 
-jobs: #Build and stage projects
+stages:
 
-- job: 'PreBuildCheck'
-  pool:
-      vmImage: 'windows-2022'
-      demands:
-      - msbuild
-      - visualstudio
-  variables:
-      runCodesignValidationInjection: false
-      Codeql.SkipTaskAutoInjection: true
+# ──────────────────────────────────────────────
+# Stage 1 — Build & Prepare Artifacts
+# ──────────────────────────────────────────────
+- stage: Build
+  displayName: 'Build'
+  jobs:
 
-  steps:
-  #Pre build analysis
-    - template: template-prebuild-code-analysis.yaml
+  - job: 'PreBuildCheck'
+    pool:
+        vmImage: 'windows-2022'
+        demands:
+        - msbuild
+        - visualstudio
+    variables:
+        runCodesignValidationInjection: false
+        Codeql.SkipTaskAutoInjection: true
 
-- job: 'BuildAndStageProjects'
-  pool:
-      vmImage: 'windows-2022'
-      demands:
-      - msbuild
-      - visualstudio
-  variables:
-      Codeql.SkipTaskAutoInjection: true
+    steps:
+    #Pre build analysis
+      - template: template-prebuild-code-analysis.yaml
 
-  steps:
-  # Bootstrap the build
-  - template: template-build-and-prep-automation.yaml
+  - job: 'BuildAndStageProjects'
+    pool:
+        vmImage: 'windows-2022'
+        demands:
+        - msbuild
+        - visualstudio
+    variables:
+        Codeql.SkipTaskAutoInjection: true
 
-# BUILD AND RUN CACHE COMPAT TESTS
-- job: 'BuildAndRunCacheCompatTests'
-  dependsOn:
-    - 'BuildAndStageProjects'
-  pool:
-      vmImage: 'windows-2022'
-      demands:
-      - msbuild
-      - visualstudio
-  variables:
-      runCodesignValidationInjection: false
-      Codeql.SkipTaskAutoInjection: true
+    steps:
+    # Bootstrap the build
+    - template: template-build-and-prep-automation.yaml
 
-  steps:
-  - template: template-cachecompat-automation.yaml
-    parameters:
-      BuildPlatform: '$(BuildPlatform)'
-      BuildConfiguration: '$(BuildConfiguration)'
-      BuildSolution: 'LibsAndSamples.sln'
+  - job: 'BuilMacConsoleAppWithBroker'
+    pool:
+        vmImage: macOS-14
 
-  #Desktop Unit + Integration Tests
-- job: 'RunDesktopTests'
-  #strategy:
-  #  parallel: 5
-  dependsOn:
-  - 'BuildAndStageProjects'
-  pool:
-      vmImage: 'windows-2022'
-      demands:
-      - msbuild
-      - visualstudio
-  variables:
-      runCodesignValidationInjection: false
-      Codeql.SkipTaskAutoInjection: true
+    variables:
+        runCodesignValidationInjection: false
+        Codeql.SkipTaskAutoInjection: true
 
-  steps:
-  - template: template-desktop-unit-and-automation.yaml
+    steps:
+    - template: template-build-on-mac.yaml
 
-  - task: BuildQualityChecks@10
-    condition: ne(variables['Build.SourceBranch'], 'refs/heads/main') #gate should not run on main branch
-    inputs:
-      checkCoverage: '$(CodeCoverageGateEnabled)'
-      coverageFailOption: 'build'
-      coverageType: 'lines'
-      allowCoverageVariance: false 
-      coverageVariance: 0.01 # Specify by how much the current amount of covered or uncovered code (depending on the parameter *Use Uncovered Elements*) may deviate from the previous value before the policy fails. Please be aware that the code coverage may slowly but steadily decrease from build to build if you allow a code coverage variance. Thus, you should keep this value as low as possible.
-      treat0of0as100: true
-      coverageUpperThreshold: '90'
-      includePartiallySucceeded: false
-      fallbackOnPRTargetBranch: false
-      baseDefinitionId: '905' #this is the PR build and it is used as a baseline
-      baseBranchRef: 'main'
+# ──────────────────────────────────────────────
+# Stage 2 — Unit Tests
+# ──────────────────────────────────────────────
+- stage: UnitTests
+  displayName: 'Unit Tests'
+  dependsOn: Build
+  jobs:
 
-- job: 'BuildandRunIntegrationTestsOnLinux'
-  pool:
-      vmImage: 'ubuntu-22.04'
-      demands:
-      - msbuild
-  variables:
-      runCodesignValidationInjection: false
-      Codeql.SkipTaskAutoInjection: true
+  - job: 'RunDesktopUnitTests'
+    pool:
+        vmImage: 'windows-2022'
+        demands:
+        - msbuild
+        - visualstudio
+    variables:
+        runCodesignValidationInjection: false
+        Codeql.SkipTaskAutoInjection: true
 
-  steps:
-  - template: template-test-on-linux.yaml
+    steps:
+    - template: template-desktop-test-setup.yaml
 
-- job: 'BuilMacConsoleAppWithBroker'
-  pool:
-      vmImage: macOS-14
+    - template: template-run-unit-tests.yaml
+      parameters:
+        BuildConfiguration: '$(BuildConfiguration)'
 
-  variables:
-      runCodesignValidationInjection: false
-      Codeql.SkipTaskAutoInjection: true
+    - task: BuildQualityChecks@10
+      condition: ne(variables['Build.SourceBranch'], 'refs/heads/main') #gate should not run on main branch
+      inputs:
+        checkCoverage: '$(CodeCoverageGateEnabled)'
+        coverageFailOption: 'build'
+        coverageType: 'lines'
+        allowCoverageVariance: false 
+        coverageVariance: 0.01
+        treat0of0as100: true
+        coverageUpperThreshold: '90'
+        includePartiallySucceeded: false
+        fallbackOnPRTargetBranch: false
+        baseDefinitionId: '905' #this is the PR build and it is used as a baseline
+        baseBranchRef: 'main'
 
-  steps:
-  - template: template-build-on-mac.yaml
+# ──────────────────────────────────────────────
+# Stage 3 — Cache Compat Tests
+# ──────────────────────────────────────────────
+- stage: CacheCompatTests
+  displayName: 'Cache Compat Tests'
+  dependsOn: Build
+  jobs:
 
-- job: 'RunManagedIdentityE2ETestsOnAzureArc'
-  displayName: 'Managed Identity E2E Tests – Azure ARC Agent'
-  dependsOn: ['BuildAndStageProjects']
-  pool:
-    name: 'MSALMSIAZUREARC'
-  condition: and(succeeded(), eq(variables['RunManagedIdentityE2EArcTests'], 'true'))
+  - job: 'BuildAndRunCacheCompatTests'
+    pool:
+        vmImage: 'windows-2022'
+        demands:
+        - msbuild
+        - visualstudio
+    variables:
+        runCodesignValidationInjection: false
+        Codeql.SkipTaskAutoInjection: true
 
-  steps:
-  - template: template-run-mi-e2e-azurearc.yaml
-    parameters:
-      BuildConfiguration: 'Release'
-      TargetFramework: 'net8.0'
+    steps:
+    - template: template-cachecompat-automation.yaml
+      parameters:
+        BuildPlatform: '$(BuildPlatform)'
+        BuildConfiguration: '$(BuildConfiguration)'
+        BuildSolution: 'LibsAndSamples.sln'
 
-- job: 'RunManagedIdentityE2ETestsOnImds'
-  displayName: 'Managed Identity E2E Tests – VM / IMDS'
-  dependsOn: ['BuildAndStageProjects']
-  pool:
-    name: 'ID4SMSIHostedAgent'
-  condition: and(succeeded(), eq(variables['RunManagedIdentityE2EVmTests'], 'true'))
+# ──────────────────────────────────────────────
+# Stage 4 — Desktop Integration Tests (Windows)
+# ──────────────────────────────────────────────
+- stage: DesktopIntegrationTests
+  displayName: 'Desktop Integration Tests'
+  dependsOn: Build
+  jobs:
 
-  steps:
-  - template: template-run-mi-e2e-imds.yaml
-    parameters:
-      BuildConfiguration: 'Release'
-      TargetFramework:   'net8.0'
+  - job: 'RunDesktopIntegrationTests'
+    pool:
+        vmImage: 'windows-2022'
+        demands:
+        - msbuild
+        - visualstudio
+    variables:
+        runCodesignValidationInjection: false
+        Codeql.SkipTaskAutoInjection: true
 
-- job: 'RunManagedIdentityE2ETestsOnImdsV2'
-  displayName: 'Managed Identity E2E Tests – VM / IMDS V2'
-  dependsOn: ['BuildAndStageProjects']
-  pool:
-    name: 'MSALMSIV2'
-  condition: and(succeeded(), eq(variables['RunManagedIdentityE2EVmTests'], 'true'))
+    steps:
+    - template: template-desktop-test-setup.yaml
 
-  steps:
-  - template: template-run-mi-e2e-imdsv2.yaml
-    parameters:
-      BuildConfiguration: 'Release'
-      TargetFramework:   'net8.0'
+    - template: template-run-integration-tests.yaml
+      parameters:
+        BuildConfiguration: '$(BuildConfiguration)'
+
+# ──────────────────────────────────────────────
+# Stage 5 — Linux Integration Tests
+# ──────────────────────────────────────────────
+- stage: LinuxIntegrationTests
+  displayName: 'Linux Integration Tests'
+  dependsOn: [] # Builds from source — no dependency on Build stage
+  jobs:
+
+  - job: 'BuildandRunIntegrationTestsOnLinux'
+    pool:
+        vmImage: 'ubuntu-22.04'
+        demands:
+        - msbuild
+    variables:
+        runCodesignValidationInjection: false
+        Codeql.SkipTaskAutoInjection: true
+
+    steps:
+    - template: template-test-on-linux.yaml
+
+# ──────────────────────────────────────────────
+# Stage 6 — Managed Identity E2E Tests
+# ──────────────────────────────────────────────
+- stage: ManagedIdentityE2ETests
+  displayName: 'Managed Identity E2E Tests'
+  dependsOn: Build
+  jobs:
+
+  - job: 'RunManagedIdentityE2ETestsOnAzureArc'
+    displayName: 'Managed Identity E2E Tests – Azure ARC Agent'
+    pool:
+      name: 'MSALMSIAZUREARC'
+    condition: and(succeeded(), eq(variables['RunManagedIdentityE2EArcTests'], 'true'))
+
+    steps:
+    - template: template-run-mi-e2e-azurearc.yaml
+      parameters:
+        BuildConfiguration: 'Release'
+        TargetFramework: 'net8.0'
+
+  - job: 'RunManagedIdentityE2ETestsOnImds'
+    displayName: 'Managed Identity E2E Tests – VM / IMDS'
+    pool:
+      name: 'ID4SMSIHostedAgent'
+    condition: and(succeeded(), eq(variables['RunManagedIdentityE2EVmTests'], 'true'))
+
+    steps:
+    - template: template-run-mi-e2e-imds.yaml
+      parameters:
+        BuildConfiguration: 'Release'
+        TargetFramework:   'net8.0'
+
+  - job: 'RunManagedIdentityE2ETestsOnImdsV2'
+    displayName: 'Managed Identity E2E Tests – VM / IMDS V2'
+    pool:
+      name: 'MSALMSIV2'
+    condition: and(succeeded(), eq(variables['RunManagedIdentityE2EVmTests'], 'true'))
+
+    steps:
+    - template: template-run-mi-e2e-imdsv2.yaml
+      parameters:
+        BuildConfiguration: 'Release'
+        TargetFramework:   'net8.0'
