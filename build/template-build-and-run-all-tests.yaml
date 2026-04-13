@@ -57,14 +57,14 @@ stages:
     - template: template-build-on-mac.yaml
 
 # ──────────────────────────────────────────────
-# Stage 3 — Unit Tests
+# Stage 3 — Unit Tests (.NET Framework)
 # ──────────────────────────────────────────────
-- stage: UnitTests
-  displayName: 'Unit Tests'
+- stage: UnitTestsNetFx
+  displayName: 'Unit Tests .NET Framework'
   dependsOn: Build
   jobs:
 
-  - job: 'RunDesktopUnitTests'
+  - job: 'RunUnitTestsNetFx'
     pool:
         vmImage: 'windows-2022'
         demands:
@@ -77,9 +77,63 @@ stages:
     steps:
     - template: template-desktop-test-setup.yaml
 
-    - template: template-run-unit-tests.yaml
-      parameters:
-        BuildConfiguration: '$(BuildConfiguration)'
+    - task: VSTest@2
+      displayName: 'Run unit tests .NET Framework (non-OneBranch)'
+      condition: and(succeeded(), eq(variables['PipelineType'], 'legacy'))
+      inputs:
+        testSelector: 'testAssemblies'
+        testAssemblyVer2: '**\Microsoft.Identity.Test.Unit\bin\**\net4*\Microsoft.Identity.Test.Unit.dll'
+        searchFolder: '$(System.DefaultWorkingDirectory)'
+        runInParallel: true
+        codeCoverageEnabled: false
+        failOnMinTestsNotRun: true
+        minimumExpectedTests: '1'
+        pathtoCustomTestAdapters: 'C:\temp'
+
+    - task: VSTest@2
+      displayName: 'Run unit tests .NET Framework (OneBranch)'
+      condition: and(succeeded(), eq(variables['PipelineType'], 'OneBranch'))
+      inputs:
+        testSelector: 'testAssemblies'
+        testAssemblyVer2: '**\Microsoft.Identity.Test.Unit\bin\**\net4*\Microsoft.Identity.Test.Unit.dll'
+        searchFolder: '$(System.DefaultWorkingDirectory)'
+        runInParallel: true
+        codeCoverageEnabled: false
+        failOnMinTestsNotRun: true
+        minimumExpectedTests: '1'
+
+# ──────────────────────────────────────────────
+# Stage 4 — Unit Tests (.NET 8)
+# ──────────────────────────────────────────────
+- stage: UnitTestsNet8
+  displayName: 'Unit Tests .NET 8'
+  dependsOn: Build
+  jobs:
+
+  - job: 'RunUnitTestsNet8'
+    pool:
+        vmImage: 'windows-2022'
+        demands:
+        - msbuild
+        - visualstudio
+    variables:
+        runCodesignValidationInjection: false
+        Codeql.SkipTaskAutoInjection: true
+
+    steps:
+    - template: template-desktop-test-setup.yaml
+
+    - task: VSTest@2
+      displayName: 'Run unit tests .NET 8'
+      inputs:
+        testSelector: 'testAssemblies'
+        testAssemblyVer2: '**\Microsoft.Identity.Test.Unit\bin\**\net8.0\Microsoft.Identity.Test.Unit.dll'
+        searchFolder: '$(System.DefaultWorkingDirectory)'
+        runInParallel: true
+        codeCoverageEnabled: true
+        failOnMinTestsNotRun: true
+        minimumExpectedTests: '1'
+        runSettingsFile: '$(MsalSourceDir)build\CodeCoverage.runsettings'
 
     - task: BuildQualityChecks@10
       condition: ne(variables['Build.SourceBranch'], 'refs/heads/main') #gate should not run on main branch
@@ -97,7 +151,7 @@ stages:
         baseBranchRef: 'main'
 
 # ──────────────────────────────────────────────
-# Stage 4 — Cache Compat Tests
+# Stage 5 — Cache Compat Tests
 # ──────────────────────────────────────────────
 - stage: CacheCompatTests
   displayName: 'Cache Compat Tests'
@@ -122,14 +176,14 @@ stages:
         BuildSolution: 'LibsAndSamples.sln'
 
 # ──────────────────────────────────────────────
-# Stage 5 — Desktop Integration Tests (Windows)
+# Stage 6 — Desktop Integration Tests .NET Framework (Windows)
 # ──────────────────────────────────────────────
-- stage: DesktopIntegrationTests
-  displayName: 'Desktop Integration Tests'
+- stage: IntegrationTestsNetFx
+  displayName: 'Integration Tests .NET Framework'
   dependsOn: Build
   jobs:
 
-  - job: 'RunDesktopIntegrationTests'
+  - job: 'RunIntegrationTestsNetFx'
     pool:
         vmImage: 'windows-2022'
         demands:
@@ -142,12 +196,72 @@ stages:
     steps:
     - template: template-desktop-test-setup.yaml
 
-    - template: template-run-integration-tests.yaml
-      parameters:
-        BuildConfiguration: '$(BuildConfiguration)'
+    - task: VSTest@2
+      displayName: 'Run integration tests .NET Framework (non-OneBranch)'
+      condition: and(succeeded(), eq(variables['PipelineType'], 'legacy'))
+      inputs:
+        testSelector: 'testAssemblies'
+        testAssemblyVer2: '**\Microsoft.Identity.Test.Integration.netfx\bin\**\Microsoft.Identity.Test.Integration.NetFx.dll'
+        searchFolder: '$(System.DefaultWorkingDirectory)'
+        rerunFailedTests: true
+        rerunMaxAttempts: '3'
+        runInParallel: false
+        codeCoverageEnabled: false
+        failOnMinTestsNotRun: true
+        minimumExpectedTests: '1'
+        pathtoCustomTestAdapters: 'C:\temp'
+
+    - task: VSTest@2
+      displayName: 'Run integration tests .NET Framework (OneBranch)'
+      condition: and(succeeded(), eq(variables['PipelineType'], 'OneBranch'))
+      inputs:
+        testSelector: 'testAssemblies'
+        testAssemblyVer2: '**\Microsoft.Identity.Test.Integration.netfx\bin\**\Microsoft.Identity.Test.Integration.NetFx.dll'
+        searchFolder: '$(System.DefaultWorkingDirectory)'
+        rerunFailedTests: true
+        rerunMaxAttempts: '3'
+        runInParallel: false
+        codeCoverageEnabled: false
+        failOnMinTestsNotRun: true
+        minimumExpectedTests: '1'
 
 # ──────────────────────────────────────────────
-# Stage 6 — Linux Integration Tests
+# Stage 7 — Desktop Integration Tests .NET 8 (Windows)
+# ──────────────────────────────────────────────
+- stage: IntegrationTestsNet8
+  displayName: 'Integration Tests .NET 8'
+  dependsOn: Build
+  jobs:
+
+  - job: 'RunIntegrationTestsNet8'
+    pool:
+        vmImage: 'windows-2022'
+        demands:
+        - msbuild
+        - visualstudio
+    variables:
+        runCodesignValidationInjection: false
+        Codeql.SkipTaskAutoInjection: true
+
+    steps:
+    - template: template-desktop-test-setup.yaml
+
+    - task: VSTest@2
+      displayName: 'Run integration tests .NET 8'
+      inputs:
+        testSelector: 'testAssemblies'
+        testAssemblyVer2: '**\Microsoft.Identity.Test.Integration.netcore\bin\**\Microsoft.Identity.Test.Integration.NetCore.dll'
+        searchFolder: '$(System.DefaultWorkingDirectory)'
+        rerunFailedTests: true
+        rerunMaxAttempts: '3'
+        runInParallel: false
+        codeCoverageEnabled: true
+        failOnMinTestsNotRun: true
+        minimumExpectedTests: '1'
+        runSettingsFile: '$(MsalSourceDir)build\CodeCoverage.runsettings'
+
+# ──────────────────────────────────────────────
+# Stage 8 — Linux Integration Tests
 # ──────────────────────────────────────────────
 - stage: LinuxIntegrationTests
   displayName: 'Linux Integration Tests'
@@ -167,10 +281,10 @@ stages:
     - template: template-test-on-linux.yaml
 
 # ──────────────────────────────────────────────
-# Stage 7 — Managed Identity E2E Tests
+# Stage 9 — MI E2E Tests – Azure Arc
 # ──────────────────────────────────────────────
-- stage: ManagedIdentityE2ETests
-  displayName: 'Managed Identity E2E Tests'
+- stage: MIE2EAzureArc
+  displayName: 'MI E2E – Azure Arc'
   dependsOn: Build
   jobs:
 
@@ -186,6 +300,14 @@ stages:
         BuildConfiguration: 'Release'
         TargetFramework: 'net8.0'
 
+# ──────────────────────────────────────────────
+# Stage 10 — MI E2E Tests – VM / IMDS
+# ──────────────────────────────────────────────
+- stage: MIE2EIMDS
+  displayName: 'MI E2E – IMDS'
+  dependsOn: Build
+  jobs:
+
   - job: 'RunManagedIdentityE2ETestsOnImds'
     displayName: 'Managed Identity E2E Tests – VM / IMDS'
     pool:
@@ -197,6 +319,14 @@ stages:
       parameters:
         BuildConfiguration: 'Release'
         TargetFramework:   'net8.0'
+
+# ──────────────────────────────────────────────
+# Stage 11 — MI E2E Tests – VM / IMDS V2
+# ──────────────────────────────────────────────
+- stage: MIE2EIMDSV2
+  displayName: 'MI E2E – IMDS V2'
+  dependsOn: Build
+  jobs:
 
   - job: 'RunManagedIdentityE2ETestsOnImdsV2'
     displayName: 'Managed Identity E2E Tests – VM / IMDS V2'
