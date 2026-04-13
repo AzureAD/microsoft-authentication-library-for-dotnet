@@ -18,7 +18,7 @@ steps:
   displayName: 'Get MSAL tests'
   inputs:
     SourceFolder: '$(build.artifactstagingdirectory)\drop\msalTests'
-    Contents: '**\*'
+    Contents: '**/*'
     TargetFolder: $(Build.SourcesDirectory)\tests\
 
 - template: template-install-keyvault-secrets.yaml

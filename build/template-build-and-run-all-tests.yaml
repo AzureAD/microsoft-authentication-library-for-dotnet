@@ -37,6 +37,14 @@ stages:
     # Bootstrap the build
     - template: template-build-and-prep-automation.yaml
 
+# ──────────────────────────────────────────────
+# Stage 2 — Mac Build (independent, no artifact dependency)
+# ──────────────────────────────────────────────
+- stage: MacBuild
+  displayName: 'Mac Build'
+  dependsOn: [] # Runs in parallel with Build stage
+  jobs:
+
   - job: 'BuilMacConsoleAppWithBroker'
     pool:
         vmImage: macOS-14
@@ -49,7 +57,7 @@ stages:
     - template: template-build-on-mac.yaml
 
 # ──────────────────────────────────────────────
-# Stage 2 — Unit Tests
+# Stage 3 — Unit Tests
 # ──────────────────────────────────────────────
 - stage: UnitTests
   displayName: 'Unit Tests'
@@ -89,7 +97,7 @@ stages:
         baseBranchRef: 'main'
 
 # ──────────────────────────────────────────────
-# Stage 3 — Cache Compat Tests
+# Stage 4 — Cache Compat Tests
 # ──────────────────────────────────────────────
 - stage: CacheCompatTests
   displayName: 'Cache Compat Tests'
@@ -114,7 +122,7 @@ stages:
         BuildSolution: 'LibsAndSamples.sln'
 
 # ──────────────────────────────────────────────
-# Stage 4 — Desktop Integration Tests (Windows)
+# Stage 5 — Desktop Integration Tests (Windows)
 # ──────────────────────────────────────────────
 - stage: DesktopIntegrationTests
   displayName: 'Desktop Integration Tests'
@@ -139,7 +147,7 @@ stages:
         BuildConfiguration: '$(BuildConfiguration)'
 
 # ──────────────────────────────────────────────
-# Stage 5 — Linux Integration Tests
+# Stage 6 — Linux Integration Tests
 # ──────────────────────────────────────────────
 - stage: LinuxIntegrationTests
   displayName: 'Linux Integration Tests'
@@ -159,7 +167,7 @@ stages:
     - template: template-test-on-linux.yaml
 
 # ──────────────────────────────────────────────
-# Stage 6 — Managed Identity E2E Tests
+# Stage 7 — Managed Identity E2E Tests
 # ──────────────────────────────────────────────
 - stage: ManagedIdentityE2ETests
   displayName: 'Managed Identity E2E Tests'
