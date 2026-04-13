@@ -1,146 +1,341 @@
 parameters:
   DataFileDirectory: 'Release'
 
-jobs: #Build and stage projects
+stages:
 
-- job: 'PreBuildCheck'
-  pool:
-      vmImage: 'windows-2022'
-      demands:
-      - msbuild
-      - visualstudio
-  variables:
-      runCodesignValidationInjection: false
-      Codeql.SkipTaskAutoInjection: true
+# ──────────────────────────────────────────────
+# Stage 1 — Build & Prepare Artifacts
+# ──────────────────────────────────────────────
+- stage: Build
+  displayName: 'Build'
+  jobs:
 
-  steps:
-  #Pre build analysis
-    - template: template-prebuild-code-analysis.yaml
+  - job: 'PreBuildCheck'
+    pool:
+        vmImage: 'windows-2022'
+        demands:
+        - msbuild
+        - visualstudio
+    variables:
+        runCodesignValidationInjection: false
+        Codeql.SkipTaskAutoInjection: true
 
-- job: 'BuildAndStageProjects'
-  pool:
-      vmImage: 'windows-2022'
-      demands:
-      - msbuild
-      - visualstudio
-  variables:
-      Codeql.SkipTaskAutoInjection: true
+    steps:
+    #Pre build analysis
+      - template: template-prebuild-code-analysis.yaml
 
-  steps:
-  # Bootstrap the build
-  - template: template-build-and-prep-automation.yaml
+  - job: 'BuildAndStageProjects'
+    pool:
+        vmImage: 'windows-2022'
+        demands:
+        - msbuild
+        - visualstudio
+    variables:
+        Codeql.SkipTaskAutoInjection: true
 
-# BUILD AND RUN CACHE COMPAT TESTS
-- job: 'BuildAndRunCacheCompatTests'
-  dependsOn:
-    - 'BuildAndStageProjects'
-  pool:
-      vmImage: 'windows-2022'
-      demands:
-      - msbuild
-      - visualstudio
-  variables:
-      runCodesignValidationInjection: false
-      Codeql.SkipTaskAutoInjection: true
+    steps:
+    # Bootstrap the build
+    - template: template-build-and-prep-automation.yaml
 
-  steps:
-  - template: template-cachecompat-automation.yaml
-    parameters:
-      BuildPlatform: '$(BuildPlatform)'
-      BuildConfiguration: '$(BuildConfiguration)'
-      BuildSolution: 'LibsAndSamples.sln'
+# ──────────────────────────────────────────────
+# Stage 2 — Mac Build (independent, no artifact dependency)
+# ──────────────────────────────────────────────
+- stage: MacBuild
+  displayName: 'Mac Build'
+  dependsOn: [] # Runs in parallel with Build stage
+  jobs:
 
-  #Desktop Unit + Integration Tests
-- job: 'RunDesktopTests'
-  #strategy:
-  #  parallel: 5
-  dependsOn:
-  - 'BuildAndStageProjects'
-  pool:
-      vmImage: 'windows-2022'
-      demands:
-      - msbuild
-      - visualstudio
-  variables:
-      runCodesignValidationInjection: false
-      Codeql.SkipTaskAutoInjection: true
+  - job: 'BuilMacConsoleAppWithBroker'
+    pool:
+        vmImage: macOS-14
 
-  steps:
-  - template: template-desktop-unit-and-automation.yaml
+    variables:
+        runCodesignValidationInjection: false
+        Codeql.SkipTaskAutoInjection: true
 
-  - task: BuildQualityChecks@10
-    condition: ne(variables['Build.SourceBranch'], 'refs/heads/main') #gate should not run on main branch
-    inputs:
-      checkCoverage: '$(CodeCoverageGateEnabled)'
-      coverageFailOption: 'build'
-      coverageType: 'lines'
-      allowCoverageVariance: false 
-      coverageVariance: 0.01 # Specify by how much the current amount of covered or uncovered code (depending on the parameter *Use Uncovered Elements*) may deviate from the previous value before the policy fails. Please be aware that the code coverage may slowly but steadily decrease from build to build if you allow a code coverage variance. Thus, you should keep this value as low as possible.
-      treat0of0as100: true
-      coverageUpperThreshold: '90'
-      includePartiallySucceeded: false
-      fallbackOnPRTargetBranch: false
-      baseDefinitionId: '905' #this is the PR build and it is used as a baseline
-      baseBranchRef: 'main'
+    steps:
+    - template: template-build-on-mac.yaml
 
-- job: 'BuildandRunIntegrationTestsOnLinux'
-  pool:
-      vmImage: 'ubuntu-22.04'
-      demands:
-      - msbuild
-  variables:
-      runCodesignValidationInjection: false
-      Codeql.SkipTaskAutoInjection: true
+# ──────────────────────────────────────────────
+# Stage 3 — Unit Tests (.NET Framework)
+# ──────────────────────────────────────────────
+- stage: UnitTestsNetFx
+  displayName: 'Unit Tests .NET Framework'
+  dependsOn: Build
+  jobs:
 
-  steps:
-  - template: template-test-on-linux.yaml
+  - job: 'RunUnitTestsNetFx'
+    pool:
+        vmImage: 'windows-2022'
+        demands:
+        - msbuild
+        - visualstudio
+    variables:
+        runCodesignValidationInjection: false
+        Codeql.SkipTaskAutoInjection: true
 
-- job: 'BuilMacConsoleAppWithBroker'
-  pool:
-      vmImage: macOS-14
+    steps:
+    - template: template-desktop-test-setup.yaml
 
-  variables:
-      runCodesignValidationInjection: false
-      Codeql.SkipTaskAutoInjection: true
+    - task: VSTest@2
+      displayName: 'Run unit tests .NET Framework (non-OneBranch)'
+      condition: and(succeeded(), eq(variables['PipelineType'], 'legacy'))
+      inputs:
+        testSelector: 'testAssemblies'
+        testAssemblyVer2: '**\Microsoft.Identity.Test.Unit\bin\**\net4*\Microsoft.Identity.Test.Unit.dll'
+        searchFolder: '$(System.DefaultWorkingDirectory)'
+        runInParallel: true
+        codeCoverageEnabled: false
+        failOnMinTestsNotRun: true
+        minimumExpectedTests: '1'
+        pathtoCustomTestAdapters: 'C:\temp'
 
-  steps:
-  - template: template-build-on-mac.yaml
+    - task: VSTest@2
+      displayName: 'Run unit tests .NET Framework (OneBranch)'
+      condition: and(succeeded(), eq(variables['PipelineType'], 'OneBranch'))
+      inputs:
+        testSelector: 'testAssemblies'
+        testAssemblyVer2: '**\Microsoft.Identity.Test.Unit\bin\**\net4*\Microsoft.Identity.Test.Unit.dll'
+        searchFolder: '$(System.DefaultWorkingDirectory)'
+        runInParallel: true
+        codeCoverageEnabled: false
+        failOnMinTestsNotRun: true
+        minimumExpectedTests: '1'
 
-- job: 'RunManagedIdentityE2ETestsOnAzureArc'
-  displayName: 'Managed Identity E2E Tests – Azure ARC Agent'
-  dependsOn: ['BuildAndStageProjects']
-  pool:
-    name: 'MSALMSIAZUREARC'
-  condition: and(succeeded(), eq(variables['RunManagedIdentityE2EArcTests'], 'true'))
+# ──────────────────────────────────────────────
+# Stage 4 — Unit Tests (.NET 8)
+# ──────────────────────────────────────────────
+- stage: UnitTestsNet8
+  displayName: 'Unit Tests .NET 8'
+  dependsOn: Build
+  jobs:
 
-  steps:
-  - template: template-run-mi-e2e-azurearc.yaml
-    parameters:
-      BuildConfiguration: 'Release'
-      TargetFramework: 'net8.0'
+  - job: 'RunUnitTestsNet8'
+    pool:
+        vmImage: 'windows-2022'
+        demands:
+        - msbuild
+        - visualstudio
+    variables:
+        runCodesignValidationInjection: false
+        Codeql.SkipTaskAutoInjection: true
 
-- job: 'RunManagedIdentityE2ETestsOnImds'
-  displayName: 'Managed Identity E2E Tests – VM / IMDS'
-  dependsOn: ['BuildAndStageProjects']
-  pool:
-    name: 'MSALMSIV2'
-  condition: and(succeeded(), eq(variables['RunManagedIdentityE2EVmTests'], 'true'))
+    steps:
+    - template: template-desktop-test-setup.yaml
 
-  steps:
-  - template: template-run-mi-e2e-imds.yaml
-    parameters:
-      BuildConfiguration: 'Release'
-      TargetFramework:   'net8.0'
+    - task: VSTest@2
+      displayName: 'Run unit tests .NET 8'
+      inputs:
+        testSelector: 'testAssemblies'
+        testAssemblyVer2: '**\Microsoft.Identity.Test.Unit\bin\**\net8.0\Microsoft.Identity.Test.Unit.dll'
+        searchFolder: '$(System.DefaultWorkingDirectory)'
+        runInParallel: true
+        codeCoverageEnabled: true
+        failOnMinTestsNotRun: true
+        minimumExpectedTests: '1'
+        runSettingsFile: '$(MsalSourceDir)build\CodeCoverage.runsettings'
 
-- job: 'RunManagedIdentityE2ETestsOnImdsV2'
-  displayName: 'Managed Identity E2E Tests – VM / IMDS V2'
-  dependsOn: ['BuildAndStageProjects']
-  pool:
-    name: 'MSALMSIV2'
-  condition: and(succeeded(), eq(variables['RunManagedIdentityE2EVmTests'], 'true'))
+    - task: BuildQualityChecks@10
+      condition: ne(variables['Build.SourceBranch'], 'refs/heads/main') #gate should not run on main branch
+      inputs:
+        checkCoverage: '$(CodeCoverageGateEnabled)'
+        coverageFailOption: 'build'
+        coverageType: 'lines'
+        allowCoverageVariance: false 
+        coverageVariance: 0.01
+        treat0of0as100: true
+        coverageUpperThreshold: '90'
+        includePartiallySucceeded: false
+        fallbackOnPRTargetBranch: false
+        baseDefinitionId: '905' #this is the PR build and it is used as a baseline
+        baseBranchRef: 'main'
 
-  steps:
-  - template: template-run-mi-e2e-imdsv2.yaml
-    parameters:
-      BuildConfiguration: 'Release'
-      TargetFramework:   'net8.0'
+# ──────────────────────────────────────────────
+# Stage 5 — Cache Compat Tests
+# ──────────────────────────────────────────────
+- stage: CacheCompatTests
+  displayName: 'Cache Compat Tests'
+  dependsOn: Build
+  jobs:
+
+  - job: 'BuildAndRunCacheCompatTests'
+    pool:
+        vmImage: 'windows-2022'
+        demands:
+        - msbuild
+        - visualstudio
+    variables:
+        runCodesignValidationInjection: false
+        Codeql.SkipTaskAutoInjection: true
+
+    steps:
+    - template: template-cachecompat-automation.yaml
+      parameters:
+        BuildPlatform: '$(BuildPlatform)'
+        BuildConfiguration: '$(BuildConfiguration)'
+        BuildSolution: 'LibsAndSamples.sln'
+
+# ──────────────────────────────────────────────
+# Stage 6 — Desktop Integration Tests .NET Framework (Windows)
+# ──────────────────────────────────────────────
+- stage: IntegrationTestsNetFx
+  displayName: 'Integration Tests .NET Framework'
+  dependsOn: Build
+  jobs:
+
+  - job: 'RunIntegrationTestsNetFx'
+    pool:
+        vmImage: 'windows-2022'
+        demands:
+        - msbuild
+        - visualstudio
+    variables:
+        runCodesignValidationInjection: false
+        Codeql.SkipTaskAutoInjection: true
+
+    steps:
+    - template: template-desktop-test-setup.yaml
+
+    - task: VSTest@2
+      displayName: 'Run integration tests .NET Framework (non-OneBranch)'
+      condition: and(succeeded(), eq(variables['PipelineType'], 'legacy'))
+      inputs:
+        testSelector: 'testAssemblies'
+        testAssemblyVer2: '**\Microsoft.Identity.Test.Integration.netfx\bin\**\Microsoft.Identity.Test.Integration.NetFx.dll'
+        searchFolder: '$(System.DefaultWorkingDirectory)'
+        rerunFailedTests: true
+        rerunMaxAttempts: '3'
+        runInParallel: false
+        codeCoverageEnabled: false
+        failOnMinTestsNotRun: true
+        minimumExpectedTests: '1'
+        pathtoCustomTestAdapters: 'C:\temp'
+
+    - task: VSTest@2
+      displayName: 'Run integration tests .NET Framework (OneBranch)'
+      condition: and(succeeded(), eq(variables['PipelineType'], 'OneBranch'))
+      inputs:
+        testSelector: 'testAssemblies'
+        testAssemblyVer2: '**\Microsoft.Identity.Test.Integration.netfx\bin\**\Microsoft.Identity.Test.Integration.NetFx.dll'
+        searchFolder: '$(System.DefaultWorkingDirectory)'
+        rerunFailedTests: true
+        rerunMaxAttempts: '3'
+        runInParallel: false
+        codeCoverageEnabled: false
+        failOnMinTestsNotRun: true
+        minimumExpectedTests: '1'
+
+# ──────────────────────────────────────────────
+# Stage 7 — Desktop Integration Tests .NET 8 (Windows)
+# ──────────────────────────────────────────────
+- stage: IntegrationTestsNet8
+  displayName: 'Integration Tests .NET 8'
+  dependsOn: Build
+  jobs:
+
+  - job: 'RunIntegrationTestsNet8'
+    pool:
+        vmImage: 'windows-2022'
+        demands:
+        - msbuild
+        - visualstudio
+    variables:
+        runCodesignValidationInjection: false
+        Codeql.SkipTaskAutoInjection: true
+
+    steps:
+    - template: template-desktop-test-setup.yaml
+
+    - task: VSTest@2
+      displayName: 'Run integration tests .NET 8'
+      inputs:
+        testSelector: 'testAssemblies'
+        testAssemblyVer2: '**\Microsoft.Identity.Test.Integration.netcore\bin\**\Microsoft.Identity.Test.Integration.NetCore.dll'
+        searchFolder: '$(System.DefaultWorkingDirectory)'
+        rerunFailedTests: true
+        rerunMaxAttempts: '3'
+        runInParallel: false
+        codeCoverageEnabled: true
+        failOnMinTestsNotRun: true
+        minimumExpectedTests: '1'
+        runSettingsFile: '$(MsalSourceDir)build\CodeCoverage.runsettings'
+
+# ──────────────────────────────────────────────
+# Stage 8 — Linux Integration Tests
+# ──────────────────────────────────────────────
+- stage: LinuxIntegrationTests
+  displayName: 'Linux Integration Tests'
+  dependsOn: [] # Builds from source — no dependency on Build stage
+  jobs:
+
+  - job: 'BuildandRunIntegrationTestsOnLinux'
+    pool:
+        vmImage: 'ubuntu-22.04'
+        demands:
+        - msbuild
+    variables:
+        runCodesignValidationInjection: false
+        Codeql.SkipTaskAutoInjection: true
+
+    steps:
+    - template: template-test-on-linux.yaml
+
+# ──────────────────────────────────────────────
+# Stage 9 — MI E2E Tests – Azure Arc
+# ──────────────────────────────────────────────
+- stage: MIE2EAzureArc
+  displayName: 'MI E2E – Azure Arc'
+  dependsOn: Build
+  jobs:
+
+  - job: 'RunManagedIdentityE2ETestsOnAzureArc'
+    displayName: 'Managed Identity E2E Tests – Azure ARC Agent'
+    pool:
+      name: 'MSALMSIAZUREARC'
+    condition: and(succeeded(), eq(variables['RunManagedIdentityE2EArcTests'], 'true'))
+
+    steps:
+    - template: template-run-mi-e2e-azurearc.yaml
+      parameters:
+        BuildConfiguration: 'Release'
+        TargetFramework: 'net8.0'
+
+# ──────────────────────────────────────────────
+# Stage 10 — MI E2E Tests – VM / IMDS
+# ──────────────────────────────────────────────
+- stage: MIE2EIMDS
+  displayName: 'MI E2E – IMDS'
+  dependsOn: Build
+  jobs:
+
+  - job: 'RunManagedIdentityE2ETestsOnImds'
+    displayName: 'Managed Identity E2E Tests – VM / IMDS'
+    pool:
+      name: 'MSALMSIV2'
+    condition: and(succeeded(), eq(variables['RunManagedIdentityE2EVmTests'], 'true'))
+
+    steps:
+    - template: template-run-mi-e2e-imds.yaml
+      parameters:
+        BuildConfiguration: 'Release'
+        TargetFramework:   'net8.0'
+
+# ──────────────────────────────────────────────
+# Stage 11 — MI E2E Tests – VM / IMDS V2
+# ──────────────────────────────────────────────
+- stage: MIE2EIMDSV2
+  displayName: 'MI E2E – IMDS V2'
+  dependsOn: Build
+  jobs:
+
+  - job: 'RunManagedIdentityE2ETestsOnImdsV2'
+    displayName: 'Managed Identity E2E Tests – VM / IMDS V2'
+    pool:
+      name: 'MSALMSIV2'
+    condition: and(succeeded(), eq(variables['RunManagedIdentityE2EVmTests'], 'true'))
+
+    steps:
+    - template: template-run-mi-e2e-imdsv2.yaml
+      parameters:
+        BuildConfiguration: 'Release'
+        TargetFramework:   'net8.0'
