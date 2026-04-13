@@ -254,5 +254,45 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(TokenSource.IdentityProvider, result2.AuthenticationResultMetadata.TokenSource);
             }
         }
+
+        [TestMethod]
+        [WorkItem(5805)] // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5805
+        public async Task InstanceDiscoveryCallerCancellation_BubblesUp_DoesNotFallBack_Async()
+        {
+            using (var httpManager = new MockHttpManager(disableInternalRetries: true))
+            {
+                // Arrange - use an authority unknown to MSAL so instance discovery goes to the network
+                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                              .WithAuthority(TestConstants.AuthorityNotKnownTenanted)
+                                                              .WithClientSecret(TestConstants.ClientSecret)
+                                                              .WithHttpManager(httpManager)
+                                                              .BuildConcrete();
+
+                // Caller-controlled cancellation token
+                using var callerCts = new CancellationTokenSource();
+
+                // The mock GET handler for instance discovery: cancel the caller's token
+                // during the request so that the linked CTS fires and the cancellation
+                // propagates through the real linked-token path (not via ExceptionToThrow).
+                httpManager.AddMockHandler(new MockHttpMessageHandler()
+                {
+                    ExpectedMethod = HttpMethod.Get,
+                    ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                    {
+                        Content = new StringContent("{}")
+                    },
+                    AdditionalRequestValidation = _ => callerCts.Cancel()
+                });
+
+                // No token endpoint mock — the request should never get that far.
+                // If it does, MockHttpManager will fail because the queue is empty.
+
+                // Act & Assert — caller cancellation must bubble up, not be swallowed
+                // by the fallback catch in FetchNetworkMetadataOrFallbackAsync.
+                await AssertException.TaskThrowsAsync<TaskCanceledException>(
+                    () => app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                             .ExecuteAsync(callerCts.Token)).ConfigureAwait(false);
+            }
+        }
     }
 }
