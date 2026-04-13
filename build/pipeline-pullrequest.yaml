@@ -11,6 +11,7 @@ pr:
 variables:
   BuildPlatform: 'any cpu'
   BuildConfiguration: 'Release'
+  MsalSourceDir: '' # Empty for non-OneBranch pipelines (source is at repo root). OneBranch pipelines set this to a subdirectory.
   #intended for running all ui automation tests as one to reduce time
   ConsolidateAppCenterTests: true
 
