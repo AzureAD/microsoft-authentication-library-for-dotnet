@@ -19,7 +19,6 @@ using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.OAuth2.Throttling;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Unit;
-using Microsoft.VisualStudio.TestTools.UnitTesting.Logging;
 using static Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil;
 
 namespace Microsoft.Identity.Test.Common.Core.Mocks
@@ -1129,7 +1128,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         /// <param name="userAssignedIdentityId">The user-assigned identity identifier type, if any.</param>
         /// <param name="userAssignedId">The user-assigned identity value, if any.</param>
         /// <returns>A configured <see cref="MockHttpMessageHandler"/>.</returns>
-        internal static MockHttpMessageHandler MockCertificateRequestResponse_AttestationRequired_ButMissingToken_Returns400(
+        public static MockHttpMessageHandler MockCertificateRequestResponse_AttestationRequired_ButMissingToken_Returns400(
             UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
             string userAssignedId = null)
         {
@@ -1191,14 +1190,25 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         }
 
-        internal static HttpResponseMessage CreateFailureMessage(HttpStatusCode code, string message)
+        /// <summary>
+        /// Creates a failure HTTP response with the specified status code and message.
+        /// </summary>
+        /// <param name="code">The HTTP status code.</param>
+        /// <param name="message">The response body content.</param>
+        /// <returns>An <see cref="HttpResponseMessage"/> with the specified status code and content.</returns>
+        public static HttpResponseMessage CreateFailureMessage(HttpStatusCode code, string message)
         {
             HttpResponseMessage responseMessage = new HttpResponseMessage(code);
             responseMessage.Content = new StringContent(message);
             return responseMessage;
         }
 
-        internal static HttpResponseMessage CreateNullMessage(HttpStatusCode code)
+        /// <summary>
+        /// Creates an HTTP response with the specified status code and null content.
+        /// </summary>
+        /// <param name="code">The HTTP status code.</param>
+        /// <returns>An <see cref="HttpResponseMessage"/> with the specified status code and null content.</returns>
+        public static HttpResponseMessage CreateNullMessage(HttpStatusCode code)
         {
             HttpResponseMessage responseMessage = new HttpResponseMessage(code);
             responseMessage.Content = null;
@@ -1298,5 +1308,115 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             // If MSAL incorrectly reuses the cert and calls /token, the test should fail,
             // and will pass after the product fix.
         }
+
+        #region Public V2 Overloads (for external consumers like ID Web)
+
+        /// <summary>
+        /// Creates a mock IMDS V1 probe success handler. Returns HTTP 400 (the expected success pattern for IMDS probes).
+        /// </summary>
+        public static MockHttpMessageHandler MockImdsV1Probe(
+            UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
+            string userAssignedId = null)
+        {
+            return MockImdsProbe(ImdsVersion.V1, userAssignedIdentityId, userAssignedId, success: true);
+        }
+
+        /// <summary>
+        /// Creates a mock IMDS V1 probe failure handler. Returns HTTP 404 (non-retryable) or 500 (retryable).
+        /// </summary>
+        public static MockHttpMessageHandler MockImdsV1ProbeFailure(
+            UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
+            string userAssignedId = null,
+            bool retry = false)
+        {
+            return MockImdsProbeFailure(ImdsVersion.V1, userAssignedIdentityId, userAssignedId, retry);
+        }
+
+        /// <summary>
+        /// Creates a mock IMDS V2 probe success handler. Returns HTTP 400 (the expected success pattern for IMDS probes).
+        /// </summary>
+        public static MockHttpMessageHandler MockImdsV2Probe(
+            UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
+            string userAssignedId = null)
+        {
+            return MockImdsProbe(ImdsVersion.V2, userAssignedIdentityId, userAssignedId, success: true);
+        }
+
+        /// <summary>
+        /// Creates a mock IMDS V2 probe failure handler. Returns HTTP 404 (non-retryable) or 500 (retryable).
+        /// </summary>
+        public static MockHttpMessageHandler MockImdsV2ProbeFailure(
+            UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
+            string userAssignedId = null,
+            bool retry = false)
+        {
+            return MockImdsProbeFailure(ImdsVersion.V2, userAssignedIdentityId, userAssignedId, retry);
+        }
+
+        /// <summary>
+        /// Creates a mock IMDS V2 Entra token response handler. Returns a successful mTLS PoP token response.
+        /// This is a simplified version for external consumers that does not validate MSAL-internal headers.
+        /// </summary>
+        /// <param name="mtlsEndpoint">The mTLS endpoint (e.g., "https://mtls.login.microsoftonline.com").</param>
+        /// <param name="tenantId">The tenant ID for the token endpoint URL.</param>
+        /// <returns>A configured <see cref="MockHttpMessageHandler"/>.</returns>
+        public static MockHttpMessageHandler MockImdsV2EntraTokenResponse(
+            string mtlsEndpoint = "https://mtls.login.microsoftonline.com",
+            string tenantId = "72f988bf-86f1-41af-91ab-2d7cd011db47")
+        {
+            var handler = new MockHttpMessageHandler()
+            {
+                ExpectedUrl = $"{mtlsEndpoint}/{tenantId}{ImdsV2ManagedIdentitySource.AcquireEntraTokenPath}",
+                ExpectedMethod = HttpMethod.Post,
+                ExpectedPostData = new Dictionary<string, string>
+                {
+                    { "token_type", "mtls_pop" }
+                },
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(GetMsiSuccessfulResponse(imdsV2: true)),
+                }
+            };
+
+            return handler;
+        }
+
+        /// <summary>
+        /// Adds the complete set of V2 flow mock handlers to a queue for a full mTLS PoP token acquisition:
+        /// V1 probe failure → V2 probe success → CSR metadata → certificate issuance → Entra token response.
+        /// </summary>
+        /// <param name="handlerQueue">The queue to add handlers to.</param>
+        /// <param name="mtlsEndpoint">The mTLS endpoint.</param>
+        /// <param name="tenantId">The tenant ID.</param>
+        /// <param name="userAssignedIdentityId">The user-assigned identity identifier type, if any.</param>
+        /// <param name="userAssignedId">The user-assigned identity value, if any.</param>
+        public static void AddFullV2FlowHandlers(
+            System.Collections.Concurrent.ConcurrentQueue<MockHttpMessageHandler> handlerQueue,
+            string mtlsEndpoint = "https://mtls.login.microsoftonline.com",
+            string tenantId = "72f988bf-86f1-41af-91ab-2d7cd011db47",
+            UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
+            string userAssignedId = null)
+        {
+            // 1. V1 probe fails (404) → triggers V2 fallback
+            handlerQueue.Enqueue(MockImdsV1ProbeFailure(userAssignedIdentityId, userAssignedId));
+
+            // 2. V2 probe succeeds (400)
+            handlerQueue.Enqueue(MockImdsV2Probe(userAssignedIdentityId, userAssignedId));
+
+            // 3. CSR metadata response
+            handlerQueue.Enqueue(MockCsrResponse(
+                userAssignedIdentityId: userAssignedIdentityId,
+                userAssignedId: userAssignedId));
+
+            // 4. Certificate issuance response
+            handlerQueue.Enqueue(MockCertificateRequestResponse(
+                userAssignedIdentityId: userAssignedIdentityId,
+                userAssignedId: userAssignedId));
+
+            // 5. Entra token response (mTLS PoP)
+            handlerQueue.Enqueue(MockImdsV2EntraTokenResponse(mtlsEndpoint, tenantId));
+        }
+
+        #endregion
     }
 }

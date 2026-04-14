@@ -31,8 +31,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             ApplicationBase.ResetStateForTest();
         }
 
-        [DoNotRunOnLinux] // POP is not supported on Linux
-        [TestMethod]
+        [RunOn(SkipConditions.Linux)] // POP is not supported on Linux
         public async Task Sni_Gets_Pop_Token_Successfully_TestAsync()
         {
             // Arrange: Use LabResponseHelper to get app configuration
@@ -83,8 +82,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                             "BindingCertificate must match the certificate supplied via WithCertificate().");
         }
 
-        [DoNotRunOnLinux] // POP is not supported on Linux
-        [TestMethod]
+        [RunOn(SkipConditions.Linux)] // POP is not supported on Linux
         public async Task Sni_Gets_Pop_Token_WithGlobalEndpoint_TestAsync()
         {
             // Arrange: validate lab setup before executing the test flow.
@@ -146,8 +144,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                             "BindingCertificate must match the certificate supplied via WithCertificate().");
         }
 
-        [DoNotRunOnLinux]
-        [TestMethod]
+        [RunOn(SkipConditions.Linux)]
         public async Task Sni_AssertionFlow_Uses_JwtPop_And_Succeeds_TestAsync()
         {
             X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
@@ -241,8 +238,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         //Downgraded test to verify bearer token acquisition works in SNI + jwt-pop scenario
-        [DoNotRunOnLinux]
-        [TestMethod]
+        [RunOn(SkipConditions.Linux)]
         public async Task Sni_AssertionFlow_Uses_JwtPop_And_Acquires_Bearer_Token_TestAsync()
         {
             X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
@@ -334,8 +330,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             StringAssert.Contains(requestUriSeen ?? "", "mtlsauth.microsoft.com");
         }
 
-        [DoNotRunOnLinux]
-        [TestMethod]
+        [RunOn(SkipConditions.Linux)]
         public async Task Sni_AssertionFlow_GlobalEndpoint_Uses_JwtPop_And_Succeeds_TestAsync()
         {
             X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
