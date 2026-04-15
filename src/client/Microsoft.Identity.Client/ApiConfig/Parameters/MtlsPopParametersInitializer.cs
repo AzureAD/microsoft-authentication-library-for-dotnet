@@ -44,7 +44,6 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         {
             if (tokenParameters.MtlsCertificate != null)
             {
-                ThrowIfRegionMissingForImplicitMtls(serviceBundle);
                 return;
             }
 
@@ -59,7 +58,6 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
                 if (ar?.TokenBindingCertificate != null)
                 {
                     tokenParameters.MtlsCertificate = ar.TokenBindingCertificate;
-                    ThrowIfRegionMissingForImplicitMtls(serviceBundle);
                 }
             }
         }
@@ -145,29 +143,11 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
                         MsalError.MissingTenantedAuthority,
                         MsalErrorMessage.MtlsNonTenantedAuthorityNotAllowedMessage);
                 }
-
-                if (serviceBundle.Config.AzureRegion == null)
-                {
-                    throw new MsalClientException(
-                        MsalError.MtlsPopWithoutRegion,
-                        MsalErrorMessage.MtlsPopWithoutRegion);
-                }
             }
 
             p.AuthenticationOperation = new MtlsPopAuthenticationOperation(cert);
             p.MtlsCertificate = cert;
         }
 
-        private static void ThrowIfRegionMissingForImplicitMtls(IServiceBundle serviceBundle)
-        {
-            // Implicit bearer-over-mTLS requires region only for AAD
-            if (serviceBundle.Config.Authority.AuthorityInfo.AuthorityType == AuthorityType.Aad &&
-                serviceBundle.Config.AzureRegion == null)
-            {
-                throw new MsalClientException(
-                    MsalError.MtlsBearerWithoutRegion,
-                    MsalErrorMessage.MtlsBearerWithoutRegion);
-            }
-        }
     }
 }
