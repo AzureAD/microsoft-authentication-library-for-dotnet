@@ -24,5 +24,26 @@ namespace Microsoft.Identity.Client.AppConfig
         /// by default it is set to <see langword="false"/> /></remarks>
         /// </summary>
         public bool AssociateTokensWithCertificate { get; init; } = false;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the certificate should be sent over the mTLS connection
+        /// for token acquisition (without requiring PoP token type).
+        /// When <see langword="true"/>, the certificate is sent in the TLS handshake (client certificate authentication)
+        /// and the resulting token is a standard Bearer token.
+        /// When <see langword="false"/> (default), the certificate is sent as a JWT assertion in the request body.
+        /// </summary>
+        /// <remarks>
+        /// <para>This property sets the default transport for requests that do not explicitly call
+        /// <see cref="AcquireTokenForClientParameterBuilder.WithMtlsProofOfPossession"/>.</para>
+        /// <para>Request-level <see cref="AcquireTokenForClientParameterBuilder.WithMtlsProofOfPossession"/>
+        /// always implies mTLS transport, regardless of this setting.</para>
+        /// <para>This option is only supported with certificate credentials configured via
+        /// <see cref="ConfidentialClientApplicationBuilder.WithCertificate(System.Security.Cryptography.X509Certificates.X509Certificate2, CertificateOptions)"/>.
+        /// Using it with client secrets or assertion-based credentials will throw at build time.</para>
+        /// <para>For AAD authorities, <see cref="ConfidentialClientApplicationBuilder.WithAzureRegion(string)"/>
+        /// must also be configured; otherwise an <see cref="MsalClientException"/> with error code
+        /// <see cref="MsalError.MtlsBearerWithoutRegion"/> is thrown at token acquisition time.</para>
+        /// </remarks>
+        public bool SendCertificateOverMtls { get; init; } = false;
     }
 }
