@@ -267,5 +267,91 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // Optional: if you rely on regional mTLS endpoints, check the host
             StringAssert.Contains(requestUriSeen ?? "", "mtlsauth.microsoft.com");
         }
+
+        [RunOn(SkipConditions.Linux)] // mTLS is not supported on Linux
+        public async Task Sni_Over_Mtls_Gets_Bearer_Token_Successfully_TestAsync()
+        {
+            // Arrange: Use LabResponseHelper to get app configuration
+            var appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
+
+            X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
+
+            string[] appScopes = new[] { "https://vault.azure.net/.default" };
+
+            var certificateOptions = new Client.AppConfig.CertificateOptions
+            {
+                SendX5C = true,
+                SendCertificateOverMtls = true
+            };
+
+            // Build Confidential Client Application with mTLS Bearer transport
+            IConfidentialClientApplication confidentialApp = ConfidentialClientApplicationBuilder.Create(MsiAllowListedAppIdforSNI)
+                .WithAuthority("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c")
+                .WithAzureRegion("westus3") //test slice region
+                .WithCertificate(cert, certificateOptions)
+                .WithTestLogging()
+                .Build();
+
+            // Act: Acquire token - should be Bearer via mTLS transport
+            AuthenticationResult authResult = await confidentialApp
+                .AcquireTokenForClient(appScopes)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            // Assert: Check that a Bearer token was acquired
+            Assert.IsNotNull(authResult, "The authentication result should not be null.");
+            Assert.AreEqual("Bearer", authResult.TokenType, "Token type should be Bearer for mTLS Bearer flow");
+            Assert.IsNotNull(authResult.AccessToken, "Access token should not be null");
+
+            // Simulate cache retrieval
+            authResult = await confidentialApp
+               .AcquireTokenForClient(appScopes)
+               .ExecuteAsync()
+               .ConfigureAwait(false);
+
+            Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource, "Token should be retrieved from cache");
+        }
+
+        [RunOn(SkipConditions.Linux)]
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task Sni_Gets_Pop_Token_WithCertificateOptions_TestAsync(bool sendCertificateOverMtls)
+        {
+            // Arrange
+            var appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
+
+            X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
+
+            string[] appScopes = new[] { "https://vault.azure.net/.default" };
+
+            var certificateOptions = new Client.AppConfig.CertificateOptions
+            {
+                SendX5C = true,
+                SendCertificateOverMtls = sendCertificateOverMtls
+            };
+
+            // Build with CertificateOptions overload
+            IConfidentialClientApplication confidentialApp = ConfidentialClientApplicationBuilder.Create(MsiAllowListedAppIdforSNI)
+                .WithAuthority("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c")
+                .WithAzureRegion("westus3")
+                .WithCertificate(cert, certificateOptions)
+                .WithTestLogging()
+                .Build();
+
+            // Act: WithMtlsProofOfPossession should always produce PoP, regardless of SendCertificateOverMtls
+            AuthenticationResult authResult = await confidentialApp
+                .AcquireTokenForClient(appScopes)
+                .WithMtlsProofOfPossession()
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            // Assert
+            Assert.IsNotNull(authResult, "The authentication result should not be null.");
+            Assert.AreEqual(Constants.MtlsPoPTokenType, authResult.TokenType, "Token type should be MTLS PoP");
+            Assert.IsNotNull(authResult.AccessToken, "Access token should not be null");
+            Assert.IsNotNull(authResult.BindingCertificate, "BindingCertificate should be set in SNI flow.");
+            Assert.AreEqual(cert.Thumbprint, authResult.BindingCertificate.Thumbprint,
+                "BindingCertificate must match the certificate supplied via WithCertificate().");
+        }
     }
 }

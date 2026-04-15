@@ -1255,5 +1255,13 @@ namespace Microsoft.Identity.Client
         /// Represents the error code returned when an IMDS operation fails.
         /// </summary>
         public const string ImdsServiceError = "imds_service_error";
+
+        /// <summary>
+        /// <para>What happened?</para> The configured credential type is not compatible with the
+        /// requested authentication mode. For example, <c>SendCertificateOverMtls</c> requires a
+        /// certificate-based credential.
+        /// <para>Mitigation:</para> Use a certificate credential via <c>WithCertificate()</c>.
+        /// </summary>
+        public const string InvalidCredentialMaterial = "invalid_credential_material";
     }
 }

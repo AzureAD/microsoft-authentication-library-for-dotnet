@@ -163,7 +163,8 @@ namespace Microsoft.Identity.Client
 
             Config.ClientCredential = new CertificateClientCredential(certificate);
             Config.SendX5C = certificateOptions?.SendX5C ?? false;
-            
+            Config.CertificateOptions = certificateOptions;
+
             return this;
         }
 
@@ -470,6 +471,14 @@ namespace Microsoft.Identity.Client
             }
 
             ValidateAndUpdateRegion();
+
+            if (Config.CertificateOptions?.SendCertificateOverMtls == true &&
+                Config.ClientCredential is not CertificateClientCredential)
+            {
+                throw new MsalClientException(
+                    MsalError.InvalidCredentialMaterial,
+                    MsalErrorMessage.SendCertificateOverMtlsRequiresCertificate);
+            }
         }
 
         private void ValidateAndUpdateRegion()

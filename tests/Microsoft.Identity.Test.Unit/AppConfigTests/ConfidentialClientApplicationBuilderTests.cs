@@ -467,6 +467,67 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         }
 
         [TestMethod]
+        public void TestConstructor_CertificateOptions_SendCertificateOverMtls_DefaultsFalse()
+        {
+            var options = new CertificateOptions();
+            Assert.IsFalse(options.SendCertificateOverMtls,
+                "SendCertificateOverMtls should default to false.");
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"Resources\testCert.crtfile")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Internal.Analyzers", "IA5352:DoNotMisuseCryptographicApi", Justification = "Test only")]
+        public void TestConstructor_WithCertificate_CertificateOptions_SendCertificateOverMtls_True()
+        {
+            var cert = new X509Certificate2(
+                ResourceHelper.GetTestResourceRelativePath("testCert.crtfile"), TestConstants.TestPlaceholderCredential);
+            var certificateOptions = new CertificateOptions { SendCertificateOverMtls = true };
+
+            var app = ConfidentialClientApplicationBuilder
+                      .Create(TestConstants.ClientId)
+                      .WithCertificate(cert, certificateOptions)
+                      .Build();
+
+            Assert.IsTrue((app.AppConfig as ApplicationConfiguration).CertificateOptions?.SendCertificateOverMtls,
+                "SendCertificateOverMtls should be stored in ApplicationConfiguration when set to true.");
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"Resources\testCert.crtfile")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Internal.Analyzers", "IA5352:DoNotMisuseCryptographicApi", Justification = "Test only")]
+        public void TestConstructor_WithCertificate_CertificateOptions_SendCertificateOverMtls_False()
+        {
+            var cert = new X509Certificate2(
+                ResourceHelper.GetTestResourceRelativePath("testCert.crtfile"), TestConstants.TestPlaceholderCredential);
+            var certificateOptions = new CertificateOptions { SendCertificateOverMtls = false };
+
+            var app = ConfidentialClientApplicationBuilder
+                      .Create(TestConstants.ClientId)
+                      .WithCertificate(cert, certificateOptions)
+                      .Build();
+
+            Assert.IsFalse(app.AppConfig is ApplicationConfiguration config && (config.CertificateOptions?.SendCertificateOverMtls ?? false),
+                "SendCertificateOverMtls should be false when not enabled.");
+        }
+
+        [TestMethod]
+        public void TestBuild_SendCertificateOverMtls_WithNonCertificateCredential_ThrowsAtBuildTime()
+        {
+            var builder = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithClientSecret(TestConstants.ClientSecret);
+
+            // Simulate misconfiguration by setting CertificateOptions directly
+            builder.Config.CertificateOptions = new CertificateOptions { SendCertificateOverMtls = true };
+
+            var ex = Assert.Throws<MsalClientException>(() => builder.Build());
+
+            Assert.AreEqual(MsalError.InvalidCredentialMaterial, ex.ErrorCode);
+            StringAssert.Contains(ex.Message, "SendCertificateOverMtls",
+                "Error message should reference the misconfigured property.");
+        }
+
+        [TestMethod]
         [DeploymentItem(@"Resources\CustomInstanceMetadata.json")]
         public void TestConstructor_WithValidInstanceDicoveryMetadata()
         {

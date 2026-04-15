@@ -951,5 +951,110 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.IsNull(bearerResult.BindingCertificate, "BindingCertificate must be null for Bearer tokens.");
             }
         }
+
+        #region SendCertificateOverMtls tests
+
+        [TestMethod]
+        public async Task SendCertificateOverMtls_NoRegion_ThrowsMtlsBearerWithoutRegionAsync()
+        {
+            using (var envContext = new EnvVariableContext())
+            {
+                Environment.SetEnvironmentVariable("REGION_NAME", null);
+
+                var options = new Client.AppConfig.CertificateOptions
+                {
+                    SendCertificateOverMtls = true
+                };
+
+                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithCertificate(s_testCertificate, options)
+                    .WithAuthority("https://login.microsoftonline.com/123456-1234-2345-1234561234")
+                    .Build();
+
+                MsalClientException ex = await AssertException.TaskThrowsAsync<MsalClientException>(
+                    () => app.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync())
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual(MsalError.MtlsBearerWithoutRegion, ex.ErrorCode,
+                    "SendCertificateOverMtls=true without a region should throw MtlsBearerWithoutRegion.");
+            }
+        }
+
+        [TestMethod]
+        public async Task SendCertificateOverMtls_WithRegion_AcquiresBearerTokenAsync()
+        {
+            const string region = EastUsRegion;
+
+            using (var envContext = new EnvVariableContext())
+            {
+                Environment.SetEnvironmentVariable("REGION_NAME", region);
+
+                using (var httpManager = new MockHttpManager())
+                {
+                    httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(tokenType: "Bearer");
+
+                    var options = new Client.AppConfig.CertificateOptions
+                    {
+                        SendCertificateOverMtls = true
+                    };
+
+                    var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                        .WithCertificate(s_testCertificate, options)
+                        .WithAuthority("https://login.microsoftonline.com/123456-1234-2345-1234561234")
+                        .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
+                        .WithHttpManager(httpManager)
+                        .BuildConcrete();
+
+                    AuthenticationResult result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
+
+                    Assert.AreEqual("Bearer", result.TokenType,
+                        "SendCertificateOverMtls without WithMtlsProofOfPossession should produce a Bearer token.");
+                    Assert.AreEqual(region, result.AuthenticationResultMetadata.RegionDetails.RegionUsed,
+                        "Token should be acquired from the regional endpoint.");
+                }
+            }
+        }
+
+        [TestMethod]
+        public async Task SendCertificateOverMtls_WithPopRequest_StillProducesPopTokenAsync()
+        {
+            const string region = EastUsRegion;
+
+            using (var envContext = new EnvVariableContext())
+            {
+                Environment.SetEnvironmentVariable("REGION_NAME", region);
+
+                using (var httpManager = new MockHttpManager())
+                {
+                    httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(tokenType: "mtls_pop");
+
+                    var options = new Client.AppConfig.CertificateOptions
+                    {
+                        SendCertificateOverMtls = true
+                    };
+
+                    var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                        .WithCertificate(s_testCertificate, options)
+                        .WithAuthority("https://login.microsoftonline.com/123456-1234-2345-1234561234")
+                        .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
+                        .WithHttpManager(httpManager)
+                        .BuildConcrete();
+
+                    AuthenticationResult result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                        .WithMtlsProofOfPossession()
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
+
+                    Assert.AreEqual(Constants.MtlsPoPAuthHeaderPrefix, result.TokenType,
+                        "WithMtlsProofOfPossession() must produce an mTLS PoP token even when SendCertificateOverMtls=true.");
+                    Assert.IsNotNull(result.BindingCertificate,
+                        "BindingCertificate should be present for mTLS PoP.");
+                }
+            }
+        }
+
+        #endregion
     }
 }
