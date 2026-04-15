@@ -1,0 +1,3 @@
+const Microsoft.Identity.Client.MsalError.InvalidCredentialMaterial = "invalid_credential_material" -> string
+Microsoft.Identity.Client.AppConfig.CertificateOptions.SendCertificateOverMtls.get -> bool
+Microsoft.Identity.Client.AppConfig.CertificateOptions.SendCertificateOverMtls.init -> void
