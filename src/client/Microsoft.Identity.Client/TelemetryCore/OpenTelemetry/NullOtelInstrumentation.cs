@@ -22,18 +22,28 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             CacheLevel cacheLevel,
             long totalDurationInUs,
             AuthenticationResultMetadata authResultMetadata,
-            ILoggerAdapter logger)
+            ILoggerAdapter logger,
+            bool isExtendedMetricsEnabled)
         {
             // No op
         }
 
-        public void LogFailureMetrics(string platform, 
-            string errorCode, 
-            ApiEvent.ApiIds apiId, 
-            string callerSdkId,
-            string callerSdkVersion,
-            CacheRefreshReason cacheRefreshReason,
-            int tokenType)
+        public void LogSuccessHttpDuration(
+            string platform,
+            ApiEvent.ApiIds apiId,
+            AuthenticationResultMetadata authResultMetadata,
+            bool isExtendedMetricsEnabled)
+        {
+            // No op
+        }
+
+        public void LogFailureMetrics(
+            string platform,
+            ApiEvent apiEvent,
+            string errorCode,
+            int httpStatusCode,
+            long totalDurationInMs,
+            bool isExtendedMetricsEnabled)
         {
             // No op
         }
