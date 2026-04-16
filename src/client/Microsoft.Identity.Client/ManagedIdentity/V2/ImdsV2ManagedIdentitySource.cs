@@ -28,6 +28,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 
         private readonly IMtlsCertificateCache _mtlsCache;
         private Func<string, SafeHandle, string, CancellationToken, Task<string>> _attestationTokenProvider;
+        private bool _isMtlsPopRequested;
 
         // used in unit tests
         public const string ApiVersionQueryParam = "cred-api-version";
@@ -181,12 +182,13 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             _mtlsCache = mtlsCache ?? throw new ArgumentNullException(nameof(mtlsCache));
         }
 
-        public override async Task<ManagedIdentityResponse> AuthenticateAsync(
+        public override async Task<(ManagedIdentityResponse Response, X509Certificate2 BindingCertificate)> AuthenticateAsync(
             ApiConfig.Parameters.AcquireTokenForManagedIdentityParameters parameters,
             CancellationToken cancellationToken)
         {
-            // Capture the attestation token provider delegate before calling base
+            // Capture per-request state before calling base
             _attestationTokenProvider = parameters.AttestationTokenProvider;
+            _isMtlsPopRequested = parameters.IsMtlsPopRequested;
 
             try
             {

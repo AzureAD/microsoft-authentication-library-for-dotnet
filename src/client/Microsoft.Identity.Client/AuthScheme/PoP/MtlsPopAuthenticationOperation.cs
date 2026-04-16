@@ -12,7 +12,7 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.AuthScheme.PoP
 {
-    internal class MtlsPopAuthenticationOperation : IAuthenticationOperation2
+    internal class MtlsPopAuthenticationOperation : IAuthenticationOperation2, IMtlsCertificateProvider
     {
         private readonly X509Certificate2 _mtlsCert;
 
@@ -21,6 +21,8 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
             _mtlsCert = mtlsCert;
             KeyId = CoreHelpers.ComputeX5tS256KeyId(_mtlsCert);
         }
+
+        public X509Certificate2 Certificate => _mtlsCert;
 
         public int TelemetryTokenType => TelemetryTokenTypeConstants.MtlsPop;
 

@@ -35,7 +35,20 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public IDictionary<string, string> ExtraHttpHeaders { get; set; }
         public PoPAuthenticationConfiguration PopAuthenticationConfiguration { get; set; }
         public IList<Func<OnBeforeTokenRequestData, Task>> OnBeforeTokenRequestHandler { get; internal set; }
-        public X509Certificate2 MtlsCertificate { get; internal set; }
+
+        /// <summary>
+        /// The mTLS transport certificate for this request.
+        /// For mTLS PoP flows the cert is derived from the <see cref="AuthenticationOperation"/>
+        /// (which implements <see cref="IMtlsCertificateProvider"/>).
+        /// For implicit bearer-over-mTLS the cert is set explicitly via the setter.
+        /// </summary>
+        public X509Certificate2 MtlsCertificate
+        {
+            get => (AuthenticationOperation as IMtlsCertificateProvider)?.Certificate ?? _transportCert;
+            internal set => _transportCert = value;
+        }
+        private X509Certificate2 _transportCert;
+
         public List<string> AdditionalCacheParameters { get; set; }
         public SortedList<string, Func<CancellationToken, Task<string>>> CacheKeyComponents { get; internal set; }
         public string FmiPathSuffix { get; internal set; }
@@ -51,13 +64,19 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public Func<string, SafeHandle, string, CancellationToken, Task<string>> AttestationTokenProvider { get; set; }
 
         /// <summary>
+        /// Sets the mTLS PoP authentication scheme for this request.
+        /// This is the single place where the scheme is created — the transport cert
+        /// is automatically derived from it via <see cref="MtlsCertificate"/>.
+        /// </summary>
+        internal void ApplyMtlsPopScheme(X509Certificate2 cert)
+        {
+            AuthenticationOperation = new MtlsPopAuthenticationOperation(cert);
+        }
+
+        /// <summary>
         /// This tries to see if the token request should be done over mTLS or over normal HTTP 
         /// and set the correct parameters
         /// </summary>
-        /// <param name="serviceBundle"></param>
-        /// <param name="ct"></param>
-        /// <returns></returns>
-        /// <exception cref="MsalClientException"></exception>
         internal async Task TryInitMtlsPopParametersAsync(IServiceBundle serviceBundle, CancellationToken ct)
         {
             await MtlsPopParametersInitializer.TryInitAsync(this, serviceBundle, ct).ConfigureAwait(false);

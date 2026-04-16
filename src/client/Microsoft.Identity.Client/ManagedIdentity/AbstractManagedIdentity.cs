@@ -31,8 +31,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         protected readonly RequestContext _requestContext;
 
-        protected bool _isMtlsPopRequested;
-
         internal const string TimeoutError = "[Managed Identity] Authentication unavailable. The request to the managed identity endpoint timed out.";
         internal readonly ManagedIdentitySource _sourceType;
 
@@ -42,7 +40,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             _sourceType = sourceType;
         }
 
-        public virtual async Task<ManagedIdentityResponse> AuthenticateAsync(
+        public virtual async Task<(ManagedIdentityResponse Response, X509Certificate2 BindingCertificate)> AuthenticateAsync(
             AcquireTokenForManagedIdentityParameters parameters,
             CancellationToken cancellationToken)
         {
@@ -57,17 +55,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             // Convert the scopes to a resource string.
             string resource = parameters.Resource;
 
-            _isMtlsPopRequested = parameters.IsMtlsPopRequested;
-
             ManagedIdentityRequest request = await CreateRequestAsync(resource).ConfigureAwait(false);
-
-            // When IMDSv2 mints a binding certificate during this request (via CSR),
-            // it's exposed via request.MtlsCertificate. Bubble it up so the request
-            // layer can set the mtls_pop scheme
-            if (parameters.IsMtlsPopRequested && request?.MtlsCertificate != null)
-            {
-                parameters.MtlsCertificate = request.MtlsCertificate;
-            }
 
             // Automatically add claims / capabilities if this MI source supports them
             if (_sourceType.SupportsClaimsAndCapabilities())
@@ -121,7 +109,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
                 }
 
-                return await HandleResponseAsync(parameters, response, cancellationToken).ConfigureAwait(false);
+                return (await HandleResponseAsync(parameters, response, cancellationToken).ConfigureAwait(false),
+                    request?.MtlsCertificate);
             }
             catch (Exception ex)
             {

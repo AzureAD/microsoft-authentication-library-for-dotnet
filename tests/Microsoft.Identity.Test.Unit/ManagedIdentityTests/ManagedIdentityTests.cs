@@ -1418,7 +1418,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 .WithHttpManager(httpManager);
 
             var managedIdentityApp = miBuilder.BuildConcrete();
-            RequestContext requestContext = new RequestContext(managedIdentityApp.ServiceBundle, Guid.NewGuid(), null);
+            RequestContext requestContext = new RequestContext(managedIdentityApp.ServiceBundle, Guid.NewGuid(), false);
 
             // Create the correct managed identity source based on the type
             AbstractManagedIdentity managedIdentity = null;
@@ -1470,7 +1470,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                         .WithHttpManager(httpManager);
                     var managedIdentityApp = miBuilder.BuildConcrete();
-                    var requestContext = new RequestContext(managedIdentityApp.ServiceBundle, Guid.NewGuid(), null);
+                    var requestContext = new RequestContext(managedIdentityApp.ServiceBundle, Guid.NewGuid(), false);
 
                     // Build the IMDS source; this caches s_cachedBaseEndpoint to firstEndpoint
                     var imdsSource = new ImdsManagedIdentitySource(requestContext);
@@ -1492,7 +1492,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                         .WithHttpManager(httpManager);
                     var managedIdentityApp = miBuilder.BuildConcrete();
-                    var requestContext = new RequestContext(managedIdentityApp.ServiceBundle, Guid.NewGuid(), null);
+                    var requestContext = new RequestContext(managedIdentityApp.ServiceBundle, Guid.NewGuid(), false);
 
                     // After ResetStateForTest, the cache should be cleared and the new env var should be picked up
                     Uri secondUri = ImdsManagedIdentitySource.GetValidatedEndpoint(

@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
@@ -29,19 +28,17 @@ namespace Microsoft.Identity.Client.Internal
 
         public CancellationToken UserCancellationToken { get; }
 
-        public X509Certificate2 MtlsCertificate { get; }
-
         public bool IsAttestationRequested { get; set; }
         
         public bool IsMtlsRequested { get; set; }
 
-        public RequestContext(IServiceBundle serviceBundle, Guid correlationId, X509Certificate2 mtlsCertificate, CancellationToken cancellationToken = default)
+        public RequestContext(IServiceBundle serviceBundle, Guid correlationId, bool isMtlsRequested, CancellationToken cancellationToken = default)
         {
             ServiceBundle = serviceBundle ?? throw new ArgumentNullException(nameof(serviceBundle));
             Logger = LoggerHelper.CreateLogger(correlationId, ServiceBundle.Config);
             CorrelationId = correlationId;
             UserCancellationToken = cancellationToken;
-            IsMtlsRequested = mtlsCertificate != null;
+            IsMtlsRequested = isMtlsRequested;
         }
     }
 }
