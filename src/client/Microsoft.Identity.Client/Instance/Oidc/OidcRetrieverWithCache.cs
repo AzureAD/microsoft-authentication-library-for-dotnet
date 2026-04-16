@@ -76,7 +76,6 @@ namespace Microsoft.Identity.Client.Instance.Oidc
 
         /// <summary>
         /// Validates that the issuer in the OIDC metadata matches the authority.
-        /// Aligned with Python MSAL's has_valid_issuer().
         /// An issuer is valid if any of the following is true:
         /// 1. Same scheme and host as the authority (path can differ)
         /// 2. The issuer host is a well-known Microsoft authority host (HTTPS only)
