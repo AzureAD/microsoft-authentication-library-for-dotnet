@@ -154,7 +154,17 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.IdentityModel.Abstractions" />
+  </ItemGroup>
+
+  <!-- System.ValueTuple is in-box starting with .NET Framework 4.7; only net462 needs the package. -->
+  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop462)'">
     <PackageReference Include="System.ValueTuple" />
+  </ItemGroup>
+
+  <!-- Suppress transitive System.ValueTuple from System.Formats.Asn1 on net472+, where it is in-box
+       and the NuGet package causes harmful binding redirects (see #5894). -->
+  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop472)'">
+    <PackageReference Include="System.ValueTuple" PrivateAssets="all" ExcludeAssets="all" />
   </ItemGroup>
 
   <ItemGroup Label="For public api analyzer support">
