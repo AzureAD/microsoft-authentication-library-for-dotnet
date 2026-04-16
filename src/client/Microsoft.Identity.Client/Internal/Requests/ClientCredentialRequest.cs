@@ -96,8 +96,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
                             using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
                             return GetAccessTokenAsync(tokenSource.Token, logger);
                         }, logger, ServiceBundle, AuthenticationRequestParameters.RequestContext.ApiEvent,
-                        AuthenticationRequestParameters.RequestContext.ApiEvent.CallerSdkApiId, 
-                        AuthenticationRequestParameters.RequestContext.ApiEvent.CallerSdkVersion);
+                        AuthenticationRequestParameters.RequestContext.ApiEvent.CallerSdkApiId,
+                        AuthenticationRequestParameters.RequestContext.ApiEvent.CallerSdkVersion,
+                        AuthenticationRequestParameters.OtelTagsEnricher);
                     }
                 }
                 catch (MsalServiceException e)

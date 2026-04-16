@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -18,10 +18,12 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             string callerSdkVersion,
             CacheLevel cacheLevel,
             long totalDurationInUs,
-            AuthenticationResultMetadata authResultMetadata,
+            TokenAcquisitionResult context,
+            Action<TokenAcquisitionResult, IList<KeyValuePair<string, object>>> tagsEnricher,
             ILoggerAdapter logger);
 
-        internal void IncrementSuccessCounter(string platform,
+        internal void IncrementSuccessCounter(
+            string platform,
             ApiEvent.ApiIds apiId,
             string callerSdkId,
             string callerSdkVersion,
@@ -29,14 +31,17 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             CacheRefreshReason cacheRefreshReason,
             CacheLevel cacheLevel,
             ILoggerAdapter logger,
-            int TokenType);
+            int tokenType,
+            IList<KeyValuePair<string, object>> extraTags);
 
-        internal void LogFailureMetrics(string platform, 
-            string errorCode, 
+        internal void LogFailureMetrics(
+            string platform,
             ApiEvent.ApiIds apiId,
             string callerSdkId,
             string callerSdkVersion,
             CacheRefreshReason cacheRefreshReason,
-            int tokenType);
+            int tokenType,
+            TokenAcquisitionResult context,
+            Action<TokenAcquisitionResult, IList<KeyValuePair<string, object>>> tagsEnricher);
     }
 }

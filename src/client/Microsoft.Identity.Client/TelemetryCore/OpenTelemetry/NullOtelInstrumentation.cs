@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -21,32 +21,37 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             string callerSdkVersion,
             CacheLevel cacheLevel,
             long totalDurationInUs,
-            AuthenticationResultMetadata authResultMetadata,
+            TokenAcquisitionResult context,
+            Action<TokenAcquisitionResult, IList<KeyValuePair<string, object>>> tagsEnricher,
             ILoggerAdapter logger)
         {
             // No op
         }
 
-        public void LogFailureMetrics(string platform, 
-            string errorCode, 
-            ApiEvent.ApiIds apiId, 
+        public void LogFailureMetrics(
+            string platform,
+            ApiEvent.ApiIds apiId,
             string callerSdkId,
             string callerSdkVersion,
             CacheRefreshReason cacheRefreshReason,
-            int tokenType)
+            int tokenType,
+            TokenAcquisitionResult context,
+            Action<TokenAcquisitionResult, IList<KeyValuePair<string, object>>> tagsEnricher)
         {
             // No op
         }
 
-        void IOtelInstrumentation.IncrementSuccessCounter(string platform, 
+        void IOtelInstrumentation.IncrementSuccessCounter(
+            string platform,
             ApiEvent.ApiIds apiId,
             string callerSdkId,
             string callerSdkVersion,
-            TokenSource tokenSource, 
-            CacheRefreshReason cacheRefreshReason, 
-            CacheLevel cacheLevel, 
+            TokenSource tokenSource,
+            CacheRefreshReason cacheRefreshReason,
+            CacheLevel cacheLevel,
             ILoggerAdapter logger,
-            int tokenType)
+            int tokenType,
+            IList<KeyValuePair<string, object>> extraTags)
         {
             // No op
         }
