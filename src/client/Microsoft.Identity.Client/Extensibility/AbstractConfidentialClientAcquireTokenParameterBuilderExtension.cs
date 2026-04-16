@@ -42,6 +42,76 @@ namespace Microsoft.Identity.Client.Extensibility
             return builder;
         }
 
+        internal static AbstractAcquireTokenParameterBuilder<T> WithExtraBodyParametersInternal<T>(
+            this AbstractAcquireTokenParameterBuilder<T> builder,
+            IDictionary<string, Func<CancellationToken, Task<string>>> extraBodyParams)
+            where T : AbstractAcquireTokenParameterBuilder<T>
+        {
+            if (extraBodyParams == null || extraBodyParams.Count == 0)
+            {
+                return builder;
+            }
+
+            builder.OnBeforeTokenRequest(async (data) =>
+            {
+                foreach (var param in extraBodyParams)
+                {
+                    if (param.Value != null)
+                    {
+                        data.BodyParameters.Add(param.Key, await param.Value(data.CancellationToken).ConfigureAwait(false));
+                    }
+                }
+            });
+
+            builder.WithAdditionalCacheKeyComponents(extraBodyParams);
+
+            return builder;
+        }
+
+        internal static AbstractAcquireTokenParameterBuilder<T> WithAttributeTokensInternal<T>(
+            this AbstractAcquireTokenParameterBuilder<T> builder,
+            IEnumerable<string> attributeTokens)
+            where T : AbstractAcquireTokenParameterBuilder<T>
+        {
+            if (attributeTokens is null)
+            {
+                return builder;
+            }
+
+            var normalizedTokens = new List<string>();
+            foreach (string token in attributeTokens)
+            {
+                if (!string.IsNullOrWhiteSpace(token))
+                {
+                    string trimmed = token.Trim();
+                    if (trimmed.IndexOfAny(new[] { ' ', '\t', '\n', '\r' }) >= 0)
+                    {
+                        throw new ArgumentException(
+                            $"Attribute tokens must not contain whitespace. Invalid token: '{trimmed}'",
+                            nameof(attributeTokens));
+                    }
+
+                    normalizedTokens.Add(trimmed);
+                }
+            }
+
+            if (normalizedTokens.Count == 0)
+            {
+                return builder;
+            }
+
+            string joinedTokens = string.Join(" ", normalizedTokens);
+
+            var extraBodyParams = new Dictionary<string, Func<CancellationToken, Task<string>>>
+            {
+                { OAuth2Parameter.AttributeTokens, _ => Task.FromResult(joinedTokens) }
+            };
+
+            builder.WithExtraBodyParametersInternal(extraBodyParams);
+
+            return builder;
+        }
+
         /// <summary>
         /// Binds the token to a key in the cache.No cryptographic operations is performed on the token.
         /// </summary>

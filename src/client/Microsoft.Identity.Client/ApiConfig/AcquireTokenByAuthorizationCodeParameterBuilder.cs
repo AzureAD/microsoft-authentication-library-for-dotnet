@@ -154,6 +154,20 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Specifies attribute tokens to include in the token request.
+        /// The tokens are joined with spaces and sent as the <c>attribute_tokens</c> body parameter.
+        /// Null, empty, or whitespace-only token entries are ignored.
+        /// </summary>
+        /// <param name="attributeTokens">A list of attribute token strings to include in the request. Individual tokens must not contain whitespace.</param>
+        /// <returns>The builder to chain method calls.</returns>
+        /// <exception cref="ArgumentException">Thrown when any token contains embedded whitespace.</exception>
+        public AcquireTokenByAuthorizationCodeParameterBuilder WithAttributeTokens(IEnumerable<string> attributeTokens)
+        {
+            this.WithAttributeTokensInternal(attributeTokens);
+            return this;
+        }
+
+        /// <summary>
         /// Requests an auth code for the frontend (SPA using MSAL.js for instance). 
         /// See https://aka.ms/msal-net/spa-auth-code for details.
         /// </summary>

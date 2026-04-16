@@ -1,0 +1,3 @@
+Microsoft.Identity.Client.AcquireTokenByAuthorizationCodeParameterBuilder.WithAttributeTokens(System.Collections.Generic.IEnumerable<string> attributeTokens) -> Microsoft.Identity.Client.AcquireTokenByAuthorizationCodeParameterBuilder
+Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder.WithAttributeTokens(System.Collections.Generic.IEnumerable<string> attributeTokens) -> Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder
+Microsoft.Identity.Client.AcquireTokenOnBehalfOfParameterBuilder.WithAttributeTokens(System.Collections.Generic.IEnumerable<string> attributeTokens) -> Microsoft.Identity.Client.AcquireTokenOnBehalfOfParameterBuilder
