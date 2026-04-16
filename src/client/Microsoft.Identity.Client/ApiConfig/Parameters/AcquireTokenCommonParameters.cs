@@ -14,6 +14,7 @@ using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.ClientCredential;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
@@ -47,8 +48,9 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         /// Optional delegate for obtaining attestation JWT for Credential Guard keys.
         /// Set by the KeyAttestation package via .WithAttestationSupport().
         /// Returns null for non-attested flows.
+        /// Signature: (endpoint, keyHandle, clientId, keyId, logger, cancellationToken) → JWT or null.
         /// </summary>
-        public Func<string, SafeHandle, string, CancellationToken, Task<string>> AttestationTokenProvider { get; set; }
+        public Func<string, SafeHandle, string, string, ILoggerAdapter, CancellationToken, Task<string>> AttestationTokenProvider { get; set; }
 
         /// <summary>
         /// This tries to see if the token request should be done over mTLS or over normal HTTP 

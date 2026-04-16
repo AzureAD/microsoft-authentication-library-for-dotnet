@@ -27,7 +27,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         internal static readonly ICertificateCache s_mtlsCertificateCache = new InMemoryCertificateCache();
 
         private readonly IMtlsCertificateCache _mtlsCache;
-        private Func<string, SafeHandle, string, CancellationToken, Task<string>> _attestationTokenProvider;
+        private Func<string, SafeHandle, string, string, ILoggerAdapter, CancellationToken, Task<string>> _attestationTokenProvider;
 
         // used in unit tests
         public const string ApiVersionQueryParam = "cred-api-version";
@@ -471,10 +471,13 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             try
             {
                 // Call the attestation token provider delegate
+                string keyId = rsaCng.Key.KeyName; // null for ephemeral (non-KSP) keys
                 string attestationJwt = await _attestationTokenProvider(
                     attestationEndpoint.AbsoluteUri,
                     rsaCng.Key.Handle,
                     clientId,
+                    keyId,
+                    _requestContext.Logger,
                     cancellationToken).ConfigureAwait(false);
 
                 if (string.IsNullOrWhiteSpace(attestationJwt))
