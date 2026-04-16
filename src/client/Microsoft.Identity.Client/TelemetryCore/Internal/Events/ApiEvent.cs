@@ -5,6 +5,7 @@ using System;
 using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Region;
+using Microsoft.Identity.Client;
 
 namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
 {
@@ -132,6 +133,8 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
         public AssertionType AssertionType { get; set; }
 
         public CacheLevel CacheLevel { get; set; }
+
+        public TokenSource TokenSource { get; set; } = TokenSource.IdentityProvider;
 
         public string MsalRuntimeTelemetry { get; set; }
 

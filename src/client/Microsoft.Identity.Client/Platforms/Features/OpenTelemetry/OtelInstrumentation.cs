@@ -8,6 +8,7 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.TelemetryCore.OpenTelemetry;
+using Microsoft.Identity.Client;
 
 namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
 {
@@ -205,8 +206,11 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                         new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                         new(TelemetryConstants.Platform, platform),
                         new(TelemetryConstants.ApiId, apiId),
+                        new(TelemetryConstants.TokenSource, authResultMetadata.TokenSource),
+                        new(TelemetryConstants.CacheLevel, cacheLevel),
                         new(TelemetryConstants.CacheRefreshReason, authResultMetadata.CacheRefreshReason),
                         new(TelemetryConstants.TokenType, authResultMetadata.TelemetryTokenType),
+                        new(TelemetryConstants.ErrorCode, string.Empty),
                         new(TelemetryConstants.Succeeded, true));
                 }
 
@@ -310,12 +314,16 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                         new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                         new(TelemetryConstants.Platform, platform),
                         new(TelemetryConstants.ApiId, apiEvent.ApiId),
+                        new(TelemetryConstants.TokenSource, apiEvent.TokenSource),
+                        new(TelemetryConstants.CacheLevel, string.Empty),
                         new(TelemetryConstants.CacheRefreshReason, apiEvent.CacheInfo),
                         new(TelemetryConstants.TokenType, apiEvent.TokenType),
+                        new(TelemetryConstants.ErrorCode, errorCode),
                         new(TelemetryConstants.Succeeded, false));
                 }
 
-                if (httpStatusCode > 0 && s_durationInHttpV2.Value.Enabled)
+                bool isTimeout = string.Equals(errorCode, MsalError.RequestTimeout, StringComparison.OrdinalIgnoreCase);
+                if ((httpStatusCode > 0 || (isTimeout && apiEvent.DurationInHttpInMs > 0)) && s_durationInHttpV2.Value.Enabled)
                 {
                     s_durationInHttpV2.Value.Record(apiEvent.DurationInHttpInMs,
                         new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
