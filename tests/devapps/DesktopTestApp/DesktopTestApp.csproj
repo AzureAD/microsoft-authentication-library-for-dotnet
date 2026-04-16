@@ -125,17 +125,17 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Microsoft.Identity.Test.Common\Microsoft.Identity.Test.Common.csproj">
-      <Project>{18559d36-c735-4933-aa86-398c8222d4f6}</Project>
-      <Name>Microsoft.Identity.Test.Common</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Microsoft.Identity.Test.LabInfrastructure\Microsoft.Identity.Test.LabInfrastructure.csproj">
-      <Project>{a181778d-5917-41ce-aa5f-7daaa7b7f5bb}</Project>
-      <Name>Microsoft.Identity.Test.LabInfrastructure</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\..\src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj">
       <Project>{3433eb33-114a-4db7-bc57-14f17f55da3c}</Project>
       <Name>Microsoft.Identity.Client</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\src\client\Microsoft.Identity.Lab.Api\Microsoft.Identity.Lab.Api.csproj">
+      <Project>{5ec9968e-2cb0-0cbb-6fba-cbeebb26fcea}</Project>
+      <Name>Microsoft.Identity.Lab.Api</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Microsoft.Identity.Test.Common\Microsoft.Identity.Test.Common.csproj">
+      <Project>{f484dc37-bb44-45b5-a78e-06819d261f53}</Project>
+      <Name>Microsoft.Identity.Test.Common</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

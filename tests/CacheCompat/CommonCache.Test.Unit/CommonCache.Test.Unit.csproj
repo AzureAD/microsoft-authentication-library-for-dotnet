@@ -10,14 +10,14 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
-    <PackageReference Include="MSTest.TestAdapter"  />
-    <PackageReference Include="MSTest.TestFramework"  />
-    <PackageReference Include="Newtonsoft.Json"  />
+    <PackageReference Include="MSTest.TestAdapter" />
+    <PackageReference Include="MSTest.TestFramework" />
+    <PackageReference Include="Newtonsoft.Json" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
-    <ProjectReference Include="..\..\Microsoft.Identity.Test.LabInfrastructure\Microsoft.Identity.Test.LabInfrastructure.csproj" />
+    <ProjectReference Include="..\..\..\src\client\Microsoft.Identity.Lab.Api\Microsoft.Identity.Lab.Api.csproj" />
+    <ProjectReference Include="..\..\Microsoft.Identity.Test.Common\Microsoft.Identity.Test.Common.csproj" />
     <ProjectReference Include="..\CommonCache.Test.Common\CommonCache.Test.Common.csproj" />
   </ItemGroup>
 

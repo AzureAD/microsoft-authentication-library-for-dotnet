@@ -5,7 +5,9 @@ parameters:
   BuildPlatform: 'any cpu'
   BuildConfiguration: 'release'
   MicrosoftIdentityClientVersion: '4.60.0-devopsbuild' 
+  LabApiVersion: '2.0.0-devopsbuild'
   MsalSourceDir: 'microsoft-authentication-library-for-dotnet\' #Default MSAL Location
+  PipelineType: '' #Passed to MSBuild so tests/Directory.Build.props can define ONEBRANCH_BUILD when set to 'OneBranch'
 
 steps:
 
@@ -82,6 +84,6 @@ steps:
   displayName: 'Build solution ${{ parameters.Solution }}'
   inputs:
     solution: ${{ parameters.Solution }}
-    msbuildArgs: '/p:RunCodeAnalysis=false /p:MicrosoftIdentityClientVersion=${{ parameters.MicrosoftIdentityClientVersion }} /p:SourceLinkCreate=true /p:ContinousIntegrationBuild=true'
+    msbuildArgs: '/p:RunCodeAnalysis=false /p:MicrosoftIdentityClientVersion=${{ parameters.MicrosoftIdentityClientVersion }} /p:LabApiVersion=${{ parameters.LabApiVersion }} /p:SourceLinkCreate=true /p:ContinousIntegrationBuild=true /p:PipelineType=${{ parameters.PipelineType }}'
     platform: ${{ parameters.BuildPlatform }}
     configuration: ${{ parameters.BuildConfiguration }}

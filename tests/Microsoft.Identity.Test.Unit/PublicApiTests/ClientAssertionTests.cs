@@ -443,13 +443,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                           .WithExperimentalFeatures(true)
                           .WithClientSecret(TestConstants.ClientSecret)
-                          .WithClientCapabilities(TestConstants.ClientCapabilities)
+                          .WithClientCapabilities(TestConstants.s_clientCapabilities)
                           .WithHttpManager(http)
                           .WithClientAssertion((opts, ct) =>
                           {
                               checkedCaps = true;
                               CollectionAssert.AreEqual(
-                                  TestConstants.ClientCapabilities,
+                                  TestConstants.s_clientCapabilities,
                                   opts.ClientCapabilities.ToList());
                               return Task.FromResult(new ClientSignedAssertion
                               {
@@ -686,6 +686,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 var cert = CertHelper.GetOrCreateTestCert();
                 var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                               .WithExperimentalFeatures(true)
+                              .WithAuthority(TestConstants.AadAuthorityWithMsftTenantId)
                               .WithClientAssertion(PopDelegate())
                               .WithHttpManager(http)
                               .BuildConcrete();

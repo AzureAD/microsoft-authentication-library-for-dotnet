@@ -37,6 +37,12 @@ jobs:
       inputs:
         restoreSolution: PerformanceTests.sln
 
+    - task: DotNetCoreCLI@2
+      displayName: 'dotnet restore'
+      inputs:
+        command: 'restore'
+        projects: 'PerformanceTests.sln'
+
     - task: MSBuild@1
       displayName: Build PerformanceTests.sln
       inputs:
@@ -45,7 +51,7 @@ jobs:
         platform: '$(BuildPlatform)'
         configuration: '$(BuildConfiguration)'
         msbuildArguments: '/p:RunCodeAnalysis=false'
-        clean: true
+        clean: false
 
     # The parameters currently are not used, but can be uploaded into the reporting system in the future.
     # Currently the build runs automatically but the results have to be compared manually.

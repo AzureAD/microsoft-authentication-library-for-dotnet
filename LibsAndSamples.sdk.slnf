@@ -12,7 +12,6 @@
       "tests/CacheCompat/CommonCache.Test.MsalV3/CommonCache.Test.MsalV3.csproj",
       "tests/CacheCompat/CommonCache.Test.MsalJava/CommonCache.Test.MsalJava.csproj",
       "tests/CacheCompat/CommonCache.Test.Common/CommonCache.Test.Common.csproj",
-      "tests/devapps/Managed Identity apps/MSIHelperService/MSIHelperService.csproj",
       "tests/devapps/Managed Identity apps/ManagedIdentityAppVM/ManagedIdentityAppVM.csproj",
       "tests/devapps/Managed Identity apps/ManagedIdentityWebApi/ManagedIdentityWebApi.csproj",
       "tests/devapps/Managed Identity apps/ManagedIdentityTokenRevocation/ManagedIdentityTokenRevocation.csproj",

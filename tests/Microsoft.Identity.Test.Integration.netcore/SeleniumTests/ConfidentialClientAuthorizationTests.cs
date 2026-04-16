@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
         #endregion
 
-        [TestMethod]        // Regression test for: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/891
+        [RunOn(SkipConditions.OneBranchBuild)]        // Regression test for: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/891
         public async Task SeleniumGetAuthCode_RedeemForAt_CommonAuthority_Async()
         {
             // Arrange
@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             await RunTestForUserAsync(app.AppId, user, $"https://login.microsoftonline.com/{user.TenantId}", false).ConfigureAwait(false);
         }
 
-        [TestMethod]
+        [RunOn(SkipConditions.OneBranchBuild)]
         public async Task GetTokenByAuthCode_WithPKCE_Async()
         {
             // Arrange
@@ -77,7 +77,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             await RunTestForUserAsync(app.AppId, user, "https://login.microsoftonline.com/common", true).ConfigureAwait(false);
         }
 
-        [TestMethod]
+        [RunOn(SkipConditions.OneBranchBuild)]
         public async Task GetTokenByAuthCode_HybridSPA_Async()
         {
             // Arrange
@@ -151,7 +151,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             Trace.WriteLine("Part 3 - Get a token using the auth code, just like a website");
              var result = await cca.AcquireTokenByAuthorizationCode(s_scopes, authorizationResult.Code)
                 .WithPkceCodeVerifier(codeVerifier)
-                .WithExtraHttpHeaders(TestConstants.ExtraHttpHeader)
+                .WithExtraHttpHeaders(TestConstants.s_extraHttpHeader)
                 .WithSpaAuthorizationCode(spaCode)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
@@ -197,10 +197,10 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             var (req, _) = factory.RequestsAndResponses.Single(x => x.Item1.RequestUri.AbsoluteUri.Contains("oauth2/v2.0/token") &&
                                                                     x.Item2.StatusCode == HttpStatusCode.OK);
 
-            var ExtraHttpHeader = req.Headers.Single(h => h.Key == TestConstants.ExtraHttpHeader.Keys.FirstOrDefault());
+            var ExtraHttpHeader = req.Headers.Single(h => h.Key == TestConstants.s_extraHttpHeader.Keys.FirstOrDefault());
 
-            Assert.AreEqual(TestConstants.ExtraHttpHeader.Keys.FirstOrDefault(), ExtraHttpHeader.Key);
-            Assert.AreEqual(TestConstants.ExtraHttpHeader.Values.FirstOrDefault(), ExtraHttpHeader.Value.FirstOrDefault());
+            Assert.AreEqual(TestConstants.s_extraHttpHeader.Keys.FirstOrDefault(), ExtraHttpHeader.Key);
+            Assert.AreEqual(TestConstants.s_extraHttpHeader.Values.FirstOrDefault(), ExtraHttpHeader.Value.FirstOrDefault());
         }
 
     }

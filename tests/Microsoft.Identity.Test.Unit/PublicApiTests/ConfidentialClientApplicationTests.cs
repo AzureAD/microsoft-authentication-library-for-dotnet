@@ -473,7 +473,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             if (withClientCapability)
             { 
-                builder.WithClientCapabilities(TestConstants.ClientCapabilities);
+                builder.WithClientCapabilities(TestConstants.s_clientCapabilities);
             }
 
             ConfidentialClientApplication app;
@@ -519,7 +519,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                             {
                                 Assert.IsNotNull(options.ClientCapabilities, "Expected ClientCapabilities to be set.");
                                 CollectionAssert.AreEqual(
-                                    TestConstants.ClientCapabilities,
+                                    TestConstants.s_clientCapabilities,
                                     options.ClientCapabilities.ToList(),
                                     "ClientCapabilities should match what was configured."
                                 );
