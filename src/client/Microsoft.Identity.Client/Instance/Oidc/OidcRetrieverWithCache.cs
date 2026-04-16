@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 
@@ -110,7 +111,8 @@ namespace Microsoft.Identity.Client.Instance.Oidc
             if (issuerIsHttps)
             {
                 // Check 2: Well-known authority host allowlist (O(1) lookup)
-                if (Constants.IsWellKnownAuthorityHost(issuerHost))
+                // Reuses KnownMetadataProvider which is the single source of truth for known environments
+                if (KnownMetadataProvider.IsKnownEnvironment(issuerHost))
                 {
                     return;
                 }
@@ -121,7 +123,7 @@ namespace Microsoft.Identity.Client.Instance.Oidc
                 {
                     string potentialBase = issuerHost.Substring(dotIndex + 1);
                     // 3a: Base host is a well-known authority host
-                    if (Constants.IsWellKnownAuthorityHost(potentialBase))
+                    if (KnownMetadataProvider.IsKnownEnvironment(potentialBase))
                     {
                         return;
                     }
