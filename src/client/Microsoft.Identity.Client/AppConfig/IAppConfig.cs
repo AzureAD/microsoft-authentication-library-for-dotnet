@@ -89,11 +89,18 @@ namespace Microsoft.Identity.Client
         ITelemetryConfig TelemetryConfig { get; }
 
         /// <summary>
-        /// Allows usage of features that are experimental and would otherwise throw a specific exception. 
-        /// Use of experimental features in production is not recommended and are subject to be removed between builds. 
+        /// Allows usage of features that are experimental and would otherwise throw a specific exception.
+        /// Use of experimental features in production is not recommended and are subject to be removed between builds.
         /// For details see https://aka.ms/msal-net-experimental-features.
         /// </summary>
         bool ExperimentalFeaturesEnabled { get; }
+
+        /// <summary>
+        /// When enabled, the raw ESTS error code returned in the <c>error_codes</c> array of the identity
+        /// provider response is included as the <c>RawStsErrorCode</c> tag on the <c>MsalFailure</c> OpenTelemetry
+        /// counter. Disabled by default to avoid unintended metric-cardinality growth.
+        /// </summary>
+        bool EnableRawStsErrorCodeTelemetry { get; }
 
         /// <summary>
         /// Microsoft Identity specific OIDC extension that allows resource challenges to be resolved without interaction. 
