@@ -170,6 +170,11 @@ namespace Microsoft.Identity.Client.OAuth2
                 }
                 catch (Exception ex)
                 {
+                    if (requestContext.ApiEvent != null)
+                    {
+                        requestContext.ApiEvent.DurationInHttpInMs += _httpManager.LastRequestDurationInMs;
+                    }
+
                     if (ex is TaskCanceledException && requestContext.UserCancellationToken.IsCancellationRequested)
                     {
                         throw;

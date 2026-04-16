@@ -333,6 +333,168 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
+        [TestMethod]
+        [Description("WithExtendedTokenAcquisitionMetrics emits MsalTotalDuration.2 tagged with Succeeded and " +
+            "MsalDurationInHttp.2 tagged with HttpStatusCode instead of V1 equivalents.")]
+        public async Task AcquireToken_WithExtendedMetrics_EmitsV2HistogramsAsync()
+        {
+            using (_harness = base.CreateTestHarness())
+            {
+                var cca = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithExperimentalFeatures()
+                    .WithAuthority(TestConstants.AuthorityUtidTenant)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithHttpManager(_harness.HttpManager)
+                    .WithExtendedTokenAcquisitionMetrics()
+                    .BuildConcrete();
+
+                // 1. Acquire token from IDP (success)
+                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                _harness.HttpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+                await cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithExtraQueryParameters(extraQueryParams)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                // 2. Acquire token — failure
+                _harness.HttpManager.AddTokenResponse(TokenResponseType.InvalidClient);
+                await AssertException.TaskThrowsAsync<MsalServiceException>(
+                    () => cca.AcquireTokenForClient(TestConstants.s_scopeForAnotherResource)
+                        .WithExtraQueryParameters(extraQueryParams)
+                        .WithTenantId(TestConstants.Utid)
+                        .ExecuteAsync()).ConfigureAwait(false);
+
+                s_meterProvider.ForceFlush();
+                var metricNames = _exportedMetrics.Select(m => m.Name).ToList();
+
+                // V2 histograms emitted instead of V1
+                CollectionAssert.Contains(metricNames, "MsalTotalDuration.2");
+                CollectionAssert.Contains(metricNames, "MsalDurationInHttp.2");
+                CollectionAssert.DoesNotContain(metricNames, "MsalTotalDuration.1A");
+                CollectionAssert.DoesNotContain(metricNames, "MsalDurationInHttp.1A");
+
+                // MsalTotalDuration.2 has Succeeded=true for the IDP success and Succeeded=false for the failure
+                var totalDurationV2 = _exportedMetrics.Single(m => m.Name == "MsalTotalDuration.2");
+                bool hasSuccessPoint = false, hasFailurePoint = false;
+                foreach (var point in totalDurationV2.GetMetricPoints())
+                {
+                    if ((bool)GetTagValue(point.Tags, TelemetryConstants.Succeeded)) hasSuccessPoint = true;
+                    else hasFailurePoint = true;
+                }
+                Assert.IsTrue(hasSuccessPoint, "MsalTotalDuration.2 should have a point with Succeeded=true");
+                Assert.IsTrue(hasFailurePoint, "MsalTotalDuration.2 should have a point with Succeeded=false");
+
+                // MsalDurationInHttp.2 has HttpStatusCode=200 from the IDP success
+                var httpDurationV2 = _exportedMetrics.Single(m => m.Name == "MsalDurationInHttp.2");
+                bool has200 = false;
+                foreach (var point in httpDurationV2.GetMetricPoints())
+                {
+                    if ((int)GetTagValue(point.Tags, TelemetryConstants.HttpStatusCode) == 200)
+                        has200 = true;
+                }
+                Assert.IsTrue(has200, "MsalDurationInHttp.2 should have a point with HttpStatusCode=200 for the IDP success");
+            }
+        }
+
+        [TestMethod]
+        [Description("Background proactive refresh success records HTTP duration in MsalDurationInHttp.1A " +
+            "even when the foreground request was served from cache with no HTTP call.")]
+        public async Task ProactiveTokenRefresh_Success_RecordsBackgroundHttpDurationAsync()
+        {
+            using (_harness = base.CreateTestHarness())
+            {
+                CreateApplication();
+
+                // Pre-populate cache so the foreground request is a cache hit with no HTTP call
+                TokenCacheHelper.PopulateCache(_cca.AppTokenCacheInternal.Accessor, addSecondAt: false);
+                TestCommon.UpdateATWithRefreshOn(_cca.AppTokenCacheInternal.Accessor);
+
+                // Background refresh will hit the IDP
+                _harness.HttpManager.AddAllMocks(TokenResponseType.Valid_ClientCredentials);
+
+                // Foreground: served from cache (no HTTP), fires background refresh
+                var result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithExtraQueryParameters(extraQueryParams)
+                    .ExecuteAsync().ConfigureAwait(false);
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+
+                // Poll until the background metric appears — flush on each iteration to avoid races
+                TestCommon.YieldTillSatisfied(() =>
+                {
+                    s_meterProvider.ForceFlush();
+                    return _exportedMetrics.Any(m => m.Name == "MsalDurationInHttp.1A");
+                });
+
+                // MsalDurationInHttp.1A must be present — it can only come from the background IDP call
+                // since the foreground request made no HTTP call
+                CollectionAssert.Contains(
+                    _exportedMetrics.Select(m => m.Name).ToList(),
+                    "MsalDurationInHttp.1A",
+                    "Background refresh HTTP duration must be recorded in MsalDurationInHttp.1A");
+            }
+        }
+
+        [TestMethod]
+        [Description("Background proactive refresh failure with extended metrics records MsalDurationInHttp.2 " +
+            "with the HTTP status code but does not emit MsalTotalDuration.2 for the background failure path.")]
+        public async Task ProactiveTokenRefresh_AadUnavailable_WithExtendedMetrics_RecordsHttpStatusCodeNotTotalDurationAsync()
+        {
+            using (_harness = base.CreateTestHarness())
+            {
+                var cca = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithExperimentalFeatures()
+                    .WithAuthority(TestConstants.AuthorityUtidTenant)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithHttpManager(_harness.HttpManager)
+                    .WithExtendedTokenAcquisitionMetrics()
+                    .BuildConcrete();
+
+                TokenCacheHelper.PopulateCache(cca.AppTokenCacheInternal.Accessor, addSecondAt: false);
+                TestCommon.UpdateATWithRefreshOn(cca.AppTokenCacheInternal.Accessor);
+
+                _harness.HttpManager.AddAllMocks(TokenResponseType.Invalid_AADUnavailable503);
+                _harness.HttpManager.AddTokenResponse(TokenResponseType.Invalid_AADUnavailable503);
+
+                // Foreground: served from cache, fires background refresh that fails with 503
+                var result = await cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithExtraQueryParameters(extraQueryParams)
+                    .ExecuteAsync().ConfigureAwait(false);
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+
+                // Poll until the background metric appears — flush on each iteration to avoid races
+                TestCommon.YieldTillSatisfied(() =>
+                {
+                    s_meterProvider.ForceFlush();
+                    return _exportedMetrics.Any(m => m.Name == "MsalDurationInHttp.2");
+                });
+
+                // MsalTotalDuration.2 should have no Succeeded=false point from the background path —
+                // background failure passes totalDurationInMs=0 which is skipped by the guard in LogFailureMetrics
+                var totalDurationV2 = _exportedMetrics.FirstOrDefault(m => m.Name == "MsalTotalDuration.2");
+                if (totalDurationV2 != null)
+                {
+                    foreach (var point in totalDurationV2.GetMetricPoints())
+                    {
+                        Assert.IsTrue(
+                            (bool)GetTagValue(point.Tags, TelemetryConstants.Succeeded),
+                            "MsalTotalDuration.2 should not record Succeeded=false from the background path");
+                    }
+                }
+
+                // MsalDurationInHttp.2 should have a point with HttpStatusCode=503 from the background failure
+                var httpDurationV2 = _exportedMetrics.FirstOrDefault(m => m.Name == "MsalDurationInHttp.2");
+                Assert.IsNotNull(httpDurationV2, "MsalDurationInHttp.2 should be recorded for background failure with an HTTP status code");
+                bool has503 = false;
+                foreach (var point in httpDurationV2.GetMetricPoints())
+                {
+                    if ((int)GetTagValue(point.Tags, TelemetryConstants.HttpStatusCode) == 503)
+                        has503 = true;
+                }
+                Assert.IsTrue(has503, "MsalDurationInHttp.2 should have a point with HttpStatusCode=503 from the background failure");
+            }
+        }
+
         private async Task AcquireTokenSuccessAsync(bool withExtension = false)
         {
             _harness.HttpManager.AddInstanceDiscoveryMockHandler();
@@ -561,6 +723,41 @@ namespace Microsoft.Identity.Test.Unit
 
                         break;
 
+                    case "MsalTotalDuration.2":
+                        Trace.WriteLine("Verify the metrics captured for MsalTotalDuration.2 histogram.");
+                        Assert.AreEqual(MetricType.Histogram, exportedItem.MetricType);
+
+                        expectedTags.Add(TelemetryConstants.MsalVersion);
+                        expectedTags.Add(TelemetryConstants.Platform);
+                        expectedTags.Add(TelemetryConstants.ApiId);
+                        expectedTags.Add(TelemetryConstants.CacheRefreshReason);
+                        expectedTags.Add(TelemetryConstants.TokenType);
+                        expectedTags.Add(TelemetryConstants.Succeeded);
+
+                        foreach (var metricPoint in exportedItem.GetMetricPoints())
+                        {
+                            AssertTags(metricPoint.Tags, expectedTags);
+                        }
+
+                        break;
+
+                    case "MsalDurationInHttp.2":
+                        Trace.WriteLine("Verify the metrics captured for MsalDurationInHttp.2 histogram.");
+                        Assert.AreEqual(MetricType.Histogram, exportedItem.MetricType);
+
+                        expectedTags.Add(TelemetryConstants.MsalVersion);
+                        expectedTags.Add(TelemetryConstants.Platform);
+                        expectedTags.Add(TelemetryConstants.ApiId);
+                        expectedTags.Add(TelemetryConstants.TokenType);
+                        expectedTags.Add(TelemetryConstants.HttpStatusCode);
+
+                        foreach (var metricPoint in exportedItem.GetMetricPoints())
+                        {
+                            AssertTags(metricPoint.Tags, expectedTags);
+                        }
+
+                        break;
+
                     case "MsalDurationBearerOperation.1B":
                         Trace.WriteLine("Verify the metrics captured for MsalDurationBearerOperation.1B histogram.");
                         Assert.AreEqual(MetricType.Histogram, exportedItem.MetricType);
@@ -583,6 +780,13 @@ namespace Microsoft.Identity.Test.Unit
                         break;
                 }
             }
+        }
+
+        private static object GetTagValue(ReadOnlyTagCollection tags, string key)
+        {
+            foreach (var tag in tags)
+                if (tag.Key == key) return tag.Value;
+            return null;
         }
 
         private void AssertTags(ReadOnlyTagCollection tags, List<string> expectedTags, bool expectCallerSdkDetails = false)

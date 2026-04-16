@@ -68,6 +68,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                 if (isBrokerConfigured && !isAccountSourceDeviceCodeFlow)
                 {
                     _logger.Info("Broker is configured and enabled, attempting to use broker instead.");
+                    AuthenticationRequestParameters.RequestContext.ApiEvent.TokenSource = TokenSource.Broker;
                     var brokerResult = await _brokerStrategyLazy.Value.ExecuteAsync(cancellationToken).ConfigureAwait(false);
 
                     // fallback to local cache if broker fails

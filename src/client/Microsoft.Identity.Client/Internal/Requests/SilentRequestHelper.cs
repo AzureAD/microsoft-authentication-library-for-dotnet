@@ -99,11 +99,16 @@ namespace Microsoft.Identity.Client.Internal
                         apiEvent.ApiId,
                         callerSdkId,
                         callerSdkVersion,
-                        TokenSource.IdentityProvider, 
-                        CacheRefreshReason.ProactivelyRefreshed, 
+                        TokenSource.IdentityProvider,
+                        CacheRefreshReason.ProactivelyRefreshed,
                         Cache.CacheLevel.None,
                         logger,
                         apiEvent.TokenType);
+                    serviceBundle.PlatformProxy.OtelInstrumentation.LogSuccessHttpDuration(
+                        serviceBundle.PlatformProxy.GetProductName(),
+                        apiEvent.ApiId,
+                        authResult.AuthenticationResultMetadata,
+                        serviceBundle.Config.IsExtendedTokenAcquisitionMetricsEnabled);
                 }
                 catch (MsalServiceException ex)
                 {
@@ -119,36 +124,33 @@ namespace Microsoft.Identity.Client.Internal
 
                     serviceBundle.PlatformProxy.OtelInstrumentation.LogFailureMetrics(
                         serviceBundle.PlatformProxy.GetProductName(),
+                        apiEvent,
                         ex.ErrorCode,
-                        apiEvent.ApiId,
-                        callerSdkId,
-                        callerSdkVersion,
-                        CacheRefreshReason.ProactivelyRefreshed,
-                        apiEvent.TokenType);
+                        ex.StatusCode,
+                        totalDurationInMs: 0,
+                        serviceBundle.Config.IsExtendedTokenAcquisitionMetricsEnabled);
                 }
                 catch (OperationCanceledException ex)
                 {
                     logger.WarningPiiWithPrefix(ex, ProactiveRefreshCancellationError);
                     serviceBundle.PlatformProxy.OtelInstrumentation.LogFailureMetrics(
                         serviceBundle.PlatformProxy.GetProductName(),
+                        apiEvent,
                         ex.GetType().Name,
-                        apiEvent.ApiId,
-                        callerSdkId, 
-                        callerSdkVersion, 
-                        CacheRefreshReason.ProactivelyRefreshed,
-                        apiEvent.TokenType);
+                        httpStatusCode: 0,
+                        totalDurationInMs: 0,
+                        serviceBundle.Config.IsExtendedTokenAcquisitionMetricsEnabled);
                 }
                 catch (Exception ex)
                 {
                     logger.ErrorPiiWithPrefix(ex, ProactiveRefreshGeneralError);
                     serviceBundle.PlatformProxy.OtelInstrumentation.LogFailureMetrics(
                         serviceBundle.PlatformProxy.GetProductName(),
+                        apiEvent,
                         ex.GetType().Name,
-                        apiEvent.ApiId,
-                        callerSdkId, 
-                        callerSdkVersion, 
-                        CacheRefreshReason.ProactivelyRefreshed,
-                        apiEvent.TokenType);
+                        httpStatusCode: 0,
+                        totalDurationInMs: 0,
+                        serviceBundle.Config.IsExtendedTokenAcquisitionMetricsEnabled);
                 }
             });
         }

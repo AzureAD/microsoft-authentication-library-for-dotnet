@@ -19,7 +19,8 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             CacheLevel cacheLevel,
             long totalDurationInUs,
             AuthenticationResultMetadata authResultMetadata,
-            ILoggerAdapter logger);
+            ILoggerAdapter logger,
+            bool isExtendedMetricsEnabled);
 
         internal void IncrementSuccessCounter(string platform,
             ApiEvent.ApiIds apiId,
@@ -31,12 +32,18 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             ILoggerAdapter logger,
             int TokenType);
 
-        internal void LogFailureMetrics(string platform, 
-            string errorCode, 
+        internal void LogSuccessHttpDuration(
+            string platform,
             ApiEvent.ApiIds apiId,
-            string callerSdkId,
-            string callerSdkVersion,
-            CacheRefreshReason cacheRefreshReason,
-            int tokenType);
+            AuthenticationResultMetadata authResultMetadata,
+            bool isExtendedMetricsEnabled);
+
+        internal void LogFailureMetrics(
+            string platform,
+            ApiEvent apiEvent,
+            string errorCode,
+            int httpStatusCode,
+            long totalDurationInMs,
+            bool isExtendedMetricsEnabled);
     }
 }
