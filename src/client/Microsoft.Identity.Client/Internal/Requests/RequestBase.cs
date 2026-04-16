@@ -131,6 +131,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         durationInUs,
                         authenticationResult.AuthenticationResultMetadata,
                         AuthenticationRequestParameters.RequestContext.Logger);
+
+            ServiceBundle.PlatformProxy.OtelInstrumentation.LogRemainingTokenLifetime(
+                        ServiceBundle.PlatformProxy.GetProductName(),
+                        apiEvent.ApiId,
+                        authenticationResult.AuthenticationResultMetadata.TokenSource,
+                        GetCacheLevel(authenticationResult),
+                        authenticationResult.AuthenticationResultMetadata.CacheRefreshReason,
+                        authenticationResult.AuthenticationResultMetadata.TelemetryTokenType,
+                        authenticationResult.ExpiresOn);
         }
 
         private void LogFailureTelemetryToOtel(string errorCodeToLog, ApiEvent apiEvent, CacheRefreshReason cacheRefreshReason)
