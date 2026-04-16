@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 
 namespace Microsoft.Identity.Client.Internal
 {
@@ -54,6 +55,53 @@ namespace Microsoft.Identity.Client.Internal
         public const string CiamAuthorityHostSuffix = ".ciamlogin.com";
         public const string CertSerialNumber = "cert_sn";
         public const string FmiNodeClientId = "urn:microsoft:identity:fmi";
+
+        // Well-known authority hosts (aligned with Python MSAL's WELL_KNOWN_AUTHORITY_HOSTS).
+        // Private to prevent external mutation; use IsWellKnownAuthorityHost() for lookups.
+        private static readonly HashSet<string> s_wellKnownAuthorityHosts = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "login.microsoftonline.com",
+            "login.microsoft.com",
+            "login.windows.net",
+            "sts.windows.net",
+            "login.chinacloudapi.cn",
+            "login.partner.microsoftonline.cn",
+            "login.microsoftonline.de",
+            "login-us.microsoftonline.com",
+            "login.microsoftonline.us",
+            "login.usgovcloudapi.net",
+            "login.sovcloud-identity.fr",
+            "login.sovcloud-identity.de",
+            "login.sovcloud-identity.sg",
+        };
+
+        // Well-known B2C host suffixes (aligned with Python MSAL's WELL_KNOWN_B2C_HOSTS).
+        // Uses dot-prefixed suffixes to prevent spoofing (fakeb2clogin.com won't match .b2clogin.com).
+        private static readonly string[] s_wellKnownB2CHostSuffixes = new[]
+        {
+            ".b2clogin.com",
+            ".b2clogin.cn",
+            ".b2clogin.us",
+            ".b2clogin.de",
+            ".ciamlogin.com",
+        };
+
+        internal static bool IsWellKnownAuthorityHost(string host)
+        {
+            return s_wellKnownAuthorityHosts.Contains(host);
+        }
+
+        internal static bool HasWellKnownB2CHostSuffix(string host)
+        {
+            foreach (string suffix in s_wellKnownB2CHostSuffixes)
+            {
+                if (host.EndsWith(suffix, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
 
         // Telemetry query parameter keys
         public const string CallerSdkIdKey = "caller-sdk-id";
