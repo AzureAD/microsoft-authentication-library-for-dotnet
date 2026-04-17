@@ -51,7 +51,7 @@ jobs:
         platform: '$(BuildPlatform)'
         configuration: '$(BuildConfiguration)'
         msbuildArguments: '/p:RunCodeAnalysis=false'
-        clean: false
+        clean: true
 
     # The parameters currently are not used, but can be uploaded into the reporting system in the future.
     # Currently the build runs automatically but the results have to be compared manually.
