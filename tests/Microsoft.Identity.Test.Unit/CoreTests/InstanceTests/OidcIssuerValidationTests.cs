@@ -199,6 +199,34 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             "https://myidp.example.com/tenant",
             "https://eastus.myidp.example.com/tenant",
             DisplayName = "Fail_RegionalAuthorityHost_NotSupported")]
+        [DataRow(
+            "https://customdomain.com/tenantA",
+            "https://tenantB.ciamlogin.com/tenantB/v2.0",
+            DisplayName = "CIAM_WrongTenant_Fails")]
+        [DataRow(
+            "https://custom.example.com/tenant",
+            "https://westus2.login.evil.com/tenant",
+            DisplayName = "Fail_RegionalLooking_UntrustedBase")]
+        [DataRow(
+            "https://otherdomain.com/tenant",
+            "https://eastus.myidp.example.com/tenant",
+            DisplayName = "Fail_RegionalLooking_WrongAuthorityBase")]
+        [DataRow(
+            "https://custom.example.com/tenant",
+            "https://login.windows-ppe.net/tenant",
+            DisplayName = "Fail_PPE_LoginWindowsPpe")]
+        [DataRow(
+            "https://custom.example.com/tenant",
+            "https://sts.windows-ppe.net/tenant",
+            DisplayName = "Fail_PPE_StsWindowsPpe")]
+        [DataRow(
+            "https://custom.example.com/tenant",
+            "https://login.microsoft-ppe.com/tenant",
+            DisplayName = "Fail_PPE_LoginMicrosoftPpe")]
+        [DataRow(
+            "https://custom.example.com/tenant",
+            "https://westus2.login.windows-ppe.net/tenant",
+            DisplayName = "Fail_PPE_Regional_LoginWindowsPpe")]
         public void ValidateIssuer_ShouldThrow(string authority, string issuer)
         {
             var ex = AssertException.Throws<MsalServiceException>(
