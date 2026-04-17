@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
@@ -80,62 +81,82 @@ namespace Microsoft.Identity.Client.Instance.Oidc
         /// An issuer is valid if any of the following is true:
         /// 1. Same scheme and host as the authority (path can differ)
         /// 2. The issuer host is a well-known Microsoft authority host (HTTPS only)
-        /// 3. The issuer host is a regional variant of a well-known host or the authority host (HTTPS only)
-        /// 4. The issuer host ends with a well-known B2C/CIAM suffix (e.g., tenant.b2clogin.com, tenant.ciamlogin.com) (HTTPS only)
+        /// 3. The issuer host is a regional variant of a well-known host (HTTPS only)
         /// </summary>
         /// <param name="authority">The authority URL.</param>
         /// <param name="issuer">The issuer from the OIDC metadata - the single source of truth.</param>
         /// <exception cref="MsalServiceException">Thrown when issuer validation fails.</exception>
         internal static void ValidateIssuer(Uri authority, string issuer)
         {
-            // Early null/empty check
-            if (string.IsNullOrEmpty(issuer) || !Uri.TryCreate(issuer, UriKind.Absolute, out Uri issuerUri))
+            // Normalize both URLs to handle trailing slash differences
+            string normalizedAuthority = authority.AbsoluteUri.TrimEnd('/');
+            string normalizedIssuer = issuer?.TrimEnd('/');
+
+            // OIDC validation: if the issuer's scheme and host match the authority's, consider it valid
+            if (!string.IsNullOrEmpty(issuer) && Uri.TryCreate(issuer, UriKind.Absolute, out Uri issuerUri))
             {
-                throw new MsalServiceException(
-                    MsalError.AuthorityValidationFailed,
-                    string.Format(MsalErrorMessage.IssuerValidationFailed, authority, issuer));
-            }
-
-            // Check 1: Same scheme and host (existing behavior)
-            if (string.Equals(authority.Scheme, issuerUri.Scheme, StringComparison.OrdinalIgnoreCase) &&
-                string.Equals(authority.Host, issuerUri.Host, StringComparison.OrdinalIgnoreCase))
-            {
-                return;
-            }
-
-            string issuerHost = issuerUri.Host;
-
-            // Checks 2-4 require HTTPS scheme to prevent scheme-downgrade attacks
-            bool issuerIsHttps = string.Equals(issuerUri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase);
-
-            if (issuerIsHttps)
-            {
-                // Check 2: Well-known authority host allowlist (O(1) lookup)
-                // Reuses KnownMetadataProvider which is the single source of truth for known environments
-                if (KnownMetadataProvider.IsKnownEnvironment(issuerHost))
+                // Rule 1: Same scheme and host
+                if (string.Equals(authority.Scheme, issuerUri.Scheme, StringComparison.OrdinalIgnoreCase) &&
+                    string.Equals(authority.Host, issuerUri.Host, StringComparison.OrdinalIgnoreCase))
                 {
                     return;
                 }
 
-                // Check 3: Regional variant (e.g., westus2.login.microsoft.com)
-                int dotIndex = issuerHost.IndexOf('.');
-                if (dotIndex > 0)
+                // Rule 2: The issuer host is a well-known Microsoft authority host (HTTPS only)
+                if (string.Equals(issuerUri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase) &&
+                    KnownMetadataProvider.IsKnownEnvironment(issuerUri.Host))
                 {
-                    string potentialBase = issuerHost.Substring(dotIndex + 1);
-                    // 3a: Base host is a well-known authority host
-                    if (KnownMetadataProvider.IsKnownEnvironment(potentialBase))
-                    {
-                        return;
-                    }
-                    // 3b: Base host matches the authority host (e.g., issuer=eastus.myidp.example.com, authority=myidp.example.com)
-                    if (string.Equals(potentialBase, authority.Host, StringComparison.OrdinalIgnoreCase))
-                    {
-                        return;
-                    }
+                    return;
                 }
 
-                // Check 4: B2C host suffix (e.g., tenant.b2clogin.com, tenant.ciamlogin.com)
-                if (Constants.HasWellKnownB2CHostSuffix(issuerHost))
+                // Rule 3: The issuer host is a regional variant ({region}.{host}) of a well-known host
+                // or the authority host (HTTPS only). E.g. westus2.login.microsoft.com
+                if (string.Equals(issuerUri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
+                {
+                    string issuerHost = issuerUri.Host;
+                    int firstDot = issuerHost.IndexOf('.');
+                    if (firstDot > 0 && firstDot < issuerHost.Length - 1)
+                    {
+                        string hostWithoutRegion = issuerHost.Substring(firstDot + 1);
+
+                        // Regional variant of a well-known host (e.g. westus2.login.microsoft.com)
+                        if (KnownMetadataProvider.IsKnownEnvironment(hostWithoutRegion))
+                        {
+                            return;
+                        }
+
+                    }
+                }
+            }
+
+            // CIAM-specific validation: In a CIAM scenario the issuer is expected to have "{tenant}.ciamlogin.com"
+            // as the host, even when using a custom domain.
+            string tenant = null;
+            try
+            {
+                tenant = AuthorityInfo.GetFirstPathSegment(authority);
+            }
+            catch (InvalidOperationException)
+            {
+                // If no path segments exist, try to extract from hostname (first part)
+                var hostParts = authority.Host.Split('.');
+                tenant = hostParts.Length > 0 ? hostParts[0] : null;
+            }
+
+            // If tenant extraction failed or returned empty, validation fails
+            if (!string.IsNullOrEmpty(tenant))
+            {
+                // Create a collection of valid CIAM issuer patterns for the tenant
+                string[] validCiamPatterns =
+                {
+                    $"https://{tenant}{Constants.CiamAuthorityHostSuffix}",
+                    $"https://{tenant}{Constants.CiamAuthorityHostSuffix}/{tenant}",
+                    $"https://{tenant}{Constants.CiamAuthorityHostSuffix}/{tenant}/v2.0"
+                };
+
+                // Normalize and check if the issuer matches any of the valid patterns
+                if (validCiamPatterns.Any(pattern =>
+                    string.Equals(normalizedIssuer, pattern.TrimEnd('/'), StringComparison.OrdinalIgnoreCase)))
                 {
                     return;
                 }

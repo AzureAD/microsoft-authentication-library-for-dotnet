@@ -66,18 +66,6 @@ namespace Microsoft.Identity.Client.Internal
             ".ciamlogin.com",
         };
 
-        internal static bool HasWellKnownB2CHostSuffix(string host)
-        {
-            foreach (string suffix in s_wellKnownB2CHostSuffixes)
-            {
-                if (host.EndsWith(suffix, StringComparison.OrdinalIgnoreCase))
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
         // Telemetry query parameter keys
         public const string CallerSdkIdKey = "caller-sdk-id";
         public const string CallerSdkVersionKey = "caller-sdk-ver";
