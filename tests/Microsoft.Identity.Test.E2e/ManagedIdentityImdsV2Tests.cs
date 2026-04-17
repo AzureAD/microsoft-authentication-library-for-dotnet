@@ -199,10 +199,6 @@ namespace Microsoft.Identity.Test.E2E
             {
                 Assert.Inconclusive($"Cryptographic operation failed: {ex.Message}");
             }
-            catch (HttpRequestException ex)
-            {
-                Assert.Inconclusive($"AKV call could not be completed: {ex.Message}");
-            }
         }
 
         #endregion
@@ -364,9 +360,7 @@ namespace Microsoft.Identity.Test.E2E
 
             if (!response.IsSuccessStatusCode)
             {
-                // AKV failures are infrastructure-related and should not fail the build.
-                // The core test validates mTLS PoP token acquisition; AKV is a downstream call.
-                Assert.Inconclusive(
+                Assert.Fail(
                     $"AKV secret GET returned non-success status: {(int)response.StatusCode} {response.StatusCode}. Body: {responseContent}");
             }
 
