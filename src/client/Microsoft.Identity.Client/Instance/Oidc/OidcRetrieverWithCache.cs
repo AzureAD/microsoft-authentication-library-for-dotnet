@@ -3,10 +3,12 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 
@@ -16,6 +18,14 @@ namespace Microsoft.Identity.Client.Instance.Oidc
     {
         private static readonly ConcurrentDictionary<string, OidcMetadata> s_cache = new();
         private static readonly SemaphoreSlim s_lockOidcRetrieval = new SemaphoreSlim(1);
+
+        // PPE hosts excluded from issuer validation – they should not be trusted as production issuers.
+        private static readonly HashSet<string> s_ppeHosts = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "login.windows-ppe.net",
+            "sts.windows-ppe.net",
+            "login.microsoft-ppe.com"
+        };
 
         public static async Task<OidcMetadata> GetOidcAsync(
             string authority,
@@ -77,11 +87,16 @@ namespace Microsoft.Identity.Client.Instance.Oidc
 
         /// <summary>
         /// Validates that the issuer in the OIDC metadata matches the authority.
+        /// An issuer is valid if any of the following is true:
+        /// 1. Same scheme and host as the authority (path can differ)
+        /// 2. The issuer host is a well-known Microsoft authority host (HTTPS only, excludes PPE)
+        /// 3. The issuer host is a regional variant of a well-known host (HTTPS only, excludes PPE)
+        /// 4. CIAM-specific: the issuer matches {tenant}.ciamlogin.com patterns
         /// </summary>
         /// <param name="authority">The authority URL.</param>
         /// <param name="issuer">The issuer from the OIDC metadata - the single source of truth.</param>
         /// <exception cref="MsalServiceException">Thrown when issuer validation fails.</exception>
-        private static void ValidateIssuer(Uri authority, string issuer)
+        internal static void ValidateIssuer(Uri authority, string issuer)
         {
             // Normalize both URLs to handle trailing slash differences
             string normalizedAuthority = authority.AbsoluteUri.TrimEnd('/');
@@ -90,10 +105,38 @@ namespace Microsoft.Identity.Client.Instance.Oidc
             // OIDC validation: if the issuer's scheme and host match the authority's, consider it valid
             if (!string.IsNullOrEmpty(issuer) && Uri.TryCreate(issuer, UriKind.Absolute, out Uri issuerUri))
             {
+                // Rule 1: Same scheme and host
                 if (string.Equals(authority.Scheme, issuerUri.Scheme, StringComparison.OrdinalIgnoreCase) &&
                     string.Equals(authority.Host, issuerUri.Host, StringComparison.OrdinalIgnoreCase))
                 {
                     return;
+                }
+
+                // Rule 2: The issuer host is a well-known Microsoft authority host (HTTPS only, excludes PPE)
+                if (string.Equals(issuerUri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase) &&
+                    KnownMetadataProvider.IsKnownEnvironment(issuerUri.Host) &&
+                    !s_ppeHosts.Contains(issuerUri.Host))
+                {
+                    return;
+                }
+
+                // Rule 3: The issuer host is a regional variant ({region}.{host}) of a well-known host
+                // (HTTPS only, excludes PPE). E.g. westus2.login.microsoft.com
+                if (string.Equals(issuerUri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
+                {
+                    string issuerHost = issuerUri.Host;
+                    int firstDot = issuerHost.IndexOf('.');
+                    if (firstDot > 0 && firstDot < issuerHost.Length - 1)
+                    {
+                        string hostWithoutRegion = issuerHost.Substring(firstDot + 1);
+
+                        // Regional variant of a well-known host (e.g. westus2.login.microsoft.com)
+                        if (KnownMetadataProvider.IsKnownEnvironment(hostWithoutRegion) &&
+                            !s_ppeHosts.Contains(hostWithoutRegion))
+                        {
+                            return;
+                        }
+                    }
                 }
             }
 

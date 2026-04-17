@@ -55,6 +55,17 @@ namespace Microsoft.Identity.Client.Internal
         public const string CertSerialNumber = "cert_sn";
         public const string FmiNodeClientId = "urn:microsoft:identity:fmi";
 
+        // Well-known B2C host suffixes (aligned with Python MSAL's WELL_KNOWN_B2C_HOSTS).
+        // Uses dot-prefixed suffixes to prevent spoofing (fakeb2clogin.com won't match .b2clogin.com).
+        private static readonly string[] s_wellKnownB2CHostSuffixes = new[]
+        {
+            ".b2clogin.com",
+            ".b2clogin.cn",
+            ".b2clogin.us",
+            ".b2clogin.de",
+            ".ciamlogin.com",
+        };
+
         // Telemetry query parameter keys
         public const string CallerSdkIdKey = "caller-sdk-id";
         public const string CallerSdkVersionKey = "caller-sdk-ver";
