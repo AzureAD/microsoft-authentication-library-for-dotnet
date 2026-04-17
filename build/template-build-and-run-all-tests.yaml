@@ -285,7 +285,7 @@ stages:
 # ──────────────────────────────────────────────
 - stage: MIE2EAzureArc
   displayName: 'MI E2E – Azure Arc'
-  dependsOn: Build
+  dependsOn: [] # Builds from source — no dependency on Build stage
   jobs:
 
   - job: 'RunManagedIdentityE2ETestsOnAzureArc'
@@ -305,7 +305,7 @@ stages:
 # ──────────────────────────────────────────────
 - stage: MIE2EIMDS
   displayName: 'MI E2E – IMDS'
-  dependsOn: Build
+  dependsOn: [] # Builds from source — no dependency on Build stage
   jobs:
 
   - job: 'RunManagedIdentityE2ETestsOnImds'
@@ -325,7 +325,7 @@ stages:
 # ──────────────────────────────────────────────
 - stage: MIE2EIMDSV2
   displayName: 'MI E2E – IMDS V2'
-  dependsOn: Build
+  dependsOn: [] # Builds from source — no dependency on Build stage
   jobs:
 
   - job: 'RunManagedIdentityE2ETestsOnImdsV2'
