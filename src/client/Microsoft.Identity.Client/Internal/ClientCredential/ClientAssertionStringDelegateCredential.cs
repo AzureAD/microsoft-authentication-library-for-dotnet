@@ -41,7 +41,8 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                 TokenEndpoint = tokenEndpoint,
                 ClientCapabilities = p.RequestContext.ServiceBundle.Config.ClientCapabilities,
                 Claims = p.Claims,
-                ClientAssertionFmiPath = p.ClientAssertionFmiPath
+                ClientAssertionFmiPath = p.ClientAssertionFmiPath,
+                CorrelationId = p.RequestContext.CorrelationId
             };
 
             string assertion = await _provider(opts, ct).ConfigureAwait(false);
