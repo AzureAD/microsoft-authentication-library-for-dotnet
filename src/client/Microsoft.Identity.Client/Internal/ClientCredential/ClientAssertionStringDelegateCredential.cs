@@ -2,18 +2,19 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.TelemetryCore;
 
 namespace Microsoft.Identity.Client.Internal.ClientCredential
 {
     /// <summary>
-    /// Client assertion provided as a string JWT. Cannot return TokenBindingCertificate (no mTLS preflight).
+    /// Client assertion provided as a string JWT via a delegate.
+    /// Cannot return a <see cref="ClientSignedAssertion.TokenBindingCertificate"/> and therefore
+    /// is incompatible with mTLS.
     /// </summary>
     internal sealed class ClientAssertionStringDelegateCredential : IClientCredential
     {
@@ -27,24 +28,33 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
 
         public AssertionType AssertionType => AssertionType.ClientAssertion;
 
-        public async Task<ClientCredentialApplicationResult> AddConfidentialClientParametersAsync(
-            OAuth2Client oAuth2Client,
-            AuthenticationRequestParameters p,
-            ICryptographyManager _,
-            string tokenEndpoint,
-            CancellationToken ct)
+        public async Task<CredentialMaterial> GetCredentialMaterialAsync(
+            CredentialContext context,
+            CancellationToken cancellationToken)
         {
+            context.Logger.Verbose(() => $"[ClientAssertionStringDelegateCredential] Mode={context.Mode}");
+
+            if (context.Mode == OAuthMode.MtlsMode)
+            {
+                throw new MsalClientException(
+                    MsalError.InvalidCredentialMaterial,
+                    "A string-returning client assertion callback cannot be used over mTLS. " +
+                    "Use a ClientSignedAssertion callback that can return a token-binding certificate.");
+            }
+
             var opts = new AssertionRequestOptions
             {
-                CancellationToken = ct,
-                ClientID = p.AppConfig.ClientId,
-                TokenEndpoint = tokenEndpoint,
-                ClientCapabilities = p.RequestContext.ServiceBundle.Config.ClientCapabilities,
-                Claims = p.Claims,
-                ClientAssertionFmiPath = p.ClientAssertionFmiPath
+                CancellationToken = cancellationToken,
+                ClientID = context.ClientId,
+                TokenEndpoint = context.TokenEndpoint,
+                ClientCapabilities = context.ClientCapabilities,
+                Claims = context.Claims,
+                ClientAssertionFmiPath = context.ClientAssertionFmiPath,
+                Authority = context.Authority,
+                TenantId = context.TenantId
             };
 
-            string assertion = await _provider(opts, ct).ConfigureAwait(false);
+            string assertion = await _provider(opts, cancellationToken).ConfigureAwait(false);
 
             if (string.IsNullOrWhiteSpace(assertion))
             {
@@ -53,10 +63,13 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                     MsalErrorMessage.InvalidClientAssertionEmpty);
             }
 
-            oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtBearer);
-            oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertion, assertion);
+            var parameters = new Dictionary<string, string>
+            {
+                { OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtBearer },
+                { OAuth2Parameter.ClientAssertion, assertion }
+            };
 
-            return ClientCredentialApplicationResult.None;
+            return new CredentialMaterial(parameters);
         }
     }
 }

@@ -2,19 +2,18 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.TelemetryCore;
 
 namespace Microsoft.Identity.Client.Internal.ClientCredential
 {
     /// <summary>
-    /// Handles client assertions supplied via a delegate that returns an
-    /// <see cref="ClientSignedAssertion"/> (JWT + optional certificate bound for mTLS‑PoP).
+    /// Handles client assertions supplied via a delegate that returns a
+    /// <see cref="ClientSignedAssertion"/> (JWT + optional certificate bound for mTLS-PoP).
     /// </summary>
     internal sealed class ClientAssertionDelegateCredential : IClientCredential, IClientSignedAssertionProvider
     {
@@ -26,41 +25,33 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             _provider = provider ?? throw new ArgumentNullException(nameof(provider));
         }
 
-        // Private helper for internal readability
-        private Task<ClientSignedAssertion> GetAssertionAsync(
-            AssertionRequestOptions options,
-            CancellationToken cancellationToken) =>
-            _provider(options, cancellationToken);
-
         // Capability interface (only used where we intentionally cast to check the capability)
         Task<ClientSignedAssertion> IClientSignedAssertionProvider.GetAssertionAsync(
             AssertionRequestOptions options,
             CancellationToken cancellationToken) =>
-            GetAssertionAsync(options, cancellationToken);
+            _provider(options, cancellationToken);
 
         public AssertionType AssertionType => AssertionType.ClientAssertion;
 
-        // ──────────────────────────────────
-        //  Main hook for token requests
-        // ──────────────────────────────────
-        public async Task<ClientCredentialApplicationResult> AddConfidentialClientParametersAsync(
-            OAuth2Client oAuth2Client,
-            AuthenticationRequestParameters p,
-            ICryptographyManager _,
-            string tokenEndpoint,
-            CancellationToken ct)
+        public async Task<CredentialMaterial> GetCredentialMaterialAsync(
+            CredentialContext context,
+            CancellationToken cancellationToken)
         {
+            context.Logger.Verbose(() => $"[ClientAssertionDelegateCredential] Mode={context.Mode}");
+
             var opts = new AssertionRequestOptions
             {
-                CancellationToken = ct,
-                ClientID = p.AppConfig.ClientId,
-                TokenEndpoint = tokenEndpoint,
-                ClientCapabilities = p.RequestContext.ServiceBundle.Config.ClientCapabilities,
-                Claims = p.Claims,
-                ClientAssertionFmiPath = p.ClientAssertionFmiPath
+                CancellationToken = cancellationToken,
+                ClientID = context.ClientId,
+                TokenEndpoint = context.TokenEndpoint,
+                ClientCapabilities = context.ClientCapabilities,
+                Claims = context.Claims,
+                ClientAssertionFmiPath = context.ClientAssertionFmiPath,
+                Authority = context.Authority,
+                TenantId = context.TenantId
             };
 
-            ClientSignedAssertion resp = await GetAssertionAsync(opts, ct).ConfigureAwait(false);
+            ClientSignedAssertion resp = await _provider(opts, cancellationToken).ConfigureAwait(false);
 
             if (string.IsNullOrWhiteSpace(resp?.Assertion))
             {
@@ -71,28 +62,28 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
 
             bool hasCert = resp.TokenBindingCertificate != null;
 
-            // If PoP was explicitly requested, we must have a certificate.
-            // (Preflight should enforce this too, but keep this defensive.)
-            if (p.IsMtlsPopRequested && !hasCert)
+            if (context.Mode == OAuthMode.MtlsMode && !hasCert)
             {
                 throw new MsalClientException(
                     MsalError.MtlsCertificateNotProvided,
                     MsalErrorMessage.MtlsCertificateNotProvidedMessage);
             }
 
-            // JWT-PoP if explicit PoP was requested OR delegate returned a cert (implicit bearer-over-mTLS)
-            bool useJwtPop = p.IsMtlsPopRequested || hasCert;
+            // Select the appropriate assertion type based on the presence of a certificate and the OAuth mode.
+            string assertionType =
+                (context.Mode == OAuthMode.MtlsMode || hasCert)
+                    ? OAuth2AssertionType.JwtPop
+                    : OAuth2AssertionType.JwtBearer;
 
-            oAuth2Client.AddBodyParameter(
-                OAuth2Parameter.ClientAssertionType,
-                useJwtPop ? OAuth2AssertionType.JwtPop : OAuth2AssertionType.JwtBearer);
+            var parameters = new Dictionary<string, string>
+            {
+                { OAuth2Parameter.ClientAssertionType, assertionType },
+                { OAuth2Parameter.ClientAssertion, resp.Assertion }
+            };
 
-            oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertion, resp.Assertion);
-
-            // Only return a cert if we actually have one.
-            return hasCert
-                ? new ClientCredentialApplicationResult(useJwtPopClientAssertion: useJwtPop, mtlsCertificate: resp.TokenBindingCertificate)
-                : ClientCredentialApplicationResult.None;
+            return new CredentialMaterial(
+                parameters,
+                hasCert ? resp.TokenBindingCertificate : null);
         }
     }
 }
