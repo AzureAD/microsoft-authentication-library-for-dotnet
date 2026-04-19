@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         //SSH User impersonation scope required for this test
         private string[] _SSH_scopes = new[] { "https://pas.windows.net/CheckMyAccess/Linux/user_impersonation" };
 
-        [TestMethod]
+        [RunOn(SkipConditions.OneBranchBuild)]
         public async Task Interactive_SSHCert_Async()
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);

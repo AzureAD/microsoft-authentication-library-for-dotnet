@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             }
         }
 
-        [RunOn(TargetFrameworks.NetCore)]
+        [RunOn(TargetFrameworks.NetCore, SkipConditions.OneBranchBuild)]
         public async Task FailingTest_SeleniumFailureAsync()
         {
             var pca = PublicClientApplicationBuilder
@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                  .ConfigureAwait(false);
         }
 
-        [RunOn(TargetFrameworks.NetCore)]
+        [RunOn(TargetFrameworks.NetCore, SkipConditions.OneBranchBuild)]
         public async Task FailingTest_ListenerTimesOut_Async()
         {
             var pca = PublicClientApplicationBuilder

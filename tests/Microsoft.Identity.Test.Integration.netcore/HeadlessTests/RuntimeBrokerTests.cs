@@ -57,8 +57,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
         }
         
         // This test should fail locally but succeed in a CI build.
-        [IgnoreOnOneBranch]
-        [TestMethod]
+        [RunOn(SkipConditions.OneBranchBuild)]
         public async Task WamSilentAuthUserInteractionRequiredAsync()
         {
             string[] scopes = new[]
@@ -91,10 +90,8 @@ namespace Microsoft.Identity.Test.Integration.Broker
             }
         }
 
-        [DoNotRunOnLinux] // POP is not supported on Linux
-        [IgnoreOnOneBranch]
         [Ignore("Tracking here: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5305")]
-        [TestMethod]
+        [RunOn(SkipConditions.OneBranchBuild | SkipConditions.Linux)]
         public async Task ExtractNonceWithAuthParserAndValidateShrAsync()
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
@@ -141,9 +138,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
                 result);
         }
     
-        [DoNotRunOnLinux] // Linux broker return different error code
-        [IgnoreOnOneBranch]
-        [TestMethod]
+        [RunOn(SkipConditions.OneBranchBuild | SkipConditions.Linux)]
         public async Task WamInvalidROPC_ThrowsException_TestAsync()
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
@@ -176,8 +171,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             
         }
 
-        [IgnoreOnOneBranch]
-        [TestMethod]
+        [RunOn(SkipConditions.OneBranchBuild)]
         public async Task WamSilentAuthLoginHintNoAccontInCacheAsync()
         {
             string[] scopes = new[]
@@ -205,9 +199,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             }
         }
 
-        [DoNotRunOnLinux] // WAM broker tests fail on Linux due to DBus communication issues
-        [IgnoreOnOneBranch]
-        [TestMethod]
+        [RunOn(SkipConditions.OneBranchBuild | SkipConditions.Linux)]
         public async Task WamUsernamePasswordRequestAsync()
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
@@ -262,9 +254,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
                 .ConfigureAwait(false);
         }
 
-        [DoNotRunOnLinux] // SSH Certs are not supported on Linux
-        [IgnoreOnOneBranch]
-        [TestMethod]
+        [RunOn(SkipConditions.OneBranchBuild | SkipConditions.Linux)]
         public async Task WamWithSSHCertificateAuthenticationSchemeAsync()
         {
             IntPtr intPtr = TestUtils.GetWindowHandle();
@@ -305,9 +295,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             Assert.AreEqual("SshCert", result.TokenType);
         }
 
-        [DoNotRunOnLinux] // WAM broker tests fail on Linux due to DBus communication issues
-        [IgnoreOnOneBranch]
-        [TestMethod]
+        [RunOn(SkipConditions.OneBranchBuild | SkipConditions.Linux)]
         public async Task WamUsernamePasswordWithForceRefreshAsync()
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
@@ -359,9 +347,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             Assert.AreNotEqual(ropcToken, result.AccessToken);
         }
 
-        [DoNotRunOnLinux] // WAM broker tests fail on Linux due to DBus communication issues
-        [IgnoreOnOneBranch]
-        [TestMethod]
+        [RunOn(SkipConditions.OneBranchBuild | SkipConditions.Linux)]
         public async Task WamUsernamePasswordRequestAsync_WithPiiAsync()
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
@@ -416,9 +402,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
                 await pca.AcquireTokenSilent(scopes, account).ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
         }
 
-        [DoNotRunOnLinux] // List Windows Work and School accounts is not supported on Linux
-        [IgnoreOnOneBranch]
-        [TestMethod]
+        [RunOn(SkipConditions.OneBranchBuild | SkipConditions.Linux)]
         public async Task WamListWindowsWorkAndSchoolAccountsAsync()
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
@@ -457,9 +441,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             Assert.AreEqual(user.Upn, account.Username);
         }
 
-        [DoNotRunOnLinux] // WAM broker tests fail on Linux due to DBus communication issues
-        [IgnoreOnOneBranch]
-        [TestMethod]
+        [RunOn(SkipConditions.OneBranchBuild | SkipConditions.Linux)]
         [DataRow(null)]
         public async Task WamAddDefaultScopesWhenNoScopesArePassedAsync(string scopes)
         {
@@ -489,9 +471,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             }
         }
 
-        [DoNotRunOnLinux] // POP is not supported on Linux     
-        [IgnoreOnOneBranch]
-        [TestMethod]
+        [RunOn(SkipConditions.OneBranchBuild | SkipConditions.Linux)]
         public async Task WamUsernamePasswordPopTokenEnforcedWithCaOnValidResourceAsync()
         {
             //Arrange
@@ -525,9 +505,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             Assert.AreEqual(user.Upn, result.Account.Username);
         }
 
-        [DoNotRunOnLinux] // POP are not supported on Linux  
-        [IgnoreOnOneBranch]
-        [TestMethod]
+        [RunOn(SkipConditions.OneBranchBuild | SkipConditions.Linux)]
         public async Task WamUsernamePasswordPopTokenEnforcedWithCaOnInValidResourceAsync()
         {
             //Arrange
