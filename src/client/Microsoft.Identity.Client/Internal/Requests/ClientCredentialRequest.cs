@@ -251,7 +251,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 var options = new AssertionRequestOptions(
                     AuthenticationRequestParameters.AppConfig, 
                     tokenEndpoint,
-                    AuthenticationRequestParameters.AuthorityManager.Authority.TenantId);
+                    AuthenticationRequestParameters.AuthorityManager.Authority.TenantId,
+                    AuthenticationRequestParameters.RequestContext.CorrelationId);
                 
                 var executionResult = new ExecutionResult
                 {
@@ -299,7 +300,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 var options = new AssertionRequestOptions(
                     AuthenticationRequestParameters.AppConfig, 
                     tokenEndpoint,
-                    AuthenticationRequestParameters.AuthorityManager.Authority.TenantId);
+                    AuthenticationRequestParameters.AuthorityManager.Authority.TenantId,
+                    AuthenticationRequestParameters.RequestContext.CorrelationId);
                 
                 var executionResult = new ExecutionResult
                 {

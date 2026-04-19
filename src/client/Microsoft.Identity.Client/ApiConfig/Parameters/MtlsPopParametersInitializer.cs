@@ -124,6 +124,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
                 Claims = p.Claims,
                 CancellationToken = ct,
                 ClientAssertionFmiPath = p.ClientAssertionFmiPath,
+                CorrelationId = p.CorrelationId,
 
                 // Best-effort context. IMPORTANT: use AbsoluteUri, not Uri.Authority (host only).
                 TokenEndpoint = serviceBundle.Config.Authority.AuthorityInfo.CanonicalAuthority.AbsoluteUri
