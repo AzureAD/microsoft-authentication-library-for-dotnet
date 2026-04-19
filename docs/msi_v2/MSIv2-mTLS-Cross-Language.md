@@ -113,6 +113,8 @@ resp = mtls_http_request(
              "x-ms-tokenboundauth": "true"})
 ```
 
+> **TBD:** The exact developer experience for the platform mTLS helper (mtls_http_request), including whether it is exposed directly by MSAL or through a shared companion package used by both MSAL and calling applications, will be finalized in a future design update.
+
 **Tradeoffs:**
 - ✅ Highest security — matches .NET's KeyGuard path
 - ❌ Windows only
