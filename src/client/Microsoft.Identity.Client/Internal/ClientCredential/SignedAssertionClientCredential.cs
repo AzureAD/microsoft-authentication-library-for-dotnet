@@ -25,13 +25,10 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             CredentialContext context,
             CancellationToken cancellationToken)
         {
-            context.Logger.Verbose(() => $"[SignedAssertionClientCredential] Resolving credential material. " +
-            $"Mode={context.Mode}");
+            context.Logger.Verbose(() => $"[SignedAssertionClientCredential] Mode={context.Mode}");
 
             if (context.Mode == OAuthMode.MtlsMode)
             {
-                context.Logger.Error("[SignedAssertionClientCredential] Static signed assertion cannot be used with mTLS Proof-of-Possession.");
-
                 throw new MsalClientException(
                     MsalError.InvalidCredentialMaterial,
                     "A precomputed client assertion string cannot be used over mTLS. " +
@@ -44,8 +41,6 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                 { OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtBearer },
                 { OAuth2Parameter.ClientAssertion, _signedAssertion }
             };
-
-            context.Logger.Verbose(() => "[SignedAssertionClientCredential] Signed assertion credential material created successfully.");
 
             return Task.FromResult(new CredentialMaterial(parameters));
         }

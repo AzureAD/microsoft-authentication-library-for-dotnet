@@ -25,13 +25,10 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             CredentialContext context,
             CancellationToken cancellationToken)
         {
-            context.Logger.Verbose(() => $"[ClientSecretCredential] Resolving credential material. " +
-            $"Mode={context.Mode}");
+            context.Logger.Verbose(() => $"[ClientSecretCredential] Mode={context.Mode}");
 
             if (context.Mode == OAuthMode.MtlsMode)
             {
-                context.Logger.Error("[ClientSecretCredential] Client secret cannot be used with mTLS Proof-of-Possession.");
-
                 throw new MsalClientException(
                     MsalError.InvalidCredentialMaterial,
                     "A client secret cannot be used over mTLS. " +
@@ -43,8 +40,6 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             {
                 { OAuth2Parameter.ClientSecret, Secret }
             };
-            
-            context.Logger.Verbose(() => "[ClientSecretCredential] Secret-based credential material created successfully.");
 
             return Task.FromResult(new CredentialMaterial(parameters));
         }

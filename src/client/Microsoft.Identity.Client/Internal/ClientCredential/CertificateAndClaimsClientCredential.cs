@@ -52,8 +52,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             CredentialContext context,
             CancellationToken cancellationToken)
         {
-            context.Logger.Verbose(() => $"[CertificateAndClaimsClientCredential] Resolving credential material. " +
-            $"Mode={context.Mode}, " + $"TokenEndpoint={context.TokenEndpoint}");
+            context.Logger.Verbose(() => $"[CertificateAndClaimsClientCredential] Mode={context.Mode}");
 
             // Resolve the certificate via the provider (used both for Regular and MtlsMode paths).
             X509Certificate2 certificate = await ResolveCertificateAsync(context, cancellationToken)
@@ -61,18 +60,12 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
 
             if (context.Mode == OAuthMode.MtlsMode)
             {
-                context.Logger.Verbose(() => "[CertificateAndClaimsClientCredential] mTLS mode detected. " +
-                "Using certificate for TLS client authentication; no client_assertion will be added.");
-
                 // mTLS path: the certificate authenticates the client at the TLS layer.
                 // No client_assertion is needed; return an empty parameter set.
                 return new CredentialMaterial(
                     CollectionHelpers.GetEmptyDictionary<string, string>(),
                     certificate);
             }
-
-            context.Logger.Verbose(() => "[CertificateAndClaimsClientCredential] Regular mode detected. " +
-            "Building certificate-based client assertion.");
 
             // Regular path: build a JWT-bearer client assertion.
             JsonWebToken jwtToken;
@@ -103,9 +96,6 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                 { OAuth2Parameter.ClientAssertion, assertion }
             };
 
-            context.Logger.Verbose(() => "[CertificateAndClaimsClientCredential] Certificate-based client " +
-            "assertion created successfully.");
-
             return new CredentialMaterial(parameters, certificate);
         }
 
@@ -116,15 +106,14 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             CredentialContext context,
             CancellationToken cancellationToken)
         {
-            context.Logger.Verbose(() => "[CertificateAndClaimsClientCredential] Resolving certificate from provider.");
-
-            // Create AssertionRequestOptions for the callback
             var options = new AssertionRequestOptions
             {
                 ClientID = context.ClientId,
                 TokenEndpoint = context.TokenEndpoint,
                 Claims = context.Claims,
                 ClientCapabilities = context.ClientCapabilities,
+                Authority = context.Authority,
+                TenantId = context.TenantId,
                 CancellationToken = cancellationToken
             };
 
@@ -160,7 +149,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                     ex);
             }
 
-            context.Logger.Verbose(() => "[CertificateAndClaimsClientCredential] Successfully resolved certificate from provider.");
+            context.Logger.Verbose(() => "[CertificateAndClaimsClientCredential] Certificate resolved.");
 
             return certificate;
         }

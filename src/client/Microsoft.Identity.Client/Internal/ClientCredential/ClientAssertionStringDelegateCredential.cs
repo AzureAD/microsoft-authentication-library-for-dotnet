@@ -14,7 +14,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
     /// <summary>
     /// Client assertion provided as a string JWT via a delegate.
     /// Cannot return a <see cref="ClientSignedAssertion.TokenBindingCertificate"/> and therefore
-    /// is incompatible with mTLS Proof-of-Possession.
+    /// is incompatible with mTLS.
     /// </summary>
     internal sealed class ClientAssertionStringDelegateCredential : IClientCredential
     {
@@ -32,22 +32,15 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             CredentialContext context,
             CancellationToken cancellationToken)
         {
-            context.Logger.Verbose(() => $"[ClientAssertionStringDelegateCredential] Resolving client assertion material. " +
-            $"Mode={context.Mode}, TokenEndpoint={context.TokenEndpoint}");
+            context.Logger.Verbose(() => $"[ClientAssertionStringDelegateCredential] Mode={context.Mode}");
 
             if (context.Mode == OAuthMode.MtlsMode)
             {
-                context.Logger.Error("[ClientAssertionStringDelegateCredential] String-returning assertion delegate " +
-                    "cannot be used with mTLS Proof-of-Possession because no token-binding certificate can be supplied.");
-
                 throw new MsalClientException(
                     MsalError.InvalidCredentialMaterial,
                     "A string-returning client assertion callback cannot be used over mTLS. " +
                     "Use a ClientSignedAssertion callback that can return a token-binding certificate.");
             }
-
-            context.Logger.Verbose(() => "[ClientAssertionStringDelegateCredential] Building assertion request " +
-            "options for delegate invocation.");
 
             var opts = new AssertionRequestOptions
             {
@@ -56,20 +49,15 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                 TokenEndpoint = context.TokenEndpoint,
                 ClientCapabilities = context.ClientCapabilities,
                 Claims = context.Claims,
-                ClientAssertionFmiPath = context.ClientAssertionFmiPath
+                ClientAssertionFmiPath = context.ClientAssertionFmiPath,
+                Authority = context.Authority,
+                TenantId = context.TenantId
             };
-
-            context.Logger.Verbose(() => "[ClientAssertionStringDelegateCredential] Invoking string assertion provider delegate.");
 
             string assertion = await _provider(opts, cancellationToken).ConfigureAwait(false);
 
-            context.Logger.Verbose(() => "[ClientAssertionStringDelegateCredential] Assertion delegate returned a response. " +
-            "Validating that it is not null or empty.");
-
             if (string.IsNullOrWhiteSpace(assertion))
             {
-                context.Logger.Error("[ClientAssertionStringDelegateCredential] Assertion delegate returned a null or empty assertion.");
-
                 throw new MsalClientException(
                     MsalError.InvalidClientAssertion,
                     MsalErrorMessage.InvalidClientAssertionEmpty);
@@ -80,8 +68,6 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                 { OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtBearer },
                 { OAuth2Parameter.ClientAssertion, assertion }
             };
-            
-            context.Logger.Verbose(() => "[ClientAssertionStringDelegateCredential] Client assertion material created successfully using JwtBearer.");
 
             return new CredentialMaterial(parameters);
         }

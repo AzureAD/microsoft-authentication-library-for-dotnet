@@ -41,13 +41,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             string tokenEndpoint,
             CancellationToken cancellationToken)
         {
-            requestParams.RequestContext.Logger.Verbose(() => $"[CredentialMaterialResolver] Building credential context " +
-            $"for credential type '{credential.GetType().Name}'.");
-
             var context = BuildContext(requestParams, tokenEndpoint);
-
-            requestParams.RequestContext.Logger.Verbose(() => $"[CredentialMaterialResolver] Invoking GetCredentialMaterialAsync " +
-            $"on credential type '{credential.GetType().Name}'.");
 
             CredentialMaterial material = await credential
                 .GetCredentialMaterialAsync(context, cancellationToken)
@@ -76,7 +70,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             }
 
             requestParams.RequestContext.Logger.Verbose(() => $"[CredentialMaterialResolver] Credential material " +
-            $"resolved successfully. HasResolvedCertificate={material.ResolvedCertificate != null}");
+            $"resolved. HasCertificate={material.ResolvedCertificate != null}");
 
             return material;
         }
@@ -99,6 +93,8 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                 UseSha2 = requestParams.AuthorityManager.Authority.AuthorityInfo.IsSha2CredentialSupported,
                 ExtraClientAssertionClaims = requestParams.ExtraClientAssertionClaims,
                 ClientAssertionFmiPath = requestParams.ClientAssertionFmiPath,
+                Authority = requestParams.AuthorityManager.Authority.AuthorityInfo.CanonicalAuthority?.ToString(),
+                TenantId = requestParams.AuthorityManager.Authority.TenantId,
                 Logger = requestParams.RequestContext.Logger
             };
         }

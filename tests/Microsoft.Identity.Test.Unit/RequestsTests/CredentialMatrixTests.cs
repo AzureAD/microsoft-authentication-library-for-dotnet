@@ -34,6 +34,9 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
     [TestClass]
     public class CredentialMatrixTests : TestBase
     {
+        private const string TestTokenEndpoint = "https://login.microsoftonline.com/tenant/oauth2/v2.0/token";
+        private const string TestAuthority = "https://login.microsoftonline.com/test-tenant-id/";
+        private const string TestTenantId = "test-tenant-id";
         private static X509Certificate2 s_cert;
         private static CommonCryptographyManager s_crypto;
 
@@ -56,7 +59,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         private static CredentialContext RegularContext() => new CredentialContext
         {
             ClientId = "client-id",
-            TokenEndpoint = "https://login.microsoftonline.com/tenant/oauth2/v2.0/token",
+            TokenEndpoint = TestTokenEndpoint,
             Mode = OAuthMode.Regular,
             Claims = null,
             ClientCapabilities = null,
@@ -65,13 +68,15 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             SendX5C = false,
             UseSha2 = true,
             ExtraClientAssertionClaims = null,
-            ClientAssertionFmiPath = null
+            ClientAssertionFmiPath = null,
+            Authority = TestAuthority,
+            TenantId = TestTenantId
         };
 
         private static CredentialContext MtlsContext() => new CredentialContext
         {
             ClientId = "client-id",
-            TokenEndpoint = "https://login.microsoftonline.com/tenant/oauth2/v2.0/token",
+            TokenEndpoint = TestTokenEndpoint,
             Mode = OAuthMode.MtlsMode,
             Claims = null,
             ClientCapabilities = null,
@@ -80,7 +85,9 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             SendX5C = false,
             UseSha2 = true,
             ExtraClientAssertionClaims = null,
-            ClientAssertionFmiPath = null
+            ClientAssertionFmiPath = null,
+            Authority = TestAuthority,
+            TenantId = TestTenantId
         };
 
         // ──────────────────────────────────────────────
@@ -408,10 +415,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
-        public void CredentialMaterial_NullTokenRequestParameters_ThrowsInvalidOperationException()
+        public void CredentialMaterial_NullTokenRequestParameters_ThrowsArgumentNullException()
         {
             // CredentialMaterial rejects null TokenRequestParameters at construction time.
-            Assert.ThrowsExactly<InvalidOperationException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => new CredentialMaterial(null));
         }
 
@@ -426,6 +433,77 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             Assert.IsNotNull(material.TokenRequestParameters);
             Assert.IsEmpty(material.TokenRequestParameters);
             Assert.IsNotNull(material.ResolvedCertificate);
+        }
+
+        // ──────────────────────────────────────────────
+        // Authority / TenantId propagation
+        // ──────────────────────────────────────────────
+
+        [TestMethod]
+        public async Task DelegateCredential_PropagatesAuthorityAndTenantId_ToCallbackOptionsAsync()
+        {
+            AssertionRequestOptions capturedOptions = null;
+
+            var credential = new ClientAssertionDelegateCredential(
+                (opts, _) =>
+                {
+                    capturedOptions = opts;
+                    return Task.FromResult(new ClientSignedAssertion { Assertion = "jwt", TokenBindingCertificate = s_cert });
+                });
+
+            await credential
+                .GetCredentialMaterialAsync(RegularContext(), CancellationToken.None)
+                .ConfigureAwait(false);
+
+            Assert.IsNotNull(capturedOptions);
+            Assert.AreEqual(TestAuthority, capturedOptions.Authority);
+            Assert.AreEqual(TestTenantId, capturedOptions.TenantId);
+            Assert.AreEqual("client-id", capturedOptions.ClientID);
+            Assert.AreEqual(TestTokenEndpoint, capturedOptions.TokenEndpoint);
+        }
+
+        [TestMethod]
+        public async Task StringDelegateCredential_PropagatesAuthorityAndTenantId_ToCallbackOptionsAsync()
+        {
+            AssertionRequestOptions capturedOptions = null;
+
+            var credential = new ClientAssertionStringDelegateCredential(
+                (opts, _) =>
+                {
+                    capturedOptions = opts;
+                    return Task.FromResult("signed.jwt");
+                });
+
+            await credential
+                .GetCredentialMaterialAsync(RegularContext(), CancellationToken.None)
+                .ConfigureAwait(false);
+
+            Assert.IsNotNull(capturedOptions);
+            Assert.AreEqual(TestAuthority, capturedOptions.Authority);
+            Assert.AreEqual(TestTenantId, capturedOptions.TenantId);
+        }
+
+        [TestMethod]
+        public async Task DynamicCertCredential_PropagatesAuthorityAndTenantId_ToCertProviderAsync()
+        {
+            AssertionRequestOptions capturedOptions = null;
+
+            var credential = new CertificateAndClaimsClientCredential(
+                certificateProvider: opts =>
+                {
+                    capturedOptions = opts;
+                    return Task.FromResult(s_cert);
+                },
+                claimsToSign: null,
+                appendDefaultClaims: true);
+
+            await credential
+                .GetCredentialMaterialAsync(RegularContext(), CancellationToken.None)
+                .ConfigureAwait(false);
+
+            Assert.IsNotNull(capturedOptions);
+            Assert.AreEqual(TestAuthority, capturedOptions.Authority);
+            Assert.AreEqual(TestTenantId, capturedOptions.TenantId);
         }
     }
 }

@@ -37,8 +37,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             CredentialContext context,
             CancellationToken cancellationToken)
         {
-            context.Logger.Verbose(() => $"[ClientAssertionDelegateCredential] Resolving client assertion material. " +
-                $"Mode={context.Mode}, TokenEndpoint={context.TokenEndpoint}");
+            context.Logger.Verbose(() => $"[ClientAssertionDelegateCredential] Mode={context.Mode}");
 
             var opts = new AssertionRequestOptions
             {
@@ -47,10 +46,10 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                 TokenEndpoint = context.TokenEndpoint,
                 ClientCapabilities = context.ClientCapabilities,
                 Claims = context.Claims,
-                ClientAssertionFmiPath = context.ClientAssertionFmiPath
+                ClientAssertionFmiPath = context.ClientAssertionFmiPath,
+                Authority = context.Authority,
+                TenantId = context.TenantId
             };
-
-            context.Logger.Verbose(() => "[ClientAssertionDelegateCredential] Invoking client assertion provider delegate.");
 
             ClientSignedAssertion resp = await _provider(opts, cancellationToken).ConfigureAwait(false);
 
@@ -62,9 +61,6 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             }
 
             bool hasCert = resp.TokenBindingCertificate != null;
-
-            context.Logger.Verbose(() => $"[ClientAssertionDelegateCredential] Provider returned assertion. " +
-                $"TokenBindingCertificatePresent={hasCert}");
 
             if (context.Mode == OAuthMode.MtlsMode && !hasCert)
             {
@@ -79,15 +75,11 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                     ? OAuth2AssertionType.JwtPop
                     : OAuth2AssertionType.JwtBearer;
 
-            context.Logger.Verbose(() => $"[ClientAssertionDelegateCredential] Selected client assertion type: {assertionType}");
-
             var parameters = new Dictionary<string, string>
             {
                 { OAuth2Parameter.ClientAssertionType, assertionType },
                 { OAuth2Parameter.ClientAssertion, resp.Assertion }
             };
-
-            context.Logger.Verbose(() => "[ClientAssertionDelegateCredential] Client assertion material created successfully.");
 
             return new CredentialMaterial(
                 parameters,

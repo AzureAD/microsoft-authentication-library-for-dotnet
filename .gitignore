@@ -259,4 +259,3 @@ package-lock.json
 
 # ignore JetBrains Rider files
 .idea/
-/git

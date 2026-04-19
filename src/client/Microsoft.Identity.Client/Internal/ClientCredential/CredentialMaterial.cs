@@ -23,16 +23,10 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         public IReadOnlyDictionary<string, string> TokenRequestParameters { get; }
 
         /// <summary>
-        /// The client certificate resolved by the selected credential, if any.
-        /// In regular certificate-auth flows this is the certificate used by the credential.
-        /// In mTLS / bound-credential flows this is the certificate attached to transport.
-        /// Null for secret-based and plain string-assertion credentials.
         /// Optional certificate returned by the credential.
-        /// Present when:
-        /// <list type="bullet">
-        ///   <item><description>A certificate credential was used and its certificate was resolved.</description></item>
-        ///   <item><description>A delegate credential returned a <see cref="ClientSignedAssertion"/> with a <see cref="ClientSignedAssertion.TokenBindingCertificate"/>.</description></item>
-        /// </list>
+        /// Present when a certificate credential was used (regular or mTLS) or a delegate credential
+        /// returned a <see cref="ClientSignedAssertion"/> with a
+        /// <see cref="ClientSignedAssertion.TokenBindingCertificate"/>.
         /// <see langword="null"/> when no certificate is involved (secret, plain JWT assertion).
         /// </summary>
         public X509Certificate2 ResolvedCertificate { get; }
@@ -44,7 +38,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             X509Certificate2 resolvedCertificate = null)
         {
             TokenRequestParameters = tokenRequestParameters
-                ?? throw new InvalidOperationException("TokenRequestParameters must not be null.");
+                ?? throw new ArgumentNullException(nameof(tokenRequestParameters));
             ResolvedCertificate = resolvedCertificate;
         }
     }

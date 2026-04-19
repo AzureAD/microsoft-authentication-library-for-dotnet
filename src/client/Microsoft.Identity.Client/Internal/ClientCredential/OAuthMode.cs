@@ -15,11 +15,9 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         Regular,
 
         /// <summary>
-        /// mTLS Authentication mode: the credential must supply a certificate for binding to the
+        /// mTLS authentication mode: the credential must supply a certificate for binding to the
         /// TLS transport layer. No client_secret is valid here; JWT-PoP assertions are issued when
         /// a certificate-bound delegate credential is used.
-        /// <see cref="ClientSignedAssertion"/> (JWT plus an optional client certificate
-        /// for mTLS / bound-credential flows).
         /// </summary>
         MtlsMode
     }

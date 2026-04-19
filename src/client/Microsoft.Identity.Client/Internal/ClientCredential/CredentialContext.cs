@@ -47,6 +47,12 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         /// <summary>FMI path used to embed a subject suffix in the client assertion.</summary>
         public string ClientAssertionFmiPath { get; init; }
 
+        /// <summary>Canonical authority URL (e.g., https://login.microsoftonline.com/{tenantId}).</summary>
+        public string Authority { get; init; }
+
+        /// <summary>Tenant ID from the runtime authority.</summary>
+        public string TenantId { get; init; }
+
         /// <summary>Logger for credential resolution diagnostics.</summary>
         public ILoggerAdapter Logger { get; init; }
     }
