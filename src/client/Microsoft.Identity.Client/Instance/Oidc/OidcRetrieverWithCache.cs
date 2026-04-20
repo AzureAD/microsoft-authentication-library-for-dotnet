@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,14 +17,6 @@ namespace Microsoft.Identity.Client.Instance.Oidc
     {
         private static readonly ConcurrentDictionary<string, OidcMetadata> s_cache = new();
         private static readonly SemaphoreSlim s_lockOidcRetrieval = new SemaphoreSlim(1);
-
-        // PPE hosts excluded from issuer validation – they should not be trusted as production issuers.
-        private static readonly HashSet<string> s_ppeHosts = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
-        {
-            "login.windows-ppe.net",
-            "sts.windows-ppe.net",
-            "login.microsoft-ppe.com"
-        };
 
         public static async Task<OidcMetadata> GetOidcAsync(
             string authority,
@@ -115,7 +106,7 @@ namespace Microsoft.Identity.Client.Instance.Oidc
                 // Rule 2: The issuer host is a well-known Microsoft authority host (HTTPS only, excludes PPE)
                 if (string.Equals(issuerUri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase) &&
                     KnownMetadataProvider.IsKnownEnvironment(issuerUri.Host) &&
-                    !s_ppeHosts.Contains(issuerUri.Host))
+                    !KnownMetadataProvider.IsPpeEnvironment(issuerUri.Host))
                 {
                     return;
                 }
@@ -132,7 +123,7 @@ namespace Microsoft.Identity.Client.Instance.Oidc
 
                         // Regional variant of a well-known host (e.g. westus2.login.microsoft.com)
                         if (KnownMetadataProvider.IsKnownEnvironment(hostWithoutRegion) &&
-                            !s_ppeHosts.Contains(hostWithoutRegion))
+                            !KnownMetadataProvider.IsPpeEnvironment(hostWithoutRegion))
                         {
                             return;
                         }
