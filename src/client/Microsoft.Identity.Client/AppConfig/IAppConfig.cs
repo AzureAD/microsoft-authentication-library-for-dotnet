@@ -96,14 +96,7 @@ namespace Microsoft.Identity.Client
         bool ExperimentalFeaturesEnabled { get; }
 
         /// <summary>
-        /// When enabled, the raw ESTS error code returned in the <c>error_codes</c> array of the identity
-        /// provider response is included as the <c>RawStsErrorCode</c> tag on the <c>MsalFailure</c> OpenTelemetry
-        /// counter. Disabled by default to avoid unintended metric-cardinality growth.
-        /// </summary>
-        bool EnableRawStsErrorCodeTelemetry { get; }
-
-        /// <summary>
-        /// Microsoft Identity specific OIDC extension that allows resource challenges to be resolved without interaction. 
+        /// Microsoft Identity specific OIDC extension that allows resource challenges to be resolved without interaction.
         /// Allows configuration of one or more client capabilities, e.g. "llt"
         /// </summary>
         /// <remarks>

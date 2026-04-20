@@ -416,11 +416,11 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        public async Task MsalFailure_WithRawStsErrorCodeTelemetry_TagIncludedAsync()
+        public async Task MsalFailure_ServiceException_RawStsErrorCodeTag_IncludedAsync()
         {
             using (_harness = CreateTestHarness())
             {
-                CreateApplicationWithRawStsErrorCodeTelemetry();
+                CreateApplication();
 
                 _harness.HttpManager.AddInstanceDiscoveryMockHandler();
                 _harness.HttpManager.AddTokenResponse(TokenResponseType.InvalidClient);
@@ -440,48 +440,18 @@ namespace Microsoft.Identity.Test.Unit
                 {
                     var tags = GetTagDictionary(metricPoint.Tags);
                     Assert.IsTrue(tags.ContainsKey(TelemetryConstants.RawStsErrorCode),
-                        "RawStsErrorCode tag should be present when opted in.");
+                        "RawStsErrorCode tag should always be present for service exceptions.");
                     Assert.AreEqual(ex.ErrorCodes[0], tags[TelemetryConstants.RawStsErrorCode]);
                 }
             }
         }
 
         [TestMethod]
-        public async Task MsalFailure_WithoutRawStsErrorCodeTelemetry_TagNotIncludedAsync()
+        public async Task MsalFailure_ClientException_RawStsErrorCodeTag_NotIncludedAsync()
         {
             using (_harness = CreateTestHarness())
             {
-                CreateApplication(); // no WithRawStsErrorCodeTelemetry
-
-                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
-                _harness.HttpManager.AddTokenResponse(TokenResponseType.InvalidClient);
-
-                MsalServiceException ex = await AssertException.TaskThrowsAsync<MsalServiceException>(
-                    () => _cca.AcquireTokenForClient(TestConstants.s_scopeForAnotherResource)
-                        .WithExtraQueryParameters(extraQueryParams)
-                        .WithTenantId(TestConstants.Utid)
-                        .ExecuteAsync(CancellationToken.None)).ConfigureAwait(false);
-
-                Assert.IsNotNull(ex);
-
-                s_meterProvider.ForceFlush();
-
-                var failureMetric = _exportedMetrics.First(m => m.Name == "MsalFailure");
-                foreach (var metricPoint in failureMetric.GetMetricPoints())
-                {
-                    var tags = GetTagDictionary(metricPoint.Tags);
-                    Assert.IsFalse(tags.ContainsKey(TelemetryConstants.RawStsErrorCode),
-                        "RawStsErrorCode tag should not be present when not opted in.");
-                }
-            }
-        }
-
-        [TestMethod]
-        public async Task MsalFailure_WithRawStsErrorCodeTelemetry_ClientException_TagNotIncludedAsync()
-        {
-            using (_harness = CreateTestHarness())
-            {
-                CreateApplicationWithRawStsErrorCodeTelemetry();
+                CreateApplication();
 
                 // Null scope triggers MsalClientException before any HTTP call — no ErrorCodes
                 MsalClientException ex = await AssertException.TaskThrowsAsync<MsalClientException>(
@@ -502,18 +472,6 @@ namespace Microsoft.Identity.Test.Unit
                         "RawStsErrorCode tag should not be present for non-service exceptions.");
                 }
             }
-        }
-
-        private void CreateApplicationWithRawStsErrorCodeTelemetry()
-        {
-            _cca = ConfidentialClientApplicationBuilder
-                .Create(TestConstants.ClientId)
-                .WithExperimentalFeatures()
-                .WithRawStsErrorCodeTelemetry()
-                .WithAuthority(TestConstants.AuthorityUtidTenant)
-                .WithClientSecret(TestConstants.ClientSecret)
-                .WithHttpManager(_harness.HttpManager)
-                .BuildConcrete();
         }
 
         private static IDictionary<string, object> GetTagDictionary(ReadOnlyTagCollection tags)

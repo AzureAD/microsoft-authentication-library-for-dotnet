@@ -1,2 +1,1 @@
-Microsoft.Identity.Client.BaseAbstractApplicationBuilder<T>.WithRawStsErrorCodeTelemetry(bool enable = true) -> T
-Microsoft.Identity.Client.IAppConfig.EnableRawStsErrorCodeTelemetry.get -> bool
+

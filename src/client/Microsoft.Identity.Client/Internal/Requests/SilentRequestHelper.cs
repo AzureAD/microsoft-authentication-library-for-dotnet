@@ -125,7 +125,7 @@ namespace Microsoft.Identity.Client.Internal
                         callerSdkVersion,
                         CacheRefreshReason.ProactivelyRefreshed,
                         apiEvent.TokenType,
-                        serviceBundle.Config.EnableRawStsErrorCodeTelemetry ? ex.ErrorCodes?[0] : null);
+                        ex.ErrorCodes?[0]);
                 }
                 catch (OperationCanceledException ex)
                 {
