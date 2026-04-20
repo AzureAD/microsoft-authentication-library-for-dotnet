@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
@@ -214,9 +215,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     });
 
                 // Act - Combine WithAttributeTokens and WithFmiPath
+                // Note: WithAttributeTokens returns AbstractAcquireTokenParameterBuilder<T>, so concrete-builder
+                // methods like WithFmiPath must be called before it in the chain.
                 var result = await app.AcquireTokenForClient(_scope)
-                    .WithAttributeTokens(new[] { "tok1", "tok2" })
                     .WithFmiPath("SomeFmiPath")
+                    .WithAttributeTokens(new[] { "tok1", "tok2" })
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 

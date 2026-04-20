@@ -68,7 +68,19 @@ namespace Microsoft.Identity.Client.Extensibility
             return builder;
         }
 
-        internal static AbstractAcquireTokenParameterBuilder<T> WithAttributeTokensInternal<T>(
+        /// <summary>
+        /// Specifies attribute tokens to include in the token request.
+        /// The tokens are joined with spaces and sent as the <c>attribute_tokens</c> body parameter,
+        /// and are also included as a cache key component so that requests with different attribute tokens
+        /// are cached as distinct entries.
+        /// Null, empty, or whitespace-only token entries are ignored. A null or empty collection is a no-op.
+        /// </summary>
+        /// <typeparam name="T">The concrete builder type.</typeparam>
+        /// <param name="builder">The builder to chain options to.</param>
+        /// <param name="attributeTokens">A list of attribute token strings to include in the request. Individual tokens must not contain whitespace.</param>
+        /// <returns>The builder to chain method calls.</returns>
+        /// <exception cref="ArgumentException">Thrown when any token contains embedded whitespace.</exception>
+        public static AbstractAcquireTokenParameterBuilder<T> WithAttributeTokens<T>(
             this AbstractAcquireTokenParameterBuilder<T> builder,
             IEnumerable<string> attributeTokens)
             where T : AbstractAcquireTokenParameterBuilder<T>
@@ -107,9 +119,7 @@ namespace Microsoft.Identity.Client.Extensibility
                 { OAuth2Parameter.AttributeTokens, _ => Task.FromResult(joinedTokens) }
             };
 
-            builder.WithExtraBodyParametersInternal(extraBodyParams);
-
-            return builder;
+            return builder.WithExtraBodyParametersInternal(extraBodyParams);
         }
 
         /// <summary>
