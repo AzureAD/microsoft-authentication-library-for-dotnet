@@ -79,6 +79,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 AuthenticationRequestParameters.RequestContext.ApiEvent = apiEvent;
             });
 
+            var requestStopwatch = Stopwatch.StartNew();
             try
             {
                 AuthenticationResult authenticationResult = null;
@@ -106,7 +107,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
                 AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
 
-                LogFailureTelemetryToOtel(ex.ErrorCode, apiEvent, apiEvent.CacheInfo);
+                int httpStatusCode = ex is MsalServiceException serviceEx ? serviceEx.StatusCode : 0;
+                LogFailureTelemetryToOtel(apiEvent, apiEvent.ApiErrorCode, httpStatusCode, requestStopwatch.ElapsedMilliseconds + measureTelemetryDurationResult.Milliseconds);
                 throw;
             }
             catch (Exception ex)
@@ -114,36 +116,34 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 apiEvent.ApiErrorCode = ex.GetType().Name;
                 AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
 
-                LogFailureTelemetryToOtel(ex.GetType().Name, apiEvent, apiEvent.CacheInfo);
+                LogFailureTelemetryToOtel(apiEvent, apiEvent.ApiErrorCode, httpStatusCode: 0, requestStopwatch.ElapsedMilliseconds + measureTelemetryDurationResult.Milliseconds);
                 throw;
             }
         }
 
         private void LogSuccessTelemetryToOtel(AuthenticationResult authenticationResult, ApiEvent apiEvent, long durationInUs)
         {
-            // Log metrics
             ServiceBundle.PlatformProxy.OtelInstrumentation.LogSuccessMetrics(
-                        ServiceBundle.PlatformProxy.GetProductName(),
-                        apiEvent.ApiId,
-                        apiEvent.CallerSdkApiId,
-                        apiEvent.CallerSdkVersion,
-                        GetCacheLevel(authenticationResult),
-                        durationInUs,
-                        authenticationResult.AuthenticationResultMetadata,
-                        AuthenticationRequestParameters.RequestContext.Logger);
+                ServiceBundle.PlatformProxy.GetProductName(),
+                apiEvent.ApiId,
+                apiEvent.CallerSdkApiId,
+                apiEvent.CallerSdkVersion,
+                GetCacheLevel(authenticationResult),
+                durationInUs,
+                authenticationResult.AuthenticationResultMetadata,
+                AuthenticationRequestParameters.RequestContext.Logger,
+                ServiceBundle.Config.IsExtendedTokenAcquisitionMetricsEnabled);
         }
 
-        private void LogFailureTelemetryToOtel(string errorCodeToLog, ApiEvent apiEvent, CacheRefreshReason cacheRefreshReason)
+        private void LogFailureTelemetryToOtel(ApiEvent apiEvent, string errorCode, int httpStatusCode, long totalDurationInMs)
         {
-            // Log metrics
             ServiceBundle.PlatformProxy.OtelInstrumentation.LogFailureMetrics(
-                        ServiceBundle.PlatformProxy.GetProductName(),
-                        errorCodeToLog,
-                        apiEvent.ApiId,
-                        apiEvent.CallerSdkApiId,
-                        apiEvent.CallerSdkVersion,
-                        cacheRefreshReason,
-                        apiEvent.TokenType);
+                ServiceBundle.PlatformProxy.GetProductName(),
+                apiEvent,
+                errorCode,
+                httpStatusCode,
+                totalDurationInMs,
+                ServiceBundle.Config.IsExtendedTokenAcquisitionMetricsEnabled);
         }
 
         private Tuple<string, string> ParseScopesForTelemetry()

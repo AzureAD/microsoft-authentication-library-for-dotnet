@@ -1,0 +1,1 @@
+Microsoft.Identity.Client.BaseAbstractApplicationBuilder<T>.WithExtendedTokenAcquisitionMetrics() -> T

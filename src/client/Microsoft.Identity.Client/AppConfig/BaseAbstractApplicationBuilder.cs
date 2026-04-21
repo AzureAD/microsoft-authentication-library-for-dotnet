@@ -100,6 +100,27 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Enables extended token acquisition metrics that cover both successful and failed token acquisition outcomes.
+        /// When enabled, MSAL emits two histograms on the <c>MicrosoftIdentityClient_Common_Meter</c> meter instead of the default ones:
+        /// <list type="bullet">
+        /// <item><description>
+        /// <c>MsalTotalDuration.2</c> — total token acquisition duration in milliseconds, tagged with <c>Succeeded</c> (true/false),
+        /// <c>CacheRefreshReason</c>, and <c>TokenType</c>.
+        /// </description></item>
+        /// <item><description>
+        /// <c>MsalDurationInHttp.2</c> — network latency in milliseconds for requests that reached the identity provider,
+        /// tagged with <c>HttpStatusCode</c> and <c>TokenType</c>.
+        /// </description></item>
+        /// </list>
+        /// </summary>
+        /// <returns>The builder to chain the .With methods</returns>
+        public T WithExtendedTokenAcquisitionMetrics()
+        {
+            Config.IsExtendedTokenAcquisitionMetricsEnabled = true;
+            return (T)this;
+        }
+
+        /// <summary>
         /// Sets the logging callback. For details see https://aka.ms/msal-net-logging
         /// </summary>
         /// <param name="loggingCallback"></param>
