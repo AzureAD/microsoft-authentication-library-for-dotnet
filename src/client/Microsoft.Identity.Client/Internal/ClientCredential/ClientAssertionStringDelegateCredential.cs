@@ -51,7 +51,8 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                 Claims = context.Claims,
                 ClientAssertionFmiPath = context.ClientAssertionFmiPath,
                 Authority = context.Authority,
-                TenantId = context.TenantId
+                TenantId = context.TenantId,
+                CorrelationId = context.CorrelationId
             };
 
             string assertion = await _provider(opts, cancellationToken).ConfigureAwait(false);

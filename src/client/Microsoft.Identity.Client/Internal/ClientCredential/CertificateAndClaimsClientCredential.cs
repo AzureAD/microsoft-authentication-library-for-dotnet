@@ -114,6 +114,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                 ClientCapabilities = context.ClientCapabilities,
                 Authority = context.Authority,
                 TenantId = context.TenantId,
+                CorrelationId = context.CorrelationId,
                 CancellationToken = cancellationToken
             };
 

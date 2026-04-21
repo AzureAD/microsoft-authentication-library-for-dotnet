@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
@@ -107,11 +108,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // Step 2: build the assertion-based app (NO WithCertificate here)
             bool assertionProviderCalled = false;
             string tokenEndpointSeenByProvider = null;
+            Guid correlationIdSeenByProvider = Guid.Empty;
 
             string requestUriSeen = null;
             string clientAssertionType = null;
             bool sawClientAssertionParam = false;
             bool sawClientAssertionTypeParam = false;
+
+            Guid expectedCorrelationId = Guid.NewGuid();
 
             IConfidentialClientApplication assertionApp = ConfidentialClientApplicationBuilder.Create(MsiAllowListedAppIdforSNI)
                 .WithExperimentalFeatures()
@@ -121,6 +125,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 {
                     assertionProviderCalled = true;
                     tokenEndpointSeenByProvider = options.TokenEndpoint;
+                    correlationIdSeenByProvider = options.CorrelationId;
 
                     return Task.FromResult(new ClientSignedAssertion
                     {
@@ -135,6 +140,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             AuthenticationResult second = await assertionApp
                 .AcquireTokenForClient(new[] { "https://vault.azure.net/.default" })
                 .WithMtlsProofOfPossession()
+                .WithCorrelationId(expectedCorrelationId)
                 .OnBeforeTokenRequest(data =>
                 {
                     requestUriSeen = data.RequestUri?.ToString();
@@ -173,6 +179,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             // Optional: if you rely on regional mTLS endpoints, check the host
             StringAssert.Contains(requestUriSeen ?? "", "mtlsauth.microsoft.com");
+
+            // Verify CorrelationId flowed to the assertion callback (Issue #5924)
+            Assert.AreEqual(expectedCorrelationId, correlationIdSeenByProvider,
+                "CorrelationId from WithCorrelationId() must flow to the assertion callback for FIC two-leg tracing.");
         }
 
         //Downgraded test to verify bearer token acquisition works in SNI + jwt-pop scenario

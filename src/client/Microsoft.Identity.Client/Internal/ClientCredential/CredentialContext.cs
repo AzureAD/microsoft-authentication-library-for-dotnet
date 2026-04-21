@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
@@ -52,6 +53,9 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
 
         /// <summary>Tenant ID from the runtime authority.</summary>
         public string TenantId { get; init; }
+
+        /// <summary>Correlation ID for end-to-end request tracing.</summary>
+        public Guid CorrelationId { get; init; }
 
         /// <summary>Logger for credential resolution diagnostics.</summary>
         public ILoggerAdapter Logger { get; init; }

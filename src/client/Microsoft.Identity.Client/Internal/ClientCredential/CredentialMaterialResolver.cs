@@ -95,6 +95,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                 ClientAssertionFmiPath = requestParams.ClientAssertionFmiPath,
                 Authority = requestParams.AuthorityManager.Authority.AuthorityInfo.CanonicalAuthority?.ToString(),
                 TenantId = requestParams.AuthorityManager.Authority.TenantId,
+                CorrelationId = requestParams.RequestContext.CorrelationId,
                 Logger = requestParams.RequestContext.Logger
             };
         }
