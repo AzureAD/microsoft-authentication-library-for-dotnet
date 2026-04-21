@@ -51,6 +51,14 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public Func<string, SafeHandle, string, CancellationToken, Task<string>> AttestationTokenProvider { get; set; }
 
         /// <summary>
+        /// Optional callback invoked before OpenTelemetry metrics are recorded for a token acquisition.
+        /// The callback receives an <see cref="TokenAcquisitionResult"/> (carrying either the
+        /// <see cref="AuthenticationResult"/> on success or the <see cref="Exception"/> on failure)
+        /// and the mutable tag list, allowing callers to append custom tags to every metric emitted for this request.
+        /// </summary>
+        public Action<TokenAcquisitionResult, IList<KeyValuePair<string, object>>> OtelTagsEnricher { get; set; }
+
+        /// <summary>
         /// This tries to see if the token request should be done over mTLS or over normal HTTP 
         /// and set the correct parameters
         /// </summary>

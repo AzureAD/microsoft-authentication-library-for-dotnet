@@ -106,7 +106,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
                 AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
 
-                LogFailureTelemetryToOtel(ex.ErrorCode, apiEvent, apiEvent.CacheInfo);
+                LogFailureTelemetryToOtel(apiEvent, apiEvent.CacheInfo, ex);
                 throw;
             }
             catch (Exception ex)
@@ -114,14 +114,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 apiEvent.ApiErrorCode = ex.GetType().Name;
                 AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
 
-                LogFailureTelemetryToOtel(ex.GetType().Name, apiEvent, apiEvent.CacheInfo);
+                LogFailureTelemetryToOtel(apiEvent, apiEvent.CacheInfo, ex);
                 throw;
             }
         }
 
         private void LogSuccessTelemetryToOtel(AuthenticationResult authenticationResult, ApiEvent apiEvent, long durationInUs)
         {
-            // Log metrics
+            var context = new TokenAcquisitionResult { AuthenticationResult = authenticationResult };
             ServiceBundle.PlatformProxy.OtelInstrumentation.LogSuccessMetrics(
                         ServiceBundle.PlatformProxy.GetProductName(),
                         apiEvent.ApiId,
@@ -129,21 +129,23 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         apiEvent.CallerSdkVersion,
                         GetCacheLevel(authenticationResult),
                         durationInUs,
-                        authenticationResult.AuthenticationResultMetadata,
+                        context,
+                        AuthenticationRequestParameters.OtelTagsEnricher,
                         AuthenticationRequestParameters.RequestContext.Logger);
         }
 
-        private void LogFailureTelemetryToOtel(string errorCodeToLog, ApiEvent apiEvent, CacheRefreshReason cacheRefreshReason)
+        private void LogFailureTelemetryToOtel(ApiEvent apiEvent, CacheRefreshReason cacheRefreshReason, Exception exception)
         {
-            // Log metrics
+            var context = new TokenAcquisitionResult { Exception = exception };
             ServiceBundle.PlatformProxy.OtelInstrumentation.LogFailureMetrics(
                         ServiceBundle.PlatformProxy.GetProductName(),
-                        errorCodeToLog,
                         apiEvent.ApiId,
                         apiEvent.CallerSdkApiId,
                         apiEvent.CallerSdkVersion,
                         cacheRefreshReason,
-                        apiEvent.TokenType);
+                        apiEvent.TokenType,
+                        context,
+                        AuthenticationRequestParameters.OtelTagsEnricher);
         }
 
         private Tuple<string, string> ParseScopesForTelemetry()
