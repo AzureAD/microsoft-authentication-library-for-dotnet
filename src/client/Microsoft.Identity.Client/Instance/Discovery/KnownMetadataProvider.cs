@@ -17,7 +17,6 @@ namespace Microsoft.Identity.Client.Instance.Discovery
 
         private static readonly ISet<string> s_knownEnvironments = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         private static readonly ISet<string> s_knownPublicEnvironments = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        private static readonly ISet<string> s_ppeEnvironments = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         static KnownMetadataProvider()
         {
@@ -111,21 +110,11 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             AddToKnownCache(delosCloudEntry);
             AddToKnownCache(govSGCloudEntry);
             AddToPublicEnvironment(publicCloudEntry);
-
-            foreach (string alias in ppeCloudEntry.Aliases)
-            {
-                s_ppeEnvironments.Add(alias);
-            }
         }
 
         public static bool IsPublicEnvironment(string environment)
         {
             return s_knownPublicEnvironments.Contains(environment);
-        }
-
-        public static bool IsPpeEnvironment(string environment)
-        {
-            return s_ppeEnvironments.Contains(environment);
         }
 
         public InstanceDiscoveryMetadataEntry GetMetadata(

@@ -93,6 +93,18 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             "https://custom.example.com/tenant",
             "https://login.sovcloud-identity.sg/tenant",
             DisplayName = "Rule2_WellKnown_GovSG")]
+        [DataRow(
+            "https://custom.example.com/tenant",
+            "https://login.windows-ppe.net/tenant",
+            DisplayName = "Rule2_WellKnown_LoginWindowsPpe")]
+        [DataRow(
+            "https://custom.example.com/tenant",
+            "https://sts.windows-ppe.net/tenant",
+            DisplayName = "Rule2_WellKnown_StsWindowsPpe")]
+        [DataRow(
+            "https://custom.example.com/tenant",
+            "https://login.microsoft-ppe.com/tenant",
+            DisplayName = "Rule2_WellKnown_LoginMicrosoftPpe")]
         public void ValidateIssuer_Rule2_WellKnownHost_ShouldPass(string authority, string issuer)
         {
             OidcRetrieverWithCache.ValidateIssuer(new Uri(authority), issuer);
@@ -139,6 +151,10 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             "https://clientlogin.test.parentpay.com/ebdf0e4c-ebe2-4793-af52-ceaf96f82741/v2.0",
             "https://westeurope.login.microsoftonline.com/ebdf0e4c-ebe2-4793-af52-ceaf96f82741/v2.0",
             DisplayName = "Rule3_OriginalUserScenario_Regional_CustomDomain_WellKnown")]
+        [DataRow(
+            "https://custom.example.com/tenant",
+            "https://westus2.login.windows-ppe.net/tenant",
+            DisplayName = "Rule3_Regional_LoginWindowsPpe")]
         public void ValidateIssuer_Rule3_RegionalWellKnown_ShouldPass(string authority, string issuer)
         {
             OidcRetrieverWithCache.ValidateIssuer(new Uri(authority), issuer);
@@ -211,22 +227,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             "https://otherdomain.com/tenant",
             "https://eastus.myidp.example.com/tenant",
             DisplayName = "Fail_RegionalLooking_WrongAuthorityBase")]
-        [DataRow(
-            "https://custom.example.com/tenant",
-            "https://login.windows-ppe.net/tenant",
-            DisplayName = "Fail_PPE_LoginWindowsPpe")]
-        [DataRow(
-            "https://custom.example.com/tenant",
-            "https://sts.windows-ppe.net/tenant",
-            DisplayName = "Fail_PPE_StsWindowsPpe")]
-        [DataRow(
-            "https://custom.example.com/tenant",
-            "https://login.microsoft-ppe.com/tenant",
-            DisplayName = "Fail_PPE_LoginMicrosoftPpe")]
-        [DataRow(
-            "https://custom.example.com/tenant",
-            "https://westus2.login.windows-ppe.net/tenant",
-            DisplayName = "Fail_PPE_Regional_LoginWindowsPpe")]
         public void ValidateIssuer_ShouldThrow(string authority, string issuer)
         {
             var ex = AssertException.Throws<MsalServiceException>(
