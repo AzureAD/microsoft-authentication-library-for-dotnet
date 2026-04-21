@@ -162,6 +162,19 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
+        /// <summary>
+        /// Specifies that the token request should use mTLS Proof-of-Possession.
+        /// This sets <c>token_type=mtls_pop</c> on the request. The mTLS certificate binding
+        /// is provided by the application's client credential (certificate or assertion).
+        /// For more information, refer to the <see href="https://aka.ms/mtls-pop">Proof-of-Possession documentation</see>.
+        /// </summary>
+        /// <returns>The current instance of <see cref="AcquireTokenOnBehalfOfParameterBuilder"/> to enable method chaining.</returns>
+        public AcquireTokenOnBehalfOfParameterBuilder WithMtlsProofOfPossession()
+        {
+            CommonParameters.IsMtlsPopRequested = true;
+            return this;
+        }
+
         /// <inheritdoc/>
         internal override Task<AuthenticationResult> ExecuteInternalAsync(CancellationToken cancellationToken)
         {

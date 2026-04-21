@@ -1,0 +1,1 @@
+Microsoft.Identity.Client.AcquireTokenOnBehalfOfParameterBuilder.WithMtlsProofOfPossession() -> Microsoft.Identity.Client.AcquireTokenOnBehalfOfParameterBuilder
