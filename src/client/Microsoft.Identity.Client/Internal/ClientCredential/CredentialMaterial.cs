@@ -16,7 +16,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
     internal sealed class CredentialMaterial
     {
         /// <summary>
-        /// Key/value pairs to be added to the token-request body.
+        /// Key/value pairs to be added to the token-request body. Usually client_assertion.
         /// Never <see langword="null"/>; may be empty (e.g., for pure mTLS-transport mode where the
         /// certificate authenticates the client at the TLS layer and no assertion is needed).
         /// </summary>

@@ -1,7 +1,8 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
@@ -26,14 +27,10 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         /// <param name="requestParams">Current authentication request parameters.</param>
         /// <param name="tokenEndpoint">Resolved token endpoint URL.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>Validated <see cref="CredentialMaterial"/>.</returns>
-        /// <exception cref="InvalidOperationException">
-        /// Thrown when the credential returns <see langword="null"/> or when
-        /// <see cref="CredentialMaterial.TokenRequestParameters"/> is <see langword="null"/>.
-        /// </exception>
+        /// <returns><see cref="CredentialMaterial"/> produced by the credential.</returns>
         /// <exception cref="MsalClientException">
         /// Thrown when the credential/mode combination is not supported
-        /// (e.g., <see cref="OAuthMode.MtlsMode"/> with a secret credential).
+        /// (e.g., <see cref="CredentialTransportProtocol.Mtls"/> with a secret credential).
         /// </exception>
         internal static async Task<CredentialMaterial> ResolveAsync(
             IClientCredential credential,
@@ -47,27 +44,8 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                 .GetCredentialMaterialAsync(context, cancellationToken)
                 .ConfigureAwait(false);
 
-            if (material == null)
-            {
-                requestParams.RequestContext.Logger.Error($"[CredentialMaterialResolver] Credential '{credential.GetType().Name}' returned null CredentialMaterial.");
-
-                throw new InvalidOperationException(
-                    $"Credential '{credential.GetType().Name}' returned null from GetCredentialMaterialAsync. " +
-                    "This is an internal error; credential implementations must never return null.");
-            }
-
-            // TokenRequestParameters is validated inside CredentialMaterial's constructor,
-            // but add an explicit guard here to surface a clear message if a future refactor
-            // allows a null reference to slip through.
-            if (material.TokenRequestParameters == null)
-            {
-                requestParams.RequestContext.Logger.Error($"[CredentialMaterialResolver] Credential " +
-                    $"'{credential.GetType().Name}' returned CredentialMaterial with null TokenRequestParameters.");
-
-                throw new InvalidOperationException(
-                    $"Credential '{credential.GetType().Name}' returned CredentialMaterial with null " +
-                    "TokenRequestParameters. TokenRequestParameters must not be null.");
-            }
+            Debug.Assert(material != null, $"Credential '{credential.GetType().Name}' returned null CredentialMaterial.");
+            Debug.Assert(material?.TokenRequestParameters != null, $"Credential '{credential.GetType().Name}' returned null TokenRequestParameters.");
 
             requestParams.RequestContext.Logger.Verbose(() => $"[CredentialMaterialResolver] Credential material " +
             $"resolved. HasCertificate={material.ResolvedCertificate != null}");
@@ -84,8 +62,8 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                 ClientId = requestParams.AppConfig.ClientId,
                 TokenEndpoint = tokenEndpoint,
                 Mode = requestParams.MtlsCertificate != null || requestParams.IsMtlsPopRequested
-                    ? OAuthMode.MtlsMode
-                    : OAuthMode.Regular,
+                    ? CredentialTransportProtocol.Mtls
+                    : CredentialTransportProtocol.OAuth,
                 Claims = requestParams.Claims,
                 ClientCapabilities = requestParams.AppConfig.ClientCapabilities,
                 CryptographyManager = requestParams.RequestContext.ServiceBundle.PlatformProxy.CryptographyManager,

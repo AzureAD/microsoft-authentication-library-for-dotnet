@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             X509Certificate2 certificate = await ResolveCertificateAsync(context, cancellationToken)
                 .ConfigureAwait(false);
 
-            if (context.Mode == OAuthMode.MtlsMode)
+            if (context.Mode == CredentialTransportProtocol.Mtls)
             {
                 // mTLS path: the certificate authenticates the client at the TLS layer.
                 // No client_assertion is needed; return an empty parameter set.

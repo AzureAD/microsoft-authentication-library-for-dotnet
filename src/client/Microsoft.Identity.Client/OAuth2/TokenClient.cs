@@ -132,7 +132,7 @@ namespace Microsoft.Identity.Client.OAuth2
         {
             _oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientId, _requestParams.AppConfig.ClientId);
 
-            IClientCredential credentialToUse = _requestParams.RequestContext.ServiceBundle.Config.ClientCredential;
+            IClientCredential credentialToUse = _serviceBundle.Config.ClientCredential;
 
             if (credentialToUse != null)
             {

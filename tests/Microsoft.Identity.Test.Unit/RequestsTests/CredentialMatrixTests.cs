@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             ClientId = "client-id",
             TokenEndpoint = TestTokenEndpoint,
-            Mode = OAuthMode.Regular,
+            Mode = CredentialTransportProtocol.OAuth,
             Claims = null,
             ClientCapabilities = null,
             CryptographyManager = s_crypto,
@@ -77,7 +77,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             ClientId = "client-id",
             TokenEndpoint = TestTokenEndpoint,
-            Mode = OAuthMode.MtlsMode,
+            Mode = CredentialTransportProtocol.Mtls,
             Claims = null,
             ClientCapabilities = null,
             CryptographyManager = s_crypto,

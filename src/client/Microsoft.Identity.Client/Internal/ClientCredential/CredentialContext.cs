@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         /// <summary>
         /// Whether this is a standard (JWT / secret) request or an mTLS-bound request.
         /// </summary>
-        public OAuthMode Mode { get; init; }
+        public CredentialTransportProtocol Mode { get; init; }
 
         /// <summary>User-provided claims string (may be null).</summary>
         public string Claims { get; init; }
