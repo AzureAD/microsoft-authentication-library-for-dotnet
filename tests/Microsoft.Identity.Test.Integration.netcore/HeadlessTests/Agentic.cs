@@ -37,19 +37,31 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         private static async Task AgentGetsAppTokenForGraph()
         {
+            Guid expectedCorrelationId = Guid.NewGuid();
+            Guid capturedCorrelationId = Guid.Empty;
+
             var cca = ConfidentialClientApplicationBuilder
                         .Create(AgentIdentity)
                         .WithAuthority("https://login.microsoftonline.com/", TenantId)
                         .WithCacheOptions(CacheOptions.EnableSharedCacheOptions)
                         .WithExperimentalFeatures(true)
-                        .WithClientAssertion((AssertionRequestOptions _) => GetAppCredentialAsync(AgentIdentity))
+                        .WithClientAssertion((AssertionRequestOptions options) =>
+                        {
+                            capturedCorrelationId = options.CorrelationId;
+                            return GetAppCredentialAsync(AgentIdentity);
+                        })
                         .Build();
 
             var result = await cca.AcquireTokenForClient([Scope])
+                .WithCorrelationId(expectedCorrelationId)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
             Trace.WriteLine($"FMI app credential from : {result.AuthenticationResultMetadata.TokenSource}");
+
+            // Verify CorrelationId flowed to the assertion callback (Issue #5924)
+            Assert.AreEqual(expectedCorrelationId, capturedCorrelationId,
+                "CorrelationId from WithCorrelationId() must flow to the assertion callback.");
         }
 
         private static async Task AgentUserIdentityGetsTokenForGraphAsync()

@@ -142,7 +142,8 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             var options = new AssertionRequestOptions(
                 requestParameters.AppConfig,
                 tokenEndpoint,
-                requestParameters.AuthorityManager.Authority.TenantId)
+                requestParameters.AuthorityManager.Authority.TenantId,
+                requestParameters.RequestContext.CorrelationId)
             {
                 Claims = requestParameters.Claims,
                 ClientCapabilities = requestParameters.AppConfig.ClientCapabilities,

@@ -50,6 +50,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         Assert.IsNull(options.ClientCapabilities);
                         Assert.IsNull(options.ClientAssertionFmiPath);
                         Assert.AreEqual(TestConstants.ClientId, options.ClientID);
+                        Assert.AreNotEqual(Guid.Empty, options.CorrelationId, "CorrelationId should be populated");
                         return await Task.FromResult("dummy_assertion").ConfigureAwait(false);
                     })
                     .BuildConcrete();
@@ -1048,6 +1049,71 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
                 Assert.IsGreaterThanOrEqualTo(1, callCount, "Expected the client assertion provider to be called at least once.");
+            }
+        }
+
+        [TestMethod]
+        public async Task CorrelationId_FlowsToSignedAssertionCallback_WithUserProvidedId()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                Guid expectedCorrelationId = Guid.NewGuid();
+                Guid capturedCorrelationId = Guid.Empty;
+
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithExperimentalFeatures(true)
+                    .WithHttpManager(httpManager)
+                    .WithClientAssertion((AssertionRequestOptions opts, CancellationToken ct) =>
+                    {
+                        capturedCorrelationId = opts.CorrelationId;
+                        return Task.FromResult(new ClientSignedAssertion { Assertion = "jwt" });
+                    })
+                    .BuildConcrete();
+
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithCorrelationId(expectedCorrelationId)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.AreEqual(expectedCorrelationId, capturedCorrelationId,
+                    "CorrelationId from WithCorrelationId() must flow to the assertion callback.");
+            }
+        }
+
+        [TestMethod]
+        public async Task CorrelationId_FlowsToStringAssertionCallback_WithUserProvidedId()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                Guid expectedCorrelationId = Guid.NewGuid();
+                Guid capturedCorrelationId = Guid.Empty;
+
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithHttpManager(httpManager)
+                    .WithClientAssertion(async (AssertionRequestOptions opts) =>
+                    {
+                        capturedCorrelationId = opts.CorrelationId;
+                        return await Task.FromResult("dummy_assertion").ConfigureAwait(false);
+                    })
+                    .BuildConcrete();
+
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithCorrelationId(expectedCorrelationId)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.AreEqual(expectedCorrelationId, capturedCorrelationId,
+                    "CorrelationId from WithCorrelationId() must flow to the string assertion callback.");
             }
         }
 
