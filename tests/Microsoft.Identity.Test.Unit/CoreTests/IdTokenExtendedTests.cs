@@ -26,23 +26,10 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         }
 
         [TestMethod]
-        public void Parse_SingleSegment_ThrowsMsalClientException()
+        public void Parse_SingleSegment_ThrowsMsalClientExceptionWithCorrectErrorCode()
         {
-            Assert.Throws<MsalClientException>(() => IdToken.Parse("singlesegment"));
-        }
-
-        [TestMethod]
-        public void Parse_SingleSegment_HasCorrectErrorCode()
-        {
-            try
-            {
-                IdToken.Parse("singlesegment");
-                Assert.Fail("Should have thrown");
-            }
-            catch (MsalClientException ex)
-            {
-                Assert.AreEqual(MsalError.InvalidJwtError, ex.ErrorCode);
-            }
+            var ex = Assert.Throws<MsalClientException>(() => IdToken.Parse("singlesegment"));
+            Assert.AreEqual(MsalError.InvalidJwtError, ex.ErrorCode);
         }
 
         [TestMethod]
@@ -132,22 +119,11 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         }
 
         [TestMethod]
-        public void Parse_InvalidBase64Payload_Throws()
+        public void Parse_InvalidBase64Payload_ThrowsFormatException()
         {
-            // Valid JWT structure but payload is not valid base64 - may throw MsalClientException or FormatException
-            try
-            {
-                IdToken.Parse("header.!!!invalid!!!.signature");
-                Assert.Fail("Should have thrown an exception");
-            }
-            catch (MsalClientException)
-            {
-                // Expected - JSON parse error
-            }
-            catch (FormatException)
-            {
-                // Expected - invalid base64
-            }
+            // "!!!invalid!!!" has length 13 (mod 4 == 1), so Base64UrlHelpers.DecodeBytes
+            // throws FormatException before JSON parsing is attempted.
+            Assert.Throws<FormatException>(() => IdToken.Parse("header.!!!invalid!!!.signature"));
         }
 
         [TestMethod]
