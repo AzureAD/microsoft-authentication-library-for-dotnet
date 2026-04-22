@@ -1,0 +1,2 @@
+Microsoft.Identity.Client.AssertionRequestOptions.CorrelationId.get -> System.Guid
+Microsoft.Identity.Client.AssertionRequestOptions.CorrelationId.set -> void
