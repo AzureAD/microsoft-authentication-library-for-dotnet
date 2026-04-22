@@ -118,7 +118,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Guid expectedCorrelationId = Guid.NewGuid();
 
             IConfidentialClientApplication assertionApp = ConfidentialClientApplicationBuilder.Create(MsiAllowListedAppIdforSNI)
-                .WithExperimentalFeatures()
                 .WithAuthority("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c")
                 .WithAzureRegion("westus3")
                 .WithClientAssertion((AssertionRequestOptions options, CancellationToken ct) =>
@@ -218,7 +217,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             bool sawClientAssertionTypeParam = false;
 
             IConfidentialClientApplication assertionApp = ConfidentialClientApplicationBuilder.Create(MsiAllowListedAppIdforSNI)
-                .WithExperimentalFeatures()
                 .WithAuthority("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c")
                 .WithAzureRegion("westus3")
                 .WithClientAssertion((AssertionRequestOptions options, CancellationToken ct) =>

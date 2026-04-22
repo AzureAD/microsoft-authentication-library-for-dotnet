@@ -349,7 +349,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             var handler = http.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
             var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                       .WithExperimentalFeatures(true)
                        .WithClientSecret(TestConstants.ClientSecret)
                        .WithHttpManager(http)
                        .WithClientAssertion(BearerDelegate())
@@ -392,7 +391,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     var cert = CertHelper.GetOrCreateTestCert();
 
                     var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                        .WithExperimentalFeatures(true)
                         .WithClientAssertion(PopDelegate())
                         .WithAuthority($"https://login.microsoftonline.com/123456-1234-2345-1234561234")
                         .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
@@ -442,7 +440,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 bool checkedCaps = false;
                 var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                          .WithExperimentalFeatures(true)
                           .WithClientSecret(TestConstants.ClientSecret)
                           .WithClientCapabilities(TestConstants.s_clientCapabilities)
                           .WithHttpManager(http)
@@ -471,7 +468,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         public async Task ClientAssertion_EmptyJwt_ThrowsAsync()
         {
             var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                      .WithExperimentalFeatures(true)
                       .WithClientSecret(TestConstants.ClientSecret)
                       .WithClientAssertion((o, c) =>
                           Task.FromResult(new ClientSignedAssertion { Assertion = string.Empty }))
@@ -488,7 +484,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             using var cts = new CancellationTokenSource();
 
             var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                      .WithExperimentalFeatures(true)
                       .WithClientSecret(TestConstants.ClientSecret)
                       .WithClientAssertion((o, ct) =>
                       {
@@ -526,7 +521,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     var cert = CertHelper.GetOrCreateTestCert();
 
                     var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                        .WithExperimentalFeatures(true)
                         .WithClientAssertion(PopDelegate())
                         .WithAuthority($"https://login.microsoftonline.com/123456-1234-2345-1234561234")
                         .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
@@ -598,7 +592,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // ─────────── Build the app ───────────
                 var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                           .WithExperimentalFeatures(true)
                            .WithClientSecret(TestConstants.ClientSecret)
                            .WithClientAssertion(popDelegate)
                            .WithAuthority($"https://login.microsoftonline.com/123456-1234-2345-1234561234")
@@ -631,7 +624,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         public async Task WithMtlsPop_AfterBearerDelegate_Throws()
         {
             var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                       .WithExperimentalFeatures(true)
                        .WithClientSecret(TestConstants.ClientSecret)
                       .WithClientAssertion(BearerDelegate())
                       .BuildConcrete();
@@ -655,7 +647,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             http.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(); // first call => network
 
             var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                      .WithExperimentalFeatures(true)
                       .WithClientSecret(TestConstants.ClientSecret)
                       .WithHttpManager(http)
                       .WithClientAssertion((o, c) =>
@@ -686,7 +677,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // Arrange – CCA with PoP delegate (returns JWT + cert) but **no AzureRegion configured**
                 var cert = CertHelper.GetOrCreateTestCert();
                 var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                              .WithExperimentalFeatures(true)
                               .WithAuthority(TestConstants.AadAuthorityWithMsftTenantId)
                               .WithClientAssertion(PopDelegate())
                               .WithHttpManager(http)
@@ -748,7 +738,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                             };
 
                         var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                            .WithExperimentalFeatures(true)
                             .WithClientAssertion(provider)
                             .WithAuthority($"https://login.microsoftonline.com/{tenantId}")
                             .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
@@ -791,7 +780,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // Arrange – CCA with PoP delegate (returns JWT + cert) but **no AzureRegion configured**
                 var cert = CertHelper.GetOrCreateTestCert();
                 var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                              .WithExperimentalFeatures(true)
                               .WithClientAssertion(PopDelegate())
                               .WithHttpManager(http)
                               .BuildConcrete();
@@ -836,7 +824,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         });
 
                     var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                        .WithExperimentalFeatures(true)
                         .WithClientSecret(TestConstants.ClientSecret)
                         .WithClientAssertion(provider)
                         .WithAuthority(new Uri($"https://login.microsoftonline.com/{tenantId}"), validateAuthority: false)
@@ -898,7 +885,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         });
 
                     var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                        .WithExperimentalFeatures(true)
                         .WithClientSecret(TestConstants.ClientSecret)
                         .WithClientAssertion(provider)
                         .WithAuthority(new Uri($"https://login.microsoftonline.com/{tenantId}"), validateAuthority: false)
@@ -936,7 +922,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             // Old overloads (returning string) should NOT be cert-capable and should NOT implement IClientSignedAssertionProvider
             var app1 = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                .WithExperimentalFeatures(true)
                 .WithClientSecret(TestConstants.ClientSecret)
                 .WithClientAssertion((AssertionRequestOptions o) => Task.FromResult("jwt"))
                 .BuildConcrete();
@@ -951,7 +936,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             // New overload (returning ClientSignedAssertion) SHOULD be cert-capable and implement IClientSignedAssertionProvider
             var app2 = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                .WithExperimentalFeatures(true)
                 .WithClientSecret(TestConstants.ClientSecret)
                 .WithClientAssertion((AssertionRequestOptions o, CancellationToken ct) =>
                     Task.FromResult(new ClientSignedAssertion { Assertion = "jwt", TokenBindingCertificate = null }))
@@ -1065,7 +1049,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 var app = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
-                    .WithExperimentalFeatures(true)
                     .WithHttpManager(httpManager)
                     .WithClientAssertion((AssertionRequestOptions opts, CancellationToken ct) =>
                     {
