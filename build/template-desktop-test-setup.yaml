@@ -1,0 +1,24 @@
+# template-desktop-test-setup.yaml
+# Shared setup steps for desktop test jobs: install .NET, download build artifact, copy tests, install secrets
+
+steps:
+- task: UseDotNet@2
+  displayName: 'Use the latest .NET 8'
+  inputs:
+    version: 8.x
+
+- task: DownloadPipelineArtifact@2
+  displayName: 'Download Drop'
+  inputs:
+    artifact: drop
+    patterns: '**/*'
+    path: $(Build.artifactstagingdirectory)/drop
+
+- task: CopyFiles@2
+  displayName: 'Get MSAL tests'
+  inputs:
+    SourceFolder: '$(build.artifactstagingdirectory)\drop\msalTests'
+    Contents: '**/*'
+    TargetFolder: $(Build.SourcesDirectory)\tests\
+
+- template: template-install-keyvault-secrets.yaml
