@@ -1,5 +1,12 @@
-const Microsoft.Identity.Client.MsalError.InvalidCredentialMaterial = "invalid_credential_material" -> string
 Microsoft.Identity.Client.AppConfig.CertificateOptions.SendCertificateOverMtls.get -> bool
 Microsoft.Identity.Client.AppConfig.CertificateOptions.SendCertificateOverMtls.init -> void
 Microsoft.Identity.Client.AssertionRequestOptions.CorrelationId.get -> System.Guid
 Microsoft.Identity.Client.AssertionRequestOptions.CorrelationId.set -> void
+Microsoft.Identity.Client.CacheOptions.InternalCacheDisabled.get -> bool
+Microsoft.Identity.Client.CacheOptions.InternalCacheDisabled.set -> void
+Microsoft.Identity.Client.CacheRefreshReason.CacheDisabled = 5 -> Microsoft.Identity.Client.CacheRefreshReason
+Microsoft.Identity.Client.Extensibility.AuthenticationResultExtensions
+const Microsoft.Identity.Client.MsalError.InternalCacheDisabled = "internal_cache_disabled" -> string
+const Microsoft.Identity.Client.MsalError.InvalidCredentialMaterial = "invalid_credential_material" -> string
+static Microsoft.Identity.Client.CacheOptions.DisableInternalCache.get -> Microsoft.Identity.Client.CacheOptions
+static Microsoft.Identity.Client.Extensibility.AuthenticationResultExtensions.GetRefreshToken(this Microsoft.Identity.Client.AuthenticationResult result) -> string

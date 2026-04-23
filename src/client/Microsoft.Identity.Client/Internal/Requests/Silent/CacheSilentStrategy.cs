@@ -42,6 +42,13 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
             
             ThrowIfCurrentBrokerAccount();
 
+            if (ServiceBundle.Config.AccessorOptions?.InternalCacheDisabled == true)
+            {
+                throw new MsalClientException(
+                    MsalError.InternalCacheDisabled,
+                    MsalErrorMessage.InternalCacheDisabledMessage);
+            }
+
             AuthenticationResult authResult = null;
 
             if (!_silentParameters.ForceRefresh && string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))

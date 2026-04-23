@@ -42,8 +42,17 @@ namespace Microsoft.Identity.Client.Cache
         #region ICacheSessionManager implementation
         public ITokenCacheInternal TokenCacheInternal { get; }
 
+        private bool IsInternalCacheDisabled =>
+            _requestParams.RequestContext.ServiceBundle.Config.AccessorOptions?.InternalCacheDisabled == true;
+
         public async Task<MsalAccessTokenCacheItem> FindAccessTokenAsync()
         {
+            if (IsInternalCacheDisabled)
+            {
+                _requestParams.RequestContext.Logger.Info("[Cache Session Manager] Internal cache disabled. Skipping access token lookup.");
+                return null;
+            }
+
             await RefreshCacheForReadOperationsAsync().ConfigureAwait(false);
             return await TokenCacheInternal.FindAccessTokenAsync(_requestParams).ConfigureAwait(false);
         }
@@ -69,6 +78,12 @@ namespace Microsoft.Identity.Client.Cache
 
         public async Task<MsalRefreshTokenCacheItem> FindFamilyRefreshTokenAsync(string familyId)
         {
+            if (IsInternalCacheDisabled)
+            {
+                _requestParams.RequestContext.Logger.Info("[Cache Session Manager] Internal cache disabled. Skipping family refresh token lookup.");
+                return null;
+            }
+
             await RefreshCacheForReadOperationsAsync().ConfigureAwait(false);
 
             if (string.IsNullOrEmpty(familyId))
@@ -81,6 +96,12 @@ namespace Microsoft.Identity.Client.Cache
 
         public async Task<MsalRefreshTokenCacheItem> FindRefreshTokenAsync()
         {
+            if (IsInternalCacheDisabled)
+            {
+                _requestParams.RequestContext.Logger.Info("[Cache Session Manager] Internal cache disabled. Skipping refresh token lookup.");
+                return null;
+            }
+
             await RefreshCacheForReadOperationsAsync().ConfigureAwait(false);
             return await TokenCacheInternal.FindRefreshTokenAsync(_requestParams).ConfigureAwait(false);
         }

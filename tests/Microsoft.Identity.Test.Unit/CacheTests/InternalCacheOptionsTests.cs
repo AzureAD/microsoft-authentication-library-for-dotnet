@@ -3,8 +3,11 @@
 
 using System;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Extensibility;
+using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
@@ -187,6 +190,169 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 result.AuthenticationResultMetadata.CachedAccessTokenCount);
 
             return result;
+        }
+
+        // ─── New tests for issue #5942 ────────────────────────────────────────────
+
+        /// <summary>AC3 + AC4: Static helper and the bool property have correct values.</summary>
+        [TestMethod]
+        public void DisableInternalCache_StaticProperty_HasCorrectValues()
+        {
+            var disabled = CacheOptions.DisableInternalCache;
+            Assert.IsNotNull(disabled);
+            Assert.IsTrue(disabled.InternalCacheDisabled, "DisableInternalCache.InternalCacheDisabled should be true");
+            Assert.IsFalse(disabled.UseSharedCache, "DisableInternalCache.UseSharedCache should be false");
+
+            var defaults = new CacheOptions();
+            Assert.IsFalse(defaults.InternalCacheDisabled, "Default CacheOptions should have InternalCacheDisabled == false");
+        }
+
+        /// <summary>AC2: The refresh token must NOT appear as a public property on AuthenticationResult.</summary>
+        [TestMethod]
+        public void RefreshToken_IsNotPublicProperty()
+        {
+            var prop = typeof(AuthenticationResult)
+                .GetProperty("RefreshToken", BindingFlags.Public | BindingFlags.Instance);
+
+            Assert.IsNull(prop, "RefreshToken must not be exposed as a public property on AuthenticationResult.");
+        }
+
+        /// <summary>AC1: GetRefreshToken() extension returns the refresh token from a real token flow.</summary>
+        [TestMethod]
+        public async Task GetRefreshToken_AcquireTokenByAuthCode_ReturnsToken_Async()
+        {
+            using (var harness = CreateTestHarness())
+            {
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
+
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithRedirectUri(TestConstants.RedirectUri)
+                    .WithHttpManager(harness.HttpManager)
+                    .BuildConcrete();
+
+                AuthenticationResult result = await app
+                    .AcquireTokenByAuthorizationCode(TestConstants.s_scope, TestConstants.DefaultAuthorizationCode)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                string rt = result.GetRefreshToken();
+                Assert.IsNotNull(rt, "GetRefreshToken() should return a non-null refresh token.");
+                Assert.AreEqual(TestConstants.RTSecret, rt, "GetRefreshToken() should return the refresh token from the token response.");
+            }
+        }
+
+        /// <summary>AC5: When DisableInternalCache is set, AcquireTokenForClient always hits the network and nothing is stored.</summary>
+        [TestMethod]
+        public async Task DisableInternalCache_AcquireTokenForClient_NeverCaches_Async()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithHttpManager(httpManager)
+                    .WithCacheOptions(CacheOptions.DisableInternalCache)
+                    .BuildConcrete();
+
+                // Two separate network calls expected because the cache is disabled.
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+                var result1 = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithTenantId(TestConstants.Utid)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+                var result2 = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithTenantId(TestConstants.Utid)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual(TokenSource.IdentityProvider, result1.AuthenticationResultMetadata.TokenSource,
+                    "First call should come from the network, not the cache.");
+                Assert.AreEqual(TokenSource.IdentityProvider, result2.AuthenticationResultMetadata.TokenSource,
+                    "Second call should also come from the network because the internal cache is disabled.");
+
+                Assert.IsEmpty(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens(),
+                    "No access tokens should have been stored in the internal cache.");
+            }
+        }
+
+        /// <summary>AC5 (user-flow variant): DisableInternalCache also skips the user token cache.</summary>
+        [TestMethod]
+        public async Task DisableInternalCache_AcquireTokenByAuthCode_DoesNotCacheTokens_Async()
+        {
+            using (var harness = CreateTestHarness())
+            {
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
+
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithRedirectUri(TestConstants.RedirectUri)
+                    .WithHttpManager(harness.HttpManager)
+                    .WithCacheOptions(CacheOptions.DisableInternalCache)
+                    .BuildConcrete();
+
+                await app
+                    .AcquireTokenByAuthorizationCode(TestConstants.s_scope, TestConstants.DefaultAuthorizationCode)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.IsEmpty(app.UserTokenCacheInternal.Accessor.GetAllAccessTokens(),
+                    "No access tokens should be stored when the internal cache is disabled.");
+                Assert.IsEmpty(app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens(),
+                    "No refresh tokens should be stored when the internal cache is disabled.");
+                Assert.IsEmpty(app.UserTokenCacheInternal.Accessor.GetAllIdTokens(),
+                    "No ID tokens should be stored when the internal cache is disabled.");
+            }
+        }
+
+        /// <summary>AC6: AcquireTokenSilent throws a descriptive MsalClientException when the internal cache is disabled.</summary>
+        [TestMethod]
+        public async Task DisableInternalCache_AcquireTokenSilent_ThrowsWithCorrectError_Async()
+        {
+            var app = PublicClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithCacheOptions(CacheOptions.DisableInternalCache)
+                .Build();
+
+            var account = new Account("aid.tid", "user@contoso.com", "login.microsoftonline.com");
+
+            var ex = await AssertException.TaskThrowsAsync<MsalClientException>(
+                () => app.AcquireTokenSilent(TestConstants.s_scope, account).ExecuteAsync())
+                .ConfigureAwait(false);
+
+            Assert.AreEqual(MsalError.InternalCacheDisabled, ex.ErrorCode,
+                "The error code should identify that the internal cache is disabled.");
+            StringAssert.Contains(ex.Message, "AcquireTokenByRefreshToken",
+                "The error message should guide the caller towards AcquireTokenByRefreshToken.");
+        }
+
+        /// <summary>Mutual exclusivity: InternalCacheDisabled and UseSharedCache cannot both be set.</summary>
+        [TestMethod]
+        public void DisableInternalCache_AndUseSharedCache_ThrowsOnBuild()
+        {
+            var conflictingOptions = new CacheOptions
+            {
+                InternalCacheDisabled = true,
+                UseSharedCache = true
+            };
+
+            var ex = AssertException.Throws<MsalClientException>(
+                () => ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithCacheOptions(conflictingOptions)
+                    .Build());
+
+            Assert.AreEqual(MsalError.InvalidRequest, ex.ErrorCode,
+                "Setting both InternalCacheDisabled and UseSharedCache should throw an InvalidRequest error.");
         }
     }
 }

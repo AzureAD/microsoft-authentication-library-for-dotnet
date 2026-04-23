@@ -346,7 +346,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 #if !MOBILE
             atItem?.AddAdditionalCacheParameters(clientInfoFromServer?.AdditionalResponseParameters);
 #endif
-            return await AuthenticationResult.CreateAsync(
+            var authResult = await AuthenticationResult.CreateAsync(
                 atItem,
                 idtItem,
                 AuthenticationRequestParameters.AuthenticationScheme,
@@ -357,6 +357,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 msalTokenResponse.SpaAuthCode,
                 msalTokenResponse.CreateExtensionDataStringMap(),
                 cancellationToken).ConfigureAwait(false);
+
+            authResult.RefreshToken = msalTokenResponse.RefreshToken;
+            return authResult;
         }
 
         protected virtual void ValidateAccountIdentifiers(ClientInfo fromServer)

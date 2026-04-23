@@ -460,5 +460,10 @@ namespace Microsoft.Identity.Client
             "configured via WithCertificate(). Non-certificate credentials (client secrets, static signed " +
             "assertions, and string-returning assertion delegates) are not supported. " +
             "Remove SendCertificateOverMtls or switch to a certificate credential.";
+
+        public const string InternalCacheDisabledMessage =
+            "AcquireTokenSilent is not supported when the internal cache is disabled via CacheOptions.DisableInternalCache. " +
+            "Retrieve the refresh token using AuthenticationResultExtensions.GetRefreshToken() and call AcquireTokenByRefreshToken, " +
+            "or use another interactive flow.";
     }
 }
