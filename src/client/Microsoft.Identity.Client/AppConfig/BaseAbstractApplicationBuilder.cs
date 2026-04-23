@@ -208,7 +208,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Allows usage of experimental features and APIs. If this flag is not set, experimental features
+        /// Allows usage of experimental features and APIs. If this flag is not set, experimental features 
         /// will throw an exception. For details see https://aka.ms/msal-net-experimental-features
         /// </summary>
         /// <remarks>

@@ -89,14 +89,14 @@ namespace Microsoft.Identity.Client
         ITelemetryConfig TelemetryConfig { get; }
 
         /// <summary>
-        /// Allows usage of features that are experimental and would otherwise throw a specific exception.
-        /// Use of experimental features in production is not recommended and are subject to be removed between builds.
+        /// Allows usage of features that are experimental and would otherwise throw a specific exception. 
+        /// Use of experimental features in production is not recommended and are subject to be removed between builds. 
         /// For details see https://aka.ms/msal-net-experimental-features.
         /// </summary>
         bool ExperimentalFeaturesEnabled { get; }
 
         /// <summary>
-        /// Microsoft Identity specific OIDC extension that allows resource challenges to be resolved without interaction.
+        /// Microsoft Identity specific OIDC extension that allows resource challenges to be resolved without interaction. 
         /// Allows configuration of one or more client capabilities, e.g. "llt"
         /// </summary>
         /// <remarks>
