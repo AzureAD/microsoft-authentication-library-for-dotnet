@@ -192,9 +192,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             return result;
         }
 
-        // ─── New tests for issue #5942 ────────────────────────────────────────────
-
-        /// <summary>AC3 + AC4: Static helper and the bool property have correct values.</summary>
+        /// <summary>Static helper and the bool property have correct values.</summary>
         [TestMethod]
         public void DisableInternalCache_StaticProperty_HasCorrectValues()
         {
@@ -207,7 +205,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.IsFalse(defaults.InternalCacheDisabled, "Default CacheOptions should have InternalCacheDisabled == false");
         }
 
-        /// <summary>AC2: The refresh token must NOT appear as a public property on AuthenticationResult.</summary>
+        /// <summary>The refresh token must NOT appear as a public property on AuthenticationResult.</summary>
         [TestMethod]
         public void RefreshToken_IsNotPublicProperty()
         {
@@ -217,7 +215,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.IsNull(prop, "RefreshToken must not be exposed as a public property on AuthenticationResult.");
         }
 
-        /// <summary>AC1: GetRefreshToken() extension returns the refresh token from a real token flow.</summary>
+        /// <summary>GetRefreshToken() extension returns the refresh token from a real token flow.</summary>
         [TestMethod]
         public async Task GetRefreshToken_AcquireTokenByAuthCode_ReturnsToken_Async()
         {
@@ -244,7 +242,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             }
         }
 
-        /// <summary>AC5: When DisableInternalCache is set, AcquireTokenForClient always hits the network and nothing is stored.</summary>
+        /// <summary>When DisableInternalCache is set, AcquireTokenForClient always hits the network and nothing is stored.</summary>
         [TestMethod]
         public async Task DisableInternalCache_AcquireTokenForClient_NeverCaches_Async()
         {
@@ -282,7 +280,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             }
         }
 
-        /// <summary>AC5 (user-flow variant): DisableInternalCache also skips the user token cache.</summary>
+        /// <summary>DisableInternalCache also skips the user token cache.</summary>
         [TestMethod]
         public async Task DisableInternalCache_AcquireTokenByAuthCode_DoesNotCacheTokens_Async()
         {
@@ -313,7 +311,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             }
         }
 
-        /// <summary>AC6: AcquireTokenSilent throws a descriptive MsalClientException when the internal cache is disabled.</summary>
+        /// <summary>AcquireTokenSilent throws a descriptive MsalClientException when the internal cache is disabled.</summary>
         [TestMethod]
         public async Task DisableInternalCache_AcquireTokenSilent_ThrowsWithCorrectError_Async()
         {
