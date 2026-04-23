@@ -588,7 +588,7 @@ namespace Microsoft.Identity.Test.Unit
             var cert = new X509Certificate2(
                ResourceHelper.GetTestResourceRelativePath(
                    "testCert.crtfile"),
-               TestConstants.TestCertPassword);
+               TestConstants.TestPlaceholderCredential);
 
             JsonWebToken msalJwtTokenObj =
                 new JsonWebToken(new CommonCryptographyManager(),
@@ -823,7 +823,7 @@ namespace Microsoft.Identity.Test.Unit
                     .AcquireTokenByUsernamePassword(
                         TestConstants.s_scope,
                         TestConstants.Username,
-                        TestConstants.DefaultPassword)
+                        TestConstants.PlaceholderCredential)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
             }
@@ -856,7 +856,7 @@ namespace Microsoft.Identity.Test.Unit
                     .AcquireTokenByUsernamePassword(
                         TestConstants.s_scope,
                         TestConstants.Username,
-                        TestConstants.DefaultPassword)
+                        TestConstants.PlaceholderCredential)
                     .WithSendX5C(sendX5C)
                     .ExecuteAsync()
                     .ConfigureAwait(false);

@@ -21,7 +21,7 @@ namespace Microsoft.Identity.Client
 #if !SUPPORTS_CONFIDENTIAL_CLIENT
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidential client on mobile
 #endif
-    public partial interface IConfidentialClientApplication : IClientApplicationBase
+    public partial interface IConfidentialClientApplication : IClientApplicationBase, IByUserFederatedIdentityCredential
     {
         /// <summary>
         /// Application token cache which holds access tokens for this application. It's maintained

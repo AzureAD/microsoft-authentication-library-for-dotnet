@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using System.Threading;
 
@@ -27,12 +28,14 @@ namespace Microsoft.Identity.Client
         /// <param name="appConfig">The application configuration</param>
         /// <param name="tokenEndpoint">The token endpoint used to acquire the token</param>
         /// <param name="tenantId">The tenant ID from the runtime authority</param>
-        internal AssertionRequestOptions(ApplicationConfiguration appConfig, string tokenEndpoint, string tenantId)
+        /// <param name="correlationId">The correlation ID from the authentication request</param>
+        internal AssertionRequestOptions(ApplicationConfiguration appConfig, string tokenEndpoint, string tenantId, Guid correlationId = default)
         {
             ClientID = appConfig.ClientId;
             TokenEndpoint = tokenEndpoint;
             Authority = appConfig.Authority?.AuthorityInfo?.CanonicalAuthority?.ToString();
             TenantId = tenantId;
+            CorrelationId = correlationId;
         }
 
         /// <summary>
@@ -76,5 +79,11 @@ namespace Microsoft.Identity.Client
         /// FMI path to be used for client assertion. Tokens are associated with this path in the cache.
         /// </summary>
         public string ClientAssertionFmiPath { get; set; }
+
+        /// <summary>
+        /// Correlation ID of the authentication request. Use this to propagate the same correlation ID 
+        /// to downstream token requests (e.g., Managed Identity) for coherent end-to-end tracing.
+        /// </summary>
+        public Guid CorrelationId { get; set; }
     }
 }

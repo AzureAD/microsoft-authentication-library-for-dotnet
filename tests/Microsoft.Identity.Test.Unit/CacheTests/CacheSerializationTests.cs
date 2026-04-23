@@ -254,7 +254,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             var item = CreateAccessTokenItem();
 
-            item.WithRefreshOn(DateTimeOffset.UtcNow + TimeSpan.FromMinutes(30));
+            TestCommon.WithRefreshOn(item, DateTimeOffset.UtcNow + TimeSpan.FromMinutes(30));
             string asJson = item.ToJsonString();
             var item2 = MsalAccessTokenCacheItem.FromJsonString(asJson);
 

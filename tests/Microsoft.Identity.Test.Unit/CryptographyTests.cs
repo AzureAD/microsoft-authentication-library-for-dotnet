@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Test.Unit
             var serviceBundle = TestCommon.CreateDefaultServiceBundle();
             // Tests the cryptography libraries used by MSAL to sign with certificates
             string resource = ResourceHelper.GetTestResourceRelativePath("testCert.crtfile");
-            var cert = new X509Certificate2(resource, TestConstants.TestCertPassword);
+            var cert = new X509Certificate2(resource, TestConstants.TestPlaceholderCredential);
             var crypto = serviceBundle.PlatformProxy.CryptographyManager;
             byte[] result = crypto.SignWithCertificate("TEST", cert, RSASignaturePadding.Pkcs1);
             string value = Base64UrlHelpers.Encode(result);

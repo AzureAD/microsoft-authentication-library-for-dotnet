@@ -21,7 +21,6 @@ using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Unit.Helpers;
-using Microsoft.Identity.Test.Unit.PublicApiTests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using static Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil;
