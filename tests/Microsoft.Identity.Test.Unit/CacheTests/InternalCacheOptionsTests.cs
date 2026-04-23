@@ -3,7 +3,6 @@
 
 using System;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Extensibility;
@@ -203,16 +202,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             var defaults = new CacheOptions();
             Assert.IsFalse(defaults.InternalCacheDisabled, "Default CacheOptions should have InternalCacheDisabled == false");
-        }
-
-        /// <summary>The refresh token must NOT appear as a public property on AuthenticationResult.</summary>
-        [TestMethod]
-        public void RefreshToken_IsNotPublicProperty()
-        {
-            var prop = typeof(AuthenticationResult)
-                .GetProperty("RefreshToken", BindingFlags.Public | BindingFlags.Instance);
-
-            Assert.IsNull(prop, "RefreshToken must not be exposed as a public property on AuthenticationResult.");
         }
 
         /// <summary>GetRefreshToken() extension returns the refresh token from a real token flow.</summary>

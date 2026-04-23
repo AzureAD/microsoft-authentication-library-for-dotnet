@@ -45,11 +45,30 @@ namespace Microsoft.Identity.Client.Cache
         private bool IsInternalCacheDisabled =>
             _requestParams.RequestContext.ServiceBundle.Config.AccessorOptions?.InternalCacheDisabled == true;
 
+        private bool ShouldSkipInternalCacheRead(string operationName)
+        {
+            if (!IsInternalCacheDisabled)
+            {
+                return false;
+            }
+            _requestParams.RequestContext.Logger.Verbose(
+                () => $"[Cache Session Manager] Internal cache disabled. Skipping {operationName}.");
+            return true;
+        }
+
+        private async Task RefreshCacheForReadOperationsIfEnabledAsync(string operationName)
+        {
+            if (ShouldSkipInternalCacheRead(operationName))
+            {
+                return;
+            }
+            await RefreshCacheForReadOperationsAsync().ConfigureAwait(false);
+        }
+
         public async Task<MsalAccessTokenCacheItem> FindAccessTokenAsync()
         {
-            if (IsInternalCacheDisabled)
+            if (ShouldSkipInternalCacheRead("access token lookup"))
             {
-                _requestParams.RequestContext.Logger.Info("[Cache Session Manager] Internal cache disabled. Skipping access token lookup.");
                 return null;
             }
 
@@ -66,21 +85,28 @@ namespace Microsoft.Identity.Client.Cache
 
         public async Task<Account> GetAccountAssociatedWithAccessTokenAsync(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
         {
-            await RefreshCacheForReadOperationsAsync().ConfigureAwait(false);
+            await RefreshCacheForReadOperationsIfEnabledAsync("account lookup for access token").ConfigureAwait(false);
+            if (IsInternalCacheDisabled)
+            {
+                return null;
+            }
             return await TokenCacheInternal.GetAccountAssociatedWithAccessTokenAsync(_requestParams, msalAccessTokenCacheItem).ConfigureAwait(false);
         }
 
         public async Task<MsalIdTokenCacheItem> GetIdTokenCacheItemAsync(MsalAccessTokenCacheItem accessTokenCacheItem)
         {
-            await RefreshCacheForReadOperationsAsync().ConfigureAwait(false);
+            await RefreshCacheForReadOperationsIfEnabledAsync("ID token lookup").ConfigureAwait(false);
+            if (IsInternalCacheDisabled)
+            {
+                return null;
+            }
             return TokenCacheInternal.GetIdTokenCacheItem(accessTokenCacheItem);
         }
 
         public async Task<MsalRefreshTokenCacheItem> FindFamilyRefreshTokenAsync(string familyId)
         {
-            if (IsInternalCacheDisabled)
+            if (ShouldSkipInternalCacheRead("family refresh token lookup"))
             {
-                _requestParams.RequestContext.Logger.Info("[Cache Session Manager] Internal cache disabled. Skipping family refresh token lookup.");
                 return null;
             }
 
@@ -96,9 +122,8 @@ namespace Microsoft.Identity.Client.Cache
 
         public async Task<MsalRefreshTokenCacheItem> FindRefreshTokenAsync()
         {
-            if (IsInternalCacheDisabled)
+            if (ShouldSkipInternalCacheRead("refresh token lookup"))
             {
-                _requestParams.RequestContext.Logger.Info("[Cache Session Manager] Internal cache disabled. Skipping refresh token lookup.");
                 return null;
             }
 
@@ -108,13 +133,21 @@ namespace Microsoft.Identity.Client.Cache
 
         public async Task<bool?> IsAppFociMemberAsync(string familyId)
         {
-            await RefreshCacheForReadOperationsAsync().ConfigureAwait(false);
+            await RefreshCacheForReadOperationsIfEnabledAsync("FOCI membership lookup").ConfigureAwait(false);
+            if (IsInternalCacheDisabled)
+            {
+                return null;
+            }
             return await TokenCacheInternal.IsFociMemberAsync(_requestParams, familyId).ConfigureAwait(false);
         }
 
         public async Task<IEnumerable<IAccount>> GetAccountsAsync()
         {
-            await RefreshCacheForReadOperationsAsync().ConfigureAwait(false);
+            await RefreshCacheForReadOperationsIfEnabledAsync("accounts lookup").ConfigureAwait(false);
+            if (IsInternalCacheDisabled)
+            {
+                return System.Array.Empty<IAccount>();
+            }
             return await TokenCacheInternal.GetAccountsAsync(_requestParams).ConfigureAwait(false);
         }
 
