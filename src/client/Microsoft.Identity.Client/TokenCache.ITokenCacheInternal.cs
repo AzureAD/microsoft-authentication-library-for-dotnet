@@ -165,17 +165,22 @@ namespace Microsoft.Identity.Client
 
             #endregion
 
+            if (ServiceBundle.Config.AccessorOptions?.InternalCacheDisabled == true)
+            {
+                logger.Info("[SaveTokenResponseAsync] Internal cache is disabled (CacheOptions.DisableInternalCache). Skipping all cache writes.");
+                return Tuple.Create(msalAccessTokenCacheItem, msalIdTokenCacheItem, account);
+            }
+
             logger.Verbose(() => $"[SaveTokenResponseAsync] Entering token cache semaphore. Count {_semaphoreSlim.GetCurrentCountLogMessage()}.");
             await _semaphoreSlim.WaitAsync(requestParams.RequestContext.UserCancellationToken).ConfigureAwait(false);
             logger.Verbose(() => "[SaveTokenResponseAsync] Entered token cache semaphore. ");
             ITokenCacheInternal tokenCacheInternal = this;
-            bool internalCacheDisabled = ServiceBundle.Config.AccessorOptions?.InternalCacheDisabled == true;
 
             try
             {
                 try
                 {
-                    if (!internalCacheDisabled && tokenCacheInternal.IsAppSubscribedToSerializationEvents())
+                    if (tokenCacheInternal.IsAppSubscribedToSerializationEvents())
                     {
                         var args = new TokenCacheNotificationArgs(
                             tokenCache: this,
@@ -203,10 +208,8 @@ namespace Microsoft.Identity.Client
                         requestParams.RequestContext.ApiEvent.DurationInCacheInMs += measuredResultDuration.Milliseconds;
                     }
 
-                    if (!internalCacheDisabled)
-                    {
-                        // Don't cache access tokens from broker
-                        if (ShouldCacheAccessToken(msalAccessTokenCacheItem, response.TokenSource))
+
+                    if (ShouldCacheAccessToken(msalAccessTokenCacheItem, response.TokenSource))
                         {
                             logger.Info("[SaveTokenResponseAsync] Saving AT in cache and removing overlapping ATs...");
                             DeleteAccessTokensWithIntersectingScopes(
@@ -247,15 +250,10 @@ namespace Microsoft.Identity.Client
                             msalIdTokenCacheItem,
                             tenantId,
                             instanceDiscoveryMetadata);
-                    }
-                    else
-                    {
-                        logger.Info("[SaveTokenResponseAsync] Internal cache is disabled (CacheOptions.DisableInternalCache). Skipping all cache writes.");
-                    }
                 }
                 finally
                 {
-                    if (!internalCacheDisabled && tokenCacheInternal.IsAppSubscribedToSerializationEvents())
+                    if (tokenCacheInternal.IsAppSubscribedToSerializationEvents())
                     {
                         DateTimeOffset? cacheExpiry = CalculateSuggestedCacheExpiry(Accessor, logger);
 

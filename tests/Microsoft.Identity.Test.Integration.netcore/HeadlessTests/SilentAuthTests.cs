@@ -2,12 +2,14 @@
 // Licensed under the MIT License.
 
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
@@ -26,6 +28,34 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public TestContext TestContext { get; set; }
 
         private IPublicClientApplication pca = null;
+
+        [TestMethod]
+        public async Task DisableInternalCache_GetRefreshToken_ReturnsToken_Async()
+        {
+            var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
+
+            var pcaWithDisabledCache = PublicClientApplicationBuilder
+                .Create(app.AppId)
+                .WithAuthority("https://login.microsoftonline.com/organizations")
+                .WithCacheOptions(CacheOptions.DisableInternalCache)
+                .WithTestLogging()
+                .Build();
+
+#pragma warning disable CS0618
+            AuthenticationResult result = await pcaWithDisabledCache
+                .AcquireTokenByUsernamePassword(s_scopes, user.Upn, user.GetOrFetchPassword())
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+#pragma warning restore CS0618
+
+            string rt = result.GetRefreshToken();
+            Assert.IsNotNull(rt, "GetRefreshToken() should return a non-null refresh token from the network response.");
+            Assert.IsFalse(string.IsNullOrEmpty(rt), "Refresh token should not be empty.");
+
+            var accounts = await pcaWithDisabledCache.GetAccountsAsync().ConfigureAwait(false);
+            Assert.IsFalse(accounts.Any(), "No accounts should be stored in cache when InternalCacheDisabled is set.");
+        }
 
         [TestMethod]
         public async Task SilentAuth_ForceRefresh_Async()
