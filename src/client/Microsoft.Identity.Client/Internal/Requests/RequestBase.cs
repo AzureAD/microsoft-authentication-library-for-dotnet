@@ -358,7 +358,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 msalTokenResponse.CreateExtensionDataStringMap(),
                 cancellationToken).ConfigureAwait(false);
 
-            authResult.RefreshToken = msalTokenResponse.RefreshToken;
+            authResult.RefreshToken = AuthenticationRequestParameters.AppConfig.IsConfidentialClient
+                ? msalTokenResponse.RefreshToken
+                : null;
             return authResult;
         }
 

@@ -14,6 +14,7 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Test.Common.Core.Helpers;
+using Microsoft.Identity.Test.Unit;
 
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
 {
@@ -29,31 +30,62 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         private IPublicClientApplication pca = null;
 
+        private string _confidentialClientSecret;
+        private readonly KeyVaultSecretsProvider _keyVault = new KeyVaultSecretsProvider(KeyVaultInstance.MsalTeam);
+
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            ApplicationBase.ResetStateForTest();
+            if (string.IsNullOrEmpty(_confidentialClientSecret))
+            {
+                _confidentialClientSecret = _keyVault.GetSecretByName(TestConstants.MsalOBOKeyVaultSecretName).Value;
+            }
+        }
+
         [TestMethod]
         public async Task DisableInternalCache_GetRefreshToken_ReturnsToken_Async()
         {
+            // Arrange: get lab user + app configs
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
-            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
+            var pcaAppConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
+            var ccaAppConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppWebApi).ConfigureAwait(false);
 
-            var pcaWithDisabledCache = PublicClientApplicationBuilder
-                .Create(app.AppId)
-                .WithAuthority("https://login.microsoftonline.com/organizations")
-                .WithCacheOptions(CacheOptions.DisableInternalCache)
-                .WithTestLogging()
+            // Step 1: get a user access token via ROPC on a PCA (scoped to the web API)
+            var pca = PublicClientApplicationBuilder
+                .Create(pcaAppConfig.AppId)
+                .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
                 .Build();
 
 #pragma warning disable CS0618
-            AuthenticationResult result = await pcaWithDisabledCache
-                .AcquireTokenByUsernamePassword(s_scopes, user.Upn, user.GetOrFetchPassword())
+            var userResult = await pca
+                .AcquireTokenByUsernamePassword(new[] { ccaAppConfig.DefaultScopes }, user.Upn, user.GetOrFetchPassword())
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 #pragma warning restore CS0618
 
+            // Step 2: exchange the user token via OBO on a CCA with internal cache disabled
+            var ccaWithDisabledCache = ConfidentialClientApplicationBuilder
+                .Create(ccaAppConfig.AppId)
+                .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
+                .WithClientSecret(_confidentialClientSecret)
+                .WithCacheOptions(CacheOptions.DisableInternalCache)
+                .WithTestLogging()
+                .Build();
+
+            var result = await ccaWithDisabledCache
+                .AcquireTokenOnBehalfOf(s_scopes, new UserAssertion(userResult.AccessToken))
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            // Assert: RT is exposed and cache is empty
             string rt = result.GetRefreshToken();
-            Assert.IsNotNull(rt, "GetRefreshToken() should return a non-null refresh token from the network response.");
+            Assert.IsNotNull(rt, "GetRefreshToken() should return a non-null refresh token from a confidential client OBO response.");
             Assert.IsFalse(string.IsNullOrEmpty(rt), "Refresh token should not be empty.");
 
-            var accounts = await pcaWithDisabledCache.GetAccountsAsync().ConfigureAwait(false);
+#pragma warning disable CS0618
+            var accounts = await ccaWithDisabledCache.GetAccountsAsync().ConfigureAwait(false);
+#pragma warning restore CS0618
             Assert.IsFalse(accounts.Any(), "No accounts should be stored in cache when InternalCacheDisabled is set.");
         }
 
