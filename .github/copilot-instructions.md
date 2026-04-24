@@ -2,6 +2,28 @@ Carefully review all markdown documents in the ../.clinerules folder. Those are 
 
 ---
 
+# Code Review Rules
+
+## ConcurrentDictionary.GetOrAdd — always use the factory delegate overload
+
+`ConcurrentDictionary.GetOrAdd(key, value)` **eagerly evaluates** the second argument before checking the dictionary. If the value is a constructor call or method invocation (e.g., `new HttpClient(...)`, `CreateFoo()`), a new object is created and discarded on every cache hit.
+
+**Bad** — object created on every call, discarded on cache hit:
+```csharp
+pool.GetOrAdd(key, new ExpensiveObject());
+pool.GetOrAdd(key, CreateExpensiveObject());
+```
+
+**Good** — factory lambda only runs on cache miss:
+```csharp
+pool.GetOrAdd(key, _ => new ExpensiveObject());
+pool.GetOrAdd(key, _ => CreateExpensiveObject());
+```
+
+When reviewing code, flag any `GetOrAdd` call where the second argument is **not** a delegate/lambda/method group. The only exception is when the key is guaranteed to be unique per call (i.e., caching is not the intent).
+
+---
+
 # GitHub Copilot Agent Skills (Repository Skills)
 
 This repository defines **Copilot Agent Skills** under `.github/skills/`.
