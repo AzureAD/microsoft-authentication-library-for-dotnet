@@ -1,1 +1,3 @@
-static Microsoft.Identity.Client.Extensibility.AbstractConfidentialClientAcquireTokenParameterBuilderExtension.WithAttributeTokens<T>(this Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T> builder, System.Collections.Generic.IEnumerable<string> attributeTokens) -> Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T>
+static Microsoft.Identity.Client.Extensibility.AbstractConfidentialClientAcquireTokenParameterBuilderExtension.WithAttributeTokens<T>(this Microsoft.Identity.Client.AbstractConfidentialClientAcquireTokenParameterBuilder<T> builder, System.Collections.Generic.IEnumerable<string> attributeTokens) -> Microsoft.Identity.Client.AbstractConfidentialClientAcquireTokenParameterBuilder<T>
+Microsoft.Identity.Client.AssertionRequestOptions.CorrelationId.get -> System.Guid
+Microsoft.Identity.Client.AssertionRequestOptions.CorrelationId.set -> void

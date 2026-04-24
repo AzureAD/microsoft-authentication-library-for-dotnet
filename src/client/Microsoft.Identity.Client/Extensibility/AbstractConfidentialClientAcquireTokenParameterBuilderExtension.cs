@@ -75,31 +75,16 @@ namespace Microsoft.Identity.Client.Extensibility
         /// and includes them in the cache key. Null/empty/whitespace entries are ignored;
         /// a null or empty collection is a no-op.
         /// </summary>
-        /// <typeparam name="T">The concrete builder type.</typeparam>
+        /// <typeparam name="T">The concrete confidential client builder type.</typeparam>
         /// <param name="builder">The builder to chain options to.</param>
         /// <param name="attributeTokens">Attribute tokens to include. Individual tokens must not contain whitespace.</param>
         /// <returns>The builder to chain method calls.</returns>
-        /// <remarks>
-        /// Distinct attribute-token sets cache as separate entries for <c>AcquireTokenForClient</c>.
-        /// For OBO/auth-code (user cache), entries with different sets do not coexist in the same
-        /// partition; use a separate confidential client per set if isolation is required.
-        /// </remarks>
-        /// <exception cref="ArgumentException">A token contains embedded whitespace.</exception>
-        /// <exception cref="InvalidOperationException">Called on a public client application.</exception>
-        public static AbstractAcquireTokenParameterBuilder<T> WithAttributeTokens<T>(
-            this AbstractAcquireTokenParameterBuilder<T> builder,
+        /// <exception cref="ArgumentException">Thrown when any token contains embedded whitespace.</exception>
+        public static AbstractConfidentialClientAcquireTokenParameterBuilder<T> WithAttributeTokens<T>(
+            this AbstractConfidentialClientAcquireTokenParameterBuilder<T> builder,
             IEnumerable<string> attributeTokens)
-            where T : AbstractAcquireTokenParameterBuilder<T>
+            where T : AbstractConfidentialClientAcquireTokenParameterBuilder<T>
         {
-            if (builder.ServiceBundle?.Config != null && !builder.ServiceBundle.Config.IsConfidentialClient)
-            {
-                throw new InvalidOperationException(
-                    "WithAttributeTokens is only supported on confidential client flows " +
-                    "(AcquireTokenForClient, AcquireTokenByAuthorizationCode, AcquireTokenOnBehalfOf). " +
-                    "Using it on public client flows would partition the token cache in a way that " +
-                    "AcquireTokenSilent cannot match, leading to unexpected cache misses.");
-            }
-
             ILoggerAdapter logger = builder.ServiceBundle?.ApplicationLogger;
 
             if (attributeTokens is null)
@@ -153,7 +138,8 @@ namespace Microsoft.Identity.Client.Extensibility
                 { OAuth2Parameter.AttributeTokens, _ => Task.FromResult(joinedTokens) }
             };
 
-            return builder.WithExtraBodyParametersInternal(extraBodyParams);
+            builder.WithExtraBodyParametersInternal(extraBodyParams);
+            return builder;
         }
 
         /// <summary>
