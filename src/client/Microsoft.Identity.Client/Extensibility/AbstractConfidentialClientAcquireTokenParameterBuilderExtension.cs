@@ -115,7 +115,7 @@ namespace Microsoft.Identity.Client.Extensibility
                 if (!string.IsNullOrWhiteSpace(token))
                 {
                     string trimmed = token.Trim();
-                    if (trimmed.IndexOfAny(new[] { ' ', '\t', '\n', '\r' }) >= 0)
+                    if (trimmed.Any(char.IsWhiteSpace))
                     {
                         throw new ArgumentException(
                             $"Attribute tokens must not contain whitespace. Invalid token: '{trimmed}'",
