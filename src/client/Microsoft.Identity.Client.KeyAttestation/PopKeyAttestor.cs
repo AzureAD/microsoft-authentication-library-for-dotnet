@@ -114,14 +114,33 @@ namespace Microsoft.Identity.Client.KeyAttestation
             var safeNCryptKeyHandle = keyHandle as SafeNCryptKeyHandle
                 ?? throw new ArgumentException("keyHandle must be a SafeNCryptKeyHandle. Only Windows CNG keys are supported.", nameof(keyHandle));
 
-            string cacheKey = BuildCacheKey(endpoint, keyId);
+            // Unnamed/ephemeral CNG keys do not have a stable keyId, so they must bypass the
+            // cache and keyed semaphore entirely. Otherwise multiple distinct key handles at the
+            // same endpoint would collapse to the same "{endpoint}|" cache/semaphore key and could
+            // incorrectly share an attestation token minted for a different key handle.
+            if (string.IsNullOrEmpty(keyId))
+            {
+                logger?.Info(() => $"[PopKeyAttestor] Bypassing MAA token cache for unnamed/ephemeral key at endpoint '{endpoint}'.");
 
-            // Note on null/empty keyId (ephemeral, non-KSP keys):
-            // When keyId is null, the cache key collapses to "{endpoint}|", which means all
-            // ephemeral keys at the same endpoint share one cache slot. In production, Credential
-            // Guard always uses persisted (named) CNG keys so keyId is never null. The degenerate
-            // case is accepted: a process can only have one in-flight attestation for the same
-            // endpoint, and the MAA token is bound to the endpoint, not the key itself.
+                Task<AttestationResult> nonCachedAttestTask = s_testAttestationProvider != null
+                    ? s_testAttestationProvider(endpoint, keyHandle, clientId, keyId, cancellationToken)
+                    : Task.Run(() =>
+                    {
+                        try
+                        {
+                            using var client = new AttestationClient();
+                            return client.Attest(endpoint, safeNCryptKeyHandle, clientId ?? string.Empty);
+                        }
+                        catch (Exception ex)
+                        {
+                            return new AttestationResult(AttestationStatus.Exception, null, string.Empty, -1, ex.Message);
+                        }
+                    }, cancellationToken);
+
+                return await nonCachedAttestTask.ConfigureAwait(false);
+            }
+
+            string cacheKey = BuildCacheKey(endpoint, keyId);
 
             // Fast path: check cache without acquiring any lock.
             if (TryGetCachedToken(cacheKey, out AttestationToken cached))

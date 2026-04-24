@@ -98,7 +98,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             bool addProbeMock = true,
             bool addSourceCheck = true,
             ManagedIdentityKeyType managedIdentityKeyType = ManagedIdentityKeyType.InMemory,
-            ImdsVersion imdsVersion = ImdsVersion.V2)
+            ImdsVersion imdsVersion = ImdsVersion.V2,
+            IManagedIdentityKeyProvider keyProvider = null)
         {
             ManagedIdentityApplicationBuilder miBuilder = null;
 
@@ -151,16 +152,19 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
 
             // Choose deterministic key source for tests.
-            IManagedIdentityKeyProvider managedIdentityKeyProvider = null;
-            if (managedIdentityKeyType == ManagedIdentityKeyType.KeyGuard)
+            IManagedIdentityKeyProvider managedIdentityKeyProvider = keyProvider;
+            if (managedIdentityKeyProvider == null)
             {
-                // Force KeyGuard keys to deterministically exercise the attestation path.
-                managedIdentityKeyProvider = new TestKeyGuardManagedIdentityKeyProvider();
-            }
-            else if (managedIdentityKeyType == ManagedIdentityKeyType.InMemory)
-            {
-                // Otherwise, no attestation.
-                managedIdentityKeyProvider = new InMemoryManagedIdentityKeyProvider();
+                if (managedIdentityKeyType == ManagedIdentityKeyType.KeyGuard)
+                {
+                    // Force KeyGuard keys to deterministically exercise the attestation path.
+                    managedIdentityKeyProvider = new TestKeyGuardManagedIdentityKeyProvider();
+                }
+                else if (managedIdentityKeyType == ManagedIdentityKeyType.InMemory)
+                {
+                    // Otherwise, no attestation.
+                    managedIdentityKeyProvider = new InMemoryManagedIdentityKeyProvider();
+                }
             }
 
             // Inject a test platform proxy that provides the chosen key provider
@@ -1228,7 +1232,11 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     Constants.ManagedIdentityDefaultClientId, TestConstants.TenantId,
                     DateTimeOffset.UtcNow.AddHours(25));
 
-                var mi = await CreateManagedIdentityAsync(httpManager, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
+                // Shared provider ensures the same RSA key is returned on both acquires,
+                // simulating a persistent hardware key that survives across cert re-mints.
+                var sharedKeyProvider = new TestKeyGuardManagedIdentityKeyProvider();
+
+                var mi = await CreateManagedIdentityAsync(httpManager, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard, keyProvider: sharedKeyProvider).ConfigureAwait(false);
 
                 // First acquire: mints cert + calls MAA provider
                 AddMocksToGetEntraToken(httpManager, certificateRequestCertificate: rawCert);
@@ -1244,7 +1252,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 ManagedIdentityClient.ResetSourceForTest();
                 ImdsV2ManagedIdentitySource.ResetCertCacheForTest();
 
-                var mi2 = await CreateManagedIdentityAsync(httpManager, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
+                // Reuse the same key provider so the same CNG key is returned — simulating
+                // a persistent hardware key that survives across cert re-mints.
+                var mi2 = await CreateManagedIdentityAsync(httpManager, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard, keyProvider: sharedKeyProvider).ConfigureAwait(false);
 
                 // Second acquire: cert cache miss → re-mints cert, but MAA cache hit → provider NOT called again
                 AddMocksToGetEntraToken(httpManager, certificateRequestCertificate: rawCert);
