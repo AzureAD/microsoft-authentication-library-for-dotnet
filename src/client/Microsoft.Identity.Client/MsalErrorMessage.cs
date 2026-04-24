@@ -465,5 +465,9 @@ namespace Microsoft.Identity.Client
             "AcquireTokenSilent is not supported when the internal cache is disabled via CacheOptions.DisableInternalCache. " +
             "Retrieve the refresh token using AuthenticationResultExtensions.GetRefreshToken() and call AcquireTokenByRefreshToken, " +
             "or use another interactive flow.";
+
+        public const string InternalCacheDisabledMutuallyExclusiveMessage =
+            "CacheOptions.InternalCacheDisabled and CacheOptions.UseSharedCache are mutually exclusive. " +
+            "Set only one of these options.";
     }
 }

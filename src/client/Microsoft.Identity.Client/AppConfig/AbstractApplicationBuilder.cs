@@ -187,8 +187,7 @@ namespace Microsoft.Identity.Client
             {
                 throw new MsalClientException(
                     MsalError.InvalidRequest,
-                    "CacheOptions.InternalCacheDisabled and CacheOptions.UseSharedCache are mutually exclusive. " +
-                    "Set only one of these options.");
+                    MsalErrorMessage.InternalCacheDisabledMutuallyExclusiveMessage);
             }
 
             Config.AccessorOptions = options;

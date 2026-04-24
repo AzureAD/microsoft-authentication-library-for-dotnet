@@ -67,12 +67,11 @@ namespace Microsoft.Identity.Client.Cache
 
         public async Task<MsalAccessTokenCacheItem> FindAccessTokenAsync()
         {
-            if (ShouldSkipInternalCacheRead("access token lookup"))
+            await RefreshCacheForReadOperationsIfEnabledAsync("access token lookup").ConfigureAwait(false);
+            if (IsInternalCacheDisabled)
             {
                 return null;
             }
-
-            await RefreshCacheForReadOperationsAsync().ConfigureAwait(false);
             return await TokenCacheInternal.FindAccessTokenAsync(_requestParams).ConfigureAwait(false);
         }
 
@@ -105,12 +104,11 @@ namespace Microsoft.Identity.Client.Cache
 
         public async Task<MsalRefreshTokenCacheItem> FindFamilyRefreshTokenAsync(string familyId)
         {
-            if (ShouldSkipInternalCacheRead("family refresh token lookup"))
+            await RefreshCacheForReadOperationsIfEnabledAsync("family refresh token lookup").ConfigureAwait(false);
+            if (IsInternalCacheDisabled)
             {
                 return null;
             }
-
-            await RefreshCacheForReadOperationsAsync().ConfigureAwait(false);
 
             if (string.IsNullOrEmpty(familyId))
             {
@@ -122,12 +120,11 @@ namespace Microsoft.Identity.Client.Cache
 
         public async Task<MsalRefreshTokenCacheItem> FindRefreshTokenAsync()
         {
-            if (ShouldSkipInternalCacheRead("refresh token lookup"))
+            await RefreshCacheForReadOperationsIfEnabledAsync("refresh token lookup").ConfigureAwait(false);
+            if (IsInternalCacheDisabled)
             {
                 return null;
             }
-
-            await RefreshCacheForReadOperationsAsync().ConfigureAwait(false);
             return await TokenCacheInternal.FindRefreshTokenAsync(_requestParams).ConfigureAwait(false);
         }
 
