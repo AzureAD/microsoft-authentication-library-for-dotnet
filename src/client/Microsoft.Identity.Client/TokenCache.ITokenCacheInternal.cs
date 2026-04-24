@@ -167,7 +167,7 @@ namespace Microsoft.Identity.Client
 
             if (ServiceBundle.Config.AccessorOptions?.InternalCacheDisabled == true)
             {
-                logger.Info("[SaveTokenResponseAsync] Internal cache is disabled (CacheOptions.DisableInternalCache). Skipping all cache writes.");
+                logger.Verbose(() => "[SaveTokenResponseAsync] Internal cache is disabled (CacheOptions.DisableInternalCache). Skipping all cache writes.");
                 return Tuple.Create(msalAccessTokenCacheItem, msalIdTokenCacheItem, account);
             }
 
