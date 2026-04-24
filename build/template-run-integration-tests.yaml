@@ -4,7 +4,7 @@
 steps:
 
 - task: VSTest@2
-  displayName: 'Run integration tests (.NET FX)'
+  displayName: 'Run integration tests .NET Framework (non-OneBranch)'
   condition: and(succeeded(), eq(variables['PipelineType'], 'legacy'))
   inputs:
     testSelector: 'testAssemblies'
@@ -16,10 +16,10 @@ steps:
     codeCoverageEnabled: false
     failOnMinTestsNotRun: true
     minimumExpectedTests: '1'
-    pathtoCustomTestAdapters: 'C:\temp' # Workaround for test failure, as NUnit Test Adapter that gets detected seems to mess something up
+    pathtoCustomTestAdapters: 'C:\temp' # Workaround: NUnit adapter on non-OneBranch agents interferes with MSTest discovery
 
 - task: VSTest@2
-  displayName: 'Run integration tests (.NET FX) On OneBranch'
+  displayName: 'Run integration tests .NET Framework (OneBranch)'
   condition: and(succeeded(), eq(variables['PipelineType'], 'OneBranch'))
   inputs:
     testSelector: 'testAssemblies'
@@ -33,7 +33,7 @@ steps:
     minimumExpectedTests: '1'
 
 - task: VSTest@2
-  displayName: 'Run integration tests (.NET Core)'
+  displayName: 'Run integration tests .NET 8 (all pipelines)'
   inputs:
     testSelector: 'testAssemblies'
     testAssemblyVer2: '**\Microsoft.Identity.Test.Integration.netcore\bin\**\Microsoft.Identity.Test.Integration.NetCore.dll'
@@ -44,4 +44,4 @@ steps:
     codeCoverageEnabled: true
     failOnMinTestsNotRun: true
     minimumExpectedTests: '1'
-    runSettingsFile: 'build\CodeCoverage.runsettings'
+    runSettingsFile: '$(MsalSourceDir)build\CodeCoverage.runsettings'

@@ -164,5 +164,28 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
 
             return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
         }
+
+        public async Task<AuthenticationResult> ExecuteAsync(
+            AcquireTokenCommonParameters commonParameters,
+            AcquireTokenByUserFederatedIdentityCredentialParameters userFicParameters,
+            CancellationToken cancellationToken)
+        {
+            RequestContext requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, commonParameters.MtlsCertificate, cancellationToken);
+
+            AuthenticationRequestParameters requestParams = await _confidentialClientApplication.CreateRequestParametersAsync(
+                commonParameters,
+                requestContext,
+                _confidentialClientApplication.UserTokenCacheInternal,
+                cancellationToken).ConfigureAwait(false);
+
+            requestParams.SendX5C = userFicParameters.SendX5C ?? false;
+
+            var handler = new UserFederatedIdentityCredentialRequest(
+                ServiceBundle,
+                requestParams,
+                userFicParameters);
+
+            return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
+        }
     }
 }

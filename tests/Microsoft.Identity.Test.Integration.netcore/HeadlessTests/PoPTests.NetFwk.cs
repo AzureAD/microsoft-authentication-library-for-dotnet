@@ -64,8 +64,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await MultipleKeys_Async().ConfigureAwait(false);
         }
 
-        [DoNotRunOnLinux] // POP is not supported on Linux
-        [RunOn(TargetFrameworks.NetCore)]
+        [RunOn(TargetFrameworks.NetCore, SkipConditions.Linux)]
         public async Task PoP_BearerAndPoP_CanCoexist_Async()
         {
             await BearerAndPoP_CanCoexist_Async().ConfigureAwait(false);
@@ -139,9 +138,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .ExecuteAsync()
                 .ConfigureAwait(false);
             Assert.AreEqual("Bearer", result.TokenType);
-            Assert.AreEqual(
-                2,
-                (cca as ConfidentialClientApplication).AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
+            Assert.HasCount(2, (cca as ConfidentialClientApplication).AppTokenCacheInternal.Accessor.GetAllAccessTokens());
         }
 
         private async Task MultipleKeys_Async()
@@ -223,8 +220,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 result);
         }
 
-        [DoNotRunOnLinux] // POP is not supported on Linux
-        [RunOn(TargetFrameworks.NetCore)]
+        [RunOn(TargetFrameworks.NetCore, SkipConditions.Linux)]
         public async Task PopTestWithConfigObjectAsync()
         {
             var appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
@@ -262,8 +258,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual("RS256", alg, "The algorithm in the token header should be RS256");
         }
 
-        [DoNotRunOnLinux] // POP is not supported on Linux
-        [TestMethod]
+        [RunOn(SkipConditions.Linux)]
         public async Task PopTestWithRSAAsync()
         {
             var appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
@@ -301,8 +296,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual("RS256", alg, "The algorithm in the token header should be RS256");
         }
 
-        [DoNotRunOnLinux] // POP is not supported on Linux
-        [RunOn(TargetFrameworks.NetCore)]
+        [RunOn(TargetFrameworks.NetCore, SkipConditions.Linux)]
         public async Task ROPC_PopTestWithRSAAsync()
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
@@ -417,8 +411,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 result2.AuthenticationResultMetadata.TokenSource);
         }
         
-        [DoNotRunOnLinux] // POP is not supported on Linux
-        [TestMethod]
+        [RunOn(SkipConditions.Linux)]
         public async Task PopTestWithECDAsync()
         {
             var appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
@@ -457,8 +450,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 result);
         }
 
-        [DoNotRunOnLinux] // POP is not supported on Linux
-        [TestMethod]
+        [RunOn(SkipConditions.Linux)]
         public async Task NewPOP_WithKeyIdOnly_Async()
         {
             // Arrange - outside MSAL
@@ -552,8 +544,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 result2.AuthenticationResultMetadata.TokenSource);
         }
 
-        [DoNotRunOnLinux] // POP is not supported on Linux
-        [TestMethod]
+        [RunOn(SkipConditions.Linux)]
         public async Task InMemoryCryptoProvider_AlgIsPS256()
         {
             // Arrange - create a Confidential Client Application with PoP configuration
@@ -664,7 +655,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var response = await httpClient.GetAsync("https://graph.microsoft.com/v1.0/users").ConfigureAwait(false);
 
             // Check for WWW-Authenticate header
-            Assert.IsTrue(response.StatusCode == HttpStatusCode.Unauthorized, "The response should be Unauthorized (401)");
+            Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode, "The response should be Unauthorized (401)");
 
             // Extract WWW-Authenticate header to get the nonce
             var authParams = await WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(
@@ -697,8 +688,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsTrue(responseWithPopToken.IsSuccessStatusCode, "The response should be successful with the PoP token");
         }
 
-        [DoNotRunOnLinux] // POP is not supported on Linux
-        [TestMethod]
+        [RunOn(SkipConditions.Linux)]
         public async Task PoPToken_ShouldHaveCorrectAlgorithm_PS256_Async()
         {
             // Arrange
@@ -738,8 +728,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
 #if NET_CORE
-        [DoNotRunOnLinux] // POP is not supported on Linux
-        [IgnoreOnOneBranch]
+        [RunOn(SkipConditions.OneBranchBuild | SkipConditions.Linux)]
         public async Task WamUsernamePasswordRequestWithPOPAsync()
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);

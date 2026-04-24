@@ -50,6 +50,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         Assert.IsNull(options.ClientCapabilities);
                         Assert.IsNull(options.ClientAssertionFmiPath);
                         Assert.AreEqual(TestConstants.ClientId, options.ClientID);
+                        Assert.AreNotEqual(Guid.Empty, options.CorrelationId, "CorrelationId should be populated");
                         return await Task.FromResult("dummy_assertion").ConfigureAwait(false);
                     })
                     .BuildConcrete();
@@ -443,13 +444,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                           .WithExperimentalFeatures(true)
                           .WithClientSecret(TestConstants.ClientSecret)
-                          .WithClientCapabilities(TestConstants.ClientCapabilities)
+                          .WithClientCapabilities(TestConstants.s_clientCapabilities)
                           .WithHttpManager(http)
                           .WithClientAssertion((opts, ct) =>
                           {
                               checkedCaps = true;
                               CollectionAssert.AreEqual(
-                                  TestConstants.ClientCapabilities,
+                                  TestConstants.s_clientCapabilities,
                                   opts.ClientCapabilities.ToList());
                               return Task.FromResult(new ClientSignedAssertion
                               {
@@ -686,6 +687,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 var cert = CertHelper.GetOrCreateTestCert();
                 var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                               .WithExperimentalFeatures(true)
+                              .WithAuthority(TestConstants.AadAuthorityWithMsftTenantId)
                               .WithClientAssertion(PopDelegate())
                               .WithHttpManager(http)
                               .BuildConcrete();
@@ -767,8 +769,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         Assert.IsNull(result.BindingCertificate, "BindingCertificate should not be present.");
 
                         // Core of the test: prove 2 invocations + capture the two distinct pairs
-                        Assert.AreEqual(2, calls.Count,
-                            "Expected the client assertion provider delegate to be invoked twice for a single token acquisition.");
+                        Assert.HasCount(2, calls, "Expected the client assertion provider delegate to be invoked twice for a single token acquisition.");
 
                         // First invocation: cert A + assertion A
                         Assert.AreEqual("assertion-a", calls[0].Assertion);
@@ -1001,7 +1002,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ConfigureAwait(false);
 
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-                Assert.IsTrue(callCount >= 1, "Expected the client assertion delegate to be called at least once.");
+                Assert.IsGreaterThanOrEqualTo(1, callCount, "Expected the client assertion delegate to be called at least once.");
             }
         }
 
@@ -1047,7 +1048,72 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ConfigureAwait(false);
 
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-                Assert.IsTrue(callCount >= 1, "Expected the client assertion provider to be called at least once.");
+                Assert.IsGreaterThanOrEqualTo(1, callCount, "Expected the client assertion provider to be called at least once.");
+            }
+        }
+
+        [TestMethod]
+        public async Task CorrelationId_FlowsToSignedAssertionCallback_WithUserProvidedId()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                Guid expectedCorrelationId = Guid.NewGuid();
+                Guid capturedCorrelationId = Guid.Empty;
+
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithExperimentalFeatures(true)
+                    .WithHttpManager(httpManager)
+                    .WithClientAssertion((AssertionRequestOptions opts, CancellationToken ct) =>
+                    {
+                        capturedCorrelationId = opts.CorrelationId;
+                        return Task.FromResult(new ClientSignedAssertion { Assertion = "jwt" });
+                    })
+                    .BuildConcrete();
+
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithCorrelationId(expectedCorrelationId)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.AreEqual(expectedCorrelationId, capturedCorrelationId,
+                    "CorrelationId from WithCorrelationId() must flow to the assertion callback.");
+            }
+        }
+
+        [TestMethod]
+        public async Task CorrelationId_FlowsToStringAssertionCallback_WithUserProvidedId()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                Guid expectedCorrelationId = Guid.NewGuid();
+                Guid capturedCorrelationId = Guid.Empty;
+
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithHttpManager(httpManager)
+                    .WithClientAssertion(async (AssertionRequestOptions opts) =>
+                    {
+                        capturedCorrelationId = opts.CorrelationId;
+                        return await Task.FromResult("dummy_assertion").ConfigureAwait(false);
+                    })
+                    .BuildConcrete();
+
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithCorrelationId(expectedCorrelationId)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.AreEqual(expectedCorrelationId, capturedCorrelationId,
+                    "CorrelationId from WithCorrelationId() must flow to the string assertion callback.");
             }
         }
 

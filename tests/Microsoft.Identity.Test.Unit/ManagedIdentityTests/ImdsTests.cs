@@ -2,13 +2,16 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.ManagedIdentity.V2;
+using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Unit.Helpers;
@@ -22,7 +25,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
     {
         private readonly TestRetryPolicyFactory _testRetryPolicyFactory = new TestRetryPolicyFactory();
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(null, null)]                                              // SAMI
         [DataRow(TestConstants.ClientId, UserAssignedIdentityId.ClientId)] // UAMI
         public async Task ImdsFails404TwiceThenSucceeds200Async(
@@ -43,7 +46,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 IManagedIdentityApplication mi = miBuilder.Build();
 
-                ManagedIdentityTests.MockImdsV1Probe(httpManager, ManagedIdentitySource.Imds, userAssignedIdentityId, userAssignedId);
 
                 // Simulate two 404s (to trigger retries), then a successful response
                 const int Num404Errors = 2;
@@ -60,7 +62,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 }
 
                 // Final success
-                httpManager.AddManagedIdentityMockHandler(
+                var successHandler = httpManager.AddManagedIdentityMockHandler(
                     ManagedIdentityTests.ImdsEndpoint,
                     ManagedIdentityTests.Resource,
                     MockHelpers.GetMsiSuccessfulResponse(),
@@ -72,15 +74,24 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                             .ExecuteAsync()
                             .ConfigureAwait(false);
-                Assert.AreEqual(result.AccessToken, TestConstants.ATSecret);
+                Assert.AreEqual(TestConstants.ATSecret, result.AccessToken);
 
                 const int NumRequests = 1 + Num404Errors; // initial request + 2 retries
                 int requestsMade = NumRequests - httpManager.QueueSize;
                 Assert.AreEqual(NumRequests, requestsMade);
+
+                // Verify client metadata headers are forwarded to IMDS on the successful request
+                Assert.IsTrue(successHandler.ActualRequestHeaders.TryGetValues(MsalIdParameter.Product, out var skuValues));
+                string actualSku = skuValues.FirstOrDefault();
+                Assert.StartsWith("MSAL.", actualSku, $"SKU should start with 'MSAL.' but was '{actualSku}'");
+                Assert.IsTrue(successHandler.ActualRequestHeaders.TryGetValues(MsalIdParameter.Version, out var verValues));
+                Assert.IsFalse(string.IsNullOrEmpty(verValues.FirstOrDefault()));
+                Assert.IsTrue(successHandler.ActualRequestHeaders.TryGetValues(OAuth2Header.XMsCorrelationId, out var corrIdValues));
+                Assert.IsTrue(Guid.TryParse(corrIdValues.FirstOrDefault(), out _));
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(null, null)]                                              // SAMI
         [DataRow(TestConstants.ClientId, UserAssignedIdentityId.ClientId)] // UAMI
         public async Task ImdsFails410FourTimesThenSucceeds200Async(
@@ -91,7 +102,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
-                
+
                 ManagedIdentityId managedIdentityId = userAssignedId == null
                     ? ManagedIdentityId.SystemAssigned
                     : ManagedIdentityId.WithUserAssignedClientId(userAssignedId);
@@ -101,7 +112,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 IManagedIdentityApplication mi = miBuilder.Build();
 
-                ManagedIdentityTests.MockImdsV1Probe(httpManager, ManagedIdentitySource.Imds, userAssignedIdentityId, userAssignedId);
 
                 // Simulate four 410s (to trigger retries), then a successful response
                 const int Num410Errors = 4;
@@ -130,7 +140,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                             .ExecuteAsync()
                             .ConfigureAwait(false);
-                Assert.AreEqual(result.AccessToken, TestConstants.ATSecret);
+                Assert.AreEqual(TestConstants.ATSecret, result.AccessToken);
 
                 const int NumRequests = 1 + Num410Errors; // initial request + 4 retries
                 int requestsMade = NumRequests - httpManager.QueueSize;
@@ -138,7 +148,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(null, null)]                                              // SAMI
         [DataRow(TestConstants.ClientId, UserAssignedIdentityId.ClientId)] // UAMI
         public async Task ImdsFails410PermanentlyAsync(
@@ -149,7 +159,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
-                
+
                 ManagedIdentityId managedIdentityId = userAssignedId == null
                     ? ManagedIdentityId.SystemAssigned
                     : ManagedIdentityId.WithUserAssignedClientId(userAssignedId);
@@ -159,7 +169,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 IManagedIdentityApplication mi = miBuilder.Build();
 
-                ManagedIdentityTests.MockImdsV1Probe(httpManager, ManagedIdentitySource.Imds, userAssignedIdentityId, userAssignedId);
 
                 // Simulate permanent 410s (to trigger the maximum number of retries)
                 const int Num410Errors = 1 + TestImdsRetryPolicy.LinearStrategyNumRetries; // initial request + maximum number of retries
@@ -193,7 +202,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(null, null)]                                              // SAMI
         [DataRow(TestConstants.ClientId, UserAssignedIdentityId.ClientId)] // UAMI
         public async Task ImdsFails504PermanentlyAsync(
@@ -204,7 +213,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
-                
+
                 ManagedIdentityId managedIdentityId = userAssignedId == null
                     ? ManagedIdentityId.SystemAssigned
                     : ManagedIdentityId.WithUserAssignedClientId(userAssignedId);
@@ -214,7 +223,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 IManagedIdentityApplication mi = miBuilder.Build();
 
-                ManagedIdentityTests.MockImdsV1Probe(httpManager, ManagedIdentitySource.Imds, userAssignedIdentityId, userAssignedId);
 
                 // Simulate permanent 504s (to trigger the maximum number of retries)
                 const int Num504Errors = 1 + TestImdsRetryPolicy.ExponentialStrategyNumRetries; // initial request + maximum number of retries
@@ -248,7 +256,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(null, null)]                                              // SAMI
         [DataRow(TestConstants.ClientId, UserAssignedIdentityId.ClientId)] // UAMI
         public async Task ImdsFails400WhichIsNonRetriableAndRetryPolicyIsNotTriggeredAsync(
@@ -259,7 +267,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
-                
+
                 ManagedIdentityId managedIdentityId = userAssignedId == null
                     ? ManagedIdentityId.SystemAssigned
                     : ManagedIdentityId.WithUserAssignedClientId(userAssignedId);
@@ -269,7 +277,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 IManagedIdentityApplication mi = miBuilder.Build();
 
-                ManagedIdentityTests.MockImdsV1Probe(httpManager, ManagedIdentitySource.Imds, userAssignedIdentityId, userAssignedId);
 
                 httpManager.AddManagedIdentityMockHandler(
                     ManagedIdentityTests.ImdsEndpoint,
@@ -299,7 +306,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(null, null)]                                              // SAMI
         [DataRow(TestConstants.ClientId, UserAssignedIdentityId.ClientId)] // UAMI
         public async Task ImdsFails500AndRetryPolicyIsDisabledAndNotTriggeredAsync(
@@ -310,7 +317,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (var httpManager = new MockHttpManager(disableInternalRetries: true))
             {
                 SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
-                
+
                 ManagedIdentityId managedIdentityId = userAssignedId == null
                     ? ManagedIdentityId.SystemAssigned
                     : ManagedIdentityId.WithUserAssignedClientId(userAssignedId);
@@ -320,7 +327,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 IManagedIdentityApplication mi = miBuilder.Build();
 
-                ManagedIdentityTests.MockImdsV1Probe(httpManager, ManagedIdentitySource.Imds, userAssignedIdentityId, userAssignedId);
 
                 httpManager.AddManagedIdentityMockHandler(
                     ManagedIdentityTests.ImdsEndpoint,
@@ -351,7 +357,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        
+
         public async Task ImdsRetryPolicyLifeTimeIsPerRequestAsync()
         {
             using (new EnvVariableContext())
@@ -365,7 +371,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 IManagedIdentityApplication mi = miBuilder.Build();
 
-                ManagedIdentityTests.MockImdsV1Probe(httpManager, ManagedIdentitySource.Imds);
 
                 // Simulate permanent errors (to trigger the maximum number of retries)
                 const int Num504Errors = 1 + TestImdsRetryPolicy.ExponentialStrategyNumRetries; // initial request + maximum number of retries
@@ -380,7 +385,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 }
 
                 MsalServiceException ex =
-                    await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                    await Assert.ThrowsAsync<MsalServiceException>(async () =>
                         await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                         .ExecuteAsync()
                         .ConfigureAwait(false))
@@ -400,7 +405,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                         statusCode: HttpStatusCode.GatewayTimeout);
                 }
 
-                ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                ex = await Assert.ThrowsAsync<MsalServiceException>(async () =>
                         await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                                 .ExecuteAsync()
                                 .ConfigureAwait(false))
@@ -421,7 +426,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                         statusCode: HttpStatusCode.GatewayTimeout);
                 }
 
-                ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                ex = await Assert.ThrowsAsync<MsalServiceException>(async () =>
                         await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                                 .ExecuteAsync()
                                 .ConfigureAwait(false))

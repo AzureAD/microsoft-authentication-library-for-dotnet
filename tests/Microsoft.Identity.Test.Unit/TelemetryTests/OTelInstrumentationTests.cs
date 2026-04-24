@@ -418,7 +418,7 @@ namespace Microsoft.Identity.Test.Unit
         private void VerifyMetrics(int expectedMetricCount, List<Metric> exportedMetrics, 
             long expectedSuccessfulRequests, long expectedFailedRequests)
         {
-            Assert.AreEqual(expectedMetricCount, exportedMetrics.Count, "Count of metrics recorded is not as expected.");
+            Assert.HasCount(expectedMetricCount, exportedMetrics, "Count of metrics recorded is not as expected.");
 
             foreach (Metric exportedItem in exportedMetrics)
             {

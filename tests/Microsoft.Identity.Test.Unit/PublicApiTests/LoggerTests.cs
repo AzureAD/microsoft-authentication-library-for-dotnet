@@ -287,7 +287,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
-                Assert.IsTrue(testLogger.StringBuilder.ToString().Contains("AcquireTokenByAuthorizationCode"));
+                Assert.Contains("AcquireTokenByAuthorizationCode", testLogger.StringBuilder.ToString());
             }
         }
 
@@ -337,13 +337,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 if (piiLogging)
                 {
-                    Assert.IsTrue(stringBuilder.ToString().Contains(TestConstants.PiiSerializeLogMessage));
-                    Assert.IsTrue(stringBuilder.ToString().Contains(TestConstants.PiiDeserializeLogMessage));
+                    Assert.Contains(TestConstants.PiiSerializeLogMessage, stringBuilder.ToString());
+                    Assert.Contains(TestConstants.PiiDeserializeLogMessage, stringBuilder.ToString());
                 }
                 else
                 {
-                    Assert.IsTrue(stringBuilder.ToString().Contains(TestConstants.SerializeLogMessage));
-                    Assert.IsTrue(stringBuilder.ToString().Contains(TestConstants.DeserializeLogMessage));
+                    Assert.Contains(TestConstants.SerializeLogMessage, stringBuilder.ToString());
+                    Assert.Contains(TestConstants.DeserializeLogMessage, stringBuilder.ToString());
                 }
             }
         }
@@ -396,12 +396,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 var app = appBuilder.Build();
 
-                var ex = await Assert.ThrowsExceptionAsync<MsalClaimsChallengeException>(async () =>
+                var ex = await Assert.ThrowsAsync<MsalClaimsChallengeException>(async () =>
                 {
                     await app.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync().ConfigureAwait(false);
                 }).ConfigureAwait(false);
 
-                Assert.IsTrue(stringBuilder.ToString().Contains(MsalErrorMessage.ClaimsChallenge));
+                Assert.Contains(MsalErrorMessage.ClaimsChallenge, stringBuilder.ToString());
             }
         }
 

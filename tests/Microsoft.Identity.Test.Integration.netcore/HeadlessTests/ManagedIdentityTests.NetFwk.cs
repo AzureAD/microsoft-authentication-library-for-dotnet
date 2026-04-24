@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private AccessToken? _labApiAccessToken;
         private string _labAccessAppId = new KeyVaultSecretsProvider().GetSecretByName("LabVaultAppID").Value;
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(MsiAzureResource.WebApp, "", DisplayName = "System_Identity_Web_App")]
         [DataRow(MsiAzureResource.WebApp, UserAssignedClientID, UserAssignedIdentityId.ClientId, DisplayName = "ClientId_Web_App")]
         [DataRow(MsiAzureResource.WebApp, UamiResourceId, UserAssignedIdentityId.ResourceId, DisplayName = "ResourceID_Web_App")]
@@ -279,7 +279,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(MsiAzureResource.WebApp, SomeRandomGuid, UserAssignedIdentityId.ClientId, DisplayName = "ClientId_Web_App")]
         [DataRow(MsiAzureResource.WebApp, SomeRandomGuid, UserAssignedIdentityId.ObjectId, DisplayName = "ObjectId_Web_App")]
         [DataRow(MsiAzureResource.WebApp, Non_Existent_UamiResourceId, UserAssignedIdentityId.ResourceId, DisplayName = "ResourceID_Web_App")]
@@ -317,12 +317,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     ManagedIdentitySource.Imds : ManagedIdentitySource.AppService;
 
                 //Assert
-                Assert.IsTrue(ex.ErrorCode == MsalError.ManagedIdentityRequestFailed);
+                Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
                 Assert.AreEqual(expectedResource.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(MsiAzureResource.WebApp, "", UserAssignedIdentityId.None, DisplayName = "System_Identity_Web_App")]
         [DataRow(MsiAzureResource.WebApp, UserAssignedClientID, UserAssignedIdentityId.ClientId, DisplayName = "ClientId_Web_App")]
         [DataRow(MsiAzureResource.WebApp, UamiResourceId, UserAssignedIdentityId.ResourceId, DisplayName = "ResourceId_Web_App")]
@@ -355,12 +355,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 }).ConfigureAwait(false);
 
                 //Assert
-                Assert.IsTrue(ex.ErrorCode == MsalError.ManagedIdentityRequestFailed);
+                Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
                 Assert.AreEqual(ManagedIdentitySource.AppService.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
             }
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(MsiAzureResource.WebApp, "", DisplayName = "System_Identity_Web_App")]
         [DataRow(MsiAzureResource.WebApp, UserAssignedClientID, UserAssignedIdentityId.ClientId, DisplayName = "ClientId_Web_App")]
         [DataRow(MsiAzureResource.WebApp, UamiResourceId, UserAssignedIdentityId.ResourceId, DisplayName = "ResourceID_Web_App")]

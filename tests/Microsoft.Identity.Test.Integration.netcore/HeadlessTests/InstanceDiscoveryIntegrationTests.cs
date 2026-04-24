@@ -90,7 +90,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .ConfigureAwait(false);
             #pragma warning restore CS0618
 
-            Assert.IsTrue(exception.Message.Contains("AADSTS50049"));
+            Assert.Contains("AADSTS50049", exception.Message);
             Assert.AreEqual("invalid_instance", exception.ErrorCode);
         }
 

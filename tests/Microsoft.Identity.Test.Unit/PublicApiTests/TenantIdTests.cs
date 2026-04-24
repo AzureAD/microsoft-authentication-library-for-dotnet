@@ -12,7 +12,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
     [TestClass]
     public class TenantIdTests : TestBase
     {
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(TestConstants.AuthorityCommonTenant, TestConstants.Common, DisplayName = "Common endpoint")]
         [DataRow(TestConstants.AuthorityNotKnownCommon, TestConstants.Common, DisplayName = "Common endpoint")]
         [DataRow(TestConstants.AuthorityHomeTenant, "home", DisplayName = "Home endpoint")]
@@ -27,7 +27,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [DataRow(TestConstants.B2CCustomDomain, TestConstants.CatsAreAwesome, DisplayName = "B2C Custom Domain Tenant Id")]
         [DataRow(TestConstants.B2CLoginAuthority, TestConstants.SomeTenantId, DisplayName = "B2C Tenant Id")]
         [DataRow(TestConstants.B2CLoginAuthorityUsGov, TestConstants.SomeTenantId, DisplayName = "B2C US GOV Tenant Id")]
-        [DataRow(TestConstants.B2CCustomDomain, TestConstants.CatsAreAwesome, DisplayName = "B2C Custom Domain Tenant Id")]
         [DataRow(TestConstants.B2CLoginAuthorityBlackforest, TestConstants.SomeTenantId, DisplayName = "B2C Blackforest Tenant Id")]
         [DataRow(TestConstants.B2CLoginAuthorityMoonCake, TestConstants.SomeTenantId, DisplayName = "B2C MoonCake Tenant Id")]
         [DataRow(TestConstants.AuthoritySovereignCNTenant, TestConstants.TenantId, DisplayName = "Sovereign Tenant Id")]
@@ -41,14 +40,14 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.AreEqual(expectedTenantId, tenantId);
         }
 
-        [DataTestMethod]
-        [DynamicData(nameof(TestData.GetAuthorityWithExpectedTenantId), typeof(TestData), DynamicDataSourceType.Method)]
+        [TestMethod]
+        [DynamicData(nameof(TestData.GetAuthorityWithExpectedTenantId), typeof(TestData))]
         public void ParseTestDynamic_Success(Uri authorityUrl, string expectedTenantId)
         {
             ParseTest_Success(authorityUrl.ToString(), expectedTenantId);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(TestConstants.ADFSAuthority, DisplayName = "ADFS Authority")]
         [DataRow(TestConstants.ADFSAuthority2, DisplayName = "ADFS Authority")]
         public void ParseTest_NoTenantId(string authorityUrl)

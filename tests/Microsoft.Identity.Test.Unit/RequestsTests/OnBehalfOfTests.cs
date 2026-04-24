@@ -131,7 +131,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 result = await cca.AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion).ExecuteAsync().ConfigureAwait(false);
 
                 Assert.AreEqual(TestConstants.ATSecret, result.AccessToken);
-                Assert.AreEqual(result.AuthenticationResultMetadata.TokenSource, TokenSource.IdentityProvider);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
             }
         }
 
@@ -163,7 +163,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 MsalAccessTokenCacheItem cachedAccessToken = cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Single();
                 Assert.AreEqual(userAssertion.AssertionHash, cachedAccessToken.OboCacheKey);
-                Assert.AreEqual(0, cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
+                Assert.IsEmpty(cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens());
             }
         }
 
@@ -238,13 +238,13 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 UserAssertion userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
 
                 //Throw exception with claims for OBO:
-                var ex = await Assert.ThrowsExceptionAsync<MsalClaimsChallengeException>(async () =>
+                var ex = await Assert.ThrowsAsync<MsalClaimsChallengeException>(async () =>
                 {
                     await cca.AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion).ExecuteAsync().ConfigureAwait(false);
                 }).ConfigureAwait(false);
 
                 Assert.AreEqual(TestConstants.ClaimsChallenge, ex.Claims);
-                Assert.IsTrue(ex.Message.Contains(MsalErrorMessage.ClaimsChallenge));
+                Assert.Contains(MsalErrorMessage.ClaimsChallenge, ex.Message);
 
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler
@@ -254,13 +254,13 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     });
 
                 //Throw exception with claims without OBO:
-                ex = await Assert.ThrowsExceptionAsync<MsalClaimsChallengeException>(async () =>
+                ex = await Assert.ThrowsAsync<MsalClaimsChallengeException>(async () =>
                 {
                     await cca.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync().ConfigureAwait(false);
                 }).ConfigureAwait(false);
 
                 Assert.AreEqual(TestConstants.ClaimsChallenge, ex.Claims);
-                Assert.IsTrue(ex.Message.Contains(MsalErrorMessage.ClaimsChallenge));
+                Assert.Contains(MsalErrorMessage.ClaimsChallenge, ex.Message);
             }
         }
 

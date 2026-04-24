@@ -189,7 +189,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         private void ValidateAt(ITokenCacheInternal cache)
         {
             var atList = cache.Accessor.GetAllAccessTokens().ToList();
-            Assert.AreEqual(1, atList.Count);
+            Assert.HasCount(1, atList);
 
             var actualPayload = JsonConvert.DeserializeObject<JObject>(atList.First().ToJsonString());
             var expectedPayload = JsonConvert.DeserializeObject<JObject>(_expectedAtCacheValue);
@@ -205,7 +205,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 {
                     if (!"extended_expires_on".Equals(propName))
                     {
-                        Assert.IsTrue(actualPayload.GetValue(propName).Type == JTokenType.String);
+                        Assert.AreEqual(JTokenType.String, actualPayload.GetValue(propName).Type);
                     }
                 }
                 else
@@ -274,7 +274,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
         private void ValidateCacheEntityValue(string expectedEntityValue, ICollection<string> entities)
         {
-            Assert.IsTrue(entities.Count == 1);
+            Assert.HasCount(1, entities);
 
             var actualPayload = JsonConvert.DeserializeObject<JObject>(entities.First());
             var expectedPayload = JsonConvert.DeserializeObject<JObject>(expectedEntityValue);

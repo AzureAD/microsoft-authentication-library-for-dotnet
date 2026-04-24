@@ -19,6 +19,6 @@ namespace Microsoft.Identity.Client.AuthScheme
         /// <summary>
         /// The cancellation token used to cancel cache validation operations.
         /// </summary>
-        public CancellationToken cancellationToken { get; internal set; }
+        public CancellationToken CancellationToken { get; internal set; }
     }
 }

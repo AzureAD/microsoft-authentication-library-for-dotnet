@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         #endregion
 
         // This test checks that MSAL.netcore / MSAL.netfx / MSAL.netstandard DLLs are actually used
-        [DataTestMethod()]
+        [TestMethod]
         [DataRow(TargetFrameworks.NetCore)]
         [DataRow(TargetFrameworks.NetFx)]
         public void AssertTfm(TargetFrameworks targetFwk)
@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             }
         }
 
-        [RunOn(TargetFrameworks.NetCore)]
+        [RunOn(TargetFrameworks.NetCore, SkipConditions.OneBranchBuild)]
         public async Task FailingTest_SeleniumFailureAsync()
         {
             var pca = PublicClientApplicationBuilder
@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                  .ConfigureAwait(false);
         }
 
-        [RunOn(TargetFrameworks.NetCore)]
+        [RunOn(TargetFrameworks.NetCore, SkipConditions.OneBranchBuild)]
         public async Task FailingTest_ListenerTimesOut_Async()
         {
             var pca = PublicClientApplicationBuilder

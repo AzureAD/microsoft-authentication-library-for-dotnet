@@ -106,11 +106,11 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             Assert.IsNotNull(result3);
 
             MsalClientException ex;
-            ex = Assert.ThrowsException<MsalClientException>(() => userMetadataProvider.GetMetadataOrThrow("non_existent", _logger));
+            ex = Assert.Throws<MsalClientException>(() => userMetadataProvider.GetMetadataOrThrow("non_existent", _logger));
             Assert.AreEqual(MsalError.InvalidUserInstanceMetadata, ex.ErrorCode);
-            ex = Assert.ThrowsException<MsalClientException>(() => userMetadataProvider.GetMetadataOrThrow(null, _logger));
+            ex = Assert.Throws<MsalClientException>(() => userMetadataProvider.GetMetadataOrThrow(null, _logger));
             Assert.AreEqual(MsalError.InvalidUserInstanceMetadata, ex.ErrorCode);
-            ex = Assert.ThrowsException<MsalClientException>(() => userMetadataProvider.GetMetadataOrThrow("", _logger));
+            ex = Assert.Throws<MsalClientException>(() => userMetadataProvider.GetMetadataOrThrow("", _logger));
             Assert.AreEqual(MsalError.InvalidUserInstanceMetadata, ex.ErrorCode);
         }
 
@@ -151,7 +151,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             Assert.IsFalse(KnownMetadataProvider.IsPublicEnvironment("login.sovcloud-identity.sg"));
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("login.sovcloud-identity.fr")]
         [DataRow("login.sovcloud-identity.de")]
         [DataRow("login.sovcloud-identity.sg")]

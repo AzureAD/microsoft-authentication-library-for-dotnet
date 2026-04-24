@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
     [TestClass]
     public class InstanceDiscoveryTests : TestBase
     {
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("login.microsoftonline.com", DisplayName = "Public")]
         [DataRow("login.microsoftonline.us", DisplayName = "UsGov")]
         [DataRow("login.microsoftonline.de", DisplayName = "GermanyLegacy")]

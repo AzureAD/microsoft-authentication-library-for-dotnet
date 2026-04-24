@@ -67,10 +67,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await RunHappyPathTestAsync(user, app, isPublicClient: false, cloud:Cloud.Arlington).ConfigureAwait(false);
         }
 
-        [RunOn(TargetFrameworks.NetCore)]
-#if IGNORE_FEDERATED
-        [Ignore]
-#endif
+        [RunOn(TargetFrameworks.NetCore, SkipConditions.FederatedDisabled)]
         public async Task ROPC_ADFSv4Federated_Async()
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserFederated).ConfigureAwait(false);
@@ -78,11 +75,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await RunHappyPathTestAsync(user, app).ConfigureAwait(false);
         }
 
-        [RunOn(TargetFrameworks.NetCore)]
         [TestCategory(TestCategories.ADFS)]
-#if IGNORE_FEDERATED
-        [Ignore]
-#endif
+        [RunOn(TargetFrameworks.NetCore, SkipConditions.FederatedDisabled)]
         public async Task AcquireTokenFromAdfsUsernamePasswordAsync()
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserFederated).ConfigureAwait(false);
@@ -279,13 +273,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 x.Item1.RequestUri.AbsoluteUri.Contains("oauth2/v2.0/token") &&
                 x.Item2.StatusCode == HttpStatusCode.OK);
 
-            Assert.IsTrue(!req.Headers.Any(h => h.Key == Constants.CcsRoutingHintHeader));
+            Assert.IsFalse(req.Headers.Any(h => h.Key == Constants.CcsRoutingHintHeader));
         }
 
         private void AssertTenantProfiles(IEnumerable<TenantProfile> tenantProfiles, string tenantId)
         {
             Assert.IsNotNull(tenantProfiles);
-            Assert.IsTrue(tenantProfiles.Count() > 0);
+            Assert.IsGreaterThan(0, tenantProfiles.Count());
 
             TenantProfile tenantProfile = tenantProfiles.Single(tp => tp.TenantId == tenantId);
             Assert.IsNotNull(tenantProfile);

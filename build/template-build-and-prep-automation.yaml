@@ -16,6 +16,7 @@ steps:
     BuildPlatform: '$(BuildPlatform)'
     BuildConfiguration: '$(BuildConfiguration)'
     MicrosoftIdentityClientVersion: $(MicrosoftIdentityClientVersion)
+    LabApiVersion: $(LabApiVersion)
     Solution: 'LibsAndSamples.sln'    
 
 - task: CopyFiles@2

@@ -114,7 +114,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                 }
                 catch (Exception ex)
                 {
+#pragma warning disable MSTEST0040 // Assert inside async void - acceptable risk (crash the test process)
                     Assert.Fail(ex.Message);
+#pragma warning restore MSTEST0040
                 }
                 finally
                 {
@@ -150,7 +152,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             ValidateInstanceMetadata(regionalMetadata);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(HttpStatusCode.NotFound, 0, TestConstants.RegionAutoDetectNotFoundFailureMessage)]  // No retries for 404 errors
         [DataRow(HttpStatusCode.InternalServerError, TestRegionDiscoveryRetryPolicy.NumRetries, TestConstants.RegionAutoDetectInternalServerErrorFailureMessage)]
         public async Task SuccessfulResponseFromUserProvidedRegionAsync(
@@ -175,7 +177,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             Assert.AreEqual(TestConstants.Region, _testRequestContext.ApiEvent.RegionUsed);
             Assert.AreEqual(RegionAutodetectionSource.FailedAutoDiscovery, _testRequestContext.ApiEvent.RegionAutodetectionSource);
             Assert.AreEqual(RegionOutcome.UserProvidedAutodetectionFailed, _testRequestContext.ApiEvent.RegionOutcome);
-            Assert.IsTrue(_testRequestContext.ApiEvent.RegionDiscoveryFailureReason.Contains(expectedFailureMessage));
+            Assert.Contains(expectedFailureMessage, _testRequestContext.ApiEvent.RegionDiscoveryFailureReason);
 
             // Verify all mock responses were consumed
             Assert.AreEqual(0, _httpManager.QueueSize);
@@ -270,7 +272,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             ValidateInstanceMetadata(regionalMetadata);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("Region with spaces")]
         [DataRow("invalid`region")]
         public async Task InvalidImdsAsync(string region)
@@ -313,13 +315,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
 
             // Assert
             Assert.IsNull(regionalMetadata, "Discovery requested, but it failed.");
-            Assert.AreEqual(null, _testRequestContext.ApiEvent.RegionUsed);
+            Assert.IsNull(_testRequestContext.ApiEvent.RegionUsed);
             Assert.AreEqual(RegionAutodetectionSource.FailedAutoDiscovery, _testRequestContext.ApiEvent.RegionAutodetectionSource);
             Assert.AreEqual(RegionOutcome.FallbackToGlobal, _testRequestContext.ApiEvent.RegionOutcome);
-            Assert.IsTrue(_testRequestContext.ApiEvent.RegionDiscoveryFailureReason.Contains(TestConstants.RegionAutoDetectOkFailureMessage));
+            Assert.Contains(TestConstants.RegionAutoDetectOkFailureMessage, _testRequestContext.ApiEvent.RegionDiscoveryFailureReason);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(HttpStatusCode.NotFound, 0, TestConstants.RegionAutoDetectNotFoundFailureMessage)]  // No retries for 404 errors
         [DataRow(HttpStatusCode.InternalServerError, TestRegionDiscoveryRetryPolicy.NumRetries, TestConstants.RegionAutoDetectInternalServerErrorFailureMessage)]
         public async Task ErrorResponseFromLocalImdsAsync(
@@ -339,10 +341,10 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
 
             Assert.IsNull(regionalMetadata, "Discovery requested, but it failed.");
 
-            Assert.AreEqual(null, _testRequestContext.ApiEvent.RegionUsed);
+            Assert.IsNull(_testRequestContext.ApiEvent.RegionUsed);
             Assert.AreEqual(RegionAutodetectionSource.FailedAutoDiscovery, _testRequestContext.ApiEvent.RegionAutodetectionSource);
             Assert.AreEqual(RegionOutcome.FallbackToGlobal, _testRequestContext.ApiEvent.RegionOutcome);
-            Assert.IsTrue(_testRequestContext.ApiEvent.RegionDiscoveryFailureReason.Contains(expectedFailureMessage));
+            Assert.Contains(expectedFailureMessage, _testRequestContext.ApiEvent.RegionDiscoveryFailureReason);
 
             // Verify all mock responses were consumed
             Assert.AreEqual(0, _httpManager.QueueSize);
@@ -382,10 +384,10 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
 
             // Assert
             Assert.IsNull(regionalMetadata, "Discovery requested, but it failed.");
-            Assert.AreEqual(null, _testRequestContext.ApiEvent.RegionUsed);
+            Assert.IsNull(_testRequestContext.ApiEvent.RegionUsed);
             Assert.AreEqual(RegionAutodetectionSource.FailedAutoDiscovery, _testRequestContext.ApiEvent.RegionAutodetectionSource);
             Assert.AreEqual(RegionOutcome.FallbackToGlobal, _testRequestContext.ApiEvent.RegionOutcome);
-            Assert.IsTrue(_testRequestContext.ApiEvent.RegionDiscoveryFailureReason.Contains(TestConstants.RegionDiscoveryNotSupportedErrorMessage));
+            Assert.Contains(TestConstants.RegionDiscoveryNotSupportedErrorMessage, _testRequestContext.ApiEvent.RegionDiscoveryFailureReason);
         }
 
         [TestMethod]
@@ -403,10 +405,10 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             // Assert
             Assert.IsNull(regionalMetadata, "Discovery requested, but it failed.");
 
-            Assert.AreEqual(null, _testRequestContext.ApiEvent.RegionUsed);
+            Assert.IsNull(_testRequestContext.ApiEvent.RegionUsed);
             Assert.AreEqual(RegionAutodetectionSource.FailedAutoDiscovery, _testRequestContext.ApiEvent.RegionAutodetectionSource);
             Assert.AreEqual(RegionOutcome.FallbackToGlobal, _testRequestContext.ApiEvent.RegionOutcome);
-            Assert.IsTrue(_testRequestContext.ApiEvent.RegionDiscoveryFailureReason.Contains(TestConstants.RegionDiscoveryNotSupportedErrorMessage));
+            Assert.Contains(TestConstants.RegionDiscoveryNotSupportedErrorMessage, _testRequestContext.ApiEvent.RegionDiscoveryFailureReason);
         }
 
         [TestMethod]
@@ -447,7 +449,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                 new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
 
             Assert.IsNull(regionalMetadata, "Discovery should fail after max retries");
-            Assert.AreEqual(null, _testRequestContext.ApiEvent.RegionUsed);
+            Assert.IsNull(_testRequestContext.ApiEvent.RegionUsed);
             Assert.AreEqual(RegionAutodetectionSource.FailedAutoDiscovery, _testRequestContext.ApiEvent.RegionAutodetectionSource);
             Assert.AreEqual(RegionOutcome.FallbackToGlobal, _testRequestContext.ApiEvent.RegionOutcome);
 
@@ -456,7 +458,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             Assert.AreEqual(NumRequests, requestsMade);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(HttpStatusCode.NotFound)]
         [DataRow(HttpStatusCode.RequestTimeout)]
         public async Task RegionDiscoveryDoesNotRetryOnNonRetryableStatusCodesAsync(HttpStatusCode statusCode)
@@ -469,7 +471,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                 new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
 
             Assert.IsNull(regionalMetadata, "Discovery should fail and not retry");
-            Assert.AreEqual(null, _testRequestContext.ApiEvent.RegionUsed);
+            Assert.IsNull(_testRequestContext.ApiEvent.RegionUsed);
             Assert.AreEqual(RegionAutodetectionSource.FailedAutoDiscovery, _testRequestContext.ApiEvent.RegionAutodetectionSource);
             Assert.AreEqual(RegionOutcome.FallbackToGlobal, _testRequestContext.ApiEvent.RegionOutcome);
 

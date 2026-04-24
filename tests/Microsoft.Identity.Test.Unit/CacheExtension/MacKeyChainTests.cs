@@ -170,8 +170,7 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
             if (_macOSKeychain.Get(serviceName, accountName) != null)
             {
                 Assert.Fail(
-                    "key exists when it shouldn't be. keychainData=\"{0}\"",
-                    _macOSKeychain.Get(serviceName, accountName).Password);
+                    $"key exists when it shouldn't be. keychainData=\"{_macOSKeychain.Get(serviceName, accountName).Password}\"");
             }
         }
     }

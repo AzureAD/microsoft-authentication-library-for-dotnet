@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             Assert.AreEqual(ep, ep2);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("foo|bar", "https://x")]
         [DataRow("foo\nbar", "https://x")]
         [DataRow("foo", "https://x|y")]

@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
 
         public void AssertContains(string needle)
         {
-            Assert.IsTrue(CurrentLog.Contains(needle));
+            Assert.Contains(needle, CurrentLog);
         }
 
         private static string FormatLogMessage(string message)

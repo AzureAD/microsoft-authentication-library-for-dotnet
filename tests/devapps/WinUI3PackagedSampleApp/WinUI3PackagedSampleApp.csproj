@@ -44,4 +44,10 @@
   <ItemGroup>
     <Manifest Include="$(ApplicationManifest)" />
   </ItemGroup>
+
+  <!-- Ensure generated output directories exist before WinRT/Xaml source generation -->
+  <Target Name="EnsureGeneratedDirectoriesExist" BeforeTargets="PrepareForBuild">
+    <MakeDir Directories="$(IntermediateOutputPath)generated" />
+    <MakeDir Directories="$(IntermediateOutputPath)generated\WinRT.SourceGenerator" />
+  </Target>
 </Project>

@@ -128,7 +128,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
                 catch (MsalException ex)
                 {
                     Assert.AreEqual(MsalError.ParsingWsTrustResponseFailed, ex.ErrorCode);
-                    Assert.AreEqual(ex.Message, expectedMessage);
+                    Assert.AreEqual(expectedMessage, ex.Message);
                 }
             }
         }
