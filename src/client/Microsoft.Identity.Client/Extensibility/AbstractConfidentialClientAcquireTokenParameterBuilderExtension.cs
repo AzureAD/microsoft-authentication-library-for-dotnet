@@ -7,7 +7,9 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.IdentityModel.Abstractions;
 
 namespace Microsoft.Identity.Client.Extensibility
 {
@@ -80,13 +82,30 @@ namespace Microsoft.Identity.Client.Extensibility
         /// <param name="attributeTokens">A list of attribute token strings to include in the request. Individual tokens must not contain whitespace.</param>
         /// <returns>The builder to chain method calls.</returns>
         /// <exception cref="ArgumentException">Thrown when any token contains embedded whitespace.</exception>
+        /// <exception cref="InvalidOperationException">Thrown when invoked on a public client application builder. This API is supported only on confidential client (and OBO/auth-code) flows; public client flows rely on <c>AcquireTokenSilent</c>, which cannot disambiguate cache entries partitioned by attribute tokens.</exception>
         public static AbstractAcquireTokenParameterBuilder<T> WithAttributeTokens<T>(
             this AbstractAcquireTokenParameterBuilder<T> builder,
             IEnumerable<string> attributeTokens)
             where T : AbstractAcquireTokenParameterBuilder<T>
         {
+            if (builder.ServiceBundle?.Config != null && !builder.ServiceBundle.Config.IsConfidentialClient)
+            {
+                throw new InvalidOperationException(
+                    "WithAttributeTokens is only supported on confidential client flows " +
+                    "(AcquireTokenForClient, AcquireTokenByAuthorizationCode, AcquireTokenOnBehalfOf). " +
+                    "Using it on public client flows would partition the token cache in a way that " +
+                    "AcquireTokenSilent cannot match, leading to unexpected cache misses.");
+            }
+
+            ILoggerAdapter logger = builder.ServiceBundle?.ApplicationLogger;
+
             if (attributeTokens is null)
             {
+                if (logger != null && logger.IsLoggingEnabled(LogLevel.Verbose))
+                {
+                    logger.Verbose(() => "[WithAttributeTokens] No attribute tokens passed.");
+                }
+
                 return builder;
             }
 
@@ -109,10 +128,22 @@ namespace Microsoft.Identity.Client.Extensibility
 
             if (normalizedTokens.Count == 0)
             {
+                if (logger != null && logger.IsLoggingEnabled(LogLevel.Verbose))
+                {
+                    logger.Verbose(() => "[WithAttributeTokens] collection contained no usable tokens.");
+                }
+
                 return builder;
             }
 
             string joinedTokens = string.Join(" ", normalizedTokens);
+
+            if (logger != null && logger.IsLoggingEnabled(LogLevel.Info))
+            {
+                int count = normalizedTokens.Count;
+                logger.Info(() => $"[WithAttributeTokens] Attaching {count} attribute token(s) " +
+                                  "to the request body and including them in the cache key partition.");
+            }
 
             var extraBodyParams = new Dictionary<string, Func<CancellationToken, Task<string>>>
             {

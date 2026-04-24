@@ -31,7 +31,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(httpManager)
-                    .WithExperimentalFeatures(true)
                     .BuildConcrete();
 
                 httpManager.AddInstanceDiscoveryMockHandler();
@@ -68,7 +67,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(httpManager)
-                    .WithExperimentalFeatures(true)
                     .BuildConcrete();
 
                 httpManager.AddInstanceDiscoveryMockHandler();
@@ -104,7 +102,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithAuthority("https://login.microsoftonline.com/", TenantId)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(httpManager)
-                    .WithExperimentalFeatures(true)
                     .BuildConcrete();
 
                 httpManager.AddInstanceDiscoveryMockHandler();
@@ -165,7 +162,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(httpManager)
-                    .WithExperimentalFeatures(true)
                     .BuildConcrete();
 
                 httpManager.AddInstanceDiscoveryMockHandler();
@@ -201,7 +197,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithAuthority("https://login.microsoftonline.com/", TenantId)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(httpManager)
-                    .WithExperimentalFeatures(true)
                     .BuildConcrete();
 
                 httpManager.AddInstanceDiscoveryMockHandler();
@@ -524,7 +519,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 .Create(ClientId)
                 .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                 .WithClientSecret(TestConstants.ClientSecret)
-                .WithExperimentalFeatures(true)
                 .BuildConcrete();
 
             var ex = AssertException.Throws<ArgumentException>(() =>
@@ -542,7 +536,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 .Create(ClientId)
                 .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                 .WithClientSecret(TestConstants.ClientSecret)
-                .WithExperimentalFeatures(true)
                 .BuildConcrete();
 
             var ex = AssertException.Throws<ArgumentException>(() =>
@@ -559,7 +552,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 .Create(ClientId)
                 .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                 .WithClientSecret(TestConstants.ClientSecret)
-                .WithExperimentalFeatures(true)
                 .BuildConcrete();
 
             AssertException.Throws<ArgumentException>(() =>
@@ -581,7 +573,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(httpManager)
-                    .WithExperimentalFeatures(true)
                     .BuildConcrete();
 
                 httpManager.AddInstanceDiscoveryMockHandler();
@@ -616,7 +607,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(httpManager)
-                    .WithExperimentalFeatures(true)
                     .BuildConcrete();
 
                 httpManager.AddInstanceDiscoveryMockHandler();
@@ -651,7 +641,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(httpManager)
-                    .WithExperimentalFeatures(true)
                     .BuildConcrete();
 
                 httpManager.AddInstanceDiscoveryMockHandler();
