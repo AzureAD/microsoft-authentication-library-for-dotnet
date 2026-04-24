@@ -25,12 +25,14 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         private static readonly ConcurrentDictionary<string, HttpClient> s_httpClientPool = new ConcurrentDictionary<string, HttpClient>();
         private static readonly object s_cacheLock = new object();
 
+        private static int s_httpClientCreationCount;
+
         // referenced in unit tests
-        internal static int HttpClientCreationCount;
+        internal static int HttpClientCreationCount => s_httpClientCreationCount;
 
         private static HttpClient CreateHttpClient()
         {
-            Interlocked.Increment(ref HttpClientCreationCount);
+            Interlocked.Increment(ref s_httpClientCreationCount);
             CheckAndManageCache();
 
             var httpClient = new HttpClient(new HttpClientHandler()
@@ -97,7 +99,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         internal static void ResetForTest()
         {
             s_httpClientPool.Clear();
-            HttpClientCreationCount = 0;
+            s_httpClientCreationCount = 0;
         }
 
         // This method is used for Service Fabric scenarios where a custom server certificate validation callback is required.
