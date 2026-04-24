@@ -230,6 +230,32 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             }
         }
 
+        /// <summary>GetRefreshToken() returns null for public client applications — RT exposure is confidential client only.</summary>
+        [TestMethod]
+        public async Task GetRefreshToken_PublicClient_ReturnsNull_Async()
+        {
+            using (var harness = CreateTestHarness())
+            {
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
+
+                var pca = PublicClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                    .WithHttpManager(harness.HttpManager)
+                    .BuildConcrete();
+
+                pca.ServiceBundle.ConfigureMockWebUI();
+
+                AuthenticationResult result = await pca
+                    .AcquireTokenInteractive(TestConstants.s_scope)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.IsNull(result.GetRefreshToken(), "GetRefreshToken() must return null for public client applications.");
+            }
+        }
+
         /// <summary>When DisableInternalCache is set, AcquireTokenForClient always hits the network and nothing is stored.</summary>
         [TestMethod]
         public async Task DisableInternalCache_AcquireTokenForClient_NeverCaches_Async()
