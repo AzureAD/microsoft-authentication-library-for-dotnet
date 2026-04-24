@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Net.Http;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.ManagedIdentity;
 
@@ -24,8 +25,12 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         private static readonly ConcurrentDictionary<string, HttpClient> s_httpClientPool = new ConcurrentDictionary<string, HttpClient>();
         private static readonly object s_cacheLock = new object();
 
+        // referenced in unit tests
+        internal static int HttpClientCreationCount;
+
         private static HttpClient CreateHttpClient()
         {
+            Interlocked.Increment(ref HttpClientCreationCount);
             CheckAndManageCache();
 
             var httpClient = new HttpClient(new HttpClientHandler()
@@ -63,7 +68,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         public HttpClient GetHttpClient()
         {
-            return s_httpClientPool.GetOrAdd("non_mtls", CreateHttpClient());
+            return s_httpClientPool.GetOrAdd("non_mtls", _ => CreateHttpClient());
         }
 
         public HttpClient GetHttpClient(X509Certificate2 x509Certificate2)
@@ -74,7 +79,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             }
 
             string key = x509Certificate2.Thumbprint;
-            return s_httpClientPool.GetOrAdd(key, CreateMtlsHttpClient(x509Certificate2));
+            return s_httpClientPool.GetOrAdd(key, _ => CreateMtlsHttpClient(x509Certificate2));
         }
 
         private static void CheckAndManageCache()
@@ -86,6 +91,13 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
                     s_httpClientPool.Clear();
                 }
             }
+        }
+
+        // referenced in unit tests
+        internal static void ResetForTest()
+        {
+            s_httpClientPool.Clear();
+            HttpClientCreationCount = 0;
         }
 
         // This method is used for Service Fabric scenarios where a custom server certificate validation callback is required.

@@ -77,5 +77,27 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
             Assert.AreNotSame(mtlsClient, handlerClient); // Should be different instances
         }
 
+        [TestMethod]
+        public void TestGetHttpClient_DoesNotLeakHttpClients()
+        {
+            // Arrange - reset static state so we start from a clean pool
+            SimpleHttpClientFactory.ResetForTest();
+            var factory = new SimpleHttpClientFactory();
+
+            // Act - call GetHttpClient multiple times with the same (default) key
+            factory.GetHttpClient();
+            factory.GetHttpClient();
+            factory.GetHttpClient();
+
+            int created = SimpleHttpClientFactory.HttpClientCreationCount;
+
+            // Assert - CreateHttpClient should be called exactly once.
+            // Before the fix, GetOrAdd(key, CreateHttpClient()) eagerly evaluates
+            // CreateHttpClient() on every call, leaking HttpClientHandler sockets.
+            Assert.AreEqual(1, created,
+                $"CreateHttpClient was called {created} times for 3 lookups. " +
+                "Use GetOrAdd(key, factory_delegate) to avoid creating throwaway HttpClient instances.");
+        }
+
     }
 }
