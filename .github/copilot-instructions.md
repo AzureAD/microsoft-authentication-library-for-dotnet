@@ -20,7 +20,7 @@ pool.GetOrAdd(key, _ => new ExpensiveObject());
 pool.GetOrAdd(key, _ => CreateExpensiveObject());
 ```
 
-When reviewing code, flag any `GetOrAdd` call where the second argument is **not** a delegate/lambda/method group. The only exception is when the key is guaranteed to be unique per call (i.e., caching is not the intent).
+When reviewing code, flag any `GetOrAdd` call where the second argument is **not** a delegate/lambda/method group. All other usages if GetOrAdd(key, value) should be justified.
 
 ---
 
