@@ -1271,7 +1271,7 @@ namespace Microsoft.Identity.Client
         /// <para>What happened?</para> <see cref="IClientApplicationBase.AcquireTokenSilent(System.Collections.Generic.IEnumerable{string}, IAccount)"/> 
         /// was called but MSAL's internal token cache is disabled via <see cref="CacheOptions.DisableInternalCache"/>.
         /// <para>Mitigation</para> Use <see cref="IByRefreshToken.AcquireTokenByRefreshToken(System.Collections.Generic.IEnumerable{string}, string)"/> 
-        /// with the refresh token obtained from <see cref="Extensibility.AuthenticationResultExtensions.GetRefreshToken"/>, 
+        /// with the refresh token obtained from <see cref="Extensibility.AuthenticationResultExtensions.GetRefreshToken(AuthenticationResult)"/>, 
         /// or use another interactive flow.
         /// </summary>
         public const string InternalCacheDisabled = "internal_cache_disabled";
