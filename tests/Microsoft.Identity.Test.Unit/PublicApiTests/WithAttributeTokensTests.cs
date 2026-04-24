@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Extensibility;
@@ -174,6 +175,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     { OAuth2Parameter.Scope, string.Join(" ", _scope) }
                 };
 
+                handler.UnExpectedPostData = new Dictionary<string, string>
+                {
+                    { OAuth2Parameter.AttributeTokens, null }
+                };
+
                 // Act
                 var result = await app.AcquireTokenForClient(_scope)
                     .WithAttributeTokens(null)
@@ -265,11 +271,16 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        public async Task WithAttributeTokens_OnBehalfOf_IncludedInCacheKey_Async()
+        public async Task WithAttributeTokens_OnBehalfOf_SentInRequestBody_Async()
         {
+            // Note: WithAttributeTokens adds attribute_tokens to the request body and to the
+            // cache key components. For OBO (user token cache), MSAL does not currently keep
+            // entries with different cache-key components side-by-side in the same partition,
+            // so this test only verifies the wire-level behavior (body params + same-token
+            // reuse + different-token network call). Callers that need strict cache isolation
+            // per attribute-token set should use a separate CCA per set.
             using (var httpManager = new MockHttpManager())
             {
-                // Arrange
                 var app = ConfidentialClientApplicationBuilder
                     .Create(ClientId)
                     .WithAuthority("https://login.microsoftonline.com/", TenantId)
@@ -279,52 +290,56 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 httpManager.AddInstanceDiscoveryMockHandler();
 
-                var handler1 = new MockHttpMessageHandler()
+                httpManager.AddMockHandler(new MockHttpMessageHandler()
                 {
                     ExpectedMethod = System.Net.Http.HttpMethod.Post,
                     ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
-                        string.Join(" ", _scope),
-                        MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId),
-                        MockHelpers.CreateClientInfo()),
+                        TestConstants.UniqueId,
+                        TestConstants.DisplayableId,
+                        _scope,
+                        accessToken: "obo_at_AB"),
                     ExpectedPostData = new Dictionary<string, string>
                     {
                         { OAuth2Parameter.AttributeTokens, "oboTokenA oboTokenB" }
                     }
-                };
-                httpManager.AddMockHandler(handler1);
+                });
 
                 var userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
 
-                // Act - First request with tokens A,B
+                // First call with tokens A,B - hits IDP and verifies attribute_tokens in body.
                 var result1 = await app.AcquireTokenOnBehalfOf(_scope, userAssertion)
                     .WithAttributeTokens(new[] { "oboTokenA", "oboTokenB" })
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
                 Assert.AreEqual(TokenSource.IdentityProvider, result1.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual("obo_at_AB", result1.AccessToken);
 
-                // Act - Same tokens, should hit cache
+                // Second call with same tokens should hit cache (no mock handler queued; if
+                // MSAL went to network the test would throw on missing handler).
                 var result2 = await app.AcquireTokenOnBehalfOf(_scope, userAssertion)
                     .WithAttributeTokens(new[] { "oboTokenA", "oboTokenB" })
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
                 Assert.AreEqual(TokenSource.Cache, result2.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual("obo_at_AB", result2.AccessToken);
 
-                // Act - Different tokens, should NOT hit cache
-                var handler2 = new MockHttpMessageHandler()
+                // Third call with different tokens should bypass the cached A/B entry and
+                // mint a new AT, with the new attribute_tokens value in the body.
+                httpManager.AddMockHandler(new MockHttpMessageHandler()
                 {
                     ExpectedMethod = System.Net.Http.HttpMethod.Post,
                     ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
-                        string.Join(" ", _scope),
-                        MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId),
-                        MockHelpers.CreateClientInfo()),
+                        TestConstants.UniqueId,
+                        TestConstants.DisplayableId,
+                        _scope,
+                        accessToken: "obo_at_XY"),
                     ExpectedPostData = new Dictionary<string, string>
                     {
                         { OAuth2Parameter.AttributeTokens, "oboTokenX oboTokenY" }
                     }
-                };
-                httpManager.AddMockHandler(handler2);
+                });
 
                 var result3 = await app.AcquireTokenOnBehalfOf(_scope, userAssertion)
                     .WithAttributeTokens(new[] { "oboTokenX", "oboTokenY" })
@@ -332,6 +347,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ConfigureAwait(false);
 
                 Assert.AreEqual(TokenSource.IdentityProvider, result3.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual("obo_at_XY", result3.AccessToken);
             }
         }
 
@@ -354,7 +370,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 {
                     ExpectedMethod = System.Net.Http.HttpMethod.Post,
                     ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
-                    ExpectedPostData = new Dictionary<string, string>()
+                    ExpectedPostData = new Dictionary<string, string>(),
+                    UnExpectedPostData = new Dictionary<string, string>
+                    {
+                        { OAuth2Parameter.AttributeTokens, null }
+                    }
                 };
 
                 httpManager.AddMockHandler(handler);
@@ -495,7 +515,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 {
                     ExpectedMethod = System.Net.Http.HttpMethod.Post,
                     ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
-                    ExpectedPostData = new Dictionary<string, string>()
+                    ExpectedPostData = new Dictionary<string, string>(),
+                    UnExpectedPostData = new Dictionary<string, string>
+                    {
+                        { OAuth2Parameter.AttributeTokens, null }
+                    }
                 };
 
                 httpManager.AddMockHandler(handler);
@@ -585,6 +609,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     { OAuth2Parameter.Scope, string.Join(" ", _scope) }
                 };
 
+                handler.UnExpectedPostData = new Dictionary<string, string>
+                {
+                    { OAuth2Parameter.AttributeTokens, null }
+                };
+
                 // Act
                 var result = await app.AcquireTokenForClient(_scope)
                     .WithAttributeTokens(new string[0])
@@ -617,6 +646,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 handler.ExpectedPostData = new Dictionary<string, string>
                 {
                     { OAuth2Parameter.Scope, string.Join(" ", _scope) }
+                };
+
+                handler.UnExpectedPostData = new Dictionary<string, string>
+                {
+                    { OAuth2Parameter.AttributeTokens, null }
                 };
 
                 // Act - all tokens are whitespace-only, should be skipped entirely

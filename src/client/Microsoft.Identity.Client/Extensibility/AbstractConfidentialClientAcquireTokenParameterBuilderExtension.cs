@@ -71,18 +71,21 @@ namespace Microsoft.Identity.Client.Extensibility
         }
 
         /// <summary>
-        /// Specifies attribute tokens to include in the token request.
-        /// The tokens are joined with spaces and sent as the <c>attribute_tokens</c> body parameter,
-        /// and are also included as a cache key component so that requests with different attribute tokens
-        /// are cached as distinct entries.
-        /// Null, empty, or whitespace-only token entries are ignored. A null or empty collection is a no-op.
+        /// Sends <paramref name="attributeTokens"/> as the <c>attribute_tokens</c> body parameter
+        /// and includes them in the cache key. Null/empty/whitespace entries are ignored;
+        /// a null or empty collection is a no-op.
         /// </summary>
         /// <typeparam name="T">The concrete builder type.</typeparam>
         /// <param name="builder">The builder to chain options to.</param>
-        /// <param name="attributeTokens">A list of attribute token strings to include in the request. Individual tokens must not contain whitespace.</param>
+        /// <param name="attributeTokens">Attribute tokens to include. Individual tokens must not contain whitespace.</param>
         /// <returns>The builder to chain method calls.</returns>
-        /// <exception cref="ArgumentException">Thrown when any token contains embedded whitespace.</exception>
-        /// <exception cref="InvalidOperationException">Thrown when invoked on a public client application builder. This API is supported only on confidential client (and OBO/auth-code) flows; public client flows rely on <c>AcquireTokenSilent</c>, which cannot disambiguate cache entries partitioned by attribute tokens.</exception>
+        /// <remarks>
+        /// Distinct attribute-token sets cache as separate entries for <c>AcquireTokenForClient</c>.
+        /// For OBO/auth-code (user cache), entries with different sets do not coexist in the same
+        /// partition; use a separate confidential client per set if isolation is required.
+        /// </remarks>
+        /// <exception cref="ArgumentException">A token contains embedded whitespace.</exception>
+        /// <exception cref="InvalidOperationException">Called on a public client application.</exception>
         public static AbstractAcquireTokenParameterBuilder<T> WithAttributeTokens<T>(
             this AbstractAcquireTokenParameterBuilder<T> builder,
             IEnumerable<string> attributeTokens)
