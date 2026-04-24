@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -68,6 +68,13 @@ namespace Microsoft.Identity.Client.Cache
         public async Task<MsalAccessTokenCacheItem> FindAccessTokenAsync()
         {
             await RefreshCacheForReadOperationsIfEnabledAsync("access token lookup").ConfigureAwait(false);
+            // NOTE: Redundant check — IsInternalCacheDisabled is already checked inside RefreshCacheForReadOperationsIfEnabledAsync
+            // via ShouldSkipInternalCacheRead(). To reduce this double-check pattern, consider:
+            // (1) Refactor FindAccessTokenAsync, FindRefreshTokenAsync, and FindFamilyRefreshTokenAsync to match the
+            //     pattern of the other methods (GetAccountsAsync, IsAppFociMemberAsync, etc.) which all use the same guard.
+            // (2) Or simplify all methods to use ShouldSkipInternalCacheRead() for early return + call RefreshCacheForReadOperationsAsync()
+            //     directly, then remove RefreshCacheForReadOperationsIfEnabledAsync entirely.
+            // This would eliminate the redundant second check and make the guard pattern consistent across all cache-read methods.
             if (IsInternalCacheDisabled)
             {
                 return null;
