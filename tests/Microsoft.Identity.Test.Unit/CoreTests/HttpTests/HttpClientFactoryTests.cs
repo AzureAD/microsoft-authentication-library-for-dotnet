@@ -81,7 +81,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
         public void TestGetHttpClient_DoesNotLeakHttpClients()
         {
             // Arrange - reset static state so we start from a clean pool
-            SimpleHttpClientFactory.ResetForTest();
+            SimpleHttpClientFactory.ResetStaticStateForTest();
             var factory = new SimpleHttpClientFactory();
 
             // Act - call GetHttpClient multiple times with the same (default) key

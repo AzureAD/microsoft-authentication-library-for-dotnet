@@ -96,8 +96,12 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         }
 
         // referenced in unit tests
-        internal static void ResetForTest()
+        internal static void ResetStaticStateForTest()
         {
+            foreach (var client in s_httpClientPool.Values)
+            {
+                client.Dispose();
+            }
             s_httpClientPool.Clear();
             s_httpClientCreationCount = 0;
         }
