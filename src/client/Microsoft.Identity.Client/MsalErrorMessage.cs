@@ -463,7 +463,7 @@ namespace Microsoft.Identity.Client
 
         public const string InternalCacheDisabledMessage =
             "AcquireTokenSilent is not supported when the internal cache is disabled via CacheOptions.DisableInternalCache. " +
-            "Retrieve the refresh token using AuthenticationResultExtensions.GetRefreshToken() and call AcquireTokenByRefreshToken, " +
+            "For confidential client flows, retrieve the refresh token using AuthenticationResultExtensions.GetRefreshToken() and call AcquireTokenByRefreshToken, " +
             "or use another interactive flow.";
 
         public const string InternalCacheDisabledMutuallyExclusiveMessage =
