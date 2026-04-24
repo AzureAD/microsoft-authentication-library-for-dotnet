@@ -44,9 +44,11 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
 
             if (ServiceBundle.Config.AccessorOptions?.InternalCacheDisabled == true)
             {
-                throw new MsalClientException(
+                throw new MsalUiRequiredException(
                     MsalError.InternalCacheDisabled,
-                    MsalErrorMessage.InternalCacheDisabledMessage);
+                    MsalErrorMessage.InternalCacheDisabledMessage,
+                    null,
+                    UiRequiredExceptionClassification.AcquireTokenSilentFailed);
             }
 
             AuthenticationResult authResult = null;

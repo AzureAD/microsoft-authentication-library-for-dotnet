@@ -325,7 +325,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             }
         }
 
-        /// <summary>AcquireTokenSilent throws a descriptive MsalClientException when the internal cache is disabled.</summary>
+        /// <summary>AcquireTokenSilent throws MsalUiRequiredException (the established "silent failed" contract) when the internal cache is disabled.</summary>
         [TestMethod]
         public async Task DisableInternalCache_AcquireTokenSilent_ThrowsWithCorrectError_Async()
         {
@@ -336,7 +336,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             var account = new Account("aid.tid", "user@contoso.com", "login.microsoftonline.com");
 
-            var ex = await AssertException.TaskThrowsAsync<MsalClientException>(
+            var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(
                 () => app.AcquireTokenSilent(TestConstants.s_scope, account).ExecuteAsync())
                 .ConfigureAwait(false);
 
@@ -344,6 +344,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 "The error code should identify that the internal cache is disabled.");
             StringAssert.Contains(ex.Message, "AcquireTokenByRefreshToken",
                 "The error message should guide the caller towards AcquireTokenByRefreshToken.");
+            Assert.AreEqual(UiRequiredExceptionClassification.AcquireTokenSilentFailed, ex.Classification,
+                "Classification should signal that silent auth failed.");
         }
 
         /// <summary>Mutual exclusivity: InternalCacheDisabled and UseSharedCache cannot both be set.</summary>

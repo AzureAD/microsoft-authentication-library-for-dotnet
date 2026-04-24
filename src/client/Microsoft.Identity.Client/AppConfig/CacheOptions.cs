@@ -27,7 +27,7 @@ namespace Microsoft.Identity.Client
         /// Options that disable MSAL's internal in-memory token cache entirely.
         /// Use this when your application manages its own token cache lifecycle.
         /// When set, MSAL will not read from or write to the internal cache accessor.
-        /// <see cref="IClientApplicationBase.AcquireTokenSilent(System.Collections.Generic.IEnumerable{string}, IAccount)"/> will throw a <see cref="MsalClientException"/>
+        /// <see cref="IClientApplicationBase.AcquireTokenSilent(System.Collections.Generic.IEnumerable{string}, IAccount)"/> will throw a <see cref="MsalUiRequiredException"/>
         /// with error code <see cref="MsalError.InternalCacheDisabled"/>.
         /// Retrieve the refresh token using <see cref="Extensibility.AuthenticationResultExtensions.GetRefreshToken"/>.
         /// </summary>
