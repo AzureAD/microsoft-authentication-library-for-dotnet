@@ -93,7 +93,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
 
             // Assert - CreateHttpClient should be called exactly once.
             // Before the fix, GetOrAdd(key, CreateHttpClient()) eagerly evaluates
-            // CreateHttpClient() on every call, leaking HttpClientHandler sockets.
+            // CreateHttpClient() on every call, causing unnecessary throwaway
+            // HttpClient/HttpClientHandler allocations.
             Assert.AreEqual(1, created,
                 $"CreateHttpClient was called {created} times for 3 lookups. " +
                 "Use GetOrAdd(key, factory_delegate) to avoid creating throwaway HttpClient instances.");
