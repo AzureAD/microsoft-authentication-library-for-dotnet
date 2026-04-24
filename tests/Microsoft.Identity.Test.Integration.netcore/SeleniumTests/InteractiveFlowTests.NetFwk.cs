@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
         #endregion MSTest Hooks
 
-        [RunOn(TargetFrameworks.NetFx)]
+        [RunOn(TargetFrameworks.NetFx, SkipConditions.OneBranchBuild)]
         public async Task Interactive_AADAsync()
         {
             // Arrange - Use pure public client multi-tenant app to avoid AADSTS7000218 credential requirement
@@ -48,8 +48,8 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             var result = await RunTestForUserAsync(user, app).ConfigureAwait(false);
         }
 
-        [RunOn(TargetFrameworks.NetCore)]
         [TestCategory(TestCategories.Arlington)]
+        [RunOn(TargetFrameworks.NetCore, SkipConditions.OneBranchBuild)]
         public async Task Arlington_Interactive_AADAsync()
         {
             // Arrange
@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             await RunTestForUserAsync(user, app, false).ConfigureAwait(false);
         }
 
-        [RunOn(TargetFrameworks.NetCore)]
+        [RunOn(TargetFrameworks.NetCore, SkipConditions.OneBranchBuild)]
         public async Task InteractiveConsentPromptAsync()
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
@@ -69,10 +69,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             await RunPromptTestForUserAsync(user, app, Prompt.Consent, false).ConfigureAwait(false);
         }
 
-        [RunOn(TargetFrameworks.NetCore)]
-#if IGNORE_FEDERATED
-        [Ignore]
-#endif
+        [RunOn(TargetFrameworks.NetCore, SkipConditions.FederatedDisabled | SkipConditions.OneBranchBuild)]
         public async Task Interactive_Adfs_FederatedAsync()
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserFederated).ConfigureAwait(false);
@@ -80,7 +77,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             await RunTestForUserAsync(user, app).ConfigureAwait(false);
         }
 
-        [RunOn(TargetFrameworks.NetCore)]
+        [RunOn(TargetFrameworks.NetCore, SkipConditions.OneBranchBuild)]
         public async Task Interactive_Arlington_MultiCloudSupport_AADAsync()
         {
             // Arrange
@@ -136,11 +133,8 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             Assert.Contains(result.Account.Environment, app.Authority);
         }
 
-        [RunOn(TargetFrameworks.NetCore)]
         [TestCategory(TestCategories.ADFS)]
-#if IGNORE_FEDERATED
-        [Ignore]
-#endif
+        [RunOn(TargetFrameworks.NetCore, SkipConditions.FederatedDisabled | SkipConditions.OneBranchBuild)]
         public async Task Interactive_Adfs_DirectAsync()
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserFederated).ConfigureAwait(false);
@@ -148,7 +142,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             await RunTestForUserAsync(user, app, true).ConfigureAwait(false);
         }      
 
-        [RunOn(TargetFrameworks.NetCore)]
+        [RunOn(TargetFrameworks.NetCore, SkipConditions.OneBranchBuild)]
         public async Task ValidateCcsHeadersForInteractiveAuthCodeFlowAsync()
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
@@ -178,7 +172,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         }
 
         /// Based on the publicly available https://demo.duendesoftware.com/
-        [RunOn(TargetFrameworks.NetCore)]
+        [RunOn(TargetFrameworks.NetCore, SkipConditions.OneBranchBuild)]
         public async Task Interactive_GenericAuthority_DuendeDemoInstanceAsync()
         {
             string[] scopes = new[] { "openid profile email api offline_access" };
