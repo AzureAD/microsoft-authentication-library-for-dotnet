@@ -108,7 +108,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 LogFailureTelemetryToOtel(
                     ex.ErrorCode, apiEvent, apiEvent.CacheInfo,
-                    (ex as MsalServiceException)?.ErrorCodes?[0]);
+                    (ex as MsalServiceException)?.ErrorCodes?.FirstOrDefault());
                 throw;
             }
             catch (Exception ex)

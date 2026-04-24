@@ -440,8 +440,8 @@ namespace Microsoft.Identity.Test.Unit
                 {
                     var tags = GetTagDictionary(metricPoint.Tags);
                     Assert.IsTrue(tags.ContainsKey(TelemetryConstants.RawStsErrorCode),
-                        "RawStsErrorCode tag should always be present for service exceptions.");
-                    Assert.AreEqual(ex.ErrorCodes[0], tags[TelemetryConstants.RawStsErrorCode]);
+                        "RawStsErrorCode tag should be present when the IDP response contains error_codes.");
+                    Assert.AreEqual(ex.ErrorCodes.FirstOrDefault(), tags[TelemetryConstants.RawStsErrorCode]);
                 }
             }
         }
