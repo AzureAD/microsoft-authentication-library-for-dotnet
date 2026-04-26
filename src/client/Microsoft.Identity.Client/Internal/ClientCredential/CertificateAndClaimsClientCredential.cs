@@ -101,25 +101,28 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
 
         /// <summary>
         /// Resolves the certificate to use for signing the client assertion.
+        /// Invokes the certificate provider delegate to get the certificate.
         /// </summary>
+        /// <param name="context">Immutable context describing the current request.</param>
+        /// <param name="cancellationToken">Cancellation token for the async operation.</param>
+        /// <returns>The X509Certificate2 to use for signing.</returns>
+        /// <exception cref="MsalClientException">
+        /// Thrown if the certificate provider returns null or a certificate without a private key.
+        /// </exception>
         private async Task<X509Certificate2> ResolveCertificateAsync(
             CredentialContext context,
             CancellationToken cancellationToken)
         {
-            var options = new AssertionRequestOptions
-            {
-                ClientID = context.ClientId,
-                TokenEndpoint = context.TokenEndpoint,
-                Claims = context.Claims,
-                ClientCapabilities = context.ClientCapabilities,
-                Authority = context.Authority,
-                TenantId = context.TenantId,
-                CorrelationId = context.CorrelationId,
-                CancellationToken = cancellationToken
-            };
+            context.Logger.Verbose(
+                () => "[CertificateAndClaimsClientCredential] Resolving certificate from provider.");
 
+            // Create AssertionRequestOptions from the credential context for the callback
+            var options = context.ToAssertionRequestOptions(cancellationToken);
+
+            // Invoke the provider to get the certificate
             X509Certificate2 certificate = await _certificateProvider(options).ConfigureAwait(false);
 
+            // Validate the certificate returned by the provider
             if (certificate == null)
             {
                 context.Logger.Error("[CertificateAndClaimsClientCredential] Certificate provider returned null.");
@@ -150,7 +153,9 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                     ex);
             }
 
-            context.Logger.Verbose(() => "[CertificateAndClaimsClientCredential] Certificate resolved.");
+            context.Logger.Verbose(
+                () => $"[CertificateAndClaimsClientCredential] Certificate resolved. " +
+                      $"Thumbprint: {certificate.Thumbprint}");
 
             return certificate;
         }

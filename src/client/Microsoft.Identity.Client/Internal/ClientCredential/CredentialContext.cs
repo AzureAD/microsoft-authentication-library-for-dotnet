@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
@@ -14,7 +15,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
     /// the direct coupling to <see cref="OAuth2.OAuth2Client"/> and
     /// <see cref="Requests.AuthenticationRequestParameters"/> that existed in the previous API.
     /// </summary>
-    internal readonly struct CredentialContext
+    internal sealed class CredentialContext
     {
         /// <summary>Application (client) identifier.</summary>
         public string ClientId { get; init; }
@@ -59,5 +60,25 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
 
         /// <summary>Logger for credential resolution diagnostics.</summary>
         public ILoggerAdapter Logger { get; init; }
+
+        /// <summary>
+        /// Creates an <see cref="AssertionRequestOptions"/> from this context.
+        /// Centralizes the mapping so credential implementations don't duplicate it.
+        /// </summary>
+        internal AssertionRequestOptions ToAssertionRequestOptions(CancellationToken cancellationToken)
+        {
+            return new AssertionRequestOptions
+            {
+                ClientID = ClientId,
+                TokenEndpoint = TokenEndpoint,
+                Claims = Claims,
+                ClientCapabilities = ClientCapabilities,
+                Authority = Authority,
+                TenantId = TenantId,
+                CorrelationId = CorrelationId,
+                ClientAssertionFmiPath = ClientAssertionFmiPath,
+                CancellationToken = cancellationToken
+            };
+        }
     }
 }

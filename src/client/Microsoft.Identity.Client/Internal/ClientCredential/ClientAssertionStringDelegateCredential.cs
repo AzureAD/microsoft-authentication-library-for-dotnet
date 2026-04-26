@@ -34,26 +34,9 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         {
             context.Logger.Verbose(() => $"[ClientAssertionStringDelegateCredential] Mode={context.Mode}");
 
-            if (context.Mode == CredentialTransportProtocol.Mtls)
-            {
-                throw new MsalClientException(
-                    MsalError.InvalidCredentialMaterial,
-                    "A string-returning client assertion callback cannot be used over mTLS. " +
-                    "Use a ClientSignedAssertion callback that can return a token-binding certificate.");
-            }
+            ClientCredentialGuards.ThrowIfMtlsNotSupported(context, "A string-returning client assertion callback");
 
-            var opts = new AssertionRequestOptions
-            {
-                CancellationToken = cancellationToken,
-                ClientID = context.ClientId,
-                TokenEndpoint = context.TokenEndpoint,
-                ClientCapabilities = context.ClientCapabilities,
-                Claims = context.Claims,
-                ClientAssertionFmiPath = context.ClientAssertionFmiPath,
-                Authority = context.Authority,
-                TenantId = context.TenantId,
-                CorrelationId = context.CorrelationId
-            };
+            var opts = context.ToAssertionRequestOptions(cancellationToken);
 
             string assertion = await _provider(opts, cancellationToken).ConfigureAwait(false);
 

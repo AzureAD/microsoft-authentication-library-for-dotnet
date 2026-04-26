@@ -39,18 +39,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         {
             context.Logger.Verbose(() => $"[ClientAssertionDelegateCredential] Mode={context.Mode}");
 
-            var opts = new AssertionRequestOptions
-            {
-                CancellationToken = cancellationToken,
-                ClientID = context.ClientId,
-                TokenEndpoint = context.TokenEndpoint,
-                ClientCapabilities = context.ClientCapabilities,
-                Claims = context.Claims,
-                ClientAssertionFmiPath = context.ClientAssertionFmiPath,
-                Authority = context.Authority,
-                TenantId = context.TenantId,
-                CorrelationId = context.CorrelationId
-            };
+            var opts = context.ToAssertionRequestOptions(cancellationToken);
 
             ClientSignedAssertion resp = await _provider(opts, cancellationToken).ConfigureAwait(false);
 

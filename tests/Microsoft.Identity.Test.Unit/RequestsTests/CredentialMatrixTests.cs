@@ -505,5 +505,105 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             Assert.AreEqual(TestAuthority, capturedOptions.Authority);
             Assert.AreEqual(TestTenantId, capturedOptions.TenantId);
         }
+
+        // ──────────────────────────────────────────────
+        // Dynamic certificate + mTLS tests
+        // ──────────────────────────────────────────────
+
+        [TestMethod]
+        public async Task DynamicCert_MtlsMode_ReturnsEmptyParamsAndCert_ViaProviderAsync()
+        {
+            // Dynamic certificate provider in mTLS mode should return empty params + cert,
+            // same as static cert but through the provider delegate path.
+            int callCount = 0;
+            AssertionRequestOptions capturedOptions = null;
+
+            var credential = new CertificateAndClaimsClientCredential(
+                certificateProvider: opts =>
+                {
+                    capturedOptions = opts;
+                    Interlocked.Increment(ref callCount);
+                    return Task.FromResult(s_cert);
+                },
+                claimsToSign: null,
+                appendDefaultClaims: true);
+
+            CredentialMaterial material = await credential
+                .GetCredentialMaterialAsync(MtlsContext(), CancellationToken.None)
+                .ConfigureAwait(false);
+
+            Assert.AreEqual(1, callCount, "Provider should be invoked exactly once.");
+            Assert.IsNotNull(material);
+            Assert.AreSame(s_cert, material.ResolvedCertificate);
+            Assert.IsEmpty(material.TokenRequestParameters,
+                "mTLS mode should not add any token request parameters.");
+
+            // Verify context was properly propagated to the provider
+            Assert.IsNotNull(capturedOptions);
+            Assert.AreEqual(TestAuthority, capturedOptions.Authority);
+            Assert.AreEqual(TestTenantId, capturedOptions.TenantId);
+        }
+
+        [TestMethod]
+        public async Task DynamicCert_MtlsMode_NullCertFromProvider_ThrowsMsalClientExceptionAsync()
+        {
+            // Dynamic provider returning null in mTLS mode should throw.
+            var credential = new CertificateAndClaimsClientCredential(
+                certificateProvider: _ => Task.FromResult<X509Certificate2>(null),
+                claimsToSign: null,
+                appendDefaultClaims: true);
+
+            MsalClientException ex = await Assert.ThrowsExactlyAsync<MsalClientException>(
+                () => credential.GetCredentialMaterialAsync(MtlsContext(), CancellationToken.None))
+                .ConfigureAwait(false);
+
+            Assert.AreEqual(MsalError.InvalidClientAssertion, ex.ErrorCode);
+        }
+
+        [TestMethod]
+        public async Task DynamicCert_Regular_ProviderCalledOnce_ReturnsJwtBearerAsync()
+        {
+            // Verify the provider path works for regular mode with claims
+            int callCount = 0;
+
+            var credential = new CertificateAndClaimsClientCredential(
+                certificateProvider: _ =>
+                {
+                    Interlocked.Increment(ref callCount);
+                    return Task.FromResult(s_cert);
+                },
+                claimsToSign: new Dictionary<string, string> { { "custom_claim", "value" } },
+                appendDefaultClaims: true);
+
+            CredentialMaterial material = await credential
+                .GetCredentialMaterialAsync(RegularContext(), CancellationToken.None)
+                .ConfigureAwait(false);
+
+            Assert.AreEqual(1, callCount, "Provider should be invoked exactly once.");
+            Assert.IsNotNull(material);
+            Assert.AreSame(s_cert, material.ResolvedCertificate);
+            Assert.AreEqual(
+                OAuth2AssertionType.JwtBearer,
+                material.TokenRequestParameters[OAuth2Parameter.ClientAssertionType]);
+        }
+
+        [TestMethod]
+        public async Task DynamicCert_MtlsMode_WithClaims_ReturnsEmptyParamsAndCertAsync()
+        {
+            // Even with claimsToSign, mTLS mode should return empty params (no assertion).
+            var credential = new CertificateAndClaimsClientCredential(
+                certificateProvider: _ => Task.FromResult(s_cert),
+                claimsToSign: new Dictionary<string, string> { { "custom_claim", "value" } },
+                appendDefaultClaims: true);
+
+            CredentialMaterial material = await credential
+                .GetCredentialMaterialAsync(MtlsContext(), CancellationToken.None)
+                .ConfigureAwait(false);
+
+            Assert.IsNotNull(material);
+            Assert.AreSame(s_cert, material.ResolvedCertificate);
+            Assert.IsEmpty(material.TokenRequestParameters,
+                "mTLS mode should not add any token request parameters, even with claimsToSign.");
+        }
     }
 }

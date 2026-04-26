@@ -27,14 +27,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         {
             context.Logger.Verbose(() => $"[SignedAssertionClientCredential] Mode={context.Mode}");
 
-            if (context.Mode == CredentialTransportProtocol.Mtls)
-            {
-                throw new MsalClientException(
-                    MsalError.InvalidCredentialMaterial,
-                    "A precomputed client assertion string cannot be used over mTLS. " +
-                    "Use a certificate credential or a ClientSignedAssertion callback " +
-                    "that can return a token-binding certificate.");
-            }
+            ClientCredentialGuards.ThrowIfMtlsNotSupported(context, "A precomputed client assertion string");
 
             var parameters = new Dictionary<string, string>
             {

@@ -27,14 +27,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         {
             context.Logger.Verbose(() => $"[ClientSecretCredential] Mode={context.Mode}");
 
-            if (context.Mode == CredentialTransportProtocol.Mtls)
-            {
-                throw new MsalClientException(
-                    MsalError.InvalidCredentialMaterial,
-                    "A client secret cannot be used over mTLS. " +
-                    "Use a certificate credential or a ClientSignedAssertion callback " +
-                    "that can return a token-binding certificate.");
-            }
+            ClientCredentialGuards.ThrowIfMtlsNotSupported(context, "A client secret");
 
             var parameters = new Dictionary<string, string>
             {

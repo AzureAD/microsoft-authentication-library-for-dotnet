@@ -132,6 +132,7 @@ namespace Microsoft.Identity.Client.OAuth2
         {
             _oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientId, _requestParams.AppConfig.ClientId);
 
+            // credentialToUse can be null, e.g. for public client apps (no client credential configured).
             IClientCredential credentialToUse = _serviceBundle.Config.ClientCredential;
 
             if (credentialToUse != null)

@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                 .ConfigureAwait(false);
 
             Debug.Assert(material != null, $"Credential '{credential.GetType().Name}' returned null CredentialMaterial.");
-            Debug.Assert(material?.TokenRequestParameters != null, $"Credential '{credential.GetType().Name}' returned null TokenRequestParameters.");
+            Debug.Assert(material.TokenRequestParameters != null, $"Credential '{credential.GetType().Name}' returned null TokenRequestParameters.");
 
             requestParams.RequestContext.Logger.Verbose(() => $"[CredentialMaterialResolver] Credential material " +
             $"resolved. HasCertificate={material.ResolvedCertificate != null}");
