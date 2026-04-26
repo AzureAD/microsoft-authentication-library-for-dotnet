@@ -112,8 +112,8 @@ namespace Microsoft.Identity.Test.Unit.Throttling
         [TestMethod]
         public void Cleanup_RemovesOnlyExpiredEntries()
         {
-            // Use a cleanup interval of 0 so cleanup triggers immediately on next add
-            var cache = new ThrottlingCache(0);
+            // Use a negative cleanup interval so cleanup triggers unconditionally on next add
+            var cache = new ThrottlingCache(-1);
 
             var expiredEntry = new ThrottlingCacheEntry(_ex1, TimeSpan.FromMilliseconds(-10000));
             var validEntry = new ThrottlingCacheEntry(_ex2, TimeSpan.FromMinutes(10));
@@ -121,7 +121,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
             cache.AddAndCleanup("expired", expiredEntry, _logger);
             cache.AddAndCleanup("valid", validEntry, _logger);
 
-            // Trigger cleanup via another add (interval is 0ms so it fires immediately)
+            // Trigger cleanup via another add (negative interval guarantees cleanup fires)
             cache.AddAndCleanup("trigger", new ThrottlingCacheEntry(_ex2, TimeSpan.FromMinutes(10)), _logger);
 
             Assert.IsFalse(cache.TryGetOrRemoveExpired("expired", _logger, out _), "Expired entry should be cleaned up");

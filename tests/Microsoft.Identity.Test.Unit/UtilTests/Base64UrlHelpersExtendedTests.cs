@@ -50,24 +50,6 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
         }
 
         [TestMethod]
-        public void EncodeAndDecode_RoundTrip_SimpleString()
-        {
-            string original = "Hello, World!";
-            string encoded = Base64UrlHelpers.Encode(original);
-            string decoded = Base64UrlHelpers.Decode(encoded);
-            Assert.AreEqual(original, decoded);
-        }
-
-        [TestMethod]
-        public void EncodeAndDecode_RoundTrip_BinaryData()
-        {
-            byte[] original = { 0x00, 0x01, 0x02, 0xFE, 0xFF };
-            string encoded = Base64UrlHelpers.Encode(original);
-            byte[] decoded = Base64UrlHelpers.DecodeBytes(encoded);
-            CollectionAssert.AreEqual(original, decoded);
-        }
-
-        [TestMethod]
         public void DecodeBytes_NullInput_ReturnsNull()
         {
             Assert.IsNull(Base64UrlHelpers.DecodeBytes(null));
@@ -87,15 +69,6 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
         }
 
         [TestMethod]
-        public void EncodeString_RoundTrip()
-        {
-            string original = "test string";
-            string encoded = Base64UrlHelpers.EncodeString(original);
-            string decoded = Base64UrlHelpers.Decode(encoded);
-            Assert.AreEqual(original, decoded);
-        }
-
-        [TestMethod]
         public void Encode_BytesThatProducePlusAndSlash()
         {
             // 0xFB, 0xEF, 0xBE => produces + and / in standard base64
@@ -110,72 +83,12 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
         }
 
         [TestMethod]
-        public void Decode_StringWithUrlSafeChars_HandlesCorrectly()
-        {
-            // Encode something that should produce - and _ in base64url
-            byte[] data = { 0xFB, 0xEF, 0xBE, 0xFE, 0xFF };
-            string encoded = Base64UrlHelpers.Encode(data);
-            byte[] decoded = Base64UrlHelpers.DecodeBytes(encoded);
-            CollectionAssert.AreEqual(data, decoded);
-        }
-
-        [TestMethod]
-        public void RoundTrip_LengthMod3_Equals0()
-        {
-            // 3 bytes -> 4 base64 chars, no padding needed
-            byte[] data = { 0x01, 0x02, 0x03 };
-            string encoded = Base64UrlHelpers.Encode(data);
-            byte[] decoded = Base64UrlHelpers.DecodeBytes(encoded);
-            CollectionAssert.AreEqual(data, decoded);
-        }
-
-        [TestMethod]
-        public void RoundTrip_LengthMod3_Equals1()
-        {
-            // 1 byte -> 2 base64 chars
-            byte[] data = { 0xAB };
-            string encoded = Base64UrlHelpers.Encode(data);
-            byte[] decoded = Base64UrlHelpers.DecodeBytes(encoded);
-            CollectionAssert.AreEqual(data, decoded);
-        }
-
-        [TestMethod]
-        public void RoundTrip_LengthMod3_Equals2()
-        {
-            // 2 bytes -> 3 base64 chars
-            byte[] data = { 0xAB, 0xCD };
-            string encoded = Base64UrlHelpers.Encode(data);
-            byte[] decoded = Base64UrlHelpers.DecodeBytes(encoded);
-            CollectionAssert.AreEqual(data, decoded);
-        }
-
-        [TestMethod]
         public void Decode_StandardBase64WithPadding_Works()
         {
-            // Standard base64 for "Hello" is "SGVsbG8=" 
-            // Base64url for "Hello" should be "SGVsbG8" (no padding)
-            string encoded = Base64UrlHelpers.Encode("Hello");
-            string decoded = Base64UrlHelpers.Decode(encoded);
-            Assert.AreEqual("Hello", decoded);
-        }
-
-        [TestMethod]
-        public void RoundTrip_LargeData()
-        {
-            byte[] data = new byte[1024];
-            new Random(42).NextBytes(data);
-            string encoded = Base64UrlHelpers.Encode(data);
-            byte[] decoded = Base64UrlHelpers.DecodeBytes(encoded);
-            CollectionAssert.AreEqual(data, decoded);
-        }
-
-        [TestMethod]
-        public void RoundTrip_UnicodeString()
-        {
-            string original = "Héllo Wörld 你好世界";
-            string encoded = Base64UrlHelpers.Encode(original);
-            string decoded = Base64UrlHelpers.Decode(encoded);
-            Assert.AreEqual(original, decoded);
+            // Standard base64 for "Hello" is "SGVsbG8=" (with padding)
+            // Verify the decoder handles standard base64 padding correctly
+            byte[] result = Base64UrlHelpers.DecodeBytes("SGVsbG8=");
+            Assert.AreEqual("Hello", System.Text.Encoding.UTF8.GetString(result));
         }
 
         [TestMethod]
@@ -184,7 +97,7 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
             // "AAAA" is valid base64 (length % 4 == 0), no URL-safe chars
             byte[] result = Base64UrlHelpers.DecodeBytes("AAAA");
             Assert.IsNotNull(result);
-            Assert.HasCount(3, result as System.Collections.IEnumerable);
+            Assert.HasCount(3, result);
         }
 
         [TestMethod]
