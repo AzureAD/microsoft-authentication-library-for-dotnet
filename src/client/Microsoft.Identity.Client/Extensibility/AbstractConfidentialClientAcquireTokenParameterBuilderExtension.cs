@@ -44,32 +44,6 @@ namespace Microsoft.Identity.Client.Extensibility
             return builder;
         }
 
-        internal static AbstractAcquireTokenParameterBuilder<T> WithExtraBodyParametersInternal<T>(
-            this AbstractAcquireTokenParameterBuilder<T> builder,
-            IDictionary<string, Func<CancellationToken, Task<string>>> extraBodyParams)
-            where T : AbstractAcquireTokenParameterBuilder<T>
-        {
-            if (extraBodyParams == null || extraBodyParams.Count == 0)
-            {
-                return builder;
-            }
-
-            builder.OnBeforeTokenRequest(async (data) =>
-            {
-                foreach (var param in extraBodyParams)
-                {
-                    if (param.Value != null)
-                    {
-                        data.BodyParameters.Add(param.Key, await param.Value(data.CancellationToken).ConfigureAwait(false));
-                    }
-                }
-            });
-
-            builder.WithAdditionalCacheKeyComponents(extraBodyParams);
-
-            return builder;
-        }
-
         /// <summary>
         /// Sends <paramref name="attributeTokens"/> as the <c>attribute_tokens</c> body parameter
         /// and includes them in the cache key. Null/empty/whitespace entries are ignored;
@@ -138,7 +112,14 @@ namespace Microsoft.Identity.Client.Extensibility
                 { OAuth2Parameter.AttributeTokens, _ => Task.FromResult(joinedTokens) }
             };
 
-            builder.WithExtraBodyParametersInternal(extraBodyParams);
+            builder.OnBeforeTokenRequest(data =>
+            {
+                data.BodyParameters[OAuth2Parameter.AttributeTokens] = joinedTokens;
+                return Task.CompletedTask;
+            });
+
+            builder.WithAdditionalCacheKeyComponents(extraBodyParams);
+
             return builder;
         }
 
