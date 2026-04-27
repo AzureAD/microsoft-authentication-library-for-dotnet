@@ -1261,7 +1261,9 @@ namespace Microsoft.Identity.Client
         /// requested authentication mode. For example, a client secret cannot be used with mTLS
         /// Proof-of-Possession or <c>SendCertificateOverMtls</c> because mTLS requires a certificate
         /// to bind the token to the TLS transport.
-        /// <para>Mitigation:</para> Use a certificate-based credential via <c>WithCertificate()</c>.
+        /// <para>Mitigation:</para> Use a certificate-based credential via <c>WithCertificate()</c>,
+        /// or a delegate that returns a <see cref="ClientSignedAssertion"/> with a
+        /// <see cref="ClientSignedAssertion.TokenBindingCertificate"/> when mTLS Proof-of-Possession is required.
         /// </summary>
         public const string InvalidCredentialMaterial = "invalid_credential_material";
     }
