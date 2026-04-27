@@ -220,7 +220,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             string identityEndpoint = EnvironmentVariables.IdentityEndpoint;
             string identityHeader = EnvironmentVariables.IdentityHeader;
             string identityServerThumbprint = EnvironmentVariables.IdentityServerThumbprint;
-            string msiSecret = EnvironmentVariables.IdentityHeader;
+
+            _ = EnvironmentVariables.IdentityHeader;
             string msiEndpoint = EnvironmentVariables.MsiEndpoint;
             string msiSecretMachineLearning = EnvironmentVariables.MsiSecret;
             string imdsEndpoint = EnvironmentVariables.ImdsEndpoint;

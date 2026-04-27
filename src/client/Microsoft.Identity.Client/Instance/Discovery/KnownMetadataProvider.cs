@@ -122,7 +122,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             IEnumerable<string> existingEnvironmentsInCache,
             ILoggerAdapter logger)
         {
-            existingEnvironmentsInCache ??= Enumerable.Empty<string>();
+            existingEnvironmentsInCache ??= [];
 
             bool canUseProvider = existingEnvironmentsInCache.All(e => s_knownEnvironments.ContainsOrdinalIgnoreCase(e));
 

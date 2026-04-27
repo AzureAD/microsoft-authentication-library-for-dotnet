@@ -160,7 +160,7 @@ namespace Microsoft.Identity.Client.Utils
             return UnsafeDecode(str);
         }
 
-        private unsafe static byte[] UnsafeDecode(string str)
+        private static unsafe byte[] UnsafeDecode(string str)
         {
             int mod = str.Length % 4;
             if (mod == 1)

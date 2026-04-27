@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
             IReadOnlyDictionary<string, string> bodyParams,
             MsalServiceException ex)
         {
-            if (!(ex is MsalThrottledServiceException))
+            if (ex is not MsalThrottledServiceException)
             {
                 foreach (IThrottlingProvider provider in ThrottlingProviders)
                 {

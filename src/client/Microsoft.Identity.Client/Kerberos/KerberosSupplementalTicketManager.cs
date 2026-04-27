@@ -29,8 +29,6 @@ namespace Microsoft.Identity.Client.Kerberos
     {
         private const int DefaultLogonId = 0;
         private const string KerberosClaimType = "xms_as_rep";
-        private const string IdTokenAsRepTemplate = @"{{""id_token"": {{ ""xms_as_rep"":{{""essential"":""false"",""value"":""{0}""}} }} }}";
-        private const string AccessTokenAsRepTemplate = @"{{""access_token"": {{ ""xms_as_rep"":{{""essential"":""false"",""value"":""{0}""}} }} }}";
 
         /// <summary>
         /// Creates a <see cref="KerberosSupplementalTicket"/> object from given ID token string..

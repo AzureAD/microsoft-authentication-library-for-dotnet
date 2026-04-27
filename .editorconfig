@@ -875,6 +875,30 @@ dotnet_diagnostic.IDE0057.severity = none
 # Disabled: introduces duplicate variable declarations in #if multi-target preprocessor blocks
 dotnet_diagnostic.IDE0019.severity = none
 
+# Use local function instead of lambda (IDE0039)
+# Disabled: local functions require Async suffix per VSTHRD200; lambda conversions break naming convention
+dotnet_diagnostic.IDE0039.severity = none
+
+# Remove unused private members (IDE0051/IDE0052)
+# Disabled: members may be used in other TFMs inside #if preprocessor blocks
+dotnet_diagnostic.IDE0051.severity = none
+dotnet_diagnostic.IDE0052.severity = none
+
+# Use range subscript operator (x[^1]) - requires .NET 5+ (System.Index not available in net462/netstandard2.0)
+dotnet_diagnostic.IDE0056.severity = none
+
+# Use Span-based string comparison / overloads - requires .NET 5+
+dotnet_diagnostic.CA1845.severity = none
+dotnet_diagnostic.CA1846.severity = none
+
+# Use HashData instead of ComputeHash - requires .NET 5+
+dotnet_diagnostic.CA1850.severity = none
+
+# Use ThrowIfCancellationRequested / ThrowIfNegativeOrZero / ObjectDisposedException.ThrowIf - requires .NET 6+/8+
+dotnet_diagnostic.CA2250.severity = none
+dotnet_diagnostic.CA1512.severity = none
+dotnet_diagnostic.CA1513.severity = none
+
 # Dispose objects before losing scope
 dotnet_diagnostic.CA2000.severity = none
 

@@ -16,7 +16,8 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
     internal class DeviceAuthManager(ICryptographyManager cryptographyManager) : IDeviceAuthManager
     {
         private readonly ICryptographyManager _cryptographyManager = cryptographyManager;
-        internal static readonly string[] separator = new[] { ";" };
+        internal static readonly string[] separator = [";"];
+        internal static readonly string[] separatorArray = [","];
 
         public bool TryCreateDeviceAuthChallengeResponse(HttpResponseHeaders responseHeaders, Uri endpointUri, out string responseHeader)
         {
@@ -119,7 +120,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             foreach (var certAuthority in certAuthorities)
             {
                 //reverse the tokenized string and replace "," with " + "
-                string[] dNames = certAuthority.Split(new[] { "," }, StringSplitOptions.None);
+                string[] dNames = certAuthority.Split(separatorArray, StringSplitOptions.None);
                 string distinguishedIssuerName = dNames[dNames.Length - 1];
                 for (int i = dNames.Length - 2; i >= 0; i--)
                 {

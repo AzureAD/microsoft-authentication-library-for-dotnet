@@ -11,7 +11,7 @@ namespace Microsoft.Identity.Client.Utils
     internal static class ScopeHelper
     {
         private const string DefaultSuffix = "/.default";
-        internal static readonly char[] separator = new[] { ' ' };
+        internal static readonly char[] separator = [' '];
 
         public static string OrderScopesAlphabetically(string originalScopes)
         {

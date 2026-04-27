@@ -11,8 +11,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 {
     internal class MachineLearningManagedIdentitySource : AbstractManagedIdentity
     {
-        private const string MachineLearning = "Machine Learning";
-
         private const string MachineLearningMsiApiVersion = "2017-09-01";
         private const string SecretHeaderName = "secret";
 

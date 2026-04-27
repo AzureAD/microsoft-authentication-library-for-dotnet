@@ -207,8 +207,8 @@ namespace Microsoft.Identity.Client
 
             IEnumerable<IAccount> accountsFromCache = await cacheSessionManager.GetAccountsAsync().ConfigureAwait(false);
             IEnumerable<IAccount> accountsFromBroker = await GetAccountsFromBrokerAsync(homeAccountIdFilter, cacheSessionManager, cancellationToken).ConfigureAwait(false);
-            accountsFromCache ??= Enumerable.Empty<IAccount>();
-            accountsFromBroker ??= Enumerable.Empty<IAccount>();
+            accountsFromCache ??= [];
+            accountsFromBroker ??= [];
 
             ServiceBundle.ApplicationLogger.Info(() => $"Found {accountsFromCache.Count()} cache accounts and {accountsFromBroker.Count()} broker accounts");
             IEnumerable<IAccount> cacheAndBrokerAccounts = MergeAccounts(accountsFromCache, accountsFromBroker);
@@ -249,7 +249,7 @@ namespace Microsoft.Identity.Client
                 }
             }
 
-            return Enumerable.Empty<IAccount>();
+            return [];
         }
 
         // Not all brokers return the accounts only for the given env

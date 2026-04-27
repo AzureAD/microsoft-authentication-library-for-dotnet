@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         public const string Prefix = "MSAL|";
         public const string TagAlias = "alias";
         public const string TagEp = "ep";
-        internal static readonly char[] separator = new[] { '|' };
+        internal static readonly char[] separator = ['|'];
 
         /// <summary>
         /// Encodes alias and endpointBase into friendly name.

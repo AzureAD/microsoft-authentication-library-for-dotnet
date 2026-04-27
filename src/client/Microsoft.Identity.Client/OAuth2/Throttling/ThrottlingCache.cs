@@ -67,7 +67,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
 
         public bool IsEmpty()
         {
-            return !_cache.Any();
+            return _cache.IsEmpty;
         }
 
         internal ConcurrentDictionary<string, ThrottlingCacheEntry> CacheForTest => _cache;

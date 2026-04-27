@@ -215,7 +215,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                 _credentialDescriptor = StorageJsonValues.CredentialTypeAccessTokenExtended;
                 if (_extraKeyParts != null)
                 {
-                    _extraKeyParts = _extraKeyParts.Concat(new[] { CoreHelpers.ComputeAccessTokenExtCacheKey(AdditionalCacheKeyComponents) }).ToArray();
+                    _extraKeyParts = [.. _extraKeyParts, .. new[] { CoreHelpers.ComputeAccessTokenExtCacheKey(AdditionalCacheKeyComponents) }];
                 }
                 else
                 {

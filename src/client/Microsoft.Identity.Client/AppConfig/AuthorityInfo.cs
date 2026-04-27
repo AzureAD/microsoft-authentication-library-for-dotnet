@@ -304,10 +304,10 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        internal static readonly char[] separator = new[]
-                {
+        internal static readonly char[] separator =
+                [
                     '/'
-                };
+                ];
 
         internal Authority CreateAuthority()
         {

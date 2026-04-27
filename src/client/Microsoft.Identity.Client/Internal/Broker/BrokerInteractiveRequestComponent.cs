@@ -115,12 +115,12 @@ namespace Microsoft.Identity.Client.Internal.Broker
 
             Dictionary<string, string> queryDict = CoreHelpers.ParseKeyValueList(query, '&', true, true, null);
 
-            if (!queryDict.ContainsKey(BrokerParameter.AppLink))
+            if (!queryDict.TryGetValue(BrokerParameter.AppLink, out string value))
             {
                 return null;
             }
 
-            return queryDict[BrokerParameter.AppLink];
+            return value;
         }
     }
 }

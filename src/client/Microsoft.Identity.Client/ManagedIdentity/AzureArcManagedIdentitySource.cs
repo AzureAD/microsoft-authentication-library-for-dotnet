@@ -21,7 +21,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         private const string AzureArc = "Azure Arc";
 
         private readonly Uri _endpoint;
-        internal static readonly char[] separator = new char[] { '=' };
+        internal static readonly char[] separator = ['='];
 
         public static AbstractManagedIdentity Create(RequestContext requestContext)
         {

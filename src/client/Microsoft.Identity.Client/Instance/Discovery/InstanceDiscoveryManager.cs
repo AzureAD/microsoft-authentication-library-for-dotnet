@@ -208,7 +208,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                     $" Exception: {e} ");
 
                 return
-                    _knownMetadataProvider.GetMetadata(authorityUri.Host, Enumerable.Empty<string>(), requestContext.Logger)
+                    _knownMetadataProvider.GetMetadata(authorityUri.Host, [], requestContext.Logger)
                 ?? CreateEntryForSingleAuthority(authorityUri);
             }
         }

@@ -17,23 +17,16 @@ namespace Microsoft.Identity.Client.OAuth2
 {
     [JsonObject]
     [Preserve(AllMembers = true)]
-    internal class DeviceAuthHeader
+    internal class DeviceAuthHeader(string base64EncodedCertificate)
     {
-        public DeviceAuthHeader(string base64EncodedCertificate)
-        {
-            Alg = "RS256";
-            Type = "JWT";
-            X5c = [base64EncodedCertificate];
-        }
-
         [JsonProperty("x5c")]
-        public IList<string> X5c { get; set; }
+        public IList<string> X5c { get; set; } = [base64EncodedCertificate];
 
         [JsonProperty("typ")]
-        public string Type { get; set; }
+        public string Type { get; set; } = "JWT";
 
         [JsonProperty("alg")]
-        public string Alg { get; private set; }
+        public string Alg { get; private set; } = "RS256";
     }
 
     [JsonObject]
