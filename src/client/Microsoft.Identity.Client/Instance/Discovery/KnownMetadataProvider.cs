@@ -15,8 +15,8 @@ namespace Microsoft.Identity.Client.Instance.Discovery
         private static readonly Dictionary<string, InstanceDiscoveryMetadataEntry> s_knownEntries =
             [];
 
-        private static readonly HashSet<string> s_knownEnvironments = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        private static readonly HashSet<string> s_knownPublicEnvironments = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        private static readonly HashSet<string> s_knownEnvironments = new(StringComparer.OrdinalIgnoreCase);
+        private static readonly HashSet<string> s_knownPublicEnvironments = new(StringComparer.OrdinalIgnoreCase);
 
         static KnownMetadataProvider()
         {

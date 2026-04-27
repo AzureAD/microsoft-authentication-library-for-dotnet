@@ -67,7 +67,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             BrokerRequest br = FromAuthenticationParameters(authenticationRequestParameters);
             var prompt = acquireTokenInteractiveParameters.Prompt;
 
-            if (prompt == Client.Prompt.NoPrompt || prompt == Client.Prompt.NotSpecified)
+            if (prompt == Client.Prompt.NoPrompt || prompt == Client.Prompt.s_notSpecified)
             {
                 br.Prompt = Client.Prompt.SelectAccount.PromptValue.ToUpperInvariant();
             }

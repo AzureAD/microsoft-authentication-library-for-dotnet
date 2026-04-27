@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client.Utils
         /// <summary>
         /// Singleton stopwatch.
         /// </summary>
-        internal static readonly Stopwatch Watch = Stopwatch.StartNew();
+        internal static readonly Stopwatch s_watch = Stopwatch.StartNew();
 
         /// <summary>
         /// Current elapsed milliseconds of the stopwatch
@@ -27,7 +27,7 @@ namespace Microsoft.Identity.Client.Utils
         {
             get
             {
-                return Watch.ElapsedMilliseconds;
+                return s_watch.ElapsedMilliseconds;
             }
         }
 
@@ -40,10 +40,10 @@ namespace Microsoft.Identity.Client.Utils
         {
             _ = codeBlock ?? throw new ArgumentNullException(nameof(codeBlock));
 
-            var startTicks = Watch.ElapsedTicks;
+            var startTicks = s_watch.ElapsedTicks;
             codeBlock.Invoke();
 
-            return new MeasureDurationResult(Watch.ElapsedTicks - startTicks);
+            return new MeasureDurationResult(s_watch.ElapsedTicks - startTicks);
         }
 
         /// <summary>
@@ -54,10 +54,10 @@ namespace Microsoft.Identity.Client.Utils
         internal static async Task<MeasureDurationResult> MeasureCodeBlockAsync(Func<Task> codeBlock)
         {
             _ = codeBlock ?? throw new ArgumentNullException(nameof(codeBlock));
-            var startTicks = Watch.ElapsedTicks;
+            var startTicks = s_watch.ElapsedTicks;
             await codeBlock.Invoke().ConfigureAwait(false);
 
-            return new MeasureDurationResult(Watch.ElapsedTicks - startTicks);
+            return new MeasureDurationResult(s_watch.ElapsedTicks - startTicks);
         }
 
         /// <summary>
@@ -68,10 +68,10 @@ namespace Microsoft.Identity.Client.Utils
         internal static async Task<MeasureDurationResult<TResult>> MeasureCodeBlockAsync<TResult>(Func<Task<TResult>> codeBlock)
         {
             _ = codeBlock ?? throw new ArgumentNullException(nameof(codeBlock));
-            var startTicks = Watch.ElapsedTicks;
+            var startTicks = s_watch.ElapsedTicks;
             TResult result = await codeBlock.Invoke().ConfigureAwait(false);
 
-            return new MeasureDurationResult<TResult>(result, Watch.ElapsedTicks - startTicks);
+            return new MeasureDurationResult<TResult>(result, s_watch.ElapsedTicks - startTicks);
         }
 
         /// <summary>
@@ -81,10 +81,10 @@ namespace Microsoft.Identity.Client.Utils
         {
             _ = task ?? throw new ArgumentNullException(nameof(task));
 
-            var startTicks = Watch.ElapsedTicks;
+            var startTicks = s_watch.ElapsedTicks;
             await task.ConfigureAwait(false);
 
-            return new MeasureDurationResult(Watch.ElapsedTicks - startTicks);
+            return new MeasureDurationResult(s_watch.ElapsedTicks - startTicks);
         }
 
         /// <summary>
@@ -94,10 +94,10 @@ namespace Microsoft.Identity.Client.Utils
         {
             _ = task ?? throw new ArgumentNullException(nameof(task));
 
-            var startTicks = Watch.ElapsedTicks;
+            var startTicks = s_watch.ElapsedTicks;
             TResult taskResult = await task.ConfigureAwait(true);
 
-            return new MeasureDurationResult<TResult>(taskResult, Watch.ElapsedTicks - startTicks);
+            return new MeasureDurationResult<TResult>(taskResult, s_watch.ElapsedTicks - startTicks);
         }
     }
 }

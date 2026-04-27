@@ -60,8 +60,8 @@ namespace Microsoft.Identity.Client.OAuth2
 
         }
 
-        private const string iOSBrokerErrorMetadata = "error_metadata";
-        private const string iOSBrokerHomeAccountId = "home_account_id";
+        private const string IosBrokerErrorMetadata = "error_metadata";
+        private const string IosBrokerHomeAccountId = "home_account_id";
 
         // Due to AOT + JSON serializer https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4082
         // disable this functionality (better fix would be to move to System.Text.Json)
@@ -187,7 +187,7 @@ namespace Microsoft.Identity.Client.OAuth2
         {
             if (responseDictionary.TryGetValue(BrokerResponseConst.BrokerErrorCode, out string errorCode))
             {
-                string metadataOriginal = responseDictionary.TryGetValue(MsalTokenResponse.iOSBrokerErrorMetadata, out string iOSBrokerErrorMetadata) ? iOSBrokerErrorMetadata : null;
+                string metadataOriginal = responseDictionary.TryGetValue(MsalTokenResponse.IosBrokerErrorMetadata, out string IosBrokerErrorMetadata) ? IosBrokerErrorMetadata : null;
                 Dictionary<string, string> metadataDictionary = null;
 
                 if (metadataOriginal != null)
@@ -205,7 +205,7 @@ namespace Microsoft.Identity.Client.OAuth2
                 }
 
                 string homeAcctId = null;
-                metadataDictionary?.TryGetValue(MsalTokenResponse.iOSBrokerHomeAccountId, out homeAcctId);
+                metadataDictionary?.TryGetValue(MsalTokenResponse.IosBrokerHomeAccountId, out homeAcctId);
                 return new MsalTokenResponse
                 {
                     Error = errorCode,

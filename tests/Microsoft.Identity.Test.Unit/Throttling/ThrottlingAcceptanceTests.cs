@@ -161,7 +161,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
                 var (retryAfterProvider, _, _) = throttlingManager.GetTypedThrottlingProviders();
                 var singleEntry = retryAfterProvider.ThrottlingCache.CacheForTest.Single().Value;
                 TimeSpan actualExpiration = singleEntry.ExpirationTime - singleEntry.CreationTime;
-                Assert.AreEqual(RetryAfterProvider.MaxRetryAfter, actualExpiration);
+                Assert.AreEqual(RetryAfterProvider.s_maxRetryAfter, actualExpiration);
             }
         }
 

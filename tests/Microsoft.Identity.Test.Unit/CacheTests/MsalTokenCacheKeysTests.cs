@@ -108,7 +108,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual("uid.utid-login.microsoftonline.com", iOSKey.iOSAccount);
             Assert.AreEqual("contoso.com", iOSKey.iOSService);
             Assert.AreEqual("localid", iOSKey.iOSGeneric);
-            Assert.AreEqual(MsalCacheKeys.iOSAuthorityTypeToAttrType["MSSTS"], iOSKey.iOSType);
+            Assert.AreEqual(MsalCacheKeys.s_iOSAuthorityTypeToAttrType["MSSTS"], iOSKey.iOSType);
         }
 
         [TestMethod]

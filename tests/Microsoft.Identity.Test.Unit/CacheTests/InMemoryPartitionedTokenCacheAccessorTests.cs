@@ -177,9 +177,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             accessor.SaveRefreshToken(rt1);
 
             Assert.HasCount(1, accessor.GetAllRefreshTokens());
-            Assert.HasCount(1, accessor.RefreshTokenCacheDictionary);
+            Assert.HasCount(1, accessor._refreshTokenCacheDictionary);
             string partitionKey1 = CacheKeyFactory.GetKeyFromCachedItem(rt1);
-            Assert.IsNotNull(accessor.RefreshTokenCacheDictionary[partitionKey1][rt1.CacheKey]);
+            Assert.IsNotNull(accessor._refreshTokenCacheDictionary[partitionKey1][rt1.CacheKey]);
 
             var rt2 = TokenCacheHelper.CreateRefreshTokenItem("userAssertion", "homeAccountId2");
 
@@ -187,8 +187,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             accessor.SaveRefreshToken(rt2);
 
             Assert.HasCount(2, accessor.GetAllRefreshTokens());
-            Assert.HasCount(1, accessor.RefreshTokenCacheDictionary);
-            Assert.IsNotNull(accessor.RefreshTokenCacheDictionary[partitionKey1][rt2.CacheKey]);
+            Assert.HasCount(1, accessor._refreshTokenCacheDictionary);
+            Assert.IsNotNull(accessor._refreshTokenCacheDictionary[partitionKey1][rt2.CacheKey]);
 
             var rt3 = TokenCacheHelper.CreateRefreshTokenItem("userAssertion2", "homeAccountId");
 
@@ -198,9 +198,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             accessor.SaveRefreshToken(rt3);
 
             Assert.HasCount(3, accessor.GetAllRefreshTokens());
-            Assert.HasCount(2, accessor.RefreshTokenCacheDictionary);
+            Assert.HasCount(2, accessor._refreshTokenCacheDictionary);
             string partitionKey2 = CacheKeyFactory.GetKeyFromCachedItem(rt3);
-            Assert.IsNotNull(accessor.RefreshTokenCacheDictionary[partitionKey2][rt3.CacheKey]);
+            Assert.IsNotNull(accessor._refreshTokenCacheDictionary[partitionKey2][rt3.CacheKey]);
         }
 
         [TestMethod]
@@ -263,9 +263,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             accessor.SaveIdToken(idt1);
 
             Assert.HasCount(1, accessor.GetAllIdTokens());
-            Assert.HasCount(1, accessor.IdTokenCacheDictionary);
+            Assert.HasCount(1, accessor._idTokenCacheDictionary);
             string partitionKey1 = CacheKeyFactory.GetKeyFromCachedItem(idt1);
-            Assert.IsNotNull(accessor.IdTokenCacheDictionary[partitionKey1][idt1.CacheKey]);
+            Assert.IsNotNull(accessor._idTokenCacheDictionary[partitionKey1][idt1.CacheKey]);
 
             var idt2 = TokenCacheHelper.CreateIdTokenCacheItem("tenant2", "homeAccountId");
 
@@ -273,8 +273,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             accessor.SaveIdToken(idt2);
 
             Assert.HasCount(2, accessor.GetAllIdTokens());
-            Assert.HasCount(1, accessor.IdTokenCacheDictionary);
-            Assert.IsNotNull(accessor.IdTokenCacheDictionary[partitionKey1][idt2.CacheKey]);
+            Assert.HasCount(1, accessor._idTokenCacheDictionary);
+            Assert.IsNotNull(accessor._idTokenCacheDictionary[partitionKey1][idt2.CacheKey]);
 
             var idt3 = TokenCacheHelper.CreateIdTokenCacheItem("tenant1", "homeAccountId2");
 
@@ -284,9 +284,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             accessor.SaveIdToken(idt3);
 
             Assert.HasCount(3, accessor.GetAllIdTokens());
-            Assert.HasCount(2, accessor.IdTokenCacheDictionary);
+            Assert.HasCount(2, accessor._idTokenCacheDictionary);
             string partitionKey2 = CacheKeyFactory.GetKeyFromCachedItem(idt3);
-            Assert.IsNotNull(accessor.IdTokenCacheDictionary[partitionKey2][idt3.CacheKey]);
+            Assert.IsNotNull(accessor._idTokenCacheDictionary[partitionKey2][idt3.CacheKey]);
         }
 
         [TestMethod]
@@ -371,9 +371,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             accessor.SaveAccount(acc1);
 
             Assert.HasCount(1, accessor.GetAllAccounts());
-            Assert.HasCount(1, accessor.AccountCacheDictionary);
+            Assert.HasCount(1, accessor._accountCacheDictionary);
             string partitionKey1 = CacheKeyFactory.GetKeyFromCachedItem(acc1);
-            Assert.IsNotNull(accessor.AccountCacheDictionary[partitionKey1][acc1.CacheKey]);
+            Assert.IsNotNull(accessor._accountCacheDictionary[partitionKey1][acc1.CacheKey]);
 
             var acc2 = TokenCacheHelper.CreateAccountItem("tenant2", "homeAccountId");
 
@@ -381,8 +381,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             accessor.SaveAccount(acc2);
 
             Assert.HasCount(2, accessor.GetAllAccounts());
-            Assert.HasCount(1, accessor.AccountCacheDictionary);
-            Assert.IsNotNull(accessor.AccountCacheDictionary[partitionKey1][acc2.CacheKey]);
+            Assert.HasCount(1, accessor._accountCacheDictionary);
+            Assert.IsNotNull(accessor._accountCacheDictionary[partitionKey1][acc2.CacheKey]);
 
             var acc3 = TokenCacheHelper.CreateAccountItem("tenant1", "homeAccountId2");
 
@@ -392,9 +392,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             accessor.SaveAccount(acc3);
 
             Assert.HasCount(3, accessor.GetAllAccounts());
-            Assert.HasCount(2, accessor.AccountCacheDictionary);
+            Assert.HasCount(2, accessor._accountCacheDictionary);
             string partitionKey2 = CacheKeyFactory.GetKeyFromCachedItem(acc3);
-            Assert.IsNotNull(accessor.AccountCacheDictionary[partitionKey2][acc3.CacheKey]);
+            Assert.IsNotNull(accessor._accountCacheDictionary[partitionKey2][acc3.CacheKey]);
         }
 
         [TestMethod]
@@ -472,11 +472,11 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             var accessor = new InMemoryPartitionedAppTokenCacheAccessor(new NullLogger(), null);
             accessor.SaveAccessToken(TokenCacheHelper.CreateAccessTokenItem());
 
-            Assert.HasCount(1, accessor.AccessTokenCacheDictionary);
+            Assert.HasCount(1, accessor._accessTokenCacheDictionary);
 
             accessor.Clear();
 
-            Assert.IsEmpty(accessor.AccessTokenCacheDictionary);
+            Assert.IsEmpty(accessor._accessTokenCacheDictionary);
         }
 
         [TestMethod]
@@ -488,17 +488,17 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             accessor.SaveIdToken(TokenCacheHelper.CreateIdTokenCacheItem());
             accessor.SaveAccount(TokenCacheHelper.CreateAccountItem());
 
-            Assert.HasCount(1, accessor.AccessTokenCacheDictionary);
-            Assert.HasCount(1, accessor.RefreshTokenCacheDictionary);
-            Assert.HasCount(1, accessor.IdTokenCacheDictionary);
-            Assert.HasCount(1, accessor.AccountCacheDictionary);
+            Assert.HasCount(1, accessor._accessTokenCacheDictionary);
+            Assert.HasCount(1, accessor._refreshTokenCacheDictionary);
+            Assert.HasCount(1, accessor._idTokenCacheDictionary);
+            Assert.HasCount(1, accessor._accountCacheDictionary);
 
             accessor.Clear();
 
-            Assert.IsEmpty(accessor.AccessTokenCacheDictionary);
-            Assert.IsEmpty(accessor.RefreshTokenCacheDictionary);
-            Assert.IsEmpty(accessor.IdTokenCacheDictionary);
-            Assert.IsEmpty(accessor.AccountCacheDictionary);
+            Assert.IsEmpty(accessor._accessTokenCacheDictionary);
+            Assert.IsEmpty(accessor._refreshTokenCacheDictionary);
+            Assert.IsEmpty(accessor._idTokenCacheDictionary);
+            Assert.IsEmpty(accessor._accountCacheDictionary);
         }
 
         [TestMethod]
@@ -597,11 +597,11 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             if (isAppCache)
             {
-                return (accessor as InMemoryPartitionedAppTokenCacheAccessor)?.AccessTokenCacheDictionary;
+                return (accessor as InMemoryPartitionedAppTokenCacheAccessor)?._accessTokenCacheDictionary;
             }
             else
             {
-                return (accessor as InMemoryPartitionedUserTokenCacheAccessor)?.AccessTokenCacheDictionary;
+                return (accessor as InMemoryPartitionedUserTokenCacheAccessor)?._accessTokenCacheDictionary;
             }
         }
 
@@ -609,11 +609,11 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             if (isAppCache)
             {
-                return (accessor as InMemoryPartitionedAppTokenCacheAccessor)?.AppMetadataDictionary;
+                return (accessor as InMemoryPartitionedAppTokenCacheAccessor)?._appMetadataDictionary;
             }
             else
             {
-                return (accessor as InMemoryPartitionedUserTokenCacheAccessor)?.AppMetadataDictionary;
+                return (accessor as InMemoryPartitionedUserTokenCacheAccessor)?._appMetadataDictionary;
             }
         }
 

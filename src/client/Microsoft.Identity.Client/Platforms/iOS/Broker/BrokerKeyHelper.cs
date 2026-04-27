@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using Foundation;
@@ -138,7 +138,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
             throw new MsalClientException(
                 MsalError.BrokerKeyFetchFailed,
-                MsalErrorMessage.iOSBrokerKeyFetchFailed);
+                MsalErrorMessage.IosBrokerKeyFetchFailed);
         }
 
         private static Aes CreateSymmetricAlgorithm(byte[] key)

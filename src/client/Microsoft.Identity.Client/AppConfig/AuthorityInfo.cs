@@ -304,7 +304,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        internal static readonly char[] separator =
+        internal static readonly char[] s_separator =
                 [
                     '/'
                 ];
@@ -437,7 +437,7 @@ namespace Microsoft.Identity.Client
         private static string[] GetPathSegments(string absolutePath)
         {
             string[] pathSegments = absolutePath.Split(
-                separator,
+                s_separator,
                 StringSplitOptions.RemoveEmptyEntries);
 
             return pathSegments;

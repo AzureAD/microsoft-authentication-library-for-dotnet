@@ -251,14 +251,14 @@ namespace Microsoft.Identity.Client
         }
 
 #if NET_CORE
-        private static readonly Type WinUIWindowType = Type.GetType("Microsoft.UI.Xaml.Window, Microsoft.WinUI");
+        private static readonly Type s_winUIWindowType = Type.GetType("Microsoft.UI.Xaml.Window, Microsoft.WinUI");
 
         /// <summary>
         /// Checks if an object is a WinUI3 Window or derives from one
         /// </summary>
         private static bool IsWinUI3Window(object obj)
         {
-            return obj != null && WinUIWindowType?.IsAssignableFrom(obj.GetType()) == true;
+            return obj != null && s_winUIWindowType?.IsAssignableFrom(obj.GetType()) == true;
         }
 #endif
 

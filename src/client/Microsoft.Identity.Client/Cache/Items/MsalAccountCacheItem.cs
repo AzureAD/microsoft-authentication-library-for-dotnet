@@ -132,8 +132,8 @@ namespace Microsoft.Identity.Client.Cache.Items
         internal IDictionary<string, string> WamAccountIds { get; set; }
         public string CacheKey { get; private set; }
 
-        private Lazy<IiOSKey> iOSCacheKeyLazy;
-        public IiOSKey iOSCacheKey => iOSCacheKeyLazy.Value;
+        private Lazy<IiOSKey> _iOSCacheKeyLazy;
+        public IiOSKey iOSCacheKey => _iOSCacheKeyLazy.Value;
 
         private void Init(
             string environment,
@@ -167,7 +167,7 @@ namespace Microsoft.Identity.Client.Cache.Items
         {
             CacheKey = $"{HomeAccountId}{MsalCacheKeys.CacheKeyDelimiter}{Environment}{MsalCacheKeys.CacheKeyDelimiter}{TenantId}";
 
-            iOSCacheKeyLazy = new Lazy<IiOSKey>(InitiOSKey);
+            _iOSCacheKeyLazy = new Lazy<IiOSKey>(InitiOSKey);
         }
 
         #region iOS
@@ -183,7 +183,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             // This is a known issue.
             // Normally AuthorityType should be passed here but since while building the MsalAccountCacheItem it is defaulted to "MSSTS",
             // keeping the default value here.
-            int iOSType = MsalCacheKeys.iOSAuthorityTypeToAttrType[CacheAuthorityType.MSSTS.ToString()];
+            int iOSType = MsalCacheKeys.s_iOSAuthorityTypeToAttrType[CacheAuthorityType.MSSTS.ToString()];
 
             return new IosKey(iOSAccount, iOSService, iOSGeneric, iOSType);
         }

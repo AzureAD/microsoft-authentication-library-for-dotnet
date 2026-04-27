@@ -21,7 +21,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         private const string AzureArc = "Azure Arc";
 
         private readonly Uri _endpoint;
-        internal static readonly char[] separator = ['='];
+        internal static readonly char[] s_separator = ['='];
 
         public static AbstractManagedIdentity Create(RequestContext requestContext)
         {
@@ -115,7 +115,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     throw exception;
                 }
 
-                var splitChallenge = challenge.Split(separator, StringSplitOptions.RemoveEmptyEntries);
+                var splitChallenge = challenge.Split(s_separator, StringSplitOptions.RemoveEmptyEntries);
 
                 ValidateSplitChallenge(splitChallenge);
 

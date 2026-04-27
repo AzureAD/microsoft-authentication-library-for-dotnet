@@ -221,7 +221,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         private string ExtractErrorMessageFromManagedIdentityErrorResponse(ManagedIdentityErrorResponse managedIdentityErrorResponse)
         {
-            StringBuilder stringBuilder = new StringBuilder(ManagedIdentityPrefix);
+            StringBuilder stringBuilder = new(ManagedIdentityPrefix);
 
             if (!string.IsNullOrEmpty(managedIdentityErrorResponse.Error))
             {

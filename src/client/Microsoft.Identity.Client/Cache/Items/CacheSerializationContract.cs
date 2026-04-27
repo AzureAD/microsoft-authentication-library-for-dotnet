@@ -19,7 +19,7 @@ namespace Microsoft.Identity.Client.Cache.Items
     internal class CacheSerializationContract(IDictionary<string, JToken> unknownNodes)
     {
 #if SUPPORTS_SYSTEM_TEXT_JSON
-        private static readonly JsonSerializerOptions NeverIgnoreJsonOptions = new()
+        private static readonly JsonSerializerOptions s_neverIgnoreJsonOptions = new()
         {
             DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.Never
         };
@@ -150,7 +150,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 #endif
         }
 
-        private static IDictionary<string, JToken> ExtractUnknownNodes(JObject root)
+        private static Dictionary<string, JToken> ExtractUnknownNodes(JObject root)
         {
 #if SUPPORTS_SYSTEM_TEXT_JSON
             return root
@@ -220,7 +220,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 #endif
             }
 #if SUPPORTS_SYSTEM_TEXT_JSON
-            return root.ToJsonString(NeverIgnoreJsonOptions);
+            return root.ToJsonString(s_neverIgnoreJsonOptions);
 #else
             return JsonConvert.SerializeObject(
                 root,

@@ -19,7 +19,7 @@ namespace Microsoft.Identity.Client.Cache.Items
         internal MsalIdTokenCacheItem()
         {
             CredentialType = StorageJsonValues.CredentialTypeIdToken;
-            idTokenLazy = new Lazy<IdToken>(() => IdToken.Parse(Secret));
+            _idTokenLazy = new Lazy<IdToken>(() => IdToken.Parse(Secret));
         }
 
         internal MsalIdTokenCacheItem(
@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                 TenantId,
                 scopes: null);
 
-            iOSCacheKeyLazy = new Lazy<IiOSKey>(InitiOSKey);
+            _iOSCacheKeyLazy = new Lazy<IiOSKey>(InitiOSKey);
         }
 
         private IiOSKey InitiOSKey()
@@ -86,14 +86,14 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         internal string TenantId { get; set; }
 
-        private readonly Lazy<IdToken> idTokenLazy;
+        private readonly Lazy<IdToken> _idTokenLazy;
 
-        internal IdToken IdToken => idTokenLazy.Value;
+        internal IdToken IdToken => _idTokenLazy.Value;
 
         public string CacheKey { get; private set; }
 
-        private Lazy<IiOSKey> iOSCacheKeyLazy;
-        public IiOSKey iOSCacheKey => iOSCacheKeyLazy.Value;
+        private Lazy<IiOSKey> _iOSCacheKeyLazy;
+        public IiOSKey iOSCacheKey => _iOSCacheKeyLazy.Value;
 
         internal static MsalIdTokenCacheItem FromJsonString(string json)
         {

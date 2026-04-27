@@ -31,14 +31,14 @@ namespace Microsoft.Identity.Client.Utils
         private const int WorkerSleepInMilliseconds = 10;
 
         // Singleton mode
-        private static readonly Lazy<MacMainThreadScheduler> _instance = new(() => new MacMainThreadScheduler());
+        private static readonly Lazy<MacMainThreadScheduler> s_instance = new(() => new MacMainThreadScheduler());
 
         /// <summary>
         /// Gets the singleton instance of MacMainThreadScheduler
         /// </summary>
         public static MacMainThreadScheduler Instance()
         {
-            return _instance.Value;
+            return s_instance.Value;
         }
 
         /// <summary>

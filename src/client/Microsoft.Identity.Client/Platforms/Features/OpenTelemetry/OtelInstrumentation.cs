@@ -32,26 +32,26 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
         /// <summary>
         /// Meter to hold the MSAL metrics.
         /// </summary>
-        internal static readonly Meter Meter = new(MeterName, "1.0.0");
+        internal static readonly Meter s_meter = new(MeterName, "1.0.0");
 
         /// <summary>
         /// Counter to hold the number of successful token acquisition calls.
         /// </summary>
-        internal static readonly Lazy<Counter<long>> s_successCounter = new(() => Meter.CreateCounter<long>(
+        internal static readonly Lazy<Counter<long>> s_successCounter = new(() => s_meter.CreateCounter<long>(
             SuccessCounterName,
             description: "Number of successful token acquisition calls"));
 
         /// <summary>
         /// Counter to hold the number of failed token acquisition calls.
         /// </summary>
-        internal static readonly Lazy<Counter<long>> s_failureCounter = new(() => Meter.CreateCounter<long>(
+        internal static readonly Lazy<Counter<long>> s_failureCounter = new(() => s_meter.CreateCounter<long>(
             FailedCounterName,
             description: "Number of failed token acquisition calls"));
 
         /// <summary>
         /// Histogram to record total duration in milliseconds of token acquisition calls.
         /// </summary>
-        internal static readonly Lazy<Histogram<long>> s_durationTotal = new(() => Meter.CreateHistogram<long>(
+        internal static readonly Lazy<Histogram<long>> s_durationTotal = new(() => s_meter.CreateHistogram<long>(
             TotalDurationHistogramName,
             unit: "ms",
             description: "Performance of token acquisition calls total latency"));
@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
         /// <summary>
         /// Histogram to record total duration of token acquisition calls in microseconds(us) when token is fetched from L1 cache.
         /// </summary>
-        internal static readonly Lazy<Histogram<long>> s_durationInL1CacheInUs = new(() => Meter.CreateHistogram<long>(
+        internal static readonly Lazy<Histogram<long>> s_durationInL1CacheInUs = new(() => s_meter.CreateHistogram<long>(
             DurationInL1CacheHistogramName,
             unit: "us",
             description: "Performance of token acquisition calls total latency in microseconds when L1 cache is used."));
@@ -67,7 +67,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
         /// <summary>
         /// Histogram to record duration in L2 cache for token acquisition calls.
         /// </summary>
-        internal static readonly Lazy<Histogram<long>> s_durationInL2Cache = new(() => Meter.CreateHistogram<long>(
+        internal static readonly Lazy<Histogram<long>> s_durationInL2Cache = new(() => s_meter.CreateHistogram<long>(
             DurationInL2CacheHistogramName,
             unit: "ms",
             description: "Performance of token acquisition calls cache latency"));
@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
         /// <summary>
         /// Histogram to record duration in milliseconds in http when the token is fetched from identity provider.
         /// </summary>
-        internal static readonly Lazy<Histogram<long>> s_durationInHttp = new(() => Meter.CreateHistogram<long>(
+        internal static readonly Lazy<Histogram<long>> s_durationInHttp = new(() => s_meter.CreateHistogram<long>(
             DurationInHttpHistogramName,
             unit: "ms",
             description: "Performance of token acquisition calls network latency"));
@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
         /// <summary>
         /// Histogram to record total duration of extension modifications in microseconds(us).
         /// </summary>
-        internal static readonly Lazy<Histogram<long>> s_durationInExtensionInMs = new(() => Meter.CreateHistogram<long>(
+        internal static readonly Lazy<Histogram<long>> s_durationInExtensionInMs = new(() => s_meter.CreateHistogram<long>(
             DurationInExtensionInMsHistogram,
             unit: "us",
             description: "Performance of token acquisition calls extension latency."));
@@ -91,7 +91,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
         public OtelInstrumentation()
         {
             // Needed to fail fast if the runtime, like in-process Azure Functions, doesn't support OpenTelemetry 
-            _ = Meter.Version;
+            _ = s_meter.Version;
         }
 
         // Aggregates the successful requests based on token source and cache refresh reason.

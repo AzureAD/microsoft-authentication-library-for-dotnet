@@ -16,8 +16,8 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
     internal class DeviceAuthManager(ICryptographyManager cryptographyManager) : IDeviceAuthManager
     {
         private readonly ICryptographyManager _cryptographyManager = cryptographyManager;
-        internal static readonly string[] separator = [";"];
-        internal static readonly string[] separatorArray = [","];
+        internal static readonly string[] s_separator = [";"];
+        internal static readonly string[] s_separatorArray = [","];
 
         public bool TryCreateDeviceAuthChallengeResponse(HttpResponseHeaders responseHeaders, Uri endpointUri, out string responseHeader)
         {
@@ -115,12 +115,12 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         private static X509Certificate2 FindCertificateByCertAuthorities(IDictionary<string, string> challengeData, X509Certificate2Collection certCollection)
         {
             X509Certificate2Collection signingCert = null;
-            string[] certAuthorities = challengeData["CertAuthorities"].Split(separator,
+            string[] certAuthorities = challengeData["CertAuthorities"].Split(s_separator,
                 StringSplitOptions.None);
             foreach (var certAuthority in certAuthorities)
             {
                 //reverse the tokenized string and replace "," with " + "
-                string[] dNames = certAuthority.Split(separatorArray, StringSplitOptions.None);
+                string[] dNames = certAuthority.Split(s_separatorArray, StringSplitOptions.None);
                 string distinguishedIssuerName = dNames[dNames.Length - 1];
                 for (int i = dNames.Length - 2; i >= 0; i--)
                 {

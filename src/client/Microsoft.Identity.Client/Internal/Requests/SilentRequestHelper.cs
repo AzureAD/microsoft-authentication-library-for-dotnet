@@ -80,8 +80,10 @@ namespace Microsoft.Identity.Client.Internal
         /// Fire and forget the fetch action on a background thread.
         /// Do not change to Task and do not await it.
         /// </summary>
+#pragma warning disable IDE0060 // oldAccessToken reserved for future use
         internal static void ProcessFetchInBackground(
             MsalAccessTokenCacheItem oldAccessToken,
+#pragma warning restore IDE0060
             Func<Task<AuthenticationResult>> fetchAction,
             ILoggerAdapter logger,
             IServiceBundle serviceBundle,

@@ -960,7 +960,7 @@ namespace Microsoft.Identity.Client
             logger.Verbose(() => $"[GetAccounts] Found {refreshTokenCacheItems.Count} RTs and {accountCacheItems.Count} accounts in MSAL cache before env filtering.");
 
             // Multi-cloud support - must filter by environment.
-            HashSet<string> allEnvironmentsInCache = new HashSet<string>(
+            HashSet<string> allEnvironmentsInCache = new(
                 accountCacheItems.Select(aci => aci.Environment),
                 StringComparer.OrdinalIgnoreCase);
             allEnvironmentsInCache.UnionWith(refreshTokenCacheItems.Select(rt => rt.Environment));
@@ -1083,7 +1083,7 @@ namespace Microsoft.Identity.Client
           string envFromRequest,
           IEnumerable<string> envAliases,
           AdalUsersForMsal adalUsers,
-          IDictionary<string, Account> clientInfoToAccountMap)
+          Dictionary<string, Account> clientInfoToAccountMap)
         {
             foreach (KeyValuePair<string, AdalUserInfo> pair in adalUsers?.GetUsersWithClientInfo(envAliases))
             {
@@ -1142,7 +1142,7 @@ namespace Microsoft.Identity.Client
 
             if (!requestParameters.AppConfig.MultiCloudSupportEnabled)
             {
-                HashSet<string> allEnvironmentsInCache = new HashSet<string>(
+                HashSet<string> allEnvironmentsInCache = new(
                     idTokenCacheItems.Select(aci => aci.Environment),
                     StringComparer.OrdinalIgnoreCase);
 

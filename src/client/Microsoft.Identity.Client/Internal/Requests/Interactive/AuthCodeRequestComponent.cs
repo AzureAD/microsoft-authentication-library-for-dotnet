@@ -51,7 +51,9 @@ namespace Microsoft.Identity.Client.Internal
             return result.Item1;
         }
 
+#pragma warning disable IDE0060 // cancellationToken reserved for future use
         public async Task<Uri> GetAuthorizationUriWithPkceAsync(string codeVerifier, CancellationToken cancellationToken)
+#pragma warning restore IDE0060
         {
             string authEndpoint = await _requestParams.Authority.GetAuthorizationEndpointAsync(_requestParams.RequestContext)
                 .ConfigureAwait(false);
@@ -219,7 +221,7 @@ namespace Microsoft.Identity.Client.Internal
                 .ToList()
                 .ForEach(kvp => authorizationRequestParameters[kvp.Key] = kvp.Value);
 
-            if (_interactiveParameters.Prompt == Prompt.NotSpecified)
+            if (_interactiveParameters.Prompt == Prompt.s_notSpecified)
             {
                 authorizationRequestParameters[OAuth2Parameter.Prompt] = Prompt.SelectAccount.PromptValue;
             }

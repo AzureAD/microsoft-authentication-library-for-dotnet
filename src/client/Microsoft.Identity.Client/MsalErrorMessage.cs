@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Client
         public const string UnauthorizedHttpStatusCodeExpected =
             "Unauthorized HTTP Status Code (401) was expected in the response. ";
 
-        internal const string iOSBrokerKeyFetchFailed = "A broker key was generated but it could not be retrieved from the KeyChain. Please capture and inspect the logs to see why the fetch operation failed. ";
+        internal const string IosBrokerKeyFetchFailed = "A broker key was generated but it could not be retrieved from the KeyChain. Please capture and inspect the logs to see why the fetch operation failed. ";
 
         public const string UnauthorizedResponseExpected = "Unauthorized HTTP response (status code 401) was expected. ";
         public const string UnexpectedAuthorityValidList = "Unexpected list of valid addresses. ";

@@ -19,7 +19,7 @@ namespace Microsoft.Identity.Client
     /// </summary>
     public class AuthenticationHeaderParser
     {
-        private static readonly Lazy<IMsalHttpClientFactory> _httpClientFactory = new(
+        private static readonly Lazy<IMsalHttpClientFactory> s_httpClientFactory = new(
                                                                           () => PlatformProxyFactory.CreatePlatformProxy(null).CreateDefaultHttpClientFactory());
 
         /// <summary>
@@ -116,7 +116,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         internal static HttpClient GetHttpClient()
         {
-            return _httpClientFactory.Value.GetHttpClient();
+            return s_httpClientFactory.Value.GetHttpClient();
         }
 
         /// <summary>

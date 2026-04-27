@@ -78,7 +78,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 
             CacheKey = key;
 
-            iOSCacheKeyLazy = new Lazy<IiOSKey>(() => InitiOSKey());
+            _iOSCacheKeyLazy = new Lazy<IiOSKey>(() => InitiOSKey());
         }
 
         internal string ToLogString(bool piiEnabled = false)
@@ -150,8 +150,8 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         public string CacheKey { get; private set; }
 
-        private Lazy<IiOSKey> iOSCacheKeyLazy;
-        public IiOSKey iOSCacheKey => iOSCacheKeyLazy.Value;
+        private Lazy<IiOSKey> _iOSCacheKeyLazy;
+        public IiOSKey iOSCacheKey => _iOSCacheKeyLazy.Value;
 
         internal static MsalRefreshTokenCacheItem FromJsonString(string json)
         {

@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         private readonly Uri _endpoint;
         private readonly string _identityHeaderValue;
 
-        internal static Lazy<HttpClient> _httpClientLazy;
+        internal static Lazy<HttpClient> s_httpClientLazy;
 
         public static AbstractManagedIdentity Create(RequestContext requestContext)
         {

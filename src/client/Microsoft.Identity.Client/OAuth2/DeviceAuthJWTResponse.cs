@@ -58,8 +58,8 @@ namespace Microsoft.Identity.Client.OAuth2
     internal class DeviceAuthJWTResponse(string audience, string nonce,
         string base64EncodedCertificate)
     {
-        private readonly DeviceAuthHeader _header = new DeviceAuthHeader(base64EncodedCertificate);
-        private readonly DeviceAuthPayload _payload = new DeviceAuthPayload(audience, nonce);
+        private readonly DeviceAuthHeader _header = new(base64EncodedCertificate);
+        private readonly DeviceAuthPayload _payload = new(audience, nonce);
 
         public string GetResponseToSign()
         {

@@ -11,7 +11,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
         private sealed class CustomWebBrowserEvent(CustomWebBrowser parent) : StandardOleMarshalObject, NativeWrapper.DWebBrowserEvents2
         {
             // Fields
-            private readonly CustomWebBrowser parent = parent;
+            private readonly CustomWebBrowser _parent = parent;
 
             public void NavigateError(object pDisp, ref object url, ref object frame, ref object statusCode,
                 ref bool cancel)
@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
                 WebBrowserNavigateErrorEventArgs e = new(uriString, frameString,
                     statusCodeInt, pDisp);
 #pragma warning restore 618
-                parent.OnNavigateError(e);
+                _parent.OnNavigateError(e);
                 cancel = e.Cancel;
             }
 
@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
 
                 WebBrowserBeforeNavigateEventArgs e = new(urlString, postDataBytes,
                     headersString, flagsInt, targetFrameNameString, pDisp);
-                parent.OnBeforeNavigate(e);
+                _parent.OnBeforeNavigate(e);
                 cancel = e.Cancel;
             }
 

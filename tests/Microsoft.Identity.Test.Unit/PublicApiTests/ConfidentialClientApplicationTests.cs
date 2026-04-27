@@ -178,7 +178,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 string partitionKey = CacheKeyFactory.GetAppTokenCacheItemKey(TestConstants.ClientId, TestConstants.Utid, null);
                 Assert.AreEqual(
                     partitionKey,
-                    ((InMemoryPartitionedAppTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary.Keys.Single());
+                    ((InMemoryPartitionedAppTokenCacheAccessor)app.AppTokenCacheInternal.Accessor)._accessTokenCacheDictionary.Keys.Single());
 
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
 
@@ -187,11 +187,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
 
                 Assert.IsNotNull(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single(at => at.TenantId == TestConstants.Utid2));
-                Assert.HasCount(2, ((InMemoryPartitionedAppTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary);
+                Assert.HasCount(2, ((InMemoryPartitionedAppTokenCacheAccessor)app.AppTokenCacheInternal.Accessor)._accessTokenCacheDictionary);
                 string partitionKey2 = CacheKeyFactory.GetAppTokenCacheItemKey(TestConstants.ClientId, TestConstants.Utid2, null);
 
-                Assert.IsTrue(((InMemoryPartitionedAppTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary.Keys.Any(k => k.Equals(partitionKey)));
-                Assert.IsTrue(((InMemoryPartitionedAppTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary.Keys.Any(k => k.Equals(partitionKey2)));
+                Assert.IsTrue(((InMemoryPartitionedAppTokenCacheAccessor)app.AppTokenCacheInternal.Accessor)._accessTokenCacheDictionary.Keys.Any(k => k.Equals(partitionKey)));
+                Assert.IsTrue(((InMemoryPartitionedAppTokenCacheAccessor)app.AppTokenCacheInternal.Accessor)._accessTokenCacheDictionary.Keys.Any(k => k.Equals(partitionKey2)));
             }
         }
 
@@ -216,11 +216,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // One tenant partition with one token
                 Assert.HasCount(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens());
-                Assert.HasCount(1, ((InMemoryPartitionedAppTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary);
+                Assert.HasCount(1, ((InMemoryPartitionedAppTokenCacheAccessor)app.AppTokenCacheInternal.Accessor)._accessTokenCacheDictionary);
                 string partitionKey = CacheKeyFactory.GetAppTokenCacheItemKey(TestConstants.ClientId, TestConstants.Utid, null);
 
-                Assert.IsNotNull(((InMemoryPartitionedAppTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary[partitionKey]);
-                Assert.HasCount(1, ((InMemoryPartitionedAppTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary[partitionKey]);
+                Assert.IsNotNull(((InMemoryPartitionedAppTokenCacheAccessor)app.AppTokenCacheInternal.Accessor)._accessTokenCacheDictionary[partitionKey]);
+                Assert.HasCount(1, ((InMemoryPartitionedAppTokenCacheAccessor)app.AppTokenCacheInternal.Accessor)._accessTokenCacheDictionary[partitionKey]);
 
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
 
@@ -230,9 +230,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // One tenant partition with two tokens
                 Assert.HasCount(2, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens());
-                Assert.HasCount(1, ((InMemoryPartitionedAppTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary);
-                Assert.IsNotNull(((InMemoryPartitionedAppTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary[partitionKey]);
-                Assert.HasCount(2, ((InMemoryPartitionedAppTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary[partitionKey]);
+                Assert.HasCount(1, ((InMemoryPartitionedAppTokenCacheAccessor)app.AppTokenCacheInternal.Accessor)._accessTokenCacheDictionary);
+                Assert.IsNotNull(((InMemoryPartitionedAppTokenCacheAccessor)app.AppTokenCacheInternal.Accessor)._accessTokenCacheDictionary[partitionKey]);
+                Assert.HasCount(2, ((InMemoryPartitionedAppTokenCacheAccessor)app.AppTokenCacheInternal.Accessor)._accessTokenCacheDictionary[partitionKey]);
 
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
 
@@ -244,9 +244,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.HasCount(3, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens());
                 string partitionKey2 = CacheKeyFactory.GetAppTokenCacheItemKey(TestConstants.ClientId, TestConstants.Utid2, null);
 
-                Assert.HasCount(2, ((InMemoryPartitionedAppTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary);
-                Assert.IsNotNull(((InMemoryPartitionedAppTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary[partitionKey2]);
-                Assert.HasCount(1, ((InMemoryPartitionedAppTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary[partitionKey2]);
+                Assert.HasCount(2, ((InMemoryPartitionedAppTokenCacheAccessor)app.AppTokenCacheInternal.Accessor)._accessTokenCacheDictionary);
+                Assert.IsNotNull(((InMemoryPartitionedAppTokenCacheAccessor)app.AppTokenCacheInternal.Accessor)._accessTokenCacheDictionary[partitionKey2]);
+                Assert.HasCount(1, ((InMemoryPartitionedAppTokenCacheAccessor)app.AppTokenCacheInternal.Accessor)._accessTokenCacheDictionary[partitionKey2]);
 
             }
         }
@@ -1373,7 +1373,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestMethod]
         public async Task GetAuthorizationRequestUrlValidatePromptNotSpecifiedTestAsync()
         {
-            Dictionary<string, string> qp = await GetAuthorizationRequestUrlQueryParamsWithPromptAsync(Prompt.NotSpecified).ConfigureAwait(false);
+            Dictionary<string, string> qp = await GetAuthorizationRequestUrlQueryParamsWithPromptAsync(Prompt.s_notSpecified).ConfigureAwait(false);
 
             Assert.IsTrue(qp.ContainsKey(TestConstants.PromptParam));
             Assert.AreEqual(Prompt.SelectAccount.PromptValue, qp[TestConstants.PromptParam]);

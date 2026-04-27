@@ -159,7 +159,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
             var prompt = acquireTokenInteractiveParameters.Prompt;
 
-            if (prompt == Prompt.NoPrompt || prompt == Prompt.NotSpecified)
+            if (prompt == Prompt.NoPrompt || prompt == Prompt.s_notSpecified)
             {
                 brokerRequest.Add(BrokerParameter.Prompt, Prompt.SelectAccount.PromptValue);
             }

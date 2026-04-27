@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Client.OAuth2
     /// </summary>    
     internal class OAuth2Client(ILoggerAdapter logger, IHttpManager httpManager, X509Certificate2 mtlsCertificate)
     {
-        private readonly Dictionary<string, string> _headers = new Dictionary<string, string>(MsalIdHelper.GetMsalIdParameters(logger));
+        private readonly Dictionary<string, string> _headers = new(MsalIdHelper.GetMsalIdParameters(logger));
         private readonly Dictionary<string, string> _queryParameters = [];
         private readonly IDictionary<string, string> _bodyParameters = new Dictionary<string, string>();
         private readonly IHttpManager _httpManager = httpManager ?? throw new ArgumentNullException(nameof(httpManager));

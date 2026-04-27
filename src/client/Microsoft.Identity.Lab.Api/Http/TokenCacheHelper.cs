@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -365,11 +365,11 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             // Check against the base classes so this works regardless of which concrete subclass is in use.
             if (tokenCache.Accessor is InMemoryPartitionedAppTokenCacheAccessor appPartitionedAccessor)
             {
-                allAccessTokens = appPartitionedAccessor.AccessTokenCacheDictionary.SelectMany(dict => dict.Value).Select(kv => kv.Value).ToList();
+                allAccessTokens = appPartitionedAccessor._accessTokenCacheDictionary.SelectMany(dict => dict.Value).Select(kv => kv.Value).ToList();
             }
             else if (tokenCache.Accessor is InMemoryPartitionedUserTokenCacheAccessor userPartitionedAccessor)
             {
-                allAccessTokens = userPartitionedAccessor.AccessTokenCacheDictionary.SelectMany(dict => dict.Value).Select(kv => kv.Value).ToList();
+                allAccessTokens = userPartitionedAccessor._accessTokenCacheDictionary.SelectMany(dict => dict.Value).Select(kv => kv.Value).ToList();
             }
             else
             {

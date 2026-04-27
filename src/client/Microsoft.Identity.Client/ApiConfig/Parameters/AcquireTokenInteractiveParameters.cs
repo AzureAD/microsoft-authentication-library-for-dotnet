@@ -14,7 +14,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
 
     internal class AcquireTokenInteractiveParameters : IAcquireTokenParameters
     {
-        public Prompt Prompt { get; set; } = Prompt.NotSpecified;
+        public Prompt Prompt { get; set; } = Prompt.s_notSpecified;
         public CoreUIParent UiParent { get; } = new CoreUIParent();
 
         /// <summary>

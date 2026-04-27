@@ -750,21 +750,21 @@ namespace Microsoft.Identity.Client.Utils
     {
         private const int ProcessorCountRefreshIntervalMs = 30000;
 
-        private static volatile int _processorCount;
-        private static volatile int _lastProcessorCountRefreshTicks;
+        private static volatile int s_processorCount;
+        private static volatile int s_lastProcessorCountRefreshTicks;
 
         internal static int ProcessorCount
         {
             get
             {
                 var now = Environment.TickCount;
-                if (_processorCount == 0 || now - _lastProcessorCountRefreshTicks >= ProcessorCountRefreshIntervalMs)
+                if (s_processorCount == 0 || now - s_lastProcessorCountRefreshTicks >= ProcessorCountRefreshIntervalMs)
                 {
-                    _processorCount = Environment.ProcessorCount;
-                    _lastProcessorCountRefreshTicks = now;
+                    s_processorCount = Environment.ProcessorCount;
+                    s_lastProcessorCountRefreshTicks = now;
                 }
 
-                return _processorCount;
+                return s_processorCount;
             }
         }
     }

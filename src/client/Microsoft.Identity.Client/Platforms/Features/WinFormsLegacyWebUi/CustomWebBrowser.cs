@@ -11,20 +11,22 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
 {
     internal partial class CustomWebBrowser : WebBrowser
     {
+#pragma warning disable IDE1006 // Windows API HRESULT constants use conventional S_OK/S_FALSE naming
         private const int S_OK = 0;
         private const int S_FALSE = 1;
+#pragma warning restore IDE1006
         private const int WM_CHAR = 0x102;
-        private static readonly HashSet<Shortcut> shortcutDisallowedList = [];
-        private CustomWebBrowserEvent webBrowserEvent;
-        private AxHost.ConnectionPointCookie webBrowserEventCookie;
+        private static readonly HashSet<Shortcut> s_shortcutDisallowedList = [];
+        private CustomWebBrowserEvent _webBrowserEvent;
+        private AxHost.ConnectionPointCookie _webBrowserEventCookie;
 
         static CustomWebBrowser()
         {
-            shortcutDisallowedList.Add(Shortcut.AltBksp);
-            shortcutDisallowedList.Add(Shortcut.AltDownArrow);
-            shortcutDisallowedList.Add(Shortcut.AltLeftArrow);
-            shortcutDisallowedList.Add(Shortcut.AltRightArrow);
-            shortcutDisallowedList.Add(Shortcut.AltUpArrow);
+            s_shortcutDisallowedList.Add(Shortcut.AltBksp);
+            s_shortcutDisallowedList.Add(Shortcut.AltDownArrow);
+            s_shortcutDisallowedList.Add(Shortcut.AltLeftArrow);
+            s_shortcutDisallowedList.Add(Shortcut.AltRightArrow);
+            s_shortcutDisallowedList.Add(Shortcut.AltUpArrow);
         }
 
         protected override WebBrowserSiteBase CreateWebBrowserSiteBase()
@@ -39,18 +41,18 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
             object activeXInstance = ActiveXInstance;
             if (activeXInstance != null)
             {
-                webBrowserEvent = new CustomWebBrowserEvent(this);
-                webBrowserEventCookie = new AxHost.ConnectionPointCookie(activeXInstance, webBrowserEvent,
+                _webBrowserEvent = new CustomWebBrowserEvent(this);
+                _webBrowserEventCookie = new AxHost.ConnectionPointCookie(activeXInstance, _webBrowserEvent,
                     typeof(NativeWrapper.DWebBrowserEvents2));
             }
         }
 
         protected override void DetachSink()
         {
-            if (webBrowserEventCookie != null)
+            if (_webBrowserEventCookie != null)
             {
-                webBrowserEventCookie.Disconnect();
-                webBrowserEventCookie = null;
+                _webBrowserEventCookie.Disconnect();
+                _webBrowserEventCookie = null;
             }
 
             base.DetachSink();
@@ -76,7 +78,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
         protected class CustomSite(WebBrowser host) : WebBrowserSite(host), NativeWrapper.IDocHostUIHandler, ICustomQueryInterface
         {
             private const int NotImplemented = -2147467263;
-            private readonly WebBrowser host = host;
+            private readonly WebBrowser _host = host;
 
             #region ICustomQueryInterface Members
 
@@ -115,7 +117,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
 
             public int GetExternal(out object ppDispatch)
             {
-                ppDispatch = host.ObjectForScripting;
+                ppDispatch = _host.ObjectForScripting;
                 return S_OK;
             }
 
@@ -138,7 +140,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
                     info.dwFlags |= DOCHOSTUIFLAG_DPI_AWARE;
                 }
 
-                if (host.ScrollBarsEnabled)
+                if (_host.ScrollBarsEnabled)
                 {
                     info.dwFlags |= DOCHOSTUIFLAG_FLAT_SCROLLBAR;
                 }
@@ -210,7 +212,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
                     {
                         int num = ((int)msg.wParam) | (int)ModifierKeys;
                         Shortcut s = (Shortcut)num;
-                        if (shortcutDisallowedList.Contains(s))
+                        if (s_shortcutDisallowedList.Contains(s))
                         {
                             return S_OK;
                         }

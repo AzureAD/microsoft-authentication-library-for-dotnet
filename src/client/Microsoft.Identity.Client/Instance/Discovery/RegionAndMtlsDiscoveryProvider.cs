@@ -13,7 +13,7 @@ namespace Microsoft.Identity.Client.Region
 {
     internal class RegionAndMtlsDiscoveryProvider(IHttpManager httpManager) : IRegionDiscoveryProvider
     {
-        private readonly IRegionManager _regionManager = new RegionManager(httpManager);
+        private readonly RegionManager _regionManager = new(httpManager);
         public const string PublicEnvForRegional = "login.microsoft.com";
         public const string PublicEnvForRegionalMtlsAuth = "mtlsauth.microsoft.com";
 

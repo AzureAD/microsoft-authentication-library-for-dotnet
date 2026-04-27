@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Client
     /// </summary>
     public class WwwAuthenticateParameters
     {
-        private static readonly HashSet<string> s_knownAuthenticationSchemes = new HashSet<string>(
+        private static readonly HashSet<string> s_knownAuthenticationSchemes = new(
                                                                               new[] {
                                                                                        Constants.BearerAuthHeaderPrefix,
                                                                                        Constants.PoPAuthHeaderPrefix

@@ -204,7 +204,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         }
 #endif
 
-        private static readonly Lazy<bool> _isMacConsoleApp = new(() =>
+        private static readonly Lazy<bool> s_isMacConsoleApp = new(() =>
         {
 #if SUPPORTS_WIN32
             return !LibObjc.IsNsApplicationRunning();
@@ -218,7 +218,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             if (!DesktopOsHelper.IsMac())
                 return false;
             // Checking if NsApplication is running for one time would be enough.
-            return _isMacConsoleApp.Value;
+            return s_isMacConsoleApp.Value;
         }
     }
 }

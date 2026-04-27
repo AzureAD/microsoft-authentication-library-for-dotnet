@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Client
         public static readonly Prompt Never = new("attempt_none");
 #endif
         // for when the developer doesn't specify a prompt
-        internal static readonly Prompt NotSpecified = new("not_specified");
+        internal static readonly Prompt s_notSpecified = new("not_specified");
 
         internal string PromptValue { get; }
 

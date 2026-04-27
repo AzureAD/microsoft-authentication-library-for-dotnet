@@ -36,17 +36,23 @@ namespace Microsoft.Identity.Client.Internal.Broker
         public const string LocalAccountId = "local_account_id";
         public const string TenantId = "tenant_id";
         public const string UserName = "username";
+#pragma warning disable IDE1006 // iOS broker protocol constants use Apple's naming convention
         public const string iOSBrokerNonce = "broker_nonce"; // included in request and response with iOS Broker v3
         public const string iOSBrokerTenantId = "utid";
+#pragma warning restore IDE1006
         public const string Environment = "environment";
 
+#pragma warning disable IDE1006 // iOS broker protocol constants use Apple's naming convention
         public const string iOSBrokerUserCancellationErrorCode = "-50005";
+#pragma warning restore IDE1006
 
         // The requested resource is protected by an Intune Conditional Access policy.
         // The calling app should integrate the Intune SDK and call the remediateComplianceForIdentity:silent: API,
         // please see https://aka.ms/intuneMAMSDK for more information. Handling of this error is optional (handle it only
         // if you are going to access resources protected by an Intune Conditional Access policy).
+#pragma warning disable IDE1006 // iOS broker protocol constants use Apple's naming convention
         public const string iOSBrokerProtectionPoliciesRequiredErrorCode = "-50004";
+#pragma warning restore IDE1006
 
         public const string TokenType = "token_type";
 

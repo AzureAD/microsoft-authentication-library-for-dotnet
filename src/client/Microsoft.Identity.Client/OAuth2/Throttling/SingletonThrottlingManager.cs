@@ -40,12 +40,12 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
             };
         }
 
-        private static readonly Lazy<SingletonThrottlingManager> lazyPrivateCtor =
+        private static readonly Lazy<SingletonThrottlingManager> s_lazyPrivateCtor =
             new(() => new SingletonThrottlingManager());
 
         public static SingletonThrottlingManager GetInstance()
         {
-            return lazyPrivateCtor.Value;
+            return s_lazyPrivateCtor.Value;
         }
 
         #endregion

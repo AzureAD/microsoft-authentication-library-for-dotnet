@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Client.Region
         private readonly int _imdsCallTimeoutMs = imdsCallTimeout;
 
         // lock for discovery. So it is done only once
-        private static readonly SemaphoreSlim _lockDiscover = new(1);
+        private static readonly SemaphoreSlim s_lockDiscover = new(1);
 
         private static string s_autoDiscoveredRegion;
         private static bool s_failedAutoDiscovery = false;
@@ -160,7 +160,7 @@ namespace Microsoft.Identity.Client.Region
         {
             RegionInfo result = null;
 
-            await _lockDiscover.WaitAsync(requestCancellationToken).ConfigureAwait(false);
+            await s_lockDiscover.WaitAsync(requestCancellationToken).ConfigureAwait(false);
             try
             {
                 RegionInfo regionInfo = GetCachedRegion(logger);
@@ -261,7 +261,7 @@ namespace Microsoft.Identity.Client.Region
                 s_failedAutoDiscovery = result.RegionSource == RegionAutodetectionSource.FailedAutoDiscovery;
                 s_autoDiscoveredRegion = result.Region;
                 s_regionDiscoveryDetails = result.RegionDetails;
-                _lockDiscover.Release();
+                s_lockDiscover.Release();
             }
 
             return result;

@@ -75,6 +75,7 @@ dotnet_naming_rule.static_fields_should_have_prefix.style = static_prefix_style
 
 dotnet_naming_symbols.static_fields.applicable_kinds   = field
 dotnet_naming_symbols.static_fields.required_modifiers = static
+dotnet_naming_symbols.static_fields.applicable_accessibilities = private, internal, private_protected
 
 dotnet_naming_style.static_prefix_style.required_prefix = s_
 dotnet_naming_style.static_prefix_style.capitalization = camel_case 
@@ -883,6 +884,11 @@ dotnet_diagnostic.IDE0039.severity = none
 # Disabled: members may be used in other TFMs inside #if preprocessor blocks
 dotnet_diagnostic.IDE0051.severity = none
 dotnet_diagnostic.IDE0052.severity = none
+
+# Namespace does not match folder structure (IDE0130)
+# Disabled: intentional flat namespace design - all public types use Microsoft.Identity.Client
+# regardless of subfolder, to maintain a clean public API surface
+dotnet_diagnostic.IDE0130.severity = none
 
 # Use range subscript operator (x[^1]) - requires .NET 5+ (System.Index not available in net462/netstandard2.0)
 dotnet_diagnostic.IDE0056.severity = none

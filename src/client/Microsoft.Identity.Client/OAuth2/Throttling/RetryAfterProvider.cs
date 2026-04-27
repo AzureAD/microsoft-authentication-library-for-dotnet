@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
 
         internal ThrottlingCache ThrottlingCache { get; } // internal for test only
 
-        internal static readonly TimeSpan MaxRetryAfter = TimeSpan.FromSeconds(3600); // internal for test only
+        internal static readonly TimeSpan s_maxRetryAfter = TimeSpan.FromSeconds(3600); // internal for test only
 
         public RetryAfterProvider()
         {
@@ -92,9 +92,9 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
 
         private static TimeSpan GetSafeValue(TimeSpan headerValue)
         {
-            if (headerValue > MaxRetryAfter)
+            if (headerValue > s_maxRetryAfter)
             {
-                return MaxRetryAfter;
+                return s_maxRetryAfter;
             }
 
             return headerValue;

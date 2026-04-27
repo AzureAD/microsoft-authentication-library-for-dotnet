@@ -7,16 +7,16 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 {
     internal class InMemoryLegacyCachePersistance : ILegacyCachePersistence
     {
-        private byte[] data;
+        private byte[] _data;
 
         public byte[] LoadCache()
         {
-            return data;
+            return _data;
         }
 
         public void WriteCache(byte[] serializedCache)
         {
-            data = serializedCache;
+            _data = serializedCache;
         }
     }
 }

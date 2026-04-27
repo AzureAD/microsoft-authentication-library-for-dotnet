@@ -116,9 +116,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 statusCode);
         }
 
+#pragma warning disable IDE0060 // logger reserved for future diagnostic use
         private static bool ValidateCsrMetadataResponse(
             HttpResponse response,
             ILoggerAdapter logger)
+#pragma warning restore IDE0060
         {
             string serverHeader = response.HeadersAsDictionary
                 .FirstOrDefault((kvp) =>

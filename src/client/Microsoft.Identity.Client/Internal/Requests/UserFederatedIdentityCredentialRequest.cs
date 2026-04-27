@@ -36,12 +36,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 [OAuth2Parameter.UserFederatedIdentityCredential] = assertion
             };
 
-            ISet<string> unionScope = new HashSet<string>
-            {
+            HashSet<string> unionScope =
+            [
                 OAuth2Value.ScopeOpenId,
                 OAuth2Value.ScopeOfflineAccess,
                 OAuth2Value.ScopeProfile
-            };
+            ];
 
             unionScope.UnionWith(AuthenticationRequestParameters.Scope);
             dict[OAuth2Parameter.Scope] = unionScope.AsSingleString();

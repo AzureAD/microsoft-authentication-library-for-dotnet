@@ -11,12 +11,12 @@ namespace Microsoft.Identity.Client.Utils
     // Based on https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/1698/files
     internal static class Base64UrlHelpers
     {
-        private const char base64PadCharacter = '=';
+        private const char Base64PadCharacter = '=';
 
-        private const char base64Character62 = '+';
-        private const char base64Character63 = '/';
-        private const char base64UrlCharacter62 = '-';
-        private const char base64UrlCharacter63 = '_';
+        private const char Base64Character62 = '+';
+        private const char Base64Character63 = '/';
+        private const char Base64UrlCharacter62 = '-';
+        private const char Base64UrlCharacter63 = '_';
 
         /// <summary>
         /// Encoding table
@@ -26,8 +26,8 @@ namespace Microsoft.Identity.Client.Utils
             'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
             'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z',
             '0','1','2','3','4','5','6','7','8','9',
-            base64UrlCharacter62,
-            base64UrlCharacter63
+            Base64UrlCharacter62,
+            Base64UrlCharacter63
         ];
 
         /// <summary>
@@ -171,7 +171,7 @@ namespace Microsoft.Identity.Client.Utils
 
             for (int i = 0; i < str.Length; i++)
             {
-                if (str[i] == base64UrlCharacter62 || str[i] == base64UrlCharacter63)
+                if (str[i] == Base64UrlCharacter62 || str[i] == Base64UrlCharacter63)
                 {
                     needReplace = true;
                     break;
@@ -186,16 +186,16 @@ namespace Microsoft.Identity.Client.Utils
                     int i = 0;
                     for (; i < str.Length; i++)
                     {
-                        if (str[i] == base64UrlCharacter62)
-                            dest[i] = base64Character62;
-                        else if (str[i] == base64UrlCharacter63)
-                            dest[i] = base64Character63;
+                        if (str[i] == Base64UrlCharacter62)
+                            dest[i] = Base64Character62;
+                        else if (str[i] == Base64UrlCharacter63)
+                            dest[i] = Base64Character63;
                         else
                             dest[i] = str[i];
                     }
 
                     for (; i < decodedLength; i++)
-                        dest[i] = base64PadCharacter;
+                        dest[i] = Base64PadCharacter;
                 }
 
                 return Convert.FromBase64String(decodedString);
@@ -213,9 +213,9 @@ namespace Microsoft.Identity.Client.Utils
                     fixed (char* dest = decodedString)
                     {
                         Buffer.MemoryCopy(src, dest, str.Length * 2, str.Length * 2);
-                        dest[str.Length] = base64PadCharacter;
+                        dest[str.Length] = Base64PadCharacter;
                         if (str.Length + 2 == decodedLength)
-                            dest[str.Length + 1] = base64PadCharacter;
+                            dest[str.Length + 1] = Base64PadCharacter;
                     }
 
                     return Convert.FromBase64String(decodedString);

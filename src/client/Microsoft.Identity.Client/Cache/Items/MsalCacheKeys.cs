@@ -107,7 +107,7 @@ namespace Microsoft.Identity.Client.Cache.Keys
 
         #region iOS
 
-        internal static readonly Dictionary<string, int> iOSAuthorityTypeToAttrType = new()
+        internal static readonly Dictionary<string, int> s_iOSAuthorityTypeToAttrType = new()
         {
             {CacheAuthorityType.AAD.ToString(), 1001},
             {CacheAuthorityType.MSA.ToString(), 1002},

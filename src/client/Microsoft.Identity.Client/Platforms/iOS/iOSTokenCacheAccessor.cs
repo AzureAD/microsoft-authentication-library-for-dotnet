@@ -163,7 +163,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
         public List<MsalAccountCacheItem> GetAllAccounts(string optionalPartitionKey = null, ILoggerAdapter requestlogger = null)
         {
-            return GetPayloadAsString(MsalCacheKeys.iOSAuthorityTypeToAttrType[CacheAuthorityType.MSSTS.ToString()])
+            return GetPayloadAsString(MsalCacheKeys.s_iOSAuthorityTypeToAttrType[CacheAuthorityType.MSSTS.ToString()])
                 .Select(x => MsalAccountCacheItem.FromJsonString(x))
                 .ToList();
         }
@@ -343,7 +343,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             RemoveByType((int)MsalCacheKeys.iOSCredentialAttrType.RefreshToken);
             RemoveByType((int)MsalCacheKeys.iOSCredentialAttrType.IdToken);
 
-            RemoveByType(MsalCacheKeys.iOSAuthorityTypeToAttrType[CacheAuthorityType.MSSTS.ToString()]);
+            RemoveByType(MsalCacheKeys.s_iOSAuthorityTypeToAttrType[CacheAuthorityType.MSSTS.ToString()]);
         }
 
         /// <summary>

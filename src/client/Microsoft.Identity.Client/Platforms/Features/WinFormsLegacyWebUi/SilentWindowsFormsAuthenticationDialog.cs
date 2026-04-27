@@ -15,9 +15,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
     [EditorBrowsable(EditorBrowsableState.Never)]
     internal class SilentWindowsFormsAuthenticationDialog : WindowsFormsWebAuthenticationDialogBase
     {
-        private bool doneSignaled;
-        private DateTime navigationExpiry = DateTime.MaxValue;
-        private Timer timer;
+        private bool _doneSignaled;
+        private DateTime _navigationExpiry = DateTime.MaxValue;
+        private Timer _timer;
 
         /// <summary>
         /// </summary>
@@ -55,13 +55,13 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
         /// </summary>
         protected override void WebBrowserBeforeNavigateHandler(object sender, WebBrowserBeforeNavigateEventArgs e)
         {
-            if (null == timer)
+            if (null == _timer)
             {
-                timer = CreateStartedTimer(
+                _timer = CreateStartedTimer(
                     () =>
                     {
                         DateTime now = DateTime.Now;
-                        if (now > navigationExpiry)
+                        if (now > _navigationExpiry)
                         {
                             OnUserInteractionRequired();
                         }
@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
 
             // We don't timeout each individual navigation, only the time between individual navigations.
             // Reset the expiry time so that it isn't relevant until the next document complete.
-            navigationExpiry = DateTime.MaxValue;
+            _navigationExpiry = DateTime.MaxValue;
 
             base.WebBrowserBeforeNavigateHandler(sender, e);
         }
@@ -94,20 +94,20 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
         /// <param name="exception"></param>
         private void SignalDone(Exception exception = null)
         {
-            if (!doneSignaled)
+            if (!_doneSignaled)
             {
-                timer.Stop();
+                _timer.Stop();
                 SilentWebUIDoneEventArgs args = new(exception);
 
                 Done?.Invoke(this, args);
 
-                doneSignaled = true;
+                _doneSignaled = true;
             }
         }
 
         private void DocumentCompletedHandler(object sender, WebBrowserDocumentCompletedEventArgs args)
         {
-            navigationExpiry = DateTime.Now.AddMilliseconds(NavigationWaitMiliSecs);
+            _navigationExpiry = DateTime.Now.AddMilliseconds(NavigationWaitMiliSecs);
             if (HasLoginPage())
             {
                 OnUserInteractionRequired();
@@ -160,7 +160,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
         /// </summary>
         protected override void Dispose(bool disposing)
         {
-            timer?.Dispose();
+            _timer?.Dispose();
             base.Dispose(disposing);
         }
 

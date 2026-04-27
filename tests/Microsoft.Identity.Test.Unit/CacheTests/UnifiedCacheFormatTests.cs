@@ -269,7 +269,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             Assert.AreEqual(_expectedAccountCacheKeyIosService, iOSKey.iOSService);
             Assert.AreEqual(_expectedAccountCacheKeyIosAccount, iOSKey.iOSAccount);
-            Assert.AreEqual(MsalCacheKeys.iOSAuthorityTypeToAttrType["MSSTS"], iOSKey.iOSType);
+            Assert.AreEqual(MsalCacheKeys.s_iOSAuthorityTypeToAttrType["MSSTS"], iOSKey.iOSType);
         }
 
         private void ValidateCacheEntityValue(string expectedEntityValue, ICollection<string> entities)

@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client
 {
     internal class MsalServiceExceptionFactory
     {
-        static readonly HashSet<string> s_nonUiSubErrors = new HashSet<string>(
+        static readonly HashSet<string> s_nonUiSubErrors = new(
             new[] { MsalError.ClientMismatch, MsalError.ProtectionPolicyRequired },
             StringComparer.OrdinalIgnoreCase);
 

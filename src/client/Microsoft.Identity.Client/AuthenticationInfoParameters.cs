@@ -61,7 +61,7 @@ namespace Microsoft.Identity.Client
                 {
                     var authInfoValue = authInfoValueList.FirstOrDefault();
                     var AuthValuesSplit = authInfoValue.Split([' '], 2);
-                    IDictionary<string, string> paramValues;
+                    Dictionary<string, string> paramValues;
 
                     if (AuthValuesSplit.Length != 2)
                     {

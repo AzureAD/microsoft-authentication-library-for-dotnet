@@ -233,7 +233,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
             // In base classes have them override this to add their properties/fields to the event.
         }
 
+#pragma warning disable IDE0060 // accountId reserved for future telemetry use
         private ApiEvent InitializeApiEvent(string accountId)
+#pragma warning restore IDE0060
         {
             ApiEvent apiEvent = new ApiEvent(AuthenticationRequestParameters.RequestContext.CorrelationId)
             {

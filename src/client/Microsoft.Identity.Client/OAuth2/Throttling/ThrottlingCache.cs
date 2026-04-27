@@ -14,12 +14,12 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
         internal const int DefaultCleanupIntervalMs = 5 * 60 * 1000; // internal for test
 
         private volatile bool _cleanupInProgress = false;
-        private static readonly object _padlock = new();
+        private static readonly object s_padlock = new();
 
         /// <summary>
         /// To prevent the cache from becoming too large, purge expired entries every X seconds
         /// </summary>
-        private readonly TimeSpan s_cleanupCacheInterval = customCleanupIntervalMs.HasValue ?
+        private readonly TimeSpan _cleanupCacheInterval = customCleanupIntervalMs.HasValue ?
                 TimeSpan.FromMilliseconds(customCleanupIntervalMs.Value) :
                 TimeSpan.FromMilliseconds(DefaultCleanupIntervalMs);
 
@@ -74,12 +74,12 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
 
         private void CleanCache(ILoggerAdapter logger)
         {
-            if (_lastCleanupTime + s_cleanupCacheInterval < DateTimeOffset.UtcNow &&
+            if (_lastCleanupTime + _cleanupCacheInterval < DateTimeOffset.UtcNow &&
                 !_cleanupInProgress)
             {
                 logger.Verbose(() => "[Throttling] Acquiring lock to cleanup throttling state");
 
-                lock (_padlock)
+                lock (s_padlock)
                 {
                     if (!_cleanupInProgress)
                     {

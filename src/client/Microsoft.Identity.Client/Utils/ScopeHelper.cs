@@ -11,12 +11,12 @@ namespace Microsoft.Identity.Client.Utils
     internal static class ScopeHelper
     {
         private const string DefaultSuffix = "/.default";
-        internal static readonly char[] separator = [' '];
+        internal static readonly char[] s_separator = [' '];
 
         public static string OrderScopesAlphabetically(string originalScopes)
         {
             // split by space and order alphabetically
-            string[] split = originalScopes.Split(separator, StringSplitOptions.RemoveEmptyEntries);
+            string[] split = originalScopes.Split(s_separator, StringSplitOptions.RemoveEmptyEntries);
             // order the scopes in alphabetical order
             Array.Sort(split, StringComparer.OrdinalIgnoreCase);
             return string.Join(" ", split);
