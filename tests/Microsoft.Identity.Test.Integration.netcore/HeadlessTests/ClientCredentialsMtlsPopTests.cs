@@ -281,16 +281,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [RunOn(SkipConditions.Linux)] // mTLS is not supported on Linux
         public async Task Sni_Over_Mtls_Gets_Bearer_Token_Successfully_TestAsync()
         {
-            // Arrange: Use LabResponseHelper to get app configuration
-            var appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
-
             X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
 
             string[] appScopes = new[] { "https://vault.azure.net/.default" };
 
             var certificateOptions = new Client.AppConfig.CertificateOptions
             {
-                SendX5C = true,
                 SendCertificateOverMtls = true
             };
 
@@ -328,15 +324,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task Sni_Gets_Pop_Token_WithCertificateOptions_TestAsync(bool sendCertificateOverMtls)
         {
             // Arrange
-            var appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
-
             X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
 
             string[] appScopes = new[] { "https://vault.azure.net/.default" };
 
             var certificateOptions = new Client.AppConfig.CertificateOptions
             {
-                SendX5C = true,
                 SendCertificateOverMtls = sendCertificateOverMtls
             };
 
