@@ -1000,7 +1000,7 @@ namespace Microsoft.Identity.Client
 
             logger.Verbose(() => $"[GetAccounts] Found {refreshTokenCacheItems.Count} RTs and {accountCacheItems.Count} accounts in MSAL cache after environment filtering. ");
 
-            Dictionary<string, Account> clientInfoToAccountMap = new Dictionary<string, Account>();
+            Dictionary<string, Account> clientInfoToAccountMap = [];
             foreach (MsalRefreshTokenCacheItem rtItem in refreshTokenCacheItems)
             {
                 foreach (MsalAccountCacheItem account in accountCacheItems)
@@ -1157,7 +1157,7 @@ namespace Microsoft.Identity.Client
             // some accessors might not support partitioning, so make sure to filter by home account id
             idTokenCacheItems.RemoveAll(idToken => !homeAccountId.Equals(idToken.HomeAccountId));
 
-            Dictionary<string, TenantProfile> tenantProfiles = new();
+            Dictionary<string, TenantProfile> tenantProfiles = [];
             foreach (MsalIdTokenCacheItem idTokenCacheItem in idTokenCacheItems)
             {
                 tenantProfiles[idTokenCacheItem.TenantId] = new TenantProfile(idTokenCacheItem);

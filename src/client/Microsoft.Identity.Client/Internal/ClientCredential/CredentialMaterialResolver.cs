@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             string tokenEndpoint,
             CancellationToken cancellationToken)
         {
-            var context = BuildContext(requestParams, tokenEndpoint);
+            CredentialContext context = BuildContext(requestParams, tokenEndpoint);
 
             CredentialMaterial material = await credential
                 .GetCredentialMaterialAsync(context, cancellationToken)

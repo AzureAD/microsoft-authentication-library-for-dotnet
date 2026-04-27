@@ -142,7 +142,7 @@ namespace Microsoft.Identity.Client.OAuth2
                         tokenEndpoint,
                         cancellationToken).ConfigureAwait(false);
 
-                    foreach (var kvp in material.TokenRequestParameters)
+                    foreach (KeyValuePair<string, string> kvp in material.TokenRequestParameters)
                     {
                         _oAuth2Client.AddBodyParameter(kvp.Key, kvp.Value);
                     }

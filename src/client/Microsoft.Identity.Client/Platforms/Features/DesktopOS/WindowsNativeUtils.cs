@@ -12,7 +12,7 @@ namespace Microsoft.Identity.Client.Utils.Windows
     /// </summary>
     [Obsolete("This workaround for previous WAM broker implementation is not necessary with the improved broker.", true)]
     [EditorBrowsable(EditorBrowsableState.Never)] // deprecated, this feature is not in use        
-    public static class WindowsNativeUtils
+    public static partial class WindowsNativeUtils
     {
         /// <summary>
         /// Tests whether the current user is a member of the Administrator's group.
@@ -40,16 +40,18 @@ namespace Microsoft.Identity.Client.Utils.Windows
             }
         }
 
-        [DllImport("shell32.dll")]
+        [LibraryImport("shell32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool IsUserAnAdmin();
+        private static partial bool IsUserAnAdmin();
 
-        [DllImport("ole32.dll")]
-        private static extern int CoInitializeSecurity(
+        [LibraryImport("ole32.dll")]
+#pragma warning disable IDE0060 // COM P/Invoke signatures must match native API exactly
+        private static partial int CoInitializeSecurity(
             IntPtr pVoid, int cAuthSvc, IntPtr asAuthSvc,
             IntPtr pReserved1, RpcAuthnLevel level,
             RpcImpLevel impers, IntPtr pAuthList,
             EoAuthnCap dwCapabilities, IntPtr pReserved3);
+#pragma warning restore IDE0060
 
         private enum RpcAuthnLevel
         {

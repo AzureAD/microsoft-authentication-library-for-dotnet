@@ -1,6 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+// P/Invoke signatures must match native API exactly; parameters may be unused by managed callers.
+// UnmanagedCallConv attribute uses [} which IDE0300 suggests simplifying - suppress as P/Invoke boilerplate.
+#pragma warning disable IDE0060
+#pragma warning disable IDE0300
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +16,7 @@ using System.Threading.Tasks;
 namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
 {
     // https://developer.apple.com/documentation/security/keychain_services/keychain_items
-    internal static class SecurityFramework
+    internal static partial class SecurityFramework
     {
         private const string SecurityFrameworkLib = "/System/Library/Frameworks/Security.framework/Security";
 
@@ -51,18 +56,22 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
             kSecReturnData = LibSystem.GetGlobal(Handle, "kSecReturnData");
         }
 
-        [DllImport(SecurityFrameworkLib, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int SessionGetInfo(int session, out int sessionId, out SessionAttributeBits attributes);
+        [LibraryImport(SecurityFrameworkLib)]
+        [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+        public static partial int SessionGetInfo(int session, out int sessionId, out SessionAttributeBits attributes);
 
-        [DllImport(SecurityFrameworkLib, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int SecAccessCreate(IntPtr descriptor, IntPtr trustedList, out IntPtr accessRef);
+        [LibraryImport(SecurityFrameworkLib)]
+        [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+        public static partial int SecAccessCreate(IntPtr descriptor, IntPtr trustedList, out IntPtr accessRef);
 
-        [DllImport(SecurityFrameworkLib, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int SecKeychainItemCreateFromContent(IntPtr itemClass, IntPtr attrList, uint length,
+        [LibraryImport(SecurityFrameworkLib)]
+        [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+        public static partial int SecKeychainItemCreateFromContent(IntPtr itemClass, IntPtr attrList, uint length,
             IntPtr data, IntPtr keychainRef, IntPtr initialAccess, out IntPtr itemRef);
 
-        [DllImport(SecurityFrameworkLib, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int SecKeychainAddGenericPassword(
+        [LibraryImport(SecurityFrameworkLib, StringMarshalling = StringMarshalling.Custom, StringMarshallingCustomType = typeof(System.Runtime.InteropServices.Marshalling.AnsiStringMarshaller))]
+        [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+        public static partial int SecKeychainAddGenericPassword(
             IntPtr keychain,
             uint serviceNameLength,
             string serviceName,
@@ -72,8 +81,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
             byte[] passwordData,
             out IntPtr itemRef);
 
-        [DllImport(SecurityFrameworkLib, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int SecKeychainFindGenericPassword(
+        [LibraryImport(SecurityFrameworkLib, StringMarshalling = StringMarshalling.Custom, StringMarshallingCustomType = typeof(System.Runtime.InteropServices.Marshalling.AnsiStringMarshaller))]
+        [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+        public static partial int SecKeychainFindGenericPassword(
             IntPtr keychainOrArray,
             uint serviceNameLength,
             string serviceName,
@@ -83,8 +93,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
             out IntPtr passwordData,
             out IntPtr itemRef);
 
-        [DllImport(SecurityFrameworkLib, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-        public static extern unsafe int SecKeychainItemCopyAttributesAndData(
+        [LibraryImport(SecurityFrameworkLib)]
+        [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+        public static unsafe partial int SecKeychainItemCopyAttributesAndData(
             IntPtr itemRef,
             IntPtr info,
             IntPtr itemClass,
@@ -92,35 +103,42 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
             uint* dataLength,
             void** data);
 
-        [DllImport(SecurityFrameworkLib, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int SecKeychainItemModifyAttributesAndData(
+        [LibraryImport(SecurityFrameworkLib)]
+        [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+        public static partial int SecKeychainItemModifyAttributesAndData(
             IntPtr itemRef,
             IntPtr attrList, // SecKeychainAttributeList*
             uint length,
             byte[] data);
 
-        [DllImport(SecurityFrameworkLib, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int SecKeychainItemDelete(
+        [LibraryImport(SecurityFrameworkLib)]
+        [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+        public static partial int SecKeychainItemDelete(
             IntPtr itemRef);
 
-        [DllImport(SecurityFrameworkLib, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int SecKeychainItemFreeContent(
+        [LibraryImport(SecurityFrameworkLib)]
+        [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+        public static partial int SecKeychainItemFreeContent(
             IntPtr attrList, // SecKeychainAttributeList*
             IntPtr data);
 
-        [DllImport(SecurityFrameworkLib, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int SecKeychainItemFreeAttributesAndData(
+        [LibraryImport(SecurityFrameworkLib)]
+        [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+        public static partial int SecKeychainItemFreeAttributesAndData(
             IntPtr attrList, // SecKeychainAttributeList*
             IntPtr data);
 
-        [DllImport(SecurityFrameworkLib, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int SecItemCopyMatching(IntPtr query, out IntPtr result);
+        [LibraryImport(SecurityFrameworkLib)]
+        [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+        public static partial int SecItemCopyMatching(IntPtr query, out IntPtr result);
 
-        [DllImport(SecurityFrameworkLib, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int SecKeychainItemCopyFromPersistentReference(IntPtr persistentItemRef, out IntPtr itemRef);
+        [LibraryImport(SecurityFrameworkLib)]
+        [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+        public static partial int SecKeychainItemCopyFromPersistentReference(IntPtr persistentItemRef, out IntPtr itemRef);
 
-        [DllImport(SecurityFrameworkLib, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int SecKeychainItemCopyContent(IntPtr itemRef, IntPtr itemClass, IntPtr attrList,
+        [LibraryImport(SecurityFrameworkLib)]
+        [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+        public static partial int SecKeychainItemCopyContent(IntPtr itemRef, IntPtr itemClass, IntPtr attrList,
             out uint length, out IntPtr outData);
 
         public const int CallerSecuritySession = -1;
@@ -189,15 +207,17 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
         AccountItem = 1633903476,
     }
 
-    internal static class LibSystem
+    internal static partial class LibSystem
     {
         private const string LibSystemLib = "/System/Library/Frameworks/System.framework/System";
 
-        [DllImport(LibSystemLib, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr dlopen(string name, int flags);
+        [LibraryImport(LibSystemLib, StringMarshalling = StringMarshalling.Custom, StringMarshallingCustomType = typeof(System.Runtime.InteropServices.Marshalling.AnsiStringMarshaller))]
+        [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+        public static partial IntPtr dlopen(string name, int flags);
 
-        [DllImport(LibSystemLib, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr dlsym(IntPtr handle, string symbol);
+        [LibraryImport(LibSystemLib, StringMarshalling = StringMarshalling.Custom, StringMarshallingCustomType = typeof(System.Runtime.InteropServices.Marshalling.AnsiStringMarshaller))]
+        [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+        public static partial IntPtr dlsym(IntPtr handle, string symbol);
 
         public static IntPtr GetGlobal(IntPtr handle, string symbol)
         {
@@ -206,7 +226,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
         }
     }
 
-    internal static class LibObjc
+    internal static partial class LibObjc
     {
         private const string LibObjcLib = "/usr/lib/libobjc.dylib";
 
@@ -251,14 +271,17 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
             }
         }
 
-        [DllImport(LibObjcLib, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-        private static extern IntPtr objc_getClass(string name);
+        [LibraryImport(LibObjcLib, StringMarshalling = StringMarshalling.Custom, StringMarshallingCustomType = typeof(System.Runtime.InteropServices.Marshalling.AnsiStringMarshaller))]
+        [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+        private static partial IntPtr objc_getClass(string name);
 
-        [DllImport(LibObjcLib, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-        private static extern IntPtr sel_registerName(string name);
+        [LibraryImport(LibObjcLib, StringMarshalling = StringMarshalling.Custom, StringMarshallingCustomType = typeof(System.Runtime.InteropServices.Marshalling.AnsiStringMarshaller))]
+        [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+        private static partial IntPtr sel_registerName(string name);
 
-        [DllImport(LibObjcLib, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-        private static extern IntPtr objc_msgSend(IntPtr receiver, IntPtr selector);
+        [LibraryImport(LibObjcLib)]
+        [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+        private static partial IntPtr objc_msgSend(IntPtr receiver, IntPtr selector);
 
         [DllImport(LibObjcLib, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
         private static extern bool objc_msgSend_bool(IntPtr receiver, IntPtr selector);

@@ -10,16 +10,11 @@ using Microsoft.Identity.Client.TelemetryCore;
 
 namespace Microsoft.Identity.Client.Internal.ClientCredential
 {
-    internal class SignedAssertionClientCredential : IClientCredential
+    internal class SignedAssertionClientCredential(string signedAssertion) : IClientCredential
     {
-        private readonly string _signedAssertion;
+        private readonly string _signedAssertion = signedAssertion;
 
         public AssertionType AssertionType => AssertionType.ClientAssertion;
-
-        public SignedAssertionClientCredential(string signedAssertion)
-        {
-            _signedAssertion = signedAssertion;
-        }
 
         public Task<CredentialMaterial> GetCredentialMaterialAsync(
             CredentialContext context,

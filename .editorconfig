@@ -903,6 +903,8 @@ dotnet_diagnostic.CA1850.severity = none
 # Use ThrowIfCancellationRequested / ThrowIfNegativeOrZero / ObjectDisposedException.ThrowIf - requires .NET 6+/8+
 dotnet_diagnostic.CA2250.severity = none
 dotnet_diagnostic.CA1512.severity = none
+# SYSLIB1054: LibraryImport requires .NET 7+ source generation; multi-target false positive
+dotnet_diagnostic.SYSLIB1054.severity = none
 dotnet_diagnostic.CA1513.severity = none
 
 # Dispose objects before losing scope

@@ -10,16 +10,11 @@ using Microsoft.Identity.Client.TelemetryCore;
 
 namespace Microsoft.Identity.Client.Internal.ClientCredential
 {
-    internal class ClientSecretCredential : IClientCredential
+    internal class ClientSecretCredential(string secret) : IClientCredential
     {
-        internal string Secret { get; }
+        internal string Secret { get; } = secret;
 
         public AssertionType AssertionType => AssertionType.Secret;
-
-        public ClientSecretCredential(string secret)
-        {
-            Secret = secret;
-        }
 
         public Task<CredentialMaterial> GetCredentialMaterialAsync(
             CredentialContext context,

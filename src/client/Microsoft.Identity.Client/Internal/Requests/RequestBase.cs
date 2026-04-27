@@ -6,24 +6,24 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.ConstrainedExecution;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance.Discovery;
-using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
-using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Client.TelemetryCore;
-using Microsoft.IdentityModel.Abstractions;
-using Microsoft.Identity.Client.TelemetryCore.TelemetryClient;
-using Microsoft.Identity.Client.TelemetryCore.OpenTelemetry;
 using Microsoft.Identity.Client.Internal.Broker;
-using System.Runtime.ConstrainedExecution;
-using Microsoft.Identity.Client.AuthScheme;
+using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.TelemetryCore;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
+using Microsoft.Identity.Client.TelemetryCore.OpenTelemetry;
+using Microsoft.Identity.Client.TelemetryCore.TelemetryClient;
+using Microsoft.Identity.Client.Utils;
+using Microsoft.IdentityModel.Abstractions;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -73,7 +73,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             ApiEvent apiEvent = null;
 
-            var measureTelemetryDurationResult = StopwatchService.MeasureCodeBlock(() =>
+            MeasureDurationResult measureTelemetryDurationResult = StopwatchService.MeasureCodeBlock(() =>
             {
                 apiEvent = InitializeApiEvent(AuthenticationRequestParameters.Account?.HomeAccountId?.Identifier);
                 AuthenticationRequestParameters.RequestContext.ApiEvent = apiEvent;
@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             try
             {
                 AuthenticationResult authenticationResult = null;
-                var measureDurationResult = await StopwatchService.MeasureCodeBlockAsync(async () =>
+                MeasureDurationResult measureDurationResult = await StopwatchService.MeasureCodeBlockAsync(async () =>
                 {
                     AuthenticationRequestParameters.LogParameters();
                     LogRequestStarted(AuthenticationRequestParameters);
@@ -156,10 +156,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 if (Uri.IsWellFormedUriString(firstScope, UriKind.Absolute))
                 {
-                    Uri firstScopeAsUri = new Uri(firstScope);
+                    Uri firstScopeAsUri = new(firstScope);
                     resource = $"{firstScopeAsUri.Scheme}://{firstScopeAsUri.Host}";
 
-                    StringBuilder stringBuilder = new StringBuilder();
+                    StringBuilder stringBuilder = new();
 
                     foreach (string scope in AuthenticationRequestParameters.Scope)
                     {
@@ -199,7 +199,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             if (logger.IsLoggingEnabled(LogLevel.Always))
             {
-                var metadata = authenticationResult.AuthenticationResultMetadata;
+                AuthenticationResultMetadata metadata = authenticationResult.AuthenticationResultMetadata;
                 logger.Always(
                     $"""
                      
@@ -237,7 +237,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private ApiEvent InitializeApiEvent(string accountId)
 #pragma warning restore IDE0060
         {
-            ApiEvent apiEvent = new ApiEvent(AuthenticationRequestParameters.RequestContext.CorrelationId)
+            ApiEvent apiEvent = new(AuthenticationRequestParameters.RequestContext.CorrelationId)
             {
                 ApiId = AuthenticationRequestParameters.ApiId,
                 IsTokenCacheSerialized =
@@ -268,11 +268,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private void UpdateCallerSdkDetails(ApiEvent apiEvent)
         {
-            string callerSdkId;
-            string callerSdkVer;
 
             // Check if ExtraQueryParameters contains caller-sdk-id and caller-sdk-ver
-            if (AuthenticationRequestParameters.ExtraQueryParameters.TryGetValue(Constants.CallerSdkIdKey, out callerSdkId))
+            if (AuthenticationRequestParameters.ExtraQueryParameters.TryGetValue(Constants.CallerSdkIdKey, out string callerSdkId))
             {
                 AuthenticationRequestParameters.ExtraQueryParameters.Remove(Constants.CallerSdkIdKey);
             }
@@ -281,7 +279,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 callerSdkId = AuthenticationRequestParameters.RequestContext.ServiceBundle.Config.ClientName;
             }
 
-            if (AuthenticationRequestParameters.ExtraQueryParameters.TryGetValue(Constants.CallerSdkVersionKey, out callerSdkVer))
+            if (AuthenticationRequestParameters.ExtraQueryParameters.TryGetValue(Constants.CallerSdkVersionKey, out string callerSdkVer))
             {
                 AuthenticationRequestParameters.ExtraQueryParameters.Remove(Constants.CallerSdkVersionKey);
             }
@@ -331,7 +329,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 AuthenticationRequestParameters.ApiId != ApiEvent.ApiIds.AcquireTokenForUserAssignedManagedIdentity &&
                 AuthenticationRequestParameters.ApiId != ApiEvent.ApiIds.AcquireTokenByRefreshToken &&
                 AuthenticationRequestParameters.AuthorityInfo.AuthorityType != AuthorityType.Adfs &&
-                !(msalTokenResponse.ClientInfo is null))
+                msalTokenResponse.ClientInfo is not null)
             {
                 //client_info is not returned from managed identity flows because there is no user present.
                 clientInfoFromServer = ClientInfo.CreateFromJson(msalTokenResponse.ClientInfo);
@@ -340,9 +338,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             AuthenticationRequestParameters.RequestContext.Logger.Info("Saving token response to cache..");
 
-            var tuple = await CacheManager.SaveTokenResponseAsync(msalTokenResponse).ConfigureAwait(false);
-            var atItem = tuple.Item1;
-            var idtItem = tuple.Item2;
+            Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem, Account> tuple = await CacheManager.SaveTokenResponseAsync(msalTokenResponse).ConfigureAwait(false);
+            MsalAccessTokenCacheItem atItem = tuple.Item1;
+            MsalIdTokenCacheItem idtItem = tuple.Item2;
             Account account = tuple.Item3;
 #if !MOBILE
             atItem?.AddAdditionalCacheParameters(clientInfoFromServer?.AdditionalResponseParameters);
@@ -376,7 +374,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             var tokenEndpoint = await AuthenticationRequestParameters.Authority.GetTokenEndpointAsync(AuthenticationRequestParameters.RequestContext).ConfigureAwait(false);
 
-            var tokenResponse = await SendTokenRequestAsync(
+            MsalTokenResponse tokenResponse = await SendTokenRequestAsync(
                 tokenEndpoint,
                 additionalBodyParameters,
                 cancellationToken).ConfigureAwait(false);
@@ -393,7 +391,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             string scopes = GetOverriddenScopes(AuthenticationRequestParameters.Scope).AsSingleString();
             var tokenClient = new TokenClient(AuthenticationRequestParameters);
 
-            var CcsHeader = GetCcsHeader(additionalBodyParameters);
+            KeyValuePair<string, string>? CcsHeader = GetCcsHeader(additionalBodyParameters);
             if (CcsHeader != null && !string.IsNullOrEmpty(CcsHeader.Value.Key))
             {
                 tokenClient.AddHeaderToClient(CcsHeader.Value.Key, CcsHeader.Value.Value);
@@ -417,7 +415,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     ServiceBundle.Config,
                     AuthenticationRequestParameters.RequestContext.Logger);
 
-                var ssoPolicyHeaders = broker.GetSsoPolicyHeaders();
+                IReadOnlyDictionary<string, string> ssoPolicyHeaders = broker.GetSsoPolicyHeaders();
                 foreach (KeyValuePair<string, string> kvp in ssoPolicyHeaders)
                 {
                     tokenClient.AddHeaderToClient(kvp.Key, kvp.Value);
@@ -531,7 +529,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             MsalAccessTokenCacheItem cachedAccessTokenItem,
             CancellationToken cancellationToken)
         {
-            var logger = AuthenticationRequestParameters.RequestContext.Logger;
+            ILoggerAdapter logger = AuthenticationRequestParameters.RequestContext.Logger;
 
             logger.Warning($"Fetching a new AT failed. Is exception retry-able? {e.IsRetryable}. Is there an AT in the cache that is usable? {cachedAccessTokenItem != null}");
 
@@ -539,8 +537,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 logger.Info("Returning existing access token. It is not expired, but should be refreshed. ");
 
-                var idToken = await CacheManager.GetIdTokenCacheItemAsync(cachedAccessTokenItem).ConfigureAwait(false);
-                var account = await CacheManager.GetAccountAssociatedWithAccessTokenAsync(cachedAccessTokenItem).ConfigureAwait(false);
+                MsalIdTokenCacheItem idToken = await CacheManager.GetIdTokenCacheItemAsync(cachedAccessTokenItem).ConfigureAwait(false);
+                Account account = await CacheManager.GetAccountAssociatedWithAccessTokenAsync(cachedAccessTokenItem).ConfigureAwait(false);
 
                 return await AuthenticationResult.CreateAsync(
                     cachedAccessTokenItem,
