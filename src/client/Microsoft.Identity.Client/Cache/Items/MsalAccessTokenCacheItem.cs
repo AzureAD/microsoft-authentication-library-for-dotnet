@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Client.Cache.Items
         }
 
 #if !MOBILE
-        private IDictionary<string, string> AcquireCacheParametersFromResponse(
+        private Dictionary<string, string> AcquireCacheParametersFromResponse(
                                                     IEnumerable<string> persistedCacheParameters,
 #if SUPPORTS_SYSTEM_TEXT_JSON
                                                     Dictionary<string, JsonElement> extraDataFromResponse)
@@ -99,7 +99,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                 }
                 else
                 {
-                    foreach (var kvp in additionalCacheParameters)
+                    foreach (KeyValuePair<string, string> kvp in additionalCacheParameters)
                     {
                         PersistedCacheParameters[kvp.Key] = kvp.Value;
                     }
@@ -169,7 +169,7 @@ namespace Microsoft.Identity.Client.Cache.Items
         /// </summary>
         internal MsalAccessTokenCacheItem WithExpiresOn(DateTimeOffset expiresOn)
         {
-            MsalAccessTokenCacheItem newAtItem = new MsalAccessTokenCacheItem(
+            MsalAccessTokenCacheItem newAtItem = new(
                Environment,
                ClientId,
                ScopeString,
@@ -339,8 +339,8 @@ namespace Microsoft.Identity.Client.Cache.Items
             string keyId = JsonHelper.ExtractExistingOrDefault<string>(j, StorageJsonKeys.KeyId);
             string tokenType = JsonHelper.ExtractExistingOrDefault<string>(j, StorageJsonKeys.TokenType) ?? StorageJsonValues.TokenTypeBearer;
             string scopes = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.Target);
-            var additionalCacheKeyComponents = JsonHelper.ExtractInnerJsonAsDictionary(j, StorageJsonKeys.CacheExtensions);
-            var persistedCacheParameters = JsonHelper.ExtractInnerJsonAsDictionary(j, StorageJsonKeys.PersistedCacheParameters);
+            IDictionary<string, string> additionalCacheKeyComponents = JsonHelper.ExtractInnerJsonAsDictionary(j, StorageJsonKeys.CacheExtensions);
+            IDictionary<string, string> persistedCacheParameters = JsonHelper.ExtractInnerJsonAsDictionary(j, StorageJsonKeys.PersistedCacheParameters);
 
             var item = new MsalAccessTokenCacheItem(
                 scopes: scopes,
@@ -369,7 +369,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         internal override JObject ToJObject()
         {
-            var json = base.ToJObject();
+            JObject json = base.ToJObject();
 
             var extExpiresUnixTimestamp = DateTimeHelpers.DateTimeToUnixTimestamp(ExtendedExpiresOn);
             SetItemIfValueNotNull(json, StorageJsonKeys.Realm, TenantId);

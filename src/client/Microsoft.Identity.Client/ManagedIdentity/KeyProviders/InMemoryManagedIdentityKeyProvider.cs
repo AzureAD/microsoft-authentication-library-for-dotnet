@@ -2,12 +2,12 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
-using System.Runtime.InteropServices;
 
 namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
 {
@@ -125,7 +125,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
             return rsa;
         }
 
-        private static RSA CreateWindowsPersistedRsa()
+        private static RSACng CreateWindowsPersistedRsa()
         {
             // Persisted CNG key (non-ephemeral) so Schannel can use it for TLS client auth
             var creation = new CngKeyCreationParameters

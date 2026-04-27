@@ -101,7 +101,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 cancellationToken.ThrowIfCancellationRequested();
             }
 
-            var userAssertion = await FetchAssertionFromWsTrustAsync().ConfigureAwait(false);
+            UserAssertion userAssertion = await FetchAssertionFromWsTrustAsync().ConfigureAwait(false);
             return await SendTokenRequestAsync(GetAdditionalBodyParameters(userAssertion), cancellationToken).ConfigureAwait(false);
         }
 
@@ -119,13 +119,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 return null;
             }
 
-            var userRealmResponse = await _commonNonInteractiveHandler
+            UserRealmDiscoveryResponse userRealmResponse = await _commonNonInteractiveHandler
                                           .QueryUserRealmDataAsync(AuthenticationRequestParameters.AuthorityInfo.UserRealmUriPrefix, _usernamePasswordParameters.Username)
                                           .ConfigureAwait(false);
 
             if (userRealmResponse.IsFederated)
             {
-                var wsTrustResponse = await _commonNonInteractiveHandler.PerformWsTrustMexExchangeAsync(
+                WsTrustResponse wsTrustResponse = await _commonNonInteractiveHandler.PerformWsTrustMexExchangeAsync(
                                           userRealmResponse.FederationMetadataUrl,
                                           userRealmResponse.CloudAudienceUrn,
                                           UserAuthType.UsernamePassword,
@@ -187,7 +187,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 dict[OAuth2Parameter.Password] = _usernamePasswordParameters.Password;
             }
 
-            ISet<string> unionScope = new HashSet<string>()
+            HashSet<string> unionScope = new HashSet<string>()
             {
                 OAuth2Value.ScopeOpenId,
                 OAuth2Value.ScopeOfflineAccess,

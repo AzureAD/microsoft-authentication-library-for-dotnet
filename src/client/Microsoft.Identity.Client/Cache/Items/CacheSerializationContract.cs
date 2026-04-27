@@ -16,7 +16,7 @@ using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client.Cache.Items
 {
-    internal class CacheSerializationContract
+    internal class CacheSerializationContract(IDictionary<string, JToken> unknownNodes)
     {
 #if SUPPORTS_SYSTEM_TEXT_JSON
         private static readonly JsonSerializerOptions NeverIgnoreJsonOptions = new()
@@ -47,31 +47,26 @@ namespace Microsoft.Identity.Client.Cache.Items
         public Dictionary<string, MsalAppMetadataCacheItem> AppMetadata { get; set; } =
             new Dictionary<string, MsalAppMetadataCacheItem>();
 
-        public IDictionary<string, JToken> UnknownNodes { get; }
-
-        public CacheSerializationContract(IDictionary<string, JToken> unknownNodes)
-        {
-            UnknownNodes = unknownNodes ?? new Dictionary<string, JToken>();
-        }
+        public IDictionary<string, JToken> UnknownNodes { get; } = unknownNodes ?? new Dictionary<string, JToken>();
 
         internal static CacheSerializationContract FromJsonString(string json)
         {
 #if SUPPORTS_SYSTEM_TEXT_JSON
-            var root = JsonNode.Parse(json, documentOptions: new JsonDocumentOptions
+            JObject root = JsonNode.Parse(json, documentOptions: new JsonDocumentOptions
             {
                 AllowTrailingCommas = true
             }).AsObject();
 #else
             var root = JObject.Parse(json);
 #endif
-            var unknownNodes = ExtractUnknownNodes(root);
+            IDictionary<string, JToken> unknownNodes = ExtractUnknownNodes(root);
 
             var contract = new CacheSerializationContract(unknownNodes);
 
             // Access Tokens
             if (root.ContainsKey(StorageJsonValues.CredentialTypeAccessToken))
             {
-                foreach (var elem in GetElement(root, StorageJsonValues.CredentialTypeAccessToken))
+                foreach (JObject elem in GetElement(root, StorageJsonValues.CredentialTypeAccessToken))
                 {
                     if (elem != null)
                     {
@@ -84,7 +79,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             // Refresh Tokens
             if (root.ContainsKey(StorageJsonValues.CredentialTypeRefreshToken))
             {
-                foreach (var elem in GetElement(root, StorageJsonValues.CredentialTypeRefreshToken))
+                foreach (JObject elem in GetElement(root, StorageJsonValues.CredentialTypeRefreshToken))
                 {
                     if (elem != null)
                     {
@@ -97,7 +92,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             // Id Tokens
             if (root.ContainsKey(StorageJsonValues.CredentialTypeIdToken))
             {
-                foreach (var elem in GetElement(root, StorageJsonValues.CredentialTypeIdToken))
+                foreach (JObject elem in GetElement(root, StorageJsonValues.CredentialTypeIdToken))
                 {
                     if (elem != null)
                     {
@@ -110,7 +105,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             // Accounts
             if (root.ContainsKey(StorageJsonValues.AccountRootKey))
             {
-                foreach (var elem in GetElement(root, StorageJsonValues.AccountRootKey))
+                foreach (JObject elem in GetElement(root, StorageJsonValues.AccountRootKey))
                 {
                     if (elem != null)
                     {
@@ -123,7 +118,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             // App Metadata
             if (root.ContainsKey(StorageJsonValues.AppMetadata))
             {
-                foreach (var elem in GetElement(root, StorageJsonValues.AppMetadata))
+                foreach (JObject elem in GetElement(root, StorageJsonValues.AppMetadata))
                 {
                     if (elem != null)
                     {
@@ -139,7 +134,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 #if SUPPORTS_SYSTEM_TEXT_JSON
             static IEnumerable<JsonObject> GetElement(JsonObject root, string key)
             {
-                foreach (var token in root[key].AsObject())
+                foreach (KeyValuePair<string, JToken> token in root[key].AsObject())
                 {
                     yield return token.Value as JObject;
                 }
@@ -147,7 +142,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 #else
             static IEnumerable<JObject> GetElement(JObject root, string key)
             {
-                foreach (var token in root[key].Values())
+                foreach (JToken token in root[key].Values())
                 {
                     yield return token as JObject;
                 }
@@ -168,11 +163,11 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         internal string ToJsonString()
         {
-            JObject root = new JObject();
+            JObject root = new();
 
             // Access Tokens
             var accessTokensRoot = new JObject();
-            foreach (var kvp in AccessTokens)
+            foreach (KeyValuePair<string, MsalAccessTokenCacheItem> kvp in AccessTokens)
             {
                 accessTokensRoot[kvp.Key] = kvp.Value.ToJObject();
             }
@@ -181,7 +176,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 
             // Refresh Tokens
             var refreshTokensRoot = new JObject();
-            foreach (var kvp in RefreshTokens)
+            foreach (KeyValuePair<string, MsalRefreshTokenCacheItem> kvp in RefreshTokens)
             {
                 refreshTokensRoot[kvp.Key] = kvp.Value.ToJObject();
             }
@@ -190,7 +185,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 
             // Id Tokens
             var idTokensRoot = new JObject();
-            foreach (var kvp in IdTokens)
+            foreach (KeyValuePair<string, MsalIdTokenCacheItem> kvp in IdTokens)
             {
                 idTokensRoot[kvp.Key] = kvp.Value.ToJObject();
             }
@@ -199,7 +194,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 
             // Accounts
             var accountsRoot = new JObject();
-            foreach (var kvp in Accounts)
+            foreach (KeyValuePair<string, MsalAccountCacheItem> kvp in Accounts)
             {
                 accountsRoot[kvp.Key] = kvp.Value.ToJObject();
             }
@@ -208,7 +203,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 
             // App Metadata
             var appMetadataRoot = new JObject();
-            foreach (var kvp in AppMetadata)
+            foreach (KeyValuePair<string, MsalAppMetadataCacheItem> kvp in AppMetadata)
             {
                 appMetadataRoot[kvp.Key] = kvp.Value.ToJObject();
             }
@@ -216,7 +211,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             root[StorageJsonValues.AppMetadata] = appMetadataRoot;
 
             // Anything else
-            foreach (var kvp in UnknownNodes)
+            foreach (KeyValuePair<string, JToken> kvp in UnknownNodes)
             {
 #if SUPPORTS_SYSTEM_TEXT_JSON
                 root[kvp.Key] = kvp.Value != null ? JToken.Parse(kvp.Value.ToJsonString()) : null;

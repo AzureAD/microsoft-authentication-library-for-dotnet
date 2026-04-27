@@ -84,7 +84,7 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentException($"{nameof(userFlow)} should not be null or whitespace", nameof(userFlow));
             }
 
-            var accounts = await GetAccountsInternalAsync(ApiIds.GetAccountsByUserFlow, null, cancellationToken).ConfigureAwait(false);
+            IEnumerable<IAccount> accounts = await GetAccountsInternalAsync(ApiIds.GetAccountsByUserFlow, null, cancellationToken).ConfigureAwait(false);
 
             return accounts.Where(acc =>
                 acc.HomeAccountId.ObjectId.EndsWith(
@@ -102,7 +102,7 @@ namespace Microsoft.Identity.Client
         /// <param name="cancellationToken">Cancellation token </param>
         public async Task<IAccount> GetAccountAsync(string accountId, CancellationToken cancellationToken = default)
         {
-            var accounts = await GetAccountsInternalAsync(ApiIds.GetAccountById, accountId, cancellationToken).ConfigureAwait(false);
+            IEnumerable<IAccount> accounts = await GetAccountsInternalAsync(ApiIds.GetAccountById, accountId, cancellationToken).ConfigureAwait(false);
             return accounts.SingleOrDefault();
         }
 
@@ -140,7 +140,7 @@ namespace Microsoft.Identity.Client
             requestContext.ApiEvent = new ApiEvent(correlationId);
             requestContext.ApiEvent.ApiId = ApiIds.RemoveAccount;
 
-            var authority = await Microsoft.Identity.Client.Instance.Authority.CreateAuthorityForRequestAsync(
+            Instance.Authority authority = await Microsoft.Identity.Client.Instance.Authority.CreateAuthorityForRequestAsync(
               requestContext,
               null).ConfigureAwait(false);
 
@@ -160,7 +160,7 @@ namespace Microsoft.Identity.Client
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                var broker = ServiceBundle.PlatformProxy.CreateBroker(ServiceBundle.Config, null);
+                Internal.Broker.IBroker broker = ServiceBundle.PlatformProxy.CreateBroker(ServiceBundle.Config, null);
                 if (broker.IsBrokerInstalledAndInvokable(authority.AuthorityInfo.AuthorityType))
                 {
                     await broker.RemoveAccountAsync(ServiceBundle.Config, account).ConfigureAwait(false);
@@ -184,7 +184,7 @@ namespace Microsoft.Identity.Client
             requestContext.ApiEvent = new ApiEvent(correlationId);
             requestContext.ApiEvent.ApiId = apiId;
 
-            var authority = await Microsoft.Identity.Client.Instance.Authority.CreateAuthorityForRequestAsync(
+            Instance.Authority authority = await Microsoft.Identity.Client.Instance.Authority.CreateAuthorityForRequestAsync(
               requestContext,
               null).ConfigureAwait(false);
 
@@ -201,8 +201,8 @@ namespace Microsoft.Identity.Client
                 UserTokenCacheInternal,
                 authParameters);
 
-            var accountsFromCache = await cacheSessionManager.GetAccountsAsync().ConfigureAwait(false);
-            var accountsFromBroker = await GetAccountsFromBrokerAsync(homeAccountIdFilter, cacheSessionManager, cancellationToken).ConfigureAwait(false);
+            IEnumerable<IAccount> accountsFromCache = await cacheSessionManager.GetAccountsAsync().ConfigureAwait(false);
+            IEnumerable<IAccount> accountsFromBroker = await GetAccountsFromBrokerAsync(homeAccountIdFilter, cacheSessionManager, cancellationToken).ConfigureAwait(false);
             accountsFromCache ??= Enumerable.Empty<IAccount>();
             accountsFromBroker ??= Enumerable.Empty<IAccount>();
 
@@ -220,10 +220,10 @@ namespace Microsoft.Identity.Client
         {
             if (AppConfig.IsBrokerEnabled && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth())
             {
-                var broker = ServiceBundle.PlatformProxy.CreateBroker(ServiceBundle.Config, null);
+                Internal.Broker.IBroker broker = ServiceBundle.PlatformProxy.CreateBroker(ServiceBundle.Config, null);
                 if (broker.IsBrokerInstalledAndInvokable(ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType))
                 {
-                    var brokerAccounts =
+                    IEnumerable<IAccount> brokerAccounts =
                         (await broker.GetAccountsAsync(
                             AppConfig.ClientId,
                             AppConfig.RedirectUri,
@@ -257,7 +257,7 @@ namespace Microsoft.Identity.Client
                 brokerAccounts.Select(aci => aci.Environment),
                 StringComparer.OrdinalIgnoreCase);
 
-            var instanceMetadata = await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
+            Instance.Discovery.InstanceDiscoveryMetadataEntry instanceMetadata = await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
                 AuthorityInfo,
                 allEnvs,
                 CreateRequestContext(Guid.NewGuid(), null, cancellationToken)).ConfigureAwait(false);
@@ -269,11 +269,11 @@ namespace Microsoft.Identity.Client
             return brokerAccounts;
         }
 
-        private IEnumerable<IAccount> MergeAccounts(
+        private List<IAccount> MergeAccounts(
             IEnumerable<IAccount> cacheAccounts,
             IEnumerable<IAccount> brokerAccounts)
         {
-            List<IAccount> allAccounts = new List<IAccount>(cacheAccounts);
+            List<IAccount> allAccounts = new(cacheAccounts);
 
             foreach (IAccount account in brokerAccounts)
             {

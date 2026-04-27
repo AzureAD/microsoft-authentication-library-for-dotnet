@@ -11,24 +11,19 @@ using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.Region
 {
-    internal class RegionAndMtlsDiscoveryProvider : IRegionDiscoveryProvider
+    internal class RegionAndMtlsDiscoveryProvider(IHttpManager httpManager) : IRegionDiscoveryProvider
     {
-        private readonly IRegionManager _regionManager;
+        private readonly IRegionManager _regionManager = new RegionManager(httpManager);
         public const string PublicEnvForRegional = "login.microsoft.com";
         public const string PublicEnvForRegionalMtlsAuth = "mtlsauth.microsoft.com";
 
         // Map of unsupported sovereign cloud hosts for mTLS PoP to their error messages
         private static readonly Dictionary<string, string> s_unsupportedMtlsHosts =
-            new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            new(StringComparer.OrdinalIgnoreCase)
             {
                 { "login.usgovcloudapi.net", MsalErrorMessage.MtlsPopNotSupportedForUsGovCloudApiMessage },
                 { "login.chinacloudapi.cn", MsalErrorMessage.MtlsPopNotSupportedForChinaCloudApiMessage }
             };
-
-        public RegionAndMtlsDiscoveryProvider(IHttpManager httpManager)
-        {
-            _regionManager = new RegionManager(httpManager);
-        }
 
         public async Task<InstanceDiscoveryMetadataEntry> GetMetadataAsync(Uri authority, RequestContext requestContext)
         {

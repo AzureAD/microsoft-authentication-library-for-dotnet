@@ -10,24 +10,18 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
-    internal class UserFederatedIdentityCredentialRequest : RequestBase
+    internal class UserFederatedIdentityCredentialRequest(
+        IServiceBundle serviceBundle,
+        AuthenticationRequestParameters authenticationRequestParameters,
+        AcquireTokenByUserFederatedIdentityCredentialParameters userFicParameters) : RequestBase(serviceBundle, authenticationRequestParameters, userFicParameters)
     {
-        private readonly AcquireTokenByUserFederatedIdentityCredentialParameters _userFicParameters;
-
-        public UserFederatedIdentityCredentialRequest(
-            IServiceBundle serviceBundle,
-            AuthenticationRequestParameters authenticationRequestParameters,
-            AcquireTokenByUserFederatedIdentityCredentialParameters userFicParameters)
-            : base(serviceBundle, authenticationRequestParameters, userFicParameters)
-        {
-            _userFicParameters = userFicParameters;
-        }
+        private readonly AcquireTokenByUserFederatedIdentityCredentialParameters _userFicParameters = userFicParameters;
 
         protected override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
             await ResolveAuthorityAsync().ConfigureAwait(false);
 
-            var additionalBodyParameters = GetAdditionalBodyParameters(_userFicParameters.Assertion);
+            Dictionary<string, string> additionalBodyParameters = GetAdditionalBodyParameters(_userFicParameters.Assertion);
             MsalTokenResponse msalTokenResponse = await SendTokenRequestAsync(additionalBodyParameters, cancellationToken).ConfigureAwait(false);
 
             return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse, cancellationToken).ConfigureAwait(false);

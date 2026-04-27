@@ -16,7 +16,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
     {
         public static IDictionary<string, string> ParseChallengeData(HttpResponseHeaders responseHeaders)
         {
-            IDictionary<string, string> data = new Dictionary<string, string>();
+            Dictionary<string, string> data = new Dictionary<string, string>();
             string wwwAuthenticate = responseHeaders.GetValues(PKeyAuthConstants.WwwAuthenticateHeader).SingleOrDefault();
             wwwAuthenticate = wwwAuthenticate?.Substring(PKeyAuthConstants.PKeyAuthName.Length + 1);
             if (string.IsNullOrEmpty(wwwAuthenticate))
@@ -24,10 +24,10 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
                 return data;
             }
 
-            var headerPairs = CoreHelpers.SplitWithQuotes(wwwAuthenticate, ',');
+            IReadOnlyList<string> headerPairs = CoreHelpers.SplitWithQuotes(wwwAuthenticate, ',');
             foreach (string pair in headerPairs)
             {
-                var keyValue = CoreHelpers.SplitWithQuotes(pair, '=');
+                IReadOnlyList<string> keyValue = CoreHelpers.SplitWithQuotes(pair, '=');
                 if (keyValue.Count == 2)
                 {
                     data.Add(keyValue[0].Trim(), keyValue[1].Trim().Replace("\"", ""));
@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         /// </summary>
         public static string GetBypassChallengeResponse(HttpResponseHeaders responseHeaders)
         {
-            var challengeData = ParseChallengeData(responseHeaders);
+            IDictionary<string, string> challengeData = ParseChallengeData(responseHeaders);
             return string.Format(CultureInfo.InvariantCulture,
                                    PKeyAuthConstants.PKeyAuthBypassReponseFormat,
                                    challengeData[PKeyAuthConstants.ChallengeResponseContext],

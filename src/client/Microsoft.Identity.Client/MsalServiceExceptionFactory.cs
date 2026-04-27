@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client
 {
     internal class MsalServiceExceptionFactory
     {
-        static readonly ISet<string> s_nonUiSubErrors = new HashSet<string>(
+        static readonly HashSet<string> s_nonUiSubErrors = new HashSet<string>(
             new[] { MsalError.ClientMismatch, MsalError.ProtectionPolicyRequired },
             StringComparer.OrdinalIgnoreCase);
 
@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Client
                     innerException);
             }
 
-            var authorityInfo = context?.ServiceBundle.Config.Authority.AuthorityInfo;
+            AuthorityInfo authorityInfo = context?.ServiceBundle.Config.Authority.AuthorityInfo;
 
             if (IsOidcAuthorityError(authorityInfo, oAuth2Response?.ErrorDescription))
             {
@@ -179,7 +179,7 @@ namespace Microsoft.Identity.Client
           HttpResponse httpResponse,
           Exception innerException = null)
         {
-            MsalServiceException ex = new MsalServiceException(errorCode, errorMessage, innerException);
+            MsalServiceException ex = new(errorCode, errorMessage, innerException);
 
             SetHttpExceptionData(ex, httpResponse);
 
@@ -236,7 +236,7 @@ namespace Microsoft.Identity.Client
 
         internal static MsalThrottledServiceException FromThrottledAuthenticationResponse(HttpResponse httpResponse)
         {
-            MsalServiceException ex = new MsalServiceException(MsalError.RequestThrottled, MsalErrorMessage.AadThrottledError);
+            MsalServiceException ex = new(MsalError.RequestThrottled, MsalErrorMessage.AadThrottledError);
             SetHttpExceptionData(ex, httpResponse);
             return new MsalThrottledServiceException(ex);
         }

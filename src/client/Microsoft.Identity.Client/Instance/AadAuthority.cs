@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client.Instance
         private const string DeviceCodeEndpointTemplate = "{0}oauth2/v2.0/devicecode";
         private const string AuthorizationEndpointTemplate = "{0}oauth2/v2.0/authorize";
 
-        private static readonly ISet<string> s_tenantlessTenantNames = new HashSet<string>(
+        private static readonly HashSet<string> s_tenantlessTenantNames = new HashSet<string>(
           new[]
           {
                 Constants.Common,
@@ -85,7 +85,7 @@ namespace Microsoft.Identity.Client.Instance
             if (!string.IsNullOrEmpty(tenantId) &&
                 (forceSpecifiedTenant || IsCommonOrganizationsOrConsumersTenant()))
             {
-                var authorityUri = AuthorityInfo.CanonicalAuthority;
+                Uri authorityUri = AuthorityInfo.CanonicalAuthority;
 
                 return string.Format(
                     CultureInfo.InvariantCulture,
