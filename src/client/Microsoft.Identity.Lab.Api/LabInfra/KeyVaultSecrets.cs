@@ -53,6 +53,11 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         /// </summary>
         public const string AppPCAClient = "App-PCAClient-Config";
         /// <summary>
+        /// Application configuration for ADFS native client testing scenarios. ADFS public client flows (ROPC, interactive)
+        /// require a NativeClientApplication registration — ServerApplications reject them with MSIS9622.
+        /// </summary>
+        public const string AppAdfsNativeClient = "App-AdfsNativeClient-Config";
+        /// <summary>
         /// Represents the configuration key for the application's Web API settings.
         /// </summary>
         public const string AppWebApi = "App-WebApi-Config";
