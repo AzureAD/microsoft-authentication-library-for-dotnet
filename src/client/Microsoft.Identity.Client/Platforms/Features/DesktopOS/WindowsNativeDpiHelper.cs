@@ -1,15 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-// P/Invoke signatures must match native API exactly; parameters may be unused by managed callers.
-#pragma warning disable IDE0060
-
 using System;
 using System.Runtime.InteropServices;
 
 namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
 {
-    internal static partial class WindowsDpiHelper
+    internal static class WindowsDpiHelper
     {
         static WindowsDpiHelper()
         {
@@ -44,17 +41,14 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
         /// </summary>
         public static int ZoomPercent { get; }
 
-        [LibraryImport("User32.dll")]
-        [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvStdcall)])]
-        internal static partial IntPtr GetDC(IntPtr hWnd);
+        [DllImport("User32.dll", CallingConvention = CallingConvention.StdCall, ExactSpelling = true)]
+        internal static extern IntPtr GetDC(IntPtr hWnd);
 
-        [LibraryImport("User32.dll")]
-        [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvStdcall)])]
-        internal static partial int ReleaseDC(IntPtr hWnd, IntPtr hDC);
+        [DllImport("User32.dll", CallingConvention = CallingConvention.StdCall, ExactSpelling = true)]
+        internal static extern int ReleaseDC(IntPtr hWnd, IntPtr hDC);
 
-        [LibraryImport("Gdi32.dll")]
-        [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvStdcall)])]
-        internal static partial int GetDeviceCaps(IntPtr hdc, int nIndex);
+        [DllImport("Gdi32.dll", CallingConvention = CallingConvention.StdCall, ExactSpelling = true)]
+        internal static extern int GetDeviceCaps(IntPtr hdc, int nIndex);
 
         [DllImport("User32.dll", CallingConvention = CallingConvention.Winapi, ExactSpelling = true)]
         internal static extern bool IsProcessDPIAware();

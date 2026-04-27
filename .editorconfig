@@ -905,6 +905,8 @@ dotnet_diagnostic.CA2250.severity = none
 dotnet_diagnostic.CA1512.severity = none
 # SYSLIB1054: LibraryImport requires .NET 7+ source generation; multi-target false positive
 dotnet_diagnostic.SYSLIB1054.severity = none
+# SYSLIB1045: GeneratedRegex requires .NET 7+ source generation; multi-target false positive
+dotnet_diagnostic.SYSLIB1045.severity = none
 dotnet_diagnostic.CA1513.severity = none
 
 # Dispose objects before losing scope

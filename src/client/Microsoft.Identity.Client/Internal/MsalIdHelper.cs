@@ -37,13 +37,13 @@ namespace Microsoft.Identity.Client.Internal
     ///     This class adds additional query parameters or headers to the requests sent to STS. This can help us in
     ///     collecting statistics and potentially on diagnostics.
     /// </summary>
-    internal static partial class MsalIdHelper
+    internal static class MsalIdHelper
     {
         private static readonly Lazy<string> s_msalVersion = new(
             () =>
             {
                 string fullVersion = typeof(MsalIdHelper).Assembly.FullName;
-                Regex regex = MyRegex();
+                var regex = new Regex(@"Version=[\d]+.[\d+]+.[\d]+.[\d]+");
                 Match match = regex.Match(fullVersion);
                 if (!match.Success)
                 {
@@ -90,8 +90,5 @@ namespace Microsoft.Identity.Client.Internal
         {
             return s_msalVersion.Value;
         }
-
-        [GeneratedRegex(@"Version=[\d]+.[\d+]+.[\d]+.[\d]+")]
-        private static partial Regex MyRegex();
     }
 }

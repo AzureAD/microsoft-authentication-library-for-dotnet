@@ -1,16 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-// P/Invoke signatures must match native API exactly; parameters may be unused by managed callers.
-#pragma warning disable IDE0060
-
 using System;
 using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
 {
-    internal static partial class WindowsNativeMethods
+    internal static class WindowsNativeMethods
     {
         public enum NetJoinStatus
         {
@@ -20,11 +17,11 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
             NetSetupDomainName
         }
 
-        [LibraryImport("kernel32.dll")]
-        public static partial uint GetCurrentProcessId();
+        [DllImport("kernel32.dll")]
+        public static extern uint GetCurrentProcessId();
 
-        [LibraryImport("user32.dll", SetLastError = true)]
-        public static partial uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
 
         private const int PROCESSOR_ARCHITECTURE_AMD64 = 9;
         private const int PROCESSOR_ARCHITECTURE_ARM = 5;
@@ -32,8 +29,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
         private const int PROCESSOR_ARCHITECTURE_INTEL = 0;
         public const int ErrorSuccess = 0;
 
-        [LibraryImport("kernel32.dll")]
-        private static partial void GetNativeSystemInfo(ref SYSTEM_INFO lpSystemInfo);
+        [DllImport("kernel32.dll")]
+        private static extern void GetNativeSystemInfo(ref SYSTEM_INFO lpSystemInfo);
 
         public static string GetProcessorArchitecture()
         {
@@ -60,17 +57,17 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
         [return: MarshalAs(UnmanagedType.U1)]
         public static extern bool GetUserNameEx(int nameFormat, StringBuilder userName, ref uint userNameSize);
 
-        [LibraryImport("Netapi32.dll", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
-        public static partial int NetGetJoinInformation(string server, out IntPtr domain, out NetJoinStatus status);
+        [DllImport("Netapi32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        public static extern int NetGetJoinInformation(string server, out IntPtr domain, out NetJoinStatus status);
 
-        [LibraryImport("Netapi32.dll")]
-        public static partial int NetApiBufferFree(IntPtr Buffer);
+        [DllImport("Netapi32.dll")]
+        public static extern int NetApiBufferFree(IntPtr Buffer);
 
-        [LibraryImport("user32.dll", EntryPoint = "GetDesktopWindow")]
-        public static partial IntPtr GetDesktopWindow();
+        [DllImport("user32.dll", EntryPoint = "GetDesktopWindow")]
+        public static extern IntPtr GetDesktopWindow();
 
-        [LibraryImport("kernel32.dll")]
-        public static partial IntPtr GetConsoleWindow();
+        [DllImport("kernel32.dll")]
+        public static extern IntPtr GetConsoleWindow();
 
         [StructLayout(LayoutKind.Sequential)]
         private readonly struct SYSTEM_INFO
@@ -89,16 +86,15 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
         }
     }
 
-    internal static partial class User32
+    internal static class User32
     {
         private const string LibraryName = "user32.dll";
 
         public const int UOI_FLAGS = 1;
         public const int WSF_VISIBLE = 0x0001;
 
-        [LibraryImport(LibraryName, SetLastError = true)]
-        [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvStdcall)])]
-        public static partial IntPtr GetProcessWindowStation();
+        [DllImport(LibraryName, CallingConvention = CallingConvention.StdCall, SetLastError = true)]
+        public static extern IntPtr GetProcessWindowStation();
 
         [DllImport(LibraryName, EntryPoint = "GetUserObjectInformation", CallingConvention = CallingConvention.StdCall, SetLastError = true)]
         public static extern unsafe bool GetUserObjectInformation(IntPtr hObj, int nIndex, void* pvBuffer, uint nLength, ref uint lpnLengthNeeded);
