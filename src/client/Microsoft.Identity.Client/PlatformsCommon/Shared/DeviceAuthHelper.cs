@@ -16,7 +16,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
     {
         public static IDictionary<string, string> ParseChallengeData(HttpResponseHeaders responseHeaders)
         {
-            Dictionary<string, string> data = new Dictionary<string, string>();
+            Dictionary<string, string> data = [];
             string wwwAuthenticate = responseHeaders.GetValues(PKeyAuthConstants.WwwAuthenticateHeader).SingleOrDefault();
             wwwAuthenticate = wwwAuthenticate?.Substring(PKeyAuthConstants.PKeyAuthName.Length + 1);
             if (string.IsNullOrEmpty(wwwAuthenticate))

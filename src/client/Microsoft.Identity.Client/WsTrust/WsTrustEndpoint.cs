@@ -53,75 +53,73 @@ namespace Microsoft.Identity.Client.WsTrust
             }
             const string wsaNamespaceValue = "http://www.w3.org/2005/08/addressing";
 
-            using (var sw = new StringWriterWithEncoding(Encoding.UTF8))
+            using var sw = new StringWriterWithEncoding(Encoding.UTF8);
+            using (XmlWriter writer = XmlWriter.Create(sw, new XmlWriterSettings()
             {
-                using (XmlWriter writer = XmlWriter.Create(sw, new XmlWriterSettings()
-                {
-                    Async = false,
-                    Encoding = Encoding.UTF8,
-                    CloseOutput = false
-                }))
-                {
-                    writer.WriteStartElement("s", "Envelope", EnvelopeNamespaceValue);
-                    writer.WriteAttributeString("wsa", "http://www.w3.org/2000/xmlns/", wsaNamespaceValue);
-                    writer.WriteAttributeString("wsu", "http://www.w3.org/2000/xmlns/", WsuNamespaceValue);
+                Async = false,
+                Encoding = Encoding.UTF8,
+                CloseOutput = false
+            }))
+            {
+                writer.WriteStartElement("s", "Envelope", EnvelopeNamespaceValue);
+                writer.WriteAttributeString("wsa", "http://www.w3.org/2000/xmlns/", wsaNamespaceValue);
+                writer.WriteAttributeString("wsu", "http://www.w3.org/2000/xmlns/", WsuNamespaceValue);
 
-                    writer.WriteStartElement("Header", EnvelopeNamespaceValue);
-                    writer.WriteStartElement("Action", wsaNamespaceValue);
-                    writer.WriteAttributeString("mustUnderstand", EnvelopeNamespaceValue, "1");
-                    writer.WriteString(soapAction);
-                    writer.WriteEndElement(); // Action
+                writer.WriteStartElement("Header", EnvelopeNamespaceValue);
+                writer.WriteStartElement("Action", wsaNamespaceValue);
+                writer.WriteAttributeString("mustUnderstand", EnvelopeNamespaceValue, "1");
+                writer.WriteString(soapAction);
+                writer.WriteEndElement(); // Action
 
-                    writer.WriteStartElement("MessageID", wsaNamespaceValue);
+                writer.WriteStartElement("MessageID", wsaNamespaceValue);
 #pragma warning disable CA1305 // Specify IFormatProvider - no overload on netcore
-                    writer.WriteString($"urn:uuid:{_guidFactory.NewGuid().ToString("D")}");
+                writer.WriteString($"urn:uuid:{_guidFactory.NewGuid():D}");
 #pragma warning restore CA1305 // Specify IFormatProvider
-                    writer.WriteEndElement(); // messageID
+                writer.WriteEndElement(); // messageID
 
-                    writer.WriteStartElement("ReplyTo", wsaNamespaceValue);
-                    writer.WriteStartElement("Address", wsaNamespaceValue);
-                    writer.WriteString("http://www.w3.org/2005/08/addressing/anonymous");
-                    writer.WriteEndElement(); // Address
-                    writer.WriteEndElement(); // ReplyTo
+                writer.WriteStartElement("ReplyTo", wsaNamespaceValue);
+                writer.WriteStartElement("Address", wsaNamespaceValue);
+                writer.WriteString("http://www.w3.org/2005/08/addressing/anonymous");
+                writer.WriteEndElement(); // Address
+                writer.WriteEndElement(); // ReplyTo
 
-                    writer.WriteStartElement("To", wsaNamespaceValue);
-                    writer.WriteAttributeString("mustUnderstand", EnvelopeNamespaceValue, "1");
-                    writer.WriteString(Uri.ToString());
-                    writer.WriteEndElement(); // To
+                writer.WriteStartElement("To", wsaNamespaceValue);
+                writer.WriteAttributeString("mustUnderstand", EnvelopeNamespaceValue, "1");
+                writer.WriteString(Uri.ToString());
+                writer.WriteEndElement(); // To
 
-                    if (authType == UserAuthType.UsernamePassword)
-                    {
-                        AppendSecurityHeader(writer, username, password);
-                    }
-
-                    writer.WriteEndElement(); // Header
-
-                    writer.WriteStartElement("Body", EnvelopeNamespaceValue);
-                    writer.WriteStartElement("wst", "RequestSecurityToken", trustNamespace);
-                    writer.WriteStartElement("wsp", "AppliesTo", "http://schemas.xmlsoap.org/ws/2004/09/policy");
-                    writer.WriteStartElement("EndpointReference", wsaNamespaceValue);
-                    writer.WriteStartElement("Address", wsaNamespaceValue);
-                    writer.WriteString(cloudAudienceUri);
-                    writer.WriteEndElement(); // Address
-                    writer.WriteEndElement(); // EndpointReference
-                    writer.WriteEndElement(); // AppliesTo
-
-                    writer.WriteStartElement("KeyType", trustNamespace);
-                    writer.WriteString(keyType);
-                    writer.WriteEndElement(); // KeyType
-
-                    writer.WriteStartElement("RequestType", trustNamespace);
-                    writer.WriteString(requestType);
-                    writer.WriteEndElement(); // RequestType
-
-                    writer.WriteEndElement(); // RequestSecurityToken
-
-                    writer.WriteEndElement(); // Body
-                    writer.WriteEndElement(); // Envelope
+                if (authType == UserAuthType.UsernamePassword)
+                {
+                    AppendSecurityHeader(writer, username, password);
                 }
 
-                return sw.ToString();
+                writer.WriteEndElement(); // Header
+
+                writer.WriteStartElement("Body", EnvelopeNamespaceValue);
+                writer.WriteStartElement("wst", "RequestSecurityToken", trustNamespace);
+                writer.WriteStartElement("wsp", "AppliesTo", "http://schemas.xmlsoap.org/ws/2004/09/policy");
+                writer.WriteStartElement("EndpointReference", wsaNamespaceValue);
+                writer.WriteStartElement("Address", wsaNamespaceValue);
+                writer.WriteString(cloudAudienceUri);
+                writer.WriteEndElement(); // Address
+                writer.WriteEndElement(); // EndpointReference
+                writer.WriteEndElement(); // AppliesTo
+
+                writer.WriteStartElement("KeyType", trustNamespace);
+                writer.WriteString(keyType);
+                writer.WriteEndElement(); // KeyType
+
+                writer.WriteStartElement("RequestType", trustNamespace);
+                writer.WriteString(requestType);
+                writer.WriteEndElement(); // RequestType
+
+                writer.WriteEndElement(); // RequestSecurityToken
+
+                writer.WriteEndElement(); // Body
+                writer.WriteEndElement(); // Envelope
             }
+
+            return sw.ToString();
         }
 
         private void AppendSecurityHeader(XmlWriter writer, string username, string password)
@@ -137,7 +135,7 @@ namespace Microsoft.Identity.Client.WsTrust
 
             string versionString = Version == WsTrustVersion.WsTrust2005 ? "UnPwSecTok2005-" : "UnPwSecTok13-";
 #pragma warning disable CA1305 // no overload on netcore
-            string trustId = $"{versionString}{_guidFactory.NewGuid().ToString("D")}";
+            string trustId = $"{versionString}{_guidFactory.NewGuid():D}";
 #pragma warning restore CA1305 // Specify IFormatProvider
 
             writer.WriteStartElement("wsse", "Security", wsseNamespaceValue);

@@ -80,7 +80,6 @@ namespace Microsoft.Identity.Client.Internal
 
         public ClaimsPrincipal ClaimsPrincipal { get; private set; }
 
-
         private static IdToken ClaimsToToken(List<Claim> claims)
         {
             var principal = new ClaimsPrincipal(new ClaimsIdentity(claims));
@@ -113,7 +112,7 @@ namespace Microsoft.Identity.Client.Internal
                 return null;
             }
 
-            string[] idTokenSegments = idToken.Split(new[] { '.' });
+            string[] idTokenSegments = idToken.Split(['.']);
 
             if (idTokenSegments.Length < 2)
             {
@@ -142,7 +141,7 @@ namespace Microsoft.Identity.Client.Internal
         #region IdToken to Claims parsing - logic copied from Wilson!
         private static List<Claim> GetClaimsFromRawToken(Dictionary<string, object> idTokenClaims)
         {
-            List<Claim> claims = new();
+            List<Claim> claims = [];
 
             string issuer = null;
             if (idTokenClaims.TryGetValue(IdTokenClaim.Issuer, out object issuerObj))
@@ -340,7 +339,7 @@ namespace Microsoft.Identity.Client.Internal
                 return null;
             }
 
-            string[] idTokenSegments = idToken.Split(new[] { '.' });
+            string[] idTokenSegments = idToken.Split(['.']);
 
             if (idTokenSegments.Length < 2)
             {
@@ -369,7 +368,7 @@ namespace Microsoft.Identity.Client.Internal
         {
             JsonElement idTokenClaims = jsonDocument.RootElement;
 
-            List<Claim> claims = new();
+            List<Claim> claims = [];
 
             string issuer = null;
             if (idTokenClaims.TryGetProperty(IdTokenClaim.Issuer, out JsonElement issuerObj))

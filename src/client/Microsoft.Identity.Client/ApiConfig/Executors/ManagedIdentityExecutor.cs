@@ -50,6 +50,5 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
         }
 
-
     }
 }

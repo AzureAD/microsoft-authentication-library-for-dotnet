@@ -72,7 +72,6 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             _regionDiscoveryProvider = regionDiscoveryProvider ??
                 new RegionAndMtlsDiscoveryProvider(_httpManager);
 
-
         }
 
         public InstanceDiscoveryMetadataEntry GetMetadataEntryAvoidNetwork(
@@ -223,7 +222,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
         {
             return new InstanceDiscoveryMetadataEntry()
             {
-                Aliases = new[] { authority.Host },
+                Aliases = [authority.Host],
                 PreferredCache = authority.Host,
                 PreferredNetwork = authority.Host
             };

@@ -14,7 +14,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
         private const int S_OK = 0;
         private const int S_FALSE = 1;
         private const int WM_CHAR = 0x102;
-        private static readonly HashSet<Shortcut> shortcutDisallowedList = new();
+        private static readonly HashSet<Shortcut> shortcutDisallowedList = [];
         private CustomWebBrowserEvent webBrowserEvent;
         private AxHost.ConnectionPointCookie webBrowserEventCookie;
 
@@ -189,16 +189,13 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
 
             public int ShowContextMenu(int dwID, NativeWrapper.POINT pt, object pcmdtReserved, object pdispReserved)
             {
-                switch (dwID)
+                return dwID switch
                 {
                     // https://learn.microsoft.com/previous-versions/windows/internet-explorer/ie-developer/platform-apis/aa753264(v=vs.85)
-                    case 0x2: // this is edit CONTEXT_MENU_CONTROL
-                    case 0x4: // selected text CONTEXT_MENU_TEXTSELECT
-                    case 0x9: // CONTEXT_MENU_VSCROLL
-                    case 0x10: //CONTEXT_MENU_HSCROLL
-                        return S_FALSE; // allow to show menu; Host did not display its UI. MSHTML will display its UI.
-                }
-                return S_OK;
+                    // this is edit CONTEXT_MENU_CONTROL
+                    0x2 or 0x4 or 0x9 or 0x10 => S_FALSE,// allow to show menu; Host did not display its UI. MSHTML will display its UI.
+                    _ => S_OK,
+                };
             }
 
             public int ShowUI(int dwID, NativeWrapper.IOleInPlaceActiveObject activeObject,

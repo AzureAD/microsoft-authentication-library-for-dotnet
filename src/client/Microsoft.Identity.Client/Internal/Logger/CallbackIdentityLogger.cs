@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
         bool enablePiiLogging,
         LogLevel minLogLevel) : IIdentityLogger
     {
-        private LogCallback _logCallback = logCallback;
+        private readonly LogCallback _logCallback = logCallback;
         private readonly string _correlationId = correlationId;
         private readonly string _clientInformation = LoggerHelper.GetClientInfo(clientName, clientVersion);
         private readonly bool _piiLoggingEnabled = enablePiiLogging;

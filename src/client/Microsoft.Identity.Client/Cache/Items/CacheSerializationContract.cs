@@ -33,19 +33,19 @@ namespace Microsoft.Identity.Client.Cache.Items
                 StorageJsonValues.AppMetadata};
 
         public Dictionary<string, MsalAccessTokenCacheItem> AccessTokens { get; set; } =
-            new Dictionary<string, MsalAccessTokenCacheItem>();
+            [];
 
         public Dictionary<string, MsalRefreshTokenCacheItem> RefreshTokens { get; set; } =
-            new Dictionary<string, MsalRefreshTokenCacheItem>();
+            [];
 
         public Dictionary<string, MsalIdTokenCacheItem> IdTokens { get; set; } =
-            new Dictionary<string, MsalIdTokenCacheItem>();
+            [];
 
         public Dictionary<string, MsalAccountCacheItem> Accounts { get; set; } =
-            new Dictionary<string, MsalAccountCacheItem>();
+            [];
 
         public Dictionary<string, MsalAppMetadataCacheItem> AppMetadata { get; set; } =
-            new Dictionary<string, MsalAppMetadataCacheItem>();
+            [];
 
         public IDictionary<string, JToken> UnknownNodes { get; } = unknownNodes ?? new Dictionary<string, JToken>();
 
@@ -163,7 +163,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         internal string ToJsonString()
         {
-            JObject root = new();
+            JObject root = [];
 
             // Access Tokens
             var accessTokensRoot = new JObject();

@@ -32,16 +32,11 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop
         {
             get
             {
-                switch (Environment.OSVersion.Platform)
+                return Environment.OSVersion.Platform switch
                 {
-                    case PlatformID.Win32S:
-                    case PlatformID.Win32Windows:
-                    case PlatformID.Win32NT:
-                    case PlatformID.WinCE:
-                        return true;
-                    default:
-                        return false;
-                }
+                    PlatformID.Win32S or PlatformID.Win32Windows or PlatformID.Win32NT or PlatformID.WinCE => true,
+                    _ => false,
+                };
             }
         }
 

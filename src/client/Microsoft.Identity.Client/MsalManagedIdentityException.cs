@@ -88,20 +88,12 @@ namespace Microsoft.Identity.Client
         /// </summary>
         protected override void UpdateIsRetryable()
         {
-            switch (StatusCode)
+            IsRetryable = StatusCode switch
             {
-                case 404: //Not Found
-                case 408: // Request Timeout
-                case 429: // Too Many Requests
-                case 500: // Internal Server Error
-                case 503: // Service Unavailable
-                case 504: // Gateway Timeout
-                    IsRetryable = true;
-                    break;
-                default:
-                    IsRetryable = false;
-                    break;
-            }
+                //Not Found
+                404 or 408 or 429 or 500 or 503 or 504 => true,
+                _ => false,
+            };
         }
     }
 }

@@ -8,11 +8,11 @@ namespace Microsoft.Identity.Client.Http.Retry
     internal class ExponentialRetryStrategy(int minExponentialBackoff, int maxExponentialBackoff, int exponentialDeltaBackoff)
     {
         // Minimum backoff time in milliseconds
-        private int _minExponentialBackoff = minExponentialBackoff;
+        private readonly int _minExponentialBackoff = minExponentialBackoff;
         // Maximum backoff time in milliseconds
-        private int _maxExponentialBackoff = maxExponentialBackoff;
+        private readonly int _maxExponentialBackoff = maxExponentialBackoff;
         // Maximum backoff time in milliseconds
-        private int _exponentialDeltaBackoff = exponentialDeltaBackoff;
+        private readonly int _exponentialDeltaBackoff = exponentialDeltaBackoff;
 
         /// <summary>
         /// Calculates the exponential delay based on the current retry attempt.

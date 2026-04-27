@@ -23,8 +23,7 @@ namespace Microsoft.Identity.Client.OAuth2
         {
             Alg = "RS256";
             Type = "JWT";
-            X5c = new List<string>();
-            X5c.Add(base64EncodedCertificate);
+            X5c = [base64EncodedCertificate];
         }
 
         [JsonProperty("x5c")]

@@ -12,7 +12,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
 {
     internal class IdentityLoggerAdapter : ILoggerAdapter
     {
-        private string _correlationId;
+        private readonly string _correlationId;
         public bool PiiLoggingEnabled { get; }
         public bool IsDefaultPlatformLoggingEnabled { get; } = false;
         public string ClientName { get; }
@@ -54,10 +54,12 @@ namespace Microsoft.Identity.Client.Internal.Logger
             {
                 string messageToLog = LoggerHelper.GetMessageToLog(messageWithPii, messageScrubbed, PiiLoggingEnabled);
 
-                LogEntry entry = new();
-                entry.EventLogLevel = LoggerHelper.GetEventLogLevel(logLevel);
-                entry.CorrelationId = _correlationId;
-                entry.Message = messageToLog;
+                LogEntry entry = new()
+                {
+                    EventLogLevel = LoggerHelper.GetEventLogLevel(logLevel),
+                    CorrelationId = _correlationId,
+                    Message = messageToLog
+                };
                 IdentityLogger.Log(entry);
             }
         }

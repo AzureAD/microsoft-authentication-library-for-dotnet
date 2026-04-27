@@ -51,6 +51,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         public const string Prefix = "MSAL|";
         public const string TagAlias = "alias";
         public const string TagEp = "ep";
+        internal static readonly char[] separator = new[] { '|' };
 
         /// <summary>
         /// Encodes alias and endpointBase into friendly name.
@@ -101,12 +102,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 
             // Example: MSAL|alias=ManagedIdentityId|ep=https://mtls.login/1234-tenant
             var payload = friendlyName.Substring(Prefix.Length);
-            var parts = payload.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
+            var parts = payload.Split(separator, StringSplitOptions.RemoveEmptyEntries);
 
             // Parse key-value pairs
             foreach (var part in parts)
             {
-                var kv = part.Split(new[] { '=' }, 2);
+                var kv = part.Split(['='], 2);
                 if (kv.Length != 2)
                     continue;
 

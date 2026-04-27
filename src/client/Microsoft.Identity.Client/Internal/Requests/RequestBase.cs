@@ -238,17 +238,16 @@ namespace Microsoft.Identity.Client.Internal.Requests
             ApiEvent apiEvent = new ApiEvent(AuthenticationRequestParameters.RequestContext.CorrelationId)
             {
                 ApiId = AuthenticationRequestParameters.ApiId,
+                IsTokenCacheSerialized =
+                AuthenticationRequestParameters.CacheSessionManager.TokenCacheInternal.IsAppSubscribedToSerializationEvents(),
+
+                IsLegacyCacheEnabled =
+                AuthenticationRequestParameters.RequestContext.ServiceBundle.Config.LegacyCacheCompatibilityEnabled,
+
+                CacheInfo = CacheRefreshReason.NotApplicable,
+                TokenType = AuthenticationRequestParameters.AuthenticationScheme.TelemetryTokenType,
+                AssertionType = GetAssertionType()
             };
-
-            apiEvent.IsTokenCacheSerialized =
-                AuthenticationRequestParameters.CacheSessionManager.TokenCacheInternal.IsAppSubscribedToSerializationEvents();
-
-            apiEvent.IsLegacyCacheEnabled =
-                AuthenticationRequestParameters.RequestContext.ServiceBundle.Config.LegacyCacheCompatibilityEnabled;
-
-            apiEvent.CacheInfo = CacheRefreshReason.NotApplicable;
-            apiEvent.TokenType = AuthenticationRequestParameters.AuthenticationScheme.TelemetryTokenType;
-            apiEvent.AssertionType = GetAssertionType();
 
             if (AuthenticationRequestParameters.ExtraQueryParameters.TryGetValue(Constants.ManagedCertKey, out string managedCertValue)
                 && !string.IsNullOrEmpty(managedCertValue))
@@ -289,8 +288,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 callerSdkVer = AuthenticationRequestParameters.RequestContext.ServiceBundle.Config.ClientVersion;
             }
 
-            apiEvent.CallerSdkApiId = callerSdkId == null ? null : callerSdkId.Substring(0, Math.Min(callerSdkId.Length, Constants.CallerSdkIdMaxLength));
-            apiEvent.CallerSdkVersion = callerSdkVer == null ? null : callerSdkVer.Substring(0, Math.Min(callerSdkVer.Length, Constants.CallerSdkVersionMaxLength));
+            apiEvent.CallerSdkApiId = callerSdkId?.Substring(0, Math.Min(callerSdkId.Length, Constants.CallerSdkIdMaxLength));
+            apiEvent.CallerSdkVersion = callerSdkVer?.Substring(0, Math.Min(callerSdkVer.Length, Constants.CallerSdkVersionMaxLength));
         }
 
         private AssertionType GetAssertionType()
@@ -432,7 +431,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             if (AuthenticationRequestParameters?.Account?.HomeAccountId != null)
             {
-                if (!String.IsNullOrEmpty(AuthenticationRequestParameters.Account.HomeAccountId.Identifier))
+                if (!string.IsNullOrEmpty(AuthenticationRequestParameters.Account.HomeAccountId.Identifier))
                 {
                     var userObjectId = AuthenticationRequestParameters.Account.HomeAccountId.ObjectId;
                     var userTenantID = AuthenticationRequestParameters.Account.HomeAccountId.TenantId;
@@ -441,7 +440,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     return new KeyValuePair<string, string>(Constants.CcsRoutingHintHeader, OidCcsHeader);
                 }
 
-                if (!String.IsNullOrEmpty(AuthenticationRequestParameters.Account.Username))
+                if (!string.IsNullOrEmpty(AuthenticationRequestParameters.Account.Username))
                 {
                     return GetCcsUpnHeader(AuthenticationRequestParameters.Account.Username);
                 }
@@ -452,7 +451,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 return GetCcsUpnHeader(username);
             }
 
-            if (!String.IsNullOrEmpty(AuthenticationRequestParameters.LoginHint))
+            if (!string.IsNullOrEmpty(AuthenticationRequestParameters.LoginHint))
             {
                 return GetCcsUpnHeader(AuthenticationRequestParameters.LoginHint);
             }
@@ -583,8 +582,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
             if (cachedAccessTokenItem != null &&
                 authenticationRequestParameters.AuthenticationScheme is IAuthenticationOperation2 authOp2)
             {
-                var cacheValidationData = new MsalCacheValidationData();
-                cacheValidationData.PersistedCacheParameters = cachedAccessTokenItem.PersistedCacheParameters;
+                var cacheValidationData = new MsalCacheValidationData
+                {
+                    PersistedCacheParameters = cachedAccessTokenItem.PersistedCacheParameters
+                };
 
                 if (!await authOp2.ValidateCachedTokenAsync(cacheValidationData).ConfigureAwait(false))
                 {

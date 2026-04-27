@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client.Cache.Keys
 {
-    internal struct IosKey : IiOSKey
+    internal readonly struct IosKey : IiOSKey
     {
         public string iOSAccount { get; }
 

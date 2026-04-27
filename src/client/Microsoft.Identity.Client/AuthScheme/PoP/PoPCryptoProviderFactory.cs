@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
         public /* public for test only */ static TimeSpan KeyRotationInterval { get; }
             = TimeSpan.FromHours(8);
 
-        private static object s_lock = new();
+        private static readonly object s_lock = new();
 
         internal static ITimeService TimeService { get; set; } = new TimeService();
 

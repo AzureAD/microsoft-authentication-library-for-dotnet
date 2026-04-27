@@ -213,7 +213,7 @@ namespace Microsoft.Identity.Client.Utils
             jsonWriter.WriteStartObject();
 
             // Create a HashSet to track processed property names
-            HashSet<string> processedProperties = new();
+            HashSet<string> processedProperties = [];
 
             // Iterate through properties of the first JSON object
             foreach (JsonProperty property in root1.EnumerateObject())

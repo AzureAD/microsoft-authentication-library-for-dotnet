@@ -97,25 +97,23 @@ namespace Microsoft.Identity.Client.Internal
             else if (hasClaimsFromDictionary)
             {
 #if SUPPORTS_SYSTEM_TEXT_JSON
-                using (var stream = new MemoryStream())
+                using var stream = new MemoryStream();
+                using (var writer = new Utf8JsonWriter(stream))
                 {
-                    using (var writer = new Utf8JsonWriter(stream))
+                    writer.WriteStartObject();
+
+                    foreach (KeyValuePair<string, string> claim in _claimsToSign)
                     {
-                        writer.WriteStartObject();
-
-                        foreach (KeyValuePair<string, string> claim in _claimsToSign)
-                        {
-                            writer.WriteString(claim.Key, claim.Value);
-                        }
-
-                        writer.WriteEndObject();
+                        writer.WriteString(claim.Key, claim.Value);
                     }
 
-                    var jsonClaims = Encoding.UTF8.GetString(stream.ToArray());
-
-                    //Remove extra brackets from JSON result
-                    payload.Append(jsonClaims.Substring(1, jsonClaims.Length - 2));
+                    writer.WriteEndObject();
                 }
+
+                var jsonClaims = Encoding.UTF8.GetString(stream.ToArray());
+
+                //Remove extra brackets from JSON result
+                payload.Append(jsonClaims.Substring(1, jsonClaims.Length - 2));
 #else
                 var json = new JObject();
 
@@ -195,11 +193,9 @@ namespace Microsoft.Identity.Client.Internal
 
                     thumbprint = Base64UrlHelpers.Encode(certificate.GetCertHash(HashAlgorithmName.SHA256));
 #else
-                    using (var hasher = SHA256.Create())
-                    {
-                        byte[] hash = hasher.ComputeHash(certificate.RawData);
-                        thumbprint = Base64UrlHelpers.Encode(hash);
-                    }
+                    using var hasher = SHA256.Create();
+                    byte[] hash = hasher.ComputeHash(certificate.RawData);
+                    thumbprint = Base64UrlHelpers.Encode(hash);
 #endif
                 }
                 else

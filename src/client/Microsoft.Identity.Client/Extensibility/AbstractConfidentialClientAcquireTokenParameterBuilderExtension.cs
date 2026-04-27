@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Client.Extensibility
         {
             if (builder.CommonParameters.OnBeforeTokenRequestHandler == null)
             {
-                builder.CommonParameters.OnBeforeTokenRequestHandler = new List<Func<OnBeforeTokenRequestData, Task>> { onBeforeTokenRequestHandler };
+                builder.CommonParameters.OnBeforeTokenRequestHandler = [onBeforeTokenRequestHandler];
             }
             else
             {
@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Client.Extensibility
             {
                 if (builder.CommonParameters.OnBeforeTokenRequestHandler == null)
                 {
-                    builder.CommonParameters.OnBeforeTokenRequestHandler = new List<Func<OnBeforeTokenRequestData, Task>> { authenticationExtension.OnBeforeTokenRequestHandler };
+                    builder.CommonParameters.OnBeforeTokenRequestHandler = [authenticationExtension.OnBeforeTokenRequestHandler];
                 }
                 else
                 {

@@ -191,7 +191,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         private void InitializeAdditionalCacheKeyComponents(SortedList<string, string> cacheKeyComponents)
         {
-            if (cacheKeyComponents != null && cacheKeyComponents.Any())
+            if (cacheKeyComponents != null && cacheKeyComponents.Count != 0)
             {
                 AdditionalCacheKeyComponents = cacheKeyComponents;
                 CredentialType = StorageJsonValues.CredentialTypeAccessTokenExtended;
@@ -206,7 +206,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 
             if (AuthSchemeHelper.StoreTokenTypeInCacheKey(TokenType))
             {
-                _extraKeyParts = new[] { TokenType };
+                _extraKeyParts = [TokenType];
                 _credentialDescriptor = StorageJsonValues.CredentialTypeAccessTokenWithAuthScheme;
             }
 
@@ -219,7 +219,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                 }
                 else
                 {
-                    _extraKeyParts = new[] { CoreHelpers.ComputeAccessTokenExtCacheKey(AdditionalCacheKeyComponents) };
+                    _extraKeyParts = [CoreHelpers.ComputeAccessTokenExtCacheKey(AdditionalCacheKeyComponents)];
                 }
             }
 

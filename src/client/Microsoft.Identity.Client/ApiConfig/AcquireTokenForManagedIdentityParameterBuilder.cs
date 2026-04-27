@@ -111,7 +111,7 @@ namespace Microsoft.Identity.Client
             if (acquireTokenCommonParameters.IsMtlsPopRequested)
             {
                 acquireTokenCommonParameters.CacheKeyComponents ??=
-                    new SortedList<string, Func<CancellationToken, Task<string>>>();
+                    [];
 
                 acquireTokenCommonParameters.CacheKeyComponents[MiAttCacheKeyComponent] =
                     _ => acquireTokenCommonParameters.AttestationTokenProvider != null ? s_att1 : s_att0;

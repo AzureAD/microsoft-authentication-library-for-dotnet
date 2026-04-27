@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Client
                 return new Dictionary<string, string>() { { requestParams.AppConfig.ClientId, response.WamAccountId } };
             }
 
-            return new Dictionary<string, string>();
+            return [];
         }
     }
 }

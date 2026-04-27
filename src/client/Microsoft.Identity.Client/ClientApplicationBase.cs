@@ -137,8 +137,10 @@ namespace Microsoft.Identity.Client
         {
             Guid correlationId = Guid.NewGuid();
             RequestContext requestContext = CreateRequestContext(correlationId, null, cancellationToken);
-            requestContext.ApiEvent = new ApiEvent(correlationId);
-            requestContext.ApiEvent.ApiId = ApiIds.RemoveAccount;
+            requestContext.ApiEvent = new ApiEvent(correlationId)
+            {
+                ApiId = ApiIds.RemoveAccount
+            };
 
             Instance.Authority authority = await Microsoft.Identity.Client.Instance.Authority.CreateAuthorityForRequestAsync(
               requestContext,
@@ -181,8 +183,10 @@ namespace Microsoft.Identity.Client
                     $"Account id filter: {!string.IsNullOrEmpty(homeAccountIdFilter)}");
             }
 
-            requestContext.ApiEvent = new ApiEvent(correlationId);
-            requestContext.ApiEvent.ApiId = apiId;
+            requestContext.ApiEvent = new ApiEvent(correlationId)
+            {
+                ApiId = apiId
+            };
 
             Instance.Authority authority = await Microsoft.Identity.Client.Instance.Authority.CreateAuthorityForRequestAsync(
               requestContext,

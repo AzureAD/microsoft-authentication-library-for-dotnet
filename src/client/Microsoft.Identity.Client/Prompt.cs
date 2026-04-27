@@ -7,7 +7,7 @@ namespace Microsoft.Identity.Client
     /// Structure containing static members that you can use to specify how the interactive overrides
     /// of AcquireTokenAsync in <see cref="IPublicClientApplication" /> should prompt the user.
     /// </summary>
-    public struct Prompt
+    public readonly struct Prompt
     {
         /// <summary>
         /// AcquireToken will send <c>prompt=select_account</c> to the authorization server's authorize endpoint.

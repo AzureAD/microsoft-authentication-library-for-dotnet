@@ -12,7 +12,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
     internal class UserMetadataProvider : IUserMetadataProvider
     {
         private readonly Dictionary<string, InstanceDiscoveryMetadataEntry> _entries =
-             new Dictionary<string, InstanceDiscoveryMetadataEntry>();
+             [];
 
         public UserMetadataProvider(InstanceDiscoveryResponse instanceDiscoveryResponse)
         {

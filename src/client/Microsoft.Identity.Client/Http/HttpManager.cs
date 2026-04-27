@@ -236,30 +236,26 @@ namespace Microsoft.Identity.Client.Http
             ILoggerAdapter logger,
             CancellationToken cancellationToken = default)
         {
-            using (HttpRequestMessage requestMessage = CreateRequestMessage(endpoint, headers))
-            {
-                requestMessage.Method = method;
-                requestMessage.Content = body;
+            using HttpRequestMessage requestMessage = CreateRequestMessage(endpoint, headers);
+            requestMessage.Method = method;
+            requestMessage.Content = body;
 
-                logger.VerbosePii(
-                    () => $"[HttpManager] Sending request. Method: {method}. URI: {(endpoint == null ? "NULL" : $"{endpoint.Scheme}://{endpoint.Authority}{endpoint.AbsolutePath}")}. Binding Certificate: {bindingCertificate != null}. Endpoint: {endpoint} ",
-                    () => $"[HttpManager] Sending request. Method: {method}. Host: {(endpoint == null ? "NULL" : $"{endpoint.Scheme}://{endpoint.Authority}")}. Binding Certificate: {bindingCertificate != null} ");
+            logger.VerbosePii(
+                () => $"[HttpManager] Sending request. Method: {method}. URI: {(endpoint == null ? "NULL" : $"{endpoint.Scheme}://{endpoint.Authority}{endpoint.AbsolutePath}")}. Binding Certificate: {bindingCertificate != null}. Endpoint: {endpoint} ",
+                () => $"[HttpManager] Sending request. Method: {method}. Host: {(endpoint == null ? "NULL" : $"{endpoint.Scheme}://{endpoint.Authority}")}. Binding Certificate: {bindingCertificate != null} ");
 
-                Stopwatch sw = Stopwatch.StartNew();
+            Stopwatch sw = Stopwatch.StartNew();
 
-                HttpClient client = GetHttpClient(bindingCertificate, validateServerCert);
+            HttpClient client = GetHttpClient(bindingCertificate, validateServerCert);
 
-                using (HttpResponseMessage responseMessage =
-                    await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false))
-                {
-                    LastRequestDurationInMs = sw.ElapsedMilliseconds;
-                    logger.Verbose(() => $"[HttpManager] Received response. Status code: {responseMessage.StatusCode}. ");
+            using HttpResponseMessage responseMessage =
+                await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
+            LastRequestDurationInMs = sw.ElapsedMilliseconds;
+            logger.Verbose(() => $"[HttpManager] Received response. Status code: {responseMessage.StatusCode}. ");
 
-                    HttpResponse returnValue = await CreateResponseAsync(responseMessage).ConfigureAwait(false);
-                    returnValue.UserAgent = requestMessage.Headers.UserAgent.ToString();
-                    return returnValue;
-                }
-            }
+            HttpResponse returnValue = await CreateResponseAsync(responseMessage).ConfigureAwait(false);
+            returnValue.UserAgent = requestMessage.Headers.UserAgent.ToString();
+            return returnValue;
         }
 
         protected static async Task<HttpContent> CloneHttpContentAsync(HttpContent httpContent)

@@ -160,10 +160,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
         /// </summary>
         protected override void Dispose(bool disposing)
         {
-            if (timer != null)
-            {
-                timer.Dispose();
-            }
+            timer?.Dispose();
             base.Dispose(disposing);
         }
 

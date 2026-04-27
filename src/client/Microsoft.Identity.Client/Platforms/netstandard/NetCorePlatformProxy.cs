@@ -250,10 +250,10 @@ namespace Microsoft.Identity.Client.Platforms.netstandard
         {
             if (isBrokerConfigured)
             {
-                return new[] { "microsoft-edge", "xdg-open", "gnome-open", "kfmclient", "wslview" };
+                return ["microsoft-edge", "xdg-open", "gnome-open", "kfmclient", "wslview"];
             }
 
-            return new[] { "xdg-open", "gnome-open", "kfmclient", "microsoft-edge", "wslview" };
+            return ["xdg-open", "gnome-open", "kfmclient", "microsoft-edge", "wslview"];
         }
 
         public override IPoPCryptoProvider GetDefaultPoPCryptoProvider()

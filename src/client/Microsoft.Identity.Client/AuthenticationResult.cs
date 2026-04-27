@@ -23,7 +23,7 @@ namespace Microsoft.Identity.Client
     /// </summary>
     public partial class AuthenticationResult
     {
-        private IAuthenticationOperation _authenticationScheme;
+        private readonly IAuthenticationOperation _authenticationScheme;
 
         /// <summary>
         /// Constructor meant to help application developers test their apps. Allows mocking of authentication flows.

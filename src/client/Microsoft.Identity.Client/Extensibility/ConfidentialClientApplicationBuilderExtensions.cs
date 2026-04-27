@@ -126,10 +126,7 @@ namespace Microsoft.Identity.Client.Extensibility
         {
             builder.ValidateUseOfExperimentalFeature();
 
-            if (onMsalServiceFailure == null)
-                throw new ArgumentNullException(nameof(onMsalServiceFailure));
-
-            builder.Config.OnMsalServiceFailure = onMsalServiceFailure;
+            builder.Config.OnMsalServiceFailure = onMsalServiceFailure ?? throw new ArgumentNullException(nameof(onMsalServiceFailure));
             return builder;
         }
 
@@ -180,12 +177,7 @@ namespace Microsoft.Identity.Client.Extensibility
         {
             builder.ValidateUseOfExperimentalFeature();
 
-            if (onCompletion == null)
-            {
-                throw new ArgumentNullException(nameof(onCompletion));
-            }
-
-            builder.Config.OnCompletion = onCompletion;
+            builder.Config.OnCompletion = onCompletion ?? throw new ArgumentNullException(nameof(onCompletion));
             return builder;
         }
     }

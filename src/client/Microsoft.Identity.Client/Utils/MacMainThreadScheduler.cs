@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client.Utils
 {
-    internal struct MainThreadActionItem(Action action, TaskCompletionSource<bool> completion, bool isAsyncAction)
+    internal readonly struct MainThreadActionItem(Action action, TaskCompletionSource<bool> completion, bool isAsyncAction)
     {
         public Action Action { get; } = action;
         public TaskCompletionSource<bool> Completion { get; } = completion;

@@ -45,10 +45,8 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         public byte[] CreateSha256HashBytes(string input)
         {
-            using (var sha = SHA256.Create())
-            {
-                return sha.ComputeHash(Encoding.UTF8.GetBytes(input));
-            }
+            using var sha = SHA256.Create();
+            return sha.ComputeHash(Encoding.UTF8.GetBytes(input));
         }
 
         public string CreateSha256HashHex(string input)
@@ -167,19 +165,18 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
             // Create a new RSACryptoServiceProvider with the correct key size
             int keySize = parameters.Modulus.Length * 8;
-            using (var rsaProvider = new RSACryptoServiceProvider(keySize))
+            using var rsaProvider = new RSACryptoServiceProvider(keySize);
+            // Import the parameters into the new provider
+            rsaProvider.ImportParameters(parameters);
+
+            // Create a new certificate instance from the raw data
+            var certWithPrivateKey = new X509Certificate2(certificate.RawData)
             {
-                // Import the parameters into the new provider
-                rsaProvider.ImportParameters(parameters);
-
-                // Create a new certificate instance from the raw data
-                var certWithPrivateKey = new X509Certificate2(certificate.RawData);
-
                 // Assign the private key using the legacy property
-                certWithPrivateKey.PrivateKey = rsaProvider;
+                PrivateKey = rsaProvider
+            };
 
-                return certWithPrivateKey;
-            }
+            return certWithPrivateKey;
         }
 #endif
     }

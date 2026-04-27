@@ -52,8 +52,10 @@ namespace Microsoft.Identity.Client.Utils
 
         public static string GetHttpsUriWithOptionalPort(string host, string tenant, string path, int port)
         {
-            var builder = new UriBuilder("https", host);
-            builder.Path = string.Format(CultureInfo.InvariantCulture, "{0}/{1}", tenant, path);
+            var builder = new UriBuilder("https", host)
+            {
+                Path = string.Format(CultureInfo.InvariantCulture, "{0}/{1}", tenant, path)
+            };
 
             //No need to set port if it equals 443 as it is the default https port
             if (port != DefaultHttpsPort)
@@ -69,8 +71,10 @@ namespace Microsoft.Identity.Client.Utils
             //No need to set port if it equals 443 as it is the default https port
             if (port != DefaultHttpsPort)
             {
-                var builder = new UriBuilder(uri);
-                builder.Port = port;
+                var builder = new UriBuilder(uri)
+                {
+                    Port = port
+                };
                 return builder.Uri.AbsoluteUri;
             }
 

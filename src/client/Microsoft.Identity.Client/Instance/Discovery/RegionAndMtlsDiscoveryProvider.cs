@@ -88,7 +88,7 @@ namespace Microsoft.Identity.Client.Region
         {
             return new InstanceDiscoveryMetadataEntry()
             {
-                Aliases = new[] { regionalEnv, originalEnv },
+                Aliases = [regionalEnv, originalEnv],
                 PreferredCache = originalEnv,
                 PreferredNetwork = regionalEnv
             };

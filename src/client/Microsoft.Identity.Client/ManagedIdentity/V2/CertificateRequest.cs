@@ -19,10 +19,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
     /// </summary>
     internal class CertificateRequest
     {
-        private X500DistinguishedName _subjectName;
-        private RSA _rsa;
-        private HashAlgorithmName _hashAlgorithmName;
-        private RSASignaturePadding _rsaPadding;
+        private readonly X500DistinguishedName _subjectName;
+        private readonly RSA _rsa;
+        private readonly HashAlgorithmName _hashAlgorithmName;
+        private readonly RSASignaturePadding _rsaPadding;
 
         internal CertificateRequest(
             X500DistinguishedName subjectName,
@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             _rsaPadding = padding;
         }
 
-        internal Collection<AsnEncodedData> OtherRequestAttributes { get; } = new Collection<AsnEncodedData>();
+        internal Collection<AsnEncodedData> OtherRequestAttributes { get; } = [];
 
         private static string MakePem(byte[] ber, string header)
         {

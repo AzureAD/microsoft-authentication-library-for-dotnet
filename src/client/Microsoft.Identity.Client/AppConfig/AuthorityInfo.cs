@@ -177,7 +177,7 @@ namespace Microsoft.Identity.Client
         internal static AuthorityInfo FromAadAuthority(string cloudInstanceUri, Guid tenantId, bool validateAuthority)
         {
 #pragma warning disable CA1305 // Specify IFormatProvider
-            return FromAuthorityUri($"{cloudInstanceUri.Trim().TrimEnd('/')}/{tenantId.ToString("D")}", validateAuthority);
+            return FromAuthorityUri($"{cloudInstanceUri.Trim().TrimEnd('/')}/{tenantId:D}", validateAuthority);
 #pragma warning restore CA1305 // Specify IFormatProvider
         }
 
@@ -251,19 +251,14 @@ namespace Microsoft.Identity.Client
         #region Helpers
         internal static string GetCloudUrl(AzureCloudInstance azureCloudInstance)
         {
-            switch (azureCloudInstance)
+            return azureCloudInstance switch
             {
-                case AzureCloudInstance.AzurePublic:
-                    return "https://login.microsoftonline.com";
-                case AzureCloudInstance.AzureChina:
-                    return "https://login.chinacloudapi.cn";
-                case AzureCloudInstance.AzureGermany:
-                    return "https://login.microsoftonline.de";
-                case AzureCloudInstance.AzureUsGovernment:
-                    return "https://login.microsoftonline.us";
-                default:
-                    throw new ArgumentException(nameof(azureCloudInstance));
-            }
+                AzureCloudInstance.AzurePublic => "https://login.microsoftonline.com",
+                AzureCloudInstance.AzureChina => "https://login.chinacloudapi.cn",
+                AzureCloudInstance.AzureGermany => "https://login.microsoftonline.de",
+                AzureCloudInstance.AzureUsGovernment => "https://login.microsoftonline.us",
+                _ => throw new ArgumentException(nameof(azureCloudInstance)),
+            };
         }
 
         internal static string GetAadAuthorityAudienceValue(AadAuthorityAudience authorityAudience, string tenantId)
@@ -309,33 +304,25 @@ namespace Microsoft.Identity.Client
             }
         }
 
+        internal static readonly char[] separator = new[]
+                {
+                    '/'
+                };
+
         internal Authority CreateAuthority()
         {
-            switch (AuthorityType)
+            return AuthorityType switch
             {
-                case AuthorityType.Adfs:
-                    return new AdfsAuthority(this);
-
-                case AuthorityType.B2C:
-                    return new B2CAuthority(this);
-
-                case AuthorityType.Aad:
-                    return new AadAuthority(this);
-
-                case AuthorityType.Dsts:
-                    return new DstsAuthority(this);
-
-                case AuthorityType.Ciam:
-                    return new CiamAuthority(this);
-
-                case AuthorityType.Generic:
-                    return new GenericAuthority(this);
-
-                default:
-                    throw new MsalClientException(
-                        MsalError.InvalidAuthorityType,
-                        $"Unsupported authority type {AuthorityType}");
-            }
+                AuthorityType.Adfs => new AdfsAuthority(this),
+                AuthorityType.B2C => new B2CAuthority(this),
+                AuthorityType.Aad => new AadAuthority(this),
+                AuthorityType.Dsts => new DstsAuthority(this),
+                AuthorityType.Ciam => new CiamAuthority(this),
+                AuthorityType.Generic => new GenericAuthority(this),
+                _ => throw new MsalClientException(
+                                        MsalError.InvalidAuthorityType,
+                                        $"Unsupported authority type {AuthorityType}"),
+            };
         }
 
         #endregion
@@ -450,10 +437,7 @@ namespace Microsoft.Identity.Client
         private static string[] GetPathSegments(string absolutePath)
         {
             string[] pathSegments = absolutePath.Split(
-                new[]
-                {
-                    '/'
-                },
+                separator,
                 StringSplitOptions.RemoveEmptyEntries);
 
             return pathSegments;
@@ -466,20 +450,13 @@ namespace Microsoft.Identity.Client
         {
             public static IAuthorityValidator CreateAuthorityValidator(AuthorityInfo authorityInfo, RequestContext requestContext)
             {
-                switch (authorityInfo.AuthorityType)
+                return authorityInfo.AuthorityType switch
                 {
-                    case AuthorityType.Adfs:
-                        return new AdfsAuthorityValidator(requestContext);
-                    case AuthorityType.Aad:
-                        return new AadAuthorityValidator(requestContext);
-                    case AuthorityType.B2C:
-                    case AuthorityType.Dsts:
-                    case AuthorityType.Ciam:
-                    case AuthorityType.Generic:
-                        return new NullAuthorityValidator();
-                    default:
-                        throw new InvalidOperationException("Invalid AuthorityType");
-                }
+                    AuthorityType.Adfs => new AdfsAuthorityValidator(requestContext),
+                    AuthorityType.Aad => new AadAuthorityValidator(requestContext),
+                    AuthorityType.B2C or AuthorityType.Dsts or AuthorityType.Ciam or AuthorityType.Generic => new NullAuthorityValidator(),
+                    _ => throw new InvalidOperationException("Invalid AuthorityType"),
+                };
             }
 
             /// <summary>
@@ -507,12 +484,7 @@ namespace Microsoft.Identity.Client
                 IAccount account = null)
             {
                 Authority configAuthority = requestContext.ServiceBundle.Config.Authority;
-                AuthorityInfo configAuthorityInfo = configAuthority.AuthorityInfo;
-
-                if (configAuthorityInfo == null)
-                {
-                    throw new ArgumentNullException(nameof(requestContext.ServiceBundle.Config.Authority.AuthorityInfo));
-                }
+                AuthorityInfo configAuthorityInfo = configAuthority.AuthorityInfo ?? throw new ArgumentNullException(nameof(requestContext.ServiceBundle.Config.Authority.AuthorityInfo));
 
                 ValidateTypeMismatch(configAuthorityInfo, requestAuthorityInfo);
 

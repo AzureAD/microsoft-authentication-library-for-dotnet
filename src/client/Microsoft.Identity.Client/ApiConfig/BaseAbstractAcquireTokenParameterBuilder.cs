@@ -122,7 +122,7 @@ namespace Microsoft.Identity.Client
 
                 if (kvp.Value.IncludeInCacheKey)
                 {
-                    CommonParameters.CacheKeyComponents = CommonParameters.CacheKeyComponents ?? new SortedList<string, Func<CancellationToken, Task<string>>>();
+                    CommonParameters.CacheKeyComponents = CommonParameters.CacheKeyComponents ?? [];
 
                     // Capture the value in a local to avoid closure issues
                     string valueToCache = kvp.Value.Value;

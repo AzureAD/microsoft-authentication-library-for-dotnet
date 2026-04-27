@@ -17,25 +17,23 @@ namespace Microsoft.Identity.Client.Cache
 
         public static byte[] Serialize(ILoggerAdapter logger, IDictionary<AdalTokenCacheKey, AdalResultWrapper> tokenCacheDictionary)
         {
-            using (Stream stream = new MemoryStream())
+            using Stream stream = new MemoryStream();
+            BinaryWriter writer = new(stream);
+            writer.Write(SchemaVersion);
+            logger.Info(() => $"[AdalCacheOperations] Serializing token cache with {tokenCacheDictionary.Count} items. ");
+
+            writer.Write(tokenCacheDictionary.Count);
+            foreach (KeyValuePair<AdalTokenCacheKey, AdalResultWrapper> kvp in tokenCacheDictionary)
             {
-                BinaryWriter writer = new(stream);
-                writer.Write(SchemaVersion);
-                logger.Info(() => $"[AdalCacheOperations] Serializing token cache with {tokenCacheDictionary.Count} items. ");
-
-                writer.Write(tokenCacheDictionary.Count);
-                foreach (KeyValuePair<AdalTokenCacheKey, AdalResultWrapper> kvp in tokenCacheDictionary)
-                {
-                    AdalTokenCacheKey key = kvp.Key;
-                    writer.Write($"{key.Authority}{Delimiter}{key.Resource}{Delimiter}{key.ClientId}{Delimiter}{(int)key.TokenSubjectType}");
-                    writer.Write(kvp.Value.Serialize());
-                }
-
-                int length = (int)stream.Position;
-                stream.Position = 0;
-                BinaryReader reader = new(stream);
-                return reader.ReadBytes(length);
+                AdalTokenCacheKey key = kvp.Key;
+                writer.Write($"{key.Authority}{Delimiter}{key.Resource}{Delimiter}{key.ClientId}{Delimiter}{(int)key.TokenSubjectType}");
+                writer.Write(kvp.Value.Serialize());
             }
+
+            int length = (int)stream.Position;
+            stream.Position = 0;
+            BinaryReader reader = new(stream);
+            return reader.ReadBytes(length);
         }
 
         public static IDictionary<AdalTokenCacheKey, AdalResultWrapper> Deserialize(ILoggerAdapter logger, byte[] state)

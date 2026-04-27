@@ -13,7 +13,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
     {
         // No need to use a ConcurrentDictionary, because the normal Dictionary is thread safe for read operations
         private static readonly Dictionary<string, InstanceDiscoveryMetadataEntry> s_knownEntries =
-            new Dictionary<string, InstanceDiscoveryMetadataEntry>();
+            [];
 
         private static readonly HashSet<string> s_knownEnvironments = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         private static readonly HashSet<string> s_knownPublicEnvironments = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -39,63 +39,63 @@ namespace Microsoft.Identity.Client.Instance.Discovery
 
             InstanceDiscoveryMetadataEntry publicCloudEntry = new()
             {
-                Aliases = new[] { "login.microsoftonline.com", "login.windows.net", "login.microsoft.com", "sts.windows.net" },
+                Aliases = ["login.microsoftonline.com", "login.windows.net", "login.microsoft.com", "sts.windows.net"],
                 PreferredNetwork = "login.microsoftonline.com",
                 PreferredCache = "login.windows.net"
             };
 
             InstanceDiscoveryMetadataEntry cloudEntryChina = new()
             {
-                Aliases = new[] { "login.partner.microsoftonline.cn", "login.chinacloudapi.cn" },
+                Aliases = ["login.partner.microsoftonline.cn", "login.chinacloudapi.cn"],
                 PreferredNetwork = "login.partner.microsoftonline.cn",
                 PreferredCache = "login.partner.microsoftonline.cn"
             };
 
             InstanceDiscoveryMetadataEntry cloudEntryLegacyGermany = new()
             {
-                Aliases = new[] { "login.microsoftonline.de" },
+                Aliases = ["login.microsoftonline.de"],
                 PreferredNetwork = "login.microsoftonline.de",
                 PreferredCache = "login.microsoftonline.de"
             };
 
             InstanceDiscoveryMetadataEntry usGovCloudEntry = new()
             {
-                Aliases = new[] { "login.microsoftonline.us", "login.usgovcloudapi.net" },
+                Aliases = ["login.microsoftonline.us", "login.usgovcloudapi.net"],
                 PreferredNetwork = "login.microsoftonline.us",
                 PreferredCache = "login.microsoftonline.us"
             };
 
             InstanceDiscoveryMetadataEntry usCloudEntry = new()
             {
-                Aliases = new[] { "login-us.microsoftonline.com" },
+                Aliases = ["login-us.microsoftonline.com"],
                 PreferredNetwork = "login-us.microsoftonline.com",
                 PreferredCache = "login-us.microsoftonline.com"
             };
 
             InstanceDiscoveryMetadataEntry ppeCloudEntry = new()
             {
-                Aliases = new[] { "login.windows-ppe.net", "sts.windows-ppe.net", "login.microsoft-ppe.com" },
+                Aliases = ["login.windows-ppe.net", "sts.windows-ppe.net", "login.microsoft-ppe.com"],
                 PreferredNetwork = "login.windows-ppe.net",
                 PreferredCache = "login.windows-ppe.net"
             };
 
             InstanceDiscoveryMetadataEntry bleuCloudEntry = new()
             {
-                Aliases = new[] { "login.sovcloud-identity.fr" },
+                Aliases = ["login.sovcloud-identity.fr"],
                 PreferredNetwork = "login.sovcloud-identity.fr",
                 PreferredCache = "login.sovcloud-identity.fr"
             };
 
             InstanceDiscoveryMetadataEntry delosCloudEntry = new()
             {
-                Aliases = new[] { "login.sovcloud-identity.de" },
+                Aliases = ["login.sovcloud-identity.de"],
                 PreferredNetwork = "login.sovcloud-identity.de",
                 PreferredCache = "login.sovcloud-identity.de"
             };
 
             InstanceDiscoveryMetadataEntry govSGCloudEntry = new()
             {
-                Aliases = new[] { "login.sovcloud-identity.sg" },
+                Aliases = ["login.sovcloud-identity.sg"],
                 PreferredNetwork = "login.sovcloud-identity.sg",
                 PreferredCache = "login.sovcloud-identity.sg"
             };
@@ -122,10 +122,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             IEnumerable<string> existingEnvironmentsInCache,
             ILoggerAdapter logger)
         {
-            if (existingEnvironmentsInCache == null)
-            {
-                existingEnvironmentsInCache = Enumerable.Empty<string>();
-            }
+            existingEnvironmentsInCache ??= Enumerable.Empty<string>();
 
             bool canUseProvider = existingEnvironmentsInCache.All(e => s_knownEnvironments.ContainsOrdinalIgnoreCase(e));
 

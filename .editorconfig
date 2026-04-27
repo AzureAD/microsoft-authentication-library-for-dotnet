@@ -863,6 +863,18 @@ dotnet_diagnostic.CA1838.severity = none
 # Not applicable: char overloads require .NET 5+; not available in net462/netstandard2.0 targets
 dotnet_diagnostic.CA1866.severity = none
 
+# Use ArgumentNullException.ThrowIfNull
+# Not applicable: ThrowIfNull requires .NET 6+; not available in net462/netstandard2.0 targets
+dotnet_diagnostic.CA1510.severity = none
+
+# Use range subscript operator (x[^1]) and index-from-end operator
+# Not applicable: System.Index/System.Range require .NET 5+; polyfill not present in this project
+dotnet_diagnostic.IDE0057.severity = none
+
+# Use pattern matching (value is Type x)
+# Disabled: introduces duplicate variable declarations in #if multi-target preprocessor blocks
+dotnet_diagnostic.IDE0019.severity = none
+
 # Dispose objects before losing scope
 dotnet_diagnostic.CA2000.severity = none
 

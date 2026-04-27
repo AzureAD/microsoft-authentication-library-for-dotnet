@@ -60,14 +60,16 @@ namespace Microsoft.Identity.Client
                 if (authInfoValueList != null)
                 {
                     var authInfoValue = authInfoValueList.FirstOrDefault();
-                    var AuthValuesSplit = authInfoValue.Split(new char[] { ' ' }, 2);
+                    var AuthValuesSplit = authInfoValue.Split([' '], 2);
                     IDictionary<string, string> paramValues;
 
                     if (AuthValuesSplit.Length != 2)
                     {
                         //Header is not in the form of a=b.
-                        paramValues = new Dictionary<string, string>();
-                        paramValues.Add(new KeyValuePair<string, string>(AuthenticationInfoKey, authInfoValue));
+                        paramValues = new Dictionary<string, string>
+                        {
+                            { AuthenticationInfoKey, authInfoValue }
+                        };
                     }
                     else
                     {

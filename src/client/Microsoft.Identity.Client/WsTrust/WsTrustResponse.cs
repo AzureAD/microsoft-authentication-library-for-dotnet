@@ -51,11 +51,9 @@ namespace Microsoft.Identity.Client.WsTrust
                 XElement text = reason.Elements(XmlNamespace.SoapEnvelope + "Text").FirstOrDefault();
                 if (text != null)
                 {
-                    using (System.Xml.XmlReader reader = text.CreateReader())
-                    {
-                        reader.MoveToContent();
-                        return reader.ReadInnerXml();
-                    }
+                    using System.Xml.XmlReader reader = text.CreateReader();
+                    reader.MoveToContent();
+                    return reader.ReadInnerXml();
                 }
             }
 
@@ -64,7 +62,7 @@ namespace Microsoft.Identity.Client.WsTrust
 
         internal static WsTrustResponse CreateFromResponseDocument(XDocument responseDocument, WsTrustVersion version)
         {
-            Dictionary<string, string> tokenResponseDictionary = new();
+            Dictionary<string, string> tokenResponseDictionary = [];
 
             XNamespace t = XmlNamespace.Trust;
             if (version == WsTrustVersion.WsTrust2005)

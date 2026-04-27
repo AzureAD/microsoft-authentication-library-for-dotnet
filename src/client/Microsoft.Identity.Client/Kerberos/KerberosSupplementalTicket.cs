@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Client.Kerberos
         /// <param name="errorMessage">Error message to be set.</param>
         public KerberosSupplementalTicket(string errorMessage)
         {
-            this.ErrorMessage = errorMessage;
+            ErrorMessage = errorMessage;
         }
 
         /// <summary>

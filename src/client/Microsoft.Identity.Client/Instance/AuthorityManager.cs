@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client.Instance
     internal class AuthorityManager(RequestContext requestContext, Authority initialAuthority)
     {
         private static readonly ConcurrentHashSet<string> s_validatedEnvironments =
-            new();
+            [];
 
         private readonly RequestContext _requestContext = requestContext;
 

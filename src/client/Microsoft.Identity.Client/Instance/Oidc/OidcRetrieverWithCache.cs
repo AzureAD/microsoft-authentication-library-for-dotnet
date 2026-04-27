@@ -148,11 +148,11 @@ namespace Microsoft.Identity.Client.Instance.Oidc
             {
                 // Create a collection of valid CIAM issuer patterns for the tenant
                 string[] validCiamPatterns =
-                {
+                [
                     $"https://{tenant}{Constants.CiamAuthorityHostSuffix}",
                     $"https://{tenant}{Constants.CiamAuthorityHostSuffix}/{tenant}",
                     $"https://{tenant}{Constants.CiamAuthorityHostSuffix}/{tenant}/v2.0"
-                };
+                ];
 
                 // Normalize and check if the issuer matches any of the valid patterns
                 if (validCiamPatterns.Any(pattern =>

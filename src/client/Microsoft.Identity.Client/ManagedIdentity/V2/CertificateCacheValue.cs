@@ -13,16 +13,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
     {
         public CertificateCacheValue(X509Certificate2 certificate, string endpoint, string clientId)
         {
-            if (certificate == null)
-                throw new ArgumentNullException(nameof(certificate));
-            if (endpoint == null)
-                throw new ArgumentNullException(nameof(endpoint));
-            if (clientId == null)
-                throw new ArgumentNullException(nameof(clientId));
-
-            Certificate = certificate;
-            Endpoint = endpoint;
-            ClientId = clientId;
+            Certificate = certificate ?? throw new ArgumentNullException(nameof(certificate));
+            Endpoint = endpoint ?? throw new ArgumentNullException(nameof(endpoint));
+            ClientId = clientId ?? throw new ArgumentNullException(nameof(clientId));
         }
 
         /// <summary>The certificate (clone owned by the caller).</summary>

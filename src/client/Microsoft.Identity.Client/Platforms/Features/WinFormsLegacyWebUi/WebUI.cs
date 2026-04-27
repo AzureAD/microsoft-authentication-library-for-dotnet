@@ -66,31 +66,29 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
                 }
                 else
                 {
-                    using (var staTaskScheduler = new StaTaskScheduler(1))
+                    using var staTaskScheduler = new StaTaskScheduler(1);
+                    try
                     {
-                        try
-                        {
-                            Task.Factory.StartNew(
-                                sendAuthorizeRequest,
-                                cancellationToken,
-                                TaskCreationOptions.None,
-                                staTaskScheduler).Wait(cancellationToken);
-                        }
-                        catch (AggregateException ae)
-                        {
-                            requestContext.Logger.ErrorPii(ae.InnerException);
-                            // Any exception thrown as a result of running task will cause AggregateException to be thrown with
-                            // actual exception as inner.
-                            Exception innerException = ae.InnerExceptions[0];
+                        Task.Factory.StartNew(
+                            sendAuthorizeRequest,
+                            cancellationToken,
+                            TaskCreationOptions.None,
+                            staTaskScheduler).Wait(cancellationToken);
+                    }
+                    catch (AggregateException ae)
+                    {
+                        requestContext.Logger.ErrorPii(ae.InnerException);
+                        // Any exception thrown as a result of running task will cause AggregateException to be thrown with
+                        // actual exception as inner.
+                        Exception innerException = ae.InnerExceptions[0];
 
-                            // In MTA case, AggregateException is two layer deep, so checking the InnerException for that.
-                            if (innerException is AggregateException innerAggregateException)
-                            {
-                                innerException = innerAggregateException.InnerExceptions[0];
-                            }
-
-                            throw innerException;
+                        // In MTA case, AggregateException is two layer deep, so checking the InnerException for that.
+                        if (innerException is AggregateException innerAggregateException)
+                        {
+                            innerException = innerAggregateException.InnerExceptions[0];
                         }
+
+                        throw innerException;
                     }
                 }
             }

@@ -9,20 +9,14 @@ namespace Microsoft.Identity.Client.Http.Retry
     {
         public virtual IRetryPolicy GetRetryPolicy(RequestType requestType)
         {
-            switch (requestType)
+            return requestType switch
             {
-                case RequestType.STS:
-                case RequestType.ManagedIdentityDefault:
-                    return new DefaultRetryPolicy(requestType);
-                case RequestType.ImdsProbe:
-                    return new ImdsProbeRetryPolicy();
-                case RequestType.Imds:
-                    return new ImdsRetryPolicy();
-                case RequestType.RegionDiscovery:
-                    return new RegionDiscoveryRetryPolicy();
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(requestType), requestType, "Unknown request type.");
-            }
+                RequestType.STS or RequestType.ManagedIdentityDefault => new DefaultRetryPolicy(requestType),
+                RequestType.ImdsProbe => new ImdsProbeRetryPolicy(),
+                RequestType.Imds => new ImdsRetryPolicy(),
+                RequestType.RegionDiscovery => new RegionDiscoveryRetryPolicy(),
+                _ => throw new ArgumentOutOfRangeException(nameof(requestType), requestType, "Unknown request type."),
+            };
         }
     }
 }

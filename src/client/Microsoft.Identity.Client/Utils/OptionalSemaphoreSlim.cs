@@ -14,7 +14,7 @@ namespace Microsoft.Identity.Client.Utils
     {
         private readonly bool _useRealSemaphore;
         private int _noLockCurrentCount;
-        private SemaphoreSlim _semaphoreSlim;
+        private readonly SemaphoreSlim _semaphoreSlim;
 
         public int CurrentCount
         {

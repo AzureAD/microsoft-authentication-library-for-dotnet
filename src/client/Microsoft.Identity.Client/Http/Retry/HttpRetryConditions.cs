@@ -16,7 +16,7 @@ namespace Microsoft.Identity.Client.Http.Retry
         {
             if (exception != null)
             {
-                return exception is TaskCanceledException ? true : false;
+                return exception is TaskCanceledException;
             }
 
             return (int)response.StatusCode switch
@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Client.Http.Retry
         {
             if (exception != null)
             {
-                return exception is TaskCanceledException ? true : false;
+                return exception is TaskCanceledException;
             }
 
             return (int)response.StatusCode switch
@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Client.Http.Retry
         {
             if (exception != null)
             {
-                return exception is TaskCanceledException ? true : false;
+                return exception is TaskCanceledException;
             }
 
             System.Net.Http.Headers.RetryConditionHeaderValue retryAfter = response?.Headers?.RetryAfter;

@@ -96,10 +96,11 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(nonce));
             }
 
-            PoPAuthenticationConfiguration popConfig = new(requestUri);
-
-            popConfig.Nonce = nonce;
-            popConfig.HttpMethod = httpMethod;
+            PoPAuthenticationConfiguration popConfig = new(requestUri)
+            {
+                Nonce = nonce,
+                HttpMethod = httpMethod
+            };
 
             CommonParameters.PopAuthenticationConfiguration = popConfig;
             CommonParameters.AuthenticationOperation = new PopBrokerAuthenticationOperation();

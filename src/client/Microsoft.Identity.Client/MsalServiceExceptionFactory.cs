@@ -34,8 +34,7 @@ namespace Microsoft.Identity.Client
 
             if (IsInvalidGrant(oAuth2Response?.Error, oAuth2Response?.SubError) || IsInteractionRequired(oAuth2Response?.Error))
             {
-                string errorMessageToUse = null;
-
+                string errorMessageToUse;
                 if (IsThrottled(oAuth2Response))
                 {
                     errorMessageToUse = MsalErrorMessage.AadThrottledError;
@@ -160,10 +159,7 @@ namespace Microsoft.Identity.Client
                     MsalErrorMessage.InvalidClient + " Original exception: " + errorMessage);
             }
 
-            if (ex == null)
-            {
-                ex = new MsalServiceException(errorCode, errorMessage);
-            }
+            ex ??= new MsalServiceException(errorCode, errorMessage);
 
             SetHttpExceptionData(ex, brokerHttpResponse);
 

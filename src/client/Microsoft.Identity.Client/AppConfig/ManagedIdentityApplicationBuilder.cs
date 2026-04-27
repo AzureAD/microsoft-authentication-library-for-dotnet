@@ -58,12 +58,13 @@ namespace Microsoft.Identity.Client
         private static ApplicationConfiguration BuildConfiguration(ManagedIdentityId managedIdentityId)
         {
             _ = managedIdentityId ?? throw new ArgumentNullException(nameof(managedIdentityId));
-            var config = new ApplicationConfiguration(MsalClientType.ManagedIdentityClient);
+            var config = new ApplicationConfiguration(MsalClientType.ManagedIdentityClient)
+            {
+                ManagedIdentityId = managedIdentityId,
 
-            config.ManagedIdentityId = managedIdentityId;
-
-            config.CacheSynchronizationEnabled = false;
-            config.AccessorOptions = CacheOptions.EnableSharedCacheOptions;
+                CacheSynchronizationEnabled = false,
+                AccessorOptions = CacheOptions.EnableSharedCacheOptions
+            };
 
             return config;
         }

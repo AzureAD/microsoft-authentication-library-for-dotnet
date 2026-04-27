@@ -38,21 +38,13 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
             {
                 var systemInfo = new SYSTEM_INFO();
                 GetNativeSystemInfo(ref systemInfo);
-                switch (systemInfo.wProcessorArchitecture)
+                return systemInfo.wProcessorArchitecture switch
                 {
-                    case PROCESSOR_ARCHITECTURE_AMD64:
-                    case PROCESSOR_ARCHITECTURE_IA64:
-                        return "x64";
-
-                    case PROCESSOR_ARCHITECTURE_ARM:
-                        return "ARM";
-
-                    case PROCESSOR_ARCHITECTURE_INTEL:
-                        return "x86";
-
-                    default:
-                        return "Unknown";
-                }
+                    PROCESSOR_ARCHITECTURE_AMD64 or PROCESSOR_ARCHITECTURE_IA64 => "x64",
+                    PROCESSOR_ARCHITECTURE_ARM => "ARM",
+                    PROCESSOR_ARCHITECTURE_INTEL => "x86",
+                    _ => "Unknown",
+                };
             }
             catch (Exception)
             {
@@ -78,7 +70,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
         public static extern IntPtr GetConsoleWindow();
 
         [StructLayout(LayoutKind.Sequential)]
-        private struct SYSTEM_INFO
+        private readonly struct SYSTEM_INFO
         {
             public readonly short wProcessorArchitecture;
             public readonly short wReserved;

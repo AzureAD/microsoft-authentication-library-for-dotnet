@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
         /// <exception cref="CryptographicException">Thrown when cryptographic operations fail during key creation or access</exception>
         public static bool TryGetOrCreateKeyGuard(ILoggerAdapter logger, out RSA rsa)
         {
-            rsa = default(RSA);
+            rsa = default;
 
             try
             {
@@ -147,7 +147,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
         /// The exception's HResult property provides additional diagnostic information</exception>
         public static bool TryGetOrCreateHardwareRsa(ILoggerAdapter logger, out RSA rsa)
         {
-            rsa = default(RSA);
+            rsa = default;
 
             try
             {

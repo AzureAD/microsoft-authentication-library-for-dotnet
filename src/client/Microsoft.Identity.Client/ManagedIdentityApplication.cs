@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Client
 
             AppTokenCacheInternal = configuration.AppTokenCacheInternalForTest ?? new TokenCache(ServiceBundle, true);
 
-            this.ServiceBundle.ApplicationLogger.Verbose(() => $"ManagedIdentityApplication {configuration.GetHashCode()} created");
+            ServiceBundle.ApplicationLogger.Verbose(() => $"ManagedIdentityApplication {configuration.GetHashCode()} created");
 
             ManagedIdentityClient = new ManagedIdentityClient();
         }
@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Client
         public async Task<ManagedIdentitySourceResult> GetManagedIdentitySourceAsync(CancellationToken cancellationToken)
         {
             // Create a temporary RequestContext for the logger and the IMDS probe request.
-            var requestContext = new RequestContext(this.ServiceBundle, Guid.NewGuid(), null, cancellationToken);
+            var requestContext = new RequestContext(ServiceBundle, Guid.NewGuid(), null, cancellationToken);
 
             return await ManagedIdentityClient.GetManagedIdentitySourceAsync(requestContext, cancellationToken).ConfigureAwait(false);
         }

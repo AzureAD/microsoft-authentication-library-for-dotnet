@@ -77,10 +77,12 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
                 return;
             }
 
-            var header = new JObject();
-            header[JsonWebTokenConstants.Algorithm] = _popCryptoProvider.CryptographicAlgorithm;
-            header[JsonWebTokenConstants.KeyId] = KeyId;
-            header[JsonWebTokenConstants.Type] = Constants.PoPTokenType;
+            var header = new JObject
+            {
+                [JsonWebTokenConstants.Algorithm] = _popCryptoProvider.CryptographicAlgorithm,
+                [JsonWebTokenConstants.KeyId] = KeyId,
+                [JsonWebTokenConstants.Type] = Constants.PoPTokenType
+            };
 
             JObject body = CreateBody(authenticationResult.AccessToken);
 
@@ -149,10 +151,8 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
         /// </summary>
         private static byte[] ComputeThumbprint(string canonicalJwk)
         {
-            using (SHA256 hash = SHA256.Create())
-            {
-                return hash.ComputeHash(Encoding.UTF8.GetBytes(canonicalJwk));
-            }
+            using SHA256 hash = SHA256.Create();
+            return hash.ComputeHash(Encoding.UTF8.GetBytes(canonicalJwk));
         }
 
         /// <summary>

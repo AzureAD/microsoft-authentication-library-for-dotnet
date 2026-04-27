@@ -16,6 +16,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
     internal class DeviceAuthManager(ICryptographyManager cryptographyManager) : IDeviceAuthManager
     {
         private readonly ICryptographyManager _cryptographyManager = cryptographyManager;
+        internal static readonly string[] separator = new[] { ";" };
 
         public bool TryCreateDeviceAuthChallengeResponse(HttpResponseHeaders responseHeaders, Uri endpointUri, out string responseHeader)
         {
@@ -113,7 +114,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         private static X509Certificate2 FindCertificateByCertAuthorities(IDictionary<string, string> challengeData, X509Certificate2Collection certCollection)
         {
             X509Certificate2Collection signingCert = null;
-            string[] certAuthorities = challengeData["CertAuthorities"].Split(new[] { ";" },
+            string[] certAuthorities = challengeData["CertAuthorities"].Split(separator,
                 StringSplitOptions.None);
             foreach (var certAuthority in certAuthorities)
             {

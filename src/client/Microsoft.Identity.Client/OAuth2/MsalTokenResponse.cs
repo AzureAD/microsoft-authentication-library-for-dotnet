@@ -194,7 +194,7 @@ namespace Microsoft.Identity.Client.OAuth2
                 {
                     string brokerMetadataJson = Uri.UnescapeDataString(metadataOriginal);
 #if SUPPORTS_SYSTEM_TEXT_JSON
-                    metadataDictionary = new Dictionary<string, string>();
+                    metadataDictionary = [];
                     foreach (System.Text.Json.JsonProperty item in JsonDocument.Parse(brokerMetadataJson).RootElement.EnumerateObject())
                     {
                         metadataDictionary.Add(item.Name, item.Value.GetString());

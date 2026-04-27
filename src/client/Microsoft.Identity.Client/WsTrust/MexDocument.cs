@@ -24,8 +24,8 @@ namespace Microsoft.Identity.Client.WsTrust
     internal class MexDocument
     {
         private const string WsTrustSoapTransport = "http://schemas.xmlsoap.org/soap/http";
-        private readonly Dictionary<string, MexPolicy> _policies = new();
-        private readonly Dictionary<string, MexPolicy> _bindings = new();
+        private readonly Dictionary<string, MexPolicy> _policies = [];
+        private readonly Dictionary<string, MexPolicy> _bindings = [];
 
         private class MexPolicy
         {
@@ -206,7 +206,7 @@ namespace Microsoft.Identity.Client.WsTrust
                 }
 
                 string portBindingName = portBinding.Value;
-                string[] portBindingNameSegments = portBindingName.Split(new[] { ':' }, 2);
+                string[] portBindingNameSegments = portBindingName.Split([':'], 2);
                 if (portBindingNameSegments.Length < 2 || !_bindings.ContainsKey(portBindingNameSegments[1]))
                 {
                     continue;
@@ -228,14 +228,9 @@ namespace Microsoft.Identity.Client.WsTrust
 
         private static IEnumerable<XElement> FindElements(XContainer mexDocument, XNamespace xNamespace, string element)
         {
-            IEnumerable<XElement> xmlElements = mexDocument.Elements()?.First()?.Elements(xNamespace + element);
-
-            if (xmlElements == null)
-            {
-                throw new MsalClientException(
+            IEnumerable<XElement> xmlElements = (mexDocument.Elements()?.First()?.Elements(xNamespace + element)) ?? throw new MsalClientException(
                 MsalError.ParsingWsMetadataExchangeFailed,
                 MsalErrorMessage.ParsingMetadataDocumentFailed + $" Could not find XML data.");
-            }
 
             if (!xmlElements.Any())
             {

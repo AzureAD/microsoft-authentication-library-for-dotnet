@@ -80,16 +80,11 @@ namespace Microsoft.Identity.Client.WsTrust
                     ex);
             }
 
-            WsTrustEndpoint wsTrustEndpoint = userAuthType == UserAuthType.IntegratedAuth
+            WsTrustEndpoint wsTrustEndpoint = (userAuthType == UserAuthType.IntegratedAuth
                 ? mexDocument.GetWsTrustWindowsTransportEndpoint()
-                : mexDocument.GetWsTrustUsernamePasswordEndpoint();
-
-            if (wsTrustEndpoint == null)
-            {
-                throw new MsalClientException(
+                : mexDocument.GetWsTrustUsernamePasswordEndpoint()) ?? throw new MsalClientException(
                   MsalError.WsTrustEndpointNotFoundInMetadataDocument,
                   MsalErrorMessage.WsTrustEndpointNotFoundInMetadataDocument);
-            }
 
             _requestContext.Logger.VerbosePii(
                 () => string.Format(CultureInfo.InvariantCulture, "WS-Trust endpoint '{0}' being used from MEX at '{1}'", wsTrustEndpoint.Uri, federationMetadataUrl),

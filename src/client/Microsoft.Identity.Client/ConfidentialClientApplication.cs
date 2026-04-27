@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client
             AppTokenCacheInternal = configuration.AppTokenCacheInternalForTest ?? new TokenCache(ServiceBundle, true);
             Certificate = configuration.ClientCredentialCertificate;
 
-            this.ServiceBundle.ApplicationLogger.Verbose(() => $"ConfidentialClientApplication {configuration.GetHashCode()} created");
+            ServiceBundle.ApplicationLogger.Verbose(() => $"ConfidentialClientApplication {configuration.GetHashCode()} created");
         }
 
         /// <inheritdoc/>
@@ -140,8 +140,10 @@ namespace Microsoft.Identity.Client
 
             Guid correlationId = Guid.NewGuid();
             RequestContext requestContext = base.CreateRequestContext(correlationId, null, cancellationToken);
-            requestContext.ApiEvent = new ApiEvent(correlationId);
-            requestContext.ApiEvent.ApiId = ApiIds.RemoveOboTokens;
+            requestContext.ApiEvent = new ApiEvent(correlationId)
+            {
+                ApiId = ApiIds.RemoveOboTokens
+            };
 
             Instance.Authority authority = await Instance.Authority.CreateAuthorityForRequestAsync(
               requestContext,

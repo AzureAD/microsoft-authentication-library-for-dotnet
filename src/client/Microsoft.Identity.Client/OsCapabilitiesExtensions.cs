@@ -66,8 +66,6 @@ namespace Microsoft.Identity.Client
                 "of the IPublicClientApplication interface.");
         }
 
-
-
         /// <summary>
         /// Returns the certificate used to create this <see cref="ConfidentialClientApplication"/>, if any.
         /// </summary>

@@ -72,10 +72,10 @@ namespace Microsoft.Identity.Client
             {
                 logger.VerbosePii(
                     () => "HtmlMessageSuccess " + HtmlMessageSuccess,
-                    () => "HtmlMessageSuccess? " + !String.IsNullOrEmpty(HtmlMessageSuccess));
+                    () => "HtmlMessageSuccess? " + !string.IsNullOrEmpty(HtmlMessageSuccess));
                 logger.VerbosePii(
                     () => "HtmlMessageError " + HtmlMessageError,
-                    () => "HtmlMessageError? " + !String.IsNullOrEmpty(HtmlMessageError));
+                    () => "HtmlMessageError? " + !string.IsNullOrEmpty(HtmlMessageError));
                 logger.VerbosePii(
                     () => "BrowserRedirectSuccess " + BrowserRedirectSuccess,
                     () => "BrowserRedirectSuccess? " + (BrowserRedirectSuccess != null));

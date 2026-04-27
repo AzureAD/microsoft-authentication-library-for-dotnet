@@ -100,7 +100,7 @@ namespace Microsoft.Identity.Client
             base.Validate();
             if (Parameters.SendX5C == null)
             {
-                Parameters.SendX5C = this.ServiceBundle.Config.SendX5C;
+                Parameters.SendX5C = ServiceBundle.Config.SendX5C;
             }
 
             // During AT Silent with no scopes, Unlike AAD, B2C will not issue an access token if no scopes are requested
@@ -228,9 +228,11 @@ namespace Microsoft.Identity.Client
                 }
             }
 
-            PoPAuthenticationConfiguration popConfig = new(requestUri ?? throw new ArgumentNullException(nameof(requestUri)));
-            popConfig.HttpMethod = httpMethod ?? throw new ArgumentNullException(nameof(httpMethod));
-            popConfig.Nonce = nonce;
+            PoPAuthenticationConfiguration popConfig = new(requestUri ?? throw new ArgumentNullException(nameof(requestUri)))
+            {
+                HttpMethod = httpMethod ?? throw new ArgumentNullException(nameof(httpMethod)),
+                Nonce = nonce
+            };
 
             IAuthenticationOperation authenticationScheme;
 

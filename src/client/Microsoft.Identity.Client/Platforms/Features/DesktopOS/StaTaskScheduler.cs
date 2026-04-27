@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
             }
 
             // Initialize the tasks collection
-            _tasks = new BlockingCollection<Task>();
+            _tasks = [];
 
             // Create the threads to be used by this scheduler
             _threads = Enumerable.Range(0, numberOfThreads).Select(_ =>

@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Client.UI
                     () => LogMessages.CustomWebUiCallingAcquireAuthorizationCodeNoPii);
                 Uri uri = await _customWebUi.AcquireAuthorizationCodeAsync(authorizationUri, redirectUri, cancellationToken)
                                             .ConfigureAwait(false);
-                if (uri == null || String.IsNullOrWhiteSpace(uri.Query))
+                if (uri == null || string.IsNullOrWhiteSpace(uri.Query))
                 {
                     throw new MsalClientException(
                         MsalError.CustomWebUiReturnedInvalidUri,

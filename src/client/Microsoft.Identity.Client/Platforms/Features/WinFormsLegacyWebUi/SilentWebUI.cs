@@ -198,10 +198,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
 
         private void UIDoneHandler(object sender, SilentWebUIDoneEventArgs e)
         {
-            if (_uiException == null)
-            {
-                _uiException = e.TransferredException;
-            }
+            _uiException ??= e.TransferredException;
 
 #pragma warning disable 618 // SilentWindowsFormsAuthenticationDialog is marked obsolete
 

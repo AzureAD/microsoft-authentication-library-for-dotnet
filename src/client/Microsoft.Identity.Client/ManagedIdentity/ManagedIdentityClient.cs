@@ -177,9 +177,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 return CacheDiscoveryResult(new ManagedIdentitySourceResult(source));
             }
 
-            string imdsV1FailureReason = null;
-            string imdsV2FailureReason = null;
-
             // Probe IMDS v1 first
             (bool imdsV1Success, string imdsV1Failure) = await ImdsManagedIdentitySource.ProbeImdsEndpointAsync(requestContext, ImdsVersion.V1, cancellationToken).ConfigureAwait(false);
             if (imdsV1Success)
@@ -187,7 +184,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 requestContext.Logger.Info("[Managed Identity] ImdsV1 detected.");
                 return CacheDiscoveryResult(new ManagedIdentitySourceResult(ManagedIdentitySource.Imds));
             }
-            imdsV1FailureReason = imdsV1Failure;
+            string imdsV1FailureReason = imdsV1Failure;
 
             // If v1 fails, probe IMDS v2
             (bool imdsV2Success, string imdsV2Failure) = await ImdsManagedIdentitySource.ProbeImdsEndpointAsync(requestContext, ImdsVersion.V2, cancellationToken).ConfigureAwait(false);
@@ -196,7 +193,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 requestContext.Logger.Info("[Managed Identity] ImdsV2 detected.");
                 return CacheDiscoveryResult(new ManagedIdentitySourceResult(ManagedIdentitySource.ImdsV2));
             }
-            imdsV2FailureReason = imdsV2Failure;
+
+            string imdsV2FailureReason = imdsV2Failure;
 
             requestContext.Logger.Info($"[Managed Identity] {MsalErrorMessage.ManagedIdentityAllSourcesUnavailable}");
             return CacheDiscoveryResult(new ManagedIdentitySourceResult(ManagedIdentitySource.None)

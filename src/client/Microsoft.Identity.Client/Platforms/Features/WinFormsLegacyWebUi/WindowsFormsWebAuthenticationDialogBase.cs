@@ -332,7 +332,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
         {
             if (InvokeRequired)
             {
-                this.Invoke(action);
+                Invoke(action);
             }
             else
             {

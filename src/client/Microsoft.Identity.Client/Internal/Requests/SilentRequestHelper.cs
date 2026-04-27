@@ -153,7 +153,7 @@ namespace Microsoft.Identity.Client.Internal
             });
         }
 
-        private static Random s_random = new();
+        private static readonly Random s_random = new();
         private static DateTimeOffset? GetRefreshOnWithJitter(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
         {
             if (msalAccessTokenCacheItem.RefreshOn.HasValue)

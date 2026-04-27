@@ -174,7 +174,7 @@ namespace Microsoft.Identity.Client
             base.Validate();
             if (Parameters.SendX5C == null)
             {
-                Parameters.SendX5C = this.ServiceBundle.Config?.SendX5C ?? false;
+                Parameters.SendX5C = ServiceBundle.Config?.SendX5C ?? false;
             }
         }
         /// <inheritdoc/>

@@ -12,7 +12,7 @@ namespace Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser
 {
     internal class HttpListenerInterceptor(ILoggerAdapter logger) : IUriInterceptor
     {
-        private ILoggerAdapter _logger = logger;
+        private readonly ILoggerAdapter _logger = logger;
 
         #region Test Hooks 
         public Action TestBeforeTopLevelCall { get; set; }
@@ -116,16 +116,14 @@ namespace Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser
             {
                 _logger.Info(() => "[HttpListener] Processing POST request with entity body (form_post response)");
 
-                using (var memoryStream = new System.IO.MemoryStream())
-                {
-                    await context.Request.InputStream.CopyToAsync(memoryStream).ConfigureAwait(false);
-                    byte[] postData = memoryStream.ToArray();
+                using var memoryStream = new System.IO.MemoryStream();
+                await context.Request.InputStream.CopyToAsync(memoryStream).ConfigureAwait(false);
+                byte[] postData = memoryStream.ToArray();
 
-                    _logger.Info(() => $"[HttpListener] Received POST data with {postData.Length} bytes");
-                    _logger.Verbose(() => "[HttpListener] Successfully processed POST data - keeping it secure (not reconstructing as URI)");
+                _logger.Info(() => $"[HttpListener] Received POST data with {postData.Length} bytes");
+                _logger.Verbose(() => "[HttpListener] Successfully processed POST data - keeping it secure (not reconstructing as URI)");
 
-                    return new AuthorizationResponse(context.Request.Url, postData);
-                }
+                return new AuthorizationResponse(context.Request.Url, postData);
             }
 
             // Security: We requested form_post, so receiving GET with query params is a security violation

@@ -97,7 +97,7 @@ namespace Microsoft.Identity.Client.Cache
             string popKid,
             SortedList<string, string> cacheKeyComponents = null)
         {
-            if (cacheKeyComponents != null && cacheKeyComponents.Any())
+            if (cacheKeyComponents != null && cacheKeyComponents.Count != 0)
             {
                 return $"{popKid}{clientId}_{tenantId}_{CoreHelpers.ComputeAccessTokenExtCacheKey(cacheKeyComponents)}_AppTokenCache";
             }

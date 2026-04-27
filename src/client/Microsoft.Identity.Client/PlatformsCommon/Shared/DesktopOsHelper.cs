@@ -15,12 +15,12 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 {
     internal static class DesktopOsHelper
     {
-        private static Lazy<bool> s_wamSupportedOSLazy = new(
+        private static readonly Lazy<bool> s_wamSupportedOSLazy = new(
            IsWamSupportedOSInternal);
-        private static Lazy<string> s_winVersionLazy = new(
+        private static readonly Lazy<string> s_winVersionLazy = new(
             GetWindowsVersionStringInternal);
 
-        private static Lazy<bool> s_wslEnvLazy = new(IsWslEnv);
+        private static readonly Lazy<bool> s_wslEnvLazy = new(IsWslEnv);
 
         public static bool IsWindows()
         {

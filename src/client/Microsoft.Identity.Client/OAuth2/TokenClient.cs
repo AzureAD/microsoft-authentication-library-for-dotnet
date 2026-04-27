@@ -53,10 +53,7 @@ namespace Microsoft.Identity.Client.OAuth2
                 cancellationToken.ThrowIfCancellationRequested();
 
                 string tokenEndpoint = tokenEndpointOverride;
-                if (tokenEndpoint == null)
-                {
-                    tokenEndpoint = await _requestParams.Authority.GetTokenEndpointAsync(_requestParams.RequestContext).ConfigureAwait(false);
-                }
+                tokenEndpoint ??= await _requestParams.Authority.GetTokenEndpointAsync(_requestParams.RequestContext).ConfigureAwait(false);
 
                 Debug.Assert(_requestParams.RequestContext.ApiEvent != null, "The Token Client must only be called by requests.");
                 _requestParams.RequestContext.ApiEvent.TokenEndpoint = tokenEndpoint;

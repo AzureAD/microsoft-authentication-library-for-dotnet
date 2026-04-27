@@ -92,7 +92,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         }
 
         private static void ThrowCsrMetadataRequestException(
-            String errorMessage,
+            string errorMessage,
             Exception ex = null,
             int? statusCode = null)
         {
@@ -517,10 +517,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         internal static void ResetCertCacheForTest()
         {
             // Clear caches so each test starts fresh
-            if (s_mtlsCertificateCache != null)
-            {
-                s_mtlsCertificateCache.Clear();
-            }
+            s_mtlsCertificateCache?.Clear();
         }
     }
 }

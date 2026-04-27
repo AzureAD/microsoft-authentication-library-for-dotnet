@@ -343,7 +343,7 @@ namespace Microsoft.Identity.Client
                 if (kvp.Value.IncludeInCacheKey)
                 {
                     // Initialize the cache key components if needed
-                    Config.CacheKeyComponents = Config.CacheKeyComponents ?? new SortedList<string, string>();
+                    Config.CacheKeyComponents = Config.CacheKeyComponents ?? [];
 
                     // Add to cache key components - uses a func that returns the value as a task
                     Config.CacheKeyComponents[kvp.Key] = kvp.Value.Value;

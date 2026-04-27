@@ -61,13 +61,9 @@ namespace Microsoft.Identity.Client.Internal
 
         public static Dictionary<string, string> GetMsalIdParameters(ILoggerAdapter logger)
         {
-            PlatformsCommon.Interfaces.IPlatformProxy platformProxy = PlatformProxyFactory.CreatePlatformProxy(logger);
-            if (platformProxy == null)
-            {
-                throw new MsalClientException(
+            PlatformsCommon.Interfaces.IPlatformProxy platformProxy = PlatformProxyFactory.CreatePlatformProxy(logger) ?? throw new MsalClientException(
                     MsalError.PlatformNotSupported,
                     MsalErrorMessage.PlatformNotSupported);
-            }
 
             var parameters = new Dictionary<string, string>
             {

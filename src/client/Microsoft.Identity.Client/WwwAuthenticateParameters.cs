@@ -176,7 +176,7 @@ namespace Microsoft.Identity.Client
             HttpResponseHeaders httpResponseHeaders,
             string scheme = "Bearer")
         {
-            if (httpResponseHeaders.WwwAuthenticate.Any())
+            if (httpResponseHeaders.WwwAuthenticate.Count != 0)
             {
                 AuthenticationHeaderValue headerValue = httpResponseHeaders.WwwAuthenticate.FirstOrDefault(v => string.Equals(v.Scheme, scheme, StringComparison.OrdinalIgnoreCase));
 
@@ -325,7 +325,7 @@ namespace Microsoft.Identity.Client
         public static IReadOnlyList<WwwAuthenticateParameters> CreateFromAuthenticationHeaders(
             HttpResponseHeaders httpResponseHeaders)
         {
-            List<WwwAuthenticateParameters> parameterList = new();
+            List<WwwAuthenticateParameters> parameterList = [];
 
             foreach (AuthenticationHeaderValue wwwAuthenticateHeaderValue in httpResponseHeaders.WwwAuthenticate)
             {
@@ -392,7 +392,7 @@ namespace Microsoft.Identity.Client
 
         private static IEnumerable<string> GetParsedAuthValueElements(string wwwAuthenticateValue)
         {
-            char[] charsToTrim = { ',', ' ' };
+            char[] charsToTrim = [',', ' '];
             IReadOnlyList<string> authValuesSplit = CoreHelpers.SplitWithQuotes(wwwAuthenticateValue, ' ');
 
             //Ensure that known headers are not being parsed.
@@ -406,9 +406,10 @@ namespace Microsoft.Identity.Client
 
         internal static WwwAuthenticateParameters CreateWwwAuthenticateParameters(IDictionary<string, string> values, string scheme)
         {
-            WwwAuthenticateParameters wwwAuthenticateParameters = new();
-
-            wwwAuthenticateParameters.AuthenticationScheme = scheme;
+            WwwAuthenticateParameters wwwAuthenticateParameters = new()
+            {
+                AuthenticationScheme = scheme
+            };
 
             if (values == null)
             {

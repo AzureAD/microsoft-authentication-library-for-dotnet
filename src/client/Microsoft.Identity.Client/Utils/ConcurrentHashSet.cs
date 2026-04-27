@@ -10,7 +10,6 @@ using System.Threading;
 namespace Microsoft.Identity.Client.Utils
 {
 
-
     /// <summary>
     /// Represents a thread-safe hash-based unique collection.
     /// </summary>

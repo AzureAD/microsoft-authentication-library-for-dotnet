@@ -17,8 +17,8 @@ namespace Microsoft.Identity.Client.Internal.Logger
 {
     internal class LoggerHelper
     {
-        private static Lazy<string> s_msalVersionLazy = new(MsalIdHelper.GetMsalVersion);
-        private static Lazy<string> s_runtimeVersionLazy = new(() => PlatformProxyFactory.CreatePlatformProxy(null).GetRuntimeVersion());
+        private static readonly Lazy<string> s_msalVersionLazy = new(MsalIdHelper.GetMsalVersion);
+        private static readonly Lazy<string> s_runtimeVersionLazy = new(() => PlatformProxyFactory.CreatePlatformProxy(null).GetRuntimeVersion());
         private static readonly Lazy<ILoggerAdapter> s_nullLogger = new(() => new NullLogger());
 
         public static string GetClientInfo(string clientName, string clientVersion)
@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
 
         public static ILoggerAdapter NullLogger => s_nullLogger.Value;
 
-        private static Lazy<string> s_osLazy = new(() =>
+        private static readonly Lazy<string> s_osLazy = new(() =>
         {
             if (MsalIdHelper.GetMsalIdParameters(null).TryGetValue(MsalIdParameter.OS, out string osValue))
             {
@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
             return "Unknown OS";
         });
 
-        private static Lazy<string> s_skuLazy = new(() =>
+        private static readonly Lazy<string> s_skuLazy = new(() =>
         {
             if (MsalIdHelper.GetMsalIdParameters(null).TryGetValue(MsalIdParameter.Product, out string sku))
             {

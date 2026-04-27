@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Client.Utils
 #endif
         public static List<T> GetEmptyList<T>()
         {
-            return new List<T>();
+            return [];
         }
 
         public static IReadOnlyDictionary<TKey, TValue> GetEmptyDictionary<TKey, TValue>()
