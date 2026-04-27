@@ -23,7 +23,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.SystemWebview
 {
     /// <summary>
     /// </summary>
-    [Activity(Name = "microsoft.identity.client.AuthenticationActivity", Exported=true)]
+    [Activity(Name = "microsoft.identity.client.AuthenticationActivity", Exported = true)]
     [Preserve(AllMembers = true)]
     internal class AuthenticationActivity : Activity
     {

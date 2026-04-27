@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -26,8 +26,8 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
         }
 
         public void RecordException(
-            AuthenticationRequestParameters requestParams, 
-            IReadOnlyDictionary<string, string> bodyParams, 
+            AuthenticationRequestParameters requestParams,
+            IReadOnlyDictionary<string, string> bodyParams,
             MsalServiceException ex)
         {
             var logger = requestParams.RequestContext.Logger;
@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
             if (IsRequestSupported(requestParams) &&
                 (ex.StatusCode == 429 || (ex.StatusCode >= 500 && ex.StatusCode < 600)) &&
                 // if a retry-after header is present, another provider will take care of this
-                !RetryAfterProvider.TryGetRetryAfterValue(ex.Headers, out _)) 
+                !RetryAfterProvider.TryGetRetryAfterValue(ex.Headers, out _))
             {
                 logger.Info(() => $"[Throttling] HTTP status code {ex.StatusCode} encountered - " +
                     $"throttling for {s_throttleDuration.TotalSeconds} seconds. ");

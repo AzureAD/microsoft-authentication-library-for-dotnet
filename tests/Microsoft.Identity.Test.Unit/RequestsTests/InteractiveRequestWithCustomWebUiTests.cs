@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 var parameters = harness.CreateAuthenticationRequestParameters(
                     TestConstants.AuthorityHomeTenant,
-                    TestConstants.s_scope, 
+                    TestConstants.s_scope,
                     new TokenCache(harness.ServiceBundle, false));
                 parameters.RedirectUri = new Uri(ExpectedRedirectUri);
                 parameters.LoginHint = TestConstants.DisplayableId;

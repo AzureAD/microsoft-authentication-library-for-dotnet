@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Client.Extensibility
         /// </remarks>
         public static ConfidentialClientApplicationBuilder WithCertificate(
             this ConfidentialClientApplicationBuilder builder,
-            Func<AssertionRequestOptions, Task<X509Certificate2>> certificateProvider, 
+            Func<AssertionRequestOptions, Task<X509Certificate2>> certificateProvider,
             CertificateOptions certificateOptions)
         {
             builder.ValidateUseOfExperimentalFeature();
@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Client.Extensibility
             {
                 throw new ArgumentNullException(nameof(certificateProvider));
             }
-            
+
             // Create a DynamicCertificateClientCredential with the certificate provider
             // The certificate will be resolved dynamically via the provider in ResolveCertificateAsync
             builder.Config.ClientCredential = new DynamicCertificateClientCredential(

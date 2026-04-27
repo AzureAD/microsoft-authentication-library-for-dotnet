@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             var silentParameters = new AcquireTokenSilentParameters();
             var silentRequest = new SilentRequest(ServiceBundle, authenticationRequestParameters, silentParameters);
-            _brokerStrategyLazy = new Lazy<ISilentAuthRequestStrategy>(() =>  new BrokerSilentStrategy(silentRequest,
+            _brokerStrategyLazy = new Lazy<ISilentAuthRequestStrategy>(() => new BrokerSilentStrategy(silentRequest,
                                                                                                serviceBundle,
                                                                                                authenticationRequestParameters,
                                                                                                silentParameters,
@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             bool isBrokerConfigured = AuthenticationRequestParameters.AppConfig.IsBrokerEnabled &&
                                       ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth();
 
-            if(isBrokerConfigured)
+            if (isBrokerConfigured)
             {
                 AuthenticationRequestParameters.RequestContext.Logger.Info("IWA called with broker. Routing to broker default user sign in");
                 AuthenticationRequestParameters.Account = PublicClientApplication.OperatingSystemAccount;

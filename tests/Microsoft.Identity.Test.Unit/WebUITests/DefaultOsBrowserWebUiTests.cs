@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -71,10 +71,10 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             // Test with form_post (POST data)
             var postData = System.Text.Encoding.UTF8.GetBytes(
                 "code=auth_code&state=901e7d87-6f49-4f9f-9fa7-e6b8c32d5b9595bc1797-dacc-4ff1-b9e9-0df81be286c7&session_state=test");
-            
+
             var webUI = CreateTestWebUI();
             AuthorizationResult authorizationResult = await AcquireAuthCodeAsync(
-                webUI, 
+                webUI,
                 postData: postData)
                .ConfigureAwait(false);
 
@@ -85,7 +85,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
 
             // Verify that response_mode=form_post was added to the authorization URI
             await _platformProxy.Received(1).StartDefaultOsBrowserAsync(
-                Arg.Is<string>(s => s.Contains("response_mode=form_post")), 
+                Arg.Is<string>(s => s.Contains("response_mode=form_post")),
                 Arg.Any<bool>())
                 .ConfigureAwait(false);
 
@@ -100,11 +100,11 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             string requestUriWithQueryMode = TestAuthorizationRequestUri + "&response_mode=query";
             var postData = System.Text.Encoding.UTF8.GetBytes(
                 "code=auth_code&state=901e7d87-6f49-4f9f-9fa7-e6b8c32d5b9595bc1797-dacc-4ff1-b9e9-0df81be286c7&session_state=test");
-            
+
             var webUI = CreateTestWebUI();
-            
+
             AuthorizationResult authorizationResult = await AcquireAuthCodeAsync(
-                webUI, 
+                webUI,
                 requestUri: requestUriWithQueryMode,
                 postData: postData)
                .ConfigureAwait(false);
@@ -114,7 +114,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
 
             // Verify that response_mode=form_post overrode the query mode
             await _platformProxy.Received(1).StartDefaultOsBrowserAsync(
-                Arg.Is<string>(s => s.Contains("response_mode=form_post") && !s.Contains("response_mode=query")), 
+                Arg.Is<string>(s => s.Contains("response_mode=form_post") && !s.Contains("response_mode=query")),
                 Arg.Any<bool>())
                 .ConfigureAwait(false);
 
@@ -238,7 +238,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             // Assert that we opened the browser
             // Verify response_mode=form_post is present (don't check for full requestUri to allow parameter replacement tests)
             await _platformProxy.Received(1).StartDefaultOsBrowserAsync(
-                Arg.Is<string>(s => s.Contains("response_mode=form_post")), 
+                Arg.Is<string>(s => s.Contains("response_mode=form_post")),
                 requestContext.ServiceBundle.Config.IsBrokerEnabled)
                 .ConfigureAwait(false);
 

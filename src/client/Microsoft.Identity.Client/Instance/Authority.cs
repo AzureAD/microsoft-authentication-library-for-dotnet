@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -118,7 +118,7 @@ namespace Microsoft.Identity.Client.Instance
         /// <param name="tenantId">The new tenant ID</param>
         /// <param name="forceSpecifiedTenant">Forces the change, even if the current tenant is not "common" or "organizations" or "consumers"</param>
         internal abstract string GetTenantedAuthority(string tenantId, bool forceSpecifiedTenant);
-       
+
         internal abstract Task<string> GetTokenEndpointAsync(RequestContext requestContext);
 
         internal abstract Task<string> GetAuthorizationEndpointAsync(RequestContext requestContext);

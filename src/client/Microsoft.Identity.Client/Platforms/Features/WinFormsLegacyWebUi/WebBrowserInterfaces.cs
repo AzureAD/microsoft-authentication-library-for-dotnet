@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -297,10 +297,10 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
         public interface IWebBrowser2
         {
             [DispId(0xcb)]
-            object Document { [return: MarshalAs(UnmanagedType.IDispatch)] [DispId(0xcb)] get; }
+            object Document { [return: MarshalAs(UnmanagedType.IDispatch)][DispId(0xcb)] get; }
 
             [DispId(0x227)]
-            bool Silent { [param: MarshalAs(UnmanagedType.Bool)] [DispId(0x227)] set; }
+            bool Silent { [param: MarshalAs(UnmanagedType.Bool)][DispId(0x227)] set; }
         }
 
         [ComImport, Guid("34A715A0-6587-11D0-924A-0020AFC7AC4D"), TypeLibType(TypeLibTypeFlags.FHidden),

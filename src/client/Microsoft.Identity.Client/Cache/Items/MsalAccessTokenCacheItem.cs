@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -88,7 +88,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 #endif
             return cacheParameters;
         }
-        
+
         internal void AddAdditionalCacheParameters(Dictionary<string, string> additionalCacheParameters)
         {
             if (additionalCacheParameters != null)

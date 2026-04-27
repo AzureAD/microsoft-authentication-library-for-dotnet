@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client.Utils
             {
                 return message;
             }
-           // Replace "+" with "%20" for backward compatibility with older systems that used "+" for spaces.
+            // Replace "+" with "%20" for backward compatibility with older systems that used "+" for spaces.
             message = message.Replace("+", "%20");
             message = Uri.UnescapeDataString(message);
 
@@ -211,7 +211,7 @@ namespace Microsoft.Identity.Client.Utils
 
         internal static string GetCcsUpnHint(string upn)
         {
-            return string.IsNullOrEmpty(upn)? string.Empty : $@"upn:{upn}";
+            return string.IsNullOrEmpty(upn) ? string.Empty : $@"upn:{upn}";
         }
 
         internal static string ComputeAccessTokenExtCacheKey(SortedList<string, string> cacheKeyComponents)

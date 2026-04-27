@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -19,7 +19,7 @@ using NSubstitute.ExceptionExtensions;
 namespace Microsoft.Identity.Test.Unit.CacheExtension
 {
     [TestClass]
-    public class ImportExportTest 
+    public class ImportExportTest
     {
         public static readonly string CacheFilePath = Path.Combine(
             Path.GetTempPath(),
@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
                     storageBuilder.Build(),
                     new TraceSource("MSAL.CacheExtension.Test"))
                 .GetAwaiter().GetResult();
-            
+
             // 4. Let the cache helper handle MSAL's cache
             _cacheHelper.RegisterCache(app.UserTokenCache);
         }

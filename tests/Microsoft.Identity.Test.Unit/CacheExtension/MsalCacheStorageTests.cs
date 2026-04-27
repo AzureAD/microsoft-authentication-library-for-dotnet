@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -104,7 +104,7 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
             Assert.IsEmpty(result);
         }
 
-      
+
         // Regression https://github.com/AzureAD/microsoft-authentication-extensions-for-dotnet/issues/56
         [TestMethod]
         public void CacheStorageCanHandleMultipleExceptionsWhenReading()
@@ -123,7 +123,7 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
             byte[] result = null;
             try
             {
-                 result = storage.ReadData();
+                result = storage.ReadData();
             }
             catch (Exception ex)
             {
@@ -207,7 +207,8 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
             storage.VerifyPersistence();
 
             // Assert
-            Received.InOrder(() => {
+            Received.InOrder(() =>
+            {
                 cacheAccessor.CreateForPersistenceValidation();
                 cacheAccessor.Write(Arg.Any<byte[]>());
                 cacheAccessor.Read();
@@ -229,7 +230,7 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
             builder = new StorageCreationPropertiesBuilder(
                Path.GetFileName(CacheFilePath),
                Path.GetDirectoryName(CacheFilePath));
-            
+
             builder = builder.WithLinuxKeyring(
                 schemaName: "msal.cache",
                 collection: "default",
@@ -244,7 +245,7 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
               Path.GetDirectoryName(CacheFilePath));
             builder.WithLinuxUnprotectedFile();
             builder.WithUnprotectedFile();
-            
+
             AssertException.Throws<ArgumentException>(() => builder.Build());
 
         }

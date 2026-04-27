@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithRetryPolicyFactory(_testRetryPolicyFactory);
 
                 // Disable cache to avoid pollution
-                
+
 
                 IManagedIdentityApplication mi = miBuilder.Build();
 
@@ -94,7 +94,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
-                
+
                 string userAssignedId = TestConstants.ClientId;
                 UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.ClientId;
 
@@ -104,7 +104,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithRetryPolicyFactory(_testRetryPolicyFactory);
 
                 // Disable cache to avoid pollution
-                
+
 
                 IManagedIdentityApplication mi = miBuilder.Build();
 
@@ -171,7 +171,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithRetryPolicyFactory(_testRetryPolicyFactory);
 
                 // Disable cache to avoid pollution
-                
+
 
                 IManagedIdentityApplication mi = miBuilder.Build();
 
@@ -223,7 +223,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithRetryPolicyFactory(_testRetryPolicyFactory);
 
                 // Disable cache to avoid pollution
-                
+
 
                 IManagedIdentityApplication mi = miBuilder.Build();
 
@@ -277,7 +277,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithRetryPolicyFactory(_testRetryPolicyFactory);
 
                 // Disable cache to avoid pollution
-                
+
 
                 IManagedIdentityApplication mi = miBuilder.Build();
 
@@ -327,7 +327,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithRetryPolicyFactory(_testRetryPolicyFactory);
 
                 // Disable cache to avoid pollution
-                
+
 
                 IManagedIdentityApplication mi = miBuilder.Build();
 

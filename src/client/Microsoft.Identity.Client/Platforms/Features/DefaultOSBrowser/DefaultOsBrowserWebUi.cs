@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -68,14 +68,14 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
             try
             {
                 var authUriBuilder = new UriBuilder(authorizationUri);
-                
+
                 // Warn if response_mode was set to something other than form_post
-                if (authorizationUri.Query.Contains("response_mode=") && 
+                if (authorizationUri.Query.Contains("response_mode=") &&
                     !authorizationUri.Query.Contains("response_mode=form_post"))
                 {
                     _logger.Warning("[DefaultOsBrowser] The 'response_mode' parameter will be overridden to 'form_post' for better security.");
                 }
-                
+
                 authUriBuilder.AppendOrReplaceQueryParameter(OAuth2Parameter.ResponseMode, "form_post");
                 authorizationUri = authUriBuilder.Uri;
 
@@ -182,7 +182,7 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
         {
             // Parse the response to understand if an error was returned. This is done just to show the user a nice error message in the browser.
             AuthorizationResult authorizationResult;
-            
+
             if (authResponse.IsFormPost)
             {
                 // For form_post, parse from POST data

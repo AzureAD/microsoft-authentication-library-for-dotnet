@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using Microsoft.Identity.Client.ApiConfig.Parameters;
@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
         {
             _logger.Info("NullBroker - acting as not installed.");
             return false;
-        }      
+        }
 
         public Task<MsalTokenResponse> AcquireTokenInteractiveAsync(AuthenticationRequestParameters authenticationRequestParameters, AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
         {
@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
         public void HandleInstallUrl(string appLink)
         {
             throw new PlatformNotSupportedException();
-        }     
+        }
 
         public Task RemoveAccountAsync(ApplicationConfiguration appConfig, IAccount account)
         {
@@ -66,10 +66,10 @@ namespace Microsoft.Identity.Client.Internal.Broker
         }
 
         public Task<IReadOnlyList<IAccount>> GetAccountsAsync(
-            string clientID, 
-            string redirectUri,             
+            string clientID,
+            string redirectUri,
             AuthorityInfo authorityInfo,
-            ICacheSessionManager cacheSessionManager, 
+            ICacheSessionManager cacheSessionManager,
             IInstanceDiscoveryManager instanceDiscoveryManager)
         {
             _logger.Info("NullBroker - returning empty list on GetAccounts request.");

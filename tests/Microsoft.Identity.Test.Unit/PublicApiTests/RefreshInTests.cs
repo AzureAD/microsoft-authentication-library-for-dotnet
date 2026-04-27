@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -250,8 +250,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 Assert.IsTrue(refreshOnWithJitter.HasValue);
                 CoreAssert.IsWithinRange(
-                    refreshOnFromCache, 
-                    refreshOnWithJitter.Value, 
+                    refreshOnFromCache,
+                    refreshOnWithJitter.Value,
                     TimeSpan.FromSeconds(Constants.DefaultJitterRangeInSeconds));
             }
             Assert.IsGreaterThanOrEqualTo(8, refreshOnWithJitterList.Distinct().Count(), "Jitter is random, so we can only have 1-2 identical values");

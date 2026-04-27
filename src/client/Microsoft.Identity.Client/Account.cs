@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System.Collections.Generic;
@@ -22,11 +22,11 @@ namespace Microsoft.Identity.Client
         /// <param name="wamAccountIds">Map of (<c>client_id</c>, <c>wam_account_id</c>)</param>
         /// <param name="tenantProfiles">Map of (<c>tenant_id</c>, <c>tenant_profile</c>)</param>
         public Account(
-            string homeAccountId, 
-            string username, 
+            string homeAccountId,
+            string username,
             string environment,
             string accountsource = null,
-            IDictionary<string, string> wamAccountIds = null, 
+            IDictionary<string, string> wamAccountIds = null,
             IEnumerable<TenantProfile> tenantProfiles = null)
         {
             Username = username;
@@ -35,8 +35,8 @@ namespace Microsoft.Identity.Client
             HomeAccountId = AccountId.ParseFromString(homeAccountId);
             WamAccountIds = wamAccountIds;
             TenantProfiles = tenantProfiles;
-        }        
-        
+        }
+
         /// <summary>
         /// Gets the username associated with the account. For example, <c>account@example.com</c>.
         /// </summary>
@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Client
         /// The same account can exist in its home tenant and also as a guest in multiple other tenants. 
         /// A <see cref="TenantProfile"/> is derived from the ID token for that tenant.
         /// </remarks>
-        public IEnumerable<TenantProfile> TenantProfiles { get; }      
+        public IEnumerable<TenantProfile> TenantProfiles { get; }
 
         /// <summary>
         /// Gets a dictionary representing the mapping between the requesting client ID and the unique account ID.

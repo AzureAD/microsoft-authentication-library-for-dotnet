@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -175,7 +175,7 @@ namespace Microsoft.Identity.Client
         /// https://aka.ms/msal-net-token-cache-serialization
         /// </summary>
         /// <param name="options">Options for the internal MSAL token caches. </param>
-#if !SUPPORTS_CUSTOM_CACHE 
+#if !SUPPORTS_CUSTOM_CACHE
     [EditorBrowsable(EditorBrowsableState.Never)]
 #endif
         public T WithCacheOptions(CacheOptions options)
@@ -337,7 +337,7 @@ namespace Microsoft.Identity.Client
             foreach (var kvp in extraQueryParameters)
             {
                 Config.ExtraQueryParameters = Config.ExtraQueryParameters ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-                
+
                 Config.ExtraQueryParameters[kvp.Key] = kvp.Value.Value;
 
                 if (kvp.Value.IncludeInCacheKey)
@@ -388,7 +388,7 @@ namespace Microsoft.Identity.Client
 
             return this as T;
         }
-       
+
         /// <summary>
         /// Generate telemetry aggregation events.
         /// </summary>
@@ -658,8 +658,8 @@ namespace Microsoft.Identity.Client
             Config.Authority = Authority.CreateAuthority(authorityInfo);
 
             return this as T;
-        }        
-        
+        }
+
         #endregion
     }
 }

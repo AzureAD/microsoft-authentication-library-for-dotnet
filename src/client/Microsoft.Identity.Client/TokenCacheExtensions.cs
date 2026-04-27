@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
@@ -27,7 +27,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="tokenCache">Either the UserTokenCache or the AppTokenCache, for which these options apply.</param>
         /// <param name="options">Options for the internal MSAL token caches. </param>
-#if !SUPPORTS_CUSTOM_CACHE 
+#if !SUPPORTS_CUSTOM_CACHE
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
 #endif
         public static void SetCacheOptions(this ITokenCache tokenCache, CacheOptions options)

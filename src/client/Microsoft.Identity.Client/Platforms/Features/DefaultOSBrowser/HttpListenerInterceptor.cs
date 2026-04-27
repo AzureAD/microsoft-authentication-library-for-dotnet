@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser
             string urlToListenTo = string.Empty;
             try
             {
-                if(string.IsNullOrEmpty(path))
+                if (string.IsNullOrEmpty(path))
                 {
                     path = "/";
                 }
@@ -78,7 +78,7 @@ namespace Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser
                     AuthorizationResponse authResponse = await GetAuthorizationResponseAsync(context).ConfigureAwait(false);
 
                     Respond(responseProducer, context, authResponse);
-                    _logger.Verbose(()=>"HttpListner received a message on " + urlToListenTo);
+                    _logger.Verbose(() => "HttpListner received a message on " + urlToListenTo);
 
                     // Return the authorization response
                     return authResponse;
@@ -94,7 +94,7 @@ namespace Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser
 
                 if (ex is HttpListenerException)
                 {
-                    throw new MsalClientException(MsalError.HttpListenerError, 
+                    throw new MsalClientException(MsalError.HttpListenerError,
                         $"An HttpListenerException occurred while listening on {urlToListenTo} for the system browser to complete the login. " +
                         "Possible cause and mitigation: the app is unable to listen on the specified URL; " +
                         "run 'netsh http add iplisten 127.0.0.1' from the Admin command prompt.",
@@ -114,28 +114,28 @@ namespace Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser
         {
             _logger.Info(() => $"[HttpListener] Received {context.Request.HttpMethod} request. HasEntityBody: {context.Request.HasEntityBody}");
             _logger.Verbose(() => $"[HttpListener] Request URL: {context.Request.Url}");
-            
+
             // With response_mode=form_post, we MUST receive a POST request for security
             if (context.Request.HttpMethod == "POST" && context.Request.HasEntityBody)
             {
                 _logger.Info(() => "[HttpListener] Processing POST request with entity body (form_post response)");
-                
+
                 using (var memoryStream = new System.IO.MemoryStream())
                 {
                     await context.Request.InputStream.CopyToAsync(memoryStream).ConfigureAwait(false);
                     byte[] postData = memoryStream.ToArray();
-                    
+
                     _logger.Info(() => $"[HttpListener] Received POST data with {postData.Length} bytes");
                     _logger.Verbose(() => "[HttpListener] Successfully processed POST data - keeping it secure (not reconstructing as URI)");
-                    
+
                     return new AuthorizationResponse(context.Request.Url, postData);
                 }
             }
-            
+
             // Security: We requested form_post, so receiving GET with query params is a security violation
             _logger.Error($"[HttpListener] Security violation: Expected POST request with form_post, but received {context.Request.HttpMethod}. " +
                          "The authorization server did not honor response_mode=form_post, which exposes the authorization code in the URL.");
-            
+
             throw new MsalClientException(
                 MsalError.AuthenticationFailed,
                 $"Expected POST request for form_post response mode, but received {context.Request.HttpMethod}. " +

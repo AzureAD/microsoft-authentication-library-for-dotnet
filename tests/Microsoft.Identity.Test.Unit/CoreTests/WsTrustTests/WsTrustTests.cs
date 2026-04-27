@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -161,7 +161,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
 
                 var ex = await AssertException.TaskThrowsAsync<MsalClientException>(() =>
                     harness.ServiceBundle.WsTrustWebRequestManager.GetWsTrustResponseAsync(endpoint, message, requestContext)).ConfigureAwait(false);
-                
+
                 Assert.AreEqual(MsalError.ParsingWsTrustResponseFailed, ex.ErrorCode);
             }
         }

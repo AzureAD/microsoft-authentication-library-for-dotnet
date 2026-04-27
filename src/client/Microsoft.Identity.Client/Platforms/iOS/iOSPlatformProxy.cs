@@ -31,17 +31,17 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         {
             return Task.FromResult(string.Empty);
         }
-        protected override  string InternalGetProcessorArchitecture()
+        protected override string InternalGetProcessorArchitecture()
         {
             return null;
         }
 
-        protected override  string InternalGetOperatingSystem()
+        protected override string InternalGetOperatingSystem()
         {
             return UIDevice.CurrentDevice.SystemVersion;
         }
 
-        protected override  string InternalGetDeviceModel()
+        protected override string InternalGetDeviceModel()
         {
             return UIDevice.CurrentDevice.Model;
         }
@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             return string.Format(CultureInfo.InvariantCulture, IosDefaultRedirectUriTemplate, clientId);
         }
 
-        protected override  string InternalGetProductName()
+        protected override string InternalGetProductName()
         {
             return "MSAL.Xamarin.iOS";
         }
@@ -61,7 +61,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         /// Considered PII, ensure that it is hashed.
         /// </summary>
         /// <returns>Name of the calling application</returns>
-        protected override  string InternalGetCallingApplicationName()
+        protected override string InternalGetCallingApplicationName()
         {
             return (NSString)NSBundle.MainBundle?.InfoDictionary?["CFBundleName"];
         }
@@ -70,7 +70,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         /// Considered PII, ensure that it is hashed.
         /// </summary>
         /// <returns>Version of the calling application</returns>
-        protected override  string InternalGetCallingApplicationVersion()
+        protected override string InternalGetCallingApplicationVersion()
         {
             return (NSString)NSBundle.MainBundle?.InfoDictionary?["CFBundleVersion"];
         }
@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         /// Considered PII. Please ensure that it is hashed.
         /// </summary>
         /// <returns>Device identifier</returns>
-        protected override  string InternalGetDeviceId()
+        protected override string InternalGetDeviceId()
         {
             return UIDevice.CurrentDevice?.IdentifierForVendor?.AsString();
         }
@@ -90,7 +90,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         }
 
         public override ITokenCacheAccessor CreateTokenCacheAccessor(
-            CacheOptions tokenCacheAccessorOptions, 
+            CacheOptions tokenCacheAccessorOptions,
             bool isApplicationTokenCache = false)
         {
             return new iOSTokenCacheAccessor();

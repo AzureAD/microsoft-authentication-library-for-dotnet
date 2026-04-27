@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -70,7 +70,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Indicates the type of cache that the token was read from.
         /// </summary>
-        public CacheLevel CacheLevel { get; set; } 
+        public CacheLevel CacheLevel { get; set; }
 
         /// <summary>
         /// Contains the outcome of the region discovery if region was used.

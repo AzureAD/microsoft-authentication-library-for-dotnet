@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 // Arrange - important for test
                 requestParams.AppConfig.IsBrokerEnabled = false;
-                var authCodeResult = new Tuple<AuthorizationResult, string>(new AuthorizationResult() { Code= "some_auth_code" }, "pkce_verifier");
+                var authCodeResult = new Tuple<AuthorizationResult, string>(new AuthorizationResult() { Code = "some_auth_code" }, "pkce_verifier");
                 _authCodeRequestComponentOverride.FetchAuthCodeAndPkceVerifierAsync(CancellationToken.None)
                     .Returns(Task.FromResult(authCodeResult));
 
@@ -184,7 +184,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 _brokerExchangeComponentOverride
                     .FetchTokensAsync(default)
                     .Returns((MsalTokenResponse)null);
-                
+
                 // web UI can deal with this
                 var authCodeResult = new Tuple<AuthorizationResult, string>(new AuthorizationResult() { Code = "some_auth_code" }, "pkce_verifier");
                 _authCodeRequestComponentOverride.FetchAuthCodeAndPkceVerifierAsync(CancellationToken.None)

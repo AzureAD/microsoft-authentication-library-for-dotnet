@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -108,9 +108,9 @@ namespace Microsoft.Identity.Client.Cache
             {
                 if (!_cacheRefreshedForRead)
                 {
-                    _requestParams.RequestContext.Logger.Verbose(()=>$"[Cache Session Manager] Entering the cache semaphore. { TokenCacheInternal.Semaphore.GetCurrentCountLogMessage()}");
+                    _requestParams.RequestContext.Logger.Verbose(() => $"[Cache Session Manager] Entering the cache semaphore. {TokenCacheInternal.Semaphore.GetCurrentCountLogMessage()}");
                     await TokenCacheInternal.Semaphore.WaitAsync(_requestParams.RequestContext.UserCancellationToken).ConfigureAwait(false);
-                    _requestParams.RequestContext.Logger.Verbose(()=>"[Cache Session Manager] Entered cache semaphore");
+                    _requestParams.RequestContext.Logger.Verbose(() => "[Cache Session Manager] Entered cache semaphore");
 
                     TelemetryData telemetryData = new TelemetryData();
                     try
@@ -124,15 +124,15 @@ namespace Microsoft.Identity.Client.Cache
                                 var args = new TokenCacheNotificationArgs(
                                   TokenCacheInternal,
                                   _requestParams.AppConfig.ClientId,
-                                  _requestParams.Account,                                  
+                                  _requestParams.Account,
                                   hasStateChanged: false,
                                   isApplicationCache: TokenCacheInternal.IsApplicationCache,
                                   suggestedCacheKey: key,
                                   hasTokens: TokenCacheInternal.HasTokensNoLocks(),
                                   cancellationToken: _requestParams.RequestContext.UserCancellationToken,
                                   suggestedCacheExpiry: null,
-                                  correlationId: _requestParams.RequestContext.CorrelationId, 
-                                  requestScopes: _requestParams.Scope, 
+                                  correlationId: _requestParams.RequestContext.CorrelationId,
+                                  requestScopes: _requestParams.Scope,
                                   requestTenantId: _requestParams.AuthorityManager.OriginalAuthority.TenantId,
                                   identityLogger: _requestParams.RequestContext.Logger.IdentityLogger,
                                   piiLoggingEnabled: _requestParams.RequestContext.Logger.PiiLoggingEnabled,
@@ -175,11 +175,12 @@ namespace Microsoft.Identity.Client.Cache
                     finally
                     {
                         TokenCacheInternal.Semaphore.Release();
-                        _requestParams.RequestContext.Logger.Verbose(()=>"[Cache Session Manager] Released cache semaphore");
+                        _requestParams.RequestContext.Logger.Verbose(() => "[Cache Session Manager] Released cache semaphore");
                         RequestContext.ApiEvent.CacheLevel = telemetryData.CacheLevel;
                     }
                 }
-            } else
+            }
+            else
             {
                 RequestContext.ApiEvent.CacheLevel = CacheLevel.L1Cache;
             }

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -23,7 +23,7 @@ namespace Microsoft.Identity.Client.Instance.Oidc
         public string Issuer { get; set; }
 
         [JsonProperty("token_endpoint")]
-        public string TokenEndpoint { get; set;  }
+        public string TokenEndpoint { get; set; }
 
         [JsonProperty("authorization_endpoint")]
         public string AuthorizationEndpoint { get; set; }

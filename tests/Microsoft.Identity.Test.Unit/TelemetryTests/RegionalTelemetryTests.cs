@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -74,7 +74,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             // we can assert telemetry here, as it will be sent to AAD. However, AAD is down, so it will not record it.
             AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenForClient,
                 RegionAutodetectionSource.Cache.ToString("D"),
-                RegionOutcome.AutodetectSuccess.ToString("D"));          
+                RegionOutcome.AutodetectSuccess.ToString("D"));
 
             // the 5xx error puts MSAL in a throttling state, so "wait" until this clears
             _harness.ServiceBundle.ThrottlingManager.SimulateTimePassing(

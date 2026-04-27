@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -27,7 +27,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         [TestInitialize]
         public void Initialize()
-        {            
+        {
             _serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(null, clientId: ClientId);
             _logger = _serviceBundle.ApplicationLogger;
             _platformProxy = _serviceBundle.PlatformProxy;

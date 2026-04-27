@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -106,7 +106,7 @@ namespace Microsoft.Identity.Client
                 }
 
                 CommonParameters.AuthenticationOperation = new MtlsPopAuthenticationOperation(certificateCredential.Certificate);
-                CommonParameters.MtlsCertificate = certificateCredential.Certificate;               
+                CommonParameters.MtlsCertificate = certificateCredential.Certificate;
             }
 
             CommonParameters.IsMtlsPopRequested = true;
@@ -166,14 +166,14 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public AcquireTokenForClientParameterBuilder WithFmiPath(string pathSuffix)
         {
-           if (string.IsNullOrWhiteSpace(pathSuffix))
+            if (string.IsNullOrWhiteSpace(pathSuffix))
             {
                 throw new ArgumentNullException(nameof(pathSuffix));
             }
 
             var cacheKey = new SortedList<string, Func<CancellationToken, Task<string>>>
-            { 
-                { OAuth2Parameter.FmiPath, (CancellationToken ct) => {return Task.FromResult(pathSuffix);} } 
+            {
+                { OAuth2Parameter.FmiPath, (CancellationToken ct) => {return Task.FromResult(pathSuffix);} }
             };
 
             this.WithAdditionalCacheKeyComponents(cacheKey);

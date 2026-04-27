@@ -112,7 +112,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
 
         /// <inheritdoc/>
         public override ITokenCacheAccessor CreateTokenCacheAccessor(
-            CacheOptions cacheOptions, 
+            CacheOptions cacheOptions,
             bool isApplicationTokenCache = false)
         {
             return new AndroidTokenCacheAccessor();
@@ -128,7 +128,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
 
         protected override IPlatformLogger InternalGetPlatformLogger() => new AndroidPlatformLogger();
 
-        protected override IFeatureFlags CreateFeatureFlags() => new AndroidFeatureFlags();     
+        protected override IFeatureFlags CreateFeatureFlags() => new AndroidFeatureFlags();
 
         public override IBroker CreateBroker(ApplicationConfiguration appConfig, CoreUIParent uiParent)
         {

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -23,7 +23,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         // IMDS constants. Docs for IMDS are available here https://docs.microsoft.com/azure/active-directory/managed-identities-azure-resources/how-to-use-vm-token#get-a-token-using-http
         // used in unit tests as well
         public const string ApiVersionQueryParam = "api-version";
-        public const string DefaultImdsBaseEndpoint= "http://169.254.169.254";
+        public const string DefaultImdsBaseEndpoint = "http://169.254.169.254";
         public const string ImdsApiVersion = "2018-02-01";
         public const string ImdsTokenPath = "/metadata/identity/oauth2/token";
 
@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             return new ImdsManagedIdentitySource(requestContext);
         }
 
-        internal ImdsManagedIdentitySource(RequestContext requestContext) : 
+        internal ImdsManagedIdentitySource(RequestContext requestContext) :
             base(requestContext, ManagedIdentitySource.Imds)
         {
             requestContext.Logger.Info(() => "[Managed Identity] Defaulting to IMDS endpoint for managed identity.");
@@ -215,12 +215,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     s_cachedBaseEndpoint = DefaultImdsBaseEndpoint;
                 }
             }
-            
+
             UriBuilder builder = new UriBuilder(s_cachedBaseEndpoint)
             {
                 Path = subPath
             };
-            
+
             if (!string.IsNullOrEmpty(queryParams))
             {
                 builder.Query = queryParams;

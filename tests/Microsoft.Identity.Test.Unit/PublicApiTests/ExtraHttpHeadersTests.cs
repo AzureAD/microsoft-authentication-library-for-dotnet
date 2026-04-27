@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft.
+// Copyright (c) Microsoft.
 // Licensed under the MIT License.
 
 using System;

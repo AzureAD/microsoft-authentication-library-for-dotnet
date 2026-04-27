@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -17,7 +17,7 @@ using NSubstitute;
 namespace Microsoft.Identity.Test.Unit.CacheTests
 {
     [TestClass]
-    public class CacheFallbackOperationsTests 
+    public class CacheFallbackOperationsTests
     {
         private InMemoryLegacyCachePersistence _legacyCachePersistence;
         private ILoggerAdapter _logger;

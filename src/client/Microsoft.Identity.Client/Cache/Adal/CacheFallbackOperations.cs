@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -248,16 +248,16 @@ namespace Microsoft.Identity.Client.Cache
                         environmentAliases.Contains(new Uri(p.Key.Authority).Host));
 
                 bool filtered = false;
-                
+
                 if (!string.IsNullOrEmpty(account?.Username))
                 {
                     listToProcess =
                         listToProcess.Where(p => account.Username.Equals(
-                            p.Key.DisplayableId, StringComparison.OrdinalIgnoreCase));                        
-                    
+                            p.Key.DisplayableId, StringComparison.OrdinalIgnoreCase));
+
                     filtered = true;
                 }
-                
+
                 if (!string.IsNullOrEmpty(account?.HomeAccountId?.ObjectId))
                 {
                     listToProcess =

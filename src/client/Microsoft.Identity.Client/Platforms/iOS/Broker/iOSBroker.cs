@@ -139,7 +139,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
             // this needs to be case sensitive because the AppBundle is case sensitive
             brokerRequest.Add(
-                BrokerParameter.RedirectUri, 
+                BrokerParameter.RedirectUri,
                 authenticationRequestParameters.RedirectUri.OriginalString);
 
             if (authenticationRequestParameters.ExtraQueryParameters?.Any() == true)
@@ -167,7 +167,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             {
                 brokerRequest.Add(BrokerParameter.Prompt, acquireTokenInteractiveParameters.Prompt.PromptValue);
             }
-            
+
             if (!string.IsNullOrEmpty(authenticationRequestParameters.Claims))
             {
                 brokerRequest.Add(BrokerParameter.Claims, authenticationRequestParameters.Claims);
@@ -291,7 +291,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
                 if (responseDictionary.TryGetValue(BrokerResponseConst.BrokerErrorCode, out string errCode))
                 {
-                    if(errCode == BrokerResponseConst.iOSBrokerUserCancellationErrorCode)
+                    if (errCode == BrokerResponseConst.iOSBrokerUserCancellationErrorCode)
                     {
                         responseDictionary[BrokerResponseConst.BrokerErrorCode] = MsalError.AuthenticationCanceledError;
                     }

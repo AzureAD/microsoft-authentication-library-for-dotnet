@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 var requestContext = new RequestContext(serviceBundle, Guid.NewGuid(), null);
                 var response = TestConstants.CreateMsalTokenResponse();
 
-                ITokenCacheInternal cache = new TokenCache(serviceBundle, false, legacyCachePersistence);                
+                ITokenCacheInternal cache = new TokenCache(serviceBundle, false, legacyCachePersistence);
                 if (serializeCache) // no point in invoking the Legacy ADAL cache if you're only keeping it memory
                 {
                     cache.SetBeforeAccess((_) => { });

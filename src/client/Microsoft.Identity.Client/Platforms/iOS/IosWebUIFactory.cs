@@ -17,8 +17,8 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         public bool IsEmbeddedWebViewAvailable => true;
 
         public IWebUI CreateAuthenticationDialog(
-            CoreUIParent coreUIParent, 
-            WebViewPreference useEmbeddedWebView, 
+            CoreUIParent coreUIParent,
+            WebViewPreference useEmbeddedWebView,
             RequestContext requestContext)
         {
             if (useEmbeddedWebView == WebViewPreference.Embedded)

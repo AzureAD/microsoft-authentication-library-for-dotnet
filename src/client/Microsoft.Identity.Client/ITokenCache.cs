@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Client
         /// <param name="beforeWrite">Delegate set in order to prepare the cache serialization</param>
 #if !SUPPORTS_CUSTOM_CACHE
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-# endif
+#endif
         void SetBeforeWrite(TokenCacheCallback beforeWrite);
 
         /// <summary>

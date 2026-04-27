@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ConfigureAwait(false);
 
                 Assert.AreEqual(
-                    "https://mtlsauth.login.microsoftonline.com/tid/oauth2/v2.0/token",                    
+                    "https://mtlsauth.login.microsoftonline.com/tid/oauth2/v2.0/token",
                     handler.ActualRequestMessage.RequestUri.ToString());
             }
         }
@@ -312,7 +312,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseWithAdditionalParamsMessage();
                 TokenCacheHelper.ExpireAllAccessTokens(app.AppTokenCacheInternal);
                 result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
-                                    .WithAdditionalCacheParameters(new List<string> { "additional_param1", "additional_param2", "additional_param3", "additional_param4", "additional_param5"})
+                                    .WithAdditionalCacheParameters(new List<string> { "additional_param1", "additional_param2", "additional_param3", "additional_param4", "additional_param5" })
                                     .ExecuteAsync()
                                     .ConfigureAwait(false);
 

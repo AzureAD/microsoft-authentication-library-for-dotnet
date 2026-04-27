@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             else
             {
                 ExtraQueryParameters = new Dictionary<string, string>(
-                    serviceBundle.Config.ExtraQueryParameters, 
+                    serviceBundle.Config.ExtraQueryParameters,
                     StringComparer.OrdinalIgnoreCase);
             }
 
@@ -151,7 +151,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public IEnumerable<string> PersistedCacheParameters => _commonParameters.AdditionalCacheParameters;
 
-        public SortedList<string, string> CacheKeyComponents {get; private set; }
+        public SortedList<string, string> CacheKeyComponents { get; private set; }
 
         #region TODO REMOVE FROM HERE AND USE FROM SPECIFIC REQUEST PARAMETERS
         // TODO: ideally, these can come from the particular request instance and not be in RequestBase since it's not valid for all requests.

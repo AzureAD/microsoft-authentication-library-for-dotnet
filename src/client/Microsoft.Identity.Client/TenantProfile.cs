@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -11,15 +11,15 @@ namespace Microsoft.Identity.Client
     /// Represents an account in a specific tenant. The same account can exist in its home tenant and also as a guest in multiple other tenants.
     /// Access tokens and Id Tokens are tenant specific and this object provides high level information about all the ID tokens associated with the account.
     /// </summary>
-    public class TenantProfile 
+    public class TenantProfile
     {
         private readonly MsalIdTokenCacheItem _msalIdTokenCacheItem;
 
-        internal TenantProfile(MsalIdTokenCacheItem msalIdTokenCacheItem) 
+        internal TenantProfile(MsalIdTokenCacheItem msalIdTokenCacheItem)
         {
             // DO NOT parse the IdToken in the ctor, this is an expensive operation!
             _msalIdTokenCacheItem = msalIdTokenCacheItem;
-        }        
+        }
 
         /// <summary>
         /// The immutable identifier for an user account, in a specific tenant. 
@@ -49,5 +49,5 @@ namespace Microsoft.Identity.Client
                 _msalIdTokenCacheItem?.IdToken.TenantId,
                 StringComparison.OrdinalIgnoreCase);
 
-    }    
+    }
 }

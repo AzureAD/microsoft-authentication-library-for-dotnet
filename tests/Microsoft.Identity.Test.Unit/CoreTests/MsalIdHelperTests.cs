@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -36,12 +36,12 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                 Regex AdalOsVersionRegex = new Regex(@"[\d]+[.\d]*", RegexOptions.Compiled);
                 Match match = AdalOsVersionRegex.Match(os);
                 Assert.IsTrue(match.Success);
-                
+
                 NuGetVersion.TryParse(match.Value, out var semanticVersion);
 
                 Assert.IsGreaterThanOrEqualTo(10, semanticVersion.Major);
 
-                
+
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {

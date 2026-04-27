@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Client.Instance
 
         internal bool IsOrganizationsTenantWithMsaPassthroughEnabled(bool isMsaPassthrough, string accountTenantId)
         {
-            return accountTenantId!= null && isMsaPassthrough && TenantId.Equals(Constants.Organizations, StringComparison.OrdinalIgnoreCase) &&
+            return accountTenantId != null && isMsaPassthrough && TenantId.Equals(Constants.Organizations, StringComparison.OrdinalIgnoreCase) &&
                 IsConsumers(accountTenantId);
         }
 

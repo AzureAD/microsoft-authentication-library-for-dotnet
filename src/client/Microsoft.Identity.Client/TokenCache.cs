@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -63,9 +63,9 @@ namespace Microsoft.Identity.Client
         }
 
         internal TokenCache(
-            IServiceBundle serviceBundle, 
+            IServiceBundle serviceBundle,
             bool isApplicationTokenCache,
-            ILegacyCachePersistence legacyCachePersistenceForTest=null)
+            ILegacyCachePersistence legacyCachePersistenceForTest = null)
         {
             if (serviceBundle == null)
                 throw new ArgumentNullException(nameof(serviceBundle));
@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Client
 
             // Must happen last, this code can access things like _accessor and such above.
             ServiceBundle = serviceBundle;
-        }      
+        }
 
         /// <summary>
         /// Sets the security group to be used with the iOS Keychain. This function should not be used by external customers. It <see href="https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2121">will be removed</see> in a future version of MSAL.

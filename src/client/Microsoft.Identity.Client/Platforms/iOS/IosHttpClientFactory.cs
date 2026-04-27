@@ -16,7 +16,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             {
                 var handler = new NSUrlSessionHandler();
                 httpClient = new HttpClient(handler);
-               
+
             }
             else
             {

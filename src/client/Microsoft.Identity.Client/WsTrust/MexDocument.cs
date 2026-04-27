@@ -134,7 +134,7 @@ namespace Microsoft.Identity.Client.WsTrust
 
         private void ReadPolicyBindings(XContainer mexDocument)
         {
-            IEnumerable<XElement> bindingElements = FindElements(mexDocument, XmlNamespace.Wsdl, "binding");    
+            IEnumerable<XElement> bindingElements = FindElements(mexDocument, XmlNamespace.Wsdl, "binding");
 
             foreach (XElement binding in bindingElements)
             {
@@ -175,7 +175,7 @@ namespace Microsoft.Identity.Client.WsTrust
                     bool isWsTrust2005 =
                         string.Compare(XmlNamespace.Issue2005.ToString(), soapAction.Value,
                             StringComparison.OrdinalIgnoreCase) == 0;
-                    _policies[policyUri.Value].Version = isWsTrust2005 ? WsTrustVersion.WsTrust2005:WsTrustVersion.WsTrust13;
+                    _policies[policyUri.Value].Version = isWsTrust2005 ? WsTrustVersion.WsTrust2005 : WsTrustVersion.WsTrust13;
 
                     XElement soapBinding = binding.Elements(XmlNamespace.Soap12 + "binding").FirstOrDefault();
                     if (soapBinding == null)

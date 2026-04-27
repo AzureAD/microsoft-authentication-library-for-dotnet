@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -78,7 +78,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             var counter = 0;
             var validationCounter = 1;
             var levelToValidate = LogLevel.Always;
-            Action incrementCounter = () => {
+            Action incrementCounter = () =>
+            {
 
                 if (level > levelToValidate)
                 {
@@ -116,7 +117,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             incrementCounter.Invoke();
 
             _callback.When(x => x(LogLevel.Verbose, Arg.Any<string>(), false)).Do(_ => counter++);
-            logger.Verbose(()=>TestConstants.TestMessage);
+            logger.Verbose(() => TestConstants.TestMessage);
             Assert.AreEqual(validationCounter, counter);
         }
 
@@ -132,7 +133,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             var counter = 0;
             var validationCounter = 1;
             var levelToValidate = LogLevel.Always;
-            Action incrementCounter = () => {
+            Action incrementCounter = () =>
+            {
 
                 if (level > levelToValidate)
                 {
@@ -167,7 +169,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             incrementCounter.Invoke();
 
             _callback.When(x => x(LogLevel.Verbose, Arg.Any<string>(), true)).Do(_ => counter++);
-            logger.VerbosePii(() => TestConstants.TestMessage,()=> string.Empty);
+            logger.VerbosePii(() => TestConstants.TestMessage, () => string.Empty);
             Assert.AreEqual(validationCounter, counter);
         }
 
@@ -383,8 +385,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithClientSecret("secret")
                     .WithHttpManager(httpManager);
 
-                    stringBuilder = testLogger.StringBuilder;
-                    appBuilder.WithLogging(testLogger, piiLogging);
+                stringBuilder = testLogger.StringBuilder;
+                appBuilder.WithLogging(testLogger, piiLogging);
 
                 httpManager.AddInstanceDiscoveryMockHandler();
                 httpManager.AddMockHandler(
@@ -440,6 +442,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             args.IdentityLogger.Log(entry);
         }
-      
+
     }
 }

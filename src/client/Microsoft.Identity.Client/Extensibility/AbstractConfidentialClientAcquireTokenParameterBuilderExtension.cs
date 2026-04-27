@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -26,8 +26,8 @@ namespace Microsoft.Identity.Client.Extensibility
         /// <param name="onBeforeTokenRequestHandler">An async delegate which gets invoked just before MSAL makes a token request</param>
         /// <returns>The builder to chain other options to.</returns>
         public static AbstractAcquireTokenParameterBuilder<T> OnBeforeTokenRequest<T>(
-            this AbstractAcquireTokenParameterBuilder<T> builder, 
-            Func<OnBeforeTokenRequestData, Task> onBeforeTokenRequestHandler) 
+            this AbstractAcquireTokenParameterBuilder<T> builder,
+            Func<OnBeforeTokenRequestData, Task> onBeforeTokenRequestHandler)
             where T : AbstractAcquireTokenParameterBuilder<T>
         {
             if (builder.CommonParameters.OnBeforeTokenRequestHandler == null)
@@ -98,7 +98,7 @@ namespace Microsoft.Identity.Client.Extensibility
 
             return builder;
         }
-        
+
         /// <summary>
         /// Specifies additional parameters acquired from authentication responses to be cached with the access token that are normally not included in the cache object.
         /// these values can be read from the <see cref="AuthenticationResult.AdditionalResponseParameters"/> parameter.
@@ -108,7 +108,7 @@ namespace Microsoft.Identity.Client.Extensibility
         /// <param name="cacheParameters">Additional parameters to cache</param>
         /// <returns></returns>
         public static AbstractAcquireTokenParameterBuilder<T> WithAdditionalCacheParameters<T>(
-            this AbstractAcquireTokenParameterBuilder<T> builder, 
+            this AbstractAcquireTokenParameterBuilder<T> builder,
             IEnumerable<string> cacheParameters)
             where T : AbstractAcquireTokenParameterBuilder<T>
         {
@@ -236,5 +236,5 @@ namespace Microsoft.Identity.Client.Extensibility
 
             return builder;
         }
-    }   
+    }
 }

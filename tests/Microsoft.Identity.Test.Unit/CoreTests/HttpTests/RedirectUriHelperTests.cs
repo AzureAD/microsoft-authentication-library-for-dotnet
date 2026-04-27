@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
             Assert.Throws<MsalClientException>(() =>
                 RedirectUriHelper.Validate(new Uri(Constants.DefaultRedirectUri), true));
 
-              RedirectUriHelper.Validate(new Uri(Constants.DefaultRedirectUri), false);
+            RedirectUriHelper.Validate(new Uri(Constants.DefaultRedirectUri), false);
         }
 
         [TestMethod]

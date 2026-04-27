@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 namespace Microsoft.Identity.Client
@@ -20,11 +20,11 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Constructor
         /// </summary>
-        public MsalThrottledUiRequiredException(MsalUiRequiredException originalException) : 
+        public MsalThrottledUiRequiredException(MsalUiRequiredException originalException) :
             base(
-                originalException.ErrorCode, 
-                originalException.Message, 
-                originalException.InnerException, 
+                originalException.ErrorCode,
+                originalException.Message,
+                originalException.InnerException,
                 originalException.Classification)
         {
             SubError = originalException.SubError;

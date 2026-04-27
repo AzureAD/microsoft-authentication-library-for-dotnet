@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -27,11 +27,11 @@ namespace Microsoft.Identity.Client
 {
     internal sealed class ApplicationConfiguration : IAppConfig
     {
-        public ApplicationConfiguration(MsalClientType applicationType) 
+        public ApplicationConfiguration(MsalClientType applicationType)
         {
             switch (applicationType)
             {
-                case MsalClientType.ConfidentialClient: 
+                case MsalClientType.ConfidentialClient:
                     IsConfidentialClient = true;
                     break;
 
@@ -180,25 +180,25 @@ namespace Microsoft.Identity.Client
                 {
                     return certCred.Certificate;
                 }
-                
+
                 // Return the certificate if using CertificateAndClaimsClientCredential with a static certificate
                 if (ClientCredential is CertificateAndClaimsClientCredential certAndClaimsCred)
                 {
                     return certAndClaimsCred.Certificate;
                 }
-               
+
                 return null;
             }
         }
 
         public SortedList<string, string> CacheKeyComponents { get; internal set; }
-#endregion
+        #endregion
 
-#region Region
+        #region Region
         public string AzureRegion { get; set; }
-#endregion
+        #endregion
 
-#region Authority
+        #region Authority
         // These are all used to create the Authority when the app is built.
 
         public string TenantId { get; internal set; }
@@ -226,15 +226,15 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public bool ValidateAuthority { get; set; }
 
-#endregion
+        #endregion
 
-#region Test Hooks
+        #region Test Hooks
         public ILegacyCachePersistence UserTokenLegacyCachePersistenceForTest { get; set; }
 
         public ITokenCacheInternal UserTokenCacheInternalForTest { get; set; }
         public ITokenCacheInternal AppTokenCacheInternalForTest { get; set; }
 
-        public IDeviceAuthManager DeviceAuthManagerForTest { get; set; }        
+        public IDeviceAuthManager DeviceAuthManagerForTest { get; set; }
         public bool IsInstanceDiscoveryEnabled { get; internal set; } = true;
         #endregion
     }

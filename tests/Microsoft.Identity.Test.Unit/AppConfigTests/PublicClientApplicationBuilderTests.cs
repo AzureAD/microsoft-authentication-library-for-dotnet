@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -608,7 +608,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             pca = PublicClientApplicationBuilder.Create(Guid.NewGuid().ToString()).Build();
             Assert.IsTrue((pca.AppConfig as ApplicationConfiguration).CacheSynchronizationEnabled);
         }
-// For some reason the broker doesn't load on netfx, running the test on .net only
+        // For some reason the broker doesn't load on netfx, running the test on .net only
 #if NET
         [TestMethod]
         public void IsBrokerAvailable_net8()

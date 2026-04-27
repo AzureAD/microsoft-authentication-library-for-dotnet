@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System.Threading;
@@ -61,7 +61,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             // Publish the created instance only if another thread has not already published one.
             // If another thread won the race, discard our newly created instance and use theirs.
             IManagedIdentityKeyProvider prior = Interlocked.CompareExchange(ref s_provider, created, null);
-            
+
             if (prior == null)
             {
                 logger?.Info($"[MI][KeyProviderFactory] Key provider created: {created.GetType().Name}.");

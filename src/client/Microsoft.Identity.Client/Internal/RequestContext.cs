@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Client.Internal
         public X509Certificate2 MtlsCertificate { get; }
 
         public bool IsAttestationRequested { get; set; }
-        
+
         public bool IsMtlsRequested { get; set; }
 
         public RequestContext(IServiceBundle serviceBundle, Guid correlationId, X509Certificate2 mtlsCertificate, CancellationToken cancellationToken = default)

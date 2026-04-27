@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -29,8 +29,8 @@ namespace Microsoft.Identity.Test.Unit.AuthExtension
             authenticationResult?.AdditionalResponseParameters?.TryGetValue("additional_param1", out cacheValue1);
             authenticationResult?.AdditionalResponseParameters?.TryGetValue("additional_param2", out cacheValue2);
 
-            authenticationResult.AccessToken = authenticationResult.AccessToken 
-                                                + "AccessTokenModifier" 
+            authenticationResult.AccessToken = authenticationResult.AccessToken
+                                                + "AccessTokenModifier"
                                                 + cacheValue1
                                                 + cacheValue2;
         }

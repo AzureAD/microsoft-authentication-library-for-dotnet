@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -23,7 +23,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
     /// </remarks>
     internal sealed class WindowsManagedIdentityKeyProvider : IManagedIdentityKeyProvider
     {
-        private static readonly SemaphoreSlim s_once = new (1, 1);
+        private static readonly SemaphoreSlim s_once = new(1, 1);
         private volatile ManagedIdentityKeyInfo _cachedKey;
 
         /// <summary>

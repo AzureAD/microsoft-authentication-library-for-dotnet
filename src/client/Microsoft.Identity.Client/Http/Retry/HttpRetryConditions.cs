@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -17,7 +17,7 @@ namespace Microsoft.Identity.Client.Http.Retry
             if (exception != null)
             {
                 return exception is TaskCanceledException ? true : false;
-            } 
+            }
 
             return (int)response.StatusCode switch
             {

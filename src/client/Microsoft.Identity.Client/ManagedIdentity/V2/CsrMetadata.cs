@@ -4,7 +4,7 @@
 #if SUPPORTS_SYSTEM_TEXT_JSON
     using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
 #else
-    using Microsoft.Identity.Json;
+using Microsoft.Identity.Json;
 #endif
 
 namespace Microsoft.Identity.Client.ManagedIdentity.V2
@@ -47,13 +47,13 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         /// <summary>
         /// AAD Tenant of the Managed Identity
         /// </summary>
-        [JsonProperty("tenantId")] 
+        [JsonProperty("tenantId")]
         public string TenantId { get; set; }
 
         /// <summary>
         /// MAA Regional / Custom Endpoint for attestation purposes.
         /// </summary>
-        [JsonProperty("attestationEndpoint")] 
+        [JsonProperty("attestationEndpoint")]
         public string AttestationEndpoint { get; set; }
 
         // Parameterless constructor for deserialization

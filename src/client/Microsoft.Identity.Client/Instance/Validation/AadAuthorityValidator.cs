@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Client.Instance.Validation
                 // MSAL will throw if the instance discovery URI does not respond with a valid json
                 await _requestContext.ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryAsync(
                                              authorityInfo,
-                                             _requestContext, 
+                                             _requestContext,
                                              forceValidation: true).ConfigureAwait(false);
             }
         }

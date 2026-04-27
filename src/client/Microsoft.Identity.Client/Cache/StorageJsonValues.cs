@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 namespace Microsoft.Identity.Client.Cache
@@ -19,6 +19,6 @@ namespace Microsoft.Identity.Client.Cache
         public const string CredentialTypeOther = "Other";
 
         public const string AppMetadata = "AppMetadata";
-    
+
     }
 }

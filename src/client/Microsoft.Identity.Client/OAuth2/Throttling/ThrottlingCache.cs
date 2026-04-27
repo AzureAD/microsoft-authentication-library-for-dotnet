@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
             return !_cache.Any();
         }
 
-        internal ConcurrentDictionary<string, ThrottlingCacheEntry> CacheForTest => _cache; 
+        internal ConcurrentDictionary<string, ThrottlingCacheEntry> CacheForTest => _cache;
 
         private void CleanCache(ILoggerAdapter logger)
         {

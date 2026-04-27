@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -1053,7 +1053,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     new BrokerOptions(
                         BrokerOptions.OperatingSystems.Windows));
 #else
-            Assert.Fail("Test failure - not supported");
+                Assert.Fail("Test failure - not supported");
 #endif
             }
             var pca = pcaBuilder.BuildConcrete();
@@ -1165,10 +1165,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                .WithUsername("upn@live.com");
             CheckBuilderCommonMethods(iwaBuilder);
 
-            #pragma warning disable CS0618 // Type or member is obsolete
+#pragma warning disable CS0618 // Type or member is obsolete
             var usernamePasswordBuilder = app.AcquireTokenByUsernamePassword(TestConstants.s_scope, "upn@live.com", "");
             CheckBuilderCommonMethods(usernamePasswordBuilder);
-            #pragma warning restore CS0618 // Type or member is obsolete
+#pragma warning restore CS0618 // Type or member is obsolete
 
             var deviceCodeBuilder = app.AcquireTokenWithDeviceCode(TestConstants.s_scope, _ => Task.FromResult(0))
                .WithDeviceCodeResultCallback(_ => Task.FromResult(0));

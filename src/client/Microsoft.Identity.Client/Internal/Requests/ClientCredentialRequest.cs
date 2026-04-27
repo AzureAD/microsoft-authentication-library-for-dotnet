@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private readonly AcquireTokenForClientParameters _clientParameters;
         private static readonly SemaphoreSlim s_semaphoreSlim = new SemaphoreSlim(1, 1);
         private readonly ICryptographyManager _cryptoManager;
-        
+
         public ClientCredentialRequest(
             IServiceBundle serviceBundle,
             AuthenticationRequestParameters authenticationRequestParameters,
@@ -57,8 +57,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
             // This ensures that when both claims and AccessTokenHashToRefresh are set,
             // we do NOT skip the cache, allowing MSAL to attempt retrieving a matching
             // cached token by the provided hash before requesting a new token.
-            bool skipCache = _clientParameters.ForceRefresh || 
-                (!string.IsNullOrEmpty(AuthenticationRequestParameters.Claims) && 
+            bool skipCache = _clientParameters.ForceRefresh ||
+                (!string.IsNullOrEmpty(AuthenticationRequestParameters.Claims) &&
                 string.IsNullOrEmpty(_clientParameters.AccessTokenHashToRefresh));
 
             if (skipCache)
@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                             using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
                             return GetAccessTokenAsync(tokenSource.Token, logger);
                         }, logger, ServiceBundle, AuthenticationRequestParameters.RequestContext.ApiEvent,
-                        AuthenticationRequestParameters.RequestContext.ApiEvent.CallerSdkApiId, 
+                        AuthenticationRequestParameters.RequestContext.ApiEvent.CallerSdkApiId,
                         AuthenticationRequestParameters.RequestContext.ApiEvent.CallerSdkVersion);
                     }
                 }
@@ -120,7 +120,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         }
 
         private async Task<AuthenticationResult> GetAccessTokenAsync(
-            CancellationToken cancellationToken, 
+            CancellationToken cancellationToken,
             ILoggerAdapter logger)
         {
             await ResolveAuthorityAsync().ConfigureAwait(false);
@@ -149,7 +149,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                     // Success - invoke OnCompletion callback if configured
                     await InvokeOnCompletionCallbackAsync(authResult, exception: null, logger).ConfigureAwait(false);
-                    
+
                     return authResult;
                 }
                 catch (MsalServiceException serviceEx)
@@ -158,23 +158,23 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     if (AuthenticationRequestParameters.AppConfig.OnMsalServiceFailure != null)
                     {
                         logger.Info("[ClientCredentialRequest] MsalServiceException caught. Invoking OnMsalServiceFailure.");
-                        
+
                         bool shouldRetry = await InvokeOnMsalServiceFailureCallbackAsync(serviceEx, logger)
                             .ConfigureAwait(false);
-                        
+
                         if (shouldRetry)
                         {
                             retryCount++;
                             logger.Info($"[ClientCredentialRequest] OnMsalServiceFailure returned true. Retrying token request (Retry #{retryCount}).");
                             continue; // Retry the loop
                         }
-                        
+
                         logger.Info("[ClientCredentialRequest] OnMsalServiceFailure returned false. Propagating exception.");
                     }
-                    
+
                     // Invoke OnCompletion callback with failure result
                     await InvokeOnCompletionCallbackAsync(authResult: null, exception: serviceEx, logger).ConfigureAwait(false);
-                    
+
                     // Re-throw if no callback or callback returned false
                     throw;
                 }
@@ -227,7 +227,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         authResult = await CreateAuthenticationResultFromCacheAsync(cachedAccessTokenItem).ConfigureAwait(false);
                     }
                 }
-                
+
                 return authResult;
             }
             finally
@@ -249,11 +249,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 var tokenEndpoint = await AuthenticationRequestParameters.Authority.GetTokenEndpointAsync(AuthenticationRequestParameters.RequestContext).ConfigureAwait(false);
                 var options = new AssertionRequestOptions(
-                    AuthenticationRequestParameters.AppConfig, 
+                    AuthenticationRequestParameters.AppConfig,
                     tokenEndpoint,
                     AuthenticationRequestParameters.AuthorityManager.Authority.TenantId,
                     AuthenticationRequestParameters.RequestContext.CorrelationId);
-                
+
                 var executionResult = new ExecutionResult
                 {
                     Successful = false,
@@ -261,11 +261,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     Exception = serviceException,
                     ClientCertificate = AuthenticationRequestParameters.ResolvedCertificate
                 };
-                
+
                 bool shouldRetry = await AuthenticationRequestParameters.AppConfig
                     .OnMsalServiceFailure(options, executionResult)
                     .ConfigureAwait(false);
-                
+
                 logger.Verbose(() => $"[ClientCredentialRequest] OnMsalServiceFailure returned: {shouldRetry}");
                 return shouldRetry;
             }
@@ -295,14 +295,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
             try
             {
                 logger.Verbose(() => "[ClientCredentialRequest] Invoking OnCompletion callback.");
-                
+
                 var tokenEndpoint = await AuthenticationRequestParameters.Authority.GetTokenEndpointAsync(AuthenticationRequestParameters.RequestContext).ConfigureAwait(false);
                 var options = new AssertionRequestOptions(
-                    AuthenticationRequestParameters.AppConfig, 
+                    AuthenticationRequestParameters.AppConfig,
                     tokenEndpoint,
                     AuthenticationRequestParameters.AuthorityManager.Authority.TenantId,
                     AuthenticationRequestParameters.RequestContext.CorrelationId);
-                
+
                 var executionResult = new ExecutionResult
                 {
                     Successful = authResult != null,
@@ -310,11 +310,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     Exception = exception,
                     ClientCertificate = AuthenticationRequestParameters.ResolvedCertificate
                 };
-                
+
                 await AuthenticationRequestParameters.AppConfig
                     .OnCompletion(options, executionResult)
                     .ConfigureAwait(false);
-                
+
                 logger.Verbose(() => "[ClientCredentialRequest] OnCompletion callback completed successfully.");
             }
             catch (Exception ex)
@@ -326,7 +326,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
         }
 
-        private async Task<AuthenticationResult> SendTokenRequestToAppTokenProviderAsync(ILoggerAdapter logger, 
+        private async Task<AuthenticationResult> SendTokenRequestToAppTokenProviderAsync(ILoggerAdapter logger,
             CancellationToken cancellationToken)
         {
             logger.Info("[ClientCredentialRequest] Acquiring a token from the token provider.");
@@ -401,7 +401,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     "[ClientCredentialRequest] Cached token KeyId does not match request certificate (SPKI-SHA256 mismatch). Bypassing cache.");
                     return false;
                 }
-                
+
                 AuthenticationRequestParameters.RequestContext.Logger.Verbose(() =>
                 "[ClientCredentialRequest] Cached token KeyId matches request certificate (SPKI-SHA256). Using cached token.");
             }

@@ -250,11 +250,11 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost();
 
                 // Act
-                #pragma warning disable CS0618 // Type or member is obsolete
+#pragma warning disable CS0618 // Type or member is obsolete
                 var result = await app.AcquireTokenByUsernamePassword(new[] { "User.Read" }, "username", "password")
                     .ExecuteAsync()
                     .ConfigureAwait(false);
-                #pragma warning restore CS0618
+#pragma warning restore CS0618
 
                 // Assert
                 Assert.IsNotNull(result);
@@ -459,7 +459,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                     .Create(TestConstants.ClientId)
                     .WithHttpManager(harness.HttpManager);
 
-                var app = builder                   
+                var app = builder
                     .BuildConcrete();
 
                 // important: set the func after calling `WithBroker`
@@ -514,9 +514,9 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             {
                 var builder = PublicClientApplicationBuilder
                     .Create(TestConstants.ClientId)
-                    .WithHttpManager(harness.HttpManager);                
-                
-                var app = builder.BuildConcrete();                
+                    .WithHttpManager(harness.HttpManager);
+
+                var app = builder.BuildConcrete();
                 builder.Config.BrokerCreatorFunc = (_, _, logger) => { return new NullBroker(logger); };
 
                 // Act
@@ -594,7 +594,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             platformProxy.CreateTokenCacheAccessor(Arg.Any<CacheOptions>(), false)
                 .Returns(new InMemoryPartitionedUserTokenCacheAccessor(Substitute.For<ILoggerAdapter>(), null));
 
-            var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)                
+            var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                 .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows))
                 .WithPlatformProxy(platformProxy)
                 .Build();
@@ -617,7 +617,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
             // Assert that MSAL acquires an account from the broker cache
             Assert.AreSame(expectedAccount, actualAccount.Single());
-        }       
+        }
 
         [TestMethod]
         public async Task SilentAuthStrategyFallbackTestAsync()
@@ -995,7 +995,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             };
         }
 
-       
+
         internal static IBroker CreateBroker(Type brokerType)
         {
             if (brokerType == typeof(NullBroker))

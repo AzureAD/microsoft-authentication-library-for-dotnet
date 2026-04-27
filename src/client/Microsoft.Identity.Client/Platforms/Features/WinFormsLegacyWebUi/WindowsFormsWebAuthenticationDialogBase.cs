@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -125,7 +125,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
 
             if (string.IsNullOrEmpty(e.Url))
             {
-                RequestContext.Logger.Verbose(()=>"[Legacy WebView] URL in BeforeNavigate is null or empty.");
+                RequestContext.Logger.Verbose(() => "[Legacy WebView] URL in BeforeNavigate is null or empty.");
                 e.Cancel = true;
                 return;
             }
@@ -246,14 +246,14 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
                     return;
                 }
 
-                RequestContext.Logger.Verbose(()=>string.Format(CultureInfo.InvariantCulture,
+                RequestContext.Logger.Verbose(() => string.Format(CultureInfo.InvariantCulture,
                     "[Legacy WebView] WebBrowser state: IsBusy: {0}, ReadyState: {1}, Created: {2}, Disposing: {3}, IsDisposed: {4}, IsOffline: {5}",
                     _webBrowser.IsBusy, _webBrowser.ReadyState, _webBrowser.Created,
                     _webBrowser.Disposing, _webBrowser.IsDisposed, _webBrowser.IsOffline));
 
                 _webBrowser.Stop();
 
-                RequestContext.Logger.Verbose(()=>string.Format(CultureInfo.InvariantCulture,
+                RequestContext.Logger.Verbose(() => string.Format(CultureInfo.InvariantCulture,
                     "[Legacy WebView] WebBrowser state (after Stop): IsBusy: {0}, ReadyState: {1}, Created: {2}, Disposing: {3}, IsDisposed: {4}, IsOffline: {5}",
                     _webBrowser.IsBusy, _webBrowser.ReadyState, _webBrowser.Created,
                     _webBrowser.Disposing, _webBrowser.IsDisposed, _webBrowser.IsOffline));
@@ -280,11 +280,11 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
             _webBrowser.Navigated += WebBrowserNavigatedHandler;
             _webBrowser.NavigateError += WebBrowserNavigateErrorHandler;
 
-            if(RequestContext.ServiceBundle.Config.IsWebviewSsoPolicyEnabled)
+            if (RequestContext.ServiceBundle.Config.IsWebviewSsoPolicyEnabled)
             {
                 IBroker broker = RequestContext.ServiceBundle.Config.BrokerCreatorFunc(null, RequestContext.ServiceBundle.Config, RequestContext.Logger);
                 var ssoPolicyHeaders = broker.GetSsoPolicyHeaders();
-                string ssoPolicyHeadersString="";
+                string ssoPolicyHeadersString = "";
                 foreach (KeyValuePair<string, string> kvp in ssoPolicyHeaders)
                 {
                     ssoPolicyHeadersString += kvp.Key + ":" + kvp.Value + Environment.NewLine;

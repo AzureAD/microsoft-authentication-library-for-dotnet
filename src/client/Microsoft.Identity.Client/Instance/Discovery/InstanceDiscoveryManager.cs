@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
           InstanceDiscoveryResponse userProvidedInstanceDiscoveryResponse = null,
           Uri userProvidedInstanceDiscoveryUri = null) :
             this(
-                httpManager,                
+                httpManager,
                 userProvidedInstanceDiscoveryResponse != null ? new UserMetadataProvider(userProvidedInstanceDiscoveryResponse) : null,
                 userProvidedInstanceDiscoveryUri,
                 null, null, null, null)
@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             _regionDiscoveryProvider = regionDiscoveryProvider ??
                 new RegionAndMtlsDiscoveryProvider(_httpManager);
 
-            
+
         }
 
         public InstanceDiscoveryMetadataEntry GetMetadataEntryAvoidNetwork(
@@ -132,7 +132,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
 
         public async Task<InstanceDiscoveryMetadataEntry> GetMetadataEntryAsync(
             AuthorityInfo authorityInfo,
-            RequestContext requestContext, 
+            RequestContext requestContext,
             bool forceValidation = false)
         {
             Uri authorityUri = authorityInfo.CanonicalAuthority;
@@ -202,13 +202,13 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                 requestContext.Logger.Error($"[Instance Discovery] Instance discovery failed - invalid instance! ");
                 throw;
             }
-            catch (Exception e) 
-            { 
+            catch (Exception e)
+            {
                 requestContext.Logger.Warning(
                     $"[Instance Discovery] Instance Discovery failed. MSAL will continue without network instance metadata. \n\r" +
                     $" Exception: {e} ");
-                
-                return 
+
+                return
                     _knownMetadataProvider.GetMetadata(authorityUri.Host, Enumerable.Empty<string>(), requestContext.Logger)
                 ?? CreateEntryForSingleAuthority(authorityUri);
             }

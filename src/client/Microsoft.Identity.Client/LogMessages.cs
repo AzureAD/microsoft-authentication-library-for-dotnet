@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -10,7 +10,7 @@ namespace Microsoft.Identity.Client
     {
         public const string BeginningAcquireByRefreshToken = "Begin acquire token by refresh token...";
         public const string NoScopesProvidedForRefreshTokenRequest = "No scopes provided for acquire token by refresh token request. " +
-            "Using default scope instead.";      
+            "Using default scope instead.";
 
         public const string CustomWebUiAcquiringAuthorizationCode = "Using CustomWebUi to acquire the authorization code";
         public const string CustomWebUiRedirectUriMatched = "Redirect Uri was matched.  Returning success from CustomWebUiHandler.";

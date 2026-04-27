@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -83,10 +83,10 @@ namespace Microsoft.Identity.Client.Internal
         internal static void ProcessFetchInBackground(
             MsalAccessTokenCacheItem oldAccessToken,
             Func<Task<AuthenticationResult>> fetchAction,
-            ILoggerAdapter logger, 
-            IServiceBundle serviceBundle, 
-            ApiEvent apiEvent, 
-            string callerSdkId, 
+            ILoggerAdapter logger,
+            IServiceBundle serviceBundle,
+            ApiEvent apiEvent,
+            string callerSdkId,
             string callerSdkVersion)
         {
             _ = Task.Run(async () =>
@@ -99,8 +99,8 @@ namespace Microsoft.Identity.Client.Internal
                         apiEvent.ApiId,
                         callerSdkId,
                         callerSdkVersion,
-                        TokenSource.IdentityProvider, 
-                        CacheRefreshReason.ProactivelyRefreshed, 
+                        TokenSource.IdentityProvider,
+                        CacheRefreshReason.ProactivelyRefreshed,
                         Cache.CacheLevel.None,
                         logger,
                         apiEvent.TokenType);
@@ -133,8 +133,8 @@ namespace Microsoft.Identity.Client.Internal
                         serviceBundle.PlatformProxy.GetProductName(),
                         ex.GetType().Name,
                         apiEvent.ApiId,
-                        callerSdkId, 
-                        callerSdkVersion, 
+                        callerSdkId,
+                        callerSdkVersion,
                         CacheRefreshReason.ProactivelyRefreshed,
                         apiEvent.TokenType);
                 }
@@ -145,8 +145,8 @@ namespace Microsoft.Identity.Client.Internal
                         serviceBundle.PlatformProxy.GetProductName(),
                         ex.GetType().Name,
                         apiEvent.ApiId,
-                        callerSdkId, 
-                        callerSdkVersion, 
+                        callerSdkId,
+                        callerSdkVersion,
                         CacheRefreshReason.ProactivelyRefreshed,
                         apiEvent.TokenType);
                 }
@@ -162,8 +162,8 @@ namespace Microsoft.Identity.Client.Internal
                 var refreshOnWithJitter = msalAccessTokenCacheItem.RefreshOn.Value + TimeSpan.FromSeconds(jitter);
                 return refreshOnWithJitter;
             }
-            
-            return null;           
+
+            return null;
         }
     }
 }

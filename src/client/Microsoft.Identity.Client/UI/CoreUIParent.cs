@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 #if ANDROID
@@ -135,7 +135,7 @@ namespace Microsoft.Identity.Client.UI
 #endif
 
 #if NETFRAMEWORK  || NET_CORE || NETSTANDARD
-        internal object OwnerWindow { get; set; }       
+        internal object OwnerWindow { get; set; }
 #endif
     }
 }

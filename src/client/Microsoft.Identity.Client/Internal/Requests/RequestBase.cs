@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -250,7 +250,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             apiEvent.TokenType = AuthenticationRequestParameters.AuthenticationScheme.TelemetryTokenType;
             apiEvent.AssertionType = GetAssertionType();
 
-            if (AuthenticationRequestParameters.ExtraQueryParameters.TryGetValue(Constants.ManagedCertKey, out string managedCertValue) 
+            if (AuthenticationRequestParameters.ExtraQueryParameters.TryGetValue(Constants.ManagedCertKey, out string managedCertValue)
                 && !string.IsNullOrEmpty(managedCertValue))
             {
                 apiEvent.IsManagedCertUsed = managedCertValue[0];
@@ -526,8 +526,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
         }
 
         internal async Task<AuthenticationResult> HandleTokenRefreshErrorAsync(
-            MsalServiceException e, 
-            MsalAccessTokenCacheItem cachedAccessTokenItem, 
+            MsalServiceException e,
+            MsalAccessTokenCacheItem cachedAccessTokenItem,
             CancellationToken cancellationToken)
         {
             var logger = AuthenticationRequestParameters.RequestContext.Logger;
@@ -550,7 +550,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     AuthenticationRequestParameters.RequestContext.ApiEvent,
                     account,
                     spaAuthCode: null,
-                    additionalResponseParameters: null, 
+                    additionalResponseParameters: null,
                     cancellationToken: cancellationToken).ConfigureAwait(false);
             }
 

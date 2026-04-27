@@ -20,7 +20,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         {
 #if iOS
             var keychainData = GetRawEnrollmentId();
-            if(!string.IsNullOrEmpty(keychainData))
+            if (!string.IsNullOrEmpty(keychainData))
             {
                 try
                 {

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             var response = await client.ExecuteRequestAsync<DeviceCodeResponse>(
                                builder.Uri,
                                HttpMethod.Post,
-                               AuthenticationRequestParameters.RequestContext, 
+                               AuthenticationRequestParameters.RequestContext,
                                // Normally AAD responds with an error HTTP code, but /devicecode endpoint sends errors on 200OK
                                expectErrorsOn200OK: true).ConfigureAwait(false);
 

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -9,7 +9,7 @@ using System.Threading;
 
 namespace Microsoft.Identity.Client.Utils
 {
-   
+
 
     /// <summary>
     /// Represents a thread-safe hash-based unique collection.
@@ -177,7 +177,8 @@ namespace Microsoft.Identity.Client.Utils
         public ConcurrentHashSet(IEnumerable<T> collection, IEqualityComparer<T> comparer)
             : this(comparer)
         {
-            if (collection == null) throw new ArgumentNullException(nameof(collection));
+            if (collection == null)
+                throw new ArgumentNullException(nameof(collection));
 
             InitializeFromCollection(collection);
         }
@@ -203,7 +204,8 @@ namespace Microsoft.Identity.Client.Utils
         public ConcurrentHashSet(int concurrencyLevel, IEnumerable<T> collection, IEqualityComparer<T> comparer)
             : this(concurrencyLevel, DefaultCapacity, false, comparer)
         {
-            if (collection == null) throw new ArgumentNullException(nameof(collection));
+            if (collection == null)
+                throw new ArgumentNullException(nameof(collection));
 
             InitializeFromCollection(collection);
         }
@@ -231,8 +233,10 @@ namespace Microsoft.Identity.Client.Utils
 
         private ConcurrentHashSet(int concurrencyLevel, int capacity, bool growLockArray, IEqualityComparer<T> comparer)
         {
-            if (concurrencyLevel < 1) throw new ArgumentOutOfRangeException(nameof(concurrencyLevel));
-            if (capacity < 0) throw new ArgumentOutOfRangeException(nameof(capacity));
+            if (concurrencyLevel < 1)
+                throw new ArgumentOutOfRangeException(nameof(concurrencyLevel));
+            if (capacity < 0)
+                throw new ArgumentOutOfRangeException(nameof(capacity));
 
             // The capacity should be at least as large as the concurrency level. Otherwise, we would have locks that don't guard
             // any buckets.
@@ -402,8 +406,10 @@ namespace Microsoft.Identity.Client.Utils
 
         void ICollection<T>.CopyTo(T[] array, int arrayIndex)
         {
-            if (array == null) throw new ArgumentNullException(nameof(array));
-            if (arrayIndex < 0) throw new ArgumentOutOfRangeException(nameof(arrayIndex));
+            if (array == null)
+                throw new ArgumentNullException(nameof(array));
+            if (arrayIndex < 0)
+                throw new ArgumentOutOfRangeException(nameof(arrayIndex));
 
             var locksAcquired = 0;
             try

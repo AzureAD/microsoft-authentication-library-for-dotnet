@@ -239,11 +239,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     {
                         providerInvoked = true;
                         capturedOptions = options;
-                        
+
                         // Validate options
                         Assert.AreEqual(TestConstants.ClientId, options.ClientID);
                         Assert.IsNotNull(options.TokenEndpoint);
-                        
+
                         return Task.FromResult(certificate);
                     }, _certificateOptions)
                     .Build();
@@ -323,7 +323,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     {
                         failureCallbackCount++;
                         capturedException = result.Exception as MsalServiceException;
-                        
+
                         // Validate ExecutionResult contains exception and certificate
                         Assert.IsFalse(result.Successful, "Result should indicate failure");
                         Assert.IsNull(result.Result, "Result should be null on failure");
@@ -332,7 +332,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         Assert.IsNotNull(capturedException, "Exception should be MsalServiceException");
                         Assert.AreEqual(TestConstants.ClientId, options.ClientID);
                         Assert.IsNotNull(options.TokenEndpoint, "TokenEndpoint should be available in failure callback");
-                        
+
                         // Retry on 503
                         return Task.FromResult(capturedException.StatusCode == 400 && failureCallbackCount < 3);
                     })
@@ -464,14 +464,14 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         observerInvoked = true;
                         capturedResult = result;
                         capturedOptions = options;
-                        
+
                         Assert.IsTrue(result.Successful);
                         Assert.IsNotNull(result.Result);
                         Assert.IsNotNull(result.ClientCertificate);
                         Assert.IsNull(result.Exception);
                         Assert.AreEqual(TestConstants.ClientId, options.ClientID);
                         Assert.IsNotNull(options.TokenEndpoint, "TokenEndpoint should be available in success callback");
-                        
+
                         return Task.CompletedTask;
                     })
                     .Build();
@@ -499,7 +499,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             // Arrange
             var logMessages = new System.Collections.Generic.List<string>();
             LogCallback logCallback = (level, message, pii) => logMessages.Add(message);
-            
+
             using (var harness = CreateTestHarness(logCallback: logCallback))
             {
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
@@ -530,14 +530,14 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     {
                         observerInvoked = true;
                         capturedResult = result;
-                        
+
                         Assert.IsFalse(result.Successful);
                         Assert.IsNull(result.Result);
                         Assert.IsNotNull(result.Exception);
                         Assert.IsNotNull(result.ClientCertificate);
                         Assert.IsInstanceOfType(result.Exception, typeof(MsalServiceException));
                         Assert.IsNotNull(options.TokenEndpoint, "TokenEndpoint should be available even on failure");
-                        
+
                         return Task.CompletedTask;
                     })
                     .Build();
@@ -558,9 +558,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsNotNull(capturedResult);
                 Assert.IsFalse(capturedResult.Successful);
                 Assert.AreEqual(exception, capturedResult.Exception);
-                
+
                 // Verify retry logging
-                Assert.IsTrue(logMessages.Any(m => m.Contains("[ClientCredentialRequest] OnMsalServiceFailure returned true. Retrying token request (Retry #1).")), 
+                Assert.IsTrue(logMessages.Any(m => m.Contains("[ClientCredentialRequest] OnMsalServiceFailure returned true. Retrying token request (Retry #1).")),
                     "Should log retry #1");
             }
         }
@@ -610,7 +610,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             // Arrange
             var logMessages = new System.Collections.Generic.List<string>();
             LogCallback logCallback = (level, message, pii) => logMessages.Add(message);
-            
+
             using (var harness = CreateTestHarness(logCallback: logCallback))
             {
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
@@ -669,9 +669,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(1, retryCallbackCount, "Retry callback invoked once");
                 Assert.IsTrue(observerInvoked, "Observer invoked once at completion");
                 Assert.IsNotNull(result.AccessToken);
-                
+
                 // Verify retry logging
-                Assert.IsTrue(logMessages.Any(m => m.Contains("[ClientCredentialRequest] OnMsalServiceFailure returned true. Retrying token request (Retry #1).")), 
+                Assert.IsTrue(logMessages.Any(m => m.Contains("[ClientCredentialRequest] OnMsalServiceFailure returned true. Retrying token request (Retry #1).")),
                     "Should log retry #1");
             }
         }

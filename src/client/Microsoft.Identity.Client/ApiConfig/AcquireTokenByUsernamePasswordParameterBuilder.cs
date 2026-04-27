@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Client
         /// <item><description>Broker is required to use Proof-of-Possession on public clients.</description></item>
         /// </list>
         /// </remarks>
-#if iOS || ANDROID 
+#if iOS || ANDROID
         [EditorBrowsable(EditorBrowsableState.Never)]
 #endif
         public AcquireTokenByUsernamePasswordParameterBuilder WithProofOfPossession(string nonce, HttpMethod httpMethod, Uri requestUri)

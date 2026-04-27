@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Client
                                                                               new[] {
                                                                                        Constants.BearerAuthHeaderPrefix,
                                                                                        Constants.PoPAuthHeaderPrefix
-                                                                              }, 
+                                                                              },
                                                                               StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
@@ -265,7 +265,7 @@ namespace Microsoft.Identity.Client
 
                     return parameters;
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     if (ex is MsalException)
                     {

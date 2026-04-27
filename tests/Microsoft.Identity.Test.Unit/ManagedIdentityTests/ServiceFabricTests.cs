@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -27,7 +27,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [TestMethod]
         public async Task ServiceFabricInvalidEndpointAsync()
         {
-            using(new EnvVariableContext())
+            using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(ManagedIdentitySource.ServiceFabric, "localhost/token");
@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithHttpManager(httpManager);
 
                 // Disabling the shared cache to avoid the test to pass because of the cache
-                
+
 
                 var mi = miBuilder.Build();
 
@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithHttpManager(httpManager);
 
                 // Disabling the shared cache to avoid the test to pass because of the cache
-                
+
 
                 var mi = miBuilder.BuildConcrete();
 
@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithHttpClientFactory(new MsalSFFactoryNotImplementedException());
 
                 // Disabling the shared cache to avoid the test to pass because of the cache
-                
+
                 var mi = miBuilder.BuildConcrete();
 
                 MsalServiceException ex = await Assert.ThrowsAsync<MsalServiceException>(async () =>

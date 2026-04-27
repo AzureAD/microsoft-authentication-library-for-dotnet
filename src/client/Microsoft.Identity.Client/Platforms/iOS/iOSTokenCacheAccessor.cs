@@ -80,7 +80,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             _requestContext = requestContext;
         }
 
-#region SaveItem
+        #region SaveItem
         public void SaveAccessToken(MsalAccessTokenCacheItem item)
         {
             IiOSKey key = item.iOSCacheKey;
@@ -101,9 +101,9 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         {
             Save(item.iOSCacheKey, item.ToJsonString());
         }
-#endregion
+        #endregion
 
-#region GetItem
+        #region GetItem
         public MsalIdTokenCacheItem GetIdToken(MsalAccessTokenCacheItem accessTokenCacheItem)
         {
             var idTokenItem = accessTokenCacheItem.GetIdTokenItem();
@@ -114,9 +114,9 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         {
             return MsalAccountCacheItem.FromJsonString(GetPayload(accountCacheItem.iOSCacheKey));
         }
-#endregion
+        #endregion
 
-#region DeleteItem
+        #region DeleteItem
         public void DeleteAccessToken(MsalAccessTokenCacheItem item)
         {
             Remove(item.iOSCacheKey);
@@ -137,7 +137,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             Remove(item.iOSCacheKey);
         }
 
-#endregion
+        #endregion
 
         #region GetAllItems
         public List<MsalAccessTokenCacheItem> GetAllAccessTokens(string optionalPartitionKey = null, ILoggerAdapter requestlogger = null)
@@ -170,7 +170,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         #endregion
 
         public int EntryCount { get; } = 0; // not implemented for iOS
-        
+
 
         internal SecStatusCode TryGetBrokerApplicationToken(string clientId, out string appToken)
         {
@@ -353,7 +353,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         {
             throw new NotSupportedException();
         }
-   
+
         #region AppMetadata - not implemented on iOS
         public MsalAppMetadataCacheItem ReadAppMetadata(MsalAppMetadataCacheItem appMetadataItem)
         {
@@ -380,7 +380,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         public MsalAppMetadataCacheItem GetAppMetadata(MsalAppMetadataCacheItem appMetadataItem)
         {
             throw new NotImplementedException();
-        }     
-#endregion
+        }
+        #endregion
     }
 }

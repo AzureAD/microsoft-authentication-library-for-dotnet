@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -13,12 +13,12 @@ namespace Microsoft.Identity.Client.Cache.Keys
         public const char CacheKeyDelimiter = '-';
 
         public static string GetCredentialKey(
-            string homeAccountId, 
-            string environment, 
-            string keyDescriptor, 
-            string clientId, 
-            string tenantId, 
-            string scopes, 
+            string homeAccountId,
+            string environment,
+            string keyDescriptor,
+            string clientId,
+            string tenantId,
+            string scopes,
             params string[] additionalKeys /* for extensibility */)
         {
             var stringBuilder = new StringBuilder();
@@ -62,9 +62,9 @@ namespace Microsoft.Identity.Client.Cache.Keys
         }
 
         public static string GetiOSServiceKey(
-            string keyDescriptor, 
-            string clientId, 
-            string tenantId, 
+            string keyDescriptor,
+            string clientId,
+            string tenantId,
             string scopes,
             params string[] extraKeyParts)
         {

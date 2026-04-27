@@ -62,12 +62,12 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
                         string error;
                         string errorDescription;
-                        
+
                         if (errorResultObj != null && errorResultObj.Count > 0)
                         {
                             JToken errorToken = errorResultObj[BrokerResponseConst.BrokerErrorCode];
                             error = errorToken?.ToString();
-                            
+
                             JToken errorDescToken = errorResultObj[BrokerResponseConst.BrokerErrorMessage];
                             errorDescription = errorDescToken?.ToString();
 

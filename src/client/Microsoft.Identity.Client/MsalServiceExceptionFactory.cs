@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -40,9 +40,9 @@ namespace Microsoft.Identity.Client
                 {
                     errorMessageToUse = MsalErrorMessage.AadThrottledError;
                 }
-                else  
-                {  
-                    errorMessageToUse = errorMessage;  
+                else
+                {
+                    errorMessageToUse = errorMessage;
                 }
 
                 if (oAuth2Response.Claims == null)
@@ -69,7 +69,7 @@ namespace Microsoft.Identity.Client
 
             if (IsOidcAuthorityError(authorityInfo, oAuth2Response?.ErrorDescription))
             {
-                errorMessage += " " +  string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.MalformedOidcAuthorityFormat, $"{authorityInfo.CanonicalAuthority}");
+                errorMessage += " " + string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.MalformedOidcAuthorityFormat, $"{authorityInfo.CanonicalAuthority}");
             }
 
             ex ??= new MsalServiceException(errorCode, GetErrorMessage(errorMessage, httpResponse, context), innerException);
@@ -132,7 +132,7 @@ namespace Microsoft.Identity.Client
         {
             string errorCode = msalTokenResponse.Error;
             string correlationId = msalTokenResponse.CorrelationId;
-            string subErrorCode = string.IsNullOrEmpty(msalTokenResponse.SubError)?
+            string subErrorCode = string.IsNullOrEmpty(msalTokenResponse.SubError) ?
                                                                      MsalError.UnknownBrokerError : msalTokenResponse.SubError;
             HttpResponse brokerHttpResponse = msalTokenResponse.HttpResponse;
             MsalServiceException ex = null;

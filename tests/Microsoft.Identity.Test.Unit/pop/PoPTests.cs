@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -185,7 +185,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
             }
         }
 
-                [TestMethod]
+        [TestMethod]
         public async Task PopWhenBrokerIsNotAvailableTest_Async()
         {
             //MSAL should not fall back to using the browser if the broker is not available when using POP

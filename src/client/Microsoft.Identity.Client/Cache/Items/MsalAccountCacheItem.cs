@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -98,8 +98,8 @@ namespace Microsoft.Identity.Client.Cache.Items
         }
 
         internal MsalAccountCacheItem(
-            string environment, 
-            string tenantId, 
+            string environment,
+            string tenantId,
             string homeAccountId,
             string accountSource,
             string preferredUsername)
@@ -165,7 +165,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         internal void InitCacheKey()
         {
-            CacheKey =  $"{HomeAccountId}{MsalCacheKeys.CacheKeyDelimiter}{Environment}{MsalCacheKeys.CacheKeyDelimiter}{TenantId}";
+            CacheKey = $"{HomeAccountId}{MsalCacheKeys.CacheKeyDelimiter}{Environment}{MsalCacheKeys.CacheKeyDelimiter}{TenantId}";
 
             iOSCacheKeyLazy = new Lazy<IiOSKey>(InitiOSKey);
         }

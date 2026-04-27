@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System.Collections.Generic;
@@ -138,9 +138,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                 proxy.GetDefaultRedirectUri("cid", false));
 
 #if NETFRAMEWORK
-   Assert.AreEqual(
-          Constants.NativeClientRedirectUri,
-          proxy.GetDefaultRedirectUri("cid", true));
+            Assert.AreEqual(
+                   Constants.NativeClientRedirectUri,
+                   proxy.GetDefaultRedirectUri("cid", true));
 #else
  Assert.AreEqual(
           Constants.LocalHostRedirectUri,

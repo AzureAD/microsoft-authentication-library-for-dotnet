@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 namespace Microsoft.Identity.Client
@@ -12,7 +12,7 @@ namespace Microsoft.Identity.Client
 
         Adfs,
 
-        B2C, 
+        B2C,
 
         Dsts,
 

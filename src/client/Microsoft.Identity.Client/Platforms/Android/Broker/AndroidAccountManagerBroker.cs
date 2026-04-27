@@ -112,7 +112,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                 // onActivityResult will receive the response for this activity.
                 // Launching this activity will switch to the broker app.
 
-                _logger.Verbose(()=>"[Android broker] Starting Android Broker interactive authentication. ");
+                _logger.Verbose(() => "[Android broker] Starting Android Broker interactive authentication. ");
                 Intent brokerIntent = await GetIntentForInteractiveBrokerRequestAsync(brokerRequest).ConfigureAwait(false);
 
                 if (brokerIntent != null)
@@ -176,7 +176,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             _brokerHelper.ValidateBrokerRedirectUri(brokerRequest);
             string brokerRequestJson = JsonHelper.SerializeToJson(brokerRequest);
             _logger.InfoPii(
-                () => "[Android broker] GetInteractiveBrokerIntent: " + brokerRequestJson, 
+                () => "[Android broker] GetInteractiveBrokerIntent: " + brokerRequestJson,
                 () => "Enable PII to see the broker request. ");
             brokerIntent.PutExtra(BrokerConstants.BrokerRequestV2, brokerRequestJson);
 
@@ -188,7 +188,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             // Don't send silent background request if account information is not provided
             using (_logger.LogMethodDuration())
             {
-                _logger.Verbose(()=>"[Android broker] User is specified for silent token request. Starting silent Android broker request. ");
+                _logger.Verbose(() => "[Android broker] User is specified for silent token request. Starting silent Android broker request. ");
                 string silentResult = await GetBrokerAuthTokenSilentlyAsync(brokerRequest).ConfigureAwait(false);
                 return _brokerHelper.HandleSilentAuthenticationResult(silentResult, brokerRequest.CorrelationId);
             }
@@ -358,7 +358,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                         {
                             JToken errorCodeToken = errorResultObj[BrokerResponseConst.BrokerErrorCode];
                             errorCode = errorCodeToken?.ToString();
-                            
+
                             JToken errorMsgToken = errorResultObj[BrokerResponseConst.BrokerErrorMessage];
                             string errorMessage = errorMsgToken?.ToString();
                             errorDescription = $"[Android broker] An error occurred during hand shake with the broker. Error: {errorCode} Error Message: {errorMessage}";

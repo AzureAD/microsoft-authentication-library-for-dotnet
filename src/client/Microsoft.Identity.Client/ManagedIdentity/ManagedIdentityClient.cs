@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         {
             using (requestContext.Logger.LogMethodDuration())
             {
-                requestContext.Logger.Info($"[Managed Identity] Selecting managed identity source. " + 
+                requestContext.Logger.Info($"[Managed Identity] Selecting managed identity source. " +
                     $"Discovery cached: {s_cachedSourceResult != null}");
 
                 // Fail fast if cancellation was requested, before performing expensive network probes
@@ -171,7 +171,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             // First check env vars to avoid the probe if possible
             ManagedIdentitySource source = GetManagedIdentitySourceNoImds(requestContext.Logger);
-            
+
             if (source != ManagedIdentitySource.None)
             {
                 return CacheDiscoveryResult(new ManagedIdentitySourceResult(source));

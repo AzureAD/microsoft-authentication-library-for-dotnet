@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -40,8 +40,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(managedIdentityId)
                     .WithHttpManager(httpManager);
 
-                
-                
+
+
 
                 var mi = miBuilder.Build();
 
@@ -83,8 +83,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var miBuilder = CreateMIABuilder(userAssignedId, userAssignedIdentityId)
                     .WithHttpManager(httpManager);
 
-                
-                
+
+
 
                 var mi = miBuilder.Build();
 
@@ -109,8 +109,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
 
-                
-                
+
+
 
                 var mi = miBuilder.Build();
 

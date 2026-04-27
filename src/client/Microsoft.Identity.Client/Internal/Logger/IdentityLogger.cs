@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -32,9 +32,9 @@ namespace Microsoft.Identity.Client.Internal.Logger
         public void Log(LogEntry entry)
         {
             entry.Message = LoggerHelper.FormatLogMessage(
-                                            entry.Message, 
-                                            _piiLoggingEnabled, 
-                                            !string.IsNullOrEmpty(entry.CorrelationId) ? entry.CorrelationId : _correlationId, 
+                                            entry.Message,
+                                            _piiLoggingEnabled,
+                                            !string.IsNullOrEmpty(entry.CorrelationId) ? entry.CorrelationId : _correlationId,
                                             _clientInformation);
 
             _identityLogger.Log(entry);

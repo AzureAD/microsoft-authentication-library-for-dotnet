@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System.Threading;
@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests.Harnesses
         {
             Assert.IsNotNull(ClientParametersReceived);
             Assert.AreEqual(expectedSendX5C, ClientParametersReceived.SendX5C);
-            Assert.AreEqual(expectedForceRefresh, ClientParametersReceived.ForceRefresh);            
+            Assert.AreEqual(expectedForceRefresh, ClientParametersReceived.ForceRefresh);
         }
     }
 }

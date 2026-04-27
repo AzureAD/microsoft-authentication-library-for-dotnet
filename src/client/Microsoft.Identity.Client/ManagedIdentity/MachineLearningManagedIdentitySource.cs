@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 : null;
         }
 
-        private MachineLearningManagedIdentitySource(RequestContext requestContext, Uri endpoint, string secret) 
+        private MachineLearningManagedIdentitySource(RequestContext requestContext, Uri endpoint, string secret)
             : base(requestContext, ManagedIdentitySource.MachineLearning)
         {
             _endpoint = endpoint;
@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 throw MsalServiceExceptionFactory.CreateManagedIdentityException(
                     MsalError.InvalidManagedIdentityEndpoint,
                     errorMessage,
-                    ex, 
+                    ex,
                     ManagedIdentitySource.MachineLearning,
                     null); // statusCode is null in this case
             }
@@ -107,7 +107,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                         ManagedIdentitySource.MachineLearning,
                         null); // statusCode is null in this case
             }
-                
+
             return Task.FromResult(request);
         }
     }

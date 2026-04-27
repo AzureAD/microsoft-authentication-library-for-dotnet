@@ -78,7 +78,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // Add expected query parameter - FIXED to match what we're sending
                 handler.ExpectedPostData = new Dictionary<string, string>
                 {
-                    { OAuth2Parameter.Attributes, "attribute1" }  
+                    { OAuth2Parameter.Attributes, "attribute1" }
                 };
 
                 // Act - First request with attribute1

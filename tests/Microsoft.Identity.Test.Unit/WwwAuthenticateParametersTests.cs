@@ -119,7 +119,7 @@ namespace Microsoft.Identity.Test.Unit
             {
                 Assert.AreEqual("token68", authParams.RawParameters[scheme]);
             }
-            
+
             if (scheme == "AuthScheme3" || scheme == "AuthScheme4")
             {
                 Assert.AreEqual("token1", authParams.RawParameters["auth-param1"]);

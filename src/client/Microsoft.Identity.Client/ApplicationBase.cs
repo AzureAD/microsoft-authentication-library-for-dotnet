@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Client
 
         internal ApplicationBase(ApplicationConfiguration config)
         {
-            ServiceBundle = Internal.ServiceBundle.Create(config);  
+            ServiceBundle = Internal.ServiceBundle.Create(config);
         }
 
         internal virtual async Task<AuthenticationRequestParameters> CreateRequestParametersAsync(

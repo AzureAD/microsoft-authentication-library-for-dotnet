@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             if (s_returnedUriReady == null)
             {
                 bool containsBrokerSubString = url.Contains(iOSBrokerConstants.IdentifyiOSBrokerFromResponseUrl);
-                
+
                 logger?.Warning(
                     "Not expecting navigation to come back to WebviewBase. " +
                     "This can indicate  a badly setup OpenUrl hook " +
@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                 logger?.WarningPii(
                     $"Url: {url} is broker url? {containsBrokerSubString}",
                     $"Is broker url? {containsBrokerSubString}");
-                
+
                 return false;
             }
 

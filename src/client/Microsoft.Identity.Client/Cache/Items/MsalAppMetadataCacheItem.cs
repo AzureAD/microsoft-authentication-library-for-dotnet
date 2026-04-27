@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             iOSCacheKeyLazy = new Lazy<IiOSKey>(InitiOSKey);
         }
 
-     #region iOS
+        #region iOS
 
         private IiOSKey InitiOSKey()
         {
@@ -54,10 +54,10 @@ namespace Microsoft.Identity.Client.Cache.Items
             return new IosKey(iOSAccount, iOSService, iOSGeneric, iOSType);
         }
 
-    #endregion
+        #endregion
 
-    /// <remarks>mandatory</remarks>
-    public string ClientId { get; }
+        /// <remarks>mandatory</remarks>
+        public string ClientId { get; }
 
         /// <remarks>mandatory</remarks>
 

@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// </summary>
-    public sealed class PublicClientApplicationBuilder : 
+    public sealed class PublicClientApplicationBuilder :
         AbstractApplicationBuilder<PublicClientApplicationBuilder>
     {
         /// <inheritdoc/>
@@ -188,7 +188,7 @@ namespace Microsoft.Identity.Client
         {
             WindowsBrokerOptions.ValidatePlatformAvailability();
             var newOptions = BrokerOptions.CreateFromWindowsOptions(options);
-            Config.BrokerOptions = newOptions; 
+            Config.BrokerOptions = newOptions;
             return this;
         }
 
@@ -228,7 +228,7 @@ namespace Microsoft.Identity.Client
         /// Do not use this method with Entra ID authorities (e.g. https://login.microsoftonline.com/common).
         /// Use WithAuthority(string) instead.
         /// </remarks>
-        public PublicClientApplicationBuilder WithOidcAuthority(string authorityUri) 
+        public PublicClientApplicationBuilder WithOidcAuthority(string authorityUri)
         {
             ValidateUseOfExperimentalFeature("WithOidcAuthority");
 

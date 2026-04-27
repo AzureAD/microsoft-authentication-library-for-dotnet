@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             var app2 =
                      ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                               .WithClientSecret(TestConstants.ClientSecret)                                                               
+                                                               .WithClientSecret(TestConstants.ClientSecret)
                                                                .Build();
             app2.AppTokenCache.SetCacheOptions(CacheOptions.EnableSharedCacheOptions);
             app2.UserTokenCache.SetCacheOptions(CacheOptions.EnableSharedCacheOptions);
@@ -169,9 +169,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         private async Task<AuthenticationResult> ClientCredsAcquireAndAssertTokenSourceAsync(
-            IConfidentialClientApplication app, 
-            string scope, 
-            TokenSource expectedSource, 
+            IConfidentialClientApplication app,
+            string scope,
+            TokenSource expectedSource,
             int expectedAccessTokenCount)
         {
             var result = await app.AcquireTokenForClient(new[] { scope })
@@ -181,9 +181,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(
                expectedSource,
                result.AuthenticationResultMetadata.TokenSource);
-               
 
-            Assert.AreEqual(expectedAccessTokenCount, 
+
+            Assert.AreEqual(expectedAccessTokenCount,
                 result.AuthenticationResultMetadata.CachedAccessTokenCount);
 
             return result;

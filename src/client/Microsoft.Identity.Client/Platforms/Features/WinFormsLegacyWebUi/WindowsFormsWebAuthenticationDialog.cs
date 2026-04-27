@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
             }
 
             WebBrowser.ObjectForScripting = this;
-            
+
         }
 
         /// <summary>
@@ -69,7 +69,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
                 InvokeHandlingOwnerWindow(() => uiResult = ShowDialog(ownerWindow));
                 cancellationToken.ThrowIfCancellationRequested();
             }
-            
+
             switch (uiResult)
             {
                 case DialogResult.OK:

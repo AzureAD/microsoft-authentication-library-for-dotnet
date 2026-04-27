@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 AddAdfsWithTenantIdMockHandler(httpManager);
 
-                #pragma warning disable CS0618 // Type or member is obsolete
+#pragma warning disable CS0618 // Type or member is obsolete
                 var result = await app.AcquireTokenByUsernamePassword(
                     TestConstants.s_scope,
                     TestConstants.Username,
@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithTenantIdFromAuthority(authorityUri)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
-                #pragma warning restore CS0618
+#pragma warning restore CS0618
 
                 var account = await app.GetAccountAsync(result.Account.HomeAccountId.Identifier).ConfigureAwait(false);
 
@@ -115,7 +115,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.AreEqual("admin@demo.asz", account.Username);
             Assert.AreEqual("FTiFcJ97JrNoywo4SSdQjA", account.HomeAccountId.Identifier);
             Assert.AreEqual("FTiFcJ97JrNoywo4SSdQjA", account.HomeAccountId.ObjectId);
-            Assert.IsNull(account.HomeAccountId.TenantId);            
+            Assert.IsNull(account.HomeAccountId.TenantId);
         }
 
         /// <summary>

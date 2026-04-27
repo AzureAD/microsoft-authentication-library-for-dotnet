@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -116,7 +116,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     Arg.Any<AcquireTokenInteractiveParameters>()).Returns(
                     MockHelpers.CreateMsalRunTimeBrokerTokenResponse(null, Constants.PoPAuthHeaderPrefix));
                 mockBroker.AcquireTokenSilentAsync(
-                    Arg.Any<AuthenticationRequestParameters>(), 
+                    Arg.Any<AuthenticationRequestParameters>(),
                     Arg.Any<AcquireTokenSilentParameters>()).Returns(
                     MockHelpers.CreateMsalRunTimeBrokerTokenResponse(null, Constants.PoPAuthHeaderPrefix));
 
@@ -242,8 +242,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ExecuteAsync().ConfigureAwait(false);
 
                 Assert.StartsWith("IAuthenticationOperation2", result.AccessToken);
-                Assert.AreEqual($"TestToken {result.AccessToken}", result.CreateAuthorizationHeader() );
-                
+                Assert.AreEqual($"TestToken {result.AccessToken}", result.CreateAuthorizationHeader());
+
             }
         }
 
@@ -317,11 +317,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             authScheme.AccessTokenType.Returns("bearer");
             authScheme.KeyId.Returns("keyid");
             authScheme.GetTokenRequestParams().Returns(new Dictionary<string, string>() { { "tokenParam", "tokenParamValue" } });
-            
+
             // Setup FormatResultAsync to just add a prefix
             authScheme.WhenForAnyArgs(x => x.FormatResultAsync(default, default))
                 .Do(x => ((AuthenticationResult)x[0]).AccessToken = "validated_" + ((AuthenticationResult)x[0]).AccessToken);
-            
+
             // Setup ValidateCachedTokenAsync to return false (cached token is invalid)
             authScheme.ValidateCachedTokenAsync(Arg.Any<MsalCacheValidationData>())
                 .Returns(Task.FromResult(false));
@@ -360,7 +360,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 await authScheme.Received(1).ValidateCachedTokenAsync(
                     Arg.Any<MsalCacheValidationData>())
                     .ConfigureAwait(false);
-                
+
                 Assert.AreEqual(TokenSource.IdentityProvider, result2.AuthenticationResultMetadata.TokenSource);
                 Assert.AreEqual(0, httpManager.QueueSize);
             }
@@ -375,11 +375,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             authScheme.AccessTokenType.Returns("bearer");
             authScheme.KeyId.Returns("keyid");
             authScheme.GetTokenRequestParams().Returns(new Dictionary<string, string>() { { "tokenParam", "tokenParamValue" } });
-            
+
             // Setup FormatResultAsync
             authScheme.WhenForAnyArgs(x => x.FormatResultAsync(default, default))
                 .Do(x => ((AuthenticationResult)x[0]).AccessToken = "validated_" + ((AuthenticationResult)x[0]).AccessToken);
-            
+
             // Setup ValidateCachedTokenAsync to return true (cached token is valid)
             authScheme.ValidateCachedTokenAsync(Arg.Any<MsalCacheValidationData>())
                 .Returns(Task.FromResult(true));
@@ -416,7 +416,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 await authScheme.Received(1).ValidateCachedTokenAsync(
                     Arg.Any<MsalCacheValidationData>())
                     .ConfigureAwait(false);
-                
+
                 Assert.AreEqual(TokenSource.Cache, result2.AuthenticationResultMetadata.TokenSource);
                 Assert.AreEqual(result1.AccessToken, result2.AccessToken);
                 Assert.AreEqual(0, httpManager.QueueSize); // No additional token requests
@@ -432,10 +432,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             authScheme.AccessTokenType.Returns("bearer");
             authScheme.KeyId.Returns("keyid");
             authScheme.GetTokenRequestParams().Returns(new Dictionary<string, string>() { { "tokenParam", "tokenParamValue" } });
-            
+
             authScheme.WhenForAnyArgs(x => x.FormatResultAsync(default, default))
                 .Do(x => ((AuthenticationResult)x[0]).AccessToken = "validated_" + ((AuthenticationResult)x[0]).AccessToken);
-            
+
             authScheme.ValidateCachedTokenAsync(Arg.Any<MsalCacheValidationData>())
                 .Returns(Task.FromResult(true));
 

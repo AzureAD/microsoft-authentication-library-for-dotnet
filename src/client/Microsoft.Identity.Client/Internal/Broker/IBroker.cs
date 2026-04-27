@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using Microsoft.Identity.Client.ApiConfig.Parameters;
@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
         //These methods are only available to brokers that have the BrokerSupportsSilentFlow flag enabled
         #region Silent Flow Methods
         Task<IReadOnlyList<IAccount>> GetAccountsAsync(
-            string clientId, 
+            string clientId,
             string redirectUri,
             AuthorityInfo authorityInfo,
             ICacheSessionManager cacheSessionManager,

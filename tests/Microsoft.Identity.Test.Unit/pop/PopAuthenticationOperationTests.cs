@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -71,15 +71,15 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 PopAuthenticationOperation authenticationScheme = new PopAuthenticationOperation(popConfig, harness.ServiceBundle);
                 var tokenParams = authenticationScheme.GetTokenRequestParams();
                 AuthenticationResult ar = await AuthenticationResult.CreateAsync(
-                    msalAccessTokenCacheItem, 
-                    null, 
-                    authenticationScheme, 
-                    Guid.NewGuid(), 
-                    TokenSource.IdentityProvider, 
-                    default, 
-                    default, 
-                    default, 
-                    default, 
+                    msalAccessTokenCacheItem,
+                    null,
+                    authenticationScheme,
+                    Guid.NewGuid(),
+                    TokenSource.IdentityProvider,
+                    default,
+                    default,
+                    default,
+                    default,
                     default).ConfigureAwait(false);
                 JwtSecurityToken decodedPopToken = new JwtSecurityToken(ar.AccessToken);
 

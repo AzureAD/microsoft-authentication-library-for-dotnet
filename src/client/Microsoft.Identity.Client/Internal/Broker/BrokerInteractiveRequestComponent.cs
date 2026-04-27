@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using Microsoft.Identity.Client.ApiConfig.Parameters;
@@ -52,11 +52,11 @@ namespace Microsoft.Identity.Client.Internal.Broker
                 }
 
                 _logger.Info(LogMessages.AddBrokerInstallUrlToPayload);
-                Broker.HandleInstallUrl(_optionalBrokerInstallUrl);                
+                Broker.HandleInstallUrl(_optionalBrokerInstallUrl);
             }
 
             var tokenResponse = await Broker.AcquireTokenInteractiveAsync(
-                _authenticationRequestParameters, 
+                _authenticationRequestParameters,
                 _interactiveParameters)
                 .ConfigureAwait(false);
 

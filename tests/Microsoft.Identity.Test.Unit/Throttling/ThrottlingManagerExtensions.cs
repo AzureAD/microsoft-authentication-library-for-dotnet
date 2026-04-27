@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 using System;
 using System.Collections.Concurrent;
@@ -10,7 +10,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
     internal static class ThrottlingManagerExtensions
     {
         public static void SimulateTimePassing(
-            this IThrottlingProvider throttlingManager, 
+            this IThrottlingProvider throttlingManager,
             TimeSpan delay)
         {
             var (retryAfterProvider, httpStatusProvider, uiRequiredProvider) = GetTypedThrottlingProviders(throttlingManager);

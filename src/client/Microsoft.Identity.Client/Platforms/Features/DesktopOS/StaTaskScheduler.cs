@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 #if !NETSTANDARD
 using System;
@@ -45,7 +45,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
                     {
                         TryExecuteTask(t);
                     }
-                }) {IsBackground = true};
+                })
+                { IsBackground = true };
                 thread.SetApartmentState(ApartmentState.STA);
                 return thread;
             }).ToList();

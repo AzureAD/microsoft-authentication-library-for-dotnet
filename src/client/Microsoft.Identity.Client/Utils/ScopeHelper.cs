@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Client.Utils
 
             foreach (var userScope in userScopes)
             {
-                if (!string.IsNullOrWhiteSpace(userScope) && 
+                if (!string.IsNullOrWhiteSpace(userScope) &&
                     !OAuth2Value.ReservedScopes.Contains(userScope))
                 {
                     return true;
@@ -69,7 +69,7 @@ namespace Microsoft.Identity.Client.Utils
             }
 
             return new HashSet<string>(
-                singleString.Split(' '), 
+                singleString.Split(' '),
                 StringComparer.OrdinalIgnoreCase);
         }
 

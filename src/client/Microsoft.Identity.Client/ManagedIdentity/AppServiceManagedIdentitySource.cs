@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -27,7 +27,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 : null;
         }
 
-        private AppServiceManagedIdentitySource(RequestContext requestContext, Uri endpoint, string secret) 
+        private AppServiceManagedIdentitySource(RequestContext requestContext, Uri endpoint, string secret)
             : base(requestContext, ManagedIdentitySource.AppService)
         {
             _endpoint = endpoint;
@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 var exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
                     MsalError.InvalidManagedIdentityEndpoint,
                     errorMessage,
-                    ex, 
+                    ex,
                     ManagedIdentitySource.AppService,
                     null); // statusCode is null in this case
 
@@ -67,7 +67,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         protected override Task<ManagedIdentityRequest> CreateRequestAsync(string resource)
         {
             ManagedIdentityRequest request = new(System.Net.Http.HttpMethod.Get, _endpoint);
-            
+
             request.Headers.Add(SecretHeaderName, _secret);
             request.QueryParameters["api-version"] = AppServiceMsiApiVersion;
             request.QueryParameters["resource"] = resource;
@@ -89,7 +89,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     request.QueryParameters[Constants.ManagedIdentityObjectId] = _requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId;
                     break;
             }
-                
+
             return Task.FromResult(request);
         }
     }

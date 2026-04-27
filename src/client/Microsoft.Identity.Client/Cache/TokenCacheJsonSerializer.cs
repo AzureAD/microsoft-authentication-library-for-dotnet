@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Client.Cache
                 string firstFewCharacters = cacheAsString.Length > 5 ? cacheAsString.Substring(0, 5) : cacheAsString;
 
                 throw new MsalClientException(
-                    MsalError.JsonParseError, 
+                    MsalError.JsonParseError,
                     string.Format(MsalErrorMessage.TokenCacheJsonSerializerFailedParse, firstFewCharacters, ex),
                     ex);
             }

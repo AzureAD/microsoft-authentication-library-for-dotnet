@@ -387,7 +387,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         public async Task MtlsPopWithoutPriorDiscovery_UsesImdsV2AndSucceeds(
             UserAssignedIdentityId userAssignedIdentityId,
             string userAssignedId)
-                {
+        {
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {

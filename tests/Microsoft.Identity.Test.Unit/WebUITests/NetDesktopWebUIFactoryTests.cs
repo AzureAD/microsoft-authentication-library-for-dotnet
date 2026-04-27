@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 #if NETFRAMEWORK
 using System;
@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         {
             // Act
             var webUi = _webUIFactory.CreateAuthenticationDialog(
-                _parent, 
+                _parent,
                 Client.ApiConfig.Parameters.WebViewPreference.Embedded,
                 _requestContext);
 
@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
 
             // Act
             var webUi = _webUIFactory.CreateAuthenticationDialog(
-                _parent, 
+                _parent,
                 Client.ApiConfig.Parameters.WebViewPreference.NotSpecified,
                 _requestContext);
 

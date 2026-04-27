@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System.Threading;
@@ -20,7 +20,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests.Harnesses
         public async Task SetupAsync()
         {
             ClientApplication = Substitute.For<IConfidentialClientApplication, IConfidentialClientApplicationExecutor>();
-            
+
             await ((IConfidentialClientApplicationExecutor)ClientApplication).ExecuteAsync(
                 Arg.Do<AcquireTokenCommonParameters>(parameters => CommonParametersReceived = parameters),
                 Arg.Do<AcquireTokenOnBehalfOfParameters>(parameters => OnBehalfOfParametersReceived = parameters),

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -138,7 +138,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 .WithAuthority(new Uri(TestConstants.B2CCustomDomain), true)
                 .WithTenantId(Guid.NewGuid().ToString("D"))
                 .BuildConcrete();
-            
+
             Assert.AreEqual(TestConstants.B2CCustomDomain, app.Authority);
 
             app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
@@ -296,7 +296,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // Act 
                 AuthenticationResult result = await app
-                    .AcquireTokenByAuthorizationCode(new[] { TestConstants.ClientId }, "code" ) 
+                    .AcquireTokenByAuthorizationCode(new[] { TestConstants.ClientId }, "code")
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -328,8 +328,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // Act 
 #pragma warning disable CS0618 // Type or member is obsolete 
-                var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(() => 
-                    app.AcquireTokenByUsernamePassword(new[] { "user.read" }, "username", "password" ) // no scopes -> no Access Token!
+                var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
+                    app.AcquireTokenByUsernamePassword(new[] { "user.read" }, "username", "password") // no scopes -> no Access Token!
                     .ExecuteAsync())
                     .ConfigureAwait(false);
 #pragma warning restore CS0618

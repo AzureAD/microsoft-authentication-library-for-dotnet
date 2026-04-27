@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
     public class ConfidentialClientApplicationTests : TestBase
     {
 
-        private byte[] _serializedCache;        
+        private byte[] _serializedCache;
 
         [TestMethod]
         [Description("Tests the public interfaces can be mocked")]
@@ -151,7 +151,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 appCacheAccess.AssertAccessCounts(1, 1);
                 userCacheAccess.AssertAccessCounts(0, 0);
             }
-        }        
+        }
 
         [TestMethod]
         [TestCategory(TestCategories.Regression)]
@@ -472,7 +472,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                               .WithHttpManager(httpManager);
 
             if (withClientCapability)
-            { 
+            {
                 builder.WithClientCapabilities(TestConstants.s_clientCapabilities);
             }
 
@@ -777,8 +777,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddInstanceDiscoveryMockHandler();
 
                 (ConfidentialClientApplication App, MockHttpMessageHandler Handler) setup =
-                    CreateConfidentialClient(httpManager, 
-                    null, 
+                    CreateConfidentialClient(httpManager,
+                    null,
                     CredentialType.SignedAssertionWithAssertionRequestOptionsAsyncDelegate,
                     true);
 
@@ -914,7 +914,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             await AssertException.TaskThrowsAsync<MsalClientException>(() =>
                 cca.AcquireTokenForClient(TestConstants.s_scope)
                     .ExecuteAsync())
-                    .ConfigureAwait(false);            
+                    .ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -1178,10 +1178,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                            ExpectedMethod = HttpMethod.Post,
                            ResponseMessage = MockHelpers.CreateSuccessResponseMessage(MockHelpers.GetTokenResponseWithNoOidClaim())
                        });
-                
+
 
                 // Act
-                var result = await app.AcquireTokenByAuthorizationCode(new[] { "https://management.core.windows.net//.default" }, "code")                    
+                var result = await app.AcquireTokenByAuthorizationCode(new[] { "https://management.core.windows.net//.default" }, "code")
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -2066,7 +2066,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
-      
+
 
         [TestMethod]
         public async Task AcquireTokenByAuthorizationCode_NullOrEmptyCode_ThrowsAsync()
@@ -2204,7 +2204,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             ).ConfigureAwait(false);
 
             Assert.AreEqual(MsalError.ForceRefreshNotCompatibleWithTokenHash, ex.ErrorCode);
-            Assert.Contains(MsalErrorMessage.ForceRefreshAndTokenHasNotCompatible, ex.Message);            
+            Assert.Contains(MsalErrorMessage.ForceRefreshAndTokenHasNotCompatible, ex.Message);
         }
 
         [TestMethod]

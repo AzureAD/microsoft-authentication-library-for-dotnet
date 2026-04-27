@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -21,9 +21,9 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         /// </summary>
         public new X509Certificate2 Certificate { get; }
 
-        public CertificateClientCredential(X509Certificate2 certificate) 
-            : base(certificateProvider: _ => Task.FromResult(certificate), claimsToSign: null, appendDefaultClaims: true, certificate: certificate) 
-        { 
+        public CertificateClientCredential(X509Certificate2 certificate)
+            : base(certificateProvider: _ => Task.FromResult(certificate), claimsToSign: null, appendDefaultClaims: true, certificate: certificate)
+        {
             Certificate = certificate;
         }
     }

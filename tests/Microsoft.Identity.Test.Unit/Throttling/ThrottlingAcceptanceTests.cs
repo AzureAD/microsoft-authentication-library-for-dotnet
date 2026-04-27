@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 using System;
 using System.Collections;
@@ -154,7 +154,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
                     400,
                     7200,
                     TokenResponseType.InvalidClient).ConfigureAwait(false);
-                
+
                 var throttlingManager = (httpManagerAndBundle.ServiceBundle.ThrottlingManager as SingletonThrottlingManager);
                 AssertThrottlingCacheEntryCount(throttlingManager, retryAfterEntryCount: 1);
 
@@ -185,7 +185,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
                 const int RetryAfterInSeconds = 10;
                 UpdateStatusCodeAndHeaders(tokenResponse.ResponseMessage, 429, RetryAfterInSeconds);
 
-                var ex = await AssertException.TaskThrowsAsync<MsalServiceException>( 
+                var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(
                     () => app.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync())
                     .ConfigureAwait(false);
 

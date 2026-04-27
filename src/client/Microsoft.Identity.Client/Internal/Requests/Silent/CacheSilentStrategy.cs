@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
             var logger = AuthenticationRequestParameters.RequestContext.Logger;
             MsalAccessTokenCacheItem cachedAccessTokenItem = null;
             CacheRefreshReason cacheInfoTelemetry = CacheRefreshReason.NotApplicable;
-            
+
             ThrowIfCurrentBrokerAccount();
 
             AuthenticationResult authResult = null;
@@ -110,7 +110,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                 return authResult;
             }
             catch (MsalServiceException e)
-            {                
+            {
                 logger.Warning($"Refreshing the RT failed. Is the exception retryable? {e.IsRetryable}. Is there an AT in the cache that is usable? {cachedAccessTokenItem != null} ");
 
                 if (cachedAccessTokenItem != null && e.IsRetryable)
@@ -128,7 +128,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
         {
             if (PublicClientApplication.IsOperatingSystemAccount(AuthenticationRequestParameters.Account))
             {
-                AuthenticationRequestParameters.RequestContext.Logger.Verbose(()=>
+                AuthenticationRequestParameters.RequestContext.Logger.Verbose(() =>
                     "OperatingSystemAccount is only supported by some brokers");
 
                 throw new MsalUiRequiredException(
@@ -170,11 +170,11 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                 AuthenticationRequestParameters.RequestContext.CorrelationId,
                 TokenSource.Cache,
                 AuthenticationRequestParameters.RequestContext.ApiEvent,
-                account, 
+                account,
                 spaAuthCode: null,
-                additionalResponseParameters: null, 
+                additionalResponseParameters: null,
                 cancellationToken: ct).ConfigureAwait(false);
-        }       
+        }
 
         private async Task<MsalTokenResponse> TryGetTokenUsingFociAsync(CancellationToken cancellationToken)
         {
@@ -195,15 +195,15 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
 
             if (isFamilyMember.HasValue && !isFamilyMember.Value)
             {
-                AuthenticationRequestParameters.RequestContext.Logger.Verbose(()=>
+                AuthenticationRequestParameters.RequestContext.Logger.Verbose(() =>
                     "[FOCI] App is not part of the family, skipping FOCI. ");
 
                 return null;
             }
 
-            logger.Verbose(()=>"[FOCI] App is part of the family or unknown, looking for FRT. ");
+            logger.Verbose(() => "[FOCI] App is part of the family or unknown, looking for FRT. ");
             var familyRefreshToken = await CacheManager.FindFamilyRefreshTokenAsync(TheOnlyFamilyId).ConfigureAwait(false);
-            logger.Verbose(()=>"[FOCI] FRT found? " + (familyRefreshToken != null));
+            logger.Verbose(() => "[FOCI] FRT found? " + (familyRefreshToken != null));
 
             if (familyRefreshToken != null)
             {
@@ -212,7 +212,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                     MsalTokenResponse frtTokenResponse = await SilentRequestHelper.RefreshAccessTokenAsync(familyRefreshToken, _silentRequest, AuthenticationRequestParameters, cancellationToken)
                         .ConfigureAwait(false);
 
-                    logger.Verbose(()=>"[FOCI] FRT refresh succeeded. ");
+                    logger.Verbose(() => "[FOCI] FRT refresh succeeded. ");
                     return frtTokenResponse;
                 }
                 catch (MsalServiceException ex)

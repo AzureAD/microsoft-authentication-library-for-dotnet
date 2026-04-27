@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -45,9 +45,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             Assert.AreEqual(AuthorityType.Aad, instance.AuthorityInfo.AuthorityType);
 
             Assert.AreEqual(
-                "https://login.microsoftonline.com/common/oauth2/v2.0/authorize", 
+                "https://login.microsoftonline.com/common/oauth2/v2.0/authorize",
                 await instance.GetAuthorizationEndpointAsync(requestContext).ConfigureAwait(false));
-            Assert.AreEqual("https://login.microsoftonline.com/common/oauth2/v2.0/token", 
+            Assert.AreEqual("https://login.microsoftonline.com/common/oauth2/v2.0/token",
                 await instance.GetTokenEndpointAsync(requestContext).ConfigureAwait(false));
         }
 
@@ -99,7 +99,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 {
                     Assert.Fail("Validation should have failed with an exception when instance discovery is enabled.");
                 }
-                
+
                 Assert.IsNotNull(am);
             }
             catch (Exception exc)

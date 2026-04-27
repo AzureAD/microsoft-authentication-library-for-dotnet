@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -69,7 +69,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 requestContext,
                 _confidentialClientApplication.AppTokenCacheInternal,
                 cancellationToken).ConfigureAwait(false);
-       
+
             requestParams.SendX5C = clientParameters.SendX5C ?? false;
 
             var handler = new ClientCredentialRequest(
@@ -154,7 +154,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 requestContext,
                 _confidentialClientApplication.UserTokenCacheInternal,
                 cancellationToken).ConfigureAwait(false);
-            
+
             requestParams.SendX5C = usernamePasswordParameters.SendX5C ?? false;
 
             var handler = new UsernamePasswordRequest(

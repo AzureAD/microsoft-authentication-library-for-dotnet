@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -12,7 +12,7 @@ using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
 #endif
 
 namespace Microsoft.Identity.Client.PlatformsCommon.Shared
-{    
+{
     internal static class DesktopOsHelper
     {
         private static Lazy<bool> s_wamSupportedOSLazy = new Lazy<bool>(
@@ -61,7 +61,8 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         private static bool IsWslEnv()
         {
-            if (IsLinux()) {
+            if (IsLinux())
+            {
                 try
                 {
                     var versionInfo = File.ReadAllText("/proc/version");
@@ -203,7 +204,8 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         }
 #endif
 
-        private static readonly Lazy<bool> _isMacConsoleApp = new Lazy<bool>(() => {
+        private static readonly Lazy<bool> _isMacConsoleApp = new Lazy<bool>(() =>
+        {
 #if SUPPORTS_WIN32
             return !LibObjc.IsNsApplicationRunning();
 #else

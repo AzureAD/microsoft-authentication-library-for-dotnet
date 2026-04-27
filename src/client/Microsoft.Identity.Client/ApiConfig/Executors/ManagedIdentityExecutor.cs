@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -20,7 +20,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
     {
         private readonly ManagedIdentityApplication _managedIdentityApplication;
 
-        public ManagedIdentityExecutor(IServiceBundle serviceBundle, ManagedIdentityApplication managedIdentityApplication) 
+        public ManagedIdentityExecutor(IServiceBundle serviceBundle, ManagedIdentityApplication managedIdentityApplication)
             : base(serviceBundle)
         {
             ClientApplicationBase.GuardMobileFrameworks();
@@ -50,6 +50,6 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
         }
 
-     
+
     }
 }

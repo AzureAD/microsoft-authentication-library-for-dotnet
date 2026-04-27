@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -114,7 +114,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
 
             Assert.AreEqual(2, parsedToken.ClaimsPrincipal.Claims.Where(c => c.Type == "emails").Count());
             Assert.IsTrue(parsedToken.ClaimsPrincipal.Claims.Where(c => c.Type == "emails").All(c => (new[] { "a@outlook.com", "b@hotmail.com" }).Contains(c.Value)));
-            
+
         }
     }
 }

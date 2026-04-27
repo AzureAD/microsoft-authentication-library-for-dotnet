@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Test.Unit
                 { "caller-sdk-ver", (callerSdkVersion, false) }
             };
 
-[TestCleanup]
+        [TestCleanup]
         public override void TestCleanup()
         {
             s_meterProvider?.Dispose();
@@ -168,8 +168,8 @@ namespace Microsoft.Identity.Test.Unit
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
 
-                
-                
+
+
 
                 var mi = miBuilder.BuildConcrete();
 
@@ -208,7 +208,7 @@ namespace Microsoft.Identity.Test.Unit
 
                 Assert.AreEqual(0, httpManager.QueueSize,
                     "MSAL should have refreshed the token because the original AT was marked for refresh");
-                
+
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
                 Assert.AreEqual(CacheRefreshReason.ProactivelyRefreshed, result.AuthenticationResultMetadata.CacheRefreshReason);
                 Assert.AreEqual(refreshOn, result.AuthenticationResultMetadata.RefreshOn);
@@ -358,7 +358,7 @@ namespace Microsoft.Identity.Test.Unit
                     .WithAuthenticationExtension(authExtension)
                     .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
                 Assert.IsNotNull(result);
-            } 
+            }
             else
             {
                 _harness.HttpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
@@ -415,7 +415,7 @@ namespace Microsoft.Identity.Test.Unit
                         .BuildConcrete();
         }
 
-        private void VerifyMetrics(int expectedMetricCount, List<Metric> exportedMetrics, 
+        private void VerifyMetrics(int expectedMetricCount, List<Metric> exportedMetrics,
             long expectedSuccessfulRequests, long expectedFailedRequests)
         {
             Assert.HasCount(expectedMetricCount, exportedMetrics, "Count of metrics recorded is not as expected.");

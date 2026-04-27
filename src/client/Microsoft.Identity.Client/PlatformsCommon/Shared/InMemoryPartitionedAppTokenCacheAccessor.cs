@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         private static int s_entryCount = 0;
 
         public int EntryCount => GetEntryCountRef();
-       
+
         public InMemoryPartitionedAppTokenCacheAccessor(
             ILoggerAdapter logger,
             CacheOptions tokenCacheAccessorOptions)

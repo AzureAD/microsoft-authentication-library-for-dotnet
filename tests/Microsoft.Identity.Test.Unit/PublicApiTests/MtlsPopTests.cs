@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -261,7 +261,7 @@ namespace Microsoft.Identity.Test.Unit
                     Assert.AreEqual(expectedTokenEndpoint, result.AuthenticationResultMetadata.TokenEndpoint);
 
                     Assert.IsNotNull(result.BindingCertificate, "BindingCertificate should be present.");
-                    Assert.AreEqual(s_testCertificate.Thumbprint, result.BindingCertificate.Thumbprint, 
+                    Assert.AreEqual(s_testCertificate.Thumbprint, result.BindingCertificate.Thumbprint,
                         "BindingCertificate must match the cert passed to WithCertificate().");
 
                     // Second token acquisition - should retrieve from cache
@@ -337,7 +337,7 @@ namespace Microsoft.Identity.Test.Unit
         public async Task AcquireMtlsPopTokenForClientWithTenantIdCertChecks_Async()
         {
             const string region = "eastus";
-            
+
             // ─────────── Two distinct certificates ───────────
             var certA = CertHelper.GetOrCreateTestCert();
             var certB = CertHelper.GetOrCreateTestCert(regenerateCert: true);
@@ -479,7 +479,7 @@ namespace Microsoft.Identity.Test.Unit
                     .WithMtlsProofOfPossession()
                     .ExecuteAsync()
                     .ConfigureAwait(false);
-                
+
                 Assert.AreEqual(TokenSource.Cache, regionalResult2.AuthenticationResultMetadata.TokenSource);
                 Assert.AreEqual(region, regionalResult2.AuthenticationResultMetadata.RegionDetails.RegionUsed);
             }
@@ -564,7 +564,7 @@ namespace Microsoft.Identity.Test.Unit
         {
             const string region = "eastus";
 
-            using (var envContext = new EnvVariableContext()) 
+            using (var envContext = new EnvVariableContext())
             {
                 Environment.SetEnvironmentVariable("REGION_NAME", region);
 
@@ -607,7 +607,7 @@ namespace Microsoft.Identity.Test.Unit
                     {
                         ExpectedUrl = $"https://eastus.mtlsauth.microsoft.com/123456-1234-2345-1234561234/oauth2/v2.0/token",
                         ExpectedMethod = HttpMethod.Post,
-                        ResponseMessage = CreateResponse(tokenType : "mtls_pop"),
+                        ResponseMessage = CreateResponse(tokenType: "mtls_pop"),
                         ExpectedPostData = new Dictionary<string, string>
                         {
                             { OAuth2Parameter.ClientId, "d3adb33f-c0de-ed0c-c0de-deadb33fc0d3" },

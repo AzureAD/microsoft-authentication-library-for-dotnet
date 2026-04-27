@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual((int)MsalCacheKeys.iOSCredentialAttrType.AccessToken, iOSKey.iOSType);
         }
 
-            [TestMethod]
+        [TestMethod]
         public void MsalPOPAccessTokenCacheKey()
         {
             var tokenResponse = new MsalTokenResponse();

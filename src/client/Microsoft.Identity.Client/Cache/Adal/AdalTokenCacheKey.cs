@@ -107,7 +107,7 @@ namespace Microsoft.Identity.Client.Cache
         {
             const string Delimiter = ":::";
             var hashString = Authority + Delimiter
-                          // do not use resource here
+                           // do not use resource here
                            + ClientId + Delimiter
                            + UniqueId + Delimiter
                            + DisplayableId + Delimiter

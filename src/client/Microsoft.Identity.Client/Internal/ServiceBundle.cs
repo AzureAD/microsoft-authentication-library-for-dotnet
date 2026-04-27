@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -29,21 +29,21 @@ namespace Microsoft.Identity.Client.Internal
 
             PlatformProxy = config.PlatformProxy ?? PlatformProxyFactory.CreatePlatformProxy(ApplicationLogger);
 
-            HttpManager = config.HttpManager ?? 
+            HttpManager = config.HttpManager ??
                 HttpManagerFactory.GetHttpManager(
-                    config.HttpClientFactory ?? PlatformProxy.CreateDefaultHttpClientFactory(), 
+                    config.HttpClientFactory ?? PlatformProxy.CreateDefaultHttpClientFactory(),
                     config.DisableInternalRetries);
 
             HttpTelemetryManager = new HttpTelemetryManager();
 
             InstanceDiscoveryManager = new InstanceDiscoveryManager(
-                HttpManager,                
+                HttpManager,
                 config.CustomInstanceDiscoveryMetadata,
                 config.CustomInstanceDiscoveryMetadataUri);
 
             WsTrustWebRequestManager = new WsTrustWebRequestManager(HttpManager);
             ThrottlingManager = SingletonThrottlingManager.GetInstance();
-            DeviceAuthManager = config.DeviceAuthManagerForTest ?? PlatformProxy.CreateDeviceAuthManager();           
+            DeviceAuthManager = config.DeviceAuthManagerForTest ?? PlatformProxy.CreateDeviceAuthManager();
         }
 
         /// <summary>

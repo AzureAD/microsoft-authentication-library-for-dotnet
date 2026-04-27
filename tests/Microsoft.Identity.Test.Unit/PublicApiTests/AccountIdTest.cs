@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using Microsoft.Identity.Client;
@@ -25,8 +25,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [Description("These constructors are public. If they need to change, this is a breaking change!")]
         public void AccountIdPublicApi()
         {
-           new AccountId("a.b", "a", "b");
-           new AccountId("adfs");
+            new AccountId("a.b", "a", "b");
+            new AccountId("adfs");
         }
 
         [TestMethod]

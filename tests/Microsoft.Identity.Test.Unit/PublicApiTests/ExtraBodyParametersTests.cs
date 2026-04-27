@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -55,9 +55,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 //Recording test data for Asserts
                 _expectedParameterHash = "8cY9AFTXo3uSqueI1A_HPiX0j66dJXB-3c3BTDcJVxE";
                 var appCacheAccess = confidentialApp.AppTokenCache.RecordAccess(
-                    (args) => 
-                    { 
-                        Assert.AreEqual(_expectedExternalCacheKey, args.SuggestedCacheKey); }
+                    (args) =>
+                    {
+                        Assert.AreEqual(_expectedExternalCacheKey, args.SuggestedCacheKey);
+                    }
                     );
 
                 //Acquire AuthN

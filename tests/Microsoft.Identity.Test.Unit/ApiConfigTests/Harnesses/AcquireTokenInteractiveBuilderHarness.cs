@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System.Collections.Generic;
@@ -44,14 +44,14 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests.Harnesses
            ICustomWebUi expectedCustomWebUi = null,
            SystemWebViewOptions browserOptions = null)
         {
-             ValidateInteractiveParameters(
-                WebViewPreference.NotSpecified,
-                expectedAccount,
-                expectedExtraScopesToConsent,
-                expectedLoginHint,
-                expectedPromptValue,
-                expectedCustomWebUi,
-                browserOptions);
+            ValidateInteractiveParameters(
+               WebViewPreference.NotSpecified,
+               expectedAccount,
+               expectedExtraScopesToConsent,
+               expectedLoginHint,
+               expectedPromptValue,
+               expectedCustomWebUi,
+               browserOptions);
         }
 
         public void ValidateInteractiveParameters(

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -13,9 +13,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
     {
         public CertificateCacheValue(X509Certificate2 certificate, string endpoint, string clientId)
         {
-            if (certificate == null) throw new ArgumentNullException(nameof(certificate));
-            if (endpoint == null) throw new ArgumentNullException(nameof(endpoint));
-            if (clientId == null) throw new ArgumentNullException(nameof(clientId));
+            if (certificate == null)
+                throw new ArgumentNullException(nameof(certificate));
+            if (endpoint == null)
+                throw new ArgumentNullException(nameof(endpoint));
+            if (clientId == null)
+                throw new ArgumentNullException(nameof(clientId));
 
             Certificate = certificate;
             Endpoint = endpoint;

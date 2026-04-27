@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
             {
                 if (AuthenticationRequestParameters.Account == null)
                 {
-                    _logger.Verbose(()=>"No account passed to AcquireTokenSilent. ");
+                    _logger.Verbose(() => "No account passed to AcquireTokenSilent. ");
                     throw new MsalUiRequiredException(
                        MsalError.UserNullError,
                        MsalErrorMessage.MsalUiRequiredMessage,
@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                 }
 
                 var account = AuthenticationRequestParameters.Account as Account;
-                bool isAccountSourceDeviceCodeFlow = account !=null &&
+                bool isAccountSourceDeviceCodeFlow = account != null &&
                                                account.AccountSource == "device_code_flow";
 
                 if (isBrokerConfigured && !isAccountSourceDeviceCodeFlow)

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -1560,7 +1560,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
             // Verify that parameters are merged
             Assert.HasCount(4, miBuilder.Config.ExtraQueryParameters);
-    
+
             // Verify merged values
             Assert.AreEqual("newvalue1", miBuilder.Config.ExtraQueryParameters["param1"]);
             Assert.AreEqual("value2", miBuilder.Config.ExtraQueryParameters["param2"]);

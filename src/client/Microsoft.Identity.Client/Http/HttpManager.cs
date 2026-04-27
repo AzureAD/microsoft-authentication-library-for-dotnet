@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -112,7 +112,7 @@ namespace Microsoft.Identity.Client.Http
                 logger.Error("The HTTP request failed. " + exception.Message);
                 timeoutException = exception;
             }
-            
+
             while (!_disableInternalRetries && await retryPolicy.PauseForRetryAsync(response, timeoutException, retryCount, logger).ConfigureAwait(false))
             {
                 retryCount++;
@@ -138,7 +138,7 @@ namespace Microsoft.Identity.Client.Http
                 //If the correlation id is available, include it in the exception message
                 string msg = MsalErrorMessage.RequestTimeOut;
 
-                if (headers != null && headers.Count > 0 && 
+                if (headers != null && headers.Count > 0 &&
                     headers.TryGetValue(OAuth2Header.CorrelationId, out var correlationId))
                 {
                     var ex = new MsalServiceException(
@@ -217,7 +217,7 @@ namespace Microsoft.Identity.Client.Http
         private static HttpRequestMessage CreateRequestMessage(Uri endpoint, IDictionary<string, string> headers)
         {
             HttpRequestMessage requestMessage = new HttpRequestMessage { RequestUri = endpoint };
-            
+
             requestMessage.Headers.Accept.Clear();
 
             if (headers != null)

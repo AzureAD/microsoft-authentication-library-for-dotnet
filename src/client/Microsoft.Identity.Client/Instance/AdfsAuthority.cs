@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System.Globalization;
@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client.Instance
                   DeviceCodeEndpointTemplate,
                   AuthorityInfo.CanonicalAuthority);
 
-            return Task.FromResult(deviceEndpoint);  
+            return Task.FromResult(deviceEndpoint);
         }
 
         /// <summary>

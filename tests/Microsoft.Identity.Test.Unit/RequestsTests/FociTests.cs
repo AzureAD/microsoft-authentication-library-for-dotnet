@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -88,7 +88,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 // Act
                 await InteractiveAsync(_appA, ServerTokenResponse.FociToken).ConfigureAwait(false);
-                var appAAccount= (await _appA.GetAccountsAsync().ConfigureAwait(false)).Single();
+                var appAAccount = (await _appA.GetAccountsAsync().ConfigureAwait(false)).Single();
                 var appCAccount = await appC.GetAccountAsync(appAAccount.HomeAccountId.Identifier).ConfigureAwait(false);
 
                 // Assert

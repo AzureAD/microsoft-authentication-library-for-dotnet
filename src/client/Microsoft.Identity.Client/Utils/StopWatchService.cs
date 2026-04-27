@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -23,8 +23,9 @@ namespace Microsoft.Identity.Client.Utils
         /// <summary>
         /// Current elapsed milliseconds of the stopwatch
         /// </summary>
-        internal static long CurrentElapsedMilliseconds {
-            get 
+        internal static long CurrentElapsedMilliseconds
+        {
+            get
             {
                 return Watch.ElapsedMilliseconds;
             }

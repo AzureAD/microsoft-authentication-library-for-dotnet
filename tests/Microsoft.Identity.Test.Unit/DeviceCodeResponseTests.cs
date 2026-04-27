@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using Microsoft.Identity.Client.Internal;
@@ -34,7 +34,8 @@ namespace Microsoft.Identity.Test.Unit
         [TestMethod]
         public void DeviceCodeResultShouldContainVerificationUriIfBothArePresent()
         {
-            var deviceCodeResponse = new DeviceCodeResponse {
+            var deviceCodeResponse = new DeviceCodeResponse
+            {
                 VerificationUri = VerificationUri,
                 VerificationUrl = VerificationUrl
             };

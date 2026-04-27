@@ -20,7 +20,7 @@ using AndroidX.Core.Graphics;
 
 namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
 {
-    [Activity(ConfigurationChanges = ConfigChanges.Orientation | ConfigChanges.ScreenSize, Exported=false)]
+    [Activity(ConfigurationChanges = ConfigChanges.Orientation | ConfigChanges.ScreenSize, Exported = false)]
     internal class AuthenticationAgentActivity : Activity
     {
         private const string AboutBlankUri = "about:blank";
@@ -30,10 +30,10 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
         protected override void OnCreate(Bundle bundle)
         {
             base.OnCreate(bundle);
-            
+
             // Enable edge-to-edge for Android API 30+
             EnableEdgeToEdge();
-            
+
             // Create your application here
             WebView webView = new WebView(this);
             var relativeLayout = new RelativeLayout(this);
@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
 
             relativeLayout.AddView(webView);
             SetContentView(relativeLayout);
-            
+
             // Apply window insets for edge-to-edge layout
             ApplyWindowInsets(relativeLayout, webView);
 
@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
             webSettings.LoadWithOverviewMode = true;
             webSettings.DomStorageEnabled = true;
             webSettings.UseWideViewPort = true;
-            webSettings.BuiltInZoomControls = true;            
+            webSettings.BuiltInZoomControls = true;
 
             _client = new CoreWebViewClient(Intent.GetStringExtra("Callback"), this);
             webView.SetWebViewClient(_client);
@@ -175,7 +175,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
                     return true;
                 }
 
-                if (!url.Equals(AboutBlankUri, StringComparison.OrdinalIgnoreCase) && 
+                if (!url.Equals(AboutBlankUri, StringComparison.OrdinalIgnoreCase) &&
                     !uri.Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
                 {
                     UriBuilder errorUri = new UriBuilder(_callback)

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -25,12 +25,13 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         public static AbstractManagedIdentity Create(RequestContext requestContext)
         {
             string identityEndpoint;
-                
+
             if (EnvironmentVariables.IdentityEndpoint == null)
             {
                 identityEndpoint = "http://127.0.0.1:40342/metadata/identity/oauth2/token";
                 requestContext.Logger.Info(() => "[Managed Identity] Azure Arc was detected through file based detection but the environment variables were not found. Defaulting to known azure arc endpoint.");
-            } else
+            }
+            else
             {
                 identityEndpoint = EnvironmentVariables.IdentityEndpoint;
             }
@@ -48,18 +49,18 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 var exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
                     MsalError.InvalidManagedIdentityEndpoint,
                     errorMessage,
-                    null, 
+                    null,
                     ManagedIdentitySource.AzureArc,
-                    null); 
+                    null);
 
                 throw exception;
             }
 
-            requestContext.Logger.Verbose(()=>"[Managed Identity] Creating Azure Arc managed identity. Endpoint URI: " + endpointUri);
+            requestContext.Logger.Verbose(() => "[Managed Identity] Creating Azure Arc managed identity. Endpoint URI: " + endpointUri);
             return new AzureArcManagedIdentitySource(endpointUri, requestContext);
         }
 
-        private AzureArcManagedIdentitySource(Uri endpoint, RequestContext requestContext) : 
+        private AzureArcManagedIdentitySource(Uri endpoint, RequestContext requestContext) :
             base(requestContext, ManagedIdentitySource.AzureArc)
         {
             _endpoint = endpoint;
@@ -69,10 +70,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 string errorMessage = string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityUserAssignedNotSupported, AzureArc);
 
                 var exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
-                    MsalError.UserAssignedManagedIdentityNotSupported, 
-                    errorMessage, 
-                    null, 
-                    ManagedIdentitySource.AzureArc, 
+                    MsalError.UserAssignedManagedIdentityNotSupported,
+                    errorMessage,
+                    null,
+                    ManagedIdentitySource.AzureArc,
                     null);
 
                 throw exception;
@@ -156,7 +157,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
 
             _requestContext.Logger.Verbose(() => $"[Managed Identity] Challenge is valid. FilePath: {splitChallenge[1]}");
-            
+
             if (!IsValidPath(splitChallenge[1]))
             {
                 throw CreateManagedIdentityException(

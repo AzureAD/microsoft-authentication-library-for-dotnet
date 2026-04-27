@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Client
         {
             LastRequestLogger?.InfoPii(
                 () => "AuthenticationContinuationHelper - SetAuthenticationContinuationEventArgs url: " + url,
-                () => "AuthenticationContinuationHelper - SetAuthenticationContinuationEventArgs ");            
+                () => "AuthenticationContinuationHelper - SetAuthenticationContinuationEventArgs ");
 
             return WebviewBase.ContinueAuthentication(url.AbsoluteString, LastRequestLogger);
         }
@@ -75,10 +75,10 @@ namespace Microsoft.Identity.Client
             LastRequestLogger?.Info(() => "SetBrokercontinuationEventArgs Called with Url " + url);
 
             string urlString = url.AbsoluteString;
-            
+
             if (urlString.Contains(iOSBrokerConstants.IdentifyiOSBrokerFromResponseUrl))
             {
-                LastRequestLogger?.Info("SetBrokercontinuationEventArgs contains <broker> string" );
+                LastRequestLogger?.Info("SetBrokercontinuationEventArgs contains <broker> string");
 
                 iOSBroker.SetBrokerResponse(url);
             }

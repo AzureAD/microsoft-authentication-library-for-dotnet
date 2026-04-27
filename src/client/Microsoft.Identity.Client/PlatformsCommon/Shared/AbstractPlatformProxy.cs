@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -21,7 +21,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 {
     internal abstract class AbstractPlatformProxy : IPlatformProxy
     {
-        
+
         public const string MacOsDescriptionForSTS = "MacOS";
         public const string LinuxOSDescriptionForSTS = "Linux";
 
@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             {
                 return new OtelInstrumentation();
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             when (ex is FileNotFoundException
                      or TypeLoadException
                      or TypeInitializationException)

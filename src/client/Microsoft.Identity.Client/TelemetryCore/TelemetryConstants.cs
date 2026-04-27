@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 namespace Microsoft.Identity.Client.TelemetryCore
@@ -15,7 +15,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
         public const char CommaDelimiter = ',';
         public const string PlatformFields = "platform_fields";
 
-#region Telemetry Client Constants
+        #region Telemetry Client Constants
 
         public const string AcquireTokenEventName = "acquire_token";
         public const string ConfigurationUpdateEventName = "config_update";
@@ -47,6 +47,6 @@ namespace Microsoft.Identity.Client.TelemetryCore
         public const string CallerSdkId = "CallerSdkId";
         public const string CallerSdkVersion = "CallerSdkVersion";
 
-#endregion
+        #endregion
     }
 }

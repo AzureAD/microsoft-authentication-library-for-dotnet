@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     CreateTokenResponseHttpHandler(
                         authority + "/connect/token",
                         scopesInRequest: "api",
-                        scopesInResponse: includeScopeInResponse ? "api" : null, 
+                        scopesInResponse: includeScopeInResponse ? "api" : null,
                         grant: "client_credentials"));
 
                 Assert.AreEqual(authority + "/", app.Authority);
@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
             }
         }
-      
+
         [TestMethod]
         public async Task UserAuth_HappyPath_Async()
         {
@@ -106,7 +106,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
 
-                var result2 = await cca.AcquireTokenSilent(requestedScopes, result.Account)                
+                var result2 = await cca.AcquireTokenSilent(requestedScopes, result.Account)
                     .ExecuteAsync().ConfigureAwait(false);
 
                 Assert.AreEqual(TokenSource.Cache, result2.AuthenticationResultMetadata.TokenSource);
@@ -117,7 +117,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     "sub",
                     null,
                     "sub",
-                    result.Account, 
+                    result.Account,
                     result2.Account);
 
             }
@@ -145,7 +145,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
                 string oidcDocument = TestConstants.GenericOidcResponse;
                 oidcDocument = oidcDocument.Replace(
-                    "https://demo.duendesoftware.com/connect/authorize", 
+                    "https://demo.duendesoftware.com/connect/authorize",
                     $"https://demo.duendesoftware.com/connect/authorize?{QP}");
 
                 oidcDocument = oidcDocument.Replace(
@@ -154,7 +154,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
                 var oidcHandler = new MockHttpMessageHandler()
                 {
-                    ExpectedMethod = HttpMethod.Get,                    
+                    ExpectedMethod = HttpMethod.Get,
                     ResponseMessage = MockHelpers.CreateSuccessResponseMessage(oidcDocument)
                 };
 
@@ -172,7 +172,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                                         .ExecuteAsync().ConfigureAwait(false);
 
                 Assert.AreEqual(
-                    $"{Authority}/connect/token?{QP}", 
+                    $"{Authority}/connect/token?{QP}",
                     tokenHttpResult.ActualRequestMessage.RequestUri.ToString());
                 Assert.AreEqual(
                     $"{Authority}/.well-known/openid-configuration?{QP}",
@@ -364,7 +364,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                              .ExecuteAsync())
                              .ConfigureAwait(false);
 
-                Assert.Contains(string.Format( CultureInfo.InvariantCulture, MsalErrorMessage.MalformedOidcAuthorityFormat, TestConstants.CiamCUDAuthorityMalformed), ex.Message);
+                Assert.Contains(string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.MalformedOidcAuthorityFormat, TestConstants.CiamCUDAuthorityMalformed), ex.Message);
 
                 httpManager.AddFailureTokenEndpointResponse(
                 error: "error",
@@ -376,7 +376,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                              .ExecuteAsync())
                              .ConfigureAwait(false);
 
-                Assert.Contains(string.Format( CultureInfo.InvariantCulture, MsalErrorMessage.MalformedOidcAuthorityFormat, TestConstants.CiamCUDAuthorityMalformed), ex.Message);
+                Assert.Contains(string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.MalformedOidcAuthorityFormat, TestConstants.CiamCUDAuthorityMalformed), ex.Message);
             }
         }
 
@@ -419,12 +419,12 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     CreateTokenResponseHttpHandler(
                         $"https://{microsoftHost}/connect/token",
                         scopesInRequest: "api",
-                        scopesInResponse: "api", 
+                        scopesInResponse: "api",
                         grant: "client_credentials"));
 
                 // Should not throw an exception with our updated validation
                 var result = await app.AcquireTokenForClient(new[] { "api" }).ExecuteAsync().ConfigureAwait(false);
-                
+
                 Assert.IsNotNull(result);
                 Assert.IsNotNull(result.AccessToken);
             }
@@ -464,7 +464,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 string expectedErrorMessage = string.Format(MsalErrorMessage.IssuerValidationFailed, app.Authority, wrongIssuer);
 
                 Assert.AreEqual(MsalError.AuthorityValidationFailed, ex.ErrorCode);
-                Assert.AreEqual(expectedErrorMessage, ex.Message, 
+                Assert.AreEqual(expectedErrorMessage, ex.Message,
                     "Error message should match the expected error message.");
             }
         }
@@ -472,7 +472,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         private static MockHttpMessageHandler CreateTokenResponseHttpHandler(
             string tokenEndpoint,
             string scopesInRequest,
-            string scopesInResponse, 
+            string scopesInResponse,
             string grant)
         {
             IDictionary<string, string> expectedRequestBody = new Dictionary<string, string>
@@ -508,7 +508,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 ExpectedPostData = expectedRequestBody,
                 ResponseMessage = MockHelpers.CreateSuccessResponseMessage(response)
             };
-        }        
+        }
 
         private static string CreateIdToken()
         {
@@ -518,8 +518,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                        "\"iss\": \"https://demo.duendesoftware.com\"," +
                        "\"iat\": 1455833828," +
                        "\"exp\": 1455837728," +
-                       "\"name\": \""+ TestConstants.Email + "\"," +
-                       "\"email\": \""+ TestConstants.Email + "\"," +
+                       "\"name\": \"" + TestConstants.Email + "\"," +
+                       "\"email\": \"" + TestConstants.Email + "\"," +
                        "\"sub\": \"sub\"" +
                 "}";
 

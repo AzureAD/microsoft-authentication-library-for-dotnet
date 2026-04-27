@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
     {
         private static BrokerType s_installedBroker;
 
-        private enum BrokerType 
+        private enum BrokerType
         {
             NoneOrUnknown,
             AccountManager,
@@ -74,7 +74,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             {
                 return Task.Run(async () => await GetInstalledBrokerAsync(uIParent, logger).ConfigureAwait(false)).GetAwaiter().GetResult();
             }
-            
+
             if (s_installedBroker == BrokerType.AccountManager)
             {
                 return new AndroidAccountManagerBroker(uIParent, logger);

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                               .WithAuthority($"https://{discoveryHost}/tenant")
                                                               .WithRedirectUri(TestConstants.RedirectUri)
                                                               .WithClientSecret(TestConstants.ClientSecret)
-                                                              .WithHttpManager(httpManager)                                      
+                                                              .WithHttpManager(httpManager)
                                                               .BuildConcrete();
 
                 Uri expectedDiscoveryEndpoint = new Uri($"https://{discoveryHost}/tenant/discovery/instance");
@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 handler.ExpectedUrl = $"https://{discoveryHost}/tenant/oauth2/v2.0/token";
 
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray()).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
-                
+
             }
         }
 

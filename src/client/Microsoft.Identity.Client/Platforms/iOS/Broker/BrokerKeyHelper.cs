@@ -141,7 +141,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                 MsalErrorMessage.iOSBrokerKeyFetchFailed);
         }
 
-       private static Aes CreateSymmetricAlgorithm(byte[] key)
+        private static Aes CreateSymmetricAlgorithm(byte[] key)
         {
             var aes = Aes.Create();
             aes.Padding = PaddingMode.PKCS7;

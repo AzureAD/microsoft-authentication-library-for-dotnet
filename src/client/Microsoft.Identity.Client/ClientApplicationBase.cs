@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -172,9 +172,9 @@ namespace Microsoft.Identity.Client
         {
             Guid correlationId = Guid.NewGuid();
             RequestContext requestContext = CreateRequestContext(correlationId, null, cancellationToken);
-            
+
             if (requestContext.Logger.IsLoggingEnabled(LogLevel.Info))
-            {                
+            {
                 requestContext.Logger.Info($"==== GetAccounts started - {apiId} ====");
                 requestContext.Logger.InfoPii(
                     $"Account id filter: {homeAccountIdFilter}",

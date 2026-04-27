@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -69,7 +69,7 @@ namespace Microsoft.Identity.Client.WsTrust
                         requestContext.ServiceBundle.Config.Authority.AuthorityInfo.CanonicalAuthority,
                         requestContext.ServiceBundle.Config.ClientId),
                     string.Format(MsalErrorMessage.RequestFailureErrorMessage,
-                        requestContext.ApiEvent?.ApiIdString, 
+                        requestContext.ApiEvent?.ApiIdString,
                         requestContext.ServiceBundle.Config.Authority.AuthorityInfo.Host));
                 throw MsalServiceExceptionFactory.FromHttpResponse(
                     MsalError.AccessingWsMetadataExchangeFailed,
@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Client.WsTrust
             {
                 { "SOAPAction", (wsTrustEndpoint.Version == WsTrustVersion.WsTrust2005) ? XmlNamespace.Issue2005.ToString() : XmlNamespace.Issue.ToString() }
             };
-            
+
             // CodeQL [SM00417] False Positive: wsTrustRequest is a body parameter for HttpRequest that follows WsTrust protocol
             var body = new StringContent(wsTrustRequest, Encoding.UTF8, "application/soap+xml");
 
@@ -128,7 +128,7 @@ namespace Microsoft.Identity.Client.WsTrust
                     errorMessage = resp.Body;
                 }
 
-                requestContext.Logger.ErrorPii(LogMessages.WsTrustRequestFailed + $"Status code: {resp.StatusCode} \nError message: {errorMessage}", 
+                requestContext.Logger.ErrorPii(LogMessages.WsTrustRequestFailed + $"Status code: {resp.StatusCode} \nError message: {errorMessage}",
                     LogMessages.WsTrustRequestFailed + $"Status code: {resp.StatusCode}");
 
                 string message = string.Format(
@@ -147,7 +147,7 @@ namespace Microsoft.Identity.Client.WsTrust
             {
                 var wsTrustResponse = WsTrustResponse.CreateFromResponse(resp.Body, wsTrustEndpoint.Version);
 
-                if  (wsTrustResponse == null)
+                if (wsTrustResponse == null)
                 {
                     requestContext.Logger.ErrorPii("Token not found in the ws trust response. See response for more details: \n" + resp.Body, "Token not found in WS-Trust response.");
                     throw new MsalClientException(MsalError.ParsingWsTrustResponseFailed, MsalErrorMessage.ParsingWsTrustResponseFailedDueToConfiguration);
@@ -211,7 +211,7 @@ namespace Microsoft.Identity.Client.WsTrust
                         requestContext.ServiceBundle.Config.Authority.AuthorityInfo.CanonicalAuthority,
                         requestContext.ServiceBundle.Config.ClientId),
                     string.Format(MsalErrorMessage.RequestFailureErrorMessage,
-                        requestContext.ApiEvent?.ApiIdString, 
+                        requestContext.ApiEvent?.ApiIdString,
                         requestContext.ServiceBundle.Config.Authority.AuthorityInfo.Host));
             throw MsalServiceExceptionFactory.FromHttpResponse(
                 MsalError.UserRealmDiscoveryFailed,

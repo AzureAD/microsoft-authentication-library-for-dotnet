@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -161,7 +161,7 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
 
         private void VerifyKey(string serviceName, string accountName, string expectedData)
         {
-            var entry  = _macOSKeychain.Get(serviceName, accountName);
+            var entry = _macOSKeychain.Get(serviceName, accountName);
             Assert.AreEqual(expectedData, Encoding.UTF8.GetString(entry.Password));
         }
 

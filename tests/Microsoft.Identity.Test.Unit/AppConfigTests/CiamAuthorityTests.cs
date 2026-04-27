@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -143,7 +143,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                     expectedEndpoint: $"https://request.ciamlogin.com/bdomain/oauth2/v2.0/token"
                     ).ConfigureAwait(false);
 
-                
+
             }
 
             static async Task TestRequestAuthorityAsync(MockHttpAndServiceBundle harness, string appAuthority, string requestAuthority, string expectedEndpoint)
@@ -196,7 +196,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 
                 harness.HttpManager.AddMockHandler(handler);
 
-                
+
                 var result = await app.AcquireTokenOnBehalfOf(new[] { "someScope" }, new UserAssertion("some_assertion"))
                      .WithTenantId(TestConstants.TenantId2)
                      .ExecuteAsync()

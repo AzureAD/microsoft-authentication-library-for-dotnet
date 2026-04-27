@@ -67,7 +67,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                 ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
                     .WithExperimentalFeatures()
-                    .WithCertificate((Func<AssertionRequestOptions, Task<X509Certificate2>>) null, null)
+                    .WithCertificate((Func<AssertionRequestOptions, Task<X509Certificate2>>)null, null)
                     .Build());
 
             Assert.AreEqual("certificateProvider", ex.ParamName);
@@ -183,7 +183,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             // Assert
             var config = app.AppConfig as ApplicationConfiguration;
             Assert.IsNotNull(config);
-            Assert.IsTrue(certificateOptions.AssociateTokensWithCertificate, 
+            Assert.IsTrue(certificateOptions.AssociateTokensWithCertificate,
                 "CertificateOptions.AssociateTokensWithCertificate should be true");
         }
 
@@ -204,7 +204,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             // Assert
             var config = app.AppConfig as ApplicationConfiguration;
             Assert.IsNotNull(config);
-            Assert.IsFalse(certificateOptions.AssociateTokensWithCertificate, 
+            Assert.IsFalse(certificateOptions.AssociateTokensWithCertificate,
                 "CertificateOptions.AssociateTokensWithCertificate should be false");
         }
 
@@ -212,10 +212,10 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void WithCertificate_CertificateOptions_BothPropertiesSet_AreStored()
         {
             // Arrange
-            var certificateOptions = new CertificateOptions 
-            { 
-                SendX5C = true, 
-                AssociateTokensWithCertificate = true 
+            var certificateOptions = new CertificateOptions
+            {
+                SendX5C = true,
+                AssociateTokensWithCertificate = true
             };
             Task<X509Certificate2> certificateProvider(AssertionRequestOptions options) => Task.FromResult(GetTestCertificate());
 
@@ -230,7 +230,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             var config = app.AppConfig as ApplicationConfiguration;
             Assert.IsNotNull(config);
             Assert.IsTrue(config.SendX5C, "SendX5C should be true");
-            Assert.IsTrue(certificateOptions.AssociateTokensWithCertificate, 
+            Assert.IsTrue(certificateOptions.AssociateTokensWithCertificate,
                 "AssociateTokensWithCertificate should be true");
         }
 

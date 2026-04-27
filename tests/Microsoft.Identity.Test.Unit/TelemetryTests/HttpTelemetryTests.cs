@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -525,7 +525,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                     CacheRefreshReason.NoCachedAccessToken,
                     managedCert: managedCertValue[0]);
 
-                Assert.IsFalse(requestHandler.ActualRequestPostData.ContainsKey(Constants.ManagedCertKey), 
+                Assert.IsFalse(requestHandler.ActualRequestPostData.ContainsKey(Constants.ManagedCertKey),
                     "ManagedCert should not be sent to AAD in the request body");
             }
         }
@@ -655,7 +655,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                         _app
                         .AcquireTokenInteractive(TestConstants.s_scope)
                         .WithCorrelationId(correlationId)
-                        .ExecuteAsync(token), 
+                        .ExecuteAsync(token),
                         allowDerived: true) // do not catch TaskCanceledException
 
                         .ConfigureAwait(false);

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             Assert.DoesNotContain(ExMessage, piiMessage);
         }
 
-        [TestMethod]        
+        [TestMethod]
         public void IsRetryable()
         {
             MsalClientException msalClientException = new MsalClientException("code");
@@ -197,7 +197,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             Assert.AreEqual("some_suberror", msalServiceException.SubError);
 
             ValidateExceptionProductInformation(msalException);
-        }      
+        }
 
         [TestMethod]
         public void InvalidClientException_IsRepackaged()
@@ -443,12 +443,12 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             Assert.DoesNotContain("X-Custom-Header", exceptionString, "Headers should not be included in ToString()");
             Assert.DoesNotContain("SensitiveValue", exceptionString, "Header values should not be included in ToString()");
             Assert.DoesNotContain("RetryAfter", exceptionString, "RetryAfter header should not be included in ToString()");
-            
+
             // Assert - Headers property should still be accessible
             Assert.IsNotNull(ex.Headers, "Headers property should still be accessible");
             Assert.IsNotNull(ex.Headers.RetryAfter, "RetryAfter header should be accessible via Headers property");
             Assert.AreEqual(TimeSpan.FromSeconds(120), ex.Headers.RetryAfter.Delta, "RetryAfter value should be preserved");
-            
+
             // Assert - Other information should still be in ToString()
             Assert.Contains("errCode", exceptionString, "Error code should be in ToString()");
             Assert.Contains("StatusCode", exceptionString, "Status code label should be in ToString()");

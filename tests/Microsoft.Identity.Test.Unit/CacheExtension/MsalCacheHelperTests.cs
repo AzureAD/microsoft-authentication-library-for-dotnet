@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -363,7 +363,7 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
             Assert.IsFalse(data.Any(), "Cache is corrupt, so it should have been deleted");
         }
 
-       
+
         [DoNotRunOnLinux] // The FileSystemWatcher on Linux doesn't always fire
         public async Task ClearCacheUsesTheLockAsync()
         {

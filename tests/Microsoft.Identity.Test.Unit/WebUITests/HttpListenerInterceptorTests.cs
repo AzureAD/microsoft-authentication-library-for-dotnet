@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 using System;
 using System.Net;
@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             Assert.IsTrue(listenTask.IsFaulted, "GET request should cause the task to fault");
             Assert.IsNotNull(listenTask.Exception, "Exception should be captured");
             Assert.IsInstanceOfType(listenTask.Exception.InnerException, typeof(MsalClientException));
-            
+
             var msalEx = (MsalClientException)listenTask.Exception.InnerException;
             Assert.AreEqual(MsalError.AuthenticationFailed, msalEx.ErrorCode);
             Assert.Contains("Expected POST request", msalEx.Message, "Error message should explain POST is required");
@@ -204,16 +204,16 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             Assert.IsNotNull(listenTask.Result);
             Assert.IsTrue(listenTask.Result.IsFormPost, "Response should be identified as form_post");
             Assert.IsNotNull(listenTask.Result.PostData, "POST data should be captured");
-            
+
             // Verify the POST data contains the expected values
             string postDataString = System.Text.Encoding.UTF8.GetString(listenTask.Result.PostData);
             Assert.Contains("code=auth_code_value", postDataString);
             Assert.Contains("state=state_value", postDataString);
-            
+
             // Verify the request URI is clean (no query params)
             Assert.AreEqual("/", listenTask.Result.RequestUri.AbsolutePath);
-            Assert.IsTrue(string.IsNullOrEmpty(listenTask.Result.RequestUri.Query) || 
-                         listenTask.Result.RequestUri.Query == "?", 
+            Assert.IsTrue(string.IsNullOrEmpty(listenTask.Result.RequestUri.Query) ||
+                         listenTask.Result.RequestUri.Query == "?",
                          "Request URI should not contain query parameters when using form_post");
         }
 
@@ -230,8 +230,8 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             using (HttpClient httpClient = new HttpClient())
             {
                 var content = new StringContent(postData, System.Text.Encoding.UTF8, "application/x-www-form-urlencoded");
-                string uri = string.IsNullOrEmpty(path) 
-                    ? $"http://localhost:{port}/" 
+                string uri = string.IsNullOrEmpty(path)
+                    ? $"http://localhost:{port}/"
                     : $"http://localhost:{port}/{path}/";
                 await httpClient.PostAsync(uri, content).ConfigureAwait(false);
             }

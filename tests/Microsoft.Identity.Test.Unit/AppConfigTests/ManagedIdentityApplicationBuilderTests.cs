@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -91,7 +91,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 
             Assert.AreEqual(userAssignedId, mi.ServiceBundle.Config.ClientId);
             Assert.IsNotNull(mi.ServiceBundle.Config.ManagedIdentityId);
-           
+
             Assert.AreEqual(userAssignedIdentityId.ToString(), mi.ServiceBundle.Config.ManagedIdentityId.IdType.ToString());
             Assert.AreEqual(userAssignedId, mi.ServiceBundle.Config.ManagedIdentityId.UserAssignedId);
         }

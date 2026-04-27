@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Client.Utils
         {
             return Environment.CurrentManagedThreadId == 1; // Main thread id is always 1 on macOS.
         }
-        
+
         /// <summary>
         /// Check if the message loop is currently running.
         /// </summary>
@@ -73,7 +73,7 @@ namespace Microsoft.Identity.Client.Utils
         {
             return _isRunning;
         }
-        
+
         /// <summary>
         /// Stop the main thread message loop
         /// </summary>

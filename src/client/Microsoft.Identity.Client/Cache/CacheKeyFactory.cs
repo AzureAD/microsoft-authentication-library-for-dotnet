@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System.Collections.Generic;
@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Client.Cache
             {
                 return homeAccountIdFromResponse;
             }
-            
+
             return null;
         }
 
@@ -78,7 +78,7 @@ namespace Microsoft.Identity.Client.Cache
                 return true;
             }
 
-            if (requestParameters.ApiId == ApiEvent.ApiIds.AcquireTokenForClient || 
+            if (requestParameters.ApiId == ApiEvent.ApiIds.AcquireTokenForClient ||
                 requestParameters.ApiId == ApiEvent.ApiIds.AcquireTokenForSystemAssignedManagedIdentity ||
                 requestParameters.ApiId == ApiEvent.ApiIds.AcquireTokenForUserAssignedManagedIdentity)
             {

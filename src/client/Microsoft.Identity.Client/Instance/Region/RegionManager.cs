@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Client.Region
             _imdsCallTimeoutMs = imdsCallTimeout;
         }
 
-        
+
         public async Task<string> GetAzureRegionAsync(RequestContext requestContext)
         {
             string azureRegionConfig = requestContext.ServiceBundle.Config.AzureRegion;

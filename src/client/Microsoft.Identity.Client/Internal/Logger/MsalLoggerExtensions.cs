@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -99,7 +99,7 @@ namespace Microsoft.Identity.Client.Core
         {
             logger.Log(LogLevel.Info, exWithPii?.ToString(), LoggerHelper.GetPiiScrubbedExceptionDetails(exWithPii));
         }
-       
+
         public static void Verbose(this ILoggerAdapter logger, Func<string> messageProducer)
         {
             if (logger.IsLoggingEnabled(LogLevel.Verbose))
@@ -109,8 +109,8 @@ namespace Microsoft.Identity.Client.Core
         }
 
         public static void VerbosePii(
-            this ILoggerAdapter logger, 
-            Func<string> messageWithPiiProducer, 
+            this ILoggerAdapter logger,
+            Func<string> messageWithPiiProducer,
             Func<string> messageScrubbedProducer)
         {
             if (logger.IsLoggingEnabled(LogLevel.Verbose))

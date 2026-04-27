@@ -239,14 +239,14 @@ namespace Microsoft.Identity.Test.Unit
                 IDictionary<string, string> extraAssertionContent = new Dictionary<string, string>
                 {
                     { "foo", "bar" },
-                    
+
                 };
 
 #pragma warning disable CS0618 // Type or member is obsolete
                 var cca = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
-                    .WithAuthority("https://login.microsoftonline.com/tid")    
-                    .WithHttpManager(harness.HttpManager)                    
+                    .WithAuthority("https://login.microsoftonline.com/tid")
+                    .WithHttpManager(harness.HttpManager)
                     .WithClientClaims(certificate, extraAssertionContent, mergeWithDefaultClaims: true, sendX5C: true) // x5c can also be enabled on the request
                     .Build();
 #pragma warning restore CS0618 // Type or member is obsolete
@@ -303,7 +303,7 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
-        private JwtSecurityToken ValidateClientAssertion(HttpRequestMessage request, string expectedX5cValue, bool validateStandardClaims )
+        private JwtSecurityToken ValidateClientAssertion(HttpRequestMessage request, string expectedX5cValue, bool validateStandardClaims)
         {
             var requestContent = request.Content.ReadAsStringAsync().GetAwaiter().GetResult();
             var formsData = CoreHelpers.ParseKeyValueList(requestContent, '&', true, null);
@@ -1218,11 +1218,11 @@ namespace Microsoft.Identity.Test.Unit
                     // Parse the nested claim value as JSON
                     var jsonElement = JsonSerializer.Deserialize<JsonElement>(customClaimsClaim.Value);
                     Assert.AreEqual(JsonValueKind.Object, jsonElement.ValueKind, "custom_claims should be a JSON object");
-                    
+
                     // Validate nested properties
                     Assert.IsTrue(jsonElement.TryGetProperty("xms_az_tm", out var tmProperty));
                     Assert.AreEqual("azureinfra", tmProperty.GetString());
-                    
+
                     Assert.IsTrue(jsonElement.TryGetProperty("xms_az_nwperimid", out var nwperimidProperty));
                     Assert.AreEqual(JsonValueKind.Array, nwperimidProperty.ValueKind);
                     Assert.AreEqual(2, nwperimidProperty.GetArrayLength());
@@ -1353,15 +1353,15 @@ namespace Microsoft.Identity.Test.Unit
                     // Parse the nested claim value as JSON
                     var jsonElement = JsonSerializer.Deserialize<JsonElement>(customClaimsClaim.Value);
                     Assert.AreEqual(JsonValueKind.Object, jsonElement.ValueKind, "custom_claims should be a JSON object");
-                    
+
                     // Validate xms_az_tm property
                     Assert.IsTrue(jsonElement.TryGetProperty("xms_az_tm", out var tmProperty));
                     Assert.AreEqual("azureinfra", tmProperty.GetString());
-                    
+
                     // Validate xms_az_nwperimid array property
                     Assert.IsTrue(jsonElement.TryGetProperty("xms_az_nwperimid", out var nwperimidProperty));
                     Assert.AreEqual(JsonValueKind.Array, nwperimidProperty.ValueKind);
-                    
+
                     var arrayElements = nwperimidProperty.EnumerateArray().ToList();
                     Assert.HasCount(2, arrayElements);
                     Assert.AreEqual("00000000-1403-0100-0000-000000000000", arrayElements[0].GetString());
@@ -1412,11 +1412,11 @@ namespace Microsoft.Identity.Test.Unit
                     // Parse the nested claim value as JSON
                     var jsonElement = JsonSerializer.Deserialize<JsonElement>(customClaimsClaim.Value);
                     Assert.AreEqual(JsonValueKind.Object, jsonElement.ValueKind, "custom_claims should be a JSON object");
-                    
+
                     // Validate nested properties
                     Assert.IsTrue(jsonElement.TryGetProperty("xms_az_tm", out var tmProperty));
                     Assert.AreEqual("azureinfra", tmProperty.GetString());
-                    
+
                     Assert.IsTrue(jsonElement.TryGetProperty("xms_az_nwperimid", out var nwperimidProperty));
                     Assert.AreEqual(JsonValueKind.Array, nwperimidProperty.ValueKind);
                     Assert.AreEqual(2, nwperimidProperty.GetArrayLength());

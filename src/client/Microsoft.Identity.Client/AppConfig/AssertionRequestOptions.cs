@@ -14,7 +14,8 @@ namespace Microsoft.Identity.Client
 #if !SUPPORTS_CONFIDENTIAL_CLIENT
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidential client on mobile
 #endif
-    public class AssertionRequestOptions {
+    public class AssertionRequestOptions
+    {
         /// <summary>
         /// Default constructor for AssertionRequestOptions
         /// </summary>
@@ -42,7 +43,7 @@ namespace Microsoft.Identity.Client
         /// Cancellation token to cancel the operation
         /// </summary>
         public CancellationToken CancellationToken { get; set; }
-        
+
         /// <summary>
         /// Client ID for which a signed assertion is requested
         /// </summary>

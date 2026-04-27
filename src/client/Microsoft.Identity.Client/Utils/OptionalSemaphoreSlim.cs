@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 using System.Threading;
 using System.Threading.Tasks;
@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Client.Utils
 
         public string GetCurrentCountLogMessage()
         {
-            return $"Real semaphore: {_useRealSemaphore}. Count: { CurrentCount}";
+            return $"Real semaphore: {_useRealSemaphore}. Count: {CurrentCount}";
         }
 
         public OptionalSemaphoreSlim(bool useRealSemaphore)
@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Client.Utils
                 return Task.FromResult(true);
             }
         }
-        
+
         public void Wait()
         {
             if (_useRealSemaphore)

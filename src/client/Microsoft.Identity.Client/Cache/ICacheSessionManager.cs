@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -23,9 +23,9 @@ namespace Microsoft.Identity.Client.Cache
         Task<MsalRefreshTokenCacheItem> FindRefreshTokenAsync();
         Task<MsalRefreshTokenCacheItem> FindFamilyRefreshTokenAsync(string familyId);
         Task<bool?> IsAppFociMemberAsync(string familyId);
-        
+
         Task<IEnumerable<IAccount>> GetAccountsAsync();
         Task<Account> GetAccountAssociatedWithAccessTokenAsync(MsalAccessTokenCacheItem msalAccessTokenCacheItem);
-        
+
     }
 }

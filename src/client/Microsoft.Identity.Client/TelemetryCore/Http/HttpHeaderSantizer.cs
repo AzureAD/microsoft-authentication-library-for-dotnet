@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System.Text;
@@ -7,7 +7,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
 {
     internal class HttpHeaderSanitizer
     {
-          private static readonly string[] s_headerEncodingTable = new string[] {
+        private static readonly string[] s_headerEncodingTable = new string[] {
             "%00", "%01", "%02", "%03", "%04", "%05", "%06", "%07",
             "%08", "%09", "%0a", "%0b", "%0c", "%0d", "%0e", "%0f",
             "%10", "%11", "%12", "%13", "%14", "%15", "%16", "%17",

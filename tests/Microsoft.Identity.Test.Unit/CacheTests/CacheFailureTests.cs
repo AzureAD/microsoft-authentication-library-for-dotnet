@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System.Text;
@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 {
                     try
                     {
-                        notificationArgs.TokenCache.DeserializeMsalV3(byteContent);                        
+                        notificationArgs.TokenCache.DeserializeMsalV3(byteContent);
                     }
                     catch (MsalClientException e)
                     {

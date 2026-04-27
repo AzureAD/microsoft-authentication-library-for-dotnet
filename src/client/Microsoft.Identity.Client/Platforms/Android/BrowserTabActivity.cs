@@ -15,7 +15,7 @@ namespace Microsoft.Identity.Client
     /// uri (redirect_uri has to be unique across apps), the os will fire an intent with the redirect,
     /// and the BrowserTabActivity will be launched.
     /// </summary>
-    [Activity(Exported =true)]
+    [Activity(Exported = true)]
     [CLSCompliant(false)]
     [Preserve(AllMembers = true)]
     public class BrowserTabActivity : Activity
@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Client
         {
             base.OnCreate(savedInstanceState);
 
-            Intent intent = new Intent(this, typeof (AuthenticationActivity));
+            Intent intent = new Intent(this, typeof(AuthenticationActivity));
             intent.PutExtra(AndroidConstants.CustomTabRedirect, Intent.DataString);
             intent.SetFlags(ActivityFlags.ClearTop | ActivityFlags.SingleTop);
             StartActivity(intent);

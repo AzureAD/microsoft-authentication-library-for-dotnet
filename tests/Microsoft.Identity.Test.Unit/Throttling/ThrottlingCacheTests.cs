@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 using System;
 using System.Threading.Tasks;
@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
         {
             // Arrange
             ThrottlingCache cache = new ThrottlingCache();
-            
+
             cache.AddAndCleanup("k1", new ThrottlingCacheEntry(_ex1, TimeSpan.FromMilliseconds(-10000)), _logger); // expired
             cache.AddAndCleanup("k2", new ThrottlingCacheEntry(_ex2, TimeSpan.FromMilliseconds(10000)), _logger);
 
@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
 
             cache.AddAndCleanup("k1", new ThrottlingCacheEntry(_ex1, TimeSpan.FromMilliseconds(-10000)), _logger); // expired
             cache.AddAndCleanup("k2", new ThrottlingCacheEntry(_ex2, TimeSpan.FromMilliseconds(10000)), _logger);
-            
+
             // Act - should trigger a cleanup
             cache.AddAndCleanup("k3", new ThrottlingCacheEntry(_ex2, TimeSpan.FromMilliseconds(1000)), _logger);
 

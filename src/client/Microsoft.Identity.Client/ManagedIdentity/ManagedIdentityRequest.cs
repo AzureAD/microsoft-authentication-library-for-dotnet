@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -53,8 +53,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         }
 
         internal void AddClaimsAndCapabilities(
-            IEnumerable<string> clientCapabilities, 
-            AcquireTokenForManagedIdentityParameters parameters, 
+            IEnumerable<string> clientCapabilities,
+            AcquireTokenForManagedIdentityParameters parameters,
             ILoggerAdapter logger)
         {
             // xms_cc  – client capabilities

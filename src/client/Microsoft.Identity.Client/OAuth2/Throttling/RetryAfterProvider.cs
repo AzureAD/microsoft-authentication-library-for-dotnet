@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -26,8 +26,8 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
         }
 
         public void RecordException(
-            AuthenticationRequestParameters requestParams, 
-            IReadOnlyDictionary<string, string> bodyParams, 
+            AuthenticationRequestParameters requestParams,
+            IReadOnlyDictionary<string, string> bodyParams,
             MsalServiceException ex)
         {
             if (TryGetRetryAfterValue(ex.Headers, out TimeSpan retryAfterTimespan))
@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
         }
 
         public void TryThrottle(
-            AuthenticationRequestParameters requestParams, 
+            AuthenticationRequestParameters requestParams,
             IReadOnlyDictionary<string, string> bodyParams)
         {
             if (!ThrottlingCache.IsEmpty())

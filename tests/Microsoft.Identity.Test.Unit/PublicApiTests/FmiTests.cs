@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 var appCacheAccess = app.AppTokenCache.RecordAccess();
 
                 httpManager.AddInstanceDiscoveryMockHandler();
-                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage( expectedPostData: new Dictionary<string, string>() { { OAuth2Parameter.FmiPath, "fmiPath" } });
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(expectedPostData: new Dictionary<string, string>() { { OAuth2Parameter.FmiPath, "fmiPath" } });
 
                 //Ensure that the FMI path is set correctly and token is retrieved
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())

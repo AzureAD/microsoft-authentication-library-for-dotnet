@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                     .WithTestBroker(mockBroker)
                     .WithHttpManager(httpManager)
                     .BuildConcrete();
-                
+
                 pca2.ServiceBundle.Config.BrokerCreatorFunc = (_, _, _) => mockBroker;
 
                 var accounts2 = await pca2.GetAccountsAsync().ConfigureAwait(false);

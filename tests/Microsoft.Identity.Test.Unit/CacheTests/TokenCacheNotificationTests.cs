@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -462,7 +462,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 // Arrange
                 var cca = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
-                    .WithClientSecret(TestConstants.ClientSecret)     
+                    .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(harness.HttpManager)
                     .BuildConcrete();
                 CancellationTokenSource cts = new CancellationTokenSource();

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -27,7 +27,7 @@ namespace Microsoft.Identity.Client.Extensibility
         /// <param name="expectedTokenTypeFromAad">AAD issues several types of bound tokens. MSAL checks the token type, which needs to match the value set by ESTS. Normal POP tokens have this as "pop"</param>
         /// <returns>the builder</returns>
         [EditorBrowsable(EditorBrowsableState.Never)] // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4789        
-        public static AcquireTokenForClientParameterBuilder WithProofOfPosessionKeyId( 
+        public static AcquireTokenForClientParameterBuilder WithProofOfPosessionKeyId(
             this AcquireTokenForClientParameterBuilder builder,
             string keyId,
             string expectedTokenTypeFromAad = "Bearer")
@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Client.Extensibility
         /// <param name="extrabodyparams">List of additional body parameters</param>
         /// <returns></returns>
         public static AcquireTokenForClientParameterBuilder WithExtraBodyParameters(
-            this AcquireTokenForClientParameterBuilder builder, 
+            this AcquireTokenForClientParameterBuilder builder,
             Dictionary<string, Func<CancellationToken, Task<string>>> extrabodyparams)
         {
             builder.ValidateUseOfExperimentalFeature();

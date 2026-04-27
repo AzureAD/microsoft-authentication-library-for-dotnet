@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System.Collections.Generic;
@@ -92,7 +92,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                                                             AuthenticationRequestParameters.RequestContext.CorrelationId,
                                                             TokenSource.Cache,
                                                             AuthenticationRequestParameters.RequestContext.ApiEvent,
-                                                            account, 
+                                                            account,
                                                             spaAuthCode: null,
                                                             additionalResponseParameters: null,
                                                             cancellationToken: cancellationToken).ConfigureAwait(false);
@@ -156,7 +156,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private async Task<AuthenticationResult> RefreshRtOrFetchNewAccessTokenAsync(CancellationToken cancellationToken)
         {
             var logger = AuthenticationRequestParameters.RequestContext.Logger;
-            
+
             if (ApiEvent.IsLongRunningObo(AuthenticationRequestParameters.ApiId))
             {
                 AuthenticationRequestParameters.RequestContext.Logger.Info("[OBO request] Long-running OBO flow, trying to refresh using a refresh token flow.");
@@ -171,7 +171,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     if (!string.IsNullOrEmpty(cachedRefreshToken.RawClientInfo))
                     {
                         var clientInfo = ClientInfo.CreateFromJson(cachedRefreshToken.RawClientInfo);
-                        
+
                         _ccsRoutingHint = CoreHelpers.GetCcsClientInfoHint(
                             clientInfo.UniqueObjectIdentifier,
                             clientInfo.UniqueTenantIdentifier);

@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.SystemWebview
                 agentIntent.PutExtra(AndroidConstants.RequestUrlKey, authorizationUri.AbsoluteUri);
                 agentIntent.PutExtra(AndroidConstants.CustomTabRedirect, redirectUri.OriginalString);
                 AuthenticationActivity.RequestContext = RequestContext;
-                _parent.Activity.RunOnUiThread(()=> _parent.Activity.StartActivityForResult(agentIntent, 0));
+                _parent.Activity.RunOnUiThread(() => _parent.Activity.StartActivityForResult(agentIntent, 0));
             }
             catch (Exception ex)
             {

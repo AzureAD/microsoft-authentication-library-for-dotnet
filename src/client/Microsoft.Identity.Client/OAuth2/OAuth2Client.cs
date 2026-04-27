@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -130,8 +130,8 @@ namespace Microsoft.Identity.Client.OAuth2
                         {
                             requestContext.Logger.Verbose(() => "[Oauth2Client] Processing onBeforePostRequestData ");
                             var requestData = new OnBeforeTokenRequestData(_bodyParameters, _headers, endpointUri, requestContext.UserCancellationToken);
-                            
-                            foreach(var handler in onBeforePostRequestHandlers)
+
+                            foreach (var handler in onBeforePostRequestHandlers)
                             {
                                 await handler(requestData).ConfigureAwait(false);
                             }
@@ -231,7 +231,7 @@ namespace Microsoft.Identity.Client.OAuth2
         private void AddCommonHeaders(RequestContext requestContext)
         {
             _headers.Add(OAuth2Header.CorrelationId, requestContext.CorrelationId.ToString());
-            _headers.Add(OAuth2Header.RequestCorrelationIdInResponse, "true");            
+            _headers.Add(OAuth2Header.RequestCorrelationIdInResponse, "true");
         }
 
         public static T CreateResponse<T>(HttpResponse response, RequestContext requestContext)

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -85,7 +85,7 @@ namespace Microsoft.Identity.Test.Unit
                 {
                     { "key1", "value1" }
                 };
-                
+
                 httpManager.AddInstanceDiscoveryMockHandler();
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseWithAdditionalParamsMessage(tokenType: "someAccessTokenType", expectedRequestHeaders: expectedRequestHeaders);
 
