@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Client.Extensibility
         /// <param name="attributeTokens">Attribute tokens to include. Individual tokens must not contain whitespace.</param>
         /// <returns>The builder to chain method calls.</returns>
         /// <exception cref="ArgumentException">Thrown when any token contains embedded whitespace.</exception>
-        public static AbstractConfidentialClientAcquireTokenParameterBuilder<T> WithAttributeTokens<T>(
+        public static T WithAttributeTokens<T>(
             this AbstractConfidentialClientAcquireTokenParameterBuilder<T> builder,
             IEnumerable<string> attributeTokens)
             where T : AbstractConfidentialClientAcquireTokenParameterBuilder<T>
@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Client.Extensibility
                     logger.Verbose(() => "[WithAttributeTokens] No attribute tokens passed.");
                 }
 
-                return builder;
+                return (T)builder;
             }
 
             var normalizedTokens = new List<string>();
@@ -95,8 +95,12 @@ namespace Microsoft.Identity.Client.Extensibility
                     logger.Verbose(() => "[WithAttributeTokens] collection contained no usable tokens.");
                 }
 
-                return builder;
+                return (T)builder;
             }
+
+            // Sort so that callers passing the same set of tokens in different orders
+            // hit the same cache entry and produce the same request body.
+            normalizedTokens.Sort(StringComparer.Ordinal);
 
             string joinedTokens = string.Join(" ", normalizedTokens);
 
@@ -123,17 +127,17 @@ namespace Microsoft.Identity.Client.Extensibility
         /// <typeparam name="T">The concrete confidential client builder type.</typeparam>
         /// <param name="builder">The builder to chain options to.</param>
         /// <param name="extraBodyParams">List of additional body parameters.</param>
-        /// <returns>The builder to chain method calls.</returns>
-        public static AbstractConfidentialClientAcquireTokenParameterBuilder<T> WithExtraBodyParameters<T>(
+        /// <returns>The concrete builder to chain method calls.</returns>
+        public static T WithExtraBodyParameters<T>(
             this AbstractConfidentialClientAcquireTokenParameterBuilder<T> builder,
-            IDictionary<string, Func<CancellationToken, Task<string>>> extraBodyParams)
+            Dictionary<string, Func<CancellationToken, Task<string>>> extraBodyParams)
             where T : AbstractConfidentialClientAcquireTokenParameterBuilder<T>
         {
             builder.ValidateUseOfExperimentalFeature();
 
             if (extraBodyParams == null || extraBodyParams.Count == 0)
             {
-                return builder;
+                return (T)builder;
             }
 
             builder.OnBeforeTokenRequest(async data =>
@@ -149,7 +153,7 @@ namespace Microsoft.Identity.Client.Extensibility
 
             builder.WithAdditionalCacheKeyComponents(extraBodyParams);
 
-            return builder;
+            return (T)builder;
         }
 
         /// <summary>

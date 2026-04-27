@@ -95,6 +95,49 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
+        public async Task WithAttributeTokens_ForClient_OrderInsensitive_SortedBeforeJoin_Async()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(ClientId)
+                    .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithExperimentalFeatures()
+                    .WithHttpManager(httpManager)
+                    .BuildConcrete();
+
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                // First call: pass tokens in reverse order; expect sorted body.
+                var handler1 = httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(
+                    token: "first_token");
+                handler1.ExpectedPostData = new Dictionary<string, string>
+                {
+                    { OAuth2Parameter.AttributeTokens, "tokenA tokenB tokenC" }
+                };
+
+                var first = await app.AcquireTokenForClient(_scope)
+                    .WithAttributeTokens(new[] { "tokenC", "tokenA", "tokenB" })
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual("first_token", first.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, first.AuthenticationResultMetadata.TokenSource);
+
+                // Second call: same set of tokens in a different order; should be served from cache
+                // (no new HTTP handler queued — would fail if a wire call were made).
+                var second = await app.AcquireTokenForClient(_scope)
+                    .WithAttributeTokens(new[] { "tokenB", "tokenC", "tokenA" })
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual("first_token", second.AccessToken);
+                Assert.AreEqual(TokenSource.Cache, second.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+
+        [TestMethod]
         public async Task WithAttributeTokens_ForClient_IncludedInCacheKey_Async()
         {
             using (var httpManager = new MockHttpManager())
@@ -220,18 +263,53 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         { OAuth2Parameter.AttributeTokens, "tok1 tok2" }
                     });
 
-                // Act - Combine WithAttributeTokens and WithFmiPath
-                // Note: WithAttributeTokens returns AbstractAcquireTokenParameterBuilder<T>, so concrete-builder
-                // methods like WithFmiPath must be called before it in the chain.
+                // Act - Combine WithAttributeTokens and WithFmiPath in either order.
+                // WithAttributeTokens<T> returns T (the concrete builder), so concrete-only methods
+                // like WithFmiPath remain available after it in the fluent chain.
                 var result = await app.AcquireTokenForClient(_scope)
-                    .WithFmiPath("SomeFmiPath")
                     .WithAttributeTokens(new[] { "tok1", "tok2" })
+                    .WithFmiPath("SomeFmiPath")
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
                 // Assert
                 Assert.IsNotNull(result);
                 Assert.AreEqual("combined_token", result.AccessToken);
+            }
+        }
+
+        [TestMethod]
+        public async Task WithAttributeTokens_ForClient_ChainBeforeConcreteMethod_TypePreserved_Async()
+        {
+            // Regression test for type narrowing: WithAttributeTokens<T> must return T so that
+            // concrete-builder methods (like WithFmiPath) remain available later in the chain.
+            using (var httpManager = new MockHttpManager())
+            {
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(ClientId)
+                    .WithAuthority("https://login.microsoftonline.com/", TenantId)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithExperimentalFeatures()
+                    .WithHttpManager(httpManager)
+                    .BuildConcrete();
+
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(
+                    token: "type_preserved_token",
+                    expectedPostData: new Dictionary<string, string>
+                    {
+                        { OAuth2Parameter.FmiPath, "AnotherFmiPath" },
+                        { OAuth2Parameter.AttributeTokens, "tA tB" }
+                    });
+
+                var result = await app.AcquireTokenForClient(_scope)
+                    .WithAttributeTokens(new[] { "tA", "tB" })
+                    .WithFmiPath("AnotherFmiPath")
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual("type_preserved_token", result.AccessToken);
             }
         }
 
