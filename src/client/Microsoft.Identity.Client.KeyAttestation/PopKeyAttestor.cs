@@ -26,9 +26,10 @@ namespace Microsoft.Identity.Client.KeyAttestation
         //   endpoint  – included because the MAA service issues endpoint-specific tokens;
         //               eastus.attestation.azure.net and westus.attestation.azure.net issue
         //               different tokens for the same CNG key.
-        //   keyId     – the CNG key name (CngKey.KeyName), included so that key rotation does
-        //               not cause a stale token for the old key to be returned for the new one.
-        //               Null/empty for ephemeral (non-KSP) keys.
+        //   keyId     – the CNG key identifier, either the CNG key name (CngKey.KeyName) for
+        //               KSP-persisted keys, or a SHA-256 fingerprint of the RSA public key for
+        //               ephemeral keys. Callers always supply a non-empty keyId; null/empty is
+        //               treated as a defensive fallback that bypasses the cache.
         //
         //   clientId  – intentionally NOT included. MAA attests the CNG key itself; clientId is
         //               forwarded to the service as metadata but does not change which attestation
@@ -44,8 +45,10 @@ namespace Microsoft.Identity.Client.KeyAttestation
             new ConcurrentDictionary<string, AttestationToken>(StringComparer.OrdinalIgnoreCase);
 
         // Per-key async gates to prevent concurrent in-flight attestation for the same cache key (single-flight).
-        // The pool is bounded in practice: ephemeral (unnamed) keys bypass the cache/semaphore entirely,
-        // so only named keys ever enter the pool. A typical process uses one named key per endpoint.
+        // Callers (e.g. ImdsV2ManagedIdentitySource) always supply a non-empty keyId — either the CNG key's
+        // KeyName (for KSP-persisted keys) or a SHA-256 fingerprint of the RSA public key (for ephemeral keys).
+        // The null/empty keyId bypass below is therefore a defensive fallback, not the common path.
+        // A typical process uses one CNG key per endpoint, so the pool size remains small in practice.
         private static readonly KeyedSemaphorePool s_keyLocks = new KeyedSemaphorePool();
 
         // Tokens within this window of expiry are considered stale and will be refreshed.
@@ -89,8 +92,10 @@ namespace Microsoft.Identity.Client.KeyAttestation
         /// <param name="endpoint">Attestation service endpoint (required).</param>
         /// <param name="keyHandle">Valid SafeNCryptKeyHandle (must remain valid for duration of call).</param>
         /// <param name="clientId">Optional client identifier (may be null/empty).</param>
-        /// <param name="keyId">Optional CNG key name (<see cref="System.Security.Cryptography.CngKey.KeyName"/>).
-        /// Pass the key name to scope the cache entry to a specific key; null/empty for ephemeral keys.</param>
+        /// <param name="keyId">CNG key identifier scoping the cache entry. Callers should pass the
+        /// CNG key's <see cref="System.Security.Cryptography.CngKey.KeyName"/> when available, or a
+        /// stable derived identifier (e.g. SHA-256 fingerprint of the RSA public key) for ephemeral keys.
+        /// Null/empty disables caching and is treated as a defensive fallback.</param>
         /// <param name="logger">Optional logger for cache hit/miss diagnostics.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         public static async Task<AttestationResult> AttestCredentialGuardAsync(
@@ -114,13 +119,13 @@ namespace Microsoft.Identity.Client.KeyAttestation
             var safeNCryptKeyHandle = keyHandle as SafeNCryptKeyHandle
                 ?? throw new ArgumentException("keyHandle must be a SafeNCryptKeyHandle. Only Windows CNG keys are supported.", nameof(keyHandle));
 
-            // Unnamed/ephemeral CNG keys do not have a stable keyId, so they must bypass the
-            // cache and keyed semaphore entirely. Otherwise multiple distinct key handles at the
-            // same endpoint would collapse to the same "{endpoint}|" cache/semaphore key and could
-            // incorrectly share an attestation token minted for a different key handle.
+            // Defensive fallback: if the caller supplies no keyId, skip the cache entirely.
+            // Callers such as ImdsV2ManagedIdentitySource always derive a non-empty keyId (the CNG
+            // key's KeyName, or a SHA-256 fingerprint for ephemeral/unnamed keys), so this path is
+            // not reached under normal operation.
             if (string.IsNullOrEmpty(keyId))
             {
-                logger?.Info(() => $"[PopKeyAttestor] Bypassing MAA token cache for unnamed/ephemeral key at endpoint '{endpoint}'.");
+                logger?.Verbose(() => $"[PopKeyAttestor] Bypassing MAA token cache — no keyId supplied (endpoint '{Mask(endpoint)}').");
 
                 Task<AttestationResult> nonCachedAttestTask = s_testAttestationProvider != null
                     ? s_testAttestationProvider(endpoint, keyHandle, clientId, keyId, cancellationToken)
@@ -145,12 +150,12 @@ namespace Microsoft.Identity.Client.KeyAttestation
             // Fast path: check cache without acquiring any lock.
             if (TryGetCachedToken(cacheKey, out AttestationToken cached))
             {
-                logger?.Info(() => $"[PopKeyAttestor] MAA token cache hit for '{cacheKey}'.");
+                logger?.Verbose(() => $"[PopKeyAttestor] MAA token cache hit for '{Mask(cacheKey)}'.");
                 return new AttestationResult(
                     AttestationStatus.Success, cached, cached.Token, 0, string.Empty);
             }
 
-            logger?.Info(() => $"[PopKeyAttestor] MAA token cache miss for '{cacheKey}'. Acquiring semaphore.");
+            logger?.Verbose(() => $"[PopKeyAttestor] MAA token cache miss for '{Mask(cacheKey)}'. Acquiring semaphore.");
 
             // Acquire per-key semaphore to ensure only one attestation call in-flight per cache key.
             await s_keyLocks.EnterAsync(cacheKey, cancellationToken).ConfigureAwait(false);
@@ -159,12 +164,12 @@ namespace Microsoft.Identity.Client.KeyAttestation
                 // Double-check cache after acquiring the lock — a concurrent caller may have populated it.
                 if (TryGetCachedToken(cacheKey, out cached))
                 {
-                    logger?.Info(() => $"[PopKeyAttestor] MAA token cache hit (post-lock) for '{cacheKey}'.");
+                    logger?.Verbose(() => $"[PopKeyAttestor] MAA token cache hit (post-lock) for '{Mask(cacheKey)}'.");
                     return new AttestationResult(
                         AttestationStatus.Success, cached, cached.Token, 0, string.Empty);
                 }
 
-                logger?.Info(() => $"[PopKeyAttestor] Calling attestation provider for '{cacheKey}'.");
+                logger?.Verbose(() => $"[PopKeyAttestor] Calling attestation provider for '{Mask(cacheKey)}'.");
 
                 // Check for test provider to avoid loading native DLL in unit tests.
                 Task<AttestationResult> attestTask = s_testAttestationProvider != null
@@ -203,7 +208,7 @@ namespace Microsoft.Identity.Client.KeyAttestation
             if (result.Status == AttestationStatus.Success && result.Token != null)
             {
                 s_tokenCache[cacheKey] = result.Token;
-                logger?.Info(() => $"[PopKeyAttestor] MAA token cached for '{cacheKey}', expires {result.Token.ExpiresOn:O}.");
+                logger?.Verbose(() => $"[PopKeyAttestor] MAA token cached for '{Mask(cacheKey)}', expires {result.Token.ExpiresOn:O}.");
             }
 
             return result;
@@ -240,6 +245,21 @@ namespace Microsoft.Identity.Client.KeyAttestation
         private static string NormalizeEndpoint(string endpoint)
         {
             return endpoint?.TrimEnd('/') ?? string.Empty;
+        }
+
+        /// <summary>
+        /// Returns a truncated representation of a cache key for logging — avoids exposing the full
+        /// endpoint URL or key fingerprint in logs. Matches the masking convention in InMemoryCertificateCache.
+        /// </summary>
+        private static string Mask(string s)
+        {
+            if (string.IsNullOrEmpty(s))
+                return "<empty>";
+
+            if (s.Length <= 8)
+                return $"…({s.Length})";
+
+            return "…" + s.Substring(s.Length - 8, 8) + $"({s.Length})";
         }
     }
 }
