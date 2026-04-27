@@ -100,5 +100,28 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                 "Use GetOrAdd(key, factory_delegate) to avoid creating throwaway HttpClient instances.");
         }
 
+        [TestMethod]
+        public void TestGetHttpClientWithMtlsCert_DoesNotLeakHttpClients()
+        {
+            // Arrange - reset static state so we start from a clean pool
+            SimpleHttpClientFactory.ResetStaticStateForTest();
+            var factory = new SimpleHttpClientFactory();
+            var cert = CertHelper.GetOrCreateTestCert();
+
+            // Act - call GetHttpClient(cert) multiple times with the same certificate
+            factory.GetHttpClient(cert);
+            factory.GetHttpClient(cert);
+            factory.GetHttpClient(cert);
+
+            int created = SimpleHttpClientFactory.HttpClientCreationCount;
+
+            // Assert - CreateMtlsHttpClient should be called exactly once for the same thumbprint key.
+            // Repeated lookups with the same cert should return the cached instance without
+            // creating throwaway HttpClient/HttpClientHandler allocations.
+            Assert.AreEqual(1, created,
+                $"CreateMtlsHttpClient was called {created} times for 3 lookups with the same certificate. " +
+                "Use GetOrAdd(key, factory_delegate) to avoid creating throwaway HttpClient instances.");
+        }
+
     }
 }

@@ -22,7 +22,8 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
     internal class SimpleHttpClientFactory : IMsalMtlsHttpClientFactory, IMsalSFHttpClientFactory
     {
         //Please see (https://aka.ms/msal-httpclient-info) for important information regarding the HttpClient.
-        private static readonly ConcurrentDictionary<string, HttpClient> s_httpClientPool = new ConcurrentDictionary<string, HttpClient>();
+        private static readonly ConcurrentDictionary<string, Lazy<HttpClient>> s_httpClientPool =
+            new ConcurrentDictionary<string, Lazy<HttpClient>>();
         private static readonly object s_cacheLock = new object();
 
         private static int s_httpClientCreationCount;
@@ -48,6 +49,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         private static HttpClient CreateMtlsHttpClient(X509Certificate2 bindingCertificate)
         {
 #if SUPPORTS_MTLS
+            Interlocked.Increment(ref s_httpClientCreationCount);
             CheckAndManageCache();
 
             if (bindingCertificate == null)
@@ -70,7 +72,9 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         public HttpClient GetHttpClient()
         {
-            return s_httpClientPool.GetOrAdd("non_mtls", _ => CreateHttpClient());
+            return s_httpClientPool.GetOrAdd(
+                "non_mtls",
+                _ => new Lazy<HttpClient>(CreateHttpClient, LazyThreadSafetyMode.ExecutionAndPublication)).Value;
         }
 
         public HttpClient GetHttpClient(X509Certificate2 x509Certificate2)
@@ -81,7 +85,9 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             }
 
             string key = x509Certificate2.Thumbprint;
-            return s_httpClientPool.GetOrAdd(key, _ => CreateMtlsHttpClient(x509Certificate2));
+            return s_httpClientPool.GetOrAdd(
+                key,
+                _ => new Lazy<HttpClient>(() => CreateMtlsHttpClient(x509Certificate2), LazyThreadSafetyMode.ExecutionAndPublication)).Value;
         }
 
         private static void CheckAndManageCache()
@@ -100,18 +106,15 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         {
             lock (s_cacheLock)
             {
-                foreach (KeyValuePair<string, HttpClient> pooledClient in s_httpClientPool)
+                foreach (Lazy<HttpClient> lazy in s_httpClientPool.Values)
                 {
-                    pooledClient.Value?.Dispose();
+                    if (lazy.IsValueCreated)
+                        lazy.Value?.Dispose();
                 }
 
                 s_httpClientPool.Clear();
                 Interlocked.Exchange(ref s_httpClientCreationCount, 0);
             }
-                client.Dispose();
-            }
-            s_httpClientPool.Clear();
-            s_httpClientCreationCount = 0;
         }
 
         // This method is used for Service Fabric scenarios where a custom server certificate validation callback is required.
@@ -133,8 +136,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
                 }
             };
 
-            string key = handler.GetHashCode().ToString();
-            return s_httpClientPool.GetOrAdd(key, new HttpClient(handler));
+            return new HttpClient(handler);
 #else
             return GetHttpClient();
 #endif
