@@ -19,6 +19,8 @@ root = true
 insert_final_newline = true
 indent_style = space
 indent_size = 4
+trim_trailing_whitespace = true
+charset = utf-8
 
 [project.json]
 indent_size = 2
@@ -246,7 +248,7 @@ dotnet_diagnostic.VSTHRD001.severity = none
 
 
 # VSTHRD110: Observe result of async calls
-dotnet_diagnostic.VSTHRD110.severity = none
+dotnet_diagnostic.VSTHRD110.severity = warning
 
 #------------------------------------------------------------------------------------------------------------------------------------------------------------#
 # Rules from aspnet
