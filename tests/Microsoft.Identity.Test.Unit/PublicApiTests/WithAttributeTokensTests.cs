@@ -31,6 +31,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .Create(ClientId)
                     .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithClientSecret(TestConstants.ClientSecret)
+                    .WithExperimentalFeatures()
                     .WithHttpManager(httpManager)
                     .BuildConcrete();
 
@@ -67,6 +68,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .Create(ClientId)
                     .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithClientSecret(TestConstants.ClientSecret)
+                    .WithExperimentalFeatures()
                     .WithHttpManager(httpManager)
                     .BuildConcrete();
 
@@ -102,6 +104,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .Create(ClientId)
                     .WithAuthority("https://login.microsoftonline.com/", TenantId)
                     .WithClientSecret(TestConstants.ClientSecret)
+                    .WithExperimentalFeatures()
                     .WithHttpManager(httpManager)
                     .BuildConcrete();
 
@@ -162,6 +165,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .Create(ClientId)
                     .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithClientSecret(TestConstants.ClientSecret)
+                    .WithExperimentalFeatures()
                     .WithHttpManager(httpManager)
                     .BuildConcrete();
 
@@ -202,6 +206,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .Create(ClientId)
                     .WithAuthority("https://login.microsoftonline.com/", TenantId)
                     .WithClientSecret(TestConstants.ClientSecret)
+                    .WithExperimentalFeatures()
                     .WithHttpManager(httpManager)
                     .BuildConcrete();
 
@@ -240,6 +245,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .Create(ClientId)
                     .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithClientSecret(TestConstants.ClientSecret)
+                    .WithExperimentalFeatures()
                     .WithHttpManager(httpManager)
                     .BuildConcrete();
 
@@ -285,6 +291,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .Create(ClientId)
                     .WithAuthority("https://login.microsoftonline.com/", TenantId)
                     .WithClientSecret(TestConstants.ClientSecret)
+                    .WithExperimentalFeatures()
                     .WithHttpManager(httpManager)
                     .BuildConcrete();
 
@@ -361,6 +368,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .Create(ClientId)
                     .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithClientSecret(TestConstants.ClientSecret)
+                    .WithExperimentalFeatures()
                     .WithHttpManager(httpManager)
                     .BuildConcrete();
 
@@ -404,6 +412,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithRedirectUri("https://localhost")
                     .WithClientSecret(TestConstants.ClientSecret)
+                    .WithExperimentalFeatures()
                     .WithHttpManager(httpManager)
                     .BuildConcrete();
 
@@ -445,6 +454,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithRedirectUri("https://localhost")
                     .WithClientSecret(TestConstants.ClientSecret)
+                    .WithExperimentalFeatures()
                     .WithHttpManager(httpManager)
                     .BuildConcrete();
 
@@ -506,6 +516,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithRedirectUri("https://localhost")
                     .WithClientSecret(TestConstants.ClientSecret)
+                    .WithExperimentalFeatures()
                     .WithHttpManager(httpManager)
                     .BuildConcrete();
 
@@ -596,6 +607,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .Create(ClientId)
                     .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithClientSecret(TestConstants.ClientSecret)
+                    .WithExperimentalFeatures()
                     .WithHttpManager(httpManager)
                     .BuildConcrete();
 
@@ -635,6 +647,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .Create(ClientId)
                     .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithClientSecret(TestConstants.ClientSecret)
+                    .WithExperimentalFeatures()
                     .WithHttpManager(httpManager)
                     .BuildConcrete();
 
@@ -674,6 +687,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .Create(ClientId)
                     .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithClientSecret(TestConstants.ClientSecret)
+                    .WithExperimentalFeatures()
                     .WithHttpManager(httpManager)
                     .BuildConcrete();
 

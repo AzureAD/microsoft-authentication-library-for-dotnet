@@ -53,23 +53,8 @@ namespace Microsoft.Identity.Client.Extensibility
             this AcquireTokenForClientParameterBuilder builder, 
             Dictionary<string, Func<CancellationToken, Task<string>>> extrabodyparams)
         {
-            builder.ValidateUseOfExperimentalFeature();
-            if (extrabodyparams == null || extrabodyparams.Count == 0)
-            {
-                return builder;
-            }
-            builder.OnBeforeTokenRequest(async (data) =>
-            {
-                foreach (var param in extrabodyparams)
-                {
-                    if (param.Value != null)
-                    {
-                        data.BodyParameters.Add(param.Key, await param.Value(data.CancellationToken).ConfigureAwait(false));
-                    }
-                }
-            });
-
-            builder.WithAdditionalCacheKeyComponents(extrabodyparams);
+            AbstractConfidentialClientAcquireTokenParameterBuilderExtension
+                .WithExtraBodyParameters<AcquireTokenForClientParameterBuilder>(builder, extrabodyparams);
             return builder;
         }
     }

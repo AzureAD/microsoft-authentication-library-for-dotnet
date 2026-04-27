@@ -112,10 +112,39 @@ namespace Microsoft.Identity.Client.Extensibility
                 { OAuth2Parameter.AttributeTokens, _ => Task.FromResult(joinedTokens) }
             };
 
-            builder.OnBeforeTokenRequest(data =>
+            return builder.WithExtraBodyParameters(extraBodyParams);
+        }
+
+        /// <summary>
+        /// Add extra body parameters to the token request. These parameters are added to the cache key
+        /// to associate these parameters with the acquired token. Works for confidential client flows
+        /// (AcquireTokenForClient, AcquireTokenOnBehalfOf, AcquireTokenByAuthorizationCode).
+        /// </summary>
+        /// <typeparam name="T">The concrete confidential client builder type.</typeparam>
+        /// <param name="builder">The builder to chain options to.</param>
+        /// <param name="extraBodyParams">List of additional body parameters.</param>
+        /// <returns>The builder to chain method calls.</returns>
+        public static AbstractConfidentialClientAcquireTokenParameterBuilder<T> WithExtraBodyParameters<T>(
+            this AbstractConfidentialClientAcquireTokenParameterBuilder<T> builder,
+            IDictionary<string, Func<CancellationToken, Task<string>>> extraBodyParams)
+            where T : AbstractConfidentialClientAcquireTokenParameterBuilder<T>
+        {
+            builder.ValidateUseOfExperimentalFeature();
+
+            if (extraBodyParams == null || extraBodyParams.Count == 0)
             {
-                data.BodyParameters[OAuth2Parameter.AttributeTokens] = joinedTokens;
-                return Task.CompletedTask;
+                return builder;
+            }
+
+            builder.OnBeforeTokenRequest(async data =>
+            {
+                foreach (var param in extraBodyParams)
+                {
+                    if (param.Value != null)
+                    {
+                        data.BodyParameters.Add(param.Key, await param.Value(data.CancellationToken).ConfigureAwait(false));
+                    }
+                }
             });
 
             builder.WithAdditionalCacheKeyComponents(extraBodyParams);
