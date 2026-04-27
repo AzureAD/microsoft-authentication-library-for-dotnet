@@ -85,10 +85,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 // Assert - orchestration
                 Received.InOrder(() =>
                 {
-                    _authCodeRequestComponentOverride
+                    _ = _authCodeRequestComponentOverride
                         .FetchAuthCodeAndPkceVerifierAsync(default);
 
-                    _authCodeExchangeComponentOverride
+                    _ = _authCodeExchangeComponentOverride
                        .FetchTokensAsync(default);
                 });
 
@@ -212,13 +212,13 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 // Assert - orchestration
                 Received.InOrder(() =>
                 {
-                    _brokerExchangeComponentOverride
+                    _ = _brokerExchangeComponentOverride
                         .FetchTokensAsync(default);
 
-                    _authCodeRequestComponentOverride
+                    _ = _authCodeRequestComponentOverride
                         .FetchAuthCodeAndPkceVerifierAsync(default);
 
-                    _authCodeExchangeComponentOverride
+                    _ = _authCodeExchangeComponentOverride
                        .FetchTokensAsync(default);
                 });
             }
@@ -274,9 +274,9 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 // Assert - orchestration
                 Received.InOrder(() =>
                 {
-                    _authCodeRequestComponentOverride
+                    _ = _authCodeRequestComponentOverride
                         .FetchAuthCodeAndPkceVerifierAsync(default);
-                    _brokerExchangeComponentOverride
+                    _ = _brokerExchangeComponentOverride
                         .FetchTokensAsync(default);
                 });
 

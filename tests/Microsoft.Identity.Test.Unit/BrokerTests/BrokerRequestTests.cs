@@ -262,13 +262,13 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         }
 
         [TestMethod]
-        public void BrokerGetAccountsAsyncOnUnsupportedPlatformTest()
+        public async Task BrokerGetAccountsAsyncOnUnsupportedPlatformTest()
         {
             using (var harness = CreateTestHarness())
             {
                 IBroker broker = harness.ServiceBundle.PlatformProxy.CreateBroker(harness.ServiceBundle.Config, null);
 
-                AssertException.TaskThrowsAsync<PlatformNotSupportedException>(
+                await AssertException.TaskThrowsAsync<PlatformNotSupportedException>(
                     () => broker.GetAccountsAsync(
                         TestConstants.ClientId,
                         TestConstants.RedirectUri,
@@ -280,13 +280,13 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         }
 
         [TestMethod]
-        public void BrokerRemoveAccountAsyncOnUnsupportedPlatformTest()
+        public async Task BrokerRemoveAccountAsyncOnUnsupportedPlatformTest()
         {
             using (var harness = CreateTestHarness())
             {
                 IBroker broker = harness.ServiceBundle.PlatformProxy.CreateBroker(harness.ServiceBundle.Config, null);
 
-                AssertException.TaskThrowsAsync<PlatformNotSupportedException>(() => broker.RemoveAccountAsync(
+                await AssertException.TaskThrowsAsync<PlatformNotSupportedException>(() => broker.RemoveAccountAsync(
                     harness.ServiceBundle.Config, new Account("test", "test", "test"))).ConfigureAwait(false);
             }
         }

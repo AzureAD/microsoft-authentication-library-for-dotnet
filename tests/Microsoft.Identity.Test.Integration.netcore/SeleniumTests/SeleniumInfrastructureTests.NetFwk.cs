@@ -100,7 +100,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             var seleniumLogic = new SeleniumWebUI((driver) =>
             {
                 Trace.WriteLine("Doing nothing for while, until the TCP listener times out");
-                Task.Delay(TimeSpan.FromSeconds(3));  
+                Thread.Sleep(TimeSpan.FromSeconds(3));
 
             }, TestContext);
 

@@ -1087,7 +1087,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
         [TestMethod]
         [TestCategory(TestCategories.TokenCacheTests)]
-        public void CacheAdfsTokenTest()
+        public async Task CacheAdfsTokenTest()
         {
             using (var harness = CreateTestHarness())
             {
@@ -1108,7 +1108,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 var requestParams = TestCommon.CreateAuthenticationRequestParameters(serviceBundle, authority);
 
-                adfsCache.SaveTokenResponseAsync(requestParams, response);
+                await adfsCache.SaveTokenResponseAsync(requestParams, response).ConfigureAwait(false);
 
                 Assert.AreEqual(1, adfsCache.Accessor.GetAllRefreshTokens().Count());
                 Assert.AreEqual(1, adfsCache.Accessor.GetAllAccessTokens().Count());
@@ -1286,7 +1286,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
         [TestMethod]
         [TestCategory(TestCategories.TokenCacheTests)]
-        public void CacheB2CTokenTest()
+        public async Task CacheB2CTokenTest()
         {
             using (var harness = CreateTestHarness())
             {
@@ -1306,7 +1306,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                   authority: authority,
                   requestContext: requestContext);
 
-                cache.SaveTokenResponseAsync(requestParams, response);
+                await cache.SaveTokenResponseAsync(requestParams, response).ConfigureAwait(false);
 
                 Assert.AreEqual(1, cache.Accessor.GetAllRefreshTokens().Count());
                 Assert.AreEqual(1, cache.Accessor.GetAllAccessTokens().Count());

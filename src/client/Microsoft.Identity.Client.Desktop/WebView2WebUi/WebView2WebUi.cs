@@ -68,8 +68,9 @@ namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
 
                         var asyncOperation = InvokeEmbeddedWebviewAsync(authorizationUri, redirectUri, cancellationToken);
 
-                        // Handle the completion asynchronously
-                        asyncOperation.ContinueWith(task =>
+                        // Handle the completion asynchronously; continuation task result is intentionally
+                        // discarded since all outcomes are propagated through taskCompletionSource.
+                        _ = asyncOperation.ContinueWith(task =>
                         {
                             if (task.IsFaulted)
                             {

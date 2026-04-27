@@ -97,7 +97,9 @@ namespace Microsoft.Identity.Client.Utils
             {
                 try
                 {
-                    asyncAction().ContinueWith(task =>
+                    // The continuation task itself is intentionally discarded; results
+                    // are propagated through tcs, so its completion need not be observed.
+                    _ = asyncAction().ContinueWith(task =>
                     {
                         if (task.IsFaulted && task.Exception != null)
                         {
