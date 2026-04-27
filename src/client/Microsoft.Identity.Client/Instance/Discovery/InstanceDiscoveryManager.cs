@@ -140,7 +140,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
 
             if (authorityInfo.IsInstanceDiscoverySupported)
             {
-                var entry = _userMetadataProvider?.GetMetadataOrThrow(environment, requestContext.Logger);
+                InstanceDiscoveryMetadataEntry entry = _userMetadataProvider?.GetMetadataOrThrow(environment, requestContext.Logger);
 
                 //Check if instance discovery endpoint is disabled
                 if (entry == null && !requestContext.ServiceBundle.Config.IsInstanceDiscoveryEnabled)

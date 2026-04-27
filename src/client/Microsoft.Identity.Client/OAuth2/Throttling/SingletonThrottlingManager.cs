@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
         }
 
         private static readonly Lazy<SingletonThrottlingManager> lazyPrivateCtor =
-            new Lazy<SingletonThrottlingManager>(() => new SingletonThrottlingManager());
+            new(() => new SingletonThrottlingManager());
 
         public static SingletonThrottlingManager GetInstance()
         {
@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
         {
             if (!(ex is MsalThrottledServiceException))
             {
-                foreach (var provider in ThrottlingProviders)
+                foreach (IThrottlingProvider provider in ThrottlingProviders)
                 {
                     provider.RecordException(requestParams, bodyParams, ex);
                 }
@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
            AuthenticationRequestParameters requestParams,
            IReadOnlyDictionary<string, string> bodyParams)
         {
-            foreach (var provider in ThrottlingProviders)
+            foreach (IThrottlingProvider provider in ThrottlingProviders)
             {
                 provider.TryThrottle(requestParams, bodyParams);
             }
@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
 
         public void ResetCache()
         {
-            foreach (var provider in ThrottlingProviders)
+            foreach (IThrottlingProvider provider in ThrottlingProviders)
             {
                 provider.ResetCache();
             }

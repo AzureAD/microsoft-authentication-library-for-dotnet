@@ -9,29 +9,24 @@ using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client.OAuth2.Throttling
 {
-    internal class ThrottlingCache
+    internal class ThrottlingCache(int? customCleanupIntervalMs = null)
     {
         internal const int DefaultCleanupIntervalMs = 5 * 60 * 1000; // internal for test
 
         private volatile bool _cleanupInProgress = false;
-        private static readonly object _padlock = new object();
+        private static readonly object _padlock = new();
 
         /// <summary>
         /// To prevent the cache from becoming too large, purge expired entries every X seconds
         /// </summary>
-        private readonly TimeSpan s_cleanupCacheInterval;
+        private readonly TimeSpan s_cleanupCacheInterval = customCleanupIntervalMs.HasValue ?
+                TimeSpan.FromMilliseconds(customCleanupIntervalMs.Value) :
+                TimeSpan.FromMilliseconds(DefaultCleanupIntervalMs);
 
         private DateTimeOffset _lastCleanupTime = DateTimeOffset.UtcNow;
 
         private readonly ConcurrentDictionary<string, ThrottlingCacheEntry> _cache =
-            new ConcurrentDictionary<string, ThrottlingCacheEntry>();
-
-        public ThrottlingCache(int? customCleanupIntervalMs = null)
-        {
-            s_cleanupCacheInterval = customCleanupIntervalMs.HasValue ?
-                TimeSpan.FromMilliseconds(customCleanupIntervalMs.Value) :
-                TimeSpan.FromMilliseconds(DefaultCleanupIntervalMs);
-        }
+            new();
 
         public void AddAndCleanup(string key, ThrottlingCacheEntry entry, ILoggerAdapter logger)
         {
@@ -47,7 +42,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
         public bool TryGetOrRemoveExpired(string key, ILoggerAdapter logger, out MsalServiceException ex)
         {
             ex = null;
-            if (_cache.TryGetValue(key, out var entry))
+            if (_cache.TryGetValue(key, out ThrottlingCacheEntry entry))
             {
                 logger.Info(() => $"[Throttling] Entry found. Creation: {entry.CreationTime} Expiration: {entry.ExpirationTime} ");
                 if (entry.IsExpired)
@@ -103,8 +98,8 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
 
         private void CleanupCacheNoLocks()
         {
-            List<string> toRemove = new List<string>();
-            foreach (var kvp in _cache)
+            List<string> toRemove = new();
+            foreach (KeyValuePair<string, ThrottlingCacheEntry> kvp in _cache)
             {
                 if (kvp.Value.IsExpired)
                 {

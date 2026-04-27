@@ -9,14 +9,9 @@ using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.Instance.Validation
 {
-    internal class AadAuthorityValidator : IAuthorityValidator
+    internal class AadAuthorityValidator(RequestContext requestContext) : IAuthorityValidator
     {
-        private readonly RequestContext _requestContext;
-
-        public AadAuthorityValidator(RequestContext requestContext)
-        {
-            _requestContext = requestContext;
-        }
+        private readonly RequestContext _requestContext = requestContext;
 
         /// <summary>
         /// AAD performs authority validation by calling the instance metadata endpoint. This is a bit unfortunate, 
@@ -26,7 +21,7 @@ namespace Microsoft.Identity.Client.Instance.Validation
         public async Task ValidateAuthorityAsync(
             AuthorityInfo authorityInfo)
         {
-            var authorityUri = authorityInfo.CanonicalAuthority;
+            Uri authorityUri = authorityInfo.CanonicalAuthority;
             bool isKnownEnv = KnownMetadataProvider.IsKnownEnvironment(authorityUri.Host);
 
             _requestContext.Logger.Info(() => $"Authority validation enabled? {authorityInfo.ValidateAuthority}. ");

@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Client
             }
             else
             {
-                var proxy = PlatformProxyFactory.CreatePlatformProxy(new NullLogger());
+                PlatformsCommon.Interfaces.IPlatformProxy proxy = PlatformProxyFactory.CreatePlatformProxy(new NullLogger());
                 await proxy.StartDefaultOsBrowserAsync(url, true).ConfigureAwait(false);
             }
 
@@ -61,7 +61,7 @@ namespace Microsoft.Identity.Client
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                var proxy = PlatformProxyFactory.CreatePlatformProxy(new NullLogger());
+                PlatformsCommon.Interfaces.IPlatformProxy proxy = PlatformProxyFactory.CreatePlatformProxy(new NullLogger());
                 await proxy.StartDefaultOsBrowserAsync(url, true).ConfigureAwait(false);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))

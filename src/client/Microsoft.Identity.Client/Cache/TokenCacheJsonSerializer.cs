@@ -13,39 +13,34 @@ using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client.Cache
 {
-    internal class TokenCacheJsonSerializer : ITokenCacheSerializable
+    internal class TokenCacheJsonSerializer(ITokenCacheAccessor accessor) : ITokenCacheSerializable
     {
-        private readonly ITokenCacheAccessor _accessor;
-
-        public TokenCacheJsonSerializer(ITokenCacheAccessor accessor)
-        {
-            _accessor = accessor;
-        }
+        private readonly ITokenCacheAccessor _accessor = accessor;
 
         public byte[] Serialize(IDictionary<string, JToken> unknownNodes)
         {
             var cache = new CacheSerializationContract(unknownNodes);
-            foreach (var token in _accessor.GetAllAccessTokens())
+            foreach (MsalAccessTokenCacheItem token in _accessor.GetAllAccessTokens())
             {
                 cache.AccessTokens[token.CacheKey] = token;
             }
 
-            foreach (var token in _accessor.GetAllRefreshTokens())
+            foreach (MsalRefreshTokenCacheItem token in _accessor.GetAllRefreshTokens())
             {
                 cache.RefreshTokens[token.CacheKey] = token;
             }
 
-            foreach (var token in _accessor.GetAllIdTokens())
+            foreach (MsalIdTokenCacheItem token in _accessor.GetAllIdTokens())
             {
                 cache.IdTokens[token.CacheKey] = token;
             }
 
-            foreach (var accountItem in _accessor.GetAllAccounts())
+            foreach (MsalAccountCacheItem accountItem in _accessor.GetAllAccounts())
             {
                 cache.Accounts[accountItem.CacheKey] = accountItem;
             }
 
-            foreach (var appMetadata in _accessor.GetAllAppMetadata())
+            foreach (MsalAppMetadataCacheItem appMetadata in _accessor.GetAllAppMetadata())
             {
                 cache.AppMetadata[appMetadata.CacheKey] = appMetadata;
             }
@@ -80,7 +75,7 @@ namespace Microsoft.Identity.Client.Cache
 
             if (cache.AccessTokens != null)
             {
-                foreach (var atItem in cache.AccessTokens.Values)
+                foreach (MsalAccessTokenCacheItem atItem in cache.AccessTokens.Values)
                 {
                     _accessor.SaveAccessToken(atItem);
                 }
@@ -88,7 +83,7 @@ namespace Microsoft.Identity.Client.Cache
 
             if (cache.RefreshTokens != null)
             {
-                foreach (var rtItem in cache.RefreshTokens.Values)
+                foreach (MsalRefreshTokenCacheItem rtItem in cache.RefreshTokens.Values)
                 {
                     _accessor.SaveRefreshToken(rtItem);
                 }
@@ -96,7 +91,7 @@ namespace Microsoft.Identity.Client.Cache
 
             if (cache.IdTokens != null)
             {
-                foreach (var idItem in cache.IdTokens.Values)
+                foreach (MsalIdTokenCacheItem idItem in cache.IdTokens.Values)
                 {
                     _accessor.SaveIdToken(idItem);
                 }
@@ -104,7 +99,7 @@ namespace Microsoft.Identity.Client.Cache
 
             if (cache.Accounts != null)
             {
-                foreach (var account in cache.Accounts.Values)
+                foreach (MsalAccountCacheItem account in cache.Accounts.Values)
                 {
                     _accessor.SaveAccount(account);
                 }
@@ -112,7 +107,7 @@ namespace Microsoft.Identity.Client.Cache
 
             if (cache.AppMetadata != null)
             {
-                foreach (var appMetadata in cache.AppMetadata.Values)
+                foreach (MsalAppMetadataCacheItem appMetadata in cache.AppMetadata.Values)
                 {
                     _accessor.SaveAppMetadata(appMetadata);
                 }

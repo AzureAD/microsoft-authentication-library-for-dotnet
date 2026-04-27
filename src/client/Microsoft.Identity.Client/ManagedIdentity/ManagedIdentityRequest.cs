@@ -13,36 +13,25 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
-    internal class ManagedIdentityRequest
+    internal class ManagedIdentityRequest(
+        HttpMethod method,
+        Uri endpoint,
+        RequestType requestType = RequestType.ManagedIdentityDefault,
+        X509Certificate2 mtlsCertificate = null)
     {
-        private readonly Uri _baseEndpoint;
+        private readonly Uri _baseEndpoint = endpoint;
 
-        public HttpMethod Method { get; }
+        public HttpMethod Method { get; } = method;
 
-        public IDictionary<string, string> Headers { get; }
+        public IDictionary<string, string> Headers { get; } = new Dictionary<string, string>();
 
-        public IDictionary<string, string> BodyParameters { get; }
+        public IDictionary<string, string> BodyParameters { get; } = new Dictionary<string, string>();
 
-        public IDictionary<string, string> QueryParameters { get; }
+        public IDictionary<string, string> QueryParameters { get; } = new Dictionary<string, string>();
 
-        public RequestType RequestType { get; set; }
+        public RequestType RequestType { get; set; } = requestType;
 
-        public X509Certificate2 MtlsCertificate { get; set; }
-
-        public ManagedIdentityRequest(
-            HttpMethod method,
-            Uri endpoint,
-            RequestType requestType = RequestType.ManagedIdentityDefault,
-            X509Certificate2 mtlsCertificate = null)
-        {
-            Method = method;
-            _baseEndpoint = endpoint;
-            Headers = new Dictionary<string, string>();
-            BodyParameters = new Dictionary<string, string>();
-            QueryParameters = new Dictionary<string, string>();
-            RequestType = requestType;
-            MtlsCertificate = mtlsCertificate;
-        }
+        public X509Certificate2 MtlsCertificate { get; set; } = mtlsCertificate;
 
         public Uri ComputeUri()
         {
@@ -83,7 +72,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         {
             if (extraQueryParameters != null)
             {
-                foreach (var kvp in extraQueryParameters)
+                foreach (KeyValuePair<string, string> kvp in extraQueryParameters)
                 {
                     QueryParameters[kvp.Key] = kvp.Value;
                 }

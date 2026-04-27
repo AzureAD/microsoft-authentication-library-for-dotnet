@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Client.Utils
                 return;
             }
 
-            foreach (var item in other)
+            foreach (KeyValuePair<TKey, TValue> item in other)
             {
                 if (!source.ContainsKey(item.Key))
                 {

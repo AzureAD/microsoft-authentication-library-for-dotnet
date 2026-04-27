@@ -14,19 +14,13 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
-    internal class OnBehalfOfRequest : RequestBase
+    internal class OnBehalfOfRequest(
+        IServiceBundle serviceBundle,
+        AuthenticationRequestParameters authenticationRequestParameters,
+        AcquireTokenOnBehalfOfParameters onBehalfOfParameters) : RequestBase(serviceBundle, authenticationRequestParameters, onBehalfOfParameters)
     {
-        private readonly AcquireTokenOnBehalfOfParameters _onBehalfOfParameters;
+        private readonly AcquireTokenOnBehalfOfParameters _onBehalfOfParameters = onBehalfOfParameters;
         private string _ccsRoutingHint;
-
-        public OnBehalfOfRequest(
-            IServiceBundle serviceBundle,
-            AuthenticationRequestParameters authenticationRequestParameters,
-            AcquireTokenOnBehalfOfParameters onBehalfOfParameters)
-            : base(serviceBundle, authenticationRequestParameters, onBehalfOfParameters)
-        {
-            _onBehalfOfParameters = onBehalfOfParameters;
-        }
 
         protected override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
@@ -39,7 +33,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             await ResolveAuthorityAsync().ConfigureAwait(false);
             MsalAccessTokenCacheItem cachedAccessToken = null;
-            var logger = AuthenticationRequestParameters.RequestContext.Logger;
+            ILoggerAdapter logger = AuthenticationRequestParameters.RequestContext.Logger;
             AuthenticationResult authResult = null;
 
             if (AuthenticationRequestParameters.Authority is AadAuthority aadAuthority &&
@@ -76,8 +70,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 if (cachedAccessToken != null)
                 {
-                    var cachedIdToken = await CacheManager.GetIdTokenCacheItemAsync(cachedAccessToken).ConfigureAwait(false);
-                    var account = await CacheManager.GetAccountAssociatedWithAccessTokenAsync(cachedAccessToken).ConfigureAwait(false);
+                    MsalIdTokenCacheItem cachedIdToken = await CacheManager.GetIdTokenCacheItemAsync(cachedAccessToken).ConfigureAwait(false);
+                    Account account = await CacheManager.GetAccountAssociatedWithAccessTokenAsync(cachedAccessToken).ConfigureAwait(false);
 
                     logger.Info(
                         () => "[OBO Request] Found a valid access token in the cache. ID token also found? " + (cachedIdToken != null));
@@ -155,7 +149,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private async Task<AuthenticationResult> RefreshRtOrFetchNewAccessTokenAsync(CancellationToken cancellationToken)
         {
-            var logger = AuthenticationRequestParameters.RequestContext.Logger;
+            ILoggerAdapter logger = AuthenticationRequestParameters.RequestContext.Logger;
 
             if (ApiEvent.IsLongRunningObo(AuthenticationRequestParameters.ApiId))
             {
@@ -181,7 +175,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         logger.Info("[OBO request] No client info associated with RT. This is OBO for a Service Principal.");
                     }
 
-                    var msalTokenResponse = await SilentRequestHelper.RefreshAccessTokenAsync(cachedRefreshToken, this, AuthenticationRequestParameters, cancellationToken)
+                    MsalTokenResponse msalTokenResponse = await SilentRequestHelper.RefreshAccessTokenAsync(cachedRefreshToken, this, AuthenticationRequestParameters, cancellationToken)
                     .ConfigureAwait(false);
 
                     return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse, cancellationToken).ConfigureAwait(false);
@@ -205,7 +199,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private async Task<AuthenticationResult> FetchNewAccessTokenAsync(CancellationToken cancellationToken)
         {
-            var msalTokenResponse = await SendTokenRequestAsync(GetBodyParameters(), cancellationToken).ConfigureAwait(false);
+            MsalTokenResponse msalTokenResponse = await SendTokenRequestAsync(GetBodyParameters(), cancellationToken).ConfigureAwait(false);
 
             // We always retrieve a refresh token in OBO but we don't want to cache it for normal OBO flow, only for long-running OBO
             if (!ApiEvent.IsLongRunningObo(AuthenticationRequestParameters.ApiId))
@@ -216,7 +210,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             if (msalTokenResponse.ClientInfo is null &&
                 AuthenticationRequestParameters.AuthorityInfo.IsClientInfoSupported)
             {
-                var logger = AuthenticationRequestParameters.RequestContext.Logger;
+                ILoggerAdapter logger = AuthenticationRequestParameters.RequestContext.Logger;
                 logger.Info("[OBO request] This is an on behalf of request for a service principal as no client info returned in the token response.");
             }
 

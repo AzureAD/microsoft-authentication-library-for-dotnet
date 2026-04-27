@@ -20,7 +20,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 HashAlgorithmName.SHA256,
                 RSASignaturePadding.Pss);
 
-            AsnWriter writer = new AsnWriter(AsnEncodingRules.DER);
+            AsnWriter writer = new(AsnEncodingRules.DER);
             writer.WriteCharacterString(UniversalTagNumber.UTF8String, JsonHelper.SerializeToJson(cuid));
 
             req.OtherRequestAttributes.Add(

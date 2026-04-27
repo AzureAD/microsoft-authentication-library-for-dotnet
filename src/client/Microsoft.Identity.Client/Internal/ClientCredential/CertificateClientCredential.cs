@@ -12,19 +12,13 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Internal.ClientCredential
 {
-    internal class CertificateClientCredential : CertificateAndClaimsClientCredential
+    internal class CertificateClientCredential(X509Certificate2 certificate) : CertificateAndClaimsClientCredential(certificateProvider: _ => Task.FromResult(certificate), claimsToSign: null, appendDefaultClaims: true, certificate: certificate)
     {
         /// <summary>
         /// Gets the static certificate when using WithCertificate(X509Certificate2).
         /// This is needed for mTLS scenarios where we need synchronous access to the certificate.
         /// Returns null when using dynamic certificate providers.
         /// </summary>
-        public new X509Certificate2 Certificate { get; }
-
-        public CertificateClientCredential(X509Certificate2 certificate)
-            : base(certificateProvider: _ => Task.FromResult(certificate), claimsToSign: null, appendDefaultClaims: true, certificate: certificate)
-        {
-            Certificate = certificate;
-        }
+        public new X509Certificate2 Certificate { get; } = certificate;
     }
 }

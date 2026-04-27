@@ -27,7 +27,7 @@ namespace Microsoft.Identity.Client.Instance
             if (!string.IsNullOrEmpty(tenantId) &&
                 (forceSpecifiedTenant || AadAuthority.IsCommonOrganizationsOrConsumersTenant(TenantId)))
             {
-                var authorityUri = AuthorityInfo.CanonicalAuthority;
+                System.Uri authorityUri = AuthorityInfo.CanonicalAuthority;
 
                 return string.Format(
                     CultureInfo.InvariantCulture,

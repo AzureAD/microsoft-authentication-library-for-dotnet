@@ -4,19 +4,19 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Extensibility;
+using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Identity.Test.Common.Core.Helpers;
-using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Client.Cache.Items;
-using Microsoft.Identity.Client.Cache;
-using System.Net.Http;
-using Microsoft.Identity.Client.AppConfig;
 
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {

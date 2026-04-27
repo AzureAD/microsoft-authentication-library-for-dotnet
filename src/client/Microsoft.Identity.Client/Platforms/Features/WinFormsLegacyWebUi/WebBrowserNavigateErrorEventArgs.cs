@@ -7,34 +7,27 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
 {
     /// <summary>
     /// </summary>
-    public class WebBrowserNavigateErrorEventArgs : CancelEventArgs
+    /// <remarks>
+    /// </remarks>
+    public class WebBrowserNavigateErrorEventArgs(string url, string targetFrameName, int statusCode,
+        object webBrowserActiveXInstance) : CancelEventArgs
     {
-        /// <summary>
-        /// </summary>
-        public WebBrowserNavigateErrorEventArgs(string url, string targetFrameName, int statusCode,
-            object webBrowserActiveXInstance)
-        {
-            Url = url;
-            TargetFrameName = targetFrameName;
-            StatusCode = statusCode;
-            WebBrowserActiveXInstance = webBrowserActiveXInstance;
-        }
 
         /// <summary>
         /// </summary>
-        public string TargetFrameName { get; }
+        public string TargetFrameName { get; } = targetFrameName;
 
         // URL as a string, as in case of error it could be invalid URL
         /// <summary>
         /// </summary>
-        public string Url { get; }
+        public string Url { get; } = url;
 
         /// <summary>
         /// </summary>
-        public object WebBrowserActiveXInstance { get; }
+        public object WebBrowserActiveXInstance { get; } = webBrowserActiveXInstance;
 
         /// <summary>
         /// </summary>
-        public int StatusCode { get; }
+        public int StatusCode { get; } = statusCode;
     }
 }

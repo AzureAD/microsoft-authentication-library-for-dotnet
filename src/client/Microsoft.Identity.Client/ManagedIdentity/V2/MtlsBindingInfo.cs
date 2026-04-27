@@ -12,27 +12,20 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
     /// <summary>
     /// mTLS binding information: certificate, endpoint, client ID.
     /// </summary>
-    internal sealed class MtlsBindingInfo
+    /// <remarks>
+    /// mTLS binding info constructor.
+    /// </remarks>
+    /// <param name="certificate"></param>
+    /// <param name="endpoint"></param>
+    /// <param name="clientId"></param>
+    /// <exception cref="ArgumentNullException"></exception>
+    internal sealed class MtlsBindingInfo(
+        X509Certificate2 certificate,
+        string endpoint,
+        string clientId)
     {
-        /// <summary>
-        /// mTLS binding info constructor.
-        /// </summary>
-        /// <param name="certificate"></param>
-        /// <param name="endpoint"></param>
-        /// <param name="clientId"></param>
-        /// <exception cref="ArgumentNullException"></exception>
-        public MtlsBindingInfo(
-            X509Certificate2 certificate,
-            string endpoint,
-            string clientId)
-        {
-            Certificate = certificate ?? throw new ArgumentNullException(nameof(certificate));
-            Endpoint = endpoint ?? throw new ArgumentNullException(nameof(endpoint));
-            ClientId = clientId ?? throw new ArgumentNullException(nameof(clientId));
-        }
-
-        public X509Certificate2 Certificate { get; }
-        public string Endpoint { get; }
-        public string ClientId { get; }
+        public X509Certificate2 Certificate { get; } = certificate ?? throw new ArgumentNullException(nameof(certificate));
+        public string Endpoint { get; } = endpoint ?? throw new ArgumentNullException(nameof(endpoint));
+        public string ClientId { get; } = clientId ?? throw new ArgumentNullException(nameof(clientId));
     }
 }

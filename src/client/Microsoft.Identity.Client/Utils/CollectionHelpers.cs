@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Client.Utils
                 return false;
             }
 
-            foreach (var kvp in dict1)
+            foreach (KeyValuePair<string, string> kvp in dict1)
             {
                 if (!dict2.TryGetValue(kvp.Key, out var value) || !string.Equals(kvp.Value, value))
                 {

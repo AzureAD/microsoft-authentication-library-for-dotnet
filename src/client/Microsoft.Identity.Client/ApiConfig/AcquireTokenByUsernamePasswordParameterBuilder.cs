@@ -84,7 +84,7 @@ namespace Microsoft.Identity.Client
                 throw new MsalClientException(MsalError.BrokerRequiredForPop, MsalErrorMessage.BrokerRequiredForPop);
             }
 
-            var broker = ServiceBundle.PlatformProxy.CreateBroker(ServiceBundle.Config, null);
+            Internal.Broker.IBroker broker = ServiceBundle.PlatformProxy.CreateBroker(ServiceBundle.Config, null);
 
             if (!broker.IsPopSupported)
             {
@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(nonce));
             }
 
-            PoPAuthenticationConfiguration popConfig = new PoPAuthenticationConfiguration(requestUri);
+            PoPAuthenticationConfiguration popConfig = new(requestUri);
 
             popConfig.Nonce = nonce;
             popConfig.HttpMethod = httpMethod;

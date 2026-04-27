@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
                 _logger.Info(() => $"[DefaultOsBrowser] Authorization URI with form_post: {authorizationUri.AbsoluteUri}");
                 _logger.Verbose(() => $"[DefaultOsBrowser] Query string contains response_mode: {authorizationUri.Query.Contains("response_mode=form_post")}");
 
-                var authResponse = await InterceptAuthorizationUriAsync(
+                AuthorizationResponse authResponse = await InterceptAuthorizationUriAsync(
                     authorizationUri,
                     redirectUri,
                     requestContext.ServiceBundle.Config.IsBrokerEnabled,
@@ -144,7 +144,7 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
                 return redirectUri;
             }
 
-            TcpListener listener = new TcpListener(IPAddress.Loopback, 0);
+            TcpListener listener = new(IPAddress.Loopback, 0);
             try
             {
                 listener.Start();

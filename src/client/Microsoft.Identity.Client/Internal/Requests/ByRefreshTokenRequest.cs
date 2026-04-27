@@ -10,24 +10,18 @@ using Microsoft.Identity.Client.OAuth2;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
-    internal class ByRefreshTokenRequest : RequestBase
+    internal class ByRefreshTokenRequest(
+        IServiceBundle serviceBundle,
+        AuthenticationRequestParameters authenticationRequestParameters,
+        AcquireTokenByRefreshTokenParameters refreshTokenParameters) : RequestBase(serviceBundle, authenticationRequestParameters, refreshTokenParameters)
     {
-        private readonly AcquireTokenByRefreshTokenParameters _refreshTokenParameters;
-
-        public ByRefreshTokenRequest(
-            IServiceBundle serviceBundle,
-            AuthenticationRequestParameters authenticationRequestParameters,
-            AcquireTokenByRefreshTokenParameters refreshTokenParameters)
-            : base(serviceBundle, authenticationRequestParameters, refreshTokenParameters)
-        {
-            _refreshTokenParameters = refreshTokenParameters;
-        }
+        private readonly AcquireTokenByRefreshTokenParameters _refreshTokenParameters = refreshTokenParameters;
 
         protected override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
             AuthenticationRequestParameters.RequestContext.Logger.Verbose(() => LogMessages.BeginningAcquireByRefreshToken);
             await ResolveAuthorityAsync().ConfigureAwait(false);
-            var msalTokenResponse = await SendTokenRequestAsync(
+            MsalTokenResponse msalTokenResponse = await SendTokenRequestAsync(
                                         GetBodyParameters(_refreshTokenParameters.RefreshToken),
                                         cancellationToken).ConfigureAwait(false);
 

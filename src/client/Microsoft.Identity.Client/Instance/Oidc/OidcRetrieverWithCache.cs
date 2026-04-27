@@ -16,7 +16,7 @@ namespace Microsoft.Identity.Client.Instance.Oidc
     internal static class OidcRetrieverWithCache
     {
         private static readonly ConcurrentDictionary<string, OidcMetadata> s_cache = new();
-        private static readonly SemaphoreSlim s_lockOidcRetrieval = new SemaphoreSlim(1);
+        private static readonly SemaphoreSlim s_lockOidcRetrieval = new(1);
 
         public static async Task<OidcMetadata> GetOidcAsync(
             string authority,
@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Client.Instance.Oidc
                 }
 
                 // preserve any query parameters in the authority
-                UriBuilder builder = new UriBuilder(authority);
+                UriBuilder builder = new(authority);
                 string existingPath = builder.Path;
                 builder.Path = existingPath.TrimEnd('/') + "/" + Constants.WellKnownOpenIdConfigurationPath;
 

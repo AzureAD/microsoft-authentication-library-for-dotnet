@@ -153,7 +153,7 @@ namespace Microsoft.Identity.Client
 
             canonicalAuthorityUri = TransformIfCiamAuthority(canonicalAuthorityUri);
 
-            var authorityType = GetAuthorityType(canonicalAuthorityUri);
+            AuthorityType authorityType = GetAuthorityType(canonicalAuthorityUri);
 
             // Authority validation is only supported for AAD 
             if (authorityType == AuthorityType.B2C || authorityType == AuthorityType.Generic)
@@ -506,8 +506,8 @@ namespace Microsoft.Identity.Client
                 AuthorityInfo requestAuthorityInfo,
                 IAccount account = null)
             {
-                var configAuthority = requestContext.ServiceBundle.Config.Authority;
-                var configAuthorityInfo = configAuthority.AuthorityInfo;
+                Authority configAuthority = requestContext.ServiceBundle.Config.Authority;
+                AuthorityInfo configAuthorityInfo = configAuthority.AuthorityInfo;
 
                 if (configAuthorityInfo == null)
                 {
@@ -562,7 +562,7 @@ namespace Microsoft.Identity.Client
                             return requestAuthorityInfo.CreateAuthority();
                         }
 
-                        var requestAuthority = updateEnvironment ?
+                        AadAuthority requestAuthority = updateEnvironment ?
                             new AadAuthority(CreateAuthorityWithEnvironment(requestAuthorityInfo, account?.Environment).AuthorityInfo) :
                             new AadAuthority(requestAuthorityInfo);
                         if (!requestAuthority.IsCommonOrganizationsOrConsumersTenant() ||
@@ -621,7 +621,7 @@ namespace Microsoft.Identity.Client
 
             private static async Task ValidateSameHostAsync(AuthorityInfo requestAuthorityInfo, RequestContext requestContext)
             {
-                var configAuthorityInfo = requestContext.ServiceBundle.Config.Authority.AuthorityInfo;
+                AuthorityInfo configAuthorityInfo = requestContext.ServiceBundle.Config.Authority.AuthorityInfo;
 
                 if (!requestContext.ServiceBundle.Config.MultiCloudSupportEnabled &&
                     requestAuthorityInfo != null &&
@@ -672,8 +672,8 @@ namespace Microsoft.Identity.Client
 
             private static async Task<bool> IsAuthorityAliasedAsync(RequestContext requestContext, AuthorityInfo requestAuthorityInfo)
             {
-                var instanceDiscoveryManager = requestContext.ServiceBundle.InstanceDiscoveryManager;
-                var result = await instanceDiscoveryManager.GetMetadataEntryAsync(requestContext.ServiceBundle.Config.Authority.AuthorityInfo, requestContext).ConfigureAwait(false);
+                Instance.Discovery.IInstanceDiscoveryManager instanceDiscoveryManager = requestContext.ServiceBundle.InstanceDiscoveryManager;
+                Instance.Discovery.InstanceDiscoveryMetadataEntry result = await instanceDiscoveryManager.GetMetadataEntryAsync(requestContext.ServiceBundle.Config.Authority.AuthorityInfo, requestContext).ConfigureAwait(false);
 
                 return result.Aliases.Any(alias => alias.Equals(requestAuthorityInfo.Host));
             }

@@ -224,7 +224,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         internal override JObject ToJObject()
         {
-            var json = base.ToJObject();
+            JObject json = base.ToJObject();
 
             SetItemIfValueNotNull(json, StorageJsonKeys.Username, PreferredUsername);
             SetItemIfValueNotNull(json, StorageJsonKeys.Name, Name);

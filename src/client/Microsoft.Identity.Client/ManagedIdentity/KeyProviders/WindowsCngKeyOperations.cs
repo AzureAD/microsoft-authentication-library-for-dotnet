@@ -152,7 +152,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
             try
             {
                 // PCP (TPM) in USER scope
-                CngProvider provider = new CngProvider(SoftwareKspName);
+                CngProvider provider = new(SoftwareKspName);
                 CngKeyOpenOptions openOpts = CngKeyOpenOptions.UserKey | CngKeyOpenOptions.Silent;
 
                 CngKey key = CngKey.Exists(HardwareKeyName, provider, openOpts)

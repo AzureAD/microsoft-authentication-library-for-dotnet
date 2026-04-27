@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Client.OAuth2
     [Preserve(AllMembers = true)]
     internal class DeviceAuthPayload
     {
-        private readonly Lazy<long> _defaultDeviceAuthJWTTimeSpan = new Lazy<long>(() => (long)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds);
+        private readonly Lazy<long> _defaultDeviceAuthJWTTimeSpan = new(() => (long)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds);
 
         public DeviceAuthPayload(string audience, string nonce)
         {
@@ -63,17 +63,11 @@ namespace Microsoft.Identity.Client.OAuth2
         public string Nonce { get; private set; }
     }
 
-    internal class DeviceAuthJWTResponse
+    internal class DeviceAuthJWTResponse(string audience, string nonce,
+        string base64EncodedCertificate)
     {
-        private readonly DeviceAuthHeader _header;
-        private readonly DeviceAuthPayload _payload;
-
-        public DeviceAuthJWTResponse(string audience, string nonce,
-            string base64EncodedCertificate)
-        {
-            _header = new DeviceAuthHeader(base64EncodedCertificate);
-            _payload = new DeviceAuthPayload(audience, nonce);
-        }
+        private readonly DeviceAuthHeader _header = new DeviceAuthHeader(base64EncodedCertificate);
+        private readonly DeviceAuthPayload _payload = new DeviceAuthPayload(audience, nonce);
 
         public string GetResponseToSign()
         {

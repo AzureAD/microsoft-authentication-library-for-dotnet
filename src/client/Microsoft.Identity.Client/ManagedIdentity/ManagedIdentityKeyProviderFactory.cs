@@ -2,9 +2,9 @@
 // Licensed under the MIT License.
 
 using System.Threading;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.ManagedIdentity.KeyProviders;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
-using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {

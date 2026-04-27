@@ -15,14 +15,9 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.UI
 {
-    internal class CustomWebUiHandler : IWebUI
+    internal class CustomWebUiHandler(ICustomWebUi customWebUi) : IWebUI
     {
-        private readonly ICustomWebUi _customWebUi;
-
-        public CustomWebUiHandler(ICustomWebUi customWebUi)
-        {
-            _customWebUi = customWebUi;
-        }
+        private readonly ICustomWebUi _customWebUi = customWebUi;
 
         /// <inheritdoc/>
         public async Task<AuthorizationResult> AcquireAuthorizationAsync(
@@ -38,7 +33,7 @@ namespace Microsoft.Identity.Client.UI
                 requestContext.Logger.InfoPii(
                     () => LogMessages.CustomWebUiCallingAcquireAuthorizationCodePii(authorizationUri, redirectUri),
                     () => LogMessages.CustomWebUiCallingAcquireAuthorizationCodeNoPii);
-                var uri = await _customWebUi.AcquireAuthorizationCodeAsync(authorizationUri, redirectUri, cancellationToken)
+                Uri uri = await _customWebUi.AcquireAuthorizationCodeAsync(authorizationUri, redirectUri, cancellationToken)
                                             .ConfigureAwait(false);
                 if (uri == null || String.IsNullOrWhiteSpace(uri.Query))
                 {

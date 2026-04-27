@@ -9,10 +9,10 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 {

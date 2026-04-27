@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
         public /* public for test only */ static TimeSpan KeyRotationInterval { get; }
             = TimeSpan.FromHours(8);
 
-        private static object s_lock = new object();
+        private static object s_lock = new();
 
         internal static ITimeService TimeService { get; set; } = new TimeService();
 
@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
         {
             lock (s_lock)
             {
-                var time = TimeService.GetUtcNow();
+                DateTime time = TimeService.GetUtcNow();
                 if (s_currentProvider != null && s_providerExpiration > time)
                 {
                     return s_currentProvider;

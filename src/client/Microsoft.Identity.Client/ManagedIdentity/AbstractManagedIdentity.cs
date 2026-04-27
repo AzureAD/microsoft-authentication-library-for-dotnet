@@ -25,22 +25,16 @@ using Microsoft.Identity.Json;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
-    internal abstract class AbstractManagedIdentity
+    internal abstract class AbstractManagedIdentity(RequestContext requestContext, ManagedIdentitySource sourceType)
     {
         private const string ManagedIdentityPrefix = "[Managed Identity] ";
 
-        protected readonly RequestContext _requestContext;
+        protected readonly RequestContext _requestContext = requestContext;
 
         protected bool _isMtlsPopRequested;
 
         internal const string TimeoutError = "[Managed Identity] Authentication unavailable. The request to the managed identity endpoint timed out.";
-        internal readonly ManagedIdentitySource _sourceType;
-
-        protected AbstractManagedIdentity(RequestContext requestContext, ManagedIdentitySource sourceType)
-        {
-            _requestContext = requestContext;
-            _sourceType = sourceType;
-        }
+        internal readonly ManagedIdentitySource _sourceType = sourceType;
 
         public virtual async Task<ManagedIdentityResponse> AuthenticateAsync(
             AcquireTokenForManagedIdentityParameters parameters,
@@ -178,7 +172,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             {
                 _requestContext.Logger.Error("[Managed Identity] MSI json response failed to parse. " + ex);
 
-                var exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
+                MsalException exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
                     MsalError.ManagedIdentityResponseParseFailure,
                     MsalErrorMessage.ManagedIdentityJsonParseFailure,
                     ex,
@@ -194,7 +188,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             {
                 _requestContext.Logger.Error("[Managed Identity] Response is either null or insufficient for authentication.");
 
-                var exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
+                MsalException exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
                     MsalError.ManagedIdentityRequestFailed,
                     MsalErrorMessage.ManagedIdentityInvalidResponse,
                     null,
@@ -262,11 +256,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         {
             try
             {
+#pragma warning disable IDE0008 // Types differ between TFMs (System.Text.Json vs Newtonsoft)
                 var json = JsonHelper.ParseIntoJsonObject(response);
 
                 JsonHelper.TryGetValue(json, "error", out var error);
 
-                StringBuilder errorMessage = new StringBuilder(ManagedIdentityPrefix);
+                StringBuilder errorMessage = new(ManagedIdentityPrefix);
 
                 if (JsonHelper.TryGetValue(JsonHelper.ToJsonObject(error), "code", out var errorCode))
                 {
@@ -277,6 +272,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 {
                     errorMessage.Append($"Error Message: {message}");
                 }
+#pragma warning restore IDE0008
 
                 if (message != null || errorCode != null)
                 {

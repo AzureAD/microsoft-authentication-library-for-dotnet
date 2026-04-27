@@ -11,18 +11,12 @@ using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.WsTrust
 {
-    internal class CommonNonInteractiveHandler
+    internal class CommonNonInteractiveHandler(
+        RequestContext requestContext,
+        IServiceBundle serviceBundle)
     {
-        private readonly RequestContext _requestContext;
-        private readonly IServiceBundle _serviceBundle;
-
-        public CommonNonInteractiveHandler(
-            RequestContext requestContext,
-            IServiceBundle serviceBundle)
-        {
-            _requestContext = requestContext;
-            _serviceBundle = serviceBundle;
-        }
+        private readonly RequestContext _requestContext = requestContext;
+        private readonly IServiceBundle _serviceBundle = serviceBundle;
 
         /// <summary>
         /// Gets the currently logged in user. Works for Windows when user is AD or AAD joined. Throws otherwise if cannot be found.
@@ -47,7 +41,7 @@ namespace Microsoft.Identity.Client.WsTrust
 
         public async Task<UserRealmDiscoveryResponse> QueryUserRealmDataAsync(string userRealmUriPrefix, string username)
         {
-            var userRealmResponse = await _serviceBundle.WsTrustWebRequestManager.GetUserRealmAsync(
+            UserRealmDiscoveryResponse userRealmResponse = await _serviceBundle.WsTrustWebRequestManager.GetUserRealmAsync(
                 userRealmUriPrefix,
                 username,
                 _requestContext).ConfigureAwait(false);

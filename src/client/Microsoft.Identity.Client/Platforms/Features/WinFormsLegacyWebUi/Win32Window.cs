@@ -7,13 +7,8 @@ using System.Windows.Forms;
 namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
 {
 
-    internal class Win32Window : IWin32Window
+    internal class Win32Window(IntPtr handle) : IWin32Window
     {
-        public Win32Window(IntPtr handle)
-        {
-            Handle = handle;
-        }
-
-        public IntPtr Handle { get; }
+        public IntPtr Handle { get; } = handle;
     }
 }

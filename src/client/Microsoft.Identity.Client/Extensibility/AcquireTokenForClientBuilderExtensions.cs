@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Client.Extensibility
             }
             builder.OnBeforeTokenRequest(async (data) =>
             {
-                foreach (var param in extrabodyparams)
+                foreach (KeyValuePair<string, Func<CancellationToken, Task<string>>> param in extrabodyparams)
                 {
                     if (param.Value != null)
                     {

@@ -209,7 +209,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public void LogParameters()
         {
-            var logger = RequestContext.Logger;
+            ILoggerAdapter logger = RequestContext.Logger;
 
             if (logger.IsLoggingEnabled(LogLevel.Info))
             {

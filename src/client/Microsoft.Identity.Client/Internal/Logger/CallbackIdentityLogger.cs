@@ -10,28 +10,19 @@ using Microsoft.IdentityModel.Abstractions;
 
 namespace Microsoft.Identity.Client.Internal.Logger
 {
-    internal class CallbackIdentityLogger : IIdentityLogger
+    internal class CallbackIdentityLogger(
+        LogCallback logCallback,
+        string correlationId,
+        string clientName,
+        string clientVersion,
+        bool enablePiiLogging,
+        LogLevel minLogLevel) : IIdentityLogger
     {
-        private LogCallback _logCallback;
-        private readonly string _correlationId;
-        private readonly string _clientInformation;
-        private readonly bool _piiLoggingEnabled;
-        private readonly LogLevel _minLogLevel;
-
-        public CallbackIdentityLogger(
-            LogCallback logCallback,
-            string correlationId,
-            string clientName,
-            string clientVersion,
-            bool enablePiiLogging,
-            LogLevel minLogLevel)
-        {
-            _correlationId = correlationId;
-            _clientInformation = LoggerHelper.GetClientInfo(clientName, clientVersion);
-            _piiLoggingEnabled = enablePiiLogging;
-            _logCallback = logCallback;
-            _minLogLevel = minLogLevel;
-        }
+        private LogCallback _logCallback = logCallback;
+        private readonly string _correlationId = correlationId;
+        private readonly string _clientInformation = LoggerHelper.GetClientInfo(clientName, clientVersion);
+        private readonly bool _piiLoggingEnabled = enablePiiLogging;
+        private readonly LogLevel _minLogLevel = minLogLevel;
 
         public bool IsEnabled(EventLogLevel eventLevel)
         {

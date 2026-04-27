@@ -125,7 +125,7 @@ namespace Microsoft.Identity.Client.Internal
             try
             {
                 string payload = Base64UrlHelpers.Decode(idTokenSegments[1]);
-                var idTokenClaims = JsonConvert.DeserializeObject<Dictionary<string, object>>(payload);
+                Dictionary<string, object> idTokenClaims = JsonConvert.DeserializeObject<Dictionary<string, object>>(payload);
 
                 List<Claim> claims = GetClaimsFromRawToken(idTokenClaims);
                 return ClaimsToToken(claims);
@@ -142,7 +142,7 @@ namespace Microsoft.Identity.Client.Internal
         #region IdToken to Claims parsing - logic copied from Wilson!
         private static List<Claim> GetClaimsFromRawToken(Dictionary<string, object> idTokenClaims)
         {
-            List<Claim> claims = new List<Claim>();
+            List<Claim> claims = new();
 
             string issuer = null;
             if (idTokenClaims.TryGetValue(IdTokenClaim.Issuer, out object issuerObj))
@@ -217,7 +217,7 @@ namespace Microsoft.Identity.Client.Internal
                 IDictionary<string, object> dictionary = keyValuePair.Value as IDictionary<string, object>;
                 if (dictionary != null)
                 {
-                    foreach (var item in dictionary)
+                    foreach (KeyValuePair<string, object> item in dictionary)
                         claims.Add(new Claim(keyValuePair.Key, "{" + item.Key + ":" + JsonConvert.SerializeObject(item.Value) + "}", GetClaimValueType(item.Value), issuer, issuer));
 
                     continue;
@@ -242,7 +242,7 @@ namespace Microsoft.Identity.Client.Internal
             else if (jtoken.Type == JTokenType.Array)
             {
                 var jarray = jtoken as JArray;
-                foreach (var item in jarray)
+                foreach (JToken item in jarray)
                 {
                     switch (item.Type)
                     {
@@ -291,7 +291,7 @@ namespace Microsoft.Identity.Client.Internal
             if (obj == null)
                 return JsonClaimValueTypes.JsonNull;
 
-            var objType = obj.GetType();
+            Type objType = obj.GetType();
 
             if (objType == typeof(string))
                 return ClaimValueTypes.String;
@@ -367,9 +367,9 @@ namespace Microsoft.Identity.Client.Internal
 
         private static List<Claim> GetClaimsFromRawToken(JsonDocument jsonDocument)
         {
-            var idTokenClaims = jsonDocument.RootElement;
+            JsonElement idTokenClaims = jsonDocument.RootElement;
 
-            List<Claim> claims = new List<Claim>();
+            List<Claim> claims = new();
 
             string issuer = null;
             if (idTokenClaims.TryGetProperty(IdTokenClaim.Issuer, out JsonElement issuerObj))
@@ -378,7 +378,7 @@ namespace Microsoft.Identity.Client.Internal
             }
             issuer ??= DefaultIssuser;
 
-            foreach (var jsonProperty in idTokenClaims.EnumerateObject())
+            foreach (JsonProperty jsonProperty in idTokenClaims.EnumerateObject())
             {
                 if (jsonProperty.Value.ValueKind == JsonValueKind.Null)
                 {
@@ -401,7 +401,7 @@ namespace Microsoft.Identity.Client.Internal
 
                 if (jsonProperty.Value.ValueKind == JsonValueKind.Array)
                 {
-                    foreach (var jtoken in jsonProperty.Value.EnumerateArray())
+                    foreach (JsonElement jtoken in jsonProperty.Value.EnumerateArray())
                     {
                         claimValue = jtoken.ValueKind == JsonValueKind.String ? jtoken.GetString() : null;
                         if (claimValue != null)
@@ -440,7 +440,7 @@ namespace Microsoft.Identity.Client.Internal
 
                 if (jsonProperty.Value.ValueKind == JsonValueKind.Object)
                 {
-                    foreach (var item in jsonProperty.Value.EnumerateObject())
+                    foreach (JsonProperty item in jsonProperty.Value.EnumerateObject())
                         claims.Add(new Claim(jsonProperty.Name, "{" + item.Name + ":" + item.Value.ToString() + "}", GetClaimValueType(item.Value), issuer, issuer));
 
                     continue;
@@ -464,7 +464,7 @@ namespace Microsoft.Identity.Client.Internal
             }
             else if (jtoken.ValueKind == JsonValueKind.Array)
             {
-                foreach (var item in jtoken.EnumerateArray())
+                foreach (JsonElement item in jtoken.EnumerateArray())
                 {
                     if (item.ValueKind == JsonValueKind.Object)
                     {
@@ -514,7 +514,7 @@ namespace Microsoft.Identity.Client.Internal
             if (obj.ValueKind == JsonValueKind.Null)
                 return JsonClaimValueTypes.JsonNull;
 
-            var valueKind = obj.ValueKind;
+            JsonValueKind valueKind = obj.ValueKind;
 
             if (valueKind == JsonValueKind.True || valueKind == JsonValueKind.False)
                 return ClaimValueTypes.Boolean;

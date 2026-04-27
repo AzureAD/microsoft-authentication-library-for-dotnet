@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     "IDENTITY_ENDPOINT", msiEndpoint, "App Service");
 
                 // Use the factory to create and throw the exception
-                var exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
+                MsalException exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
                     MsalError.InvalidManagedIdentityEndpoint,
                     errorMessage,
                     ex,

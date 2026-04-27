@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Client.OAuth2
                 return CollectionHelpers.GetEmptyDictionary<string, string>();
             }
 
-            Dictionary<string, string> stringExtensionData = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, string> stringExtensionData = new(StringComparer.OrdinalIgnoreCase);
 
 #if SUPPORTS_SYSTEM_TEXT_JSON
             foreach (KeyValuePair<string, JsonElement> item in ExtensionData)
@@ -195,7 +195,7 @@ namespace Microsoft.Identity.Client.OAuth2
                     string brokerMetadataJson = Uri.UnescapeDataString(metadataOriginal);
 #if SUPPORTS_SYSTEM_TEXT_JSON
                     metadataDictionary = new Dictionary<string, string>();
-                    foreach (var item in JsonDocument.Parse(brokerMetadataJson).RootElement.EnumerateObject())
+                    foreach (System.Text.Json.JsonProperty item in JsonDocument.Parse(brokerMetadataJson).RootElement.EnumerateObject())
                     {
                         metadataDictionary.Add(item.Name, item.Value.GetString());
                     }
@@ -342,7 +342,7 @@ namespace Microsoft.Identity.Client.OAuth2
         /// </remarks>
         internal static MsalTokenResponse CreateFromAndroidBrokerResponse(string jsonResponse, string correlationId)
         {
-            var authResult = JsonHelper.ParseIntoJsonObject(jsonResponse);
+            JObject authResult = JsonHelper.ParseIntoJsonObject(jsonResponse);
             var errorCode = authResult[BrokerResponseConst.BrokerErrorCode]?.ToString();
 
             if (!string.IsNullOrEmpty(errorCode))
@@ -358,7 +358,7 @@ namespace Microsoft.Identity.Client.OAuth2
                 };
             }
 
-            MsalTokenResponse msalTokenResponse = new MsalTokenResponse()
+            MsalTokenResponse msalTokenResponse = new()
             {
                 AccessToken = authResult[BrokerResponseConst.AccessToken].ToString(),
                 IdToken = authResult[BrokerResponseConst.IdToken].ToString(),

@@ -90,7 +90,7 @@ namespace Microsoft.Identity.Client.Http.Retry
                 return exception is TaskCanceledException ? true : false;
             }
 
-            var retryAfter = response?.Headers?.RetryAfter;
+            System.Net.Http.Headers.RetryConditionHeaderValue retryAfter = response?.Headers?.RetryAfter;
             bool hasRetryAfterHeader = retryAfter != null &&
                 (retryAfter.Delta.HasValue || retryAfter.Date.HasValue);
 

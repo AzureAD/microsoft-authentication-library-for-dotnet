@@ -2,35 +2,28 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Linq;
 using System.Globalization;
+using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.TelemetryCore;
-using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.TelemetryCore;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Instance.Discovery
 {
-    internal class NetworkMetadataProvider : INetworkMetadataProvider
+    internal class NetworkMetadataProvider(
+        IHttpManager httpManager,
+        INetworkCacheMetadataProvider networkCacheMetadataProvider,
+        Uri userProvidedInstanceDiscoveryUri = null) : INetworkMetadataProvider
     {
-        private readonly IHttpManager _httpManager;
-        private readonly INetworkCacheMetadataProvider _networkCacheMetadataProvider;
-        private readonly Uri _userProvidedInstanceDiscoveryUri; // can be null
-
-        public NetworkMetadataProvider(
-            IHttpManager httpManager,
-            INetworkCacheMetadataProvider networkCacheMetadataProvider,
-            Uri userProvidedInstanceDiscoveryUri = null)
-        {
-            _httpManager = httpManager ?? throw new ArgumentNullException(nameof(httpManager));
-            _networkCacheMetadataProvider = networkCacheMetadataProvider ?? throw new ArgumentNullException(nameof(networkCacheMetadataProvider));
-            _userProvidedInstanceDiscoveryUri = userProvidedInstanceDiscoveryUri; // can be null
-        }
+        private readonly IHttpManager _httpManager = httpManager ?? throw new ArgumentNullException(nameof(httpManager));
+        private readonly INetworkCacheMetadataProvider _networkCacheMetadataProvider = networkCacheMetadataProvider ?? throw new ArgumentNullException(nameof(networkCacheMetadataProvider));
+        private readonly Uri _userProvidedInstanceDiscoveryUri = userProvidedInstanceDiscoveryUri; // can be null
 
         public async Task<InstanceDiscoveryMetadataEntry> GetMetadataAsync(Uri authority, RequestContext requestContext)
         {

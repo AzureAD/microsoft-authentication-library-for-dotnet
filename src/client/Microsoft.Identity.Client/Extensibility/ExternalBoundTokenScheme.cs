@@ -11,16 +11,10 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Extensibility
 {
-    internal class ExternalBoundTokenScheme : IAuthenticationOperation2
+    internal class ExternalBoundTokenScheme(string keyId, string expectedTokenTypeFromEsts = "Bearer") : IAuthenticationOperation2
     {
-        private readonly string _keyId;
-        private readonly string _tokenType;
-
-        public ExternalBoundTokenScheme(string keyId, string expectedTokenTypeFromEsts = "Bearer")
-        {
-            _keyId = keyId;
-            _tokenType = expectedTokenTypeFromEsts;
-        }
+        private readonly string _keyId = keyId;
+        private readonly string _tokenType = expectedTokenTypeFromEsts;
 
         public int TelemetryTokenType => TelemetryTokenTypeConstants.AtPop;
 

@@ -11,22 +11,16 @@ using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client.ApiConfig.Executors
 {
-    internal class PublicClientExecutor : AbstractExecutor, IPublicClientApplicationExecutor
+    internal class PublicClientExecutor(IServiceBundle serviceBundle, PublicClientApplication publicClientApplication) : AbstractExecutor(serviceBundle), IPublicClientApplicationExecutor
     {
-        private readonly PublicClientApplication _publicClientApplication;
-
-        public PublicClientExecutor(IServiceBundle serviceBundle, PublicClientApplication publicClientApplication)
-            : base(serviceBundle)
-        {
-            _publicClientApplication = publicClientApplication;
-        }
+        private readonly PublicClientApplication _publicClientApplication = publicClientApplication;
 
         public async Task<AuthenticationResult> ExecuteAsync(
             AcquireTokenCommonParameters commonParameters,
             AcquireTokenInteractiveParameters interactiveParameters,
             CancellationToken cancellationToken)
         {
-            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, commonParameters.MtlsCertificate, cancellationToken);
+            RequestContext requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, commonParameters.MtlsCertificate, cancellationToken);
 
             AuthenticationRequestParameters requestParams = await _publicClientApplication.CreateRequestParametersAsync(
                 commonParameters,
@@ -38,7 +32,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             requestParams.Account = interactiveParameters.Account;
 
             InteractiveRequest interactiveRequest =
-                new InteractiveRequest(requestParams, interactiveParameters);
+                new(requestParams, interactiveParameters);
 
             return await interactiveRequest.RunAsync(cancellationToken).ConfigureAwait(false);
         }
@@ -48,9 +42,9 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenWithDeviceCodeParameters deviceCodeParameters,
             CancellationToken cancellationToken)
         {
-            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, commonParameters.MtlsCertificate, cancellationToken);
+            RequestContext requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, commonParameters.MtlsCertificate, cancellationToken);
 
-            var requestParams = await _publicClientApplication.CreateRequestParametersAsync(
+            AuthenticationRequestParameters requestParams = await _publicClientApplication.CreateRequestParametersAsync(
                 commonParameters,
                 requestContext,
                 _publicClientApplication.UserTokenCacheInternal,
@@ -69,9 +63,9 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenByIntegratedWindowsAuthParameters integratedWindowsAuthParameters,
             CancellationToken cancellationToken)
         {
-            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, commonParameters.MtlsCertificate, cancellationToken);
+            RequestContext requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, commonParameters.MtlsCertificate, cancellationToken);
 
-            var requestParams = await _publicClientApplication.CreateRequestParametersAsync(
+            AuthenticationRequestParameters requestParams = await _publicClientApplication.CreateRequestParametersAsync(
                 commonParameters,
                 requestContext,
                 _publicClientApplication.UserTokenCacheInternal,
@@ -90,9 +84,9 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenByUsernamePasswordParameters usernamePasswordParameters,
             CancellationToken cancellationToken)
         {
-            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, commonParameters.MtlsCertificate, cancellationToken);
+            RequestContext requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, commonParameters.MtlsCertificate, cancellationToken);
 
-            var requestParams = await _publicClientApplication.CreateRequestParametersAsync(
+            AuthenticationRequestParameters requestParams = await _publicClientApplication.CreateRequestParametersAsync(
                 commonParameters,
                 requestContext,
                 _publicClientApplication.UserTokenCacheInternal,

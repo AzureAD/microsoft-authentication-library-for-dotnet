@@ -16,26 +16,17 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
-    internal class ManagedIdentityAuthRequest : RequestBase
+    internal class ManagedIdentityAuthRequest(
+        IServiceBundle serviceBundle,
+        AuthenticationRequestParameters authenticationRequestParameters,
+        AcquireTokenForManagedIdentityParameters managedIdentityParameters,
+        ManagedIdentityClient managedIdentityClient) : RequestBase(serviceBundle, authenticationRequestParameters, managedIdentityParameters)
     {
-        private readonly AcquireTokenForManagedIdentityParameters _managedIdentityParameters;
-        private readonly ManagedIdentityClient _managedIdentityClient;
-        private static readonly SemaphoreSlim s_semaphoreSlim = new SemaphoreSlim(1, 1);
-        private readonly ICryptographyManager _cryptoManager;
-        private readonly IManagedIdentityKeyProvider _managedIdentityKeyProvider;
-
-        public ManagedIdentityAuthRequest(
-            IServiceBundle serviceBundle,
-            AuthenticationRequestParameters authenticationRequestParameters,
-            AcquireTokenForManagedIdentityParameters managedIdentityParameters,
-            ManagedIdentityClient managedIdentityClient)
-            : base(serviceBundle, authenticationRequestParameters, managedIdentityParameters)
-        {
-            _managedIdentityParameters = managedIdentityParameters;
-            _managedIdentityClient = managedIdentityClient;
-            _cryptoManager = serviceBundle.PlatformProxy.CryptographyManager;
-            _managedIdentityKeyProvider = serviceBundle.PlatformProxy.ManagedIdentityKeyProvider;
-        }
+        private readonly AcquireTokenForManagedIdentityParameters _managedIdentityParameters = managedIdentityParameters;
+        private readonly ManagedIdentityClient _managedIdentityClient = managedIdentityClient;
+        private static readonly SemaphoreSlim s_semaphoreSlim = new(1, 1);
+        private readonly ICryptographyManager _cryptoManager = serviceBundle.PlatformProxy.CryptographyManager;
+        private readonly IManagedIdentityKeyProvider _managedIdentityKeyProvider = serviceBundle.PlatformProxy.ManagedIdentityKeyProvider;
 
         protected override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {

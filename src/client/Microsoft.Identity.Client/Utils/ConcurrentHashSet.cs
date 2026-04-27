@@ -302,13 +302,13 @@ namespace Microsoft.Identity.Client.Utils
             var hashcode = _comparer.GetHashCode(item);
 
             // We must capture the _buckets field in a local variable. It is set to a new table on each table resize.
-            var tables = _tables;
+            Tables tables = _tables;
 
             var bucketNo = GetBucket(hashcode, tables.Buckets.Length);
 
             // We can get away w/out a lock here.
             // The Volatile.Read ensures that the load of the fields of 'n' doesn't move before the load from buckets[i].
-            var current = Volatile.Read(ref tables.Buckets[bucketNo]);
+            Node current = Volatile.Read(ref tables.Buckets[bucketNo]);
 
             while (current != null)
             {
@@ -332,7 +332,7 @@ namespace Microsoft.Identity.Client.Utils
             var hashcode = _comparer.GetHashCode(item);
             while (true)
             {
-                var tables = _tables;
+                Tables tables = _tables;
 
                 GetBucketAndLockNo(hashcode, out int bucketNo, out int lockNo, tables.Buckets.Length, tables.Locks.Length);
 
@@ -346,7 +346,7 @@ namespace Microsoft.Identity.Client.Utils
                     }
 
                     Node previous = null;
-                    for (var current = tables.Buckets[bucketNo]; current != null; current = current.Next)
+                    for (Node current = tables.Buckets[bucketNo]; current != null; current = current.Next)
                     {
                         Debug.Assert((previous == null && current == tables.Buckets[bucketNo]) || previous?.Next == current);
 
@@ -385,12 +385,12 @@ namespace Microsoft.Identity.Client.Utils
         /// </remarks>
         public IEnumerator<T> GetEnumerator()
         {
-            var buckets = _tables.Buckets;
+            Node[] buckets = _tables.Buckets;
 
             for (var i = 0; i < buckets.Length; i++)
             {
                 // The Volatile.Read ensures that the load of the fields of 'current' doesn't move before the load from buckets[i].
-                var current = Volatile.Read(ref buckets[i]);
+                Node current = Volatile.Read(ref buckets[i]);
 
                 while (current != null)
                 {
@@ -440,7 +440,7 @@ namespace Microsoft.Identity.Client.Utils
 
         private void InitializeFromCollection(IEnumerable<T> collection)
         {
-            foreach (var item in collection)
+            foreach (T item in collection)
             {
                 AddInternal(item, _comparer.GetHashCode(item), false);
             }
@@ -455,7 +455,7 @@ namespace Microsoft.Identity.Client.Utils
         {
             while (true)
             {
-                var tables = _tables;
+                Tables tables = _tables;
 
                 GetBucketAndLockNo(hashcode, out int bucketNo, out int lockNo, tables.Buckets.Length, tables.Locks.Length);
 
@@ -475,7 +475,7 @@ namespace Microsoft.Identity.Client.Utils
 
                     // Try to find this item in the bucket
                     Node previous = null;
-                    for (var current = tables.Buckets[bucketNo]; current != null; current = current.Next)
+                    for (Node current = tables.Buckets[bucketNo]; current != null; current = current.Next)
                     {
                         Debug.Assert(previous == null && current == tables.Buckets[bucketNo] || previous?.Next == current);
                         if (hashcode == current.Hashcode && _comparer.Equals(current.Item, item))
@@ -644,10 +644,10 @@ namespace Microsoft.Identity.Client.Utils
                 // Copy all data into a new table, creating new nodes for all elements
                 for (var i = 0; i < tables.Buckets.Length; i++)
                 {
-                    var current = tables.Buckets[i];
+                    Node current = tables.Buckets[i];
                     while (current != null)
                     {
-                        var next = current.Next;
+                        Node next = current.Next;
                         GetBucketAndLockNo(current.Hashcode, out int newBucketNo, out int newLockNo, newBuckets.Length, newLocks.Length);
 
                         newBuckets[newBucketNo] = new Node(current.Item, current.Hashcode, newBuckets[newBucketNo]);
@@ -719,10 +719,10 @@ namespace Microsoft.Identity.Client.Utils
 
         private void CopyToItems(T[] array, int index)
         {
-            var buckets = _tables.Buckets;
+            Node[] buckets = _tables.Buckets;
             for (var i = 0; i < buckets.Length; i++)
             {
-                for (var current = buckets[i]; current != null; current = current.Next)
+                for (Node current = buckets[i]; current != null; current = current.Next)
                 {
                     array[index] = current.Item;
                     index++; //this should never flow, CopyToItems is only called when there's no overflow risk
@@ -730,34 +730,20 @@ namespace Microsoft.Identity.Client.Utils
             }
         }
 
-        private class Tables
+        private class Tables(ConcurrentHashSet<T>.Node[] buckets, object[] locks, int[] countPerLock)
         {
-            public readonly Node[] Buckets;
-            public readonly object[] Locks;
+            public readonly Node[] Buckets = buckets;
+            public readonly object[] Locks = locks;
 
-            public volatile int[] CountPerLock;
-
-            public Tables(Node[] buckets, object[] locks, int[] countPerLock)
-            {
-                Buckets = buckets;
-                Locks = locks;
-                CountPerLock = countPerLock;
-            }
+            public volatile int[] CountPerLock = countPerLock;
         }
 
-        private class Node
+        private class Node(T item, int hashcode, ConcurrentHashSet<T>.Node next)
         {
-            public readonly T Item;
-            public readonly int Hashcode;
+            public readonly T Item = item;
+            public readonly int Hashcode = hashcode;
 
-            public volatile Node Next;
-
-            public Node(T item, int hashcode, Node next)
-            {
-                Item = item;
-                Hashcode = hashcode;
-                Next = next;
-            }
+            public volatile Node Next = next;
         }
     }
 

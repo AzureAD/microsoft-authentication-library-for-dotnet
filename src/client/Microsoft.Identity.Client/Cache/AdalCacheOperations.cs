@@ -19,21 +19,21 @@ namespace Microsoft.Identity.Client.Cache
         {
             using (Stream stream = new MemoryStream())
             {
-                BinaryWriter writer = new BinaryWriter(stream);
+                BinaryWriter writer = new(stream);
                 writer.Write(SchemaVersion);
                 logger.Info(() => $"[AdalCacheOperations] Serializing token cache with {tokenCacheDictionary.Count} items. ");
 
                 writer.Write(tokenCacheDictionary.Count);
                 foreach (KeyValuePair<AdalTokenCacheKey, AdalResultWrapper> kvp in tokenCacheDictionary)
                 {
-                    var key = kvp.Key;
+                    AdalTokenCacheKey key = kvp.Key;
                     writer.Write($"{key.Authority}{Delimiter}{key.Resource}{Delimiter}{key.ClientId}{Delimiter}{(int)key.TokenSubjectType}");
                     writer.Write(kvp.Value.Serialize());
                 }
 
                 int length = (int)stream.Position;
                 stream.Position = 0;
-                BinaryReader reader = new BinaryReader(stream);
+                BinaryReader reader = new(stream);
                 return reader.ReadBytes(length);
             }
         }
@@ -49,12 +49,12 @@ namespace Microsoft.Identity.Client.Cache
 
             using (Stream stream = new MemoryStream())
             {
-                BinaryWriter writer = new BinaryWriter(stream);
+                BinaryWriter writer = new(stream);
                 writer.Write(state);
                 writer.Flush();
                 stream.Position = 0;
 
-                BinaryReader reader = new BinaryReader(stream);
+                BinaryReader reader = new(stream);
                 int blobSchemaVersion = reader.ReadInt32();
                 if (blobSchemaVersion != SchemaVersion)
                 {
@@ -69,7 +69,7 @@ namespace Microsoft.Identity.Client.Cache
 
                     string[] kvpElements = keyString.Split(new[] { Delimiter }, StringSplitOptions.None);
                     AdalResultWrapper resultEx = AdalResultWrapper.Deserialize(reader.ReadString());
-                    AdalTokenCacheKey key = new AdalTokenCacheKey(kvpElements[0], kvpElements[1], kvpElements[2],
+                    AdalTokenCacheKey key = new(kvpElements[0], kvpElements[1], kvpElements[2],
                         (TokenSubjectType)int.Parse(kvpElements[3], CultureInfo.CurrentCulture),
                         resultEx.Result.UserInfo);
 

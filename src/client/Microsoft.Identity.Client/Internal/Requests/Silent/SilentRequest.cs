@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                 if (isBrokerConfigured && !isAccountSourceDeviceCodeFlow)
                 {
                     _logger.Info("Broker is configured and enabled, attempting to use broker instead.");
-                    var brokerResult = await _brokerStrategyLazy.Value.ExecuteAsync(cancellationToken).ConfigureAwait(false);
+                    AuthenticationResult brokerResult = await _brokerStrategyLazy.Value.ExecuteAsync(cancellationToken).ConfigureAwait(false);
 
                     // fallback to local cache if broker fails
                     if (brokerResult != null)
@@ -109,7 +109,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
             AuthenticationRequestParameters.Account = account;
 
             // AcquireTokenSilent must not use "common" or "organizations". Instead, use the home tenant id.
-            var tenantedAuthority = await Authority.CreateAuthorityForRequestAsync(
+            Authority tenantedAuthority = await Authority.CreateAuthorityForRequestAsync(
                 AuthenticationRequestParameters.RequestContext,
                 AuthenticationRequestParameters.AuthorityOverride,
                 account).ConfigureAwait(false);

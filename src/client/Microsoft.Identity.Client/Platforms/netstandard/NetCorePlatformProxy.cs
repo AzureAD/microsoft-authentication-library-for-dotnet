@@ -24,12 +24,8 @@ namespace Microsoft.Identity.Client.Platforms.netstandard
     /// <summary>
     /// Platform / OS specific logic.  No library (ADAL / MSAL) specific code should go in here.
     /// </summary>
-    internal class NetCorePlatformProxy : AbstractPlatformProxy
+    internal class NetCorePlatformProxy(ILoggerAdapter logger) : AbstractPlatformProxy(logger)
     {
-        public NetCorePlatformProxy(ILoggerAdapter logger)
-            : base(logger)
-        {
-        }
 
         /// <summary>
         /// Get the user logged in
@@ -239,7 +235,7 @@ namespace Microsoft.Identity.Client.Platforms.netstandard
 
         private void OpenLinuxBrowser(string openToolPath, string url)
         {
-            ProcessStartInfo psi = new ProcessStartInfo(openToolPath, url)
+            ProcessStartInfo psi = new(openToolPath, url)
             {
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,

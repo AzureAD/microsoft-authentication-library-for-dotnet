@@ -24,8 +24,8 @@ namespace Microsoft.Identity.Client.WsTrust
     internal class MexDocument
     {
         private const string WsTrustSoapTransport = "http://schemas.xmlsoap.org/soap/http";
-        private readonly Dictionary<string, MexPolicy> _policies = new Dictionary<string, MexPolicy>();
-        private readonly Dictionary<string, MexPolicy> _bindings = new Dictionary<string, MexPolicy>();
+        private readonly Dictionary<string, MexPolicy> _policies = new();
+        private readonly Dictionary<string, MexPolicy> _bindings = new();
 
         private class MexPolicy
         {

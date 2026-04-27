@@ -69,7 +69,7 @@ namespace Microsoft.Identity.Client.Utils
         {
             _ = codeBlock ?? throw new ArgumentNullException(nameof(codeBlock));
             var startTicks = Watch.ElapsedTicks;
-            var result = await codeBlock.Invoke().ConfigureAwait(false);
+            TResult result = await codeBlock.Invoke().ConfigureAwait(false);
 
             return new MeasureDurationResult<TResult>(result, Watch.ElapsedTicks - startTicks);
         }
@@ -95,7 +95,7 @@ namespace Microsoft.Identity.Client.Utils
             _ = task ?? throw new ArgumentNullException(nameof(task));
 
             var startTicks = Watch.ElapsedTicks;
-            var taskResult = await task.ConfigureAwait(true);
+            TResult taskResult = await task.ConfigureAwait(true);
 
             return new MeasureDurationResult<TResult>(taskResult, Watch.ElapsedTicks - startTicks);
         }

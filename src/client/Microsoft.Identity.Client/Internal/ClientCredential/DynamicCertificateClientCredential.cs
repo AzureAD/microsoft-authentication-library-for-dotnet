@@ -11,15 +11,11 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
     /// Client credential that resolves certificates dynamically at runtime via a provider delegate.
     /// Used when certificates need to be rotated or selected based on runtime conditions.
     /// </summary>
-    internal class DynamicCertificateClientCredential : CertificateAndClaimsClientCredential
+    internal class DynamicCertificateClientCredential(
+        Func<AssertionRequestOptions, Task<X509Certificate2>> certificateProvider) : CertificateAndClaimsClientCredential(
+            certificateProvider: certificateProvider,
+            claimsToSign: null,
+            appendDefaultClaims: true)
     {
-        public DynamicCertificateClientCredential(
-            Func<AssertionRequestOptions, Task<X509Certificate2>> certificateProvider)
-            : base(
-                certificateProvider: certificateProvider,
-                claimsToSign: null,
-                appendDefaultClaims: true)
-        {
-        }
     }
 }

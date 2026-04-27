@@ -16,14 +16,9 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.WsTrust
 {
-    internal class WsTrustWebRequestManager : IWsTrustWebRequestManager
+    internal class WsTrustWebRequestManager(IHttpManager httpManager) : IWsTrustWebRequestManager
     {
-        private readonly IHttpManager _httpManager;
-
-        public WsTrustWebRequestManager(IHttpManager httpManager)
-        {
-            _httpManager = httpManager;
-        }
+        private readonly IHttpManager _httpManager = httpManager;
 
         /// <inheritdoc/>
         public async Task<MexDocument> GetMexDocumentAsync(string federationMetadataUrl, RequestContext requestContext, string federationMetadata = null)
@@ -178,12 +173,12 @@ namespace Microsoft.Identity.Client.WsTrust
 
             Dictionary<string, string> msalIdParams = MsalIdHelper.GetMsalIdParameters(requestContext.Logger);
 
-            var uri = new UriBuilder(userRealmUriPrefix + userName + "?api-version=1.0").Uri;
+            Uri uri = new UriBuilder(userRealmUriPrefix + userName + "?api-version=1.0").Uri;
 
             IRetryPolicyFactory retryPolicyFactory = requestContext.ServiceBundle.Config.RetryPolicyFactory;
             IRetryPolicy retryPolicy = retryPolicyFactory.GetRetryPolicy(RequestType.STS);
 
-            var httpResponse = await _httpManager.SendRequestAsync(
+            HttpResponse httpResponse = await _httpManager.SendRequestAsync(
                 uri,
                 msalIdParams,
                 body: null,

@@ -51,11 +51,11 @@ namespace Microsoft.Identity.Client
         /// <returns>Authentication-Info provided by the endpoint</returns>
         public static AuthenticationInfoParameters CreateFromResponseHeaders(HttpResponseHeaders httpResponseHeaders)
         {
-            AuthenticationInfoParameters parameters = new AuthenticationInfoParameters();
+            AuthenticationInfoParameters parameters = new();
 
             try
             {
-                var authInfoValueList = httpResponseHeaders.SingleOrDefault(header => header.Key == AuthenticationInfoKey).Value;
+                IEnumerable<string> authInfoValueList = httpResponseHeaders.SingleOrDefault(header => header.Key == AuthenticationInfoKey).Value;
 
                 if (authInfoValueList != null)
                 {

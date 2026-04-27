@@ -8,18 +8,11 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client.Utils
 {
-    internal struct MainThreadActionItem
+    internal struct MainThreadActionItem(Action action, TaskCompletionSource<bool> completion, bool isAsyncAction)
     {
-        public Action Action { get; }
-        public TaskCompletionSource<bool> Completion { get; }
-        public bool IsAsyncAction { get; }
-
-        public MainThreadActionItem(Action action, TaskCompletionSource<bool> completion, bool isAsyncAction)
-        {
-            Action = action;
-            Completion = completion;
-            IsAsyncAction = isAsyncAction;
-        }
+        public Action Action { get; } = action;
+        public TaskCompletionSource<bool> Completion { get; } = completion;
+        public bool IsAsyncAction { get; } = isAsyncAction;
     }
 
     /// <summary>
@@ -38,7 +31,7 @@ namespace Microsoft.Identity.Client.Utils
         private const int WorkerSleepInMilliseconds = 10;
 
         // Singleton mode
-        private static readonly Lazy<MacMainThreadScheduler> _instance = new Lazy<MacMainThreadScheduler>(() => new MacMainThreadScheduler());
+        private static readonly Lazy<MacMainThreadScheduler> _instance = new(() => new MacMainThreadScheduler());
 
         /// <summary>
         /// Gets the singleton instance of MacMainThreadScheduler
@@ -138,7 +131,7 @@ namespace Microsoft.Identity.Client.Utils
             {
                 while (!_workerFinished)
                 {
-                    while (_mainThreadActions.TryDequeue(out var actionItem))
+                    while (_mainThreadActions.TryDequeue(out MainThreadActionItem actionItem))
                     {
                         try
                         {

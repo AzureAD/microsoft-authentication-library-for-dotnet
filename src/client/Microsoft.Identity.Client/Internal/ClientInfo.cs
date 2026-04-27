@@ -40,13 +40,13 @@ namespace Microsoft.Identity.Client.Internal
                 var decodedBytes = Base64UrlHelpers.DecodeBytes(clientInfo);
 
                 // Deserialize into a dictionary to get all properties
-                var allProperties = JsonHelper.DeserializeFromJson<Dictionary<string, object>>(decodedBytes);
+                Dictionary<string, object> allProperties = JsonHelper.DeserializeFromJson<Dictionary<string, object>>(decodedBytes);
 
                 var clientInfoObj = new ClientInfo();
                 var additionalParams = new Dictionary<string, string>();
 
                 // Extract known claims and store the rest in AdditionalResponseParameters
-                foreach (var kvp in allProperties)
+                foreach (KeyValuePair<string, object> kvp in allProperties)
                 {
                     if (kvp.Key == ClientInfoClaim.UniqueIdentifier)
                     {

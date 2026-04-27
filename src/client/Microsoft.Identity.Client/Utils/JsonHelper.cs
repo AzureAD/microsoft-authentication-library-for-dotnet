@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Client.Utils
 
         internal static string GetExistingOrEmptyString(JObject json, string key)
         {
-            if (TryGetValue(json, key, out var val))
+            if (TryGetValue(json, key, out JToken val))
             {
                 return GetValue<string>(val);
             }
@@ -97,7 +97,7 @@ namespace Microsoft.Identity.Client.Utils
 
         internal static string ExtractExistingOrEmptyString(JObject json, string key)
         {
-            if (TryGetValue(json, key, out var val))
+            if (TryGetValue(json, key, out JToken val))
             {
                 string strVal = GetValue<string>(val);
                 json.Remove(key);
@@ -124,7 +124,7 @@ namespace Microsoft.Identity.Client.Utils
 
         internal static T ExtractExistingOrDefault<T>(JObject json, string key)
         {
-            if (TryGetValue(json, key, out var val))
+            if (TryGetValue(json, key, out JToken val))
             {
                 T obj = GetValue<T>(val);
                 json.Remove(key);
@@ -213,7 +213,7 @@ namespace Microsoft.Identity.Client.Utils
             jsonWriter.WriteStartObject();
 
             // Create a HashSet to track processed property names
-            HashSet<string> processedProperties = new HashSet<string>();
+            HashSet<string> processedProperties = new();
 
             // Iterate through properties of the first JSON object
             foreach (JsonProperty property in root1.EnumerateObject())

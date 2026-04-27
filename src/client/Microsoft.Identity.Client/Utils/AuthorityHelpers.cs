@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client.Utils
         public static string GetTenantId(Uri authorityUri)
         {
             var authorityInfo = AuthorityInfo.FromAuthorityUri(authorityUri.ToString(), false);
-            var authority = authorityInfo.CreateAuthority();
+            Instance.Authority authority = authorityInfo.CreateAuthority();
             return authority.TenantId;
         }
     }

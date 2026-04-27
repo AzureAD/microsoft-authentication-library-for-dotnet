@@ -11,14 +11,9 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.ApiConfig.Executors
 {
-    internal abstract class AbstractExecutor
+    internal abstract class AbstractExecutor(IServiceBundle serviceBundle)
     {
-        protected AbstractExecutor(IServiceBundle serviceBundle)
-        {
-            ServiceBundle = serviceBundle;
-        }
-
-        public IServiceBundle ServiceBundle { get; }
+        public IServiceBundle ServiceBundle { get; } = serviceBundle;
 
         protected RequestContext CreateRequestContextAndLogVersionInfo(Guid correlationId, X509Certificate2 mtlsCertificate, CancellationToken userCancellationToken = default)
         {

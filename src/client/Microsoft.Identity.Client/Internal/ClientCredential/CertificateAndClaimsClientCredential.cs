@@ -14,11 +14,23 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Internal.ClientCredential
 {
-    internal class CertificateAndClaimsClientCredential : IClientCredential
+    /// <summary>
+    /// Constructor that accepts a certificate provider delegate.
+    /// This allows both static certificates (via a simple delegate) and dynamic certificate resolution.
+    /// </summary>
+    /// <param name="certificateProvider">Async delegate that provides the certificate</param>
+    /// <param name="claimsToSign">Additional claims to include in the client assertion</param>
+    /// <param name="appendDefaultClaims">Whether to append default claims</param>
+    /// <param name="certificate">Optional static certificate for backward compatibility</param>
+    internal class CertificateAndClaimsClientCredential(
+        Func<AssertionRequestOptions, Task<X509Certificate2>> certificateProvider,
+        IDictionary<string, string> claimsToSign,
+        bool appendDefaultClaims,
+        X509Certificate2 certificate = null) : IClientCredential
     {
-        private readonly IDictionary<string, string> _claimsToSign;
-        private readonly bool _appendDefaultClaims = true;
-        private readonly Func<AssertionRequestOptions, Task<X509Certificate2>> _certificateProvider;
+        private readonly IDictionary<string, string> _claimsToSign = claimsToSign;
+        private readonly bool _appendDefaultClaims = appendDefaultClaims;
+        private readonly Func<AssertionRequestOptions, Task<X509Certificate2>> _certificateProvider = certificateProvider;
 
         public AssertionType AssertionType => AssertionType.CertificateWithoutSni;
 
@@ -26,27 +38,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         /// The static certificate if one was provided directly; otherwise null.
         /// This is used for backward compatibility with the Certificate property on ConfidentialClientApplication.
         /// </summary>
-        public X509Certificate2 Certificate { get; }
-
-        /// <summary>
-        /// Constructor that accepts a certificate provider delegate.
-        /// This allows both static certificates (via a simple delegate) and dynamic certificate resolution.
-        /// </summary>
-        /// <param name="certificateProvider">Async delegate that provides the certificate</param>
-        /// <param name="claimsToSign">Additional claims to include in the client assertion</param>
-        /// <param name="appendDefaultClaims">Whether to append default claims</param>
-        /// <param name="certificate">Optional static certificate for backward compatibility</param>
-        public CertificateAndClaimsClientCredential(
-            Func<AssertionRequestOptions, Task<X509Certificate2>> certificateProvider,
-            IDictionary<string, string> claimsToSign,
-            bool appendDefaultClaims,
-            X509Certificate2 certificate = null)
-        {
-            _certificateProvider = certificateProvider;
-            _claimsToSign = claimsToSign;
-            _appendDefaultClaims = appendDefaultClaims;
-            Certificate = certificate;
-        }
+        public X509Certificate2 Certificate { get; } = certificate;
 
         public async Task<CredentialMaterial> GetCredentialMaterialAsync(
             CredentialContext context,

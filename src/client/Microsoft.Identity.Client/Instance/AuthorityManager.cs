@@ -15,25 +15,17 @@ namespace Microsoft.Identity.Client.Instance
     /// <summary>
     /// This object is at REQUEST level.
     /// </summary>
-    internal class AuthorityManager
+    internal class AuthorityManager(RequestContext requestContext, Authority initialAuthority)
     {
         private static readonly ConcurrentHashSet<string> s_validatedEnvironments =
-            new ConcurrentHashSet<string>();
+            new();
 
-        private readonly RequestContext _requestContext;
+        private readonly RequestContext _requestContext = requestContext;
 
-        private readonly Authority _initialAuthority;
-        private Authority _currentAuthority;
+        private readonly Authority _initialAuthority = initialAuthority;
+        private Authority _currentAuthority = initialAuthority;
 
         bool _instanceDiscoveryAndValidationExecuted = false;
-
-        public AuthorityManager(RequestContext requestContext, Authority initialAuthority)
-        {
-            _requestContext = requestContext;
-
-            _initialAuthority = initialAuthority;
-            _currentAuthority = initialAuthority;
-        }
 
         public Authority OriginalAuthority => _initialAuthority;
 
@@ -94,7 +86,7 @@ namespace Microsoft.Identity.Client.Instance
                 !s_validatedEnvironments.Contains(authority.AuthorityInfo.Host))
             {
                 // validate the original authority, as the resolved authority might be regionalized and we cannot validate regionalized authorities.
-                var validator = AuthorityInfoHelper.CreateAuthorityValidator(authority.AuthorityInfo, _requestContext);
+                IAuthorityValidator validator = AuthorityInfoHelper.CreateAuthorityValidator(authority.AuthorityInfo, _requestContext);
                 await validator.ValidateAuthorityAsync(authority.AuthorityInfo).ConfigureAwait(false);
 
                 s_validatedEnvironments.Add(authority.AuthorityInfo.Host);

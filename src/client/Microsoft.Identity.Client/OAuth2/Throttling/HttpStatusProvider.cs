@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
             IReadOnlyDictionary<string, string> bodyParams,
             MsalServiceException ex)
         {
-            var logger = requestParams.RequestContext.Logger;
+            ILoggerAdapter logger = requestParams.RequestContext.Logger;
 
             if (IsRequestSupported(requestParams) &&
                 (ex.StatusCode == 429 || (ex.StatusCode >= 500 && ex.StatusCode < 600)) &&
@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
             if (!ThrottlingCache.IsEmpty() &&
                 IsRequestSupported(requestParams))
             {
-                var logger = requestParams.RequestContext.Logger;
+                ILoggerAdapter logger = requestParams.RequestContext.Logger;
 
                 string strictThumbprint = ThrottleCommon.GetRequestStrictThumbprint(
                     bodyParams,

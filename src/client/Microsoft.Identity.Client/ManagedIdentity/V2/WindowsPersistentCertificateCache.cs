@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 string bestEndpoint = null;
                 DateTime bestNotAfter = DateTime.MinValue;
 
-                foreach (var candidate in items)
+                foreach (X509Certificate2 candidate in items)
                 {
                     try
                     {
@@ -111,7 +111,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                         logger.Verbose(() => "[PersistentCert] Failed to read CN from selected certificate: " + ex.Message);
                     }
 
-                    if (!Guid.TryParse(cn, out var clientIdGuid))
+                    if (!Guid.TryParse(cn, out Guid clientIdGuid))
                     {
                         best.Dispose();
                         logger.Verbose(() => "[PersistentCert] Selected entry CN is not a GUID; skipping.");
@@ -162,8 +162,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                         using var store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
                         store.Open(OpenFlags.ReadWrite);
 
-                        var nowUtc = DateTime.UtcNow;
-                        var newNotAfterUtc = cert.NotAfter.ToUniversalTime();
+                        DateTime nowUtc = DateTime.UtcNow;
+                        DateTime newNotAfterUtc = cert.NotAfter.ToUniversalTime();
 
                         // Skip write if a newer/equal, non-expired binding for this alias already exists.
                         DateTime newestForAliasUtc = DateTime.MinValue;
@@ -180,7 +180,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                             present = store.Certificates.Cast<X509Certificate2>().ToArray();
                         }
 
-                        foreach (var existing in present)
+                        foreach (X509Certificate2 existing in present)
                         {
                             try
                             {
@@ -194,7 +194,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                                     continue;
                                 }
 
-                                var existingNotAfterUtc = existing.NotAfter.ToUniversalTime();
+                                DateTime existingNotAfterUtc = existing.NotAfter.ToUniversalTime();
                                 if (existingNotAfterUtc > newestForAliasUtc)
                                 {
                                     newestForAliasUtc = existingNotAfterUtc;
@@ -297,7 +297,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 
                         int removed = 0;
 
-                        foreach (var existing in items)
+                        foreach (X509Certificate2 existing in items)
                         {
                             try
                             {
@@ -350,7 +350,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 
             int removed = 0;
 
-            foreach (var existing in items)
+            foreach (X509Certificate2 existing in items)
             {
                 try
                 {

@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
         internal RequestContext RequestContext { get; set; }
 
         private const int UIWidth = 566;
-        private static readonly NavigateErrorStatus NavigateErrorStatus = new NavigateErrorStatus();
+        private static readonly NavigateErrorStatus NavigateErrorStatus = new();
         private readonly CustomWebBrowser _webBrowser;
         private Uri _desiredCallbackUri;
         private Keys _key = Keys.None;
@@ -130,7 +130,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
                 return;
             }
 
-            Uri url = new Uri(e.Url);
+            Uri url = new(e.Url);
 
             // we cancel further processing, if we reached final URL.
             // Security issue: we prohibit navigation with auth code
@@ -283,7 +283,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
             if (RequestContext.ServiceBundle.Config.IsWebviewSsoPolicyEnabled)
             {
                 IBroker broker = RequestContext.ServiceBundle.Config.BrokerCreatorFunc(null, RequestContext.ServiceBundle.Config, RequestContext.Logger);
-                var ssoPolicyHeaders = broker.GetSsoPolicyHeaders();
+                IReadOnlyDictionary<string, string> ssoPolicyHeaders = broker.GetSsoPolicyHeaders();
                 string ssoPolicyHeadersString = "";
                 foreach (KeyValuePair<string, string> kvp in ssoPolicyHeaders)
                 {

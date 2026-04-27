@@ -12,7 +12,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity
     /// This information is useful for credential chains like DefaultAzureCredential to determine whether to skip
     /// managed identity authentication entirely.
     /// </remarks>
-    public class ManagedIdentitySourceResult
+    /// <remarks>
+    /// Initializes a new instance of the <see cref="ManagedIdentitySourceResult"/> class.
+    /// </remarks>
+    /// <param name="source">The detected managed identity source.</param>
+    public class ManagedIdentitySourceResult(ManagedIdentitySource source)
     {
         /// <summary>
         /// Gets the detected managed identity source.
@@ -21,7 +25,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         /// The <see cref="ManagedIdentitySource"/> that was detected on the environment.
         /// Returns <see cref="ManagedIdentitySource.None"/> if no managed identity source was detected.
         /// </value>
-        public ManagedIdentitySource Source { get; }
+        public ManagedIdentitySource Source { get; } = source;
 
         /// <summary>
         /// Gets or sets the failure reason from the IMDSv1 probe, if it failed.
@@ -38,14 +42,5 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         /// A string describing why the IMDSv2 probe failed, or <c>null</c> if the probe succeeded or was not attempted.
         /// </value>
         public string ImdsV2FailureReason { get; set; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ManagedIdentitySourceResult"/> class.
-        /// </summary>
-        /// <param name="source">The detected managed identity source.</param>
-        public ManagedIdentitySourceResult(ManagedIdentitySource source)
-        {
-            Source = source;
-        }
     }
 }

@@ -158,7 +158,7 @@ namespace Microsoft.Identity.Client.Extensibility
             }
             else
             {
-                foreach (var kvp in cacheKeyComponents)
+                foreach (KeyValuePair<string, Func<CancellationToken, Task<string>>> kvp in cacheKeyComponents)
                 {
                     // Key conflicts are not allowed, it is expected for this method to fail.
                     builder.CommonParameters.CacheKeyComponents.Add(kvp.Key, kvp.Value);

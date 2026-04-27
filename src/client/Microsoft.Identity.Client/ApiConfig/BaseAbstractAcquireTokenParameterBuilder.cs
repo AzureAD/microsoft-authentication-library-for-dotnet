@@ -116,7 +116,7 @@ namespace Microsoft.Identity.Client
             CommonParameters.ExtraQueryParameters = CommonParameters.ExtraQueryParameters ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
             // Add each parameter to ExtraQueryParameters and, if requested, to CacheKeyComponents
-            foreach (var kvp in extraQueryParameters)
+            foreach (KeyValuePair<string, (string Value, bool IncludeInCacheKey)> kvp in extraQueryParameters)
             {
                 CommonParameters.ExtraQueryParameters[kvp.Key] = kvp.Value.Value;
 

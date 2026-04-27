@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     "IDENTITY_ENDPOINT", identityEndpoint, AzureArc);
 
                 // Use the factory to create and throw the exception
-                var exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
+                MsalException exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
                     MsalError.InvalidManagedIdentityEndpoint,
                     errorMessage,
                     null,
@@ -69,7 +69,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             {
                 string errorMessage = string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityUserAssignedNotSupported, AzureArc);
 
-                var exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
+                MsalException exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
                     MsalError.UserAssignedManagedIdentityNotSupported,
                     errorMessage,
                     null,
@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         protected override Task<ManagedIdentityRequest> CreateRequestAsync(string resource)
         {
-            ManagedIdentityRequest request = new ManagedIdentityRequest(System.Net.Http.HttpMethod.Get, _endpoint);
+            ManagedIdentityRequest request = new(System.Net.Http.HttpMethod.Get, _endpoint);
 
             request.Headers.Add("Metadata", "true");
             request.QueryParameters["api-version"] = ArcApiVersion;
@@ -104,7 +104,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 {
                     _requestContext.Logger.Error("[Managed Identity] WWW-Authenticate header is expected but not found.");
 
-                    var exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
+                    MsalException exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
                         MsalError.ManagedIdentityRequestFailed,
                         MsalErrorMessage.ManagedIdentityNoChallengeError,
                         null,

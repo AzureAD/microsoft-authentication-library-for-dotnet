@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client.Internal
         public async Task<Tuple<AuthorizationResult, string>> FetchAuthCodeAndPkceVerifierAsync(
             CancellationToken cancellationToken)
         {
-            var webUi = CreateWebAuthenticationDialog();
+            IWebUI webUi = CreateWebAuthenticationDialog();
             return await FetchAuthCodeAndPkceInternalAsync(webUi, cancellationToken).ConfigureAwait(false);
         }
 
@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Client.Internal
             string authEndpoint = await _requestParams.Authority.GetAuthorizationEndpointAsync(
                 _requestParams.RequestContext).ConfigureAwait(false);
 
-            var result = CreateAuthorizationUri(authEndpoint, false);
+            Tuple<Uri, string, string> result = CreateAuthorizationUri(authEndpoint, false);
             return result.Item1;
         }
 
@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Client.Internal
             string authEndpoint = await _requestParams.Authority.GetAuthorizationEndpointAsync(_requestParams.RequestContext)
                 .ConfigureAwait(false);
 
-            var result = CreateAuthorizationUriWithCodeChallenge(authEndpoint, codeVerifier);
+            Tuple<Uri, string> result = CreateAuthorizationUriWithCodeChallenge(authEndpoint, codeVerifier);
             return result.Item1;
         }
 
@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Client.Internal
             string state = authorizationTuple.Item2;
             string codeVerifier = authorizationTuple.Item3;
 
-            var authorizationResult = await webUi.AcquireAuthorizationAsync(
+            AuthorizationResult authorizationResult = await webUi.AcquireAuthorizationAsync(
                                        authorizationUri,
                                        _requestParams.RedirectUri,
                                        _requestParams.RequestContext,
@@ -169,7 +169,7 @@ namespace Microsoft.Identity.Client.Internal
                 throw new ArgumentException("API does not accept client id as a user-provided scope");
             }
 
-            var unionScope = ScopeHelper.GetMsalScopes(
+            HashSet<string> unionScope = ScopeHelper.GetMsalScopes(
                 new HashSet<string>(_requestParams.Scope.Concat(extraScopesToConsent)));
 
             var authorizationRequestParameters = new Dictionary<string, string>

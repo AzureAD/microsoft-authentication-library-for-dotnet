@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Client.WsTrust
                 XElement text = reason.Elements(XmlNamespace.SoapEnvelope + "Text").FirstOrDefault();
                 if (text != null)
                 {
-                    using (var reader = text.CreateReader())
+                    using (System.Xml.XmlReader reader = text.CreateReader())
                     {
                         reader.MoveToContent();
                         return reader.ReadInnerXml();
@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Client.WsTrust
 
         internal static WsTrustResponse CreateFromResponseDocument(XDocument responseDocument, WsTrustVersion version)
         {
-            Dictionary<string, string> tokenResponseDictionary = new Dictionary<string, string>();
+            Dictionary<string, string> tokenResponseDictionary = new();
 
             XNamespace t = XmlNamespace.Trust;
             if (version == WsTrustVersion.WsTrust2005)
@@ -91,7 +91,7 @@ namespace Microsoft.Identity.Client.WsTrust
 
             IEnumerable<XElement> tokenResponses =
                 responseDocument.Descendants(t + "RequestSecurityTokenResponse");
-            foreach (var tokenResponse in tokenResponses)
+            foreach (XElement tokenResponse in tokenResponses)
             {
                 XElement tokenTypeElement = tokenResponse.Elements(t + "TokenType").FirstOrDefault();
                 if (tokenTypeElement == null)
@@ -107,7 +107,7 @@ namespace Microsoft.Identity.Client.WsTrust
                 }
 
                 var token = new System.Text.StringBuilder();
-                foreach (var node in requestedSecurityToken.Nodes())
+                foreach (XNode node in requestedSecurityToken.Nodes())
                 {
                     // Since we moved from XDocument.Load(..., LoadOptions.None) to Load(..., LoadOptions.PreserveWhitespace),
                     // requestedSecurityToken can contain multiple nodes, and the first node is possibly just whitespaces e.g. "\n   ",
@@ -127,7 +127,7 @@ namespace Microsoft.Identity.Client.WsTrust
                 ? Saml1Assertion
                 : tokenResponseDictionary.Keys.First();
 
-            WsTrustResponse wsTrustResponse = new WsTrustResponse
+            WsTrustResponse wsTrustResponse = new()
             {
                 TokenType = tokenType,
                 Token = tokenResponseDictionary[tokenType]

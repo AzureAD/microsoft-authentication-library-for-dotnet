@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Client.Cache
 
         public async Task<Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem, Account>> SaveTokenResponseAsync(MsalTokenResponse tokenResponse)
         {
-            var result = await TokenCacheInternal.SaveTokenResponseAsync(_requestParams, tokenResponse).ConfigureAwait(false);
+            Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem, Account> result = await TokenCacheInternal.SaveTokenResponseAsync(_requestParams, tokenResponse).ConfigureAwait(false);
             RequestContext.ApiEvent.CachedAccessTokenCount = TokenCacheInternal.Accessor.EntryCount;
             return result;
         }
@@ -112,7 +112,7 @@ namespace Microsoft.Identity.Client.Cache
                     await TokenCacheInternal.Semaphore.WaitAsync(_requestParams.RequestContext.UserCancellationToken).ConfigureAwait(false);
                     _requestParams.RequestContext.Logger.Verbose(() => "[Cache Session Manager] Entered cache semaphore");
 
-                    TelemetryData telemetryData = new TelemetryData();
+                    TelemetryData telemetryData = new();
                     try
                     {
                         if (!_cacheRefreshedForRead) // double check locking
@@ -138,12 +138,12 @@ namespace Microsoft.Identity.Client.Cache
                                   piiLoggingEnabled: _requestParams.RequestContext.Logger.PiiLoggingEnabled,
                                   telemetryData: telemetryData);
 
-                                var measureDurationResult = await TokenCacheInternal.OnBeforeAccessAsync(args).MeasureAsync().ConfigureAwait(false);
+                                MeasureDurationResult measureDurationResult = await TokenCacheInternal.OnBeforeAccessAsync(args).MeasureAsync().ConfigureAwait(false);
                                 RequestContext.ApiEvent.DurationInCacheInMs += measureDurationResult.Milliseconds;
                             }
                             finally
                             {
-                                var measureDurationResult = await StopwatchService.MeasureCodeBlockAsync(async () =>
+                                MeasureDurationResult measureDurationResult = await StopwatchService.MeasureCodeBlockAsync(async () =>
                                 {
                                     var args = new TokenCacheNotificationArgs(
                                       TokenCacheInternal,

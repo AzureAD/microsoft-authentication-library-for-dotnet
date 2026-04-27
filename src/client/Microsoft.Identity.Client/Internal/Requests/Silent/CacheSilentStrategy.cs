@@ -13,30 +13,22 @@ using Microsoft.Identity.Client.OAuth2;
 
 namespace Microsoft.Identity.Client.Internal.Requests.Silent
 {
-    internal class CacheSilentStrategy : ISilentAuthRequestStrategy
+    internal class CacheSilentStrategy(
+        SilentRequest request,
+        IServiceBundle serviceBundle,
+        AuthenticationRequestParameters authenticationRequestParameters,
+        AcquireTokenSilentParameters silentParameters) : ISilentAuthRequestStrategy
     {
-        private AuthenticationRequestParameters AuthenticationRequestParameters { get; }
+        private AuthenticationRequestParameters AuthenticationRequestParameters { get; } = authenticationRequestParameters;
         private ICacheSessionManager CacheManager => AuthenticationRequestParameters.CacheSessionManager;
-        protected IServiceBundle ServiceBundle { get; }
-        private readonly AcquireTokenSilentParameters _silentParameters;
+        protected IServiceBundle ServiceBundle { get; } = serviceBundle;
+        private readonly AcquireTokenSilentParameters _silentParameters = silentParameters;
         private const string TheOnlyFamilyId = "1";
-        private readonly SilentRequest _silentRequest;
-
-        public CacheSilentStrategy(
-            SilentRequest request,
-            IServiceBundle serviceBundle,
-            AuthenticationRequestParameters authenticationRequestParameters,
-            AcquireTokenSilentParameters silentParameters)
-        {
-            AuthenticationRequestParameters = authenticationRequestParameters;
-            _silentParameters = silentParameters;
-            ServiceBundle = serviceBundle;
-            _silentRequest = request;
-        }
+        private readonly SilentRequest _silentRequest = request;
 
         public async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
-            var logger = AuthenticationRequestParameters.RequestContext.Logger;
+            ILoggerAdapter logger = AuthenticationRequestParameters.RequestContext.Logger;
             MsalAccessTokenCacheItem cachedAccessTokenItem = null;
             CacheRefreshReason cacheInfoTelemetry = CacheRefreshReason.NotApplicable;
 
@@ -160,8 +152,8 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
 
         private async Task<AuthenticationResult> CreateAuthenticationResultAsync(MsalAccessTokenCacheItem cachedAccessTokenItem, CancellationToken ct)
         {
-            var msalIdTokenItem = await CacheManager.GetIdTokenCacheItemAsync(cachedAccessTokenItem).ConfigureAwait(false);
-            var account = await CacheManager.GetAccountAssociatedWithAccessTokenAsync(cachedAccessTokenItem).ConfigureAwait(false);
+            MsalIdTokenCacheItem msalIdTokenItem = await CacheManager.GetIdTokenCacheItemAsync(cachedAccessTokenItem).ConfigureAwait(false);
+            Account account = await CacheManager.GetAccountAssociatedWithAccessTokenAsync(cachedAccessTokenItem).ConfigureAwait(false);
 
             return await AuthenticationResult.CreateAsync(
                 cachedAccessTokenItem,
@@ -178,7 +170,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
 
         private async Task<MsalTokenResponse> TryGetTokenUsingFociAsync(CancellationToken cancellationToken)
         {
-            var logger = AuthenticationRequestParameters.RequestContext.Logger;
+            ILoggerAdapter logger = AuthenticationRequestParameters.RequestContext.Logger;
 
             // FOCI is only supported on public client desktop apps
             if (!(ServiceBundle.PlatformProxy.GetFeatureFlags().IsFociEnabled &&
@@ -202,7 +194,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
             }
 
             logger.Verbose(() => "[FOCI] App is part of the family or unknown, looking for FRT. ");
-            var familyRefreshToken = await CacheManager.FindFamilyRefreshTokenAsync(TheOnlyFamilyId).ConfigureAwait(false);
+            MsalRefreshTokenCacheItem familyRefreshToken = await CacheManager.FindFamilyRefreshTokenAsync(TheOnlyFamilyId).ConfigureAwait(false);
             logger.Verbose(() => "[FOCI] FRT found? " + (familyRefreshToken != null));
 
             if (familyRefreshToken != null)
@@ -244,7 +236,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
 
         private async Task<MsalRefreshTokenCacheItem> FindRefreshTokenOrFailAsync()
         {
-            var msalRefreshTokenItem = await CacheManager.FindRefreshTokenAsync().ConfigureAwait(false);
+            MsalRefreshTokenCacheItem msalRefreshTokenItem = await CacheManager.FindRefreshTokenAsync().ConfigureAwait(false);
             if (msalRefreshTokenItem == null)
             {
                 AuthenticationRequestParameters.RequestContext.Logger.Warning(

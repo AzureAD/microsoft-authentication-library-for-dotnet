@@ -10,20 +10,16 @@ using Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser;
 
 namespace Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser
 {
-    internal class HttpListenerInterceptor : IUriInterceptor
+    internal class HttpListenerInterceptor(ILoggerAdapter logger) : IUriInterceptor
     {
-        private ILoggerAdapter _logger;
+        private ILoggerAdapter _logger = logger;
 
         #region Test Hooks 
         public Action TestBeforeTopLevelCall { get; set; }
         public Action<string> TestBeforeStart { get; set; }
         public Action TestBeforeGetContext { get; set; }
-        #endregion
 
-        public HttpListenerInterceptor(ILoggerAdapter logger)
-        {
-            _logger = logger;
-        }
+        #endregion
 
         public async Task<AuthorizationResponse> ListenToSingleRequestAndRespondAsync(
             int port,

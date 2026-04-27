@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Client.Utils
 
         public static string ToQueryParameter(this IDictionary<string, string> input)
         {
-            StringBuilder builder = new StringBuilder();
+            StringBuilder builder = new();
 
             if (input.Count > 0)
             {
@@ -86,7 +86,7 @@ namespace Microsoft.Identity.Client.Utils
             var response = new Dictionary<string, string>();
 
             // Split the full query string on & (or any provided delimiter) to get individual k=v pairs.
-            var queryPairs = SplitWithQuotes(input, delimiter);
+            IReadOnlyList<string> queryPairs = SplitWithQuotes(input, delimiter);
 
             foreach (string queryPair in queryPairs)
             {
@@ -151,7 +151,7 @@ namespace Microsoft.Identity.Client.Utils
             }
 
             var result = new Dictionary<string, (string value, bool includeInCacheKey)>(StringComparer.OrdinalIgnoreCase);
-            foreach (var kvp in parameters)
+            foreach (KeyValuePair<string, string> kvp in parameters)
             {
                 result[kvp.Key] = (kvp.Value, false); // Exclude all parameters from cache key by default
             }
@@ -223,7 +223,7 @@ namespace Microsoft.Identity.Client.Utils
 
             StringBuilder stringBuilder = new();
 
-            foreach (var component in cacheKeyComponents)
+            foreach (KeyValuePair<string, string> component in cacheKeyComponents)
             {
                 stringBuilder.Append(component.Key);
                 stringBuilder.Append(component.Value);

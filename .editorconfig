@@ -859,6 +859,10 @@ dotnet_diagnostic.CA1837.severity = none
 # Avoid &apos;StringBuilder&apos; parameters for P/Invokes
 dotnet_diagnostic.CA1838.severity = none
 
+# Use 'string.StartsWith(char)' / 'string.EndsWith(char)' overloads
+# Not applicable: char overloads require .NET 5+; not available in net462/netstandard2.0 targets
+dotnet_diagnostic.CA1866.severity = none
+
 # Dispose objects before losing scope
 dotnet_diagnostic.CA2000.severity = none
 

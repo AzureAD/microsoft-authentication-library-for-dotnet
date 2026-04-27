@@ -19,21 +19,15 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
     ///   4) factory mint + back-fill
     /// Persistence is best-effort and non-throwing.
     /// </summary>
-    internal sealed class MtlsBindingCache : IMtlsCertificateCache
+    /// <remarks>
+    /// Inject both caches to avoid global state and enable testing.
+    /// </remarks>
+    internal sealed class MtlsBindingCache(ICertificateCache memory, IPersistentCertificateCache persisted) : IMtlsCertificateCache
     {
         private readonly KeyedSemaphorePool _gates = new();
-        private readonly ICertificateCache _memory;
-        private readonly IPersistentCertificateCache _persisted;
+        private readonly ICertificateCache _memory = memory ?? throw new ArgumentNullException(nameof(memory));
+        private readonly IPersistentCertificateCache _persisted = persisted ?? throw new ArgumentNullException(nameof(persisted));
         private readonly ConcurrentDictionary<string, byte> _forceMint = new();
-
-        /// <summary>
-        /// Inject both caches to avoid global state and enable testing.
-        /// </summary>
-        public MtlsBindingCache(ICertificateCache memory, IPersistentCertificateCache persisted)
-        {
-            _memory = memory ?? throw new ArgumentNullException(nameof(memory));
-            _persisted = persisted ?? throw new ArgumentNullException(nameof(persisted));
-        }
 
         /// <summary>
         /// Get or create mTLS binding info
@@ -64,7 +58,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             bool forceMint = _forceMint.ContainsKey(cacheKey);
 
             // 1) In-memory cache first
-            if (!forceMint && _memory.TryGet(cacheKey, out var cachedEntry, logger))
+            if (!forceMint && _memory.TryGet(cacheKey, out CertificateCacheValue cachedEntry, logger))
             {
                 logger.Verbose(() =>
                     $"[PersistentCert] mTLS binding cache HIT (memory) for '{cacheKey}'.");
@@ -95,7 +89,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 }
 
                 // 3) Persistent cache (best-effort)
-                if (!forceMint && _persisted.Read(cacheKey, out var persistedEntry, logger))
+                if (!forceMint && _persisted.Read(cacheKey, out CertificateCacheValue persistedEntry, logger))
                 {
                     logger.Verbose(() =>
                         $"[PersistentCert] mTLS binding cache HIT (persistent) for '{cacheKey}'.");
@@ -122,7 +116,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 }
 
                 // 4) Mint + back-fill mem + best-effort persist + prune
-                var mintedBinding = await factory().ConfigureAwait(false);
+                MtlsBindingInfo mintedBinding = await factory().ConfigureAwait(false);
 
                 logger.Verbose(() =>
                     $"[PersistentCert] mTLS binding cache MISS -> minted new binding for '{cacheKey}'.");

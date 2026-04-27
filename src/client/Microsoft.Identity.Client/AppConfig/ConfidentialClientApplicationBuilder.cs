@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Client
             ApplicationBase.GuardMobileFrameworks();
 
             var config = new ApplicationConfiguration(MsalClientType.ConfidentialClient);
-            var builder = new ConfidentialClientApplicationBuilder(config).WithOptions(options);
+            ConfidentialClientApplicationBuilder builder = new ConfidentialClientApplicationBuilder(config).WithOptions(options);
 
             if (!string.IsNullOrWhiteSpace(options.ClientSecret))
             {

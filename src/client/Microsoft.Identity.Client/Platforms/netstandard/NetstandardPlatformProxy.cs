@@ -9,12 +9,8 @@ namespace Microsoft.Identity.Client.Platforms.netstandard
     /// NetStandard 2.0 is very similar to Net Core. We could completely remove netcore2.1 however
     /// customers have reported issues with approach.
     /// </summary>
-    internal class NetStandardPlatformProxy : NetCorePlatformProxy
+    internal class NetStandardPlatformProxy(ILoggerAdapter logger) : NetCorePlatformProxy(logger)
     {
-        public NetStandardPlatformProxy(ILoggerAdapter logger)
-            : base(logger)
-        {
-        }
 
         /// <inheritdoc/>
         protected override string InternalGetProductName()

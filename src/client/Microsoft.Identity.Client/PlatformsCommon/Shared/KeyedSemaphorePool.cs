@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         /// </summary>
         public async Task EnterAsync(string key, CancellationToken cancellationToken)
         {
-            var gate = _gates.GetOrAdd(key, static _ => new SemaphoreSlim(1, 1));
+            SemaphoreSlim gate = _gates.GetOrAdd(key, static _ => new SemaphoreSlim(1, 1));
             await gate.WaitAsync(cancellationToken).ConfigureAwait(false);
         }
 
@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         /// </summary>
         public void Release(string key)
         {
-            if (_gates.TryGetValue(key, out var gate))
+            if (_gates.TryGetValue(key, out SemaphoreSlim gate))
             {
                 gate.Release();
             }

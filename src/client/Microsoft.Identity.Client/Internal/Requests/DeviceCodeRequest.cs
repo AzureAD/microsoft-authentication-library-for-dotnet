@@ -12,18 +12,12 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
-    internal class DeviceCodeRequest : RequestBase
+    internal class DeviceCodeRequest(
+        IServiceBundle serviceBundle,
+        AuthenticationRequestParameters authenticationRequestParameters,
+        AcquireTokenWithDeviceCodeParameters deviceCodeParameters) : RequestBase(serviceBundle, authenticationRequestParameters, deviceCodeParameters)
     {
-        private readonly AcquireTokenWithDeviceCodeParameters _deviceCodeParameters;
-
-        public DeviceCodeRequest(
-            IServiceBundle serviceBundle,
-            AuthenticationRequestParameters authenticationRequestParameters,
-            AcquireTokenWithDeviceCodeParameters deviceCodeParameters)
-            : base(serviceBundle, authenticationRequestParameters, deviceCodeParameters)
-        {
-            _deviceCodeParameters = deviceCodeParameters;
-        }
+        private readonly AcquireTokenWithDeviceCodeParameters _deviceCodeParameters = deviceCodeParameters;
 
         protected override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
@@ -47,17 +41,17 @@ namespace Microsoft.Identity.Client.Internal.Requests
             var builder = new UriBuilder(deviceCodeEndpoint);
             builder.AppendQueryParameters(AuthenticationRequestParameters.ExtraQueryParameters);
 
-            var response = await client.ExecuteRequestAsync<DeviceCodeResponse>(
+            DeviceCodeResponse response = await client.ExecuteRequestAsync<DeviceCodeResponse>(
                                builder.Uri,
                                HttpMethod.Post,
                                AuthenticationRequestParameters.RequestContext,
                                // Normally AAD responds with an error HTTP code, but /devicecode endpoint sends errors on 200OK
                                expectErrorsOn200OK: true).ConfigureAwait(false);
 
-            var deviceCodeResult = response.GetResult(AuthenticationRequestParameters.AppConfig.ClientId, deviceCodeScopes);
+            DeviceCodeResult deviceCodeResult = response.GetResult(AuthenticationRequestParameters.AppConfig.ClientId, deviceCodeScopes);
             await _deviceCodeParameters.DeviceCodeResultCallback(deviceCodeResult).ConfigureAwait(false);
 
-            var msalTokenResponse = await WaitForTokenResponseAsync(deviceCodeResult, cancellationToken).ConfigureAwait(false);
+            MsalTokenResponse msalTokenResponse = await WaitForTokenResponseAsync(deviceCodeResult, cancellationToken).ConfigureAwait(false);
             return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse, cancellationToken).ConfigureAwait(false);
         }
 
@@ -65,7 +59,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             DeviceCodeResult deviceCodeResult,
             CancellationToken cancellationToken)
         {
-            var timeRemaining = deviceCodeResult.ExpiresOn - DateTimeOffset.UtcNow;
+            TimeSpan timeRemaining = deviceCodeResult.ExpiresOn - DateTimeOffset.UtcNow;
 
             while (timeRemaining.TotalSeconds > 0.0)
             {
@@ -79,7 +73,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     var tokenEndpoint = await AuthenticationRequestParameters.Authority.GetTokenEndpointAsync(AuthenticationRequestParameters.RequestContext)
                         .ConfigureAwait(false);
 
-                    var tokenResponse = await SendTokenRequestAsync(
+                    MsalTokenResponse tokenResponse = await SendTokenRequestAsync(
                         tokenEndpoint,
                         GetBodyParameters(deviceCodeResult),
                         cancellationToken).ConfigureAwait(false);

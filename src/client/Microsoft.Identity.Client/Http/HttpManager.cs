@@ -26,33 +26,27 @@ namespace Microsoft.Identity.Client.Http
     /// In particular, do not change any properties on HttpClient such as BaseAddress, buffer sizes and Timeout. You should
     /// also not access DefaultRequestHeaders because the getters are not thread safe (use HttpRequestMessage.Headers instead).
     /// </remarks>
-    internal class HttpManager : IHttpManager
+    /// <summary>
+    /// Initializes a new instance of the <see cref="HttpManager"/> class.
+    /// </summary>
+    /// <param name="httpClientFactory">
+    /// An instance of <see cref="IMsalHttpClientFactory"/> used to create and manage <see cref="HttpClient"/> instances.
+    /// This factory ensures proper reuse of <see cref="HttpClient"/> to avoid socket exhaustion.
+    /// </param>
+    /// <param name="disableInternalRetries">
+    /// A boolean flag indicating whether the HTTP manager should enable retry logic for transient failures.
+    /// </param>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when <paramref name="httpClientFactory"/> is null.
+    /// </exception>
+    internal class HttpManager(
+        IMsalHttpClientFactory httpClientFactory,
+        bool disableInternalRetries) : IHttpManager
     {
-        protected readonly IMsalHttpClientFactory _httpClientFactory;
-        private readonly bool _disableInternalRetries;
-        public long LastRequestDurationInMs { get; private set; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="HttpManager"/> class.
-        /// </summary>
-        /// <param name="httpClientFactory">
-        /// An instance of <see cref="IMsalHttpClientFactory"/> used to create and manage <see cref="HttpClient"/> instances.
-        /// This factory ensures proper reuse of <see cref="HttpClient"/> to avoid socket exhaustion.
-        /// </param>
-        /// <param name="disableInternalRetries">
-        /// A boolean flag indicating whether the HTTP manager should enable retry logic for transient failures.
-        /// </param>
-        /// <exception cref="ArgumentNullException">
-        /// Thrown when <paramref name="httpClientFactory"/> is null.
-        /// </exception>
-        public HttpManager(
-            IMsalHttpClientFactory httpClientFactory,
-            bool disableInternalRetries)
-        {
-            _httpClientFactory = httpClientFactory ??
+        protected readonly IMsalHttpClientFactory _httpClientFactory = httpClientFactory ??
                 throw new ArgumentNullException(nameof(httpClientFactory));
-            _disableInternalRetries = disableInternalRetries;
-        }
+        private readonly bool _disableInternalRetries = disableInternalRetries;
+        public long LastRequestDurationInMs { get; private set; }
 
         public async Task<HttpResponse> SendRequestAsync(
             Uri endpoint,
@@ -216,7 +210,8 @@ namespace Microsoft.Identity.Client.Http
 
         private static HttpRequestMessage CreateRequestMessage(Uri endpoint, IDictionary<string, string> headers)
         {
-            HttpRequestMessage requestMessage = new HttpRequestMessage { RequestUri = endpoint };
+            HttpRequestMessage requestMessage = new()
+            { RequestUri = endpoint };
 
             requestMessage.Headers.Accept.Clear();
 
@@ -276,7 +271,7 @@ namespace Microsoft.Identity.Client.Http
             var clone = new StreamContent(temp);
             if (httpContent.Headers != null)
             {
-                foreach (var h in httpContent.Headers)
+                foreach (KeyValuePair<string, IEnumerable<string>> h in httpContent.Headers)
                 {
                     clone.Headers.Add(h.Key, h.Value);
                 }

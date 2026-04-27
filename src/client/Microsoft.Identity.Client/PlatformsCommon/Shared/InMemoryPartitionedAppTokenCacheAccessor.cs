@@ -28,9 +28,9 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         // static versions to support the "shared cache" mode
         private static readonly ConcurrentDictionary<string, ConcurrentDictionary<string, MsalAccessTokenCacheItem>> s_accessTokenCacheDictionary =
-            new ConcurrentDictionary<string, ConcurrentDictionary<string, MsalAccessTokenCacheItem>>();
+            new();
         private static readonly ConcurrentDictionary<string, MsalAppMetadataCacheItem> s_appMetadataDictionary =
-           new ConcurrentDictionary<string, MsalAppMetadataCacheItem>(1, 1);
+           new(1, 1);
 
         protected readonly ILoggerAdapter _logger;
         private readonly CacheOptions _tokenCacheAccessorOptions;
@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             string itemKey = item.CacheKey;
             string partitionKey = CacheKeyFactory.GetAppTokenCacheItemKey(item.ClientId, item.TenantId, item.KeyId, item.AdditionalCacheKeyComponents);
 
-            var partition = AccessTokenCacheDictionary.GetOrAdd(partitionKey, _ => new ConcurrentDictionary<string, MsalAccessTokenCacheItem>());
+            ConcurrentDictionary<string, MsalAccessTokenCacheItem> partition = AccessTokenCacheDictionary.GetOrAdd(partitionKey, _ => new ConcurrentDictionary<string, MsalAccessTokenCacheItem>());
             bool added = partition.TryAdd(itemKey, item);
 
             // only increment the entry count if the item was added, not updated
@@ -144,7 +144,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         {
             var partitionKey = CacheKeyFactory.GetAppTokenCacheItemKey(item.ClientId, item.TenantId, item.KeyId);
 
-            if (AccessTokenCacheDictionary.TryGetValue(partitionKey, out var partition))
+            if (AccessTokenCacheDictionary.TryGetValue(partitionKey, out ConcurrentDictionary<string, MsalAccessTokenCacheItem> partition))
             {
                 bool removed = partition.TryRemove(item.CacheKey, out _);
                 if (removed)
@@ -239,7 +239,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         public virtual void Clear(ILoggerAdapter requestlogger = null)
         {
-            var logger = requestlogger ?? _logger;
+            ILoggerAdapter logger = requestlogger ?? _logger;
             AccessTokenCacheDictionary.Clear();
             Interlocked.Exchange(ref GetEntryCountRef(), 0);
             logger.Always("[Internal cache] Clearing app token cache accessor.");

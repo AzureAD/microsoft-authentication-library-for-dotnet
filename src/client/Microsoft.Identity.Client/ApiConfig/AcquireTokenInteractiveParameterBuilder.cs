@@ -387,14 +387,14 @@ namespace Microsoft.Identity.Client
                 throw new MsalClientException(MsalError.BrokerRequiredForPop, MsalErrorMessage.BrokerRequiredForPop);
             }
 
-            var broker = ServiceBundle.PlatformProxy.CreateBroker(ServiceBundle.Config, null);
+            Internal.Broker.IBroker broker = ServiceBundle.PlatformProxy.CreateBroker(ServiceBundle.Config, null);
 
             if (!broker.IsPopSupported)
             {
                 throw new MsalClientException(MsalError.BrokerDoesNotSupportPop, MsalErrorMessage.BrokerDoesNotSupportPop);
             }
 
-            PoPAuthenticationConfiguration popConfig = new PoPAuthenticationConfiguration(requestUri);
+            PoPAuthenticationConfiguration popConfig = new(requestUri);
 
             if (string.IsNullOrEmpty(nonce))
             {

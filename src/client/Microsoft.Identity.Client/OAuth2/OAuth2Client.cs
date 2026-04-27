@@ -34,20 +34,13 @@ namespace Microsoft.Identity.Client.OAuth2
     /// - /token endpoint via TokenClient
     /// - device code endpoint
     /// </summary>    
-    internal class OAuth2Client
+    internal class OAuth2Client(ILoggerAdapter logger, IHttpManager httpManager, X509Certificate2 mtlsCertificate)
     {
-        private readonly Dictionary<string, string> _headers;
-        private readonly Dictionary<string, string> _queryParameters = new Dictionary<string, string>();
+        private readonly Dictionary<string, string> _headers = new Dictionary<string, string>(MsalIdHelper.GetMsalIdParameters(logger));
+        private readonly Dictionary<string, string> _queryParameters = new();
         private readonly IDictionary<string, string> _bodyParameters = new Dictionary<string, string>();
-        private readonly IHttpManager _httpManager;
-        private readonly X509Certificate2 _mtlsCertificate;
-
-        public OAuth2Client(ILoggerAdapter logger, IHttpManager httpManager, X509Certificate2 mtlsCertificate)
-        {
-            _headers = new Dictionary<string, string>(MsalIdHelper.GetMsalIdParameters(logger));
-            _httpManager = httpManager ?? throw new ArgumentNullException(nameof(httpManager));
-            _mtlsCertificate = mtlsCertificate;
-        }
+        private readonly IHttpManager _httpManager = httpManager ?? throw new ArgumentNullException(nameof(httpManager));
+        private readonly X509Certificate2 _mtlsCertificate = mtlsCertificate;
 
         public void AddQueryParameter(string key, string value)
         {
@@ -131,7 +124,7 @@ namespace Microsoft.Identity.Client.OAuth2
                             requestContext.Logger.Verbose(() => "[Oauth2Client] Processing onBeforePostRequestData ");
                             var requestData = new OnBeforeTokenRequestData(_bodyParameters, _headers, endpointUri, requestContext.UserCancellationToken);
 
-                            foreach (var handler in onBeforePostRequestHandlers)
+                            foreach (Func<OnBeforeTokenRequestData, Task> handler in onBeforePostRequestHandlers)
                             {
                                 await handler(requestData).ConfigureAwait(false);
                             }
@@ -204,7 +197,7 @@ namespace Microsoft.Identity.Client.OAuth2
                     // CreateResponse handles throwing errors - in the case of HttpStatusCode <> and ErrorResponse will be created.
                     if (!string.IsNullOrWhiteSpace(response.Body))
                     {
-                        var msalTokenResponse = JsonHelper.DeserializeFromJson<MsalTokenResponse>(response.Body);
+                        MsalTokenResponse msalTokenResponse = JsonHelper.DeserializeFromJson<MsalTokenResponse>(response.Body);
 
                         if (response.StatusCode == HttpStatusCode.OK &&
                             expectErrorsOn200OK &&

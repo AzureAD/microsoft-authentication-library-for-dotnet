@@ -7,14 +7,8 @@ using System.Text;
 
 namespace Microsoft.Identity.Client.Utils
 {
-    internal class StringWriterWithEncoding : StringWriter
+    internal class StringWriterWithEncoding(Encoding encoding) : StringWriter(CultureInfo.InvariantCulture)
     {
-        public StringWriterWithEncoding(Encoding encoding)
-            : base(CultureInfo.InvariantCulture)
-        {
-            Encoding = encoding;
-        }
-
-        public override Encoding Encoding { get; }
+        public override Encoding Encoding { get; } = encoding;
     }
 }

@@ -17,18 +17,13 @@ namespace Microsoft.Identity.Client.Cache
     /// <remarks>
     /// The dictionary serializer does not handle unknown nodes.
     /// </remarks>
-    internal class TokenCacheDictionarySerializer : ITokenCacheSerializable
+    internal class TokenCacheDictionarySerializer(ITokenCacheAccessor accessor) : ITokenCacheSerializable
     {
         private const string AccessTokenKey = "access_tokens";
         private const string RefreshTokenKey = "refresh_tokens";
         private const string IdTokenKey = "id_tokens";
         private const string AccountKey = "accounts";
-        private readonly ITokenCacheAccessor _accessor;
-
-        public TokenCacheDictionarySerializer(ITokenCacheAccessor accessor)
-        {
-            _accessor = accessor;
-        }
+        private readonly ITokenCacheAccessor _accessor = accessor;
 
         public byte[] Serialize(IDictionary<string, JToken> unknownNodes)
         {
@@ -37,22 +32,22 @@ namespace Microsoft.Identity.Client.Cache
             var idTokensAsString = new List<string>();
             var accountsAsString = new List<string>();
 
-            foreach (var accessToken in _accessor.GetAllAccessTokens())
+            foreach (MsalAccessTokenCacheItem accessToken in _accessor.GetAllAccessTokens())
             {
                 accessTokensAsString.Add(accessToken.ToJsonString());
             }
 
-            foreach (var refreshToken in _accessor.GetAllRefreshTokens())
+            foreach (MsalRefreshTokenCacheItem refreshToken in _accessor.GetAllRefreshTokens())
             {
                 refreshTokensAsString.Add(refreshToken.ToJsonString());
             }
 
-            foreach (var idToken in _accessor.GetAllIdTokens())
+            foreach (MsalIdTokenCacheItem idToken in _accessor.GetAllIdTokens())
             {
                 idTokensAsString.Add(idToken.ToJsonString());
             }
 
-            foreach (var account in _accessor.GetAllAccounts())
+            foreach (MsalAccountCacheItem account in _accessor.GetAllAccounts())
             {
                 accountsAsString.Add(account.ToJsonString());
             }

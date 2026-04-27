@@ -213,7 +213,7 @@ namespace Microsoft.Identity.Client
             }
 
             ClientApplicationBase.GuardMobileFrameworks();
-            var broker = ServiceBundle.PlatformProxy.CreateBroker(ServiceBundle.Config, null);
+            Internal.Broker.IBroker broker = ServiceBundle.PlatformProxy.CreateBroker(ServiceBundle.Config, null);
 
             if (ServiceBundle.Config.IsBrokerEnabled)
             {
@@ -228,7 +228,7 @@ namespace Microsoft.Identity.Client
                 }
             }
 
-            PoPAuthenticationConfiguration popConfig = new PoPAuthenticationConfiguration(requestUri ?? throw new ArgumentNullException(nameof(requestUri)));
+            PoPAuthenticationConfiguration popConfig = new(requestUri ?? throw new ArgumentNullException(nameof(requestUri)));
             popConfig.HttpMethod = httpMethod ?? throw new ArgumentNullException(nameof(httpMethod));
             popConfig.Nonce = nonce;
 

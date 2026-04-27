@@ -7,16 +7,11 @@ using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.Instance
 {
-    internal class AdfsAuthority : Authority
+    internal class AdfsAuthority(AuthorityInfo authorityInfo) : Authority(authorityInfo)
     {
         private const string TokenEndpointTemplate = "{0}oauth2/token";
         private const string AuthorizationEndpointTemplate = "{0}oauth2/authorize";
         private const string DeviceCodeEndpointTemplate = "{0}oauth2/devicecode";
-
-        public AdfsAuthority(AuthorityInfo authorityInfo)
-            : base(authorityInfo)
-        {
-        }
 
         internal override Task<string> GetTokenEndpointAsync(RequestContext requestContext)
         {

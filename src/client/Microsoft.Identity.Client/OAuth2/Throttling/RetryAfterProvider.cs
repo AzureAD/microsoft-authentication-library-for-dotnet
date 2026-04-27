@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
             {
                 retryAfterTimespan = GetSafeValue(retryAfterTimespan);
 
-                var logger = requestParams.RequestContext.Logger;
+                ILoggerAdapter logger = requestParams.RequestContext.Logger;
                 logger.Info(() => $"[Throttling] Retry-After header detected, " +
                     $"value: {retryAfterTimespan.TotalSeconds} seconds");
 
@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
         {
             if (!ThrottlingCache.IsEmpty())
             {
-                var logger = requestParams.RequestContext.Logger;
+                ILoggerAdapter logger = requestParams.RequestContext.Logger;
 
                 string strictThumbprint = ThrottleCommon.GetRequestStrictThumbprint(
                     bodyParams,
@@ -74,14 +74,14 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
         {
             retryAfterTimespan = TimeSpan.Zero;
 
-            var date = headers?.RetryAfter?.Date;
+            DateTimeOffset? date = headers?.RetryAfter?.Date;
             if (date.HasValue)
             {
                 retryAfterTimespan = date.Value - DateTimeOffset.Now;
                 return true;
             }
 
-            var delta = headers?.RetryAfter?.Delta;
+            TimeSpan? delta = headers?.RetryAfter?.Delta;
             if (delta.HasValue)
             {
                 retryAfterTimespan = delta.Value;

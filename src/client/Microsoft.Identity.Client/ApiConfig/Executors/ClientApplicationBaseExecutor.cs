@@ -13,24 +13,18 @@ using Microsoft.Identity.Client.Internal.Requests.Silent;
 
 namespace Microsoft.Identity.Client.ApiConfig.Executors
 {
-    internal class ClientApplicationBaseExecutor : AbstractExecutor, IClientApplicationBaseExecutor
+    internal class ClientApplicationBaseExecutor(IServiceBundle serviceBundle, ClientApplicationBase clientApplicationBase) : AbstractExecutor(serviceBundle), IClientApplicationBaseExecutor
     {
-        private readonly ClientApplicationBase _clientApplicationBase;
-
-        public ClientApplicationBaseExecutor(IServiceBundle serviceBundle, ClientApplicationBase clientApplicationBase)
-            : base(serviceBundle)
-        {
-            _clientApplicationBase = clientApplicationBase;
-        }
+        private readonly ClientApplicationBase _clientApplicationBase = clientApplicationBase;
 
         public async Task<AuthenticationResult> ExecuteAsync(
             AcquireTokenCommonParameters commonParameters,
             AcquireTokenSilentParameters silentParameters,
             CancellationToken cancellationToken)
         {
-            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, commonParameters.MtlsCertificate, cancellationToken);
+            RequestContext requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, commonParameters.MtlsCertificate, cancellationToken);
 
-            var requestParameters = await _clientApplicationBase.CreateRequestParametersAsync(
+            AuthenticationRequestParameters requestParameters = await _clientApplicationBase.CreateRequestParametersAsync(
                 commonParameters,
                 requestContext,
                 _clientApplicationBase.UserTokenCacheInternal,
@@ -47,7 +41,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenByRefreshTokenParameters refreshTokenParameters,
             CancellationToken cancellationToken)
         {
-            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, commonParameters.MtlsCertificate, cancellationToken);
+            RequestContext requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, commonParameters.MtlsCertificate, cancellationToken);
             if (commonParameters.Scopes == null || !commonParameters.Scopes.Any())
             {
                 commonParameters.Scopes = new SortedSet<string>
@@ -57,7 +51,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 requestContext.Logger.Info(LogMessages.NoScopesProvidedForRefreshTokenRequest);
             }
 
-            var requestParameters = await _clientApplicationBase.CreateRequestParametersAsync(
+            AuthenticationRequestParameters requestParameters = await _clientApplicationBase.CreateRequestParametersAsync(
                 commonParameters,
                 requestContext,
                 _clientApplicationBase.UserTokenCacheInternal,

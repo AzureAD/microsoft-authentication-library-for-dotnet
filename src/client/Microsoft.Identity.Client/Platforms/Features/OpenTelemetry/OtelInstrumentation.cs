@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
         /// <summary>
         /// Meter to hold the MSAL metrics.
         /// </summary>
-        internal static readonly Meter Meter = new Meter(MeterName, "1.0.0");
+        internal static readonly Meter Meter = new(MeterName, "1.0.0");
 
         /// <summary>
         /// Counter to hold the number of successful token acquisition calls.
@@ -67,7 +67,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
         /// <summary>
         /// Histogram to record duration in L2 cache for token acquisition calls.
         /// </summary>
-        internal static readonly Lazy<Histogram<long>> s_durationInL2Cache = new Lazy<Histogram<long>>(() => Meter.CreateHistogram<long>(
+        internal static readonly Lazy<Histogram<long>> s_durationInL2Cache = new(() => Meter.CreateHistogram<long>(
             DurationInL2CacheHistogramName,
             unit: "ms",
             description: "Performance of token acquisition calls cache latency"));
@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
         /// <summary>
         /// Histogram to record duration in milliseconds in http when the token is fetched from identity provider.
         /// </summary>
-        internal static readonly Lazy<Histogram<long>> s_durationInHttp = new Lazy<Histogram<long>>(() => Meter.CreateHistogram<long>(
+        internal static readonly Lazy<Histogram<long>> s_durationInHttp = new(() => Meter.CreateHistogram<long>(
             DurationInHttpHistogramName,
             unit: "ms",
             description: "Performance of token acquisition calls network latency"));

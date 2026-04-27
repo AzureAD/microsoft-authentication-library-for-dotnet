@@ -9,22 +9,17 @@ namespace Microsoft.Identity.Client
     /// <summary>
     /// Contains metadata of the authentication result. <see cref="Metrics"/> for additional MSAL-wide metrics.
     /// </summary>
-    public class AuthenticationResultMetadata
+    /// <remarks>
+    /// Constructor for the class AuthenticationResultMetadata
+    /// <param name="tokenSource">The token source.</param>
+    /// </remarks>
+    public class AuthenticationResultMetadata(TokenSource tokenSource)
     {
-
-        /// <summary>
-        /// Constructor for the class AuthenticationResultMetadata
-        /// <param name="tokenSource">The token source.</param>
-        /// </summary>
-        public AuthenticationResultMetadata(TokenSource tokenSource)
-        {
-            TokenSource = tokenSource;
-        }
 
         /// <summary>
         /// The source of the token in the result.
         /// </summary>
-        public TokenSource TokenSource { get; }
+        public TokenSource TokenSource { get; } = tokenSource;
 
         /// <summary>
         /// The token endpoint used to contact the Identity Provider (e.g. Azure Active Directory). 

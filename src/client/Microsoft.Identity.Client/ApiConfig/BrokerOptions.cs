@@ -13,7 +13,11 @@ namespace Microsoft.Identity.Client
     /// The common properties are direct members
     /// Platform specific properties (if they exist) are part of the corresponding options
     /// </summary>
-    public class BrokerOptions
+    /// <remarks>
+    /// Constructor
+    /// </remarks>
+    /// <param name="enabledOn">Choices of OperatingSystems</param>
+    public class BrokerOptions(BrokerOptions.OperatingSystems enabledOn)
     {
         /// <summary>
         /// Supported OperatingSystems
@@ -40,20 +44,11 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="enabledOn">Choices of OperatingSystems</param>
-        public BrokerOptions(OperatingSystems enabledOn)
-        {
-            EnabledOn = enabledOn;
-        }
-
-        /// <summary>
         /// Creates BrokerOptions from WindowsBrokerOptions
         /// </summary>
         internal static BrokerOptions CreateFromWindowsOptions(WindowsBrokerOptions winOptions)
         {
-            BrokerOptions ret = new BrokerOptions(OperatingSystems.Windows);
+            BrokerOptions ret = new(OperatingSystems.Windows);
             ret.Title = winOptions.HeaderText;
             ret.MsaPassthrough = winOptions.MsaPassthrough;
             ret.ListOperatingSystemAccounts = winOptions.ListWindowsWorkAndSchoolAccounts;
@@ -64,7 +59,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Operating systems on which broker is enabled.
         /// </summary>
-        public OperatingSystems EnabledOn { get; }
+        public OperatingSystems EnabledOn { get; } = enabledOn;
 
         /// <summary>
         /// Title of the broker window

@@ -17,49 +17,35 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Region
 {
-    internal sealed class RegionManager : IRegionManager
+    internal sealed class RegionManager(
+        IHttpManager httpManager,
+        int imdsCallTimeout = 2000) : IRegionManager
     {
-        private class RegionInfo
+        private class RegionInfo(string region, RegionAutodetectionSource regionSource, string regionDetails)
         {
-            public RegionInfo(string region, RegionAutodetectionSource regionSource, string regionDetails)
-            {
-                Region = region;
-                RegionSource = regionSource;
-                RegionDetails = regionDetails;
-            }
-
-            public string Region { get; }
-            public RegionAutodetectionSource RegionSource { get; }
-            public readonly string RegionDetails;
+            public string Region { get; } = region;
+            public RegionAutodetectionSource RegionSource { get; } = regionSource;
+            public readonly string RegionDetails = regionDetails;
         }
 
         // For information of the current api-version refer: https://learn.microsoft.com/azure/virtual-machines/instance-metadata-service?tabs=windows#versioning
         private const string ImdsEndpoint = "http://169.254.169.254/metadata/instance/compute/location";
         private const string DefaultApiVersion = "2020-06-01";
 
-        private readonly IHttpManager _httpManager;
-        private readonly int _imdsCallTimeoutMs;
+        private readonly IHttpManager _httpManager = httpManager;
+        private readonly int _imdsCallTimeoutMs = imdsCallTimeout;
 
         // lock for discovery. So it is done only once
-        private static readonly SemaphoreSlim _lockDiscover = new SemaphoreSlim(1);
+        private static readonly SemaphoreSlim _lockDiscover = new(1);
 
         private static string s_autoDiscoveredRegion;
         private static bool s_failedAutoDiscovery = false;
         private static string s_regionDiscoveryDetails;
 
-        public RegionManager(
-            IHttpManager httpManager,
-            int imdsCallTimeout = 2000) // for test
-        {
-            _httpManager = httpManager;
-            _imdsCallTimeoutMs = imdsCallTimeout;
-        }
-
-
         public async Task<string> GetAzureRegionAsync(RequestContext requestContext)
         {
             string azureRegionConfig = requestContext.ServiceBundle.Config.AzureRegion;
-            var logger = requestContext.Logger;
+            ILoggerAdapter logger = requestContext.Logger;
             if (string.IsNullOrEmpty(azureRegionConfig))
             {
                 logger.Verbose(() => $"[Region discovery] WithAzureRegion not configured. ");
@@ -75,7 +61,7 @@ namespace Microsoft.Identity.Client.Region
 
             // MSAL always performs region auto-discovery, even if the user configured an actual region
             // in order to detect inconsistencies and report via telemetry
-            var discoveredRegion = await DiscoverAndCacheAsync(logger, requestContext.UserCancellationToken, retryPolicy).ConfigureAwait(false);
+            RegionInfo discoveredRegion = await DiscoverAndCacheAsync(logger, requestContext.UserCancellationToken, retryPolicy).ConfigureAwait(false);
 
             RecordTelemetry(requestContext.ApiEvent, azureRegionConfig, discoveredRegion);
 
@@ -159,13 +145,13 @@ namespace Microsoft.Identity.Client.Region
 
         private async Task<RegionInfo> DiscoverAndCacheAsync(ILoggerAdapter logger, CancellationToken requestCancellationToken, IRetryPolicy retryPolicy)
         {
-            var regionInfo = GetCachedRegion(logger);
+            RegionInfo regionInfo = GetCachedRegion(logger);
             if (regionInfo != null)
             {
                 return regionInfo;
             }
 
-            var result = await DiscoverAsync(logger, requestCancellationToken, retryPolicy).ConfigureAwait(false);
+            RegionInfo result = await DiscoverAsync(logger, requestCancellationToken, retryPolicy).ConfigureAwait(false);
 
             return result;
         }
@@ -177,7 +163,7 @@ namespace Microsoft.Identity.Client.Region
             await _lockDiscover.WaitAsync(requestCancellationToken).ConfigureAwait(false);
             try
             {
-                var regionInfo = GetCachedRegion(logger);
+                RegionInfo regionInfo = GetCachedRegion(logger);
                 if (regionInfo != null)
                 {
                     result = regionInfo;
@@ -361,7 +347,7 @@ namespace Microsoft.Identity.Client.Region
 
         private static Uri BuildImdsUri(string apiVersion)
         {
-            UriBuilder uriBuilder = new UriBuilder(ImdsEndpoint);
+            UriBuilder uriBuilder = new(ImdsEndpoint);
             uriBuilder.AppendQueryParameters($"api-version={apiVersion}");
             uriBuilder.AppendQueryParameters("format=text");
             return uriBuilder.Uri;
@@ -369,7 +355,7 @@ namespace Microsoft.Identity.Client.Region
 
         private CancellationToken GetCancellationToken(CancellationToken userCancellationToken)
         {
-            CancellationTokenSource tokenSource = new CancellationTokenSource(_imdsCallTimeoutMs);
+            CancellationTokenSource tokenSource = new(_imdsCallTimeoutMs);
             CancellationTokenSource linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(userCancellationToken, tokenSource.Token);
 
             return linkedTokenSource.Token;

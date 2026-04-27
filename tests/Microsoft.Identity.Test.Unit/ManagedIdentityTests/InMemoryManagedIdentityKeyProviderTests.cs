@@ -6,10 +6,10 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.ManagedIdentity.KeyProviders;
-using Microsoft.Identity.Client.Core;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute; // For Substitute.For<T>()
 

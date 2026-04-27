@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     "MSI_ENDPOINT", msiEndpoint, CloudShell);
 
                 // Use the factory to create and throw the exception
-                var exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
+                MsalException exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
                     MsalError.InvalidManagedIdentityEndpoint,
                     errorMessage,
                     ex,
@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     MsalErrorMessage.ManagedIdentityUserAssignedNotSupported,
                     CloudShell);
 
-                var exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
+                MsalException exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
                     MsalError.UserAssignedManagedIdentityNotSupported,
                     errorMessage,
                     null,
@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         protected override Task<ManagedIdentityRequest> CreateRequestAsync(string resource)
         {
-            ManagedIdentityRequest request = new ManagedIdentityRequest(HttpMethod.Post, _endpoint);
+            ManagedIdentityRequest request = new(HttpMethod.Post, _endpoint);
 
             request.Headers.Add("ContentType", "application/x-www-form-urlencoded");
             request.Headers.Add("Metadata", "true");

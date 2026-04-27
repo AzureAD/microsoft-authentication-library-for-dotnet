@@ -161,12 +161,12 @@ namespace Microsoft.Identity.Client.OAuth2
 
             _oAuth2Client.AddBodyParameter(OAuth2Parameter.Claims, _requestParams.ClaimsAndClientCapabilities);
 
-            foreach (var kvp in additionalBodyParameters)
+            foreach (KeyValuePair<string, string> kvp in additionalBodyParameters)
             {
                 _oAuth2Client.AddBodyParameter(kvp.Key, kvp.Value);
             }
 
-            foreach (var kvp in _requestParams.AuthenticationScheme.GetTokenRequestParams())
+            foreach (KeyValuePair<string, string> kvp in _requestParams.AuthenticationScheme.GetTokenRequestParams())
             {
                 _oAuth2Client.AddBodyParameter(kvp.Key, kvp.Value);
             }
@@ -212,7 +212,7 @@ namespace Microsoft.Identity.Client.OAuth2
 
         private async Task<MsalTokenResponse> SendHttpAndClearTelemetryAsync(string tokenEndpoint, Core.ILoggerAdapter logger)
         {
-            UriBuilder builder = new UriBuilder(tokenEndpoint);
+            UriBuilder builder = new(tokenEndpoint);
             builder.AppendQueryParameters(_requestParams.ExtraQueryParameters);
             Uri tokenEndpointWithQueryParams = builder.Uri;
 

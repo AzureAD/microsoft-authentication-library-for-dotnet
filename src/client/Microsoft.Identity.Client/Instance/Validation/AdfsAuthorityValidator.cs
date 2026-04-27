@@ -12,14 +12,9 @@ using Microsoft.Identity.Client.OAuth2;
 
 namespace Microsoft.Identity.Client.Instance.Validation
 {
-    internal class AdfsAuthorityValidator : IAuthorityValidator
+    internal class AdfsAuthorityValidator(RequestContext requestContext) : IAuthorityValidator
     {
-        private readonly RequestContext _requestContext;
-
-        public AdfsAuthorityValidator(RequestContext requestContext)
-        {
-            _requestContext = requestContext;
-        }
+        private readonly RequestContext _requestContext = requestContext;
 
         public async Task ValidateAuthorityAsync(
             AuthorityInfo authorityInfo)

@@ -9,24 +9,16 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.WsTrust
 {
-    internal class WsTrustEndpoint
+    internal class WsTrustEndpoint(Uri uri, WsTrustVersion version, ITimeService timeService = null, IGuidFactory guidFactory = null)
     {
         private const string EnvelopeNamespaceValue = "http://www.w3.org/2003/05/soap-envelope";
         private const string WsuNamespaceValue = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd";
 
-        private readonly ITimeService _timeService;
-        private readonly IGuidFactory _guidFactory;
+        private readonly ITimeService _timeService = timeService ?? new TimeService();
+        private readonly IGuidFactory _guidFactory = guidFactory ?? new GuidFactory();
 
-        public WsTrustEndpoint(Uri uri, WsTrustVersion version, ITimeService timeService = null, IGuidFactory guidFactory = null)
-        {
-            Uri = uri;
-            Version = version;
-            _timeService = timeService ?? new TimeService();
-            _guidFactory = guidFactory ?? new GuidFactory();
-        }
-
-        public Uri Uri { get; }
-        public WsTrustVersion Version { get; }
+        public Uri Uri { get; } = uri;
+        public WsTrustVersion Version { get; } = version;
 
         public string BuildTokenRequestMessageWindowsIntegratedAuth(string cloudAudienceUri)
         {

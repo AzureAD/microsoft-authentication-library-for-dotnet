@@ -50,19 +50,19 @@ namespace Microsoft.Identity.Client
         public Action<ITelemetryEventPayload> DispatchAction => payload =>
         {
             var jsonObject = new JObject();
-            foreach (var kvp in payload.BoolValues)
+            foreach (KeyValuePair<string, bool> kvp in payload.BoolValues)
             {
                 jsonObject[kvp.Key] = kvp.Value;
             }
-            foreach (var kvp in payload.IntValues)
+            foreach (KeyValuePair<string, int> kvp in payload.IntValues)
             {
                 jsonObject[kvp.Key] = kvp.Value;
             }
-            foreach (var kvp in payload.Int64Values)
+            foreach (KeyValuePair<string, long> kvp in payload.Int64Values)
             {
                 jsonObject[kvp.Key] = kvp.Value;
             }
-            foreach (var kvp in payload.StringValues)
+            foreach (KeyValuePair<string, string> kvp in payload.StringValues)
             {
                 jsonObject[kvp.Key] = kvp.Value;
             }

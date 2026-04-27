@@ -1,6 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
@@ -10,26 +14,17 @@ using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client.Internal.Broker
 {
     /// <summary>
     /// For platforms that do not support a broker
     /// </summary>
-    internal class NullBroker : IBroker
+    internal class NullBroker(ILoggerAdapter logger) : IBroker
     {
-        private readonly ILoggerAdapter _logger;
+        private readonly ILoggerAdapter _logger = logger ?? new NullLogger();
 
         public bool IsPopSupported => false;
-
-        public NullBroker(ILoggerAdapter logger)
-        {
-            _logger = logger ?? new NullLogger();
-        }
 
         public virtual bool IsBrokerInstalledAndInvokable(AuthorityType authorityType)
         {

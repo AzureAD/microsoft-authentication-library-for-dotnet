@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Client.Utils
         public static void AppendQueryParameters(this UriBuilder builder, IDictionary<string, string> queryParams)
         {
             var list = new List<string>();
-            foreach (var kvp in queryParams)
+            foreach (KeyValuePair<string, string> kvp in queryParams)
             {
                 list.Add($"{kvp.Key}={kvp.Value}");
             }
@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Client.Utils
                 return;
             }
 
-            var queryParams = CoreHelpers.ParseKeyValueList(builder.Query.Substring(1), '&', true, null);
+            Dictionary<string, string> queryParams = CoreHelpers.ParseKeyValueList(builder.Query.Substring(1), '&', true, null);
             queryParams[key] = value;
             builder.Query = queryParams.ToQueryParameter();
         }

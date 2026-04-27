@@ -33,9 +33,9 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenForManagedIdentityParameters managedIdentityParameters,
             CancellationToken cancellationToken)
         {
-            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, commonParameters.MtlsCertificate, cancellationToken);
+            RequestContext requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, commonParameters.MtlsCertificate, cancellationToken);
 
-            var requestParams = await _managedIdentityApplication.CreateRequestParametersAsync(
+            AuthenticationRequestParameters requestParams = await _managedIdentityApplication.CreateRequestParametersAsync(
                 commonParameters,
                 requestContext,
                 _managedIdentityApplication.AppTokenCacheInternal,

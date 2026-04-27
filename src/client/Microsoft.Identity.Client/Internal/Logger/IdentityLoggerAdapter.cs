@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
             {
                 string messageToLog = LoggerHelper.GetMessageToLog(messageWithPii, messageScrubbed, PiiLoggingEnabled);
 
-                LogEntry entry = new LogEntry();
+                LogEntry entry = new();
                 entry.EventLogLevel = LoggerHelper.GetEventLogLevel(logLevel);
                 entry.CorrelationId = _correlationId;
                 entry.Message = messageToLog;

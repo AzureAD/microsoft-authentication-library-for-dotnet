@@ -10,7 +10,15 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
     /// <summary>
     /// In-memory entry owned by the cache. Disposing the entry disposes the certificate it owns.
     /// </summary>
-    internal sealed class CertificateCacheEntry : IDisposable
+    /// <remarks>
+    /// certificate+endpoint+clientId cache entry.
+    /// </remarks>
+    /// <param name="certificate"></param>
+    /// <param name="notAfterUtc"></param>
+    /// <param name="endpoint"></param>
+    /// <param name="clientId"></param>
+    /// <exception cref="ArgumentNullException"></exception>
+    internal sealed class CertificateCacheEntry(X509Certificate2 certificate, DateTimeOffset notAfterUtc, string endpoint, string clientId) : IDisposable
     {
         private int _disposed;
 
@@ -20,37 +28,21 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         public static readonly TimeSpan MinRemainingLifetime = TimeSpan.FromHours(24);
 
         /// <summary>
-        /// certificate+endpoint+clientId cache entry.
-        /// </summary>
-        /// <param name="certificate"></param>
-        /// <param name="notAfterUtc"></param>
-        /// <param name="endpoint"></param>
-        /// <param name="clientId"></param>
-        /// <exception cref="ArgumentNullException"></exception>
-        public CertificateCacheEntry(X509Certificate2 certificate, DateTimeOffset notAfterUtc, string endpoint, string clientId)
-        {
-            Certificate = certificate ?? throw new ArgumentNullException(nameof(certificate));
-            NotAfterUtc = notAfterUtc;
-            Endpoint = endpoint ?? throw new ArgumentNullException(nameof(endpoint));
-            ClientId = clientId ?? throw new ArgumentNullException(nameof(clientId));
-        }
-
-        /// <summary>
         /// certificate owned by this entry.
         /// </summary>
-        public X509Certificate2 Certificate { get; }
+        public X509Certificate2 Certificate { get; } = certificate ?? throw new ArgumentNullException(nameof(certificate));
         /// <summary>
         /// notAfterUtc of the certificate.
         /// </summary>
-        public DateTimeOffset NotAfterUtc { get; }
+        public DateTimeOffset NotAfterUtc { get; } = notAfterUtc;
         /// <summary>
         /// endpoint associated with this certificate.
         /// </summary>
-        public string Endpoint { get; }
+        public string Endpoint { get; } = endpoint ?? throw new ArgumentNullException(nameof(endpoint));
         /// <summary>
         /// clientId associated with this certificate.
         /// </summary>
-        public string ClientId { get; }
+        public string ClientId { get; } = clientId ?? throw new ArgumentNullException(nameof(clientId));
 
         /// <summary>Whether this entry has been disposed.</summary>
         public bool IsDisposed => Volatile.Read(ref _disposed) != 0;

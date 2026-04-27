@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
             header[JsonWebTokenConstants.KeyId] = KeyId;
             header[JsonWebTokenConstants.Type] = Constants.PoPTokenType;
 
-            var body = CreateBody(authenticationResult.AccessToken);
+            JObject body = CreateBody(authenticationResult.AccessToken);
 
             string popToken = CreateJWS(JsonHelper.JsonObjectToString(body), JsonHelper.JsonObjectToString(header));
             authenticationResult.AccessToken = popToken;
@@ -161,7 +161,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
         /// </summary>
         private string CreateJWS(string payload, string header)
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
             sb.Append(Base64UrlHelpers.Encode(Encoding.UTF8.GetBytes(header)));
             sb.Append('.');
             sb.Append(Base64UrlHelpers.Encode(payload));

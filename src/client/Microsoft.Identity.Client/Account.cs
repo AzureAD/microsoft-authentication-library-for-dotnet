@@ -10,52 +10,43 @@ namespace Microsoft.Identity.Client
     /// Contains information about a single account. A user can be present in multiple directories and thus have multiple accounts.
     /// This information is used for token cache lookup and enforcing the user session on the STS authorize endpoint.
     /// </summary>
-    internal sealed class Account : IAccount
+    /// <remarks>
+    /// Constructor for the account instance.
+    /// </remarks>
+    /// <param name="homeAccountId">Home account ID in "uid.utid" format; can be null, for example when migrating the ADAL v3 cache.</param>
+    /// <param name="username"><see href="https://learn.microsoft.com/windows/win32/secauthn/user-name-formats#user-principal-name">UPN-style</see>, can be null</param>
+    /// <param name="environment">Identity provider for the account, e.g., <c>login.microsoftonline.com</c>.</param>
+    /// <param name="accountsource">The initial flow that established the account. e.g., device code flow.</param>
+    /// <param name="wamAccountIds">Map of (<c>client_id</c>, <c>wam_account_id</c>)</param>
+    /// <param name="tenantProfiles">Map of (<c>tenant_id</c>, <c>tenant_profile</c>)</param>
+    internal sealed class Account(
+        string homeAccountId,
+        string username,
+        string environment,
+        string accountsource = null,
+        IDictionary<string, string> wamAccountIds = null,
+        IEnumerable<TenantProfile> tenantProfiles = null) : IAccount
     {
-        /// <summary>
-        /// Constructor for the account instance.
-        /// </summary>
-        /// <param name="homeAccountId">Home account ID in "uid.utid" format; can be null, for example when migrating the ADAL v3 cache.</param>
-        /// <param name="username"><see href="https://learn.microsoft.com/windows/win32/secauthn/user-name-formats#user-principal-name">UPN-style</see>, can be null</param>
-        /// <param name="environment">Identity provider for the account, e.g., <c>login.microsoftonline.com</c>.</param>
-        /// <param name="accountsource">The initial flow that established the account. e.g., device code flow.</param>
-        /// <param name="wamAccountIds">Map of (<c>client_id</c>, <c>wam_account_id</c>)</param>
-        /// <param name="tenantProfiles">Map of (<c>tenant_id</c>, <c>tenant_profile</c>)</param>
-        public Account(
-            string homeAccountId,
-            string username,
-            string environment,
-            string accountsource = null,
-            IDictionary<string, string> wamAccountIds = null,
-            IEnumerable<TenantProfile> tenantProfiles = null)
-        {
-            Username = username;
-            Environment = environment;
-            AccountSource = accountsource;
-            HomeAccountId = AccountId.ParseFromString(homeAccountId);
-            WamAccountIds = wamAccountIds;
-            TenantProfiles = tenantProfiles;
-        }
 
         /// <summary>
         /// Gets the username associated with the account. For example, <c>account@example.com</c>.
         /// </summary>
-        public string Username { get; }
+        public string Username { get; } = username;
 
         /// <summary>
         /// Gets the environment associated with the account. For example, <c>login.microsoftonline.com</c>.
         /// </summary>
-        public string Environment { get; }
+        public string Environment { get; } = environment;
 
         /// <summary>
         /// Gets the source of the account. For example, device code flow, broker etc.
         /// </summary>
-        public string AccountSource { get; }
+        public string AccountSource { get; } = accountsource;
 
         /// <summary>
         /// Gets additional account identifiers, such as object ID, tenant ID, and the unique identifier.
         /// </summary>
-        public AccountId HomeAccountId { get; }
+        public AccountId HomeAccountId { get; } = AccountId.ParseFromString(homeAccountId);
 
         /// <summary>
         /// Gets the list of tenant profiles.
@@ -64,12 +55,12 @@ namespace Microsoft.Identity.Client
         /// The same account can exist in its home tenant and also as a guest in multiple other tenants. 
         /// A <see cref="TenantProfile"/> is derived from the ID token for that tenant.
         /// </remarks>
-        public IEnumerable<TenantProfile> TenantProfiles { get; }
+        public IEnumerable<TenantProfile> TenantProfiles { get; } = tenantProfiles;
 
         /// <summary>
         /// Gets a dictionary representing the mapping between the requesting client ID and the unique account ID.
         /// </summary>
-        internal IDictionary<string, string> WamAccountIds { get; }
+        internal IDictionary<string, string> WamAccountIds { get; } = wamAccountIds;
 
         public override string ToString()
         {

@@ -122,7 +122,7 @@ namespace Microsoft.Identity.Client
             }
             else
             {
-                foreach (var kvp in extraQueryParameters)
+                foreach (KeyValuePair<string, string> kvp in extraQueryParameters)
                 {
                     Config.ExtraQueryParameters[kvp.Key] = kvp.Value; // This will overwrite if key exists, or add if new
                 }

@@ -89,7 +89,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     break;
             }
 
-            var userAssignedIdQueryParam = GetUserAssignedIdQueryParam(
+            KeyValuePair<string, string>? userAssignedIdQueryParam = GetUserAssignedIdQueryParam(
                 _requestContext.ServiceBundle.Config.ManagedIdentityId.IdType,
                 _requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId,
                 _requestContext.Logger,
@@ -153,7 +153,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
                 _requestContext.Logger.Error($"Error message: {message} Http status code: {response.StatusCode}");
 
-                var exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
+                MsalException exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
                     MsalError.ManagedIdentityRequestFailed,
                     message,
                     null,
@@ -169,7 +169,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         internal static string CreateRequestFailedMessage(HttpResponse response, string message)
         {
-            StringBuilder messageBuilder = new StringBuilder();
+            StringBuilder messageBuilder = new();
 
             messageBuilder
                 .AppendLine(message ?? DefaultMessage)
@@ -188,7 +188,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 .AppendLine()
                 .AppendLine("Headers:");
 
-            foreach (var header in response.HeadersAsDictionary)
+            foreach (KeyValuePair<string, string> header in response.HeadersAsDictionary)
             {
                 messageBuilder.AppendLine($"{header.Key}: {header.Value}");
             }
@@ -216,7 +216,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 }
             }
 
-            UriBuilder builder = new UriBuilder(s_cachedBaseEndpoint)
+            UriBuilder builder = new(s_cachedBaseEndpoint)
             {
                 Path = subPath
             };
@@ -236,7 +236,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         {
             var queryParams = $"{apiVersionQueryParam}={imdsApiVersion}";
 
-            var userAssignedIdQueryParam = GetUserAssignedIdQueryParam(
+            KeyValuePair<string, string>? userAssignedIdQueryParam = GetUserAssignedIdQueryParam(
                 requestContext.ServiceBundle.Config.ManagedIdentityId.IdType,
                 requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId,
                 requestContext.Logger);

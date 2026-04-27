@@ -17,7 +17,7 @@ using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client.Internal
 {
-    internal class JsonWebToken
+    internal class JsonWebToken(ICryptographyManager cryptographyManager, string clientId, string audience)
     {
         // (64K) This is an arbitrary large value for the token length. We can adjust it as needed.
         private const int MaxTokenLength = 65536;
@@ -25,17 +25,10 @@ namespace Microsoft.Identity.Client.Internal
 
         private readonly IDictionary<string, string> _claimsToSign;
         private readonly string _claimsToSignJson;
-        private readonly ICryptographyManager _cryptographyManager;
-        private readonly string _clientId;
-        private readonly string _audience;
+        private readonly ICryptographyManager _cryptographyManager = cryptographyManager;
+        private readonly string _clientId = clientId;
+        private readonly string _audience = audience;
         private readonly bool _appendDefaultClaims;
-
-        public JsonWebToken(ICryptographyManager cryptographyManager, string clientId, string audience)
-        {
-            _cryptographyManager = cryptographyManager;
-            _clientId = clientId;
-            _audience = audience;
-        }
 
         public JsonWebToken(
              ICryptographyManager cryptographyManager,
@@ -75,7 +68,7 @@ namespace Microsoft.Identity.Client.Internal
             }
 
             // extra claims
-            StringBuilder payload = new StringBuilder();
+            StringBuilder payload = new();
 
             if (_appendDefaultClaims)
             {
@@ -110,7 +103,7 @@ namespace Microsoft.Identity.Client.Internal
                     {
                         writer.WriteStartObject();
 
-                        foreach (var claim in _claimsToSign)
+                        foreach (KeyValuePair<string, string> claim in _claimsToSign)
                         {
                             writer.WriteString(claim.Key, claim.Value);
                         }
@@ -126,7 +119,7 @@ namespace Microsoft.Identity.Client.Internal
 #else
                 var json = new JObject();
 
-                foreach (var claim in _claimsToSign)
+                foreach (KeyValuePair<string, string> claim in _claimsToSign)
                 {
                     json[claim.Key] = claim.Value;
                 }

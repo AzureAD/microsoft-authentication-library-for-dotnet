@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         internal override JObject ToJObject()
         {
-            var json = base.ToJObject();
+            JObject json = base.ToJObject();
 
             SetItemIfValueNotNull(json, StorageJsonKeys.ClientId, ClientId);
             SetItemIfValueNotNull(json, StorageJsonKeys.Secret, Secret);

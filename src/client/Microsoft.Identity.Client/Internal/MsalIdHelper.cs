@@ -39,12 +39,12 @@ namespace Microsoft.Identity.Client.Internal
     /// </summary>
     internal static class MsalIdHelper
     {
-        private static readonly Lazy<string> s_msalVersion = new Lazy<string>(
+        private static readonly Lazy<string> s_msalVersion = new(
             () =>
             {
                 string fullVersion = typeof(MsalIdHelper).Assembly.FullName;
                 var regex = new Regex(@"Version=[\d]+.[\d+]+.[\d]+.[\d]+");
-                var match = regex.Match(fullVersion);
+                Match match = regex.Match(fullVersion);
                 if (!match.Success)
                 {
                     return null;
@@ -61,7 +61,7 @@ namespace Microsoft.Identity.Client.Internal
 
         public static Dictionary<string, string> GetMsalIdParameters(ILoggerAdapter logger)
         {
-            var platformProxy = PlatformProxyFactory.CreatePlatformProxy(logger);
+            PlatformsCommon.Interfaces.IPlatformProxy platformProxy = PlatformProxyFactory.CreatePlatformProxy(logger);
             if (platformProxy == null)
             {
                 throw new MsalClientException(

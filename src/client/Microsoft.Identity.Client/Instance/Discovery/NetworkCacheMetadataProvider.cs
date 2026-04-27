@@ -10,7 +10,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
     internal class NetworkCacheMetadataProvider : INetworkCacheMetadataProvider
     {
         private static readonly ConcurrentDictionary<string, InstanceDiscoveryMetadataEntry> s_cache =
-             new ConcurrentDictionary<string, InstanceDiscoveryMetadataEntry>();
+             new();
 
         public InstanceDiscoveryMetadataEntry GetMetadata(string environment, ILoggerAdapter logger)
         {

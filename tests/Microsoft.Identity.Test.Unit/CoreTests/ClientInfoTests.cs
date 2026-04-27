@@ -2,9 +2,9 @@
 // Licensed under the MIT License.
 
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests
 {

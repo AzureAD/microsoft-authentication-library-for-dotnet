@@ -10,42 +10,35 @@ namespace Microsoft.Identity.Client.Extensibility
     /// <summary>
     /// Authentication request details
     /// </summary>
-    public sealed class OnBeforeTokenRequestData
+    /// <remarks>
+    /// Constructor. 
+    /// </remarks>
+    /// <remarks>Apps should not have to use this constructor. It is provided for testability purposes.</remarks>
+    public sealed class OnBeforeTokenRequestData(
+        IDictionary<string, string> bodyParameters,
+        IDictionary<string, string> headers,
+        Uri requestUri,
+        CancellationToken cancellationToken)
     {
-        /// <summary>
-        /// Constructor. 
-        /// </summary>
-        /// <remarks>Apps should not have to use this constructor. It is provided for testability purposes.</remarks>
-        public OnBeforeTokenRequestData(
-            IDictionary<string, string> bodyParameters,
-            IDictionary<string, string> headers,
-            Uri requestUri,
-            CancellationToken cancellationToken)
-        {
-            BodyParameters = bodyParameters;
-            Headers = headers;
-            RequestUri = requestUri;
-            CancellationToken = cancellationToken;
-        }
 
         /// <summary>
         /// Parameters which will be sent in the request body, as POST parameters.
         /// </summary>
-        public IDictionary<string, string> BodyParameters { get; }
+        public IDictionary<string, string> BodyParameters { get; } = bodyParameters;
 
         /// <summary>
         /// Headers which will be sent with the request.
         /// </summary>
-        public IDictionary<string, string> Headers { get; }
+        public IDictionary<string, string> Headers { get; } = headers;
 
         /// <summary>
         /// The token endpoint, including any query parameters, where the request is being sent to.
         /// </summary>
-        public Uri RequestUri { get; set; }
+        public Uri RequestUri { get; set; } = requestUri;
 
         /// <summary>
         /// The cancellation token associated with the request
         /// </summary>
-        public CancellationToken CancellationToken { get; }
+        public CancellationToken CancellationToken { get; } = cancellationToken;
     }
 }

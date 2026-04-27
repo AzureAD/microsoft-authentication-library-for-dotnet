@@ -12,30 +12,20 @@ using Microsoft.Identity.Client.OAuth2;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
-    internal class BrokerSilentStrategy
-        : ISilentAuthRequestStrategy
+    internal class BrokerSilentStrategy(
+        SilentRequest request,
+        IServiceBundle serviceBundle,
+        AuthenticationRequestParameters authenticationRequestParameters,
+        AcquireTokenSilentParameters silentParameters,
+        IBroker broker)
+                : ISilentAuthRequestStrategy
     {
-        internal AuthenticationRequestParameters _authenticationRequestParameters;
-        protected IServiceBundle _serviceBundle;
-        private readonly AcquireTokenSilentParameters _silentParameters;
-        private readonly SilentRequest _silentRequest;
-        internal IBroker Broker { get; }
-        private readonly ILoggerAdapter _logger;
-
-        public BrokerSilentStrategy(
-            SilentRequest request,
-            IServiceBundle serviceBundle,
-            AuthenticationRequestParameters authenticationRequestParameters,
-            AcquireTokenSilentParameters silentParameters,
-            IBroker broker)
-        {
-            _authenticationRequestParameters = authenticationRequestParameters;
-            _silentParameters = silentParameters;
-            _serviceBundle = serviceBundle;
-            _silentRequest = request;
-            Broker = broker ?? throw new ArgumentNullException(nameof(broker));
-            _logger = authenticationRequestParameters.RequestContext.Logger;
-        }
+        internal AuthenticationRequestParameters _authenticationRequestParameters = authenticationRequestParameters;
+        protected IServiceBundle _serviceBundle = serviceBundle;
+        private readonly AcquireTokenSilentParameters _silentParameters = silentParameters;
+        private readonly SilentRequest _silentRequest = request;
+        internal IBroker Broker { get; } = broker ?? throw new ArgumentNullException(nameof(broker));
+        private readonly ILoggerAdapter _logger = authenticationRequestParameters.RequestContext.Logger;
 
         public async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {

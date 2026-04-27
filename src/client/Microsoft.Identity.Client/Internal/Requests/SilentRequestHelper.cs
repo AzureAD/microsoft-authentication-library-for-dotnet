@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Client.Internal
             authenticationRequestParameters.RequestContext.Logger.Verbose(() => "Refreshing access token...");
             await authenticationRequestParameters.AuthorityManager.RunInstanceDiscoveryAndValidationAsync().ConfigureAwait(false);
 
-            var dict = GetBodyParameters(msalRefreshTokenItem.Secret);
+            Dictionary<string, string> dict = GetBodyParameters(msalRefreshTokenItem.Secret);
 #if iOS
                 var realEnrollmentId = IntuneEnrollmentIdHelper.GetEnrollmentId(authenticationRequestParameters.RequestContext.Logger);
                 if(!string.IsNullOrEmpty(realEnrollmentId))
@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Client.Internal
                     dict[MamEnrollmentIdKey] = realEnrollmentId;
                 }
 #endif
-            var msalTokenResponse = await request.SendTokenRequestAsync(dict, cancellationToken)
+            MsalTokenResponse msalTokenResponse = await request.SendTokenRequestAsync(dict, cancellationToken)
                                     .ConfigureAwait(false);
 
             if (msalTokenResponse.RefreshToken == null)
@@ -93,7 +93,7 @@ namespace Microsoft.Identity.Client.Internal
             {
                 try
                 {
-                    var authResult = await fetchAction().ConfigureAwait(false);
+                    AuthenticationResult authResult = await fetchAction().ConfigureAwait(false);
                     serviceBundle.PlatformProxy.OtelInstrumentation.IncrementSuccessCounter(
                         serviceBundle.PlatformProxy.GetProductName(),
                         apiEvent.ApiId,
@@ -153,13 +153,13 @@ namespace Microsoft.Identity.Client.Internal
             });
         }
 
-        private static Random s_random = new Random();
+        private static Random s_random = new();
         private static DateTimeOffset? GetRefreshOnWithJitter(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
         {
             if (msalAccessTokenCacheItem.RefreshOn.HasValue)
             {
                 int jitter = s_random.Next(-Constants.DefaultJitterRangeInSeconds, Constants.DefaultJitterRangeInSeconds);
-                var refreshOnWithJitter = msalAccessTokenCacheItem.RefreshOn.Value + TimeSpan.FromSeconds(jitter);
+                DateTimeOffset refreshOnWithJitter = msalAccessTokenCacheItem.RefreshOn.Value + TimeSpan.FromSeconds(jitter);
                 return refreshOnWithJitter;
             }
 

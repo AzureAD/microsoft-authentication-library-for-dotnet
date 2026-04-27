@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Client
                requestContext,
                commonParameters.AuthorityOverride).ConfigureAwait(false);
 
-            var cacheKeyComponents = await InitializeCacheKeyComponentsAsync(commonParameters.CacheKeyComponents, cancellationToken).ConfigureAwait(false);
+            SortedList<string, string> cacheKeyComponents = await InitializeCacheKeyComponentsAsync(commonParameters.CacheKeyComponents, cancellationToken).ConfigureAwait(false);
 
             return new AuthenticationRequestParameters(
                 ServiceBundle,
@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Client
             {
                 var initializedCacheKeyComponents = new SortedList<string, string>();
 
-                foreach (var kvp in cacheKeyComponents)
+                foreach (KeyValuePair<string, Func<CancellationToken, Task<string>>> kvp in cacheKeyComponents)
                 {
                     if (kvp.Value != null)
                     {

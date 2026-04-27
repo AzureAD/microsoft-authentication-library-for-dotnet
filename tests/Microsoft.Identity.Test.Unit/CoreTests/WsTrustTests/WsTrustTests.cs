@@ -2,19 +2,19 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.WsTrust;
+using Microsoft.Identity.Test.Common;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Identity.Test.Common;
-using System.Globalization;
-using Microsoft.Identity.Client.Internal;
-using System.Linq;
-using Microsoft.Identity.Test.Common.Core.Helpers;
 using NSubstitute.Extensions;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests

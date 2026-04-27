@@ -10,65 +10,50 @@ namespace Microsoft.Identity.Client.Utils
     /// <summary>
     /// Structure that holds a <see cref="Task"/> result and duration of the <see cref="Task"/> in milliseconds
     /// </summary>
-    internal struct MeasureDurationResult<TResult>
+    internal struct MeasureDurationResult<TResult>(TResult result, long ticks)
     {
         private const int TicksPerMicrosecond = 10;
         private static readonly double s_tickFrequency = TimeSpan.TicksPerSecond / (double)Stopwatch.Frequency;
 
-        public MeasureDurationResult(TResult result, long ticks)
-        {
-            Result = result;
-            Milliseconds = (long)(ticks * s_tickFrequency / TimeSpan.TicksPerMillisecond);
-            Microseconds = (long)(ticks * s_tickFrequency / TicksPerMicrosecond);
-            Ticks = ticks;
-        }
-
-        public TResult Result { get; }
+        public TResult Result { get; } = result;
 
         /// <summary>
         /// Measured milliseconds
         /// </summary>
-        public long Milliseconds { get; }
+        public long Milliseconds { get; } = (long)(ticks * s_tickFrequency / TimeSpan.TicksPerMillisecond);
 
         /// <summary>
         /// Measured microseconds
         /// </summary>
-        public long Microseconds { get; }
+        public long Microseconds { get; } = (long)(ticks * s_tickFrequency / TicksPerMicrosecond);
 
         /// <summary>
         /// Measured ticks
         /// </summary>
-        public long Ticks { get; }
+        public long Ticks { get; } = ticks;
     }
 
     /// <summary>
     /// Structure that holds a duration of the <see cref="Task"/> in milliseconds.
     /// </summary>
-    internal struct MeasureDurationResult
+    internal struct MeasureDurationResult(long ticks)
     {
         private const int TicksPerMicrosecond = 10;
         private static readonly double s_tickFrequency = TimeSpan.TicksPerSecond / (double)Stopwatch.Frequency;
 
-        public MeasureDurationResult(long ticks)
-        {
-            Milliseconds = (long)(ticks * s_tickFrequency / TimeSpan.TicksPerMillisecond);
-            Microseconds = (long)(ticks * s_tickFrequency / TicksPerMicrosecond);
-            Ticks = ticks;
-        }
-
         /// <summary>
         /// Measured milliseconds
         /// </summary>
-        public long Milliseconds { get; }
+        public long Milliseconds { get; } = (long)(ticks * s_tickFrequency / TimeSpan.TicksPerMillisecond);
 
         /// <summary>
         /// Measured microseconds
         /// </summary>
-        public long Microseconds { get; }
+        public long Microseconds { get; } = (long)(ticks * s_tickFrequency / TicksPerMicrosecond);
 
         /// <summary>
         /// Measured ticks
         /// </summary>
-        public long Ticks { get; }
+        public long Ticks { get; } = ticks;
     }
 }

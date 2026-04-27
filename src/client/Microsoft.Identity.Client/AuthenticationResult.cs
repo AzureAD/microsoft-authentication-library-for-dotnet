@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.Security.Claims;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.AuthScheme;
@@ -13,7 +14,6 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
-using System.Security.Cryptography.X509Certificates;
 
 namespace Microsoft.Identity.Client
 {
@@ -161,7 +161,7 @@ namespace Microsoft.Identity.Client
                 authenticationScheme);
 
             // Apply token formatting (async if supported, sync otherwise)
-            var measuredResultDuration = await StopwatchService.MeasureCodeBlockAsync(async () =>
+            MeasureDurationResult measuredResultDuration = await StopwatchService.MeasureCodeBlockAsync(async () =>
             {
                 if (authenticationScheme is IAuthenticationOperation2 asyncAuthScheme)
                 {

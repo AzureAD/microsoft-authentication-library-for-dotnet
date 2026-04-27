@@ -93,7 +93,7 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(userToken));
             }
 
-            UserAssertion userAssertion = new UserAssertion(userToken);
+            UserAssertion userAssertion = new(userToken);
 
             if (string.IsNullOrEmpty(longRunningProcessSessionKey))
             {
@@ -143,7 +143,7 @@ namespace Microsoft.Identity.Client
             requestContext.ApiEvent = new ApiEvent(correlationId);
             requestContext.ApiEvent.ApiId = ApiIds.RemoveOboTokens;
 
-            var authority = await Instance.Authority.CreateAuthorityForRequestAsync(
+            Instance.Authority authority = await Instance.Authority.CreateAuthorityForRequestAsync(
               requestContext,
               null).ConfigureAwait(false);
 

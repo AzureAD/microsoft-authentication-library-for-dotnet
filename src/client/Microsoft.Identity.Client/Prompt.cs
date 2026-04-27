@@ -17,33 +17,33 @@ namespace Microsoft.Identity.Client
         /// <remarks>
         /// This is the default prompt for backwards compatibility reasons. Please use <see cref="Prompt.NoPrompt"/> for the best user experience.
         /// </remarks>
-        public static readonly Prompt SelectAccount = new Prompt("select_account");
+        public static readonly Prompt SelectAccount = new("select_account");
 
         /// <summary>
         /// The user will be prompted for credentials by the service. It is achieved
         /// by sending <c>prompt=login</c> to the authorize endpoint.
         /// </summary>
-        public static readonly Prompt ForceLogin = new Prompt("login");
+        public static readonly Prompt ForceLogin = new("login");
 
         /// <summary>
         /// The user will be prompted to consent, even if consent was granted before. It is achieved
         /// by sending <c>prompt=consent</c> to the authorization server's authorize endpoint.
         /// </summary>
-        public static readonly Prompt Consent = new Prompt("consent");
+        public static readonly Prompt Consent = new("consent");
 
         /// <summary>
         /// Let the identity service decide on the best user experience, based on browser cookies and 
         /// on the login hint, which can be specified using WithAccount() or WithLoginHint()
         /// </summary>
         /// <remarks>This is the recommended prompt</remarks>
-        public static readonly Prompt NoPrompt = new Prompt("no_prompt");
+        public static readonly Prompt NoPrompt = new("no_prompt");
 
         /// <summary>
         /// AcquireToken will send <c>prompt=create</c> to the authorization server's authorize endpoint
         /// which would trigger a sign-up experience, used for External Identities. 
         /// </summary>
         /// <remarks>More details at https://aka.ms/msal-net-prompt-create. </remarks>
-        public static readonly Prompt Create = new Prompt("create");
+        public static readonly Prompt Create = new("create");
 
 #if NETFRAMEWORK
         /// <summary>
@@ -51,10 +51,10 @@ namespace Microsoft.Identity.Client
         /// the authorization server's authorize endpoint and the library will use a hidden WebView (and its cookies) to authenticate the user.
         /// This can fail, and in that case a <see cref="MsalUiRequiredException"/> will be thrown.
         /// </summary>
-        public static readonly Prompt Never = new Prompt("attempt_none");
+        public static readonly Prompt Never = new("attempt_none");
 #endif
         // for when the developer doesn't specify a prompt
-        internal static readonly Prompt NotSpecified = new Prompt("not_specified");
+        internal static readonly Prompt NotSpecified = new("not_specified");
 
         internal string PromptValue { get; }
 

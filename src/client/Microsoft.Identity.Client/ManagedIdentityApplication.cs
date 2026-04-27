@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Client
         [Obsolete("Use GetManagedIdentitySourceAsync() instead. \"ManagedIdentityApplication mi = miBuilder.Build() as ManagedIdentityApplication;\"")]
         public static ManagedIdentitySource GetManagedIdentitySource()
         {
-            var source = ManagedIdentityClient.GetManagedIdentitySourceNoImds();
+            ManagedIdentitySource source = ManagedIdentityClient.GetManagedIdentitySourceNoImds();
 
             return source == ManagedIdentitySource.None
 #pragma warning disable CS0618

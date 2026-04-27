@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Client
             IConfidentialClientApplicationExecutor confidentialClientApplicationExecutor,
             IEnumerable<string> scopes)
         {
-            var builder = new AcquireTokenForClientParameterBuilder(confidentialClientApplicationExecutor).WithScopes(scopes);
+            AcquireTokenForClientParameterBuilder builder = new AcquireTokenForClientParameterBuilder(confidentialClientApplicationExecutor).WithScopes(scopes);
 
             if (!string.IsNullOrEmpty(confidentialClientApplicationExecutor.ServiceBundle.Config.CertificateIdToAssociateWithToken))
             {

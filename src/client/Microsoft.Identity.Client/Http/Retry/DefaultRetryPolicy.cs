@@ -19,7 +19,7 @@ namespace Microsoft.Identity.Client.Http.Retry
         public readonly int _defaultRetryDelayMs;
         private readonly int _maxRetries;
         private readonly Func<HttpResponse, Exception, bool> _retryCondition;
-        private readonly LinearRetryStrategy _linearRetryStrategy = new LinearRetryStrategy();
+        private readonly LinearRetryStrategy _linearRetryStrategy = new();
 
         public DefaultRetryPolicy(RequestType requestType)
         {

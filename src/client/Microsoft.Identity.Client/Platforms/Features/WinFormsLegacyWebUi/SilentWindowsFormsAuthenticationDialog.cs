@@ -78,7 +78,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
 
         private static Timer CreateStartedTimer(Action onTickAction, int interval)
         {
-            Timer timer = new Timer { Interval = interval };
+            Timer timer = new()
+            { Interval = interval };
             timer.Tick += (_, _) => onTickAction();
             timer.Start();
             return timer;
@@ -96,7 +97,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
             if (!doneSignaled)
             {
                 timer.Stop();
-                SilentWebUIDoneEventArgs args = new SilentWebUIDoneEventArgs(exception);
+                SilentWebUIDoneEventArgs args = new(exception);
 
                 Done?.Invoke(this, args);
 

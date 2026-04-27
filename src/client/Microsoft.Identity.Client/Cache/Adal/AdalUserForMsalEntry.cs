@@ -5,19 +5,11 @@ using System;
 
 namespace Microsoft.Identity.Client.Cache
 {
-    internal class AdalUserForMsalEntry
+    internal class AdalUserForMsalEntry(string clientId, string authority, string clientInfo, AdalUserInfo userInfo)
     {
-        public AdalUserForMsalEntry(string clientId, string authority, string clientInfo, AdalUserInfo userInfo)
-        {
-            ClientId = clientId ?? throw new ArgumentNullException(nameof(clientId));
-            Authority = authority;
-            ClientInfo = clientInfo;
-            UserInfo = userInfo ?? throw new ArgumentNullException(nameof(userInfo));
-        }
-
-        public string ClientId { get; }
-        public string Authority { get; }
-        public string ClientInfo { get; } // optional, ADAL v3 doesn't have this
-        public AdalUserInfo UserInfo { get; }
+        public string ClientId { get; } = clientId ?? throw new ArgumentNullException(nameof(clientId));
+        public string Authority { get; } = authority;
+        public string ClientInfo { get; } = clientInfo;
+        public AdalUserInfo UserInfo { get; } = userInfo ?? throw new ArgumentNullException(nameof(userInfo));
     }
 }

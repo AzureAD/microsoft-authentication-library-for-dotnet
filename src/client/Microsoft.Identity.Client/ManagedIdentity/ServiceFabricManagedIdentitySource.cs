@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                         "IDENTITY_ENDPOINT", identityEndpoint, "Service Fabric");
 
                 // Use the factory to create and throw the exception
-                var exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
+                MsalException exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
                     MsalError.InvalidManagedIdentityEndpoint,
                     errorMessage,
                     null,
@@ -77,7 +77,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         protected override Task<ManagedIdentityRequest> CreateRequestAsync(string resource)
         {
-            ManagedIdentityRequest request = new ManagedIdentityRequest(HttpMethod.Get, _endpoint);
+            ManagedIdentityRequest request = new(HttpMethod.Get, _endpoint);
 
             request.Headers["secret"] = _identityHeaderValue;
 

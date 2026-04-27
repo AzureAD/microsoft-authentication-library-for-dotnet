@@ -5,21 +5,14 @@ using System;
 
 namespace Microsoft.Identity.Client.Http.Retry
 {
-    internal class ExponentialRetryStrategy
+    internal class ExponentialRetryStrategy(int minExponentialBackoff, int maxExponentialBackoff, int exponentialDeltaBackoff)
     {
         // Minimum backoff time in milliseconds
-        private int _minExponentialBackoff;
+        private int _minExponentialBackoff = minExponentialBackoff;
         // Maximum backoff time in milliseconds
-        private int _maxExponentialBackoff;
+        private int _maxExponentialBackoff = maxExponentialBackoff;
         // Maximum backoff time in milliseconds
-        private int _exponentialDeltaBackoff;
-
-        public ExponentialRetryStrategy(int minExponentialBackoff, int maxExponentialBackoff, int exponentialDeltaBackoff)
-        {
-            _minExponentialBackoff = minExponentialBackoff;
-            _maxExponentialBackoff = maxExponentialBackoff;
-            _exponentialDeltaBackoff = exponentialDeltaBackoff;
-        }
+        private int _exponentialDeltaBackoff = exponentialDeltaBackoff;
 
         /// <summary>
         /// Calculates the exponential delay based on the current retry attempt.

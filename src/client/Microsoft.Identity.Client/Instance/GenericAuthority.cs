@@ -20,7 +20,7 @@ namespace Microsoft.Identity.Client.Instance
 
         internal override async Task<string> GetTokenEndpointAsync(RequestContext requestContext)
         {
-            var configuration = await OidcRetrieverWithCache.GetOidcAsync(
+            OidcMetadata configuration = await OidcRetrieverWithCache.GetOidcAsync(
                 AuthorityInfo.CanonicalAuthority.AbsoluteUri, requestContext)
                     .ConfigureAwait(false);
 

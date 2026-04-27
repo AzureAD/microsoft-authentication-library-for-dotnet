@@ -32,15 +32,15 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         // static versions to support the "shared cache" mode
         private static readonly ConcurrentDictionary<string, ConcurrentDictionary<string, MsalAccessTokenCacheItem>> s_accessTokenCacheDictionary =
-          new ConcurrentDictionary<string, ConcurrentDictionary<string, MsalAccessTokenCacheItem>>();
+          new();
         private static readonly ConcurrentDictionary<string, ConcurrentDictionary<string, MsalRefreshTokenCacheItem>> s_refreshTokenCacheDictionary =
-             new ConcurrentDictionary<string, ConcurrentDictionary<string, MsalRefreshTokenCacheItem>>();
+             new();
         private static readonly ConcurrentDictionary<string, ConcurrentDictionary<string, MsalIdTokenCacheItem>> s_idTokenCacheDictionary =
-             new ConcurrentDictionary<string, ConcurrentDictionary<string, MsalIdTokenCacheItem>>();
+             new();
         private static readonly ConcurrentDictionary<string, ConcurrentDictionary<string, MsalAccountCacheItem>> s_accountCacheDictionary =
-             new ConcurrentDictionary<string, ConcurrentDictionary<string, MsalAccountCacheItem>>();
+             new();
         private static readonly ConcurrentDictionary<string, MsalAppMetadataCacheItem> s_appMetadataDictionary =
-            new ConcurrentDictionary<string, MsalAppMetadataCacheItem>();
+            new();
 
         private static int s_entryCount = 0;
 
@@ -80,7 +80,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             string itemKey = item.CacheKey;
             string partitionKey = CacheKeyFactory.GetKeyFromCachedItem(item);
 
-            var partition = AccessTokenCacheDictionary.GetOrAdd(partitionKey, _ => new ConcurrentDictionary<string, MsalAccessTokenCacheItem>());
+            ConcurrentDictionary<string, MsalAccessTokenCacheItem> partition = AccessTokenCacheDictionary.GetOrAdd(partitionKey, _ => new ConcurrentDictionary<string, MsalAccessTokenCacheItem>());
             bool added = partition.TryAdd(itemKey, item);
             // only increment the entry count if this is a new item
             if (added)
@@ -133,8 +133,8 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         {
             string partitionKey = CacheKeyFactory.GetIdTokenKeyFromCachedItem(accessTokenCacheItem);
 
-            IdTokenCacheDictionary.TryGetValue(partitionKey, out var partition);
-            if (partition != null && partition.TryGetValue(accessTokenCacheItem.GetIdTokenItem().CacheKey, out var idToken))
+            IdTokenCacheDictionary.TryGetValue(partitionKey, out ConcurrentDictionary<string, MsalIdTokenCacheItem> partition);
+            if (partition != null && partition.TryGetValue(accessTokenCacheItem.GetIdTokenItem().CacheKey, out MsalIdTokenCacheItem idToken))
             {
                 return idToken;
             }
@@ -149,7 +149,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         {
             string partitionKey = CacheKeyFactory.GetKeyFromAccount(accountCacheItem);
 
-            AccountCacheDictionary.TryGetValue(partitionKey, out var partition);
+            AccountCacheDictionary.TryGetValue(partitionKey, out ConcurrentDictionary<string, MsalAccountCacheItem> partition);
             MsalAccountCacheItem cacheItem = null;
             partition?.TryGetValue(accountCacheItem.CacheKey, out cacheItem);
             return cacheItem;
@@ -167,7 +167,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         {
             string partitionKey = CacheKeyFactory.GetKeyFromCachedItem(item);
 
-            if (AccessTokenCacheDictionary.TryGetValue(partitionKey, out var partition))
+            if (AccessTokenCacheDictionary.TryGetValue(partitionKey, out ConcurrentDictionary<string, MsalAccessTokenCacheItem> partition))
             {
                 bool removed = partition.TryRemove(item.CacheKey, out _);
                 if (removed)
@@ -187,7 +187,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         {
             string partitionKey = CacheKeyFactory.GetKeyFromCachedItem(item);
 
-            RefreshTokenCacheDictionary.TryGetValue(partitionKey, out var partition);
+            RefreshTokenCacheDictionary.TryGetValue(partitionKey, out ConcurrentDictionary<string, MsalRefreshTokenCacheItem> partition);
             if (partition == null || !partition.TryRemove(item.CacheKey, out _))
             {
                 _logger.InfoPii(
@@ -200,7 +200,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         {
             string partitionKey = CacheKeyFactory.GetKeyFromCachedItem(item);
 
-            IdTokenCacheDictionary.TryGetValue(partitionKey, out var partition);
+            IdTokenCacheDictionary.TryGetValue(partitionKey, out ConcurrentDictionary<string, MsalIdTokenCacheItem> partition);
             if (partition == null || !partition.TryRemove(item.CacheKey, out _))
             {
                 _logger.InfoPii(
@@ -213,7 +213,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         {
             string partitionKey = CacheKeyFactory.GetKeyFromCachedItem(item);
 
-            AccountCacheDictionary.TryGetValue(partitionKey, out var partition);
+            AccountCacheDictionary.TryGetValue(partitionKey, out ConcurrentDictionary<string, MsalAccountCacheItem> partition);
             if (partition == null || !partition.TryRemove(item.CacheKey, out _))
             {
                 _logger.InfoPii(
@@ -229,7 +229,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         /// It should only support external token caching, in the hope that the external token cache is partitioned.
         public virtual List<MsalAccessTokenCacheItem> GetAllAccessTokens(string partitionKey = null, ILoggerAdapter requestlogger = null)
         {
-            var logger = requestlogger ?? _logger;
+            ILoggerAdapter logger = requestlogger ?? _logger;
             logger.Always($"[Internal cache] Total number of cache partitions found while getting access tokens: {AccessTokenCacheDictionary.Count}");
             if (string.IsNullOrEmpty(partitionKey))
             {
@@ -247,7 +247,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         public virtual List<MsalRefreshTokenCacheItem> GetAllRefreshTokens(string partitionKey = null, ILoggerAdapter requestlogger = null)
         {
             List<MsalRefreshTokenCacheItem> result;
-            var logger = requestlogger ?? _logger;
+            ILoggerAdapter logger = requestlogger ?? _logger;
             logger.AlwaysPii(
                 $"[Internal cache] Total number of cache partitions found while getting refresh tokens: {RefreshTokenCacheDictionary.Count}. PartitionKey {partitionKey}",
                 $"[Internal cache] Total number of cache partitions found while getting refresh tokens: {RefreshTokenCacheDictionary.Count}. PartitionKey  {!string.IsNullOrEmpty(partitionKey)}");
@@ -297,7 +297,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         /// It should only support external token caching, in the hope that the external token cache is partitioned.
         public virtual List<MsalAccountCacheItem> GetAllAccounts(string partitionKey = null, ILoggerAdapter requestlogger = null)
         {
-            var logger = requestlogger ?? _logger;
+            ILoggerAdapter logger = requestlogger ?? _logger;
             List<MsalAccountCacheItem> result;
 
             logger.AlwaysPii(
@@ -343,7 +343,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         public virtual void Clear(ILoggerAdapter requestlogger = null)
         {
-            var logger = requestlogger ?? _logger;
+            ILoggerAdapter logger = requestlogger ?? _logger;
             logger.Always("[Internal cache] Clearing user token cache accessor.");
             AccessTokenCacheDictionary.Clear();
             RefreshTokenCacheDictionary.Clear();

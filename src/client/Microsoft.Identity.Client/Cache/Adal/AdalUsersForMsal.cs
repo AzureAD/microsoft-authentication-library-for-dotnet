@@ -9,14 +9,9 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Cache
 {
-    internal class AdalUsersForMsal
+    internal class AdalUsersForMsal(IEnumerable<AdalUserForMsalEntry> userEntries)
     {
-        private readonly IEnumerable<AdalUserForMsalEntry> _userEntries;
-
-        public AdalUsersForMsal(IEnumerable<AdalUserForMsalEntry> userEntries)
-        {
-            _userEntries = userEntries ?? throw new ArgumentNullException(nameof(userEntries));
-        }
+        private readonly IEnumerable<AdalUserForMsalEntry> _userEntries = userEntries ?? throw new ArgumentNullException(nameof(userEntries));
 
         public IDictionary<string, AdalUserInfo> GetUsersWithClientInfo(IEnumerable<string> envAliases)
         {
@@ -39,7 +34,7 @@ namespace Microsoft.Identity.Client.Cache
 
         public ISet<string> GetAdalUserEnvironments()
         {
-            var envList = _userEntries
+            IEnumerable<string> envList = _userEntries
                 .Where(u => !string.IsNullOrEmpty(u.Authority))
                 .Select(u => Authority.GetEnvironment(u.Authority));
 

@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Client.Instance
             if (!string.IsNullOrEmpty(tenantId) &&
                (forceSpecifiedTenant || IsCommonOrganizationsOrConsumersTenant()))
             {
-                var authorityUri = AuthorityInfo.CanonicalAuthority;
+                Uri authorityUri = AuthorityInfo.CanonicalAuthority;
 
                 return string.Format(
                     CultureInfo.InvariantCulture,

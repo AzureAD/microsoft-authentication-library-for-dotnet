@@ -21,8 +21,8 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
     internal class SimpleHttpClientFactory : IMsalMtlsHttpClientFactory, IMsalSFHttpClientFactory
     {
         //Please see (https://aka.ms/msal-httpclient-info) for important information regarding the HttpClient.
-        private static readonly ConcurrentDictionary<string, HttpClient> s_httpClientPool = new ConcurrentDictionary<string, HttpClient>();
-        private static readonly object s_cacheLock = new object();
+        private static readonly ConcurrentDictionary<string, HttpClient> s_httpClientPool = new();
+        private static readonly object s_cacheLock = new();
 
         private static HttpClient CreateHttpClient()
         {

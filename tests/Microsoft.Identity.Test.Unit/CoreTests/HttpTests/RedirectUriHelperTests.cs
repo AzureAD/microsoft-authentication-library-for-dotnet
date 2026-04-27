@@ -2,13 +2,13 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Globalization;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Http;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Client.Internal;
-using System.Globalization;
 using Microsoft.Identity.Client.Internal.Logger;
+using Microsoft.Identity.Test.Common;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
 {

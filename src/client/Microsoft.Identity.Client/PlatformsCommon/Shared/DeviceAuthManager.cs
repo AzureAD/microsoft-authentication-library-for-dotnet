@@ -13,14 +13,9 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 {
-    internal class DeviceAuthManager : IDeviceAuthManager
+    internal class DeviceAuthManager(ICryptographyManager cryptographyManager) : IDeviceAuthManager
     {
-        private readonly ICryptographyManager _cryptographyManager;
-
-        public DeviceAuthManager(ICryptographyManager cryptographyManager)
-        {
-            _cryptographyManager = cryptographyManager;
-        }
+        private readonly ICryptographyManager _cryptographyManager = cryptographyManager;
 
         public bool TryCreateDeviceAuthChallengeResponse(HttpResponseHeaders responseHeaders, Uri endpointUri, out string responseHeader)
         {
@@ -88,7 +83,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             try
             {
                 store.Open(OpenFlags.ReadOnly);
-                var certCollection = store.Certificates;
+                X509Certificate2Collection certCollection = store.Certificates;
                 if (challengeData.ContainsKey("CertAuthorities"))
                 {
                     return FindCertificateByCertAuthorities(challengeData, certCollection);

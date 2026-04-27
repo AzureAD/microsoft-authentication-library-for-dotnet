@@ -73,7 +73,7 @@ namespace Microsoft.Identity.Client
             // useRealSemaphore= false for MyApps and potentially for all apps when using non-singleton MSAL
             _semaphoreSlim = new OptionalSemaphoreSlim(useRealSemaphore: serviceBundle.Config.CacheSynchronizationEnabled);
 
-            var proxy = serviceBundle?.PlatformProxy ?? PlatformProxyFactory.CreatePlatformProxy(null);
+            IPlatformProxy proxy = serviceBundle?.PlatformProxy ?? PlatformProxyFactory.CreatePlatformProxy(null);
             Accessor = proxy.CreateTokenCacheAccessor(serviceBundle.Config.AccessorOptions, isApplicationTokenCache);
             _featureFlags = proxy.GetFeatureFlags();
 
@@ -133,7 +133,7 @@ namespace Microsoft.Identity.Client
             var partitionKeyFromResponse = CacheKeyFactory.GetInternalPartitionKeyFromResponse(requestParams, homeAccountId);
             Debug.Assert(partitionKeyFromResponse != null || !requestParams.AppConfig.IsConfidentialClient, "On confidential client, cache must be partitioned.");
 
-            foreach (var accessToken in Accessor.GetAllAccessTokens(partitionKeyFromResponse))
+            foreach (MsalAccessTokenCacheItem accessToken in Accessor.GetAllAccessTokens(partitionKeyFromResponse))
             {
                 if (accessToken.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase) &&
                     environmentAliases.Contains(accessToken.Environment) &&
@@ -158,7 +158,7 @@ namespace Microsoft.Identity.Client
                 requestParams.RequestContext.Logger.Info(() => "Matching entries after filtering by user - " + accessTokensToDelete.Count);
             }
 
-            foreach (var cacheItem in accessTokensToDelete)
+            foreach (MsalAccessTokenCacheItem cacheItem in accessTokensToDelete)
             {
                 Accessor.DeleteAccessToken(cacheItem);
             }

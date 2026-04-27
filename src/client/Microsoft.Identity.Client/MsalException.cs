@@ -228,7 +228,7 @@ namespace Microsoft.Identity.Client
         internal virtual void PopulateObjectFromJson(JObject jObject)
         {
             // Populate this exception instance with broker exception data from JSON
-            var exceptionData = JsonHelper.ExtractInnerJsonAsDictionary(jObject, ExceptionSerializationKey.AdditionalExceptionData);
+            IDictionary<string, string> exceptionData = JsonHelper.ExtractInnerJsonAsDictionary(jObject, ExceptionSerializationKey.AdditionalExceptionData);
 
             if (exceptionData.TryGetValue(ExceptionSerializationKey.BrokerErrorContext, out string brokerErrorContext))
             {
@@ -270,7 +270,7 @@ namespace Microsoft.Identity.Client
         /// <returns></returns>
         public string ToJsonString()
         {
-            JObject jObject = new JObject();
+            JObject jObject = new();
             PopulateJson(jObject);
 
 #if SUPPORTS_SYSTEM_TEXT_JSON

@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Client.Http.Retry
 
         private int _maxRetries;
 
-        private readonly ExponentialRetryStrategy _exponentialRetryStrategy = new ExponentialRetryStrategy(
+        private readonly ExponentialRetryStrategy _exponentialRetryStrategy = new(
             ImdsRetryPolicy.MinExponentialBackoffMs,
             ImdsRetryPolicy.MaxExponentialBackoffMs,
             ImdsRetryPolicy.ExponentialDeltaBackoffMs

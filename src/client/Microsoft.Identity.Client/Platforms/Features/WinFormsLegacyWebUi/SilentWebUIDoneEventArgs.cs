@@ -5,13 +5,8 @@ using System;
 
 namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
 {
-    internal class SilentWebUIDoneEventArgs : EventArgs
+    internal class SilentWebUIDoneEventArgs(Exception e) : EventArgs
     {
-        public SilentWebUIDoneEventArgs(Exception e)
-        {
-            TransferredException = e;
-        }
-
-        public Exception TransferredException { get; private set; }
+        public Exception TransferredException { get; private set; } = e;
     }
 }

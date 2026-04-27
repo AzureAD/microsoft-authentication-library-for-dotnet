@@ -25,14 +25,9 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop
     /// <summary>
     ///     Platform / OS specific logic.
     /// </summary>
-    internal class NetDesktopPlatformProxy : AbstractPlatformProxy
+    /// <inheritdoc/>
+    internal class NetDesktopPlatformProxy(ILoggerAdapter logger) : AbstractPlatformProxy(logger)
     {
-        /// <inheritdoc/>
-        public NetDesktopPlatformProxy(ILoggerAdapter logger)
-            : base(logger)
-        {
-        }
-
         private static bool IsWindows
         {
             get

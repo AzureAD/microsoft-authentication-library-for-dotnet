@@ -16,7 +16,7 @@ namespace Microsoft.Identity.Client.Http.Retry
         private const int MaxExponentialBackoffMs = 4000;
         private const int ExponentialDeltaBackoffMs = 2000;
 
-        private readonly ExponentialRetryStrategy _exponentialRetryStrategy = new ExponentialRetryStrategy(
+        private readonly ExponentialRetryStrategy _exponentialRetryStrategy = new(
             MinExponentialBackoffMs,
             MaxExponentialBackoffMs,
             ExponentialDeltaBackoffMs

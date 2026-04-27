@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         internal virtual JObject ToJObject()
         {
-            var json = string.IsNullOrWhiteSpace(AdditionalFieldsJson) ? new JObject() : JsonHelper.ParseIntoJsonObject(AdditionalFieldsJson);
+            JObject json = string.IsNullOrWhiteSpace(AdditionalFieldsJson) ? new JObject() : JsonHelper.ParseIntoJsonObject(AdditionalFieldsJson);
 
             return json;
         }

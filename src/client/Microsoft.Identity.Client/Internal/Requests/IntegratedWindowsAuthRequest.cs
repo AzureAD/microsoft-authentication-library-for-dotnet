@@ -59,8 +59,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             await ResolveAuthorityAsync().ConfigureAwait(false);
             await UpdateUsernameAsync().ConfigureAwait(false);
-            var userAssertion = await FetchAssertionFromWsTrustAsync().ConfigureAwait(false);
-            var msalTokenResponse = await SendTokenRequestAsync(
+            UserAssertion userAssertion = await FetchAssertionFromWsTrustAsync().ConfigureAwait(false);
+            MsalTokenResponse msalTokenResponse = await SendTokenRequestAsync(
                                                 GetAdditionalBodyParameters(userAssertion), cancellationToken)
                                             .ConfigureAwait(false);
 
@@ -83,13 +83,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
                             + " See https://aka.ms/msal-net-iwa for more details.");
             }
 
-            var userRealmResponse = await _commonNonInteractiveHandler
+            UserRealmDiscoveryResponse userRealmResponse = await _commonNonInteractiveHandler
                                           .QueryUserRealmDataAsync(AuthenticationRequestParameters.AuthorityInfo.UserRealmUriPrefix, _integratedWindowsAuthParameters.Username)
                                           .ConfigureAwait(false);
 
             if (userRealmResponse.IsFederated)
             {
-                var wsTrustResponse = await _commonNonInteractiveHandler.PerformWsTrustMexExchangeAsync(
+                WsTrustResponse wsTrustResponse = await _commonNonInteractiveHandler.PerformWsTrustMexExchangeAsync(
                     userRealmResponse.FederationMetadataUrl,
                     userRealmResponse.CloudAudienceUrn,
                     UserAuthType.IntegratedAuth,

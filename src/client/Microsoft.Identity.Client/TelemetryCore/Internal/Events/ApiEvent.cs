@@ -8,7 +8,7 @@ using Microsoft.Identity.Client.Region;
 
 namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
 {
-    internal class ApiEvent
+    internal class ApiEvent(Guid correlationId)
     {
         public enum ApiIds
         {
@@ -45,12 +45,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
             // "2002" is reserved for 1p OTEL signal that telemetry is disabled
         }
 
-        public ApiEvent(Guid correlationId)
-        {
-            CorrelationId = correlationId;
-        }
-
-        public Guid CorrelationId { get; set; }
+        public Guid CorrelationId { get; set; } = correlationId;
 
         public ApiIds ApiId { get; set; }
 

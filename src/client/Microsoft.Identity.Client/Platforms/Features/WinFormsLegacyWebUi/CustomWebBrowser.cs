@@ -14,7 +14,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
         private const int S_OK = 0;
         private const int S_FALSE = 1;
         private const int WM_CHAR = 0x102;
-        private static readonly HashSet<Shortcut> shortcutDisallowedList = new HashSet<Shortcut>();
+        private static readonly HashSet<Shortcut> shortcutDisallowedList = new();
         private CustomWebBrowserEvent webBrowserEvent;
         private AxHost.ConnectionPointCookie webBrowserEventCookie;
 
@@ -76,16 +76,10 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
         public event WebBrowserBeforeNavigateEventHandler BeforeNavigate;
 
         [ComVisible(true), ComDefaultInterface(typeof(NativeWrapper.IDocHostUIHandler))]
-        protected class CustomSite : WebBrowserSite, NativeWrapper.IDocHostUIHandler, ICustomQueryInterface
+        protected class CustomSite(WebBrowser host) : WebBrowserSite(host), NativeWrapper.IDocHostUIHandler, ICustomQueryInterface
         {
             private const int NotImplemented = -2147467263;
-            private readonly WebBrowser host;
-
-            public CustomSite(WebBrowser host)
-                : base(host)
-            {
-                this.host = host;
-            }
+            private readonly WebBrowser host = host;
 
             #region ICustomQueryInterface Members
 

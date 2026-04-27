@@ -177,7 +177,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         internal override JObject ToJObject()
         {
-            var json = base.ToJObject();
+            JObject json = base.ToJObject();
             SetItemIfValueNotNull(json, StorageJsonKeys.FamilyId, FamilyId);
             SetItemIfValueNotNull(json, StorageJsonKeys.UserAssertionHash, OboCacheKey);
             return json;

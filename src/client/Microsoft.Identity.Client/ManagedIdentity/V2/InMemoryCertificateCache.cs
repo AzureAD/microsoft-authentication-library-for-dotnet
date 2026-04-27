@@ -15,7 +15,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
     internal sealed class InMemoryCertificateCache : ICertificateCache, IDisposable
     {
         private readonly ConcurrentDictionary<string, CertificateCacheEntry> _entriesByCacheKey =
-            new ConcurrentDictionary<string, CertificateCacheEntry>(StringComparer.Ordinal);
+            new(StringComparer.Ordinal);
 
         private int _disposed;
 
@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 
             value = default;
 
-            if (_entriesByCacheKey.TryGetValue(cacheKey, out var entry))
+            if (_entriesByCacheKey.TryGetValue(cacheKey, out CertificateCacheEntry entry))
             {
                 if (TryEvictIfExpired(cacheKey, entry, logger))
                 {
@@ -65,13 +65,13 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             if (string.IsNullOrWhiteSpace(value.ClientId))
                 throw new ArgumentException("ClientId must be non-empty.", nameof(value.ClientId));
 
-            var notAfterUtc = ToNotAfterUtc(value.Certificate);
-            var nowUtc = DateTimeOffset.UtcNow;
+            DateTimeOffset notAfterUtc = ToNotAfterUtc(value.Certificate);
+            DateTimeOffset nowUtc = DateTimeOffset.UtcNow;
 
             // Enforce minimum remaining lifetime (e.g., 24h).
             if (notAfterUtc <= nowUtc + CertificateCacheEntry.MinRemainingLifetime)
             {
-                var remaining = notAfterUtc - nowUtc;
+                TimeSpan remaining = notAfterUtc - nowUtc;
                 logger?.Verbose(() =>
                     "[CertCache] Skipping certificate with insufficient remaining lifetime " +
                     $"({remaining.TotalHours:F2}h) (key='{Mask(cacheKey)}').");
@@ -106,7 +106,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             ThrowIfDisposed();
             ValidateCacheKey(cacheKey);
 
-            if (_entriesByCacheKey.TryRemove(cacheKey, out var entry))
+            if (_entriesByCacheKey.TryRemove(cacheKey, out CertificateCacheEntry entry))
             {
                 if (!entry.IsDisposed)
                 {
@@ -123,9 +123,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         {
             ThrowIfDisposed();
 
-            foreach (var kvp in _entriesByCacheKey)
+            foreach (System.Collections.Generic.KeyValuePair<string, CertificateCacheEntry> kvp in _entriesByCacheKey)
             {
-                if (_entriesByCacheKey.TryRemove(kvp.Key, out var entry))
+                if (_entriesByCacheKey.TryRemove(kvp.Key, out CertificateCacheEntry entry))
                 {
                     if (!entry.IsDisposed)
                     {
@@ -143,9 +143,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 return;
 
             // Dispose entries and empty the map
-            foreach (var kvp in _entriesByCacheKey)
+            foreach (System.Collections.Generic.KeyValuePair<string, CertificateCacheEntry> kvp in _entriesByCacheKey)
             {
-                if (_entriesByCacheKey.TryRemove(kvp.Key, out var entry))
+                if (_entriesByCacheKey.TryRemove(kvp.Key, out CertificateCacheEntry entry))
                 {
                     if (!entry.IsDisposed)
                     {
@@ -173,13 +173,13 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 
         private bool TryEvictIfExpired(string cacheKey, CertificateCacheEntry entry, ILoggerAdapter logger)
         {
-            var nowUtc = DateTimeOffset.UtcNow;
+            DateTimeOffset nowUtc = DateTimeOffset.UtcNow;
             if (!entry.IsExpiredUtc(nowUtc))
             {
                 return false;
             }
 
-            if (_entriesByCacheKey.TryRemove(cacheKey, out var removed))
+            if (_entriesByCacheKey.TryRemove(cacheKey, out CertificateCacheEntry removed))
             {
                 if (!removed.IsDisposed)
                 {
@@ -193,7 +193,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 
         private static DateTimeOffset ToNotAfterUtc(X509Certificate2 cert)
         {
-            var notAfter = cert.NotAfter;
+            DateTime notAfter = cert.NotAfter;
             if (notAfter.Kind == DateTimeKind.Unspecified)
             {
                 notAfter = DateTime.SpecifyKind(notAfter, DateTimeKind.Local);

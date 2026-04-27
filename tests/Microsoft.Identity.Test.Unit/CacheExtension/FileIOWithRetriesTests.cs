@@ -7,8 +7,8 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Extensions.Msal;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.CacheExtension
 {

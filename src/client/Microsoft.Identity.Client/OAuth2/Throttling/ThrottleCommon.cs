@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
 
         public static void TryThrowServiceException(string thumbprint, ThrottlingCache cache, ILoggerAdapter logger, string providerName)
         {
-            if (cache.TryGetOrRemoveExpired(thumbprint, logger, out var ex))
+            if (cache.TryGetOrRemoveExpired(thumbprint, logger, out MsalServiceException ex))
             {
                 logger.WarningPii(
                     $"[Throttling] Exception thrown because of throttling rule {providerName} - thumbprint: {thumbprint}",

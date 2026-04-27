@@ -8,16 +8,10 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
     /// <summary>
     /// Result from intercepting an authorization response
     /// </summary>
-    internal class AuthorizationResponse
+    internal class AuthorizationResponse(Uri requestUri, byte[] postData)
     {
-        public AuthorizationResponse(Uri requestUri, byte[] postData)
-        {
-            RequestUri = requestUri;
-            PostData = postData;
-        }
-
-        public Uri RequestUri { get; set; }
-        public byte[] PostData { get; set; }
+        public Uri RequestUri { get; set; } = requestUri;
+        public byte[] PostData { get; set; } = postData;
         public bool IsFormPost => PostData != null && PostData.Length > 0;
     }
 }

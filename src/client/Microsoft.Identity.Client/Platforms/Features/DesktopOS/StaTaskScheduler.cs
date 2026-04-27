@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
                 {
                     // Continually get the next task and try to execute it.
                     // This will continue until the scheduler is disposed and no more tasks remain.
-                    foreach (var t in _tasks.GetConsumingEnumerable())
+                    foreach (Task t in _tasks.GetConsumingEnumerable())
                     {
                         TryExecuteTask(t);
                     }
@@ -73,7 +73,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
                 _tasks.CompleteAdding();
 
                 // Wait for all threads to finish processing tasks
-                foreach (var thread in _threads)
+                foreach (Thread thread in _threads)
                 {
                     thread.Join();
                 }

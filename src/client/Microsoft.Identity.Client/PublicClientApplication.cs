@@ -176,7 +176,7 @@ namespace Microsoft.Identity.Client
         {
             if (ServiceBundle.Config.IsBrokerEnabled)
             {
-                var broker = ServiceBundle.PlatformProxy.CreateBroker(ServiceBundle.Config, null);
+                Internal.Broker.IBroker broker = ServiceBundle.PlatformProxy.CreateBroker(ServiceBundle.Config, null);
 
                 if (broker.IsBrokerInstalledAndInvokable(ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType))
                 {

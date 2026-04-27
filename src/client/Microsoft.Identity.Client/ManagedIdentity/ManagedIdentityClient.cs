@@ -181,7 +181,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             string imdsV2FailureReason = null;
 
             // Probe IMDS v1 first
-            var (imdsV1Success, imdsV1Failure) = await ImdsManagedIdentitySource.ProbeImdsEndpointAsync(requestContext, ImdsVersion.V1, cancellationToken).ConfigureAwait(false);
+            (bool imdsV1Success, string imdsV1Failure) = await ImdsManagedIdentitySource.ProbeImdsEndpointAsync(requestContext, ImdsVersion.V1, cancellationToken).ConfigureAwait(false);
             if (imdsV1Success)
             {
                 requestContext.Logger.Info("[Managed Identity] ImdsV1 detected.");
@@ -190,7 +190,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             imdsV1FailureReason = imdsV1Failure;
 
             // If v1 fails, probe IMDS v2
-            var (imdsV2Success, imdsV2Failure) = await ImdsManagedIdentitySource.ProbeImdsEndpointAsync(requestContext, ImdsVersion.V2, cancellationToken).ConfigureAwait(false);
+            (bool imdsV2Success, string imdsV2Failure) = await ImdsManagedIdentitySource.ProbeImdsEndpointAsync(requestContext, ImdsVersion.V2, cancellationToken).ConfigureAwait(false);
             if (imdsV2Success)
             {
                 requestContext.Logger.Info("[Managed Identity] ImdsV2 detected.");

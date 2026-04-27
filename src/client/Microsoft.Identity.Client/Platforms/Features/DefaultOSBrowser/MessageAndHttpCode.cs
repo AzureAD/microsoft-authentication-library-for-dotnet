@@ -6,15 +6,9 @@ using System.Net;
 
 namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
 {
-    internal class MessageAndHttpCode
+    internal class MessageAndHttpCode(HttpStatusCode httpCode, string message)
     {
-        public MessageAndHttpCode(HttpStatusCode httpCode, string message)
-        {
-            HttpCode = httpCode;
-            Message = message ?? throw new ArgumentNullException(nameof(message));
-        }
-
-        public HttpStatusCode HttpCode { get; }
-        public string Message { get; }
+        public HttpStatusCode HttpCode { get; } = httpCode;
+        public string Message { get; } = message ?? throw new ArgumentNullException(nameof(message));
     }
 }

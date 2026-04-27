@@ -326,7 +326,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                     (int)response.StatusCode);
             }
 
-            var certificateRequestResponse = JsonHelper.DeserializeFromJson<CertificateRequestResponse>(response.Body);
+            CertificateRequestResponse certificateRequestResponse = JsonHelper.DeserializeFromJson<CertificateRequestResponse>(response.Body);
             CertificateRequestResponse.Validate(certificateRequestResponse);
 
             return certificateRequestResponse;
@@ -372,16 +372,16 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                         .GetOrCreateKeyAsync(_requestContext.Logger, _requestContext.UserCancellationToken)
                         .ConfigureAwait(false);
 
-                    var csrAndKey = _requestContext.ServiceBundle.Config.CsrFactory.Generate(
+                    (string csrPem, System.Security.Cryptography.RSA privateKey) csrAndKey = _requestContext.ServiceBundle.Config.CsrFactory.Generate(
                         keyInfo.Key,
                         csrMetadata.ClientId,
                         csrMetadata.TenantId,
                         csrMetadata.CuId);
 
                     string csr = csrAndKey.csrPem;
-                    var privateKey = csrAndKey.privateKey;
+                    System.Security.Cryptography.RSA privateKey = csrAndKey.privateKey;
 
-                    var certificateRequestResponse = await ExecuteCertificateRequestAsync(
+                    CertificateRequestResponse certificateRequestResponse = await ExecuteCertificateRequestAsync(
                         csrMetadata.ClientId,
                         csrMetadata.AttestationEndpoint,
                         csr,
@@ -411,7 +411,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             string endpointBaseForToken = mtlsBinding.Endpoint;
             string clientIdForToken = mtlsBinding.ClientId;
 
-            ManagedIdentityRequest request = new ManagedIdentityRequest(
+            ManagedIdentityRequest request = new(
                 HttpMethod.Post,
                 new Uri(endpointBaseForToken + AcquireEntraTokenPath));
 

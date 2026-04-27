@@ -2,9 +2,9 @@
 // Licensed under the MIT License.
 
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http.Headers;
-using System.Linq;
 
 namespace Microsoft.Identity.Client.Http
 {
@@ -20,7 +20,7 @@ namespace Microsoft.Identity.Client.Http
 
                 if (Headers != null)
                 {
-                    foreach (var kvp in Headers)
+                    foreach (KeyValuePair<string, IEnumerable<string>> kvp in Headers)
                     {
                         headers[kvp.Key] = kvp.Value.First();
                     }

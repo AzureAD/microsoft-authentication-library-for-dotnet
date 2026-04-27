@@ -17,21 +17,14 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
-    internal class ClientCredentialRequest : RequestBase
+    internal class ClientCredentialRequest(
+        IServiceBundle serviceBundle,
+        AuthenticationRequestParameters authenticationRequestParameters,
+        AcquireTokenForClientParameters clientParameters) : RequestBase(serviceBundle, authenticationRequestParameters, clientParameters)
     {
-        private readonly AcquireTokenForClientParameters _clientParameters;
-        private static readonly SemaphoreSlim s_semaphoreSlim = new SemaphoreSlim(1, 1);
-        private readonly ICryptographyManager _cryptoManager;
-
-        public ClientCredentialRequest(
-            IServiceBundle serviceBundle,
-            AuthenticationRequestParameters authenticationRequestParameters,
-            AcquireTokenForClientParameters clientParameters)
-            : base(serviceBundle, authenticationRequestParameters, clientParameters)
-        {
-            _clientParameters = clientParameters;
-            _cryptoManager = serviceBundle.PlatformProxy.CryptographyManager;
-        }
+        private readonly AcquireTokenForClientParameters _clientParameters = clientParameters;
+        private static readonly SemaphoreSlim s_semaphoreSlim = new(1, 1);
+        private readonly ICryptographyManager _cryptoManager = serviceBundle.PlatformProxy.CryptographyManager;
 
         protected override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
@@ -330,7 +323,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             CancellationToken cancellationToken)
         {
             logger.Info("[ClientCredentialRequest] Acquiring a token from the token provider.");
-            AppTokenProviderParameters appTokenProviderParameters = new AppTokenProviderParameters
+            AppTokenProviderParameters appTokenProviderParameters = new()
             {
                 Scopes = GetOverriddenScopes(AuthenticationRequestParameters.Scope),
                 CorrelationId = AuthenticationRequestParameters.RequestContext.CorrelationId.ToString(),

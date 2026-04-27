@@ -15,17 +15,12 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 {
 
     [Preserve(AllMembers = true)]
-    internal class CommonCryptographyManager : ICryptographyManager
+    internal class CommonCryptographyManager(ILoggerAdapter logger = null) : ICryptographyManager
     {
-        private static readonly ConcurrentDictionary<string, RSA> s_certificateToRsaMap = new ConcurrentDictionary<string, RSA>();
+        private static readonly ConcurrentDictionary<string, RSA> s_certificateToRsaMap = new();
         private static readonly int s_maximumMapSize = 1000;
 
-        protected ILoggerAdapter Logger { get; }
-
-        public CommonCryptographyManager(ILoggerAdapter logger = null)
-        {
-            Logger = logger;
-        }
+        protected ILoggerAdapter Logger { get; } = logger;
 
         public string CreateBase64UrlEncodedSha256Hash(string input)
         {
@@ -168,7 +163,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         {
             // For older frameworks, we need to use the legacy approach with RSACryptoServiceProvider
             // First, export the RSA parameters from the provided private key
-            var parameters = privateKey.ExportParameters(includePrivateParameters: true);
+            RSAParameters parameters = privateKey.ExportParameters(includePrivateParameters: true);
 
             // Create a new RSACryptoServiceProvider with the correct key size
             int keySize = parameters.Modulus.Length * 8;

@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             string base64 = Convert.ToBase64String(ber);
             int offset = 0;
 
-            StringBuilder builder = new StringBuilder("-----BEGIN ");
+            StringBuilder builder = new("-----BEGIN ");
             builder.Append(header);
             builder.AppendLine("-----");
 
@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 throw new NotSupportedException("Signature Processing has only been written for SHA256");
             }
 
-            AsnWriter writer = new AsnWriter(AsnEncodingRules.DER);
+            AsnWriter writer = new(AsnEncodingRules.DER);
 
             // RSAPublicKey ::= SEQUENCE {
             //     modulus           INTEGER,  -- n

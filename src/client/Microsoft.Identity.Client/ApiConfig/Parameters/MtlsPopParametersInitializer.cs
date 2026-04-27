@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Instance;
@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
             // Only cert-capable credentials implement this capability interface.
             if (serviceBundle.Config.ClientCredential is IClientSignedAssertionProvider signedProvider)
             {
-                var opts = CreateAssertionRequestOptions(tokenParameters, serviceBundle, ct);
+                AssertionRequestOptions opts = CreateAssertionRequestOptions(tokenParameters, serviceBundle, ct);
 
                 ClientSignedAssertion ar =
                     await signedProvider.GetAssertionAsync(opts, ct).ConfigureAwait(false);
@@ -90,7 +90,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
             // Case 2 – Signed assertion provider (JWT + optional cert)
             if (serviceBundle.Config.ClientCredential is IClientSignedAssertionProvider signedProvider)
             {
-                var opts = CreateAssertionRequestOptions(p, serviceBundle, ct);
+                AssertionRequestOptions opts = CreateAssertionRequestOptions(p, serviceBundle, ct);
 
                 ClientSignedAssertion ar =
                     await signedProvider.GetAssertionAsync(opts, ct).ConfigureAwait(false);

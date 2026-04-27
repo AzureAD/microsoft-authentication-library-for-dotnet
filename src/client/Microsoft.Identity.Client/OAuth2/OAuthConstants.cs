@@ -106,7 +106,7 @@ namespace Microsoft.Identity.Client.OAuth2
         public const string ScopeProfile = "profile";
 
         public static readonly HashSet<string> ReservedScopes =
-          new HashSet<string>(StringComparer.OrdinalIgnoreCase) { ScopeOpenId, ScopeProfile, ScopeOfflineAccess };
+          new(StringComparer.OrdinalIgnoreCase) { ScopeOpenId, ScopeProfile, ScopeOfflineAccess };
     }
 
     internal class PromptValue

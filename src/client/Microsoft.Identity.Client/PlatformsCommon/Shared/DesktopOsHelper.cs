@@ -15,12 +15,12 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 {
     internal static class DesktopOsHelper
     {
-        private static Lazy<bool> s_wamSupportedOSLazy = new Lazy<bool>(
+        private static Lazy<bool> s_wamSupportedOSLazy = new(
            IsWamSupportedOSInternal);
-        private static Lazy<string> s_winVersionLazy = new Lazy<string>(
+        private static Lazy<string> s_winVersionLazy = new(
             GetWindowsVersionStringInternal);
 
-        private static Lazy<bool> s_wslEnvLazy = new Lazy<bool>(IsWslEnv);
+        private static Lazy<bool> s_wslEnvLazy = new(IsWslEnv);
 
         public static bool IsWindows()
         {
@@ -101,7 +101,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             //For more information on how to acquire the current OS version from the registry
             //See (https://stackoverflow.com/a/61914068)
 #if NETFRAMEWORK
-            var reg = Win32.Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion");
+            Win32.RegistryKey reg = Win32.Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion");
 
             string OSInfo = (string)reg.GetValue("ProductName");
 
@@ -185,7 +185,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         private static bool IsInteractiveSessionMac()
         {
             // Get information about the current session
-            int error = SecurityFramework.SessionGetInfo(SecurityFramework.CallerSecuritySession, out int _, out var sessionFlags);
+            int error = SecurityFramework.SessionGetInfo(SecurityFramework.CallerSecuritySession, out int _, out SessionAttributeBits sessionFlags);
 
             // Check if the session supports Quartz
             if (error == 0 && (sessionFlags & SessionAttributeBits.SessionHasGraphicAccess) != 0)
@@ -204,7 +204,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         }
 #endif
 
-        private static readonly Lazy<bool> _isMacConsoleApp = new Lazy<bool>(() =>
+        private static readonly Lazy<bool> _isMacConsoleApp = new(() =>
         {
 #if SUPPORTS_WIN32
             return !LibObjc.IsNsApplicationRunning();
