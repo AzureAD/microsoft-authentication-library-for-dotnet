@@ -2,9 +2,7 @@
 // Licensed under the MIT License.
 
 
-using System;
 using System.Xml.Linq;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.WsTrust;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 

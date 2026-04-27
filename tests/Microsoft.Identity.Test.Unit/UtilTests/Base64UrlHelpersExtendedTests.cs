@@ -3,7 +3,6 @@
 
 
 using System;
-using System.Text;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 

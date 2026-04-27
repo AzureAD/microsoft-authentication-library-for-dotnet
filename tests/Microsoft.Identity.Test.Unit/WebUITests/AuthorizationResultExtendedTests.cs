@@ -3,11 +3,8 @@
 
 
 using System;
-using System.Collections.Generic;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.UI;
-using Microsoft.Identity.Client.Utils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.WebUITests
