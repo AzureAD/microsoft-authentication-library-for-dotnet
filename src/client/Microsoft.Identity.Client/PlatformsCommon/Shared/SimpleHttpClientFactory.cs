@@ -98,8 +98,16 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         // referenced in unit tests
         internal static void ResetStaticStateForTest()
         {
-            foreach (var client in s_httpClientPool.Values)
+            lock (s_cacheLock)
             {
+                foreach (KeyValuePair<string, HttpClient> pooledClient in s_httpClientPool)
+                {
+                    pooledClient.Value?.Dispose();
+                }
+
+                s_httpClientPool.Clear();
+                Interlocked.Exchange(ref s_httpClientCreationCount, 0);
+            }
                 client.Dispose();
             }
             s_httpClientPool.Clear();
