@@ -35,6 +35,27 @@ Before submitting a pull request, make sure that it passes the following require
 - You added test coverage following existing patterns within the codebase.
 - Your code matches the existing syntax conventions within the codebase.
 - Your PR is small, focused, and avoids making unrelated changes.
+- **Your code passes the formatting check** (see [Code Formatting](#code-formatting) below).
+
+### Code Formatting
+
+This repository enforces code style rules defined in [`.editorconfig`](.editorconfig). The PR pipeline will fail if formatting violations are found.
+
+**Run the formatter locally before pushing:**
+```bash
+dotnet format src/client/Microsoft.Identity.Client/Microsoft.Identity.Client.csproj --severity info
+```
+
+**Set up your editor to auto-format on save:**
+
+- **VS Code**: formatting is configured automatically via `.vscode/settings.json` in this repo. Install the [C# extension](https://marketplace.visualstudio.com/items?itemName=ms-dotnettools.csharp) if you haven't already.
+
+- **Visual Studio 2022**: Enable *Run Code Cleanup profile on Save* to auto-fix style violations on save:
+  1. Go to `Tools → Options → Text Editor → Code Cleanup`
+  2. Check **Run Code Cleanup profile on Save**
+  3. Ensure the active profile includes *Fix all warnings and errors*
+
+  You can also run Code Cleanup manually at any time with `Ctrl+K, Ctrl+E`.
 
 If your pull request contains any of the below, it's less likely to be merged.
 

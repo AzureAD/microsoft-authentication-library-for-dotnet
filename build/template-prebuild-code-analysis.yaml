@@ -12,6 +12,13 @@ steps:
   inputs:
     version: 8.x
 
+- task: DotNetCoreCLI@2
+  displayName: 'Check code formatting (dotnet format)'
+  inputs:
+    command: 'custom'
+    custom: 'format'
+    arguments: 'src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj --severity info --verify-no-changes --no-restore'
+
 - task: securedevelopmentteam.vss-secure-development-tools.build-task-policheck.PoliCheck@2
   displayName: 'Run PoliCheck'
   inputs:
