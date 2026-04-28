@@ -247,6 +247,25 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         }
 
         [TestMethod]
+        public void GetTenantedAuthority_MsaGuid_IsNotReplaced()
+        {
+            // Regression test for https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5951
+            // The MSA GUID is a real tenant ID — GetTenantedAuthority should NOT replace it
+            // unless forceSpecifiedTenant=true.
+            Authority authority = Authority.CreateAuthority(TestConstants.AuthorityConsumerTidTenant);
+
+            // Without force: MSA GUID is preserved (it's a real tenant)
+            string updatedAuthority = authority.GetTenantedAuthority("other_tenant_id", false);
+            Assert.AreEqual(TestConstants.AuthorityConsumerTidTenant, updatedAuthority,
+                "MSA GUID authority should not be replaced when forceSpecifiedTenant=false");
+
+            // With force: replacement is honored
+            string updatedAuthority2 = authority.GetTenantedAuthority("other_tenant_id", true);
+            StringAssert.Contains(updatedAuthority2, "other_tenant_id",
+                "MSA GUID authority should be replaced when forceSpecifiedTenant=true");
+        }
+
+        [TestMethod]
         public void CreateAuthorityFromCommonWithTenantTest()
         {
             Authority authority = Authority.CreateAuthority("https://login.microsoft.com/common");
