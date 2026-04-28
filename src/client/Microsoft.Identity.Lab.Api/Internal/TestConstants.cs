@@ -418,7 +418,7 @@ namespace Microsoft.Identity.Test.Unit
         /// <summary>
         /// Primary ADFS authority used in tests.
         /// </summary>
-        public const string ADFSAuthority = "https://fs.msidlab8.com/adfs/";
+        public const string ADFSAuthority = "https://fs.id4slab1.com/adfs/";
 
         /// <summary>
         /// Secondary ADFS authority used in tests.

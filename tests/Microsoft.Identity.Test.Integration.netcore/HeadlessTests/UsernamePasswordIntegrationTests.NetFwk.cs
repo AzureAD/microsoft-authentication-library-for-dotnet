@@ -80,7 +80,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task AcquireTokenFromAdfsUsernamePasswordAsync()
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserFederated).ConfigureAwait(false);
-            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppAdfsNativeClient).ConfigureAwait(false);
 
             // Use the new ADFS authority and disable validation since ADFS infrastructure is not fully available
             Uri authorityUri = new Uri("https://fs.id4slab1.com/adfs");

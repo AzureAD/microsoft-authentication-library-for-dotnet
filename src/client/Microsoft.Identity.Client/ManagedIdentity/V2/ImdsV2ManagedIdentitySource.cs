@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
@@ -27,7 +28,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         internal static readonly ICertificateCache s_mtlsCertificateCache = new InMemoryCertificateCache();
 
         private readonly IMtlsCertificateCache _mtlsCache;
-        private Func<string, SafeHandle, string, CancellationToken, Task<string>> _attestationTokenProvider;
+        private Func<string, SafeHandle, string, string, ILoggerAdapter, CancellationToken, Task<string>> _attestationTokenProvider;
 
         // used in unit tests
         public const string ApiVersionQueryParam = "cred-api-version";
@@ -470,11 +471,18 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 
             try
             {
-                // Call the attestation token provider delegate
+                // Call the attestation token provider delegate.
+                // Prefer the CNG key name (stable for persisted/KSP keys).
+                // For ephemeral keys (no name), derive a stable identifier from the public key
+                // fingerprint so that the same key handle maps to the same cache entry while
+                // distinct ephemeral keys get distinct entries.
+                string keyId = rsaCng.Key.KeyName ?? GetPublicKeyFingerprint(rsaCng);
                 string attestationJwt = await _attestationTokenProvider(
                     attestationEndpoint.AbsoluteUri,
                     rsaCng.Key.Handle,
                     clientId,
+                    keyId,
+                    _requestContext.Logger,
                     cancellationToken).ConfigureAwait(false);
 
                 if (string.IsNullOrWhiteSpace(attestationJwt))
@@ -520,6 +528,23 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             {
                 s_mtlsCertificateCache.Clear();
             }
+        }
+
+        /// <summary>
+        /// Computes a stable hex fingerprint of the RSA public key.
+        /// Used as a cache key for ephemeral CNG keys that have no key name.
+        /// Compatible with .NET Framework 4.6.2 and netstandard2.0.
+        /// </summary>
+        private static string GetPublicKeyFingerprint(RSA rsa)
+        {
+            RSAParameters p = rsa.ExportParameters(includePrivateParameters: false);
+            // Concatenate Modulus + Exponent as a stable, unique representation of the public key.
+            byte[] combined = new byte[p.Modulus.Length + p.Exponent.Length];
+            Buffer.BlockCopy(p.Modulus, 0, combined, 0, p.Modulus.Length);
+            Buffer.BlockCopy(p.Exponent, 0, combined, p.Modulus.Length, p.Exponent.Length);
+            using var sha256 = SHA256.Create();
+            byte[] hash = sha256.ComputeHash(combined);
+            return BitConverter.ToString(hash).Replace("-", string.Empty);
         }
     }
 }

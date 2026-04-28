@@ -233,7 +233,7 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(clientSecret));
             }
 
-            Config.ClientCredential = new SecretStringClientCredential(clientSecret);
+            Config.ClientCredential = new ClientSecretCredential(clientSecret);
             return this;
         }
 
