@@ -15,8 +15,11 @@ namespace Microsoft.Identity.Client.Extensibility
         /// </summary>
         /// <param name="result">The authentication result.</param>
         /// <returns>
-        /// The refresh token string, or <c>null</c> if the token response did not include a refresh token
-        /// (e.g., client credentials flow, or when the token was served from cache).
+        /// The refresh token string if the result is from a confidential client flow and the token
+        /// response included a refresh token; <c>null</c> otherwise. Refresh tokens are not exposed
+        /// for public client flows, client credentials, managed identity, or when the token was
+        /// served from cache. For the normal (non-long-running) On-Behalf-Of flow, MSAL intentionally
+        /// clears the refresh token, so this method will also return <c>null</c>.
         /// </returns>
         /// <remarks>
         /// Refresh tokens are long-lived credentials. Store them securely and never expose them to end users or untrusted code.

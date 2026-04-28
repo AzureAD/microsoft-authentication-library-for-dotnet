@@ -142,9 +142,12 @@ namespace Microsoft.Identity.Client
                              tenantId,
                              wamAccountIds);
 
-                // Add the newly obtained id token to the list of profiles
+                // Add the newly obtained id token to the list of profiles.
+                // Skip reading from the internal cache when it is disabled — GetTenantProfilesAsync
+                // reads ID tokens from Accessor, which would violate the no-reads contract.
                 IDictionary<string, TenantProfile> tenantProfiles = null;
-                if (msalIdTokenCacheItem.TenantId != null)
+                if (msalIdTokenCacheItem.TenantId != null &&
+                    ServiceBundle.Config.AccessorOptions?.InternalCacheDisabled != true)
                 {
                     tenantProfiles = await GetTenantProfilesAsync(requestParams, homeAccountId).ConfigureAwait(false);
                     if (tenantProfiles != null)

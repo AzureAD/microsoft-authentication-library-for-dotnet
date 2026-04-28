@@ -26,15 +26,19 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Options that disable MSAL's internal in-memory token cache entirely.
         /// Use this when your application manages its own token cache lifecycle.
-        /// When set, MSAL will not read from or write to the internal cache accessor,
-        /// and token cache serialization callbacks (<c>OnBeforeAccess</c>, <c>OnAfterAccess</c>, <c>OnBeforeWrite</c>)
-        /// will not be invoked. Built-in cache-based operations such as
-        /// <see cref="IClientApplicationBase.GetAccountsAsync()"/> will return empty results, and
-        /// <see cref="IClientApplicationBase.AcquireTokenSilent(System.Collections.Generic.IEnumerable{string}, IAccount)"/> will throw a <see cref="MsalUiRequiredException"/>
-        /// with error code <see cref="MsalError.InternalCacheDisabled"/>.
+        /// <para>When set:</para>
+        /// <list type="bullet">
+        ///   <item><description>MSAL will not read from or write to the internal cache accessor.</description></item>
+        ///   <item><description>Token cache serialization callbacks (<c>OnBeforeAccess</c>, <c>OnAfterAccess</c>, <c>OnBeforeWrite</c>) will <b>not</b> be invoked.</description></item>
+        ///   <item><description><see cref="IClientApplicationBase.GetAccountsAsync()"/> will always return an empty collection.</description></item>
+        ///   <item><description><see cref="IClientApplicationBase.AcquireTokenSilent(System.Collections.Generic.IEnumerable{string}, IAccount)"/> will throw a <see cref="MsalUiRequiredException"/> with error code <see cref="MsalError.InternalCacheDisabled"/>.</description></item>
+        /// </list>
+        /// <para>
         /// For confidential client flows, retrieve the refresh token using
         /// <see cref="Extensibility.AuthenticationResultExtensions.GetRefreshToken(AuthenticationResult)"/>
-        /// and manage token reuse externally.
+        /// and call <see cref="IByRefreshToken.AcquireTokenByRefreshToken(System.Collections.Generic.IEnumerable{string}, string)"/>
+        /// to re-acquire a token on subsequent requests, or use another interactive flow.
+        /// </para>
         /// </summary>
         public static CacheOptions DisableInternalCache => new CacheOptions { InternalCacheDisabled = true };
 
