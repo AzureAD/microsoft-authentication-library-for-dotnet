@@ -164,7 +164,7 @@
   <!-- Suppress transitive System.ValueTuple from System.Formats.Asn1 on net472+, where it is in-box
        and the NuGet package causes harmful binding redirects (see #5894). -->
   <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop472)'">
-    <PackageReference Include="System.ValueTuple" PrivateAssets="all" ExcludeAssets="all" />
+    <PackageReference Include="System.ValueTuple" PrivateAssets="All" ExcludeAssets="All" />
   </ItemGroup>
 
   <ItemGroup Label="For public api analyzer support">
