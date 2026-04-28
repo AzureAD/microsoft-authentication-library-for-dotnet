@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.AuthScheme.PoP;
+using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Region;
@@ -84,6 +85,105 @@ namespace Microsoft.Identity.Test.Unit
                 .ConfigureAwait(false);
 
             Assert.AreEqual(MsalError.MtlsCertificateNotProvided, ex.ErrorCode);
+        }
+
+        [TestMethod]
+        public async Task MtlsPop_WithDynamicCertificate_ThrowsWithoutRegionAsync()
+        {
+            // Dynamic cert + mTLS PoP without region should throw the same as static cert
+            using (var envContext = new EnvVariableContext())
+            {
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithExperimentalFeatures()
+                    .WithAuthority(TestConstants.AuthorityTenant)
+                    .WithCertificate(_ => Task.FromResult(s_testCertificate), new CertificateOptions())
+                    .Build();
+
+                MsalClientException ex = await AssertException.TaskThrowsAsync<MsalClientException>(() =>
+                    app.AcquireTokenForClient(TestConstants.s_scope)
+                       .WithMtlsProofOfPossession()
+                       .ExecuteAsync())
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual(MsalError.MtlsPopWithoutRegion, ex.ErrorCode);
+            }
+        }
+
+        [TestMethod]
+        public async Task MtlsPop_WithDynamicCertificate_NullFromProvider_ThrowsAsync()
+        {
+            using (var envContext = new EnvVariableContext())
+            {
+                Environment.SetEnvironmentVariable("REGION_NAME", EastUsRegion);
+
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithExperimentalFeatures()
+                    .WithAuthority(TestConstants.AuthorityTenant)
+                    .WithCertificate(_ => Task.FromResult<X509Certificate2>(null), new CertificateOptions())
+                    .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
+                    .Build();
+
+                MsalClientException ex = await AssertException.TaskThrowsAsync<MsalClientException>(() =>
+                    app.AcquireTokenForClient(TestConstants.s_scope)
+                       .WithMtlsProofOfPossession()
+                       .ExecuteAsync())
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual(MsalError.MtlsCertificateNotProvided, ex.ErrorCode);
+            }
+        }
+
+        [TestMethod]
+        public async Task MtlsPop_WithDynamicCertificate_SuccessAsync()
+        {
+            const string region = "eastus";
+            int providerCallCount = 0;
+
+            using (var envContext = new EnvVariableContext())
+            {
+                Environment.SetEnvironmentVariable("REGION_NAME", region);
+
+                string globalEndpoint = "mtlsauth.microsoft.com";
+                string expectedTokenEndpoint = $"https://{region}.{globalEndpoint}/123456-1234-2345-1234561234/oauth2/v2.0/token";
+
+                using (var httpManager = new MockHttpManager())
+                {
+                    httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(
+                        tokenType: "mtls_pop");
+
+                    var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                        .WithExperimentalFeatures()
+                        .WithCertificate(
+                            _ =>
+                            {
+                                Interlocked.Increment(ref providerCallCount);
+                                return Task.FromResult(s_testCertificate);
+                            },
+                            new CertificateOptions())
+                        .WithAuthority($"https://login.microsoftonline.com/123456-1234-2345-1234561234")
+                        .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
+                        .WithHttpManager(httpManager)
+                        .BuildConcrete();
+
+                    AuthenticationResult result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                        .WithMtlsProofOfPossession()
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
+
+                    Assert.AreEqual("header.payload.signature", result.AccessToken);
+                    Assert.AreEqual(Constants.MtlsPoPAuthHeaderPrefix, result.TokenType);
+                    Assert.AreEqual(region, result.AuthenticationResultMetadata.RegionDetails.RegionUsed);
+                    Assert.AreEqual(expectedTokenEndpoint, result.AuthenticationResultMetadata.TokenEndpoint);
+
+                    Assert.IsNotNull(result.BindingCertificate, "BindingCertificate should be present.");
+                    Assert.AreEqual(s_testCertificate.Thumbprint, result.BindingCertificate.Thumbprint);
+
+                    // Provider is called during preflight + credential material resolution (#5886)
+                    Assert.IsGreaterThan(0, providerCallCount, "Provider should be invoked at least once.");
+                }
+            }
         }
 
         [TestMethod]

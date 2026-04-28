@@ -89,7 +89,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
             IServiceBundle serviceBundle,
             CancellationToken ct)
         {
-            // Case 1 – Certificate credential
+            // Case 1 – Static certificate credential
             if (serviceBundle.Config.ClientCredential is CertificateClientCredential certCred)
             {
                 if (certCred.Certificate == null)
@@ -103,7 +103,21 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
                 return;
             }
 
-            // Case 2 – Signed assertion provider (JWT + optional cert)
+            // Case 2 – Dynamic certificate credential (WithCertificate(() => x509))
+            // The provider is invoked here for preflight; it will be invoked again during
+            // credential material resolution in TokenClient. This is accepted tech debt — see #5886.
+            if (serviceBundle.Config.ClientCredential is DynamicCertificateClientCredential dynamicCertCred)
+            {
+                var opts = CreateAssertionRequestOptions(p, serviceBundle, ct);
+                X509Certificate2 cert = await dynamicCertCred
+                    .ResolveCertificateForPreflightAsync(opts)
+                    .ConfigureAwait(false);
+
+                InitMtlsPopParameters(p, cert, serviceBundle);
+                return;
+            }
+
+            // Case 3 – Signed assertion provider (JWT + optional cert)
             if (serviceBundle.Config.ClientCredential is IClientSignedAssertionProvider signedProvider)
             {
                 var opts = CreateAssertionRequestOptions(p, serviceBundle, ct);
@@ -122,7 +136,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
                 return;
             }
 
-            // Case 3 – Any other credential (client-secret etc.)
+            // Case 4 – Any other credential (client-secret etc.)
             throw new MsalClientException(
                 MsalError.MtlsCertificateNotProvided,
                 MsalErrorMessage.MtlsCertificateNotProvidedMessage);
@@ -142,8 +156,11 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
                 ClientAssertionFmiPath = p.ClientAssertionFmiPath,
                 CorrelationId = p.CorrelationId,
 
-                // Best-effort context. IMPORTANT: use AbsoluteUri, not Uri.Authority (host only).
-                TokenEndpoint = serviceBundle.Config.Authority.AuthorityInfo.CanonicalAuthority.AbsoluteUri
+                // Best-effort context from app-level config (runtime authority not yet resolved at preflight).
+                // IMPORTANT: use AbsoluteUri, not Uri.Authority (host only).
+                TokenEndpoint = serviceBundle.Config.Authority.AuthorityInfo.CanonicalAuthority.AbsoluteUri,
+                Authority = serviceBundle.Config.Authority.AuthorityInfo.CanonicalAuthority.AbsoluteUri,
+                TenantId = AuthorityInfo.GetFirstPathSegment(serviceBundle.Config.Authority.AuthorityInfo.CanonicalAuthority)
             };
         }
 
