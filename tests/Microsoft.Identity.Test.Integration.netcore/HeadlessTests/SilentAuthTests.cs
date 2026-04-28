@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
-        public async Task DisableInternalCache_GetRefreshToken_ReturnsToken_Async()
+        public async Task DisableInternalCache_NormalOboFlow_DoesNotExposeRefreshToken_Async()
         {
             // Arrange: get lab user + app configs
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
