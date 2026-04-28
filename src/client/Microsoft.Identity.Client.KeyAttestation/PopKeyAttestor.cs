@@ -41,8 +41,11 @@ namespace Microsoft.Identity.Client.KeyAttestation
         //               deployments) or multiple named CNG keys (e.g. during key rotation). A single
         //               field would incorrectly return the wrong token for the second endpoint/key.
         //               With endpoint+keyId as a compound key the cache correctly scopes each entry.
+        // Ordinal comparison is intentional: the endpoint is normalized to lowercase in BuildCacheKey,
+        // so endpoint comparisons are effectively case-insensitive without making the keyId portion
+        // case-insensitive (CNG key names and SHA-256 fingerprints are case-sensitive identifiers).
         private static readonly ConcurrentDictionary<string, AttestationToken> s_tokenCache =
-            new ConcurrentDictionary<string, AttestationToken>(StringComparer.OrdinalIgnoreCase);
+            new ConcurrentDictionary<string, AttestationToken>(StringComparer.Ordinal);
 
         // Per-key async gates to prevent concurrent in-flight attestation for the same cache key (single-flight).
         // Callers (e.g. ImdsV2ManagedIdentitySource) always supply a non-empty keyId — either the CNG key's
@@ -242,11 +245,14 @@ namespace Microsoft.Identity.Client.KeyAttestation
         }
 
         /// <summary>
-        /// Strips a trailing slash so that "https://host/" and "https://host" map to the same cache key.
+        /// Normalizes an endpoint for use as a cache key component: lowercases and strips a trailing slash
+        /// so that "https://Host/" and "https://host" map to the same cache key.
+        /// Because the dictionary uses <see cref="StringComparer.Ordinal"/>, normalization is required
+        /// to make endpoint comparisons case-insensitive while keeping the keyId portion case-sensitive.
         /// </summary>
         private static string NormalizeEndpoint(string endpoint)
         {
-            return endpoint?.TrimEnd('/') ?? string.Empty;
+            return endpoint?.TrimEnd('/').ToLowerInvariant() ?? string.Empty;
         }
 
         /// <summary>

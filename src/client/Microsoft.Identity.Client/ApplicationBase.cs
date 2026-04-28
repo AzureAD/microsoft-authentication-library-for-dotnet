@@ -119,8 +119,27 @@ namespace Microsoft.Identity.Client
             InMemoryPartitionedAppTokenCacheAccessor.ClearStaticCacheForTest();
             InMemoryPartitionedUserTokenCacheAccessor.ClearStaticCacheForTest();
 
+            List<Exception> callbackExceptions = null;
             foreach (var cb in s_resetCallbacks)
-                cb();
+            {
+                try
+                {
+                    cb();
+                }
+                catch (Exception ex)
+                {
+                    callbackExceptions ??= new List<Exception>();
+                    callbackExceptions.Add(new InvalidOperationException(
+                        "A registered reset callback threw during ResetStateForTest().", ex));
+                }
+            }
+
+            if (callbackExceptions != null)
+            {
+                throw new AggregateException(
+                    "One or more registered reset callbacks failed during ResetStateForTest().",
+                    callbackExceptions);
+            }
         }
     }
 }
