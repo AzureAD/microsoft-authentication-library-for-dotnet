@@ -2,9 +2,11 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
@@ -121,6 +123,40 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
             Assert.AreEqual(1, created,
                 $"CreateMtlsHttpClient was called {created} times for 3 lookups with the same certificate. " +
                 "Use GetOrAdd(key, factory_delegate) to avoid creating throwaway HttpClient instances.");
+        }
+
+        [TestMethod]
+        public async Task TestGetHttpClient_ConcurrentCalls_DoNotLeakHttpClients()
+        {
+            // Arrange - reset static state so we start from a clean pool
+            SimpleHttpClientFactory.ResetStaticStateForTest();
+            var factory = new SimpleHttpClientFactory();
+
+            const int threadCount = 20;
+            var tasks = new List<Task<HttpClient>>(threadCount);
+
+            // Act - call GetHttpClient() concurrently from many threads at once
+            for (int i = 0; i < threadCount; i++)
+            {
+                tasks.Add(Task.Run(() => factory.GetHttpClient()));
+            }
+
+            HttpClient[] results = await Task.WhenAll(tasks).ConfigureAwait(false);
+
+            int created = SimpleHttpClientFactory.HttpClientCreationCount;
+
+            // Assert - all callers got a non-null client and the same cached instance.
+            // With Lazy<HttpClient>(ExecutionAndPublication) only one HttpClient should
+            // ever be constructed, regardless of how many threads raced on the same key.
+            foreach (HttpClient client in results)
+            {
+                Assert.IsNotNull(client);
+                Assert.AreSame(results[0], client, "All concurrent callers should receive the same cached HttpClient instance.");
+            }
+
+            Assert.AreEqual(1, created,
+                $"CreateHttpClient was called {created} times across {threadCount} concurrent calls. " +
+                "Lazy<HttpClient>(ExecutionAndPublication) should guarantee exactly one construction per key.");
         }
 
     }
