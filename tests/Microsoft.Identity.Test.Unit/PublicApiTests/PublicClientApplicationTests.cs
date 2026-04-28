@@ -262,6 +262,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .BuildConcrete();
                 app.ServiceBundle.ConfigureMockWebUI();
                 var userCacheAccess = app.UserTokenCache.RecordAccess();
+                // Copy preserving the original OrdinalIgnoreCase comparer so header-key lookups
+                // remain case-insensitive, matching HTTP header semantics.
                 var extraExpectedHeaders = new Dictionary<string, string>(
                     TestConstants.s_extraHttpHeader,
                     TestConstants.s_extraHttpHeader.Comparer);
