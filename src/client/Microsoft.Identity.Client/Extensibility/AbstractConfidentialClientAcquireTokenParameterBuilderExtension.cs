@@ -9,7 +9,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.IdentityModel.Abstractions;
 
 namespace Microsoft.Identity.Client.Extensibility
 {
@@ -63,11 +62,7 @@ namespace Microsoft.Identity.Client.Extensibility
 
             if (attributeTokens is null)
             {
-                if (logger != null && logger.IsLoggingEnabled(LogLevel.Verbose))
-                {
-                    logger.Verbose(() => "[WithAttributeTokens] No attribute tokens passed.");
-                }
-
+                logger?.Verbose(() => "[WithAttributeTokens] No attribute tokens passed.");
                 return (T)builder;
             }
 
@@ -90,11 +85,7 @@ namespace Microsoft.Identity.Client.Extensibility
 
             if (normalizedTokens.Count == 0)
             {
-                if (logger != null && logger.IsLoggingEnabled(LogLevel.Verbose))
-                {
-                    logger.Verbose(() => "[WithAttributeTokens] collection contained no usable tokens.");
-                }
-
+                logger?.Verbose(() => "[WithAttributeTokens] collection contained no usable tokens.");
                 return (T)builder;
             }
 
@@ -104,12 +95,9 @@ namespace Microsoft.Identity.Client.Extensibility
 
             string joinedTokens = string.Join(" ", normalizedTokens);
 
-            if (logger != null && logger.IsLoggingEnabled(LogLevel.Info))
-            {
-                int count = normalizedTokens.Count;
-                logger.Info(() => $"[WithAttributeTokens] Attaching {count} attribute token(s) " +
-                                  "to the request body and including them in the cache key partition.");
-            }
+            int count = normalizedTokens.Count;
+            logger?.Info(() => $"[WithAttributeTokens] Attaching {count} attribute token(s) " +
+                               "to the request body and including them in the cache key partition.");
 
             var extraBodyParams = new Dictionary<string, Func<CancellationToken, Task<string>>>
             {
