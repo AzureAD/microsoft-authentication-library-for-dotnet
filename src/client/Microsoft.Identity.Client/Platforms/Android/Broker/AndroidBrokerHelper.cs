@@ -171,9 +171,9 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                     {
                         var accountInfo = account[BrokerResponseConst.Account];
                         IAccount iAccount = new Account(
-                            (string?)accountInfo?[BrokerResponseConst.HomeAccountId] ?? string.Empty,
-                            (string?)accountInfo?[BrokerResponseConst.UserName] ?? string.Empty,
-                            (string?)accountInfo?[BrokerResponseConst.Environment] ?? string.Empty);
+                            accountInfo?[BrokerResponseConst.HomeAccountId]?.GetValue<string>() ?? string.Empty,
+                            accountInfo?[BrokerResponseConst.UserName]?.GetValue<string>() ?? string.Empty,
+                            accountInfo?[BrokerResponseConst.Environment]?.GetValue<string>() ?? string.Empty);
                         brokerAccounts.Add(iAccount);
                     }
                 }
