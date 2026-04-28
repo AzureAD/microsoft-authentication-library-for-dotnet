@@ -88,6 +88,8 @@ namespace Microsoft.Identity.Client.KeyAttestation
         /// Returns a cached token if one is available and not within the expiration buffer.
         /// Uses a per-key semaphore to ensure only one in-flight attestation call occurs per cache key,
         /// preventing redundant native DLL and network calls under concurrency.
+        /// The implementation wraps the synchronous native attestation call in <see cref="System.Threading.Tasks.Task.Run(System.Action)"/>;
+        /// cancellation can prevent the operation from starting but cannot stop the native call once it has begun.
         /// </summary>
         /// <param name="endpoint">Attestation service endpoint (required).</param>
         /// <param name="keyHandle">Valid SafeNCryptKeyHandle (must remain valid for duration of call).</param>

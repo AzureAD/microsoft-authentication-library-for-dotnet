@@ -960,7 +960,11 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [TestMethod]
         public async Task MaaTokenCache_Hit_DoesNotCallAttestationProviderAgain()
         {
-            // Arrange: track how many times the attestation provider is called
+            // Validates the MAA token cache itself: after a first acquire populates the cache,
+            // a subsequent acquire that is forced through the full cert+attestation path (by
+            // clearing the cert cache) must NOT call the attestation provider again because the
+            // MAA token is still fresh. The cert-cache-miss guarantees we actually reach the
+            // attestation code path — without it the test would pass vacuously.
             int providerCallCount = 0;
             PopKeyAttestor.s_testAttestationProvider = (endpoint, keyHandle, clientId, keyId, ct) =>
             {
@@ -980,33 +984,45 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     Constants.ManagedIdentityDefaultClientId, TestConstants.TenantId,
                     DateTimeOffset.UtcNow.AddHours(25));
 
-                var mi = await CreateManagedIdentityAsync(httpManager, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
+                // Shared provider ensures both acquires use the same CNG key, so the MAA cache key
+                // (derived from the key fingerprint) matches between the two calls.
+                var sharedKeyProvider = new TestKeyGuardManagedIdentityKeyProvider();
 
-                // First acquire: mints cert + calls MAA
+                var mi = await CreateManagedIdentityAsync(httpManager, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard, keyProvider: sharedKeyProvider).ConfigureAwait(false);
+
+                // First acquire: mints cert + calls MAA provider → populates MAA cache
                 AddMocksToGetEntraToken(httpManager, certificateRequestCertificate: rawCert);
                 await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .WithMtlsProofOfPossession()
                     .WithAttestationSupport()
                     .ExecuteAsync().ConfigureAwait(false);
 
-                Assert.AreEqual(1, providerCallCount, "MAA should be called once on first acquire.");
+                Assert.AreEqual(1, providerCallCount, "MAA should be called exactly once on first acquire.");
 
-                // Second acquire: force bypass the MSAL token cache so we actually exercise the
-                // cert/MAA path again. Cert is still cached so no re-mint; MAA cache is hit so
-                // the attestation provider must NOT be called a second time.
-                MockHelpers.AddMocksToGetEntraTokenUsingCachedCert(
+                // Clear the cert cache (and MSAL source) so the second acquire must re-mint the cert,
+                // forcing it through the full attestation code path. The MAA token cache is intentionally
+                // NOT cleared — this is what the test is validating.
+                ManagedIdentityClient.ResetSourceForTest();
+                ImdsV2ManagedIdentitySource.ResetCertCacheForTest();
+
+                // Create a fresh MI app that shares the same key provider (same CNG key → same MAA cache key).
+                var mi2 = await CreateManagedIdentityAsync(
                     httpManager,
-                    _identityLoggerAdapter,
-                    mTLSPop: true);
+                    managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard,
+                    keyProvider: sharedKeyProvider).ConfigureAwait(false);
 
-                var second = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                    .WithForceRefresh(true)
+                // Second acquire: cert cache miss → goes through /issuecredential → would call attestation,
+                // but MAA token is still fresh → attestation provider must NOT be called again.
+                AddMocksToGetEntraToken(httpManager, certificateRequestCertificate: rawCert);
+                var second = await mi2.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .WithMtlsProofOfPossession()
                     .WithAttestationSupport()
                     .ExecuteAsync().ConfigureAwait(false);
 
-                Assert.AreEqual(1, providerCallCount, "MAA should NOT be called again when token is cached.");
-                Assert.AreEqual(TokenSource.IdentityProvider, second.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(TokenSource.IdentityProvider, second.AuthenticationResultMetadata.TokenSource,
+                    "Should have called the identity provider, confirming the cert/attestation path was exercised.");
+                Assert.AreEqual(1, providerCallCount,
+                    "MAA attestation provider must NOT be called again — the MAA token cache should have been hit.");
             }
         }
 
