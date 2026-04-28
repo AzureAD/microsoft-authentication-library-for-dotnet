@@ -178,5 +178,55 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                     ex);
             }
         }
+
+        /// <summary>
+        /// Resolves the certificate via the provider for preflight checks (e.g., mTLS PoP initialization).
+        /// Uses the same validation as the credential-material path so errors are consistent.
+        /// </summary>
+        /// <remarks>
+        /// The provider may be invoked again during credential material resolution in TokenClient.
+        /// This is accepted tech debt — see https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5886
+        /// </remarks>
+        internal async Task<X509Certificate2> ResolveCertificateForPreflightAsync(
+            AssertionRequestOptions options)
+        {
+            X509Certificate2 certificate = await _certificateProvider(options).ConfigureAwait(false);
+
+            ValidateResolvedCertificate(certificate);
+
+            return certificate;
+        }
+
+        /// <summary>
+        /// Validates the certificate returned by the provider.
+        /// Shared between the credential-material path and the preflight path.
+        /// </summary>
+        private static void ValidateResolvedCertificate(X509Certificate2 certificate)
+        {
+            if (certificate == null)
+            {
+                throw new MsalClientException(
+                    MsalError.MtlsCertificateNotProvided,
+                    "The certificate provider callback returned null. " +
+                    "Ensure the callback returns a valid X509Certificate2 instance.");
+            }
+
+            try
+            {
+                if (!certificate.HasPrivateKey)
+                {
+                    throw new MsalClientException(
+                        MsalError.CertWithoutPrivateKey,
+                        MsalErrorMessage.CertMustHavePrivateKey(certificate.FriendlyName));
+                }
+            }
+            catch (System.Security.Cryptography.CryptographicException ex)
+            {
+                throw new MsalClientException(
+                    MsalError.CryptographicError,
+                    MsalErrorMessage.CryptographicError,
+                    ex);
+            }
+        }
     }
 }
