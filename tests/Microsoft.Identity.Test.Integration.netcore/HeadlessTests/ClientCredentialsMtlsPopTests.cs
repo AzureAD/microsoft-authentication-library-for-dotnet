@@ -310,6 +310,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual("Bearer", authResult.TokenType, "Token type should be Bearer for mTLS Bearer flow");
             Assert.IsNotNull(authResult.AccessToken, "Access token should not be null");
 
+            // Verify the mTLS transport was actually used (regional mTLS endpoint)
+            Assert.IsNotNull(authResult.AuthenticationResultMetadata.TokenEndpoint,
+                "TokenEndpoint should be set for network requests.");
+            StringAssert.Contains(authResult.AuthenticationResultMetadata.TokenEndpoint, "mtlsauth",
+                "SendCertificateOverMtls should route through the mTLS regional endpoint.");
+
             // Simulate cache retrieval
             authResult = await confidentialApp
                .AcquireTokenForClient(appScopes)

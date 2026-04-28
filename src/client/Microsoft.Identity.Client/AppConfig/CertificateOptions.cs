@@ -26,10 +26,13 @@ namespace Microsoft.Identity.Client.AppConfig
         public bool AssociateTokensWithCertificate { get; init; } = false;
 
         /// <summary>
-        /// Gets or sets a value indicating whether the certificate should be sent over the mTLS connection
-        /// for token acquisition (without requiring PoP token type).
-        /// When <see langword="true"/>, the certificate is sent in the TLS handshake (client certificate authentication)
-        /// and the resulting token is a standard Bearer token.
+        /// Gets or sets a value indicating whether the certificate should be sent over mTLS
+        /// (TLS client certificate authentication) as the default transport for token requests.
+        /// When <see langword="true"/>, the certificate is sent in the TLS handshake instead of as a
+        /// JWT assertion in the request body. This controls transport only — the resulting token type
+        /// depends on request-level configuration: a plain request produces a Bearer token, while
+        /// <see cref="AcquireTokenForClientParameterBuilder.WithMtlsProofOfPossession()"/> produces
+        /// an mTLS PoP token.
         /// When <see langword="false"/> (default), the certificate is sent as a JWT assertion in the request body.
         /// </summary>
         /// <remarks>
@@ -37,9 +40,10 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <see cref="AcquireTokenForClientParameterBuilder.WithMtlsProofOfPossession"/>.</para>
         /// <para>Request-level <see cref="AcquireTokenForClientParameterBuilder.WithMtlsProofOfPossession"/>
         /// always implies mTLS transport, regardless of this setting.</para>
-        /// <para>This option is only supported with certificate credentials configured via
+        /// <para>This option is supported only with the static certificate overload
         /// <see cref="ConfidentialClientApplicationBuilder.WithCertificate(System.Security.Cryptography.X509Certificates.X509Certificate2, CertificateOptions)"/>.
-        /// Using it with client secrets or assertion-based credentials will throw at build time.</para>
+        /// Dynamic certificate providers and non-certificate credentials are not supported
+        /// and will throw at build time.</para>
         /// <para>For AAD authorities, <see cref="ConfidentialClientApplicationBuilder.WithAzureRegion(string)"/>
         /// must also be configured; otherwise an <see cref="MsalClientException"/> with error code
         /// <see cref="MsalError.MtlsBearerWithoutRegion"/> is thrown at token acquisition time.</para>
