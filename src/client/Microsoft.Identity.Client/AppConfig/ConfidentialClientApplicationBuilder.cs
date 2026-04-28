@@ -333,12 +333,12 @@ namespace Microsoft.Identity.Client
         public ConfidentialClientApplicationBuilder WithClientAssertion(Func<AssertionRequestOptions,
             CancellationToken, Task<ClientSignedAssertion>> clientSignedAssertionProvider)
         {
-            ValidateUseOfExperimentalFeature();
-
             if (clientSignedAssertionProvider == null)
             {
                 throw new ArgumentNullException(nameof(clientSignedAssertionProvider));
             }
+
+            ValidateUseOfExperimentalFeature();
 
             return WithClientAssertionInternal(
                 clientSignedAssertionProvider: clientSignedAssertionProvider);
