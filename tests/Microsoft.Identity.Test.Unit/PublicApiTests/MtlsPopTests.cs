@@ -592,6 +592,48 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
+        public async Task MtlsPop_WithMsaTenantGuidAuthority_DoesNotThrowMissingTenantedAuthorityAsync()
+        {
+            // Regression test: the MSA tenant GUID (9188040d-...) is a real tenant ID, not a tenantless alias.
+            // Configuring an app with it at the app level and using mTLS PoP should NOT throw MissingTenantedAuthority.
+            // See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5951
+            const string region = "eastus";
+
+            using (var envContext = new EnvVariableContext())
+            {
+                Environment.SetEnvironmentVariable("REGION_NAME", region);
+
+                using (var httpManager = new MockHttpManager())
+                {
+                    var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                        .WithCertificate(s_testCertificate)
+                        .WithAuthority(TestConstants.AuthorityConsumerTidTenant)
+                        .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
+                        .WithHttpManager(httpManager)
+                        .BuildConcrete();
+
+                    // Should NOT throw MissingTenantedAuthority — the MSA GUID is a tenanted authority.
+                    // Any other exception (e.g. MsalServiceException from the network call) is acceptable.
+                    try
+                    {
+                        await app.AcquireTokenForClient(TestConstants.s_scope)
+                            .WithMtlsProofOfPossession()
+                            .ExecuteAsync()
+                            .ConfigureAwait(false);
+                    }
+                    catch (MsalClientException ex) when (ex.ErrorCode == MsalError.MissingTenantedAuthority)
+                    {
+                        Assert.Fail("MSA tenant GUID should not be rejected as a non-tenanted authority");
+                    }
+                    catch (Exception)
+                    {
+                        // Any other exception means we passed the MissingTenantedAuthority guard — test passes.
+                    }
+                }
+            }
+        }
+
+        [TestMethod]
         public async Task MtlsPop_ValidateExpectedUrlAsync()
         {
             string authorityUrl = "https://login.microsoftonline.com/123456-1234-2345-1234561234";

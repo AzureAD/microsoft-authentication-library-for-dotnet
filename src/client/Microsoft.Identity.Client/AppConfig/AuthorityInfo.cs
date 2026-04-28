@@ -499,8 +499,10 @@ namespace Microsoft.Identity.Client
             /// - if the authority is not defined at the application level and the request level is not AAD, use the request authority
             /// - if the authority is defined at app level, and the request level authority is of different type, throw an exception
             /// 
-            /// - if the intended authority is consumers, please define it at the app level and not at the request level. 
+            /// - if the intended authority is the "consumers" alias, please define it at the app level and not at the request level. 
             /// known issue: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2929
+            /// - if the intended authority is the MSA tenant GUID (9188040d-6c67-4c5b-b112-36a304b66dad), it IS honored
+            /// at the request level because it is a specific tenant ID rather than a tenantless alias.
             /// </summary>
             public static async Task<Authority> CreateAuthorityForRequestAsync(RequestContext requestContext,
                 AuthorityInfo requestAuthorityInfo,
@@ -566,6 +568,7 @@ namespace Microsoft.Identity.Client
                             new AadAuthority(CreateAuthorityWithEnvironment(requestAuthorityInfo, account?.Environment).AuthorityInfo) :
                             new AadAuthority(requestAuthorityInfo);
                         if (!requestAuthority.IsCommonOrganizationsOrConsumersTenant() ||
+                            requestAuthority.IsConsumersGuid() ||
                             requestAuthority.IsOrganizationsTenantWithMsaPassthroughEnabled(requestContext.ServiceBundle.Config.IsBrokerEnabled && requestContext.ServiceBundle.Config.BrokerOptions != null && requestContext.ServiceBundle.Config.BrokerOptions.MsaPassthrough, account?.HomeAccountId?.TenantId))
                         {
                             return requestAuthority;

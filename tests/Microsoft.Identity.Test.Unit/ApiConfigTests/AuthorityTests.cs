@@ -27,6 +27,11 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         private static readonly Authority s_b2cAuthority = Authority.CreateAuthority(TestConstants.B2CAuthority, true);
         private static readonly Authority s_commonNetAuthority = Authority.CreateAuthority(TestConstants.PrefCacheAuthorityCommonTenant, true);
 
+        private static readonly Authority s_consumersTenantAuthority =
+            Authority.CreateAuthority(TestConstants.AuthorityConsumersTenant, true);
+        private static readonly Authority s_consumerTidAuthority =
+            Authority.CreateAuthority(TestConstants.AuthorityConsumerTidTenant, true);
+
         private MockHttpAndServiceBundle _harness;
         private RequestContext _testRequestContext;
 
@@ -451,6 +456,56 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
 
             Assert.IsInstanceOfType(app.ServiceBundle.Config.Authority, authorityTypeInstance);
             Assert.AreEqual(app.AuthorityInfo.AuthorityType.ToString(), authorityType);
+        }
+
+        /// <summary>
+        /// Regression test for https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5951
+        /// When WithTenantId is called with the MSA GUID at request level, it should be honored regardless
+        /// of the app-level authority, because the GUID is a real tenant ID (not a tenantless alias).
+        /// The "consumers" string alias is a different case and is still ignored at request level.
+        /// </summary>
+        [TestMethod]
+        public void WithTenantId_ConsumerGuid_IsHonoredAtRequestLevel()
+        {
+            // Case 1 (bug regression): app=specific tenant, request=MSA GUID → MSA GUID wins
+            VerifyAuthority(
+                configAuthority: s_utidAuthority,
+                requestAuthority: s_consumerTidAuthority,
+                account: null,
+                expectedTenantId: TestConstants.MsaTenantId,
+                _testRequestContext);
+
+            // Case 2: app=common, request=MSA GUID → MSA GUID wins
+            VerifyAuthority(
+                configAuthority: s_commonAuthority,
+                requestAuthority: s_consumerTidAuthority,
+                account: null,
+                expectedTenantId: TestConstants.MsaTenantId,
+                _testRequestContext);
+
+            // Case 3: app=specific tenant, request="consumers" string alias → app tenant wins (existing behavior preserved)
+            VerifyAuthority(
+                configAuthority: s_utidAuthority,
+                requestAuthority: s_consumersTenantAuthority,
+                account: null,
+                expectedTenantId: TestConstants.Utid,
+                _testRequestContext);
+
+            // Case 4: app=common, request="consumers" string alias → "common" used (existing behavior preserved)
+            VerifyAuthority(
+                configAuthority: s_commonAuthority,
+                requestAuthority: s_consumersTenantAuthority,
+                account: null,
+                expectedTenantId: "common",
+                _testRequestContext);
+
+            // Case 5: app=MSA GUID, no request override → MSA GUID used (no regression)
+            VerifyAuthority(
+                configAuthority: s_consumerTidAuthority,
+                requestAuthority: null,
+                account: null,
+                expectedTenantId: TestConstants.MsaTenantId,
+                _testRequestContext);
         }
 
         private static void VerifyAuthority(
