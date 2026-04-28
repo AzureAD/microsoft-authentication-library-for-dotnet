@@ -73,8 +73,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 _clientId = configJson["client_id"]?.GetValue<string>();
                 _requestAuthority = configJson["authority"]?.GetValue<string>();
 
-                _tokenResponse = configJson["token_response"]?.GetValue<string>();
-                _idTokenResponse = configJson["id_token_response"]?.GetValue<string>();
+                _tokenResponse = configJson["token_response"]?.ToJsonString();
+                _idTokenResponse = configJson["id_token_response"]?.ToJsonString();
 
                 _expectedAtCacheKey = configJson["at_cache_key"]?.GetValue<string>();
                 _expectedAtCacheKeyIosService = configJson["at_cache_key_ios_service"]?.GetValue<string>();
@@ -82,25 +82,25 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 _expectedAtCacheKeyIosGeneric = configJson["at_cache_key_ios_generic"]?.GetValue<string>();
                 _expectedAtCacheKey = configJson["at_cache_key"]?.GetValue<string>();
 
-                _expectedAtCacheValue = configJson["at_cache_value"]?.GetValue<string>();
+                _expectedAtCacheValue = configJson["at_cache_value"]?.ToJsonString();
 
                 _expectedIdTokenCacheKey = configJson["id_token_cache_key"]?.GetValue<string>();
                 _expectedIdTokenCacheKeyIosService = configJson["id_token_cache_key_ios_service"]?.GetValue<string>();
                 _expectedIdTokenCacheKeyIosAccount = configJson["id_token_cache_key_ios_account"]?.GetValue<string>();
                 _expectedIdTokenCacheKeyIosGeneric = configJson["id_token_cache_key_ios_generic"]?.GetValue<string>();
-                _expectedIdTokenCacheValue = configJson["id_token_cache_value"]?.GetValue<string>();
+                _expectedIdTokenCacheValue = configJson["id_token_cache_value"]?.ToJsonString();
 
                 _expectedRtCacheKey = configJson["rt_cache_key"]?.GetValue<string>();
                 _expectedRtCacheKeyIosService = configJson["rt_cache_key_ios_service"]?.GetValue<string>();
                 _expectedRtCacheKeyIosAccount = configJson["rt_cache_key_ios_account"]?.GetValue<string>();
                 _expectedRtCacheKeyIosGeneric = configJson["rt_cache_key_ios_generic"]?.GetValue<string>();
-                _expectedRtCacheValue = configJson["rt_cache_value"]?.GetValue<string>();
+                _expectedRtCacheValue = configJson["rt_cache_value"]?.ToJsonString();
 
                 _expectedAccountCacheKey = configJson["account_cache_key"]?.GetValue<string>();
                 _expectedAccountCacheKeyIosService = configJson["account_cache_key_ios_service"]?.GetValue<string>();
                 _expectedAccountCacheKeyIosAccount = configJson["account_cache_key_ios_account"]?.GetValue<string>();
                 _expectedAccountCacheKeyIosGeneric = configJson["account_cache_key_ios_generic"]?.GetValue<string>();
-                _expectedAccountCacheValue = configJson["account_cache_value"]?.GetValue<string>();
+                _expectedAccountCacheValue = configJson["account_cache_value"]?.ToJsonString();
 
                 var idTokenSecret = CreateIdToken(_idTokenResponse);
 
