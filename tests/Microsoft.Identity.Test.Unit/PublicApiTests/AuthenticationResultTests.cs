@@ -10,7 +10,6 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Newtonsoft.Json;
 
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {

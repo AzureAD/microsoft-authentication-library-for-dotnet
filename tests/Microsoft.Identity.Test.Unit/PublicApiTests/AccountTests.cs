@@ -16,7 +16,7 @@ using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Newtonsoft.Json.Linq;
+using System.Text.Json.Nodes;
 using NSubstitute;
 
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
@@ -111,23 +111,23 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             // Arrange - modify an existing account to have an unknown environment
             string tokenCacheAsString = File.ReadAllText(
                 ResourceHelper.GetTestResourceRelativePath("MultiCloudTokenCache.json"));
-            var cacheJson = JObject.Parse(tokenCacheAsString);
+            var cacheJson = JsonNode.Parse(tokenCacheAsString).AsObject();
 
-            JEnumerable<JToken> tokens = cacheJson["Account"].Children();
-            foreach (JToken token in tokens)
+            var tokens = cacheJson["Account"].AsObject();
+            foreach (var token in tokens)
             {
-                var obj = token.Children().Single() as JObject;
+                var obj = token.Value.AsObject();
 
                 if (string.Equals(
-                    obj["environment"].ToString(),
+                    obj["environment"]?.GetValue<string>(),
                     "login.microsoftonline.de",
                     StringComparison.InvariantCulture))
                 {
-                    obj["environment"] = new Uri(TestConstants.AuthorityNotKnownTenanted).Host;
+                    obj["environment"] = JsonValue.Create(new Uri(TestConstants.AuthorityNotKnownTenanted).Host);
                 }
             }
 
-            tokenCacheAsString = cacheJson.ToString();
+            tokenCacheAsString = cacheJson.ToJsonString();
 
             await ValidateGetAccountsWithDiscoveryAsync(tokenCacheAsString).ConfigureAwait(false);
         }
@@ -139,23 +139,23 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             // Arrange - modify an existing account to have an unknown environment
             string tokenCacheAsString = File.ReadAllText(
                 ResourceHelper.GetTestResourceRelativePath("MultiCloudTokenCache.json"));
-            var cacheJson = JObject.Parse(tokenCacheAsString);
+            var cacheJson = JsonNode.Parse(tokenCacheAsString).AsObject();
 
-            JEnumerable<JToken> tokens = cacheJson["RefreshToken"].Children();
-            foreach (JToken token in tokens)
+            var tokens = cacheJson["RefreshToken"].AsObject();
+            foreach (var token in tokens)
             {
-                var obj = token.Children().Single() as JObject;
+                var obj = token.Value.AsObject();
 
                 if (string.Equals(
-                    obj["environment"].ToString(),
+                    obj["environment"]?.GetValue<string>(),
                     "login.microsoftonline.de",
                     StringComparison.InvariantCulture))
                 {
-                    obj["environment"] = new Uri(TestConstants.AuthorityNotKnownTenanted).Host;
+                    obj["environment"] = JsonValue.Create(new Uri(TestConstants.AuthorityNotKnownTenanted).Host);
                 }
             }
 
-            tokenCacheAsString = cacheJson.ToString();
+            tokenCacheAsString = cacheJson.ToJsonString();
 
             await ValidateGetAccountsWithDiscoveryAsync(tokenCacheAsString).ConfigureAwait(false);
         }

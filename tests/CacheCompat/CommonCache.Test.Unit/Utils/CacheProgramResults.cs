@@ -3,7 +3,7 @@
 
 using System.IO;
 using CommonCache.Test.Common;
-using Microsoft.Identity.Json;
+using System.Text.Json;
 
 namespace CommonCache.Test.Unit.Utils
 {
@@ -29,7 +29,7 @@ namespace CommonCache.Test.Unit.Utils
             ExecutionContent executionResults;
             if (File.Exists(resultsFilePath))
             {
-                executionResults = JsonConvert.DeserializeObject<ExecutionContent>(File.ReadAllText(resultsFilePath));
+                executionResults = JsonSerializer.Deserialize<ExecutionContent>(File.ReadAllText(resultsFilePath));
             }
             else
             {
