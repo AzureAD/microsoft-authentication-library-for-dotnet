@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.ClientCredential;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.Kerberos;
 using Microsoft.Identity.Client.OAuth2.Throttling;
@@ -62,7 +63,8 @@ namespace Microsoft.Identity.Client.OAuth2
 
                 string scopes = !string.IsNullOrEmpty(scopeOverride) ? scopeOverride : GetDefaultScopes(_requestParams.Scope);
 
-                await AddBodyParamsAndHeadersAsync(additionalBodyParameters, scopes, cancellationToken).ConfigureAwait(false);
+                await AddBodyParamsAndHeadersAsync(additionalBodyParameters, scopes, tokenEndpoint, cancellationToken).ConfigureAwait(false);
+
                 AddThrottlingHeader();
 
                 _serviceBundle.ThrottlingManager.TryThrottle(_requestParams, _oAuth2Client.GetBodyParameters());
@@ -125,26 +127,34 @@ namespace Microsoft.Identity.Client.OAuth2
         private async Task AddBodyParamsAndHeadersAsync(
             IDictionary<string, string> additionalBodyParameters,
             string scopes,
+            string tokenEndpoint,
             CancellationToken cancellationToken)
         {
             _oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientId, _requestParams.AppConfig.ClientId);
 
-            if (_serviceBundle.Config.ClientCredential != null)
+            // credentialToUse can be null, e.g. for public client apps (no client credential configured).
+            IClientCredential credentialToUse = _serviceBundle.Config.ClientCredential;
+
+            if (credentialToUse != null)
             {
-                _requestParams.RequestContext.Logger.Verbose(
-                    () => "[TokenClient] Before adding the client assertion / secret");
+                using (_requestParams.RequestContext.Logger.LogBlockDuration("[TokenClient] Resolving credential material"))
+                {
+                    CredentialMaterial material = await CredentialMaterialResolver.ResolveAsync(
+                        credentialToUse,
+                        _requestParams,
+                        tokenEndpoint,
+                        cancellationToken).ConfigureAwait(false);
 
-                var tokenEndpoint = await _requestParams.Authority.GetTokenEndpointAsync(_requestParams.RequestContext).ConfigureAwait(false);
+                    foreach (var kvp in material.TokenRequestParameters)
+                    {
+                        _oAuth2Client.AddBodyParameter(kvp.Key, kvp.Value);
+                    }
 
-                await _serviceBundle.Config.ClientCredential.AddConfidentialClientParametersAsync(
-                    _oAuth2Client,
-                    _requestParams,
-                    _serviceBundle.PlatformProxy.CryptographyManager,
-                    tokenEndpoint,
-                    cancellationToken).ConfigureAwait(false);
-
-                _requestParams.RequestContext.Logger.Verbose(
-                    () => "[TokenClient] After adding the client assertion / secret");
+                    if (material.ResolvedCertificate != null)
+                    {
+                        _requestParams.ResolvedCertificate = material.ResolvedCertificate;
+                    }
+                }
             }
 
             _oAuth2Client.AddBodyParameter(OAuth2Parameter.Scope, scopes);
@@ -238,7 +248,7 @@ namespace Microsoft.Identity.Client.OAuth2
                 }
 
                 throw;
-            }           
+            }
         }
 
         private static string GetDefaultScopes(ISet<string> inputScope)
