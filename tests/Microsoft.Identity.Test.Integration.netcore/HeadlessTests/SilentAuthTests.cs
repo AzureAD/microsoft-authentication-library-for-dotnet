@@ -78,10 +78,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
-            // Assert: RT is exposed and cache is empty
+            // Assert: normal OBO does not expose a refresh token (MSAL intentionally clears it
+            // in OnBehalfOfRequest.FetchNewAccessTokenAsync for non-long-running OBO) and cache is empty.
             string rt = result.GetRefreshToken();
-            Assert.IsNotNull(rt, "GetRefreshToken() should return a non-null refresh token from a confidential client OBO response.");
-            Assert.IsFalse(string.IsNullOrEmpty(rt), "Refresh token should not be empty.");
+            Assert.IsNull(rt, "GetRefreshToken() should return null for the normal confidential client OBO flow.");
 
 #pragma warning disable CS0618
             var accounts = await ccaWithDisabledCache.GetAccountsAsync().ConfigureAwait(false);
