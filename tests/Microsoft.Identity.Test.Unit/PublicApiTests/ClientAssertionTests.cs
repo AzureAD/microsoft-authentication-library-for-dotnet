@@ -483,6 +483,19 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
+        public void ClientAssertion_NullClientSignedAssertionProvider_ThrowsArgumentNullException()
+        {
+            Func<AssertionRequestOptions, CancellationToken, Task<ClientSignedAssertion>> provider = null;
+
+            var ex = AssertException.Throws<ArgumentNullException>(() =>
+                ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithExperimentalFeatures(true)
+                    .WithClientAssertion(provider));
+
+            Assert.AreEqual("clientSignedAssertionProvider", ex.ParamName);
+        }
+
+        [TestMethod]
         public async Task ClientAssertion_CancellationTokenPropagatesAsync()
         {
             using var cts = new CancellationTokenSource();
