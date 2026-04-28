@@ -52,13 +52,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var ccaAppConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppWebApi).ConfigureAwait(false);
 
             // Step 1: get a user access token via ROPC on a PCA (scoped to the web API)
-            var pca = PublicClientApplicationBuilder
+            var pcaForRopc = PublicClientApplicationBuilder
                 .Create(pcaAppConfig.AppId)
                 .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
                 .Build();
 
 #pragma warning disable CS0618
-            var userResult = await pca
+            var userResult = await pcaForRopc
                 .AcquireTokenByUsernamePassword(new[] { ccaAppConfig.DefaultScopes }, user.Upn, user.GetOrFetchPassword())
                 .ExecuteAsync()
                 .ConfigureAwait(false);
