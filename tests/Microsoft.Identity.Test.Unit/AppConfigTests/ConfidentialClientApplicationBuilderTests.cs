@@ -488,7 +488,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                       .WithCertificate(cert, certificateOptions)
                       .Build();
 
-            Assert.IsTrue((app.AppConfig as ApplicationConfiguration).CertificateOptions?.SendCertificateOverMtls,
+            Assert.IsTrue((app.AppConfig as ApplicationConfiguration).CertificateOptions?.SendCertificateOverMtls ?? false,
                 "SendCertificateOverMtls should be stored in ApplicationConfiguration when set to true.");
         }
 

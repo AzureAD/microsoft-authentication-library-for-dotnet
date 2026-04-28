@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -7,6 +7,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Test.Common.Core.Helpers;
@@ -285,7 +286,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             string[] appScopes = new[] { "https://vault.azure.net/.default" };
 
-            var certificateOptions = new Client.AppConfig.CertificateOptions
+            var certificateOptions = new CertificateOptions
             {
                 SendCertificateOverMtls = true
             };
@@ -328,7 +329,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             string[] appScopes = new[] { "https://vault.azure.net/.default" };
 
-            var certificateOptions = new Client.AppConfig.CertificateOptions
+            var certificateOptions = new CertificateOptions
             {
                 SendCertificateOverMtls = sendCertificateOverMtls
             };

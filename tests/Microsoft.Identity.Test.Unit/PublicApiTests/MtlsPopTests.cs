@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -12,6 +12,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
@@ -961,7 +962,7 @@ namespace Microsoft.Identity.Test.Unit
             {
                 Environment.SetEnvironmentVariable("REGION_NAME", null);
 
-                var options = new Client.AppConfig.CertificateOptions
+                var options = new CertificateOptions
                 {
                     SendCertificateOverMtls = true
                 };
@@ -993,7 +994,7 @@ namespace Microsoft.Identity.Test.Unit
                 {
                     httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(tokenType: "Bearer");
 
-                    var options = new Client.AppConfig.CertificateOptions
+                    var options = new CertificateOptions
                     {
                         SendCertificateOverMtls = true
                     };
@@ -1030,7 +1031,7 @@ namespace Microsoft.Identity.Test.Unit
                 {
                     httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(tokenType: "mtls_pop");
 
-                    var options = new Client.AppConfig.CertificateOptions
+                    var options = new CertificateOptions
                     {
                         SendCertificateOverMtls = true
                     };
