@@ -12,6 +12,9 @@ using Foundation;
 
 namespace Microsoft.Identity.Client.Platforms.iOS
 {
+    [JsonSerializable(typeof(IntuneEnrollmentIdHelper.EnrollmentIDs))]
+    internal partial class IntuneSerializerContext : JsonSerializerContext { }
+
     internal class IntuneEnrollmentIdHelper
     {
         const string EnrollmentIdKey = "intune_app_protection_enrollment_id_V1";
@@ -25,7 +28,8 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             {
                 try
                 {
-                    var enrollmentIDs = JsonSerializer.Deserialize<EnrollmentIDs>(keychainData);
+                    var enrollmentIDs = (EnrollmentIDs)JsonSerializer.Deserialize(
+                        keychainData, typeof(EnrollmentIDs), IntuneSerializerContext.Default);
 
                     if ((enrollmentIDs?.EnrollmentIds?.Count ?? 0) > 0)
                     {
