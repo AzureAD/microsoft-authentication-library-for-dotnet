@@ -150,15 +150,28 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         }
 
         /// <summary>
-        /// Validates that the certificate is non-null and has a private key.
+        /// Validates that the certificate is non-null and has an accessible private key.
         /// </summary>
-        private static void ValidateCertificate(X509Certificate2 certificate)
+        /// <param name="certificate">The certificate returned by the provider.</param>
+        /// <param name="nullErrorCode">
+        /// The <see cref="MsalError"/> code to throw when the certificate is null. Defaults to
+        /// <see cref="MsalError.InvalidClientAssertion"/> for the credential-material path. The
+        /// preflight path passes <see cref="MsalError.MtlsCertificateNotProvided"/> instead.
+        /// </param>
+        /// <param name="nullErrorMessage">
+        /// Optional message to use when the certificate is null. If omitted, a generic
+        /// provider-returned-null message is used.
+        /// </param>
+        private static void ValidateCertificate(
+            X509Certificate2 certificate,
+            string nullErrorCode = MsalError.InvalidClientAssertion,
+            string nullErrorMessage = null)
         {
             if (certificate == null)
             {
                 throw new MsalClientException(
-                    MsalError.InvalidClientAssertion,
-                    "The certificate provider callback returned null. Ensure the callback returns a valid X509Certificate2 instance.");
+                    nullErrorCode,
+                    nullErrorMessage ?? "The certificate provider callback returned null. Ensure the callback returns a valid X509Certificate2 instance.");
             }
 
             try
@@ -181,7 +194,8 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
 
         /// <summary>
         /// Resolves the certificate via the provider for preflight checks (e.g., mTLS PoP initialization).
-        /// Uses the same validation as the credential-material path so errors are consistent.
+        /// Uses the same validation as the credential-material path; only the null-error code differs so
+        /// callers see an mTLS-specific error at preflight.
         /// </summary>
         /// <remarks>
         /// The provider may be invoked again during credential material resolution in TokenClient.
@@ -192,41 +206,12 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         {
             X509Certificate2 certificate = await _certificateProvider(options).ConfigureAwait(false);
 
-            ValidateResolvedCertificate(certificate);
+            ValidateCertificate(
+                certificate,
+                MsalError.MtlsCertificateNotProvided,
+                MsalErrorMessage.MtlsCertificateNotProvidedMessage);
 
             return certificate;
-        }
-
-        /// <summary>
-        /// Validates the certificate returned by the provider.
-        /// Shared between the credential-material path and the preflight path.
-        /// </summary>
-        private static void ValidateResolvedCertificate(X509Certificate2 certificate)
-        {
-            if (certificate == null)
-            {
-                throw new MsalClientException(
-                    MsalError.MtlsCertificateNotProvided,
-                    "The certificate provider callback returned null. " +
-                    "Ensure the callback returns a valid X509Certificate2 instance.");
-            }
-
-            try
-            {
-                if (!certificate.HasPrivateKey)
-                {
-                    throw new MsalClientException(
-                        MsalError.CertWithoutPrivateKey,
-                        MsalErrorMessage.CertMustHavePrivateKey(certificate.FriendlyName));
-                }
-            }
-            catch (System.Security.Cryptography.CryptographicException ex)
-            {
-                throw new MsalClientException(
-                    MsalError.CryptographicError,
-                    MsalErrorMessage.CryptographicError,
-                    ex);
-            }
         }
     }
 }
