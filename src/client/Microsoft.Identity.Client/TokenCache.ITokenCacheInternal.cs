@@ -213,46 +213,46 @@ namespace Microsoft.Identity.Client
 
 
                     if (ShouldCacheAccessToken(msalAccessTokenCacheItem, response.TokenSource))
-                        {
-                            logger.Info("[SaveTokenResponseAsync] Saving AT in cache and removing overlapping ATs...");
-                            DeleteAccessTokensWithIntersectingScopes(
-                                requestParams,
-                                instanceDiscoveryMetadata.Aliases,
-                                tenantId,
-                                msalAccessTokenCacheItem.ScopeSet,
-                                msalAccessTokenCacheItem.HomeAccountId,
-                                msalAccessTokenCacheItem.TokenType);
-
-                            Accessor.SaveAccessToken(msalAccessTokenCacheItem);
-                        }
-
-                        if (idToken != null)
-                        {
-                            logger.Info("[SaveTokenResponseAsync] Saving Id Token and Account in cache ...");
-                            Accessor.SaveIdToken(msalIdTokenCacheItem);
-                            MergeWamAccountIds(msalAccountCacheItem);
-                            Accessor.SaveAccount(msalAccountCacheItem);
-                        }
-
-                        // if server returns the refresh token back, save it in the cache.
-                        if (msalRefreshTokenCacheItem != null)
-                        {
-                            logger.Info("[SaveTokenResponseAsync] Saving RT in cache...");
-                            Accessor.SaveRefreshToken(msalRefreshTokenCacheItem);
-                        }
-
-                        UpdateAppMetadata(
-                            requestParams.AppConfig.ClientId,
-                            instanceDiscoveryMetadata.PreferredCache,
-                            response.FamilyId);
-
-                        SaveToLegacyAdalCache(
+                    {
+                        logger.Info("[SaveTokenResponseAsync] Saving AT in cache and removing overlapping ATs...");
+                        DeleteAccessTokensWithIntersectingScopes(
                             requestParams,
-                            response,
-                            msalRefreshTokenCacheItem,
-                            msalIdTokenCacheItem,
+                            instanceDiscoveryMetadata.Aliases,
                             tenantId,
-                            instanceDiscoveryMetadata);
+                            msalAccessTokenCacheItem.ScopeSet,
+                            msalAccessTokenCacheItem.HomeAccountId,
+                            msalAccessTokenCacheItem.TokenType);
+
+                        Accessor.SaveAccessToken(msalAccessTokenCacheItem);
+                    }
+
+                    if (idToken != null)
+                    {
+                        logger.Info("[SaveTokenResponseAsync] Saving Id Token and Account in cache ...");
+                        Accessor.SaveIdToken(msalIdTokenCacheItem);
+                        MergeWamAccountIds(msalAccountCacheItem);
+                        Accessor.SaveAccount(msalAccountCacheItem);
+                    }
+
+                    // if server returns the refresh token back, save it in the cache.
+                    if (msalRefreshTokenCacheItem != null)
+                    {
+                        logger.Info("[SaveTokenResponseAsync] Saving RT in cache...");
+                        Accessor.SaveRefreshToken(msalRefreshTokenCacheItem);
+                    }
+
+                    UpdateAppMetadata(
+                        requestParams.AppConfig.ClientId,
+                        instanceDiscoveryMetadata.PreferredCache,
+                        response.FamilyId);
+
+                    SaveToLegacyAdalCache(
+                        requestParams,
+                        response,
+                        msalRefreshTokenCacheItem,
+                        msalIdTokenCacheItem,
+                        tenantId,
+                        instanceDiscoveryMetadata);
                 }
                 finally
                 {

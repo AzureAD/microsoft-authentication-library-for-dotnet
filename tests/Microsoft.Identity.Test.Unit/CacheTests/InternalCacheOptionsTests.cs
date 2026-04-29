@@ -438,8 +438,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
         /// <summary>
         /// Long-running OBO with DisableInternalCache: InitiateLongRunningProcessInWebApi always hits
-        /// the network and stores nothing. AcquireTokenInLongRunningProcess cannot function without the
-        /// internal cache and throws MsalUiRequiredException(InternalCacheDisabled).
+        /// the network and stores nothing. AcquireTokenInLongRunningProcess cannot go to the network
+        /// (no user assertion to exchange) and throws MsalUiRequiredException(InternalCacheDisabled)
+        /// to surface the root cause directly.
         /// </summary>
         [TestMethod]
         public async Task DisableInternalCache_LongRunningObo_InitiateAlwaysHitsNetwork_AcquireThrows_Async()
@@ -480,15 +481,16 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 Assert.IsEmpty(cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens(),
                     "No refresh tokens should have been stored in the internal cache.");
 
-                // AcquireTokenInLongRunningProcess relies entirely on the internal cache for key-based
-                // lookups. Because DisableInternalCache prevented Initiate from writing to the cache,
-                // there is no token under this key and the call fails with a cache-miss error.
-                var ex = await AssertException.TaskThrowsAsync<MsalClientException>(
+                // AcquireTokenInLongRunningProcess cannot go to the network (no user assertion to
+                // exchange). When the cache is disabled it surfaces the root cause directly.
+                var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(
                     () => cca.AcquireTokenInLongRunningProcess(TestConstants.s_scope, oboCacheKey).ExecuteAsync())
                     .ConfigureAwait(false);
 
-                Assert.AreEqual(MsalError.OboCacheKeyNotInCacheError, ex.ErrorCode,
-                    "AcquireTokenInLongRunningProcess should report that the OBO cache key is absent when the cache is disabled.");
+                Assert.AreEqual(MsalError.InternalCacheDisabled, ex.ErrorCode,
+                    "AcquireTokenInLongRunningProcess should throw InternalCacheDisabled when the cache is disabled.");
+                Assert.AreEqual(UiRequiredExceptionClassification.AcquireTokenSilentFailed, ex.Classification,
+                    "Classification should signal that silent auth failed.");
             }
         }
 

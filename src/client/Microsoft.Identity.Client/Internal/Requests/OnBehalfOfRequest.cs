@@ -70,6 +70,18 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 return await FetchNewAccessTokenAsync(cancellationToken).ConfigureAwait(false);
             }
 
+            // AcquireTokenInLongRunningProcess (UserAssertion == null) cannot go to the network
+            // because there is no assertion to exchange. Surface the root cause directly.
+            if (ServiceBundle.Config.AccessorOptions?.InternalCacheDisabled == true)
+            {
+                AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.CacheDisabled;
+                throw new MsalUiRequiredException(
+                    MsalError.InternalCacheDisabled,
+                    MsalErrorMessage.InternalCacheDisabledMessage,
+                    null,
+                    UiRequiredExceptionClassification.AcquireTokenSilentFailed);
+            }
+
             if (!_onBehalfOfParameters.ForceRefresh && string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
             {
                 // look for access token in the cache first.
