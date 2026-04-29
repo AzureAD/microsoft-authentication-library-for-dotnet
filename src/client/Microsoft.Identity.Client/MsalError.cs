@@ -1268,11 +1268,14 @@ namespace Microsoft.Identity.Client
         public const string InvalidCredentialMaterial = "invalid_credential_material";
 
         /// <summary>
-        /// <para>What happened?</para> <see cref="IClientApplicationBase.AcquireTokenSilent(System.Collections.Generic.IEnumerable{string}, IAccount)"/> 
-        /// was called but MSAL's internal token cache is disabled via <see cref="CacheOptions.DisableInternalCacheOptions"/>.
-        /// <para>Mitigation</para> Use <see cref="IByRefreshToken.AcquireTokenByRefreshToken(System.Collections.Generic.IEnumerable{string}, string)"/> 
-        /// with the refresh token obtained from <see cref="Extensibility.AuthenticationResultExtensions.GetRefreshToken(AuthenticationResult)"/>, 
-        /// or use another interactive flow.
+        /// <para>What happened?</para> A cache-dependent API was called, but MSAL's internal token cache is disabled via
+        /// <see cref="CacheOptions.DisableInternalCacheOptions"/>. This can occur with APIs such as
+        /// <see cref="IClientApplicationBase.AcquireTokenSilent(System.Collections.Generic.IEnumerable{string}, IAccount)"/>
+        /// and <c>AcquireTokenInLongRunningProcess(...)</c>.
+        /// <para>Mitigation</para> Use an authentication flow that does not depend on MSAL's internal cache, such as
+        /// <see cref="IByRefreshToken.AcquireTokenByRefreshToken(System.Collections.Generic.IEnumerable{string}, string)"/>
+        /// with the refresh token obtained from <see cref="Extensibility.AuthenticationResultExtensions.GetRefreshToken(AuthenticationResult)"/>,
+        /// or use another interactive flow, as appropriate for your application.
         /// </summary>
         public const string InternalCacheDisabled = "internal_cache_disabled";
     }
