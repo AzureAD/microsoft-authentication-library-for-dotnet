@@ -543,7 +543,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     .ConfigureAwait(false);
 
                 Assert.AreEqual(MsalError.InternalCacheDisabled, ex.ErrorCode,
-                    "AcquireTokenInLongRunningProcess should throw IsInternalCacheDisabled when the cache is disabled.");
+                    "AcquireTokenInLongRunningProcess should throw MsalError.InternalCacheDisabled when the cache is disabled.");
                 Assert.AreEqual(UiRequiredExceptionClassification.AcquireTokenSilentFailed, ex.Classification,
                     "Classification should signal that silent auth failed.");
             }
