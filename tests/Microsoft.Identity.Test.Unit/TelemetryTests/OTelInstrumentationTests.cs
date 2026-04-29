@@ -404,7 +404,7 @@ namespace Microsoft.Identity.Test.Unit
             Assert.IsNotNull(exClient.ErrorCode);
         }
 
-        private void CreateApplication(CacheOptions useCacheOptions = null)
+        private void CreateApplication(CacheOptions cacheOptions = null)
         {
             var builder = ConfidentialClientApplicationBuilder
                         .Create(TestConstants.ClientId)
@@ -413,9 +413,9 @@ namespace Microsoft.Identity.Test.Unit
                         .WithClientSecret(TestConstants.ClientSecret)
                         .WithHttpManager(_harness.HttpManager);
 
-            if (useCacheOptions != null)
+            if (cacheOptions != null)
             {
-                builder = builder.WithCacheOptions(useCacheOptions);
+                builder = builder.WithCacheOptions(cacheOptions);
             }
 
             _cca = builder.BuildConcrete();
@@ -426,7 +426,7 @@ namespace Microsoft.Identity.Test.Unit
         {
             using (_harness = CreateTestHarness())
             {
-                CreateApplication(useCacheOptions: CacheOptions.DisableInternalCacheOptions);
+                CreateApplication(cacheOptions: CacheOptions.DisableInternalCacheOptions);
 
                 _harness.HttpManager.AddInstanceDiscoveryMockHandler();
                 _harness.HttpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
