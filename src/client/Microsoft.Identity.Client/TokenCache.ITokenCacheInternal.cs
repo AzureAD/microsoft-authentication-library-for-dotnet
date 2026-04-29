@@ -143,17 +143,25 @@ namespace Microsoft.Identity.Client
                              wamAccountIds);
 
                 // Add the newly obtained id token to the list of profiles.
-                // Skip reading from the internal cache when it is disabled — GetTenantProfilesAsync
-                // reads ID tokens from Accessor, which would violate the no-reads contract.
                 IDictionary<string, TenantProfile> tenantProfiles = null;
-                if (msalIdTokenCacheItem.TenantId != null &&
-                    ServiceBundle.Config.AccessorOptions?.IsInternalCacheDisabled != true)
+                if (msalIdTokenCacheItem.TenantId != null)
                 {
-                    tenantProfiles = await GetTenantProfilesAsync(requestParams, homeAccountId).ConfigureAwait(false);
-                    if (tenantProfiles != null)
+                    if (ServiceBundle.Config.AccessorOptions?.IsInternalCacheDisabled == true)
                     {
-                        TenantProfile tenantProfile = new TenantProfile(msalIdTokenCacheItem);
-                        tenantProfiles[msalIdTokenCacheItem.TenantId] = tenantProfile;
+                        // When the internal cache is disabled, skip GetTenantProfilesAsync (which reads
+                        // from Accessor) and instead seed a fresh dict with just the current profile.
+                        tenantProfiles = new Dictionary<string, TenantProfile>
+                        {
+                            [msalIdTokenCacheItem.TenantId] = new TenantProfile(msalIdTokenCacheItem)
+                        };
+                    }
+                    else
+                    {
+                        tenantProfiles = await GetTenantProfilesAsync(requestParams, homeAccountId).ConfigureAwait(false);
+                        if (tenantProfiles != null)
+                        {
+                            tenantProfiles[msalIdTokenCacheItem.TenantId] = new TenantProfile(msalIdTokenCacheItem);
+                        }
                     }
                 }
 

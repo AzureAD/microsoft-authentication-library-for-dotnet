@@ -437,6 +437,45 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         /// <summary>
+        /// When DisableInternalCacheOptions is set, Account.TenantProfiles should still contain
+        /// the current tenant's profile derived from the freshly received ID token (no cache reads needed).
+        /// </summary>
+        [TestMethod]
+        public async Task DisableInternalCacheOptions_OboResult_HasTenantProfile_Async()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                var cca = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithAuthority(TestConstants.AuthorityCommonTenant)
+                    .WithHttpManager(httpManager)
+                    .WithCacheOptions(CacheOptions.DisableInternalCacheOptions)
+                    .BuildConcrete();
+
+                var userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
+
+                httpManager.AddMockHandler(new MockHttpMessageHandler
+                {
+                    ExpectedUrl = TestConstants.AuthorityCommonTenant + "oauth2/v2.0/token",
+                    ExpectedMethod = HttpMethod.Post,
+                    ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
+                });
+
+                var result = await cca.AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                var profiles = result.Account.GetTenantProfiles()?.ToList();
+                Assert.IsNotNull(profiles, "TenantProfiles should not be null when DisableInternalCacheOptions is set.");
+                Assert.HasCount(1, profiles, "Should have exactly one TenantProfile from the freshly received ID token.");
+                Assert.AreEqual(TestConstants.Utid, profiles[0].TenantId,
+                    "TenantProfile.TenantId should match the ID token's tenant.");
+            }
+        }
+
+        /// <summary>
         /// Long-running OBO with DisableInternalCacheOptions: InitiateLongRunningProcessInWebApi always hits
         /// the network and stores nothing. AcquireTokenInLongRunningProcess cannot go to the network
         /// (no user assertion to exchange) and throws MsalUiRequiredException(IsInternalCacheDisabled)
