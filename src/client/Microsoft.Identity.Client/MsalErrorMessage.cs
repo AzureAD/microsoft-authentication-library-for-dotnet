@@ -462,7 +462,7 @@ namespace Microsoft.Identity.Client
             "Remove SendCertificateOverMtls or switch to a certificate credential.";
 
         public const string InternalCacheDisabledMessage =
-            "AcquireTokenSilent is not supported when the internal cache is disabled via CacheOptions.DisableInternalCacheOptions. " +
+            "Silent token acquisition is not supported when the internal cache is disabled via CacheOptions.DisableInternalCacheOptions. " +
             "For confidential client flows, retrieve the refresh token using AuthenticationResultExtensions.GetRefreshToken() and call AcquireTokenByRefreshToken, " +
             "or use another interactive flow.";
 
