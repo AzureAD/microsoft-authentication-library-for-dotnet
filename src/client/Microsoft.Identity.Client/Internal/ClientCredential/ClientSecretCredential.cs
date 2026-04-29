@@ -10,29 +10,28 @@ using Microsoft.Identity.Client.TelemetryCore;
 
 namespace Microsoft.Identity.Client.Internal.ClientCredential
 {
-    internal class SignedAssertionClientCredential : IClientCredential
+    internal class ClientSecretCredential : IClientCredential
     {
-        private readonly string _signedAssertion;
+        internal string Secret { get; }
 
-        public AssertionType AssertionType => AssertionType.ClientAssertion;
+        public AssertionType AssertionType => AssertionType.Secret;
 
-        public SignedAssertionClientCredential(string signedAssertion)
+        public ClientSecretCredential(string secret)
         {
-            _signedAssertion = signedAssertion;
+            Secret = secret;
         }
 
         public Task<CredentialMaterial> GetCredentialMaterialAsync(
             CredentialContext context,
             CancellationToken cancellationToken)
         {
-            context.Logger.Verbose(() => $"[SignedAssertionClientCredential] Mode={context.Mode}");
+            context.Logger.Verbose(() => $"[ClientSecretCredential] Mode={context.Mode}");
 
-            ClientCredentialGuards.ThrowIfMtlsNotSupported(context, "A precomputed client assertion string");
+            ClientCredentialGuards.ThrowIfMtlsNotSupported(context, "A client secret");
 
             var parameters = new Dictionary<string, string>
             {
-                { OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtBearer },
-                { OAuth2Parameter.ClientAssertion, _signedAssertion }
+                { OAuth2Parameter.ClientSecret, Secret }
             };
 
             return Task.FromResult(new CredentialMaterial(parameters));

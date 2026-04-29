@@ -7,7 +7,7 @@ parameters:
 steps:
 
 - task: VSTest@2
-  displayName: 'Run unit tests NetFwk (vanilla CI)'
+  displayName: 'Run unit tests .NET Framework (non-OneBranch)'
   condition: and(succeeded(), eq(variables['PipelineType'], 'legacy'))
   inputs:
     testSelector: 'testAssemblies'
@@ -17,10 +17,10 @@ steps:
     codeCoverageEnabled: false
     failOnMinTestsNotRun: true
     minimumExpectedTests: '1'
-    pathtoCustomTestAdapters: 'C:\temp' # Workaround for test failure, as NUnit Test Adapter that gets detected seems to mess something up
+    pathtoCustomTestAdapters: 'C:\temp' # Workaround: NUnit adapter on non-OneBranch agents interferes with MSTest discovery
 
 - task: VSTest@2
-  displayName: 'Run unit tests NetFwk on OneBranch'
+  displayName: 'Run unit tests .NET Framework (OneBranch)'
   condition: and(succeeded(), eq(variables['PipelineType'], 'OneBranch'))
   inputs:
     testSelector: 'testAssemblies'
@@ -32,7 +32,7 @@ steps:
     minimumExpectedTests: '1'
 
 - task: VSTest@2
-  displayName: 'Run unit tests .NET '
+  displayName: 'Run unit tests .NET 8 (all pipelines)'
   inputs:
     testSelector: 'testAssemblies'
     testAssemblyVer2: '**\Microsoft.Identity.Test.Unit\bin\**\net8.0\Microsoft.Identity.Test.Unit.dll'
@@ -41,4 +41,4 @@ steps:
     codeCoverageEnabled: true
     failOnMinTestsNotRun: true
     minimumExpectedTests: '1'
-    runSettingsFile: 'build\CodeCoverage.runsettings'
+    runSettingsFile: '$(MsalSourceDir)build\CodeCoverage.runsettings'
