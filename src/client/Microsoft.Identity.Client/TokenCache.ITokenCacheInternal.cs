@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -147,7 +147,7 @@ namespace Microsoft.Identity.Client
                 // reads ID tokens from Accessor, which would violate the no-reads contract.
                 IDictionary<string, TenantProfile> tenantProfiles = null;
                 if (msalIdTokenCacheItem.TenantId != null &&
-                    ServiceBundle.Config.AccessorOptions?.InternalCacheDisabled != true)
+                    ServiceBundle.Config.AccessorOptions?.IsInternalCacheDisabled != true)
                 {
                     tenantProfiles = await GetTenantProfilesAsync(requestParams, homeAccountId).ConfigureAwait(false);
                     if (tenantProfiles != null)
@@ -168,9 +168,9 @@ namespace Microsoft.Identity.Client
 
             #endregion
 
-            if (ServiceBundle.Config.AccessorOptions?.InternalCacheDisabled == true)
+            if (ServiceBundle.Config.AccessorOptions?.IsInternalCacheDisabled == true)
             {
-                logger.Verbose(() => "[SaveTokenResponseAsync] Internal cache is disabled (CacheOptions.DisableInternalCache). Skipping all cache writes.");
+                logger.Verbose(() => "[SaveTokenResponseAsync] Internal cache is disabled (CacheOptions.DisableInternalCacheOptions). Skipping all cache writes.");
                 return Tuple.Create(msalAccessTokenCacheItem, msalIdTokenCacheItem, account);
             }
 
@@ -211,7 +211,7 @@ namespace Microsoft.Identity.Client
                         requestParams.RequestContext.ApiEvent.DurationInCacheInMs += measuredResultDuration.Milliseconds;
                     }
 
-
+                    // Don't cache access tokens from broker
                     if (ShouldCacheAccessToken(msalAccessTokenCacheItem, response.TokenSource))
                     {
                         logger.Info("[SaveTokenResponseAsync] Saving AT in cache and removing overlapping ATs...");

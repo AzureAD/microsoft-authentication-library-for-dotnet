@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client.Cache
         public ITokenCacheInternal TokenCacheInternal { get; }
 
         private bool IsInternalCacheDisabled =>
-            _requestParams.RequestContext.ServiceBundle.Config.AccessorOptions?.InternalCacheDisabled == true;
+            _requestParams.RequestContext.ServiceBundle.Config.AccessorOptions?.IsInternalCacheDisabled == true;
 
         private bool ShouldSkipInternalCacheRead(string operationName)
         {

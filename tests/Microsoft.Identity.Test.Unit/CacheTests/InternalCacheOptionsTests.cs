@@ -193,15 +193,15 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
         /// <summary>Static helper and the bool property have correct values.</summary>
         [TestMethod]
-        public void DisableInternalCache_StaticProperty_HasCorrectValues()
+        public void DisableInternalCacheOptions_StaticProperty_HasCorrectValues()
         {
-            var disabled = CacheOptions.DisableInternalCache;
+            var disabled = CacheOptions.DisableInternalCacheOptions;
             Assert.IsNotNull(disabled);
-            Assert.IsTrue(disabled.InternalCacheDisabled, "DisableInternalCache.InternalCacheDisabled should be true");
-            Assert.IsFalse(disabled.UseSharedCache, "DisableInternalCache.UseSharedCache should be false");
+            Assert.IsTrue(disabled.IsInternalCacheDisabled, "DisableInternalCacheOptions.IsInternalCacheDisabled should be true");
+            Assert.IsFalse(disabled.UseSharedCache, "DisableInternalCacheOptions.UseSharedCache should be false");
 
             var defaults = new CacheOptions();
-            Assert.IsFalse(defaults.InternalCacheDisabled, "Default CacheOptions should have InternalCacheDisabled == false");
+            Assert.IsFalse(defaults.IsInternalCacheDisabled, "Default CacheOptions should have IsInternalCacheDisabled == false");
         }
 
         /// <summary>GetRefreshToken() extension returns the refresh token from a real token flow.</summary>
@@ -257,9 +257,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             }
         }
 
-        /// <summary>When DisableInternalCache is set, AcquireTokenForClient always hits the network and nothing is stored.</summary>
+        /// <summary>When DisableInternalCacheOptions is set, AcquireTokenForClient always hits the network and nothing is stored.</summary>
         [TestMethod]
-        public async Task DisableInternalCache_AcquireTokenForClient_NeverCaches_Async()
+        public async Task DisableInternalCacheOptions_AcquireTokenForClient_NeverCaches_Async()
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -269,7 +269,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     .Create(TestConstants.ClientId)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(httpManager)
-                    .WithCacheOptions(CacheOptions.DisableInternalCache)
+                    .WithCacheOptions(CacheOptions.DisableInternalCacheOptions)
                     .BuildConcrete();
 
                 // Two separate network calls expected because the cache is disabled.
@@ -299,9 +299,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             }
         }
 
-        /// <summary>DisableInternalCache also skips the user token cache.</summary>
+        /// <summary>DisableInternalCacheOptions also skips the user token cache.</summary>
         [TestMethod]
-        public async Task DisableInternalCache_AcquireTokenByAuthCode_DoesNotCacheTokens_Async()
+        public async Task DisableInternalCacheOptions_AcquireTokenByAuthCode_DoesNotCacheTokens_Async()
         {
             using (var harness = CreateTestHarness())
             {
@@ -313,7 +313,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithRedirectUri(TestConstants.RedirectUri)
                     .WithHttpManager(harness.HttpManager)
-                    .WithCacheOptions(CacheOptions.DisableInternalCache)
+                    .WithCacheOptions(CacheOptions.DisableInternalCacheOptions)
                     .BuildConcrete();
 
                 await app
@@ -332,11 +332,11 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
         /// <summary>AcquireTokenSilent throws MsalUiRequiredException (the established "silent failed" contract) when the internal cache is disabled.</summary>
         [TestMethod]
-        public async Task DisableInternalCache_AcquireTokenSilent_ThrowsWithCorrectError_Async()
+        public async Task DisableInternalCacheOptions_AcquireTokenSilent_ThrowsWithCorrectError_Async()
         {
             var app = PublicClientApplicationBuilder
                 .Create(TestConstants.ClientId)
-                .WithCacheOptions(CacheOptions.DisableInternalCache)
+                .WithCacheOptions(CacheOptions.DisableInternalCacheOptions)
                 .Build();
 
             var account = new Account("aid.tid", "user@contoso.com", "login.microsoftonline.com");
@@ -353,13 +353,13 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 "Classification should signal that silent auth failed.");
         }
 
-        /// <summary>Mutual exclusivity: InternalCacheDisabled and UseSharedCache cannot both be set.</summary>
+        /// <summary>Mutual exclusivity: IsInternalCacheDisabled and UseSharedCache cannot both be set.</summary>
         [TestMethod]
-        public void DisableInternalCache_AndUseSharedCache_ThrowsOnBuild()
+        public void DisableInternalCacheOptions_AndUseSharedCache_ThrowsOnBuild()
         {
             var conflictingOptions = new CacheOptions
             {
-                InternalCacheDisabled = true,
+                IsInternalCacheDisabled = true,
                 UseSharedCache = true
             };
 
@@ -371,15 +371,15 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     .Build());
 
             Assert.AreEqual(MsalError.InvalidRequest, ex.ErrorCode,
-                "Setting both InternalCacheDisabled and UseSharedCache should throw an InvalidRequest error.");
+                "Setting both IsInternalCacheDisabled and UseSharedCache should throw an InvalidRequest error.");
         }
 
         /// <summary>
-        /// Short-running OBO with DisableInternalCache: every call always goes to the network
+        /// Short-running OBO with DisableInternalCacheOptions: every call always goes to the network
         /// and nothing is written to the internal cache.
         /// </summary>
         [TestMethod]
-        public async Task DisableInternalCache_ShortRunningObo_AlwaysHitsNetwork_Async()
+        public async Task DisableInternalCacheOptions_ShortRunningObo_AlwaysHitsNetwork_Async()
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -390,7 +390,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithAuthority(TestConstants.AuthorityCommonTenant)
                     .WithHttpManager(httpManager)
-                    .WithCacheOptions(CacheOptions.DisableInternalCache)
+                    .WithCacheOptions(CacheOptions.DisableInternalCacheOptions)
                     .BuildConcrete();
 
                 var userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
@@ -437,13 +437,13 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         /// <summary>
-        /// Long-running OBO with DisableInternalCache: InitiateLongRunningProcessInWebApi always hits
+        /// Long-running OBO with DisableInternalCacheOptions: InitiateLongRunningProcessInWebApi always hits
         /// the network and stores nothing. AcquireTokenInLongRunningProcess cannot go to the network
-        /// (no user assertion to exchange) and throws MsalUiRequiredException(InternalCacheDisabled)
+        /// (no user assertion to exchange) and throws MsalUiRequiredException(IsInternalCacheDisabled)
         /// to surface the root cause directly.
         /// </summary>
         [TestMethod]
-        public async Task DisableInternalCache_LongRunningObo_InitiateAlwaysHitsNetwork_AcquireThrows_Async()
+        public async Task DisableInternalCacheOptions_LongRunningObo_InitiateAlwaysHitsNetwork_AcquireThrows_Async()
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -454,7 +454,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithAuthority(TestConstants.AuthorityCommonTenant)
                     .WithHttpManager(httpManager)
-                    .WithCacheOptions(CacheOptions.DisableInternalCache)
+                    .WithCacheOptions(CacheOptions.DisableInternalCacheOptions)
                     .BuildConcrete();
 
                 string oboCacheKey = "obo-cache-key";
@@ -488,7 +488,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     .ConfigureAwait(false);
 
                 Assert.AreEqual(MsalError.InternalCacheDisabled, ex.ErrorCode,
-                    "AcquireTokenInLongRunningProcess should throw InternalCacheDisabled when the cache is disabled.");
+                    "AcquireTokenInLongRunningProcess should throw IsInternalCacheDisabled when the cache is disabled.");
                 Assert.AreEqual(UiRequiredExceptionClassification.AcquireTokenSilentFailed, ex.Classification,
                     "Classification should signal that silent auth failed.");
             }
@@ -496,15 +496,15 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
         /// <summary>
         /// AcquireTokenSilent on a CCA (confidential client) throws the same MsalUiRequiredException
-        /// as on a PCA when DisableInternalCache is set.
+        /// as on a PCA when DisableInternalCacheOptions is set.
         /// </summary>
         [TestMethod]
-        public async Task DisableInternalCache_AcquireTokenSilent_CcaVariant_ThrowsWithCorrectError_Async()
+        public async Task DisableInternalCacheOptions_AcquireTokenSilent_CcaVariant_ThrowsWithCorrectError_Async()
         {
             var cca = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
                 .WithClientSecret(TestConstants.ClientSecret)
-                .WithCacheOptions(CacheOptions.DisableInternalCache)
+                .WithCacheOptions(CacheOptions.DisableInternalCacheOptions)
                 .Build();
 
             var account = new Account("aid.tid", "user@contoso.com", "login.microsoftonline.com");

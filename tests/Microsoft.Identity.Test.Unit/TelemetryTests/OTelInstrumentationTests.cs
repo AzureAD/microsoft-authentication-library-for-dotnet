@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -422,11 +422,11 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        public async Task DisableInternalCache_AcquireTokenForClient_OTelEmitsCacheDisabledReason_Async()
+        public async Task DisableInternalCacheOptions_AcquireTokenForClient_OTelEmitsCacheDisabledReason_Async()
         {
             using (_harness = CreateTestHarness())
             {
-                CreateApplication(useCacheOptions: CacheOptions.DisableInternalCache);
+                CreateApplication(useCacheOptions: CacheOptions.DisableInternalCacheOptions);
 
                 _harness.HttpManager.AddInstanceDiscoveryMockHandler();
                 _harness.HttpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
@@ -450,7 +450,7 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        public async Task DisableInternalCache_AcquireTokenOnBehalfOf_OTelEmitsCacheDisabledReason_Async()
+        public async Task DisableInternalCacheOptions_AcquireTokenOnBehalfOf_OTelEmitsCacheDisabledReason_Async()
         {
             using (_harness = CreateTestHarness())
             {
@@ -462,7 +462,7 @@ namespace Microsoft.Identity.Test.Unit
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithAuthority(TestConstants.AuthorityCommonTenant)
                     .WithHttpManager(_harness.HttpManager)
-                    .WithCacheOptions(CacheOptions.DisableInternalCache)
+                    .WithCacheOptions(CacheOptions.DisableInternalCacheOptions)
                     .BuildConcrete();
 
                 AuthenticationResult result = await cca.AcquireTokenOnBehalfOf(

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System.Globalization;
@@ -462,12 +462,12 @@ namespace Microsoft.Identity.Client
             "Remove SendCertificateOverMtls or switch to a certificate credential.";
 
         public const string InternalCacheDisabledMessage =
-            "AcquireTokenSilent is not supported when the internal cache is disabled via CacheOptions.DisableInternalCache. " +
+            "AcquireTokenSilent is not supported when the internal cache is disabled via CacheOptions.DisableInternalCacheOptions. " +
             "For confidential client flows, retrieve the refresh token using AuthenticationResultExtensions.GetRefreshToken() and call AcquireTokenByRefreshToken, " +
             "or use another interactive flow.";
 
         public const string InternalCacheDisabledMutuallyExclusiveMessage =
-            "CacheOptions.InternalCacheDisabled and CacheOptions.UseSharedCache are mutually exclusive. " +
+            "CacheOptions.IsInternalCacheDisabled and CacheOptions.UseSharedCache are mutually exclusive. " +
             "Set only one of these options.";
     }
 }

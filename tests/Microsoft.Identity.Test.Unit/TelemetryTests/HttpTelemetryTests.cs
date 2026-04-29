@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -531,7 +531,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         }
 
         [TestMethod]
-        public async Task DisableInternalCache_AcquireTokenForClient_EmitsCacheDisabledTelemetry_Async()
+        public async Task DisableInternalCacheOptions_AcquireTokenForClient_EmitsCacheDisabledTelemetry_Async()
         {
             using (_harness = CreateTestHarness())
             {
@@ -542,7 +542,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithAuthority(TestConstants.AuthorityCommonTenant)
                     .WithHttpManager(_harness.HttpManager)
-                    .WithCacheOptions(CacheOptions.DisableInternalCache)
+                    .WithCacheOptions(CacheOptions.DisableInternalCacheOptions)
                     .BuildConcrete();
 
                 await cca.AcquireTokenForClient(TestConstants.s_scope)
@@ -553,7 +553,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         }
 
         [TestMethod]
-        public async Task DisableInternalCache_AcquireTokenOnBehalfOf_EmitsCacheDisabledTelemetry_Async()
+        public async Task DisableInternalCacheOptions_AcquireTokenOnBehalfOf_EmitsCacheDisabledTelemetry_Async()
         {
             using (_harness = CreateTestHarness())
             {
@@ -564,7 +564,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithAuthority(TestConstants.AuthorityCommonTenant)
                     .WithHttpManager(_harness.HttpManager)
-                    .WithCacheOptions(CacheOptions.DisableInternalCache)
+                    .WithCacheOptions(CacheOptions.DisableInternalCacheOptions)
                     .BuildConcrete();
 
                 await cca.AcquireTokenOnBehalfOf(TestConstants.s_scope, new UserAssertion(TestConstants.DefaultAccessToken))
@@ -575,7 +575,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         }
 
         [TestMethod]
-        public async Task DisableInternalCache_InitiateLongRunningObo_EmitsCacheDisabledTelemetry_Async()
+        public async Task DisableInternalCacheOptions_InitiateLongRunningObo_EmitsCacheDisabledTelemetry_Async()
         {
             using (_harness = CreateTestHarness())
             {
@@ -586,7 +586,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithAuthority(TestConstants.AuthorityCommonTenant)
                     .WithHttpManager(_harness.HttpManager)
-                    .WithCacheOptions(CacheOptions.DisableInternalCache)
+                    .WithCacheOptions(CacheOptions.DisableInternalCacheOptions)
                     .BuildConcrete();
 
                 var cacheKey = string.Empty;

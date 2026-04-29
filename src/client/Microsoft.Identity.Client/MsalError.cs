@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -1269,7 +1269,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// <para>What happened?</para> <see cref="IClientApplicationBase.AcquireTokenSilent(System.Collections.Generic.IEnumerable{string}, IAccount)"/> 
-        /// was called but MSAL's internal token cache is disabled via <see cref="CacheOptions.DisableInternalCache"/>.
+        /// was called but MSAL's internal token cache is disabled via <see cref="CacheOptions.DisableInternalCacheOptions"/>.
         /// <para>Mitigation</para> Use <see cref="IByRefreshToken.AcquireTokenByRefreshToken(System.Collections.Generic.IEnumerable{string}, string)"/> 
         /// with the refresh token obtained from <see cref="Extensibility.AuthenticationResultExtensions.GetRefreshToken(AuthenticationResult)"/>, 
         /// or use another interactive flow.

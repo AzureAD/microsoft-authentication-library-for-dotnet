@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 namespace Microsoft.Identity.Client
@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Client
         /// to re-acquire a token on subsequent requests, or use another interactive flow.
         /// </para>
         /// </summary>
-        public static CacheOptions DisableInternalCache => new CacheOptions { InternalCacheDisabled = true };
+        public static CacheOptions DisableInternalCacheOptions => new CacheOptions { IsInternalCacheDisabled = true };
 
         /// <summary>
         /// Constructor for the options with default values.
@@ -74,7 +74,7 @@ namespace Microsoft.Identity.Client
         /// This is intended for advanced scenarios where the caller manages its own token cache.
         /// Cannot be combined with <see cref="UseSharedCache"/>.
         /// </summary>
-        public bool InternalCacheDisabled { get; set; }
+        public bool IsInternalCacheDisabled { get; set; }
 
     }
 }

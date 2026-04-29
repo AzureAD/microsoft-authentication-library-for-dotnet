@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System.Collections.Generic;
@@ -50,31 +50,28 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             CacheRefreshReason cacheInfoTelemetry = CacheRefreshReason.NotApplicable;
 
+            if (ServiceBundle.Config.AccessorOptions?.IsInternalCacheDisabled == true)
+            {
+                AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.CacheDisabled;
+            }
+
             //Check if initiating a long running process
             if (AuthenticationRequestParameters.ApiId == ApiEvent.ApiIds.InitiateLongRunningObo && !_onBehalfOfParameters.SearchInCacheForLongRunningObo)
             {
                 //Long running OBO doesn't search in cache by default
                 logger.Info("[OBO Request] Initiating long running process. Fetching OBO token from ESTS.");
-
-                if (ServiceBundle.Config.AccessorOptions?.InternalCacheDisabled == true)
-                {
-                    AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.CacheDisabled;
-                }
-
                 return await FetchNewAccessTokenAsync(cancellationToken).ConfigureAwait(false);
             }
 
-            if (ServiceBundle.Config.AccessorOptions?.InternalCacheDisabled == true && _onBehalfOfParameters.UserAssertion != null)
+            if (ServiceBundle.Config.AccessorOptions?.IsInternalCacheDisabled == true && _onBehalfOfParameters.UserAssertion != null)
             {
-                AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.CacheDisabled;
                 return await FetchNewAccessTokenAsync(cancellationToken).ConfigureAwait(false);
             }
 
             // AcquireTokenInLongRunningProcess (UserAssertion == null) cannot go to the network
             // because there is no assertion to exchange. Surface the root cause directly.
-            if (ServiceBundle.Config.AccessorOptions?.InternalCacheDisabled == true)
+            if (ServiceBundle.Config.AccessorOptions?.IsInternalCacheDisabled == true)
             {
-                AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.CacheDisabled;
                 throw new MsalUiRequiredException(
                     MsalError.InternalCacheDisabled,
                     MsalErrorMessage.InternalCacheDisabledMessage,

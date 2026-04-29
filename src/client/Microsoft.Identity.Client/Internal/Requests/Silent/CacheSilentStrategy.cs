@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
             
             ThrowIfCurrentBrokerAccount();
 
-            if (ServiceBundle.Config.AccessorOptions?.InternalCacheDisabled == true)
+            if (ServiceBundle.Config.AccessorOptions?.IsInternalCacheDisabled == true)
             {
                 AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.CacheDisabled;
                 throw new MsalUiRequiredException(
