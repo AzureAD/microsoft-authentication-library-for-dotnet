@@ -36,7 +36,9 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         /// <summary>
         /// NON-PoP request:
         /// We may still need mTLS transport in two situations:
-        /// Case 1 – The app-level SendCertificateOverMtls option is set and the credential is a certificate.
+        /// Case 1 – The app-level SendCertificateOverMtls option is set and the credential is certificate-based
+        ///          (both static <see cref="CertificateClientCredential"/> and dynamic
+        ///          <see cref="DynamicCertificateClientCredential"/> are supported).
         /// Case 2 – The credential is a signed-assertion provider that returns a TokenBindingCertificate.
         /// </summary>
         private static async Task TryInitImplicitBearerOverMtlsAsync(
@@ -46,23 +48,31 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         {
             if (tokenParameters.MtlsCertificate != null)
             {
-                ThrowIfRegionMissingForImplicitMtls(serviceBundle);
                 return;
             }
 
-            // Case 1 – App opted into mTLS Bearer via SendCertificateOverMtls on a certificate credential.
+            // Case 1 – App opted into mTLS Bearer via SendCertificateOverMtls on a certificate-based credential.
+            // Supports both static (CertificateClientCredential) and dynamic (DynamicCertificateClientCredential)
+            // certificate credentials; the cert is resolved via the provider if needed.
             if (serviceBundle.Config.CertificateOptions?.SendCertificateOverMtls == true &&
-                serviceBundle.Config.ClientCredential is CertificateClientCredential certCred)
+                serviceBundle.Config.ClientCredential is CertificateAndClaimsClientCredential certBasedCred)
             {
-                if (certCred.Certificate == null)
+                // For static credentials the certificate is already cached; for dynamic credentials
+                // the provider delegate is invoked asynchronously.
+                X509Certificate2 cert = certBasedCred.Certificate
+                    ?? await certBasedCred.ResolveCertificateForMtlsAsync(
+                           CreateAssertionRequestOptions(tokenParameters, serviceBundle, ct),
+                           ct)
+                       .ConfigureAwait(false);
+
+                if (cert == null)
                 {
                     throw new MsalClientException(
                         MsalError.MtlsCertificateNotProvided,
                         MsalErrorMessage.MtlsCertificateNotProvidedMessage);
                 }
 
-                tokenParameters.MtlsCertificate = certCred.Certificate;
-                ThrowIfRegionMissingForImplicitMtls(serviceBundle);
+                tokenParameters.MtlsCertificate = cert;
                 return;
             }
 
@@ -77,7 +87,6 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
                 if (ar?.TokenBindingCertificate != null)
                 {
                     tokenParameters.MtlsCertificate = ar.TokenBindingCertificate;
-                    ThrowIfRegionMissingForImplicitMtls(serviceBundle);
                 }
             }
         }
@@ -164,29 +173,11 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
                         MsalError.MissingTenantedAuthority,
                         MsalErrorMessage.MtlsNonTenantedAuthorityNotAllowedMessage);
                 }
-
-                if (serviceBundle.Config.AzureRegion == null)
-                {
-                    throw new MsalClientException(
-                        MsalError.MtlsPopWithoutRegion,
-                        MsalErrorMessage.MtlsPopWithoutRegion);
-                }
             }
 
             p.AuthenticationOperation = new MtlsPopAuthenticationOperation(cert);
             p.MtlsCertificate = cert;
         }
 
-        private static void ThrowIfRegionMissingForImplicitMtls(IServiceBundle serviceBundle)
-        {
-            // Implicit bearer-over-mTLS requires region only for AAD
-            if (serviceBundle.Config.Authority.AuthorityInfo.AuthorityType == AuthorityType.Aad &&
-                serviceBundle.Config.AzureRegion == null)
-            {
-                throw new MsalClientException(
-                    MsalError.MtlsBearerWithoutRegion,
-                    MsalErrorMessage.MtlsBearerWithoutRegion);
-            }
-        }
     }
 }

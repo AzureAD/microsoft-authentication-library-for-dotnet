@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
@@ -475,12 +476,13 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         }
 
         [TestMethod]
-        [DeploymentItem(@"Resources\testCert.crtfile")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Internal.Analyzers", "IA5352:DoNotMisuseCryptographicApi", Justification = "Test only")]
         public void TestConstructor_WithCertificate_CertificateOptions_SendCertificateOverMtls_True()
         {
-            var cert = new X509Certificate2(
-                ResourceHelper.GetTestResourceRelativePath("testCert.crtfile"), TestConstants.TestPlaceholderCredential);
+            using var rsa = RSA.Create(2048);
+            var req = new CertificateRequest("CN=Test", rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+            using var cert = req.CreateSelfSigned(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddDays(1));
+
             var certificateOptions = new CertificateOptions { SendCertificateOverMtls = true };
 
             var app = ConfidentialClientApplicationBuilder
@@ -493,12 +495,13 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         }
 
         [TestMethod]
-        [DeploymentItem(@"Resources\testCert.crtfile")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Internal.Analyzers", "IA5352:DoNotMisuseCryptographicApi", Justification = "Test only")]
         public void TestConstructor_WithCertificate_CertificateOptions_SendCertificateOverMtls_False()
         {
-            var cert = new X509Certificate2(
-                ResourceHelper.GetTestResourceRelativePath("testCert.crtfile"), TestConstants.TestPlaceholderCredential);
+            using var rsa = RSA.Create(2048);
+            var req = new CertificateRequest("CN=Test", rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+            using var cert = req.CreateSelfSigned(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddDays(1));
+
             var certificateOptions = new CertificateOptions { SendCertificateOverMtls = false };
 
             var app = ConfidentialClientApplicationBuilder
@@ -506,7 +509,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                       .WithCertificate(cert, certificateOptions)
                       .Build();
 
-            Assert.IsFalse(app.AppConfig is ApplicationConfiguration config && (config.CertificateOptions?.SendCertificateOverMtls ?? false),
+            Assert.IsFalse((app.AppConfig as ApplicationConfiguration).CertificateOptions?.SendCertificateOverMtls ?? false,
                 "SendCertificateOverMtls should be false when not enabled.");
         }
 

@@ -330,11 +330,17 @@ namespace Microsoft.Identity.Client
         /// langword="null"/>.</param>
         /// <returns>The <see cref="ConfidentialClientApplicationBuilder"/> instance configured with the specified client
         /// assertion.</returns>
-        /// <exception cref="MsalClientException">Thrown if <paramref name="clientSignedAssertionProvider"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="clientSignedAssertionProvider"/> is <see langword="null"/>.</exception>
         public ConfidentialClientApplicationBuilder WithClientAssertion(Func<AssertionRequestOptions,
             CancellationToken, Task<ClientSignedAssertion>> clientSignedAssertionProvider)
         {
+            if (clientSignedAssertionProvider == null)
+            {
+                throw new ArgumentNullException(nameof(clientSignedAssertionProvider));
+            }
+
             ValidateUseOfExperimentalFeature();
+
             return WithClientAssertionInternal(
                 clientSignedAssertionProvider: clientSignedAssertionProvider);
         }
@@ -472,10 +478,10 @@ namespace Microsoft.Identity.Client
 
             ValidateAndUpdateRegion();
 
-            // SendCertificateOverMtls is only supported with the static
-            // WithCertificate(X509Certificate2, CertificateOptions) overload.
+            // SendCertificateOverMtls is only supported with certificate-based credentials
+            // (both static WithCertificate(X509Certificate2, ...) and dynamic WithCertificate(Func<...>, ...)).
             if (Config.CertificateOptions?.SendCertificateOverMtls == true
-                && Config.ClientCredential is not CertificateClientCredential)
+                && Config.ClientCredential is not CertificateAndClaimsClientCredential)
             {
                 throw new MsalClientException(
                     MsalError.InvalidCredentialMaterial,

@@ -456,9 +456,9 @@ namespace Microsoft.Identity.Client
         public const string MtlsPopTokenNotSupportedinImdsV1 = "mTLS Proof of Possession with managed identity is currently in private preview and is not supported on this VM. Ensure you're running on a supported VM image.";
         public const string ManagedIdentityAllSourcesUnavailable = "All Managed Identity sources are unavailable.";
         public const string SendCertificateOverMtlsRequiresCertificate =
-            "CertificateOptions.SendCertificateOverMtls requires the static " +
-            "WithCertificate(X509Certificate2, CertificateOptions) overload. " +
-            "Dynamic certificate providers and non-certificate credentials are not supported. " +
-            "Remove SendCertificateOverMtls or use the static certificate overload.";
+            "CertificateOptions.SendCertificateOverMtls is only valid with a certificate-based credential " +
+            "configured via WithCertificate(). Non-certificate credentials (client secrets, static signed " +
+            "assertions, and string-returning assertion delegates) are not supported. " +
+            "Remove SendCertificateOverMtls or switch to a certificate credential.";
     }
 }

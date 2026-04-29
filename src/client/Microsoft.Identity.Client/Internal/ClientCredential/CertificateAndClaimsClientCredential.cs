@@ -100,6 +100,47 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         }
 
         /// <summary>
+        /// Resolves the certificate for use as an mTLS transport credential, without building a full
+        /// JWT client assertion. Invokes the provider delegate (which may be a static lambda or a
+        /// true async callback) and validates the result.
+        /// Called by <see cref="Microsoft.Identity.Client.ApiConfig.Parameters.MtlsPopParametersInitializer"/>
+        /// for the implicit Bearer-over-mTLS path when
+        /// <see cref="AppConfig.CertificateOptions.SendCertificateOverMtls"/> is <see langword="true"/>.
+        /// </summary>
+        internal async Task<X509Certificate2> ResolveCertificateForMtlsAsync(
+            AssertionRequestOptions options,
+            CancellationToken cancellationToken)
+        {
+            X509Certificate2 certificate = await _certificateProvider(options).ConfigureAwait(false);
+
+            if (certificate == null)
+            {
+                throw new MsalClientException(
+                    MsalError.InvalidClientAssertion,
+                    "The certificate provider callback returned null. Ensure the callback returns a valid X509Certificate2 instance.");
+            }
+
+            try
+            {
+                if (!certificate.HasPrivateKey)
+                {
+                    throw new MsalClientException(
+                        MsalError.CertWithoutPrivateKey,
+                        MsalErrorMessage.CertMustHavePrivateKey(certificate.FriendlyName));
+                }
+            }
+            catch (System.Security.Cryptography.CryptographicException ex)
+            {
+                throw new MsalClientException(
+                    MsalError.CryptographicError,
+                    MsalErrorMessage.CryptographicError,
+                    ex);
+            }
+
+            return certificate;
+        }
+
+        /// <summary>
         /// Resolves the certificate to use for signing the client assertion.
         /// Invokes the certificate provider delegate to get the certificate.
         /// </summary>
