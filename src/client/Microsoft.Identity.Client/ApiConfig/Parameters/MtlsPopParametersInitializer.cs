@@ -52,27 +52,18 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
             }
 
             // Case 1 – App opted into mTLS Bearer via SendCertificateOverMtls on a certificate-based credential.
-            // Supports both static (CertificateClientCredential) and dynamic (DynamicCertificateClientCredential)
-            // certificate credentials; the cert is resolved via the provider if needed.
+            // Both static (CertificateClientCredential) and dynamic (DynamicCertificateClientCredential)
+            // credentials are supported; for dynamic credentials the provider delegate is invoked.
             if (serviceBundle.Config.CertificateOptions?.SendCertificateOverMtls == true &&
                 serviceBundle.Config.ClientCredential is CertificateAndClaimsClientCredential certBasedCred)
             {
-                // For static credentials the certificate is already cached; for dynamic credentials
-                // the provider delegate is invoked asynchronously.
-                X509Certificate2 cert = certBasedCred.Certificate
+                // Static credentials have Certificate set directly; dynamic credentials resolve
+                // via the provider delegate (which validates and throws on null/missing private key).
+                tokenParameters.MtlsCertificate = certBasedCred.Certificate
                     ?? await certBasedCred.ResolveCertificateForMtlsAsync(
-                           CreateAssertionRequestOptions(tokenParameters, serviceBundle, ct),
-                           ct)
+                           CreateAssertionRequestOptions(tokenParameters, serviceBundle, ct))
                        .ConfigureAwait(false);
 
-                if (cert == null)
-                {
-                    throw new MsalClientException(
-                        MsalError.MtlsCertificateNotProvided,
-                        MsalErrorMessage.MtlsCertificateNotProvidedMessage);
-                }
-
-                tokenParameters.MtlsCertificate = cert;
                 return;
             }
 

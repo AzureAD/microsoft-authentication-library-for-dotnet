@@ -108,34 +108,11 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         /// <see cref="AppConfig.CertificateOptions.SendCertificateOverMtls"/> is <see langword="true"/>.
         /// </summary>
         internal async Task<X509Certificate2> ResolveCertificateForMtlsAsync(
-            AssertionRequestOptions options,
-            CancellationToken cancellationToken)
+            AssertionRequestOptions options)
         {
             X509Certificate2 certificate = await _certificateProvider(options).ConfigureAwait(false);
 
-            if (certificate == null)
-            {
-                throw new MsalClientException(
-                    MsalError.InvalidClientAssertion,
-                    "The certificate provider callback returned null. Ensure the callback returns a valid X509Certificate2 instance.");
-            }
-
-            try
-            {
-                if (!certificate.HasPrivateKey)
-                {
-                    throw new MsalClientException(
-                        MsalError.CertWithoutPrivateKey,
-                        MsalErrorMessage.CertMustHavePrivateKey(certificate.FriendlyName));
-                }
-            }
-            catch (System.Security.Cryptography.CryptographicException ex)
-            {
-                throw new MsalClientException(
-                    MsalError.CryptographicError,
-                    MsalErrorMessage.CryptographicError,
-                    ex);
-            }
+            ValidateCertificate(certificate);
 
             return certificate;
         }
@@ -163,11 +140,22 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             // Invoke the provider to get the certificate
             X509Certificate2 certificate = await _certificateProvider(options).ConfigureAwait(false);
 
-            // Validate the certificate returned by the provider
+            ValidateCertificate(certificate);
+
+            context.Logger.Verbose(
+                () => $"[CertificateAndClaimsClientCredential] Certificate resolved. " +
+                      $"Thumbprint: {certificate.Thumbprint}");
+
+            return certificate;
+        }
+
+        /// <summary>
+        /// Validates that the certificate is non-null and has a private key.
+        /// </summary>
+        private static void ValidateCertificate(X509Certificate2 certificate)
+        {
             if (certificate == null)
             {
-                context.Logger.Error("[CertificateAndClaimsClientCredential] Certificate provider returned null.");
-
                 throw new MsalClientException(
                     MsalError.InvalidClientAssertion,
                     "The certificate provider callback returned null. Ensure the callback returns a valid X509Certificate2 instance.");
@@ -177,8 +165,6 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             {
                 if (!certificate.HasPrivateKey)
                 {
-                    context.Logger.Error("[CertificateAndClaimsClientCredential] The certificate does not have a private key.");
-
                     throw new MsalClientException(
                         MsalError.CertWithoutPrivateKey,
                         MsalErrorMessage.CertMustHavePrivateKey(certificate.FriendlyName));
@@ -186,19 +172,11 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             }
             catch (System.Security.Cryptography.CryptographicException ex)
             {
-                context.Logger.Error("[CertificateAndClaimsClientCredential] A cryptographic error occurred while accessing the certificate.");
-
                 throw new MsalClientException(
                     MsalError.CryptographicError,
                     MsalErrorMessage.CryptographicError,
                     ex);
             }
-
-            context.Logger.Verbose(
-                () => $"[CertificateAndClaimsClientCredential] Certificate resolved. " +
-                      $"Thumbprint: {certificate.Thumbprint}");
-
-            return certificate;
         }
     }
 }

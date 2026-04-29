@@ -2,7 +2,6 @@
 ======
 
 ### New Features
-- Added `CertificateOptions.SendCertificateOverMtls` to support mTLS Bearer token acquisition. When set to `true`, the certificate is sent in the TLS handshake instead of as a JWT assertion in the request body. Both static (`WithCertificate(X509Certificate2, ...)`) and dynamic (`WithCertificate(Func<...>, ...)`) certificate credentials are supported. [#5848](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5848)
 - Added support for User Federated Identity Credential (UserFIC) scenarios through the `IByUserFederatedIdentityCredential` interface and `user_fic` grant type. [#5802](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5802)
 
 ### Changes
