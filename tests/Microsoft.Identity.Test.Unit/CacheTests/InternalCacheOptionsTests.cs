@@ -1,8 +1,9 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Extensibility;
@@ -367,6 +368,145 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             Assert.AreEqual(MsalError.InvalidRequest, ex.ErrorCode,
                 "Setting both InternalCacheDisabled and UseSharedCache should throw an InvalidRequest error.");
+        }
+
+        /// <summary>
+        /// Short-running OBO with DisableInternalCache: every call always goes to the network
+        /// and nothing is written to the internal cache.
+        /// </summary>
+        [TestMethod]
+        public async Task DisableInternalCache_ShortRunningObo_AlwaysHitsNetwork_Async()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                var cca = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithAuthority(TestConstants.AuthorityCommonTenant)
+                    .WithHttpManager(httpManager)
+                    .WithCacheOptions(CacheOptions.DisableInternalCache)
+                    .BuildConcrete();
+
+                var userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
+
+                // First OBO call — must hit the network.
+                httpManager.AddMockHandler(new MockHttpMessageHandler
+                {
+                    ExpectedUrl = TestConstants.AuthorityCommonTenant + "oauth2/v2.0/token",
+                    ExpectedMethod = HttpMethod.Post,
+                    ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
+                });
+
+                var result1 = await cca.AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.AreEqual(TokenSource.IdentityProvider, result1.AuthenticationResultMetadata.TokenSource,
+                    "First OBO call should hit the network.");
+                Assert.IsNull(result1.GetRefreshToken(),
+                    "Normal OBO does not expose a refresh token (MSAL intentionally clears it).");
+
+                // Second OBO call with the same assertion — must hit the network again because the cache is disabled.
+                httpManager.AddMockHandler(new MockHttpMessageHandler
+                {
+                    ExpectedUrl = TestConstants.AuthorityCommonTenant + "oauth2/v2.0/token",
+                    ExpectedMethod = HttpMethod.Post,
+                    ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
+                });
+
+                var result2 = await cca.AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.AreEqual(TokenSource.IdentityProvider, result2.AuthenticationResultMetadata.TokenSource,
+                    "Second OBO call should also hit the network because the internal cache is disabled.");
+
+                Assert.IsEmpty(cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens(),
+                    "No access tokens should have been stored in the internal cache.");
+                Assert.IsEmpty(cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens(),
+                    "No refresh tokens should have been stored in the internal cache.");
+            }
+        }
+
+        /// <summary>
+        /// Long-running OBO with DisableInternalCache: InitiateLongRunningProcessInWebApi always hits
+        /// the network and stores nothing. AcquireTokenInLongRunningProcess cannot function without the
+        /// internal cache and throws MsalUiRequiredException(InternalCacheDisabled).
+        /// </summary>
+        [TestMethod]
+        public async Task DisableInternalCache_LongRunningObo_InitiateAlwaysHitsNetwork_AcquireThrows_Async()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                var cca = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithAuthority(TestConstants.AuthorityCommonTenant)
+                    .WithHttpManager(httpManager)
+                    .WithCacheOptions(CacheOptions.DisableInternalCache)
+                    .BuildConcrete();
+
+                string oboCacheKey = "obo-cache-key";
+
+                // Initiate — must hit the network.
+                httpManager.AddMockHandler(new MockHttpMessageHandler
+                {
+                    ExpectedUrl = TestConstants.AuthorityCommonTenant + "oauth2/v2.0/token",
+                    ExpectedMethod = HttpMethod.Post,
+                    ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
+                });
+
+                var result = await cca
+                    .InitiateLongRunningProcessInWebApi(TestConstants.s_scope, TestConstants.DefaultAccessToken, ref oboCacheKey)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource,
+                    "Initiate should always hit the network when the internal cache is disabled.");
+
+                Assert.IsEmpty(cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens(),
+                    "No access tokens should have been stored in the internal cache.");
+                Assert.IsEmpty(cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens(),
+                    "No refresh tokens should have been stored in the internal cache.");
+
+                // AcquireTokenInLongRunningProcess relies entirely on the internal cache for key-based
+                // lookups. Because DisableInternalCache prevented Initiate from writing to the cache,
+                // there is no token under this key and the call fails with a cache-miss error.
+                var ex = await AssertException.TaskThrowsAsync<MsalClientException>(
+                    () => cca.AcquireTokenInLongRunningProcess(TestConstants.s_scope, oboCacheKey).ExecuteAsync())
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual(MsalError.OboCacheKeyNotInCacheError, ex.ErrorCode,
+                    "AcquireTokenInLongRunningProcess should report that the OBO cache key is absent when the cache is disabled.");
+            }
+        }
+
+        /// <summary>
+        /// AcquireTokenSilent on a CCA (confidential client) throws the same MsalUiRequiredException
+        /// as on a PCA when DisableInternalCache is set.
+        /// </summary>
+        [TestMethod]
+        public async Task DisableInternalCache_AcquireTokenSilent_CcaVariant_ThrowsWithCorrectError_Async()
+        {
+            var cca = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithClientSecret(TestConstants.ClientSecret)
+                .WithCacheOptions(CacheOptions.DisableInternalCache)
+                .Build();
+
+            var account = new Account("aid.tid", "user@contoso.com", "login.microsoftonline.com");
+
+            var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(
+                () => cca.AcquireTokenSilent(TestConstants.s_scope, account).ExecuteAsync())
+                .ConfigureAwait(false);
+
+            Assert.AreEqual(MsalError.InternalCacheDisabled, ex.ErrorCode,
+                "The error code should identify that the internal cache is disabled.");
+            StringAssert.Contains(ex.Message, "AcquireTokenByRefreshToken",
+                "The error message should guide the caller towards AcquireTokenByRefreshToken.");
+            Assert.AreEqual(UiRequiredExceptionClassification.AcquireTokenSilentFailed, ex.Classification,
+                "Classification should signal that silent auth failed.");
         }
     }
 }

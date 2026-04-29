@@ -44,52 +44,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
-        public async Task DisableInternalCache_NormalOboFlow_DoesNotExposeRefreshToken_Async()
-        {
-            // Arrange: get lab user + app configs
-            var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
-            var pcaAppConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
-            var ccaAppConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppWebApi).ConfigureAwait(false);
-
-            // Step 1: get a user access token via ROPC on a PCA (scoped to the web API)
-            var pcaForRopc = PublicClientApplicationBuilder
-                .Create(pcaAppConfig.AppId)
-                .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
-                .Build();
-
-#pragma warning disable CS0618
-            var userResult = await pcaForRopc
-                .AcquireTokenByUsernamePassword(new[] { ccaAppConfig.DefaultScopes }, user.Upn, user.GetOrFetchPassword())
-                .ExecuteAsync()
-                .ConfigureAwait(false);
-#pragma warning restore CS0618
-
-            // Step 2: exchange the user token via OBO on a CCA with internal cache disabled
-            var ccaWithDisabledCache = ConfidentialClientApplicationBuilder
-                .Create(ccaAppConfig.AppId)
-                .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
-                .WithClientSecret(_confidentialClientSecret)
-                .WithCacheOptions(CacheOptions.DisableInternalCache)
-                .WithTestLogging()
-                .Build();
-
-            var result = await ccaWithDisabledCache
-                .AcquireTokenOnBehalfOf(s_scopes, new UserAssertion(userResult.AccessToken))
-                .ExecuteAsync()
-                .ConfigureAwait(false);
-
-            // Assert: normal OBO does not expose a refresh token (MSAL intentionally clears it
-            // in OnBehalfOfRequest.FetchNewAccessTokenAsync for non-long-running OBO) and cache is empty.
-            string rt = result.GetRefreshToken();
-            Assert.IsNull(rt, "GetRefreshToken() should return null for the normal confidential client OBO flow.");
-
-#pragma warning disable CS0618
-            var accounts = await ccaWithDisabledCache.GetAccountsAsync().ConfigureAwait(false);
-#pragma warning restore CS0618
-            Assert.IsFalse(accounts.Any(), "No accounts should be stored in cache when InternalCacheDisabled is set.");
-        }
-
-        [TestMethod]
         public async Task SilentAuth_ForceRefresh_Async()
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
