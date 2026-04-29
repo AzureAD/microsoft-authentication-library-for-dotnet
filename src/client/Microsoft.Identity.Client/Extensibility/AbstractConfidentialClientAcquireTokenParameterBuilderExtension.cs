@@ -53,6 +53,11 @@ namespace Microsoft.Identity.Client.Extensibility
         /// <param name="attributeTokens">Attribute tokens to include. Individual tokens must not contain whitespace.</param>
         /// <returns>The builder to chain method calls.</returns>
         /// <exception cref="ArgumentException">Thrown when any token contains embedded whitespace.</exception>
+        /// <exception cref="MsalClientException">
+        /// Thrown when the application was not configured to allow experimental features
+        /// (this method transitively calls <see cref="WithExtraBodyParameters{T}"/>, which requires
+        /// experimental features to be enabled via <c>WithExperimentalFeatures()</c> on the application builder).
+        /// </exception>
         public static T WithAttributeTokens<T>(
             this AbstractConfidentialClientAcquireTokenParameterBuilder<T> builder,
             IEnumerable<string> attributeTokens)
@@ -89,8 +94,10 @@ namespace Microsoft.Identity.Client.Extensibility
                 return (T)builder;
             }
 
-            // Sort so that callers passing the same set of tokens in different orders
-            // hit the same cache entry and produce the same request body.
+            // Deduplicate and sort so that callers passing the same logical set of tokens
+            // (in any order, with possible duplicates) hit the same cache entry and
+            // produce the same request body.
+            normalizedTokens = normalizedTokens.Distinct(StringComparer.Ordinal).ToList();
             normalizedTokens.Sort(StringComparer.Ordinal);
 
             string joinedTokens = string.Join(" ", normalizedTokens);
