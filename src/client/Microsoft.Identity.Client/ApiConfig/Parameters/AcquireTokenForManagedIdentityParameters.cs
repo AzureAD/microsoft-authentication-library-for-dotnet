@@ -31,8 +31,9 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         /// <summary>
         /// Optional delegate for obtaining attestation JWT for Credential Guard keys.
         /// Set by the KeyAttestation package via .WithAttestationSupport().
+        /// Signature: (endpoint, keyHandle, clientId, keyId, logger, cancellationToken) → JWT or null.
         /// </summary>
-        public Func<string, SafeHandle, string, CancellationToken, Task<string>> AttestationTokenProvider { get; set; }
+        public Func<string, SafeHandle, string, string, ILoggerAdapter, CancellationToken, Task<string>> AttestationTokenProvider { get; set; }
 
         public void LogParameters(ILoggerAdapter logger)
         {
