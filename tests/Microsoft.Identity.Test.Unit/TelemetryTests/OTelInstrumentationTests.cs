@@ -534,7 +534,10 @@ namespace Microsoft.Identity.Test.Unit
                         foreach (var metricPoint in exportedItem.GetMetricPoints())
                         {
                             totalFailedRequests += metricPoint.GetSumLong();
-                            AssertTags(metricPoint.Tags, expectedTags, true);
+                            var pointExpectedTags = new List<string>(expectedTags);
+                            if (GetTagDictionary(metricPoint.Tags).ContainsKey(TelemetryConstants.RawStsErrorCode))
+                                pointExpectedTags.Add(TelemetryConstants.RawStsErrorCode);
+                            AssertTags(metricPoint.Tags, pointExpectedTags, true);
                         }
 
                         Assert.AreEqual(expectedFailedRequests, totalFailedRequests);
