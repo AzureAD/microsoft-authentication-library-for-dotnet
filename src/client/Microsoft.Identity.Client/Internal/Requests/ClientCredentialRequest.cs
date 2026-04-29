@@ -51,6 +51,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
             AuthenticationResult authResult;
 
+            if (ServiceBundle.Config.AccessorOptions?.InternalCacheDisabled == true)
+            {
+                AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.CacheDisabled;
+                return await GetAccessTokenAsync(cancellationToken, logger).ConfigureAwait(false);
+            }
+
             // Skip cache if either:
             // 1) ForceRefresh is set, or
             // 2) Claims are specified and there is no AccessTokenHashToRefresh.

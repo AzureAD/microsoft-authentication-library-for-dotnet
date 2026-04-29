@@ -27,6 +27,10 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// When the token request goes to the identity provider because refresh_in was used and the existing token needs to be refreshed
         /// </summary>
-        ProactivelyRefreshed = 4
+        ProactivelyRefreshed = 4,
+        /// <summary>
+        /// When the token request goes to the identity provider because the internal token cache has been disabled via <see cref="CacheOptions.DisableInternalCache"/>.
+        /// </summary>
+        CacheDisabled = 5
     }
 }

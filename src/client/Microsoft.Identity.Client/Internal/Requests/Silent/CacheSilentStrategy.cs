@@ -44,6 +44,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
 
             if (ServiceBundle.Config.AccessorOptions?.InternalCacheDisabled == true)
             {
+                AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.CacheDisabled;
                 throw new MsalUiRequiredException(
                     MsalError.InternalCacheDisabled,
                     MsalErrorMessage.InternalCacheDisabledMessage,

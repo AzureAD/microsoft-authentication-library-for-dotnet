@@ -287,8 +287,12 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 Assert.AreEqual(TokenSource.IdentityProvider, result1.AuthenticationResultMetadata.TokenSource,
                     "First call should come from the network, not the cache.");
+                Assert.AreEqual(CacheRefreshReason.CacheDisabled, result1.AuthenticationResultMetadata.CacheRefreshReason,
+                    "CacheRefreshReason should be CacheDisabled when the internal cache is disabled.");
                 Assert.AreEqual(TokenSource.IdentityProvider, result2.AuthenticationResultMetadata.TokenSource,
                     "Second call should also come from the network because the internal cache is disabled.");
+                Assert.AreEqual(CacheRefreshReason.CacheDisabled, result2.AuthenticationResultMetadata.CacheRefreshReason,
+                    "CacheRefreshReason should be CacheDisabled when the internal cache is disabled.");
 
                 Assert.IsEmpty(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens(),
                     "No access tokens should have been stored in the internal cache.");
@@ -404,6 +408,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 Assert.AreEqual(TokenSource.IdentityProvider, result1.AuthenticationResultMetadata.TokenSource,
                     "First OBO call should hit the network.");
+                Assert.AreEqual(CacheRefreshReason.CacheDisabled, result1.AuthenticationResultMetadata.CacheRefreshReason,
+                    "CacheRefreshReason should be CacheDisabled for OBO when the internal cache is disabled.");
                 Assert.IsNull(result1.GetRefreshToken(),
                     "Normal OBO does not expose a refresh token (MSAL intentionally clears it).");
 
@@ -420,6 +426,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 Assert.AreEqual(TokenSource.IdentityProvider, result2.AuthenticationResultMetadata.TokenSource,
                     "Second OBO call should also hit the network because the internal cache is disabled.");
+                Assert.AreEqual(CacheRefreshReason.CacheDisabled, result2.AuthenticationResultMetadata.CacheRefreshReason,
+                    "CacheRefreshReason should be CacheDisabled for OBO when the internal cache is disabled.");
 
                 Assert.IsEmpty(cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens(),
                     "No access tokens should have been stored in the internal cache.");
@@ -464,6 +472,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource,
                     "Initiate should always hit the network when the internal cache is disabled.");
+                Assert.AreEqual(CacheRefreshReason.CacheDisabled, result.AuthenticationResultMetadata.CacheRefreshReason,
+                    "CacheRefreshReason should be CacheDisabled for long-running OBO when the internal cache is disabled.");
 
                 Assert.IsEmpty(cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens(),
                     "No access tokens should have been stored in the internal cache.");

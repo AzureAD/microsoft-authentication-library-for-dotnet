@@ -55,6 +55,18 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 //Long running OBO doesn't search in cache by default
                 logger.Info("[OBO Request] Initiating long running process. Fetching OBO token from ESTS.");
+
+                if (ServiceBundle.Config.AccessorOptions?.InternalCacheDisabled == true)
+                {
+                    AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.CacheDisabled;
+                }
+
+                return await FetchNewAccessTokenAsync(cancellationToken).ConfigureAwait(false);
+            }
+
+            if (ServiceBundle.Config.AccessorOptions?.InternalCacheDisabled == true && _onBehalfOfParameters.UserAssertion != null)
+            {
+                AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.CacheDisabled;
                 return await FetchNewAccessTokenAsync(cancellationToken).ConfigureAwait(false);
             }
 
