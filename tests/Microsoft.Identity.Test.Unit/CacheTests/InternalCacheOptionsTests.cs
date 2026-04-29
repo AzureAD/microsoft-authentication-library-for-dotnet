@@ -204,6 +204,18 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.IsFalse(defaults.IsInternalCacheDisabled, "Default CacheOptions should have IsInternalCacheDisabled == false");
         }
 
+        /// <summary>CacheOptions.IsDisabledFor is null-safe and returns the correct value for all inputs.</summary>
+        [TestMethod]
+        public void CacheOptions_IsDisabledFor_NullSafeAndCorrect()
+        {
+            Assert.IsFalse(CacheOptions.IsDisabledFor(null),
+                "IsDisabledFor(null) should return false — null options means cache is not disabled.");
+            Assert.IsFalse(CacheOptions.IsDisabledFor(new CacheOptions()),
+                "IsDisabledFor(default CacheOptions) should return false.");
+            Assert.IsTrue(CacheOptions.IsDisabledFor(CacheOptions.DisableInternalCacheOptions),
+                "IsDisabledFor(DisableInternalCacheOptions) should return true.");
+        }
+
         /// <summary>GetRefreshToken() extension returns the refresh token from a real token flow.</summary>
         [TestMethod]
         public async Task GetRefreshToken_AcquireTokenByAuthCode_ReturnsToken_Async()
@@ -482,8 +494,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         /// <summary>
         /// Long-running OBO with DisableInternalCacheOptions: InitiateLongRunningProcessInWebApi always hits
         /// the network and stores nothing. AcquireTokenInLongRunningProcess cannot go to the network
-        /// (no user assertion to exchange) and throws MsalUiRequiredException(IsInternalCacheDisabled)
-        /// to surface the root cause directly.
+        /// (no user assertion to exchange) and throws MsalUiRequiredException with error code
+        /// MsalError.InternalCacheDisabled to surface the root cause directly.
         /// </summary>
         [TestMethod]
         public async Task DisableInternalCacheOptions_LongRunningObo_InitiateAlwaysHitsNetwork_AcquireThrows_Async()
