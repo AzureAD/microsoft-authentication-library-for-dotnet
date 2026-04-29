@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
@@ -14,7 +13,7 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Test.Common.Core.Helpers;
-using Microsoft.Identity.Test.Unit;
+
 
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
 {
@@ -30,17 +29,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         private IPublicClientApplication pca = null;
 
-        private string _confidentialClientSecret;
-        private readonly KeyVaultSecretsProvider _keyVault = new KeyVaultSecretsProvider(KeyVaultInstance.MsalTeam);
-
         [TestInitialize]
         public void TestInitialize()
         {
             ApplicationBase.ResetStateForTest();
-            if (string.IsNullOrEmpty(_confidentialClientSecret))
-            {
-                _confidentialClientSecret = _keyVault.GetSecretByName(TestConstants.MsalOBOKeyVaultSecretName).Value;
-            }
         }
 
         [TestMethod]
