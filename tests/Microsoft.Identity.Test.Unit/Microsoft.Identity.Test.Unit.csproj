@@ -3,8 +3,10 @@
   <PropertyGroup>
     <TargetFrameworkNetDesktop48>net48</TargetFrameworkNetDesktop48>
     <TargetFrameworkNet>net8.0</TargetFrameworkNet>
+    <TargetFrameworkNetDesktop462>net462</TargetFrameworkNetDesktop462>
+    <TargetFrameworkNetDesktop472>net472</TargetFrameworkNetDesktop472>
 
-    <TargetFrameworks>$(TargetFrameworkNetDesktop48);$(TargetFrameworkNet)</TargetFrameworks>
+    <TargetFrameworks>$(TargetFrameworkNetDesktop48);$(TargetFrameworkNet);$(TargetFrameworkNetDesktop462);$(TargetFrameworkNetDesktop472)</TargetFrameworks>
     <IsPackable>false</IsPackable>
 
     <Configurations>Debug;Release;Debug + MobileApps</Configurations>
@@ -13,7 +15,7 @@
 </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\client\Microsoft.Identity.Client.Desktop\Microsoft.Identity.Client.Desktop.csproj" Condition="$(TargetFramework)==$(TargetFrameworkNetDesktop48)" />
+    <ProjectReference Include="..\..\src\client\Microsoft.Identity.Client.Desktop\Microsoft.Identity.Client.Desktop.csproj" Condition="$(TargetFramework)==$(TargetFrameworkNetDesktop48) Or $(TargetFramework)==$(TargetFrameworkNetDesktop462)" />
     <ProjectReference Include="..\..\src\client\Microsoft.Identity.Client.Broker\Microsoft.Identity.Client.Broker.csproj" />
     <ProjectReference Include="..\..\src\client\Microsoft.Identity.Client.Extensions.Msal\Microsoft.Identity.Client.Extensions.Msal.csproj" />
     <ProjectReference Include="..\..\src\client\Microsoft.Identity.Client.KeyAttestation\Microsoft.Identity.Client.KeyAttestation.csproj" />
@@ -59,12 +61,36 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
 
+  </ItemGroup>
 
+  <!-- net472 doesn't have Microsoft.Identity.Client.Desktop (targets net462 only), exclude WebView2 test that needs it -->
+  <!-- Also exclude ClientCredentialWithCertTest which uses GetCertHash(HashAlgorithmName) added in net48 -->
+  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop472)'">
+    <Compile Remove="WebUITests\WebView2WebUiFactoryTests.cs" />
+    <Compile Remove="PublicApiTests\ClientCredentialWithCertTest.cs" />
+  </ItemGroup>
+
+  <!-- net462 lacks CertificateRequest / ECCurve (added in 4.7.1/4.7.2); exclude those test files -->
+  <!-- Also excludes ManagedIdentityTests\ entirely because ImdsV2 is unsupported on net462 -->
+  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop462)'">
+    <Compile Remove="Helpers\CertHelper.cs" />
+    <Compile Remove="CryptographyTests.cs" />
+    <Compile Remove="CoreTests\HttpTests\HttpClientFactoryTests.cs" />
+    <Compile Remove="CoreTests\HttpTests\HttpManagerTests.cs" />
+    <Compile Remove="ExceptionTests\ExperimentalFeatureTests.cs" />
+    <Compile Remove="ManagedIdentityTests\**" />
+    <Compile Remove="PublicApiTests\ClientAssertionTests.cs" />
+    <Compile Remove="PublicApiTests\ClientCredentialWithCertTest.cs" />
+    <Compile Remove="PublicApiTests\ConfidentialClientApplicationExtensibilityTests.cs" />
+    <Compile Remove="PublicApiTests\ConfidentialClientApplicationTests.cs" />
+    <Compile Remove="PublicApiTests\MtlsPopTests.cs" />
+    <Compile Remove="RequestsTests\CredentialMatrixTests.cs" />
+    <Compile Remove="WebUITests\WebView2WebUiFactoryTests.cs" />
   </ItemGroup>
 
   <Import Project="../../build/platform_and_feature_flags.props" />
 
-  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop48)'">
+  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop48)' Or '$(TargetFramework)' == '$(TargetFrameworkNetDesktop462)' Or '$(TargetFramework)' == '$(TargetFrameworkNetDesktop472)'">
     <PackageReference Include="System.Windows.Forms" />
   </ItemGroup>
 
