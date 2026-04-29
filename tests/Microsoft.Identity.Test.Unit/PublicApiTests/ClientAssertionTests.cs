@@ -1033,6 +1033,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 var app = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
                     .WithAuthority(TestConstants.AuthorityTestTenant)
+                    .WithExperimentalFeatures(true)
                     .WithHttpManager(httpManager)
                     .WithClientAssertion((AssertionRequestOptions o, CancellationToken ct) =>
                     {
