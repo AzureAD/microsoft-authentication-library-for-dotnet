@@ -11,7 +11,7 @@ namespace Microsoft.Identity.Client.Extensibility
         /// <summary>
         /// Returns the refresh token from the authentication result, if available.
         /// This is intended for advanced scenarios where the caller manages its own token cache,
-        /// for example when using <see cref="CacheOptions.DisableInternalCacheOptions"/>.
+        /// for example when using <see cref="Microsoft.Identity.Client.CacheOptions.DisableInternalCacheOptions"/>.
         /// </summary>
         /// <param name="result">The authentication result.</param>
         /// <returns>
