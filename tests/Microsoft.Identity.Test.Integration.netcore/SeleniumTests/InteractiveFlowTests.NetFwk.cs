@@ -138,7 +138,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         public async Task Interactive_Adfs_DirectAsync()
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserFederated).ConfigureAwait(false);
-            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppAdfsNativeClient).ConfigureAwait(false);
             await RunTestForUserAsync(user, app, true).ConfigureAwait(false);
         }      
 
@@ -216,9 +216,11 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             }
             else
             {
+                // Use a dynamic port to avoid conflicts when this test runs in parallel with Interactive_Adfs_DirectAsync,
+                // which also listens on http://localhost:52073. AAD public client apps accept any http://localhost:{port}.
                 pca = PublicClientApplicationBuilder
                     .Create(app.AppId)
-                    .WithRedirectUri("http://localhost:52073")
+                    .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
                     .WithAuthority(app.Authority + "common")
                     .WithTestLogging(out factory)
                     .Build();
