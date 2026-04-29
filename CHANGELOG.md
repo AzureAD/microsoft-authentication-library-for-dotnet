@@ -5,6 +5,7 @@
 - Added support for User Federated Identity Credential (UserFIC) scenarios through the `IByUserFederatedIdentityCredential` interface and `user_fic` grant type. [#5802](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5802)
 
 ### Changes
+- Graduated `WithClientAssertion(Func<AssertionRequestOptions, CancellationToken, Task<ClientSignedAssertion>>)` from experimental to GA. This overload no longer requires `.WithExperimentalFeatures(true)`. [#5945](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5945)
 - Updated NativeInterop to version 0.20.3. [#5866](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5866)
 
 ### Bug Fixes

@@ -479,6 +479,29 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
+        public void ClientAssertion_NullClientSignedAssertionProvider_ThrowsArgumentNullException()
+        {
+            Func<AssertionRequestOptions, CancellationToken, Task<ClientSignedAssertion>> provider = null;
+
+            // Null check must occur before ValidateUseOfExperimentalFeature(), so passing null
+            // without enabling experimental features should still surface ArgumentNullException
+            // rather than MsalClientException.
+            var ex = AssertException.Throws<ArgumentNullException>(() =>
+                ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithClientAssertion(provider));
+
+            Assert.AreEqual("clientSignedAssertionProvider", ex.ParamName);
+
+            // Also verify the same when experimental features are explicitly enabled.
+            var ex2 = AssertException.Throws<ArgumentNullException>(() =>
+                ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithExperimentalFeatures(true)
+                    .WithClientAssertion(provider));
+
+            Assert.AreEqual("clientSignedAssertionProvider", ex2.ParamName);
+        }
+
+        [TestMethod]
         public async Task ClientAssertion_CancellationTokenPropagatesAsync()
         {
             using var cts = new CancellationTokenSource();
@@ -1005,7 +1028,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 var app = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
                     .WithAuthority(TestConstants.AuthorityTestTenant)
-                    .WithExperimentalFeatures(true)
                     .WithHttpManager(httpManager)
                     .WithClientAssertion((AssertionRequestOptions o, CancellationToken ct) =>
                     {

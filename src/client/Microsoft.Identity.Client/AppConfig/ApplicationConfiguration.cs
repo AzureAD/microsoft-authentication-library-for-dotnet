@@ -158,7 +158,7 @@ namespace Microsoft.Identity.Client
         {
             get
             {
-                if (ClientCredential is SecretStringClientCredential secretCred)
+                if (ClientCredential is ClientSecretCredential secretCred)
                 {
                     return secretCred.Secret;
                 }

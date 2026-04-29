@@ -233,7 +233,7 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(clientSecret));
             }
 
-            Config.ClientCredential = new SecretStringClientCredential(clientSecret);
+            Config.ClientCredential = new ClientSecretCredential(clientSecret);
             return this;
         }
 
@@ -329,10 +329,15 @@ namespace Microsoft.Identity.Client
         /// langword="null"/>.</param>
         /// <returns>The <see cref="ConfidentialClientApplicationBuilder"/> instance configured with the specified client
         /// assertion.</returns>
-        /// <exception cref="MsalClientException">Thrown if <paramref name="clientSignedAssertionProvider"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="clientSignedAssertionProvider"/> is <see langword="null"/>.</exception>
         public ConfidentialClientApplicationBuilder WithClientAssertion(Func<AssertionRequestOptions,
             CancellationToken, Task<ClientSignedAssertion>> clientSignedAssertionProvider)
         {
+            if (clientSignedAssertionProvider == null)
+            {
+                throw new ArgumentNullException(nameof(clientSignedAssertionProvider));
+            }
+
             return WithClientAssertionInternal(
                 clientSignedAssertionProvider: clientSignedAssertionProvider);
         }
