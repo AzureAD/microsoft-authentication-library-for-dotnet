@@ -52,6 +52,22 @@ namespace Microsoft.Identity.Client.Extensibility
         /// <param name="builder">The builder to chain options to.</param>
         /// <param name="attributeTokens">Attribute tokens to include. Individual tokens must not contain whitespace.</param>
         /// <returns>The builder to chain method calls.</returns>
+        /// <remarks>
+        /// <para>
+        /// For <c>AcquireTokenForClient</c> the <c>attribute_tokens</c> set is part of the cache
+        /// partition key, so different sets are fully isolated.
+        /// </para>
+        /// <para>
+        /// For <c>AcquireTokenOnBehalfOf</c> the partition key is the user assertion hash; the
+        /// <c>attribute_tokens</c> set is stored as an item-level cache component within that
+        /// partition. Multiple variants for the same assertion coexist and are disambiguated on
+        /// read only when the caller supplies the same <c>WithAttributeTokens</c> set.
+        /// <b>Mixing attributed and non-attributed reads against the same user assertion can
+        /// return unintended cache entries or fail with <c>multiple_matching_tokens_detected</c>.</b>
+        /// Be consistent: if you used <c>WithAttributeTokens</c> on a write, use it on every
+        /// subsequent read for that assertion.
+        /// </para>
+        /// </remarks>
         /// <exception cref="ArgumentException">Thrown when any token contains embedded whitespace.</exception>
         /// <exception cref="MsalClientException">
         /// Thrown when the application was not configured to allow experimental features
