@@ -52,13 +52,10 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
             }
 
             // Case 1 – App opted into mTLS Bearer via SendCertificateOverMtls on a certificate-based credential.
-            // Both static (CertificateClientCredential) and dynamic (DynamicCertificateClientCredential)
-            // credentials are supported; for dynamic credentials the provider delegate is invoked.
             if (serviceBundle.Config.CertificateOptions?.SendCertificateOverMtls == true &&
                 serviceBundle.Config.ClientCredential is CertificateAndClaimsClientCredential certBasedCred)
             {
-                // Static credentials have Certificate set directly; dynamic credentials resolve
-                // via the provider delegate (which validates and throws on null/missing private key).
+                // Static credentials have Certificate set directly
                 tokenParameters.MtlsCertificate = certBasedCred.Certificate
                     ?? await certBasedCred.ResolveCertificateForMtlsAsync(
                            CreateAssertionRequestOptions(tokenParameters, serviceBundle, ct))
