@@ -472,8 +472,10 @@ namespace Microsoft.Identity.Client
 
             ValidateAndUpdateRegion();
 
-            if (Config.CertificateOptions?.SendCertificateOverMtls == true &&
-                Config.ClientCredential is not CertificateClientCredential)
+            // SendCertificateOverMtls is only supported with the static
+            // WithCertificate(X509Certificate2, CertificateOptions) overload.
+            if (Config.CertificateOptions?.SendCertificateOverMtls == true
+                && Config.ClientCredential is not CertificateClientCredential)
             {
                 throw new MsalClientException(
                     MsalError.InvalidCredentialMaterial,

@@ -316,13 +316,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             StringAssert.Contains(authResult.AuthenticationResultMetadata.TokenEndpoint, "mtlsauth",
                 "SendCertificateOverMtls should route through the mTLS regional endpoint.");
 
-            // Simulate cache retrieval
-            authResult = await confidentialApp
+            // Verify cache retrieval still works with mTLS Bearer configuration
+            AuthenticationResult cachedResult = await confidentialApp
                .AcquireTokenForClient(appScopes)
                .ExecuteAsync()
                .ConfigureAwait(false);
 
-            Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource, "Token should be retrieved from cache");
+            Assert.AreEqual(TokenSource.Cache, cachedResult.AuthenticationResultMetadata.TokenSource, "Token should be retrieved from cache");
         }
 
         [RunOn(SkipConditions.Linux)]
