@@ -129,24 +129,18 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private void LogSuccessTelemetryToOtel(AuthenticationResult authenticationResult, ApiEvent apiEvent, long durationInUs)
         {
+            CacheLevel cacheLevel = GetCacheLevel(authenticationResult);
+
             // Log metrics
             ServiceBundle.PlatformProxy.OtelInstrumentation.LogSuccessMetrics(
                         ServiceBundle.PlatformProxy.GetProductName(),
                         apiEvent.ApiId,
                         apiEvent.CallerSdkApiId,
                         apiEvent.CallerSdkVersion,
-                        GetCacheLevel(authenticationResult),
+                        cacheLevel,
                         durationInUs,
                         authenticationResult.AuthenticationResultMetadata,
-                        AuthenticationRequestParameters.RequestContext.Logger);
-
-            ServiceBundle.PlatformProxy.OtelInstrumentation.LogRemainingTokenLifetime(
-                        ServiceBundle.PlatformProxy.GetProductName(),
-                        apiEvent.ApiId,
-                        authenticationResult.AuthenticationResultMetadata.TokenSource,
-                        GetCacheLevel(authenticationResult),
-                        authenticationResult.AuthenticationResultMetadata.CacheRefreshReason,
-                        authenticationResult.AuthenticationResultMetadata.TelemetryTokenType,
+                        AuthenticationRequestParameters.RequestContext.Logger,
                         authenticationResult.ExpiresOn);
         }
 

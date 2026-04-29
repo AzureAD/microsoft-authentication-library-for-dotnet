@@ -743,6 +743,8 @@ namespace Microsoft.Identity.Test.Unit
                         foreach (var metricPoint in exportedItem.GetMetricPoints())
                         {
                             AssertTags(metricPoint.Tags, expectedTags);
+                            Assert.IsGreaterThan((long)0, metricPoint.GetHistogramCount(), "Histogram should have at least one recorded value.");
+                            Assert.IsGreaterThanOrEqualTo(0.0, metricPoint.GetHistogramSum(), "Remaining token lifetime should be non-negative.");
                         }
 
                         break;

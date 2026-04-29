@@ -113,7 +113,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             CacheLevel cacheLevel,
             long totalDurationInUs,
             AuthenticationResultMetadata authResultMetadata,
-            ILoggerAdapter logger)
+            ILoggerAdapter logger,
+            DateTimeOffset expiresOn)
         {
             IncrementSuccessCounter(
                 platform,
@@ -181,6 +182,19 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                 new(TelemetryConstants.CacheLevel, authResultMetadata.CacheLevel),
                 new(TelemetryConstants.TokenType, authResultMetadata.TelemetryTokenType));
             }
+
+            if (s_remainingTokenLifetime.Value.Enabled)
+            {
+                long remainingSeconds = Math.Max(0, (long)(expiresOn - DateTimeOffset.UtcNow).TotalSeconds);
+
+                s_remainingTokenLifetime.Value.Record(remainingSeconds,
+                    new(TelemetryConstants.MsalVersionPlatform, $"{MsalIdHelper.GetMsalVersion()},{platform}"),
+                    new(TelemetryConstants.ApiId, apiId),
+                    new(TelemetryConstants.TokenSource, authResultMetadata.TokenSource),
+                    new(TelemetryConstants.CacheLevel, cacheLevel),
+                    new(TelemetryConstants.CacheRefreshReason, authResultMetadata.CacheRefreshReason),
+                    new(TelemetryConstants.TokenType, authResultMetadata.TelemetryTokenType));
+            }
         }
 
         public void IncrementSuccessCounter(string platform,
@@ -237,27 +251,5 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             s_failureCounter.Value.Add(1, in tags);
         }
 
-        public void LogRemainingTokenLifetime(
-            string platform,
-            ApiEvent.ApiIds apiId,
-            TokenSource tokenSource,
-            CacheLevel cacheLevel,
-            CacheRefreshReason cacheRefreshReason,
-            int tokenType,
-            DateTimeOffset expiresOn)
-        {
-            if (s_remainingTokenLifetime.Value.Enabled)
-            {
-                long remainingSeconds = Math.Max(0, (long)(expiresOn - DateTimeOffset.UtcNow).TotalSeconds);
-
-                s_remainingTokenLifetime.Value.Record(remainingSeconds,
-                    new(TelemetryConstants.MsalVersionPlatform, $"{MsalIdHelper.GetMsalVersion()},{platform}"),
-                    new(TelemetryConstants.ApiId, apiId),
-                    new(TelemetryConstants.TokenSource, tokenSource),
-                    new(TelemetryConstants.CacheLevel, cacheLevel),
-                    new(TelemetryConstants.CacheRefreshReason, cacheRefreshReason),
-                    new(TelemetryConstants.TokenType, TelemetryTokenTypeConstants.ToDisplayString(tokenType)));
-            }
-        }
     }
 }
