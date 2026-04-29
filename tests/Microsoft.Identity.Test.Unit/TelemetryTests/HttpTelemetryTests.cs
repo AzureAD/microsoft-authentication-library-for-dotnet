@@ -530,6 +530,73 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             }
         }
 
+        [TestMethod]
+        public async Task DisableInternalCache_AcquireTokenForClient_EmitsCacheDisabledTelemetry_Async()
+        {
+            using (_harness = CreateTestHarness())
+            {
+                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                var requestHandler = _harness.HttpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithAuthority(TestConstants.AuthorityCommonTenant)
+                    .WithHttpManager(_harness.HttpManager)
+                    .WithCacheOptions(CacheOptions.DisableInternalCache)
+                    .BuildConcrete();
+
+                await cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                AssertCurrentTelemetry(requestHandler.ActualRequestMessage, ApiIds.AcquireTokenForClient, CacheRefreshReason.CacheDisabled);
+            }
+        }
+
+        [TestMethod]
+        public async Task DisableInternalCache_AcquireTokenOnBehalfOf_EmitsCacheDisabledTelemetry_Async()
+        {
+            using (_harness = CreateTestHarness())
+            {
+                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                var requestHandler = _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost();
+
+                var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithAuthority(TestConstants.AuthorityCommonTenant)
+                    .WithHttpManager(_harness.HttpManager)
+                    .WithCacheOptions(CacheOptions.DisableInternalCache)
+                    .BuildConcrete();
+
+                await cca.AcquireTokenOnBehalfOf(TestConstants.s_scope, new UserAssertion(TestConstants.DefaultAccessToken))
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                AssertCurrentTelemetry(requestHandler.ActualRequestMessage, ApiIds.AcquireTokenOnBehalfOf, CacheRefreshReason.CacheDisabled);
+            }
+        }
+
+        [TestMethod]
+        public async Task DisableInternalCache_InitiateLongRunningObo_EmitsCacheDisabledTelemetry_Async()
+        {
+            using (_harness = CreateTestHarness())
+            {
+                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                var requestHandler = _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost();
+
+                var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithAuthority(TestConstants.AuthorityCommonTenant)
+                    .WithHttpManager(_harness.HttpManager)
+                    .WithCacheOptions(CacheOptions.DisableInternalCache)
+                    .BuildConcrete();
+
+                var cacheKey = string.Empty;
+                await cca.InitiateLongRunningProcessInWebApi(TestConstants.s_scope, TestConstants.DefaultAccessToken, ref cacheKey)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                AssertCurrentTelemetry(requestHandler.ActualRequestMessage, ApiIds.InitiateLongRunningObo, CacheRefreshReason.CacheDisabled);
+            }
+        }
+
         private PublicClientApplication CreatePublicClientApp(bool isLegacyCacheEnabled = true)
         {
             return PublicClientApplicationBuilder.Create(TestConstants.ClientId)
