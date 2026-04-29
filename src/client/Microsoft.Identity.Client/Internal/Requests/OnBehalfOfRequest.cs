@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             CacheRefreshReason cacheInfoTelemetry = CacheRefreshReason.NotApplicable;
 
-            if (ServiceBundle.Config.AccessorOptions?.IsInternalCacheDisabled == true)
+            if (IsInternalCacheDisabled)
             {
                 AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.CacheDisabled;
             }
@@ -63,14 +63,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 return await FetchNewAccessTokenAsync(cancellationToken).ConfigureAwait(false);
             }
 
-            if (ServiceBundle.Config.AccessorOptions?.IsInternalCacheDisabled == true && _onBehalfOfParameters.UserAssertion != null)
+            if (IsInternalCacheDisabled && _onBehalfOfParameters.UserAssertion != null)
             {
                 return await FetchNewAccessTokenAsync(cancellationToken).ConfigureAwait(false);
             }
 
             // AcquireTokenInLongRunningProcess (UserAssertion == null) cannot go to the network
             // because there is no assertion to exchange. Surface the root cause directly.
-            if (ServiceBundle.Config.AccessorOptions?.IsInternalCacheDisabled == true)
+            if (IsInternalCacheDisabled)
             {
                 throw new MsalUiRequiredException(
                     MsalError.InternalCacheDisabled,

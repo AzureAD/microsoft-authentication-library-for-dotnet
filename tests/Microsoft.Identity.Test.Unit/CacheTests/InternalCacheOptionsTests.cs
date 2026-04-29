@@ -294,6 +294,10 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 Assert.AreEqual(CacheRefreshReason.CacheDisabled, result2.AuthenticationResultMetadata.CacheRefreshReason,
                     "CacheRefreshReason should be CacheDisabled when the internal cache is disabled.");
 
+                // Client credentials does not include a refresh token in the token response.
+                Assert.IsNull(result1.GetRefreshToken(),
+                    "GetRefreshToken() must return null for AcquireTokenForClient — the server does not issue refresh tokens for client credentials.");
+
                 Assert.IsEmpty(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens(),
                     "No access tokens should have been stored in the internal cache.");
             }

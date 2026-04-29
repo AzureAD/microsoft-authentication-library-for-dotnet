@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
             AuthenticationResult authResult;
 
-            if (ServiceBundle.Config.AccessorOptions?.IsInternalCacheDisabled == true)
+            if (IsInternalCacheDisabled)
             {
                 AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.CacheDisabled;
                 return await GetAccessTokenAsync(cancellationToken, logger).ConfigureAwait(false);

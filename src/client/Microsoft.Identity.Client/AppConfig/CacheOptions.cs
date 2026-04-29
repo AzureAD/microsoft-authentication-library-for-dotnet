@@ -32,6 +32,7 @@ namespace Microsoft.Identity.Client
         ///   <item><description>Token cache serialization callbacks (<c>OnBeforeAccess</c>, <c>OnAfterAccess</c>, <c>OnBeforeWrite</c>) will <b>not</b> be invoked.</description></item>
         ///   <item><description><see cref="IClientApplicationBase.GetAccountsAsync()"/> will always return an empty collection.</description></item>
         ///   <item><description><see cref="IClientApplicationBase.AcquireTokenSilent(System.Collections.Generic.IEnumerable{string}, IAccount)"/> will throw a <see cref="MsalUiRequiredException"/> with error code <see cref="MsalError.InternalCacheDisabled"/>.</description></item>
+        ///   <item><description><see cref="ILongRunningWebApi.AcquireTokenInLongRunningProcess(System.Collections.Generic.IEnumerable{string}, string)"/> will throw a <see cref="MsalUiRequiredException"/> with error code <see cref="MsalError.InternalCacheDisabled"/>, because the long-running OBO flow requires a cached token to refresh.</description></item>
         /// </list>
         /// <para>
         /// For confidential client flows, retrieve the refresh token using

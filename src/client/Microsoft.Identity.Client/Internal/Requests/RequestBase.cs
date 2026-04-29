@@ -38,6 +38,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
         internal ICacheSessionManager CacheManager => AuthenticationRequestParameters.CacheSessionManager;
         internal IServiceBundle ServiceBundle { get; }
 
+        /// <summary>
+        /// Returns <c>true</c> if the internal token cache is disabled via <c>CacheOptions.DisableInternalCacheOptions</c>.
+        /// </summary>
+        protected bool IsInternalCacheDisabled =>
+            ServiceBundle.Config.AccessorOptions?.IsInternalCacheDisabled == true;
+
         protected RequestBase(
             IServiceBundle serviceBundle,
             AuthenticationRequestParameters authenticationRequestParameters,
