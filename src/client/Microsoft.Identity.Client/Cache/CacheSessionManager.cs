@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client.Cache
         public ITokenCacheInternal TokenCacheInternal { get; }
 
         private bool IsInternalCacheDisabled =>
-            _requestParams.RequestContext.ServiceBundle.Config.AccessorOptions?.IsInternalCacheDisabled == true;
+            CacheOptions.IsDisabledFor(_requestParams.RequestContext.ServiceBundle.Config.AccessorOptions);
 
         private bool ShouldSkipInternalCacheRead(string operationName)
         {

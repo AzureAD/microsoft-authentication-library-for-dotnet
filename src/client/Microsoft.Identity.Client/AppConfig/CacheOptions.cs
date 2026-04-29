@@ -75,7 +75,18 @@ namespace Microsoft.Identity.Client
         /// This is intended for advanced scenarios where the caller manages its own token cache.
         /// Cannot be combined with <see cref="UseSharedCache"/>.
         /// </summary>
+        /// <remarks>
+        /// When enabled, <see cref="IClientApplicationBase.AcquireTokenSilent(System.Collections.Generic.IEnumerable{string}, IAccount)"/>
+        /// and <see cref="ILongRunningWebApi.AcquireTokenInLongRunningProcess(System.Collections.Generic.IEnumerable{string}, string)"/>
+        /// will throw a <see cref="MsalUiRequiredException"/> with error code <see cref="MsalError.InternalCacheDisabled"/>.
+        /// </remarks>
         public bool IsInternalCacheDisabled { get; set; }
+
+        /// <summary>
+        /// Returns <c>true</c> if the given <see cref="CacheOptions"/> instance has the internal cache disabled.
+        /// Safe to call with a <c>null</c> argument (returns <c>false</c>).
+        /// </summary>
+        internal static bool IsDisabledFor(CacheOptions options) => options?.IsInternalCacheDisabled == true;
 
     }
 }

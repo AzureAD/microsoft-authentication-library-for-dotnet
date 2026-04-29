@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         /// Returns <c>true</c> if the internal token cache is disabled via <c>CacheOptions.DisableInternalCacheOptions</c>.
         /// </summary>
         protected bool IsInternalCacheDisabled =>
-            ServiceBundle.Config.AccessorOptions?.IsInternalCacheDisabled == true;
+            CacheOptions.IsDisabledFor(ServiceBundle.Config.AccessorOptions);
 
         protected RequestBase(
             IServiceBundle serviceBundle,

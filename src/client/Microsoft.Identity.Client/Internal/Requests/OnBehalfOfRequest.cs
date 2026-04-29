@@ -63,15 +63,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 return await FetchNewAccessTokenAsync(cancellationToken).ConfigureAwait(false);
             }
 
-            if (IsInternalCacheDisabled && _onBehalfOfParameters.UserAssertion != null)
-            {
-                return await FetchNewAccessTokenAsync(cancellationToken).ConfigureAwait(false);
-            }
-
-            // AcquireTokenInLongRunningProcess (UserAssertion == null) cannot go to the network
-            // because there is no assertion to exchange. Surface the root cause directly.
             if (IsInternalCacheDisabled)
             {
+                if (_onBehalfOfParameters.UserAssertion != null)
+                {
+                    return await FetchNewAccessTokenAsync(cancellationToken).ConfigureAwait(false);
+                }
+
+                // AcquireTokenInLongRunningProcess (UserAssertion == null) cannot go to the network
+                // because there is no assertion to exchange. Surface the root cause directly.
                 throw new MsalUiRequiredException(
                     MsalError.InternalCacheDisabled,
                     MsalErrorMessage.InternalCacheDisabledMessage,

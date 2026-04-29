@@ -146,7 +146,7 @@ namespace Microsoft.Identity.Client
                 IDictionary<string, TenantProfile> tenantProfiles = null;
                 if (msalIdTokenCacheItem.TenantId != null)
                 {
-                    if (ServiceBundle.Config.AccessorOptions?.IsInternalCacheDisabled == true)
+                    if (CacheOptions.IsDisabledFor(ServiceBundle.Config.AccessorOptions))
                     {
                         // When the internal cache is disabled, skip GetTenantProfilesAsync (which reads
                         // from Accessor) and instead seed a fresh dict with just the current profile.
@@ -176,7 +176,7 @@ namespace Microsoft.Identity.Client
 
             #endregion
 
-            if (ServiceBundle.Config.AccessorOptions?.IsInternalCacheDisabled == true)
+            if (CacheOptions.IsDisabledFor(ServiceBundle.Config.AccessorOptions))
             {
                 logger.Verbose(() => "[SaveTokenResponseAsync] Internal cache is disabled (CacheOptions.DisableInternalCacheOptions). Skipping all cache writes.");
                 return Tuple.Create(msalAccessTokenCacheItem, msalIdTokenCacheItem, account);

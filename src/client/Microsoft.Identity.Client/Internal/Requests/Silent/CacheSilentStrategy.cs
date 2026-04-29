@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
             
             ThrowIfCurrentBrokerAccount();
 
-            if (ServiceBundle.Config.AccessorOptions?.IsInternalCacheDisabled == true)
+            if (CacheOptions.IsDisabledFor(ServiceBundle.Config.AccessorOptions))
             {
                 AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.CacheDisabled;
                 throw new MsalUiRequiredException(
