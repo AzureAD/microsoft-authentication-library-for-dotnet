@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -483,6 +483,29 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
+        public void ClientAssertion_NullClientSignedAssertionProvider_ThrowsArgumentNullException()
+        {
+            Func<AssertionRequestOptions, CancellationToken, Task<ClientSignedAssertion>> provider = null;
+
+            // Null check must occur before ValidateUseOfExperimentalFeature(), so passing null
+            // without enabling experimental features should still surface ArgumentNullException
+            // rather than MsalClientException.
+            var ex = AssertException.Throws<ArgumentNullException>(() =>
+                ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithClientAssertion(provider));
+
+            Assert.AreEqual("clientSignedAssertionProvider", ex.ParamName);
+
+            // Also verify the same when experimental features are explicitly enabled.
+            var ex2 = AssertException.Throws<ArgumentNullException>(() =>
+                ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithExperimentalFeatures(true)
+                    .WithClientAssertion(provider));
+
+            Assert.AreEqual("clientSignedAssertionProvider", ex2.ParamName);
+        }
+
+        [TestMethod]
         public async Task ClientAssertion_CancellationTokenPropagatesAsync()
         {
             using var cts = new CancellationTokenSource();
@@ -679,12 +702,14 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        public async Task WithMtlsPop_AfterPoPDelegate_NoRegion_ThrowsAsync()
+        public async Task WithMtlsPop_AfterPoPDelegate_NoRegion_UsesGlobalEndpointAsync()
         {
             using var http = new MockHttpManager();
             {
                 // Arrange – CCA with PoP delegate (returns JWT + cert) but **no AzureRegion configured**
-                var cert = CertHelper.GetOrCreateTestCert();
+                http.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(
+                    tokenType: "mtls_pop");
+
                 var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                               .WithExperimentalFeatures(true)
                               .WithAuthority(TestConstants.AadAuthorityWithMsftTenantId)
@@ -692,15 +717,16 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                               .WithHttpManager(http)
                               .BuildConcrete();
 
-                // Act & Assert – should fail because region is missing
-                var ex = await AssertException.TaskThrowsAsync<MsalClientException>(async () =>
-                    await cca.AcquireTokenForClient(TestConstants.s_scope)
-                             .WithMtlsProofOfPossession()
-                             .ExecuteAsync()
-                             .ConfigureAwait(false))
+                // Act – should succeed using global mTLS endpoint
+                AuthenticationResult result = await cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithMtlsProofOfPossession()
+                    .ExecuteAsync()
                     .ConfigureAwait(false);
 
-                Assert.AreEqual(MsalError.MtlsPopWithoutRegion, ex.ErrorCode);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(Constants.MtlsPoPAuthHeaderPrefix, result.TokenType);
+                var tokenEndpointUri = new Uri(result.AuthenticationResultMetadata.TokenEndpoint);
+                Assert.AreEqual("mtlsauth.microsoft.com", tokenEndpointUri.Host);
             }
         }
 
@@ -784,26 +810,28 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        public async Task WithMtlsAssertion_NoRegion_ThrowsAsync()
+        public async Task WithMtlsAssertion_NoRegion_UsesGlobalEndpointAsync()
         {
             using var http = new MockHttpManager();
             {
                 // Arrange – CCA with PoP delegate (returns JWT + cert) but **no AzureRegion configured**
-                var cert = CertHelper.GetOrCreateTestCert();
+                http.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
                 var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                               .WithExperimentalFeatures(true)
+                              .WithAuthority(TestConstants.AadAuthorityWithMsftTenantId)
                               .WithClientAssertion(PopDelegate())
                               .WithHttpManager(http)
                               .BuildConcrete();
 
-                // Act & Assert – should fail because region is missing
-                var ex = await AssertException.TaskThrowsAsync<MsalClientException>(async () =>
-                    await cca.AcquireTokenForClient(TestConstants.s_scope)
-                             .ExecuteAsync()
-                             .ConfigureAwait(false))
+                // Act – should succeed using global mTLS endpoint
+                AuthenticationResult result = await cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync()
                     .ConfigureAwait(false);
 
-                Assert.AreEqual(MsalError.MtlsBearerWithoutRegion, ex.ErrorCode);
+                Assert.IsNotNull(result.AccessToken);
+                var tokenEndpoint = new Uri(result.AuthenticationResultMetadata.TokenEndpoint, UriKind.Absolute);
+                Assert.AreEqual("mtlsauth.microsoft.com", tokenEndpoint.Host);
             }
         }
 
