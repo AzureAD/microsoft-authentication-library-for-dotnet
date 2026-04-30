@@ -1,8 +1,8 @@
-# MSAL .NET API Spec: `WithMtlsPopFallback()` + `MtlsPopOptions` — Bound Token Acquisition with Fallback
+# MSAL.NET API Spec: `WithMtlsPopFallback()` + `MtlsPopOptions` — Bound Token Acquisition with Fallback
 
 **Status:** Draft  
 **Date:** April 30, 2026  
-**Applies to:** `Microsoft.Identity.Client` (MSAL .NET)  
+**Applies to:** `Microsoft.Identity.Client` (MSAL.NET)  
 **Related PR:** [AzureAD/microsoft-identity-web#3773](https://github.com/AzureAD/microsoft-identity-web/pull/3773)
 
 ---
@@ -24,19 +24,23 @@ miBuilder.WithMtlsProofOfPossession()
 ```
 
 This requires IdWeb (a higher-level SDK) to:
-1. **Know about attestation** as a binding mechanism — a low-level implementation detail.
-2. **Take a package dependency** on `Microsoft.Identity.Client.KeyAttestation`.
-3. **Hard-code the binding strategy** — no fallback if attestation fails.
+1. **Orchestrate fallback policy** — IdWeb hard-codes the binding approach with no fallback if attestation fails at runtime.
+2. **Take a package dependency** on `Microsoft.Identity.Client.KeyAttestation` (this dependency remains, but the fallback orchestration moves to MSAL).
+3. **Couple to low-level mechanism details** — IdWeb explicitly chains `WithMtlsProofOfPossession().WithAttestationSupport()`, prescribing the exact binding strategy rather than declaring intent.
+
+> **Note:** The `Microsoft.Identity.Client.KeyAttestation` package dependency and the `WithAttestationSupport()` call remain in IdWeb because that call brings in the native Credential Guard DLL. This proposal moves the **fallback orchestration** into MSAL, not the package dependency itself.
 
 ### Current MSAL Behavior When Things Go Wrong
 
 | Scenario | Current Behavior | Desired Behavior |
 |----------|-----------------|------------------|
 | KeyGuard key + attestation succeeds | ✅ Works | ✅ Same |
-| KeyGuard key + attestation provider not configured | ✅ Non-attested flow | ✅ Same |
-| KeyGuard key + attestation **fails** (exception) | ❌ **Throws `attestation_failed`** | 🔄 Fall back to non-attested flow |
+| KeyGuard key + attestation provider not configured | ✅ Non-attested flow (returns null) | ✅ Same (not a fallback scenario) |
+| KeyGuard key + attestation **fails** (provider throws) | ❌ **Throws `attestation_failed`** | 🔄 Fall back to non-attested flow |
+| KeyGuard key + key is not RSACng | ❌ **Throws `credential_guard_requires_cng`** | 🔄 Fall back to non-attested flow |
 | Non-KeyGuard key (Hardware/InMemory) | ❌ **Throws `mtls_pop_requires_keyguard`** | 🔄 Proceed with non-attested mTLS PoP |
 | mTLS PoP not supported (IMDSv1 host) | ❌ Throws | ❌ Throws (correct — no fallback to bearer) |
+| Non-Windows or NET462 | ❌ Throws | ❌ Throws (platform unsupported) |
 
 ### Design Principle
 
@@ -104,10 +108,23 @@ namespace Microsoft.Identity.Client
         /// <param name="builder">The AcquireTokenForManagedIdentityParameterBuilder instance.</param>
         /// <param name="options">Options controlling mTLS PoP behavior.</param>
         /// <returns>The builder to chain .With methods.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown when <paramref name="options"/> is <see langword="null"/>.
+        /// </exception>
         public static AcquireTokenForManagedIdentityParameterBuilder WithMtlsProofOfPossession(
             this AcquireTokenForManagedIdentityParameterBuilder builder,
             MtlsPopOptions options)
         {
+            if (options == null)
+            {
+                throw new ArgumentNullException(nameof(options));
+            }
+
+#if NET462
+            throw new MsalClientException(
+                MsalError.MtlsNotSupportedForManagedIdentity,
+                MsalErrorMessage.MtlsNotSupportedForManagedIdentityMessage);
+#else
             if (!DesktopOsHelper.IsWindows())
             {
                 throw new MsalClientException(
@@ -118,9 +135,11 @@ namespace Microsoft.Identity.Client
             builder.CommonParameters.IsMtlsPopRequested = true;
             builder.CommonParameters.IsBoundTokenFallbackEnabled = options.EnableFallback;
             return builder;
+#endif
         }
 
         // Existing API — unchanged, strict, no fallback.
+        // The new overload mirrors the same NET462/non-Windows constraints.
         public static AcquireTokenForManagedIdentityParameterBuilder WithMtlsProofOfPossession(
             this AcquireTokenForManagedIdentityParameterBuilder builder) { /* unchanged */ }
     }
@@ -139,11 +158,17 @@ namespace Microsoft.Identity.Client
     {
         /// <summary>
         /// When <c>true</c>, MSAL will attempt attested binding first, and if attestation
-        /// fails (provider not configured, attestation exception, or KeyGuard unavailable),
-        /// silently fall back to non-attested mTLS PoP binding.
+        /// fails at runtime (attestation provider throws, or key is not RSACng for Credential Guard),
+        /// silently fall back to non-attested mTLS PoP binding instead of throwing.
+        /// Also allows non-KeyGuard key types (Hardware, InMemory) to proceed with
+        /// non-attested binding instead of throwing `mtls_pop_requires_keyguard`.
         ///
-        /// When <c>false</c> (default), MSAL uses strict mode: attestation failures
-        /// and missing KeyGuard keys result in exceptions.
+        /// Note: When the attestation provider is not configured (WithAttestationSupport()
+        /// not called), MSAL already proceeds with non-attested flow in both strict
+        /// and fallback modes — this is existing behavior, not a fallback scenario.
+        ///
+        /// When <c>false</c> (default), MSAL uses strict mode: attestation provider
+        /// exceptions and non-KeyGuard keys result in exceptions.
         ///
         /// Default: <c>false</c>
         /// </summary>
@@ -167,7 +192,9 @@ namespace Microsoft.Identity.Client.KeyAttestation
     {
         /// <summary>
         /// Registers the Credential Guard attestation provider.
-        /// Call after WithMtlsPopFallback() or WithMtlsProofOfPossession().
+        /// Used with WithMtlsPopFallback() or WithMtlsProofOfPossession() to enable
+        /// attested mTLS PoP flows. Order of calls does not matter — both set
+        /// independent builder state.
         ///
         /// When used with WithMtlsPopFallback():
         ///   - Attestation is attempted first
@@ -187,7 +214,9 @@ namespace Microsoft.Identity.Client.KeyAttestation
 
 ---
 
-## 3. New Internal Property
+## 3. Internal Plumbing
+
+### 3.1 New Property on Parameter Classes
 
 Add to `AcquireTokenCommonParameters`:
 
@@ -196,24 +225,71 @@ internal class AcquireTokenCommonParameters
 {
     // Existing
     public bool IsMtlsPopRequested { get; set; }
-    public Func<...> AttestationTokenProvider { get; set; }
+    public Func<string, SafeHandle, string, string, ILoggerAdapter, CancellationToken, Task<string>>
+        AttestationTokenProvider { get; set; }
 
-    // NEW — enables the fallback chain when set via WithMtlsPopFallback()
-    //        or WithMtlsProofOfPossession(new MtlsPopOptions { EnableFallback = true })
+    // NEW
     public bool IsBoundTokenFallbackEnabled { get; set; }
 }
 ```
 
-Propagate to `AcquireTokenForManagedIdentityParameters`:
+Add to `AcquireTokenForManagedIdentityParameters`:
 
 ```csharp
 internal class AcquireTokenForManagedIdentityParameters
 {
     public bool IsMtlsPopRequested { get; set; }
     public bool IsBoundTokenFallbackEnabled { get; set; }  // NEW
-    public Func<...> AttestationTokenProvider { get; set; }
+    public Func<string, SafeHandle, string, string, ILoggerAdapter, CancellationToken, Task<string>>
+        AttestationTokenProvider { get; set; }
 }
 ```
+
+### 3.2 Propagation in `ApplyMtlsPopAndAttestation()`
+
+The existing `ApplyMtlsPopAndAttestation()` in `AcquireTokenForManagedIdentityParameterBuilder` copies `IsMtlsPopRequested` and `AttestationTokenProvider` from common params to MI params. It must also copy the new flag:
+
+```csharp
+private static void ApplyMtlsPopAndAttestation(
+    AcquireTokenCommonParameters acquireTokenCommonParameters,
+    AcquireTokenForManagedIdentityParameters acquireTokenForManagedIdentityParameters)
+{
+    acquireTokenForManagedIdentityParameters.IsMtlsPopRequested =
+        acquireTokenCommonParameters.IsMtlsPopRequested;
+    acquireTokenForManagedIdentityParameters.AttestationTokenProvider =
+        acquireTokenCommonParameters.AttestationTokenProvider;
+
+    // NEW — propagate fallback flag
+    acquireTokenForManagedIdentityParameters.IsBoundTokenFallbackEnabled =
+        acquireTokenCommonParameters.IsBoundTokenFallbackEnabled;
+
+    // existing cache key partitioning...
+}
+```
+
+### 3.3 Capture in `ImdsV2ManagedIdentitySource`
+
+The `ImdsV2ManagedIdentitySource` already captures `_attestationTokenProvider` from `parameters.AttestationTokenProvider` in its `AuthenticateAsync()` method. The new flag must be captured the same way:
+
+```csharp
+internal class ImdsV2ManagedIdentitySource : AbstractManagedIdentity
+{
+    private Func<...> _attestationTokenProvider;
+    private bool _isBoundTokenFallbackEnabled;  // NEW
+
+    public override async Task<ManagedIdentityResponse> AuthenticateAsync(
+        AcquireTokenForManagedIdentityParameters parameters,
+        CancellationToken cancellationToken)
+    {
+        _attestationTokenProvider = parameters.AttestationTokenProvider;
+        _isBoundTokenFallbackEnabled = parameters.IsBoundTokenFallbackEnabled;  // NEW
+
+        // ... existing logic
+    }
+}
+```
+
+This ensures both `_attestationTokenProvider` and `_isBoundTokenFallbackEnabled` are available as instance fields throughout `CreateRequestAsync()`, `GetAttestationJwtAsync()`, and other methods.
 
 ---
 
@@ -221,7 +297,7 @@ internal class AcquireTokenForManagedIdentityParameters
 
 ### 4.1 Key Type Validation (Replace Throw with Fallback)
 
-**Current code** (`CreateRequestAsync`, line ~350):
+**Current code** (`CreateRequestAsync`):
 ```csharp
 if (keyInfo.Type != ManagedIdentityKeyType.KeyGuard)
 {
@@ -235,15 +311,16 @@ if (keyInfo.Type != ManagedIdentityKeyType.KeyGuard)
 ```csharp
 if (keyInfo.Type != ManagedIdentityKeyType.KeyGuard)
 {
-    if (!parameters.IsBoundTokenFallbackEnabled)
+    if (!_isBoundTokenFallbackEnabled)
     {
-        // Explicit WithMtlsProofOfPossession() — strict mode, throw as before
+        // Strict mode — throw as before
         throw new MsalClientException(
             "mtls_pop_requires_keyguard",
             $"mTLS PoP requires KeyGuard keys. Current key type: {keyInfo.Type}");
     }
 
-    // WithMtlsPopFallback() — proceed with whatever key type is available
+    // Fallback mode — remove the early gate, let the existing non-attested
+    // path in ExecuteCertificateRequestAsync() handle non-KeyGuard keys
     _requestContext.Logger.Info(
         $"[ImdsV2] KeyGuard not available (key type: {keyInfo.Type}). " +
         "Proceeding with non-attested mTLS PoP binding.");
@@ -252,7 +329,7 @@ if (keyInfo.Type != ManagedIdentityKeyType.KeyGuard)
 
 ### 4.2 Attestation Failure (Replace Throw with Fallback)
 
-**Current code** (`GetAttestationJwtAsync`, line ~498):
+**Current code** (`GetAttestationJwtAsync`):
 ```csharp
 catch (Exception ex)
 {
@@ -269,21 +346,52 @@ catch (Exception ex)
 {
     if (!_isBoundTokenFallbackEnabled)
     {
-        // Explicit WithMtlsProofOfPossession() + WithAttestationSupport()
-        // — strict mode, throw as before
+        // Strict mode — throw as before
         throw new MsalClientException(
             "attestation_failed",
             $"[ImdsV2] Attestation token provider failed: {ex.Message}",
             ex);
     }
 
-    // WithMtlsPopFallback() — swallow attestation failure, proceed without attestation
+    // Fallback mode — swallow attestation failure, proceed without attestation
     _requestContext.Logger.Warning(
         $"[ImdsV2] Attestation failed ({ex.Message}). " +
         "Falling back to non-attested mTLS PoP flow.");
     return null;  // null attestation JWT → non-attested flow
 }
 ```
+
+### 4.3 CNG Key Validation (Replace Throw with Fallback)
+
+**Current code** (`GetAttestationJwtAsync`):
+```csharp
+if (keyInfo.Key is not System.Security.Cryptography.RSACng rsaCng)
+{
+    throw new MsalClientException(
+        "credential_guard_requires_cng",
+        "[ImdsV2] Credential Guard attestation currently supports only RSA CNG keys on Windows.");
+}
+```
+
+**Proposed change:**
+```csharp
+if (keyInfo.Key is not System.Security.Cryptography.RSACng rsaCng)
+{
+    if (!_isBoundTokenFallbackEnabled)
+    {
+        throw new MsalClientException(
+            "credential_guard_requires_cng",
+            "[ImdsV2] Credential Guard attestation currently supports only RSA CNG keys.");
+    }
+
+    _requestContext.Logger.Warning(
+        "[ImdsV2] Key is not RSACng, cannot perform Credential Guard attestation. " +
+        "Falling back to non-attested mTLS PoP flow.");
+    return null;
+}
+```
+
+> **Design decision:** Fallback mode absorbs **all attestation-stage failures** — provider exceptions, CNG key type mismatch, and non-KeyGuard keys. The only failures NOT absorbed are platform-level (non-Windows, NET462) and infrastructure-level (IMDSv1 host, IMDS unreachable).
 
 ### 4.3 Full Fallback Chain (Summary)
 
@@ -295,10 +403,12 @@ When `WithMtlsPopFallback()` (or `WithMtlsProofOfPossession(new MtlsPopOptions {
 │                                                                 │
 │  1. Get/create key from key provider                            │
 │     ├── KeyGuard available?                                     │
-│     │   ├── YES → Try attested flow                             │
-│     │   │         ├── Attestation succeeds → Use attested JWT   │
-│     │   │         └── Attestation fails → Log warning,          │
-│     │   │                                  proceed non-attested │
+│     │   ├── YES → Key is RSACng?                                │
+│     │   │         ├── YES → Try attested flow                   │
+│     │   │         │         ├── Succeeds → Use attested JWT     │
+│     │   │         │         └── Fails → Log warning,            │
+│     │   │         │                      proceed non-attested   │
+│     │   │         └── NO → Log warning, proceed non-attested    │
 │     │   └── NO → Log info, proceed with available key type      │
 │     │                                                           │
 │  2. Generate CSR with available key                             │
@@ -326,6 +436,8 @@ When `WithMtlsPopFallback()` (or `WithMtlsProofOfPossession(new MtlsPopOptions {
 ---
 
 ## 5. Impact on IdWeb (PR #3773)
+
+> **Scope note:** The FIC (Federated Identity Credential) path in IdWeb acquires a managed identity token as a client assertion. This reaches MSAL through `AcquireTokenForManagedIdentity` — the same managed identity builder. No confidential client (`AcquireTokenForClient`) API surface is changed by this proposal.
 
 ### Before (Current PR)
 ```csharp
@@ -381,9 +493,9 @@ if (IsTokenBinding)
 > Both options produce identical behavior. Option 1 is syntactic sugar for Option 2.
 
 ### Key Difference
-- **Before:** IdWeb says _"use mTLS PoP **with** attestation"_ (prescriptive — knows the mechanism, no fallback)
-- **After:** IdWeb says _"get me a bound token with fallback"_ + _"I have attestation capability available"_ (declarative)
-- `WithAttestationSupport()` is now purely a **capability registration** ("I have the native DLL"), not a strategy directive
+- **Before:** IdWeb says _"use mTLS PoP **with** attestation"_ (prescriptive — no fallback if attestation fails)
+- **After:** IdWeb says _"get me a bound token with fallback"_ + _"I have attestation capability available"_ (MSAL handles fallback)
+- `WithAttestationSupport()` is now purely a **capability registration** — IdWeb still calls it (and keeps the KeyAttestation package dependency) because it brings in the native DLL, but MSAL decides the fallback policy
 - If attestation fails at runtime, MSAL falls back transparently — IdWeb never sees the failure
 - `WithMtlsProofOfPossession()` (no args) remains available as the strict, no-fallback API
 
@@ -393,12 +505,14 @@ if (IsTokenBinding)
 
 ### New Log Messages
 
+These messages should match the exact strings used in the fallback code paths (Section 4):
+
 | Level | Message | When |
 |-------|---------|------|
-| Info | `[ImdsV2] WithMtlsPopFallback: KeyGuard not available (key type: {type}). Using non-attested binding.` | Key provider returns non-KeyGuard key |
-| Warning | `[ImdsV2] WithMtlsPopFallback: Attestation failed ({message}). Falling back to non-attested binding.` | Attestation delegate throws |
-| Info | `[ImdsV2] WithMtlsPopFallback: Attestation not configured. Using non-attested binding.` | No `WithAttestationSupport()` called |
-| Info | `[ImdsV2] WithMtlsPopFallback: Attested binding succeeded.` | Full attested flow completed |
+| Info | `[ImdsV2] KeyGuard not available (key type: {type}). Proceeding with non-attested mTLS PoP binding.` | Key provider returns non-KeyGuard key (Section 4.1) |
+| Warning | `[ImdsV2] Attestation failed ({message}). Falling back to non-attested mTLS PoP flow.` | Attestation provider delegate throws (Section 4.2) |
+| Warning | `[ImdsV2] Key is not RSACng, cannot perform Credential Guard attestation. Falling back to non-attested mTLS PoP flow.` | KeyGuard key but not RSACng (Section 4.3) |
+| Info | `[ImdsV2] Attestation token provider not configured. Proceeding with non-attested flow.` | No `WithAttestationSupport()` called (existing behavior, unchanged) |
 
 ### Telemetry Events
 
@@ -414,21 +528,53 @@ public enum MtlsBindingOutcome
 }
 ```
 
+Log `IsBoundTokenFallbackEnabled` in `AcquireTokenForManagedIdentityParameters.LogParameters()` for debugging rollout issues.
+
 ---
 
 ## 7. Cache Key Partitioning
 
-The current cache key includes an attestation tag (`#att=0` / `#att=1`). With fallback, a request may start as attested and fall back to non-attested. 
+Two caches are affected by the attestation tag:
 
-**Strategy:** Partition by **actual outcome**, not intent. After the binding is resolved:
+### 7.1 Token Cache (in `AcquireTokenForManagedIdentityParameterBuilder.ApplyMtlsPopAndAttestation()`)
 
+Current code partitions by whether `AttestationTokenProvider` is configured:
 ```csharp
-// Use the actual attestation outcome for the cache key
-string attestationTag = (attestationJwt != null) ? AttestationTagEnabled : AttestationTagDisabled;
-return baseKey + attestationTag;
+acquireTokenCommonParameters.CacheKeyComponents[MiAttCacheKeyComponent] =
+    _ => acquireTokenCommonParameters.AttestationTokenProvider != null ? s_att1 : s_att0;
 ```
 
-This is already the effective behavior (attestation JWT is resolved before caching), so **no cache key changes needed**.
+### 7.2 Cert Cache (in `ImdsV2ManagedIdentitySource.GetMtlsCertCacheKey()`)
+
+Current code also partitions by provider presence:
+```csharp
+return baseKey + (_attestationTokenProvider != null ? AttestationTagEnabled : AttestationTagDisabled);
+```
+
+### 7.3 Problem with Fallback
+
+With fallback enabled, the attestation provider **is** configured (so cache key = `#att=1`), but attestation may **fail** at runtime, producing a non-attested binding. This means:
+- A non-attested cert/token gets cached under the `#att=1` partition
+- If attestation later succeeds (transient failure), the cached non-attested artifact is returned instead of the attested one
+
+### 7.4 Required Change
+
+Both cache keys must be based on the **actual outcome**, not provider presence. However, the cert cache key is computed **before** attestation runs (it's used to look up cached certs). This means:
+
+**Option A (Recommended):** When fallback is enabled, always use `#att=0` for the cache key. Attested and non-attested certs produce functionally equivalent bound tokens — the attestation only affects the trust level of the CSR, not the resulting cert's mTLS binding capability. This avoids the stale-cache problem entirely.
+
+```csharp
+// In GetMtlsCertCacheKey():
+if (_isBoundTokenFallbackEnabled)
+{
+    return baseKey + AttestationTagDisabled; // fallback mode: single partition
+}
+return baseKey + (_attestationTokenProvider != null ? AttestationTagEnabled : AttestationTagDisabled);
+```
+
+**Option B:** Split the cert provisioning into lookup → attestation → cache-store, making the cache key depend on outcome. This is more complex and may not be worth it if Option A is acceptable.
+
+The same approach applies to the token cache key component in `ApplyMtlsPopAndAttestation()`.
 
 ---
 
@@ -485,4 +631,4 @@ No change needed. Continue using `WithMtlsProofOfPossession()` (no args).
 
 2. **Should the fallback also cover IMDSv1 hosts?** Currently, if the host only supports IMDSv1 (404 from CSR metadata endpoint), the request throws. Should `WithMtlsPopFallback()` fall back to a bearer token on IMDSv1 hosts? *(Likely no — bound token is the requirement, not optional.)*
 
-4. **Future options:** `MtlsPopOptions` is extensible. Future properties could include things like preferred key type, attestation timeout, or custom fallback policies.
+3. **Future options:** `MtlsPopOptions` is extensible. Future properties could include things like preferred key type, attestation timeout, or custom fallback policies.
