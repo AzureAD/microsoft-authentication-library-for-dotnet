@@ -183,7 +183,7 @@ namespace Microsoft.Identity.Client
 #if !SUPPORTS_CUSTOM_CACHE 
             throw new PlatformNotSupportedException("WithCacheOptions is supported only on platforms where MSAL stores tokens in memory and not on mobile platforms.");
 #else
-            if (options != null && CacheOptions.IsDisabledFor(options) && options.UseSharedCache)
+            if (CacheOptions.IsDisabledFor(options) && options.UseSharedCache)
             {
                 throw new MsalClientException(
                     MsalError.InvalidRequest,
