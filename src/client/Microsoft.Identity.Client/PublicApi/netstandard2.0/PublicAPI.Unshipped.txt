@@ -3,3 +3,5 @@ static Microsoft.Identity.Client.Extensibility.AbstractConfidentialClientAcquire
 Microsoft.Identity.Client.AssertionRequestOptions.CorrelationId.get -> System.Guid
 Microsoft.Identity.Client.AssertionRequestOptions.CorrelationId.set -> void
 const Microsoft.Identity.Client.MsalError.InvalidCredentialMaterial = "invalid_credential_material" -> string
+Microsoft.Identity.Client.AppConfig.CertificateOptions.SendCertificateOverMtls.get -> bool
+Microsoft.Identity.Client.AppConfig.CertificateOptions.SendCertificateOverMtls.init -> void
