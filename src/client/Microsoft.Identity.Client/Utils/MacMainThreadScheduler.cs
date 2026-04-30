@@ -60,24 +60,16 @@ namespace Microsoft.Identity.Client.Utils
             private static extern IntPtr CFStringCreateWithCString(
                 IntPtr alloc, string cStr, uint encoding);
 
-            private static IntPtr s_defaultMode;
+            private static readonly Lazy<IntPtr> s_defaultMode = new Lazy<IntPtr>(() =>
+                CFStringCreateWithCString(IntPtr.Zero, "kCFRunLoopDefaultMode", KCFStringEncodingUTF8));
 
-            private static IntPtr GetDefaultMode()
-            {
-                if (s_defaultMode == IntPtr.Zero)
-                {
-                    s_defaultMode = CFStringCreateWithCString(
-                        IntPtr.Zero, "kCFRunLoopDefaultMode", KCFStringEncodingUTF8);
-                }
-
-                return s_defaultMode;
-            }
+            private static IntPtr GetDefaultMode() => s_defaultMode.Value;
 
             /// <summary>
-            /// Process one iteration of the macOS CFRunLoop for the given duration.
-            /// This allows GCD dispatch_sync calls targeting the main queue to execute,
-            /// preventing the deadlock that occurs when native broker code falls back
-            /// to MSAL native on non-Intune macOS devices.
+            /// Process the macOS CFRunLoop for up to the given duration, servicing all
+            /// pending sources (including GCD dispatch_sync calls targeting the main queue)
+            /// until the timeout elapses. This prevents the deadlock that occurs when native
+            /// broker code falls back to MSAL native on non-Intune macOS devices.
             /// </summary>
             public static void ProcessRunLoop(double seconds)
             {
@@ -180,6 +172,7 @@ namespace Microsoft.Identity.Client.Utils
 
             _isRunning = true;
             _workerFinished = false;
+            bool isMacOS = RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
             try
             {
                 while (!_workerFinished)
@@ -204,7 +197,7 @@ namespace Microsoft.Identity.Client.Utils
                     // runtime may use dispatch_sync to the main GCD queue (e.g. during FallbackToNativeMsal
                     // on devices without an SSO extension). Without processing the run loop, dispatch_sync
                     // blocks forever because the main thread never services the GCD queue → deadlock.
-                    if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                    if (isMacOS)
                     {
                         CoreFoundationInterop.ProcessRunLoop(WorkerSleepInMilliseconds / 1000.0);
                     }
