@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -36,6 +37,53 @@ namespace Microsoft.Identity.Client.Utils
 
         // Configurable sleep time in milliseconds in the message loop.
         private const int WorkerSleepInMilliseconds = 10;
+
+        /// <summary>
+        /// P/Invoke bindings for macOS CoreFoundation CFRunLoop.
+        /// Isolated in a nested class so the DllImport is only JIT-resolved on macOS.
+        /// Processing the CFRunLoop is required to prevent deadlocks when the native
+        /// MSAL broker runtime uses dispatch_sync to the main GCD queue (e.g. during
+        /// FallbackToNativeMsal on devices without an SSO extension).
+        /// </summary>
+        private static class CoreFoundationInterop
+        {
+            private const string CoreFoundationLib =
+                "/System/Library/Frameworks/CoreFoundation.framework/CoreFoundation";
+            private const uint KCFStringEncodingUTF8 = 0x08000100;
+
+            [DllImport(CoreFoundationLib)]
+            private static extern int CFRunLoopRunInMode(
+                IntPtr mode, double seconds,
+                [MarshalAs(UnmanagedType.I1)] bool returnAfterSourceHandled);
+
+            [DllImport(CoreFoundationLib)]
+            private static extern IntPtr CFStringCreateWithCString(
+                IntPtr alloc, string cStr, uint encoding);
+
+            private static IntPtr s_defaultMode;
+
+            private static IntPtr GetDefaultMode()
+            {
+                if (s_defaultMode == IntPtr.Zero)
+                {
+                    s_defaultMode = CFStringCreateWithCString(
+                        IntPtr.Zero, "kCFRunLoopDefaultMode", KCFStringEncodingUTF8);
+                }
+
+                return s_defaultMode;
+            }
+
+            /// <summary>
+            /// Process one iteration of the macOS CFRunLoop for the given duration.
+            /// This allows GCD dispatch_sync calls targeting the main queue to execute,
+            /// preventing the deadlock that occurs when native broker code falls back
+            /// to MSAL native on non-Intune macOS devices.
+            /// </summary>
+            public static void ProcessRunLoop(double seconds)
+            {
+                CFRunLoopRunInMode(GetDefaultMode(), seconds, false);
+            }
+        }
 
         // Singleton mode
         private static readonly Lazy<MacMainThreadScheduler> _instance = new Lazy<MacMainThreadScheduler>(() => new MacMainThreadScheduler());
@@ -152,7 +200,18 @@ namespace Microsoft.Identity.Client.Utils
                         }
                     }
                     // Sleep for a short interval to avoid busy-waiting and reduce CPU usage while waiting for new actions in the queue.
-                    Thread.Sleep(WorkerSleepInMilliseconds);
+                    // On macOS, we must process the CFRunLoop instead of sleeping. The native MSAL broker
+                    // runtime may use dispatch_sync to the main GCD queue (e.g. during FallbackToNativeMsal
+                    // on devices without an SSO extension). Without processing the run loop, dispatch_sync
+                    // blocks forever because the main thread never services the GCD queue → deadlock.
+                    if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                    {
+                        CoreFoundationInterop.ProcessRunLoop(WorkerSleepInMilliseconds / 1000.0);
+                    }
+                    else
+                    {
+                        Thread.Sleep(WorkerSleepInMilliseconds);
+                    }
                 }
             }
             finally
