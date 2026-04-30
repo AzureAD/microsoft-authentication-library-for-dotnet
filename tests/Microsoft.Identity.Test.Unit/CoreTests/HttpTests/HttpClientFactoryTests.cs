@@ -45,20 +45,39 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
         }
 
         [TestMethod]
-        public void TestHttpClientIsNotCached()
+        public void TestHttpClientWithSameCallback_ReturnsCachedInstance()
         {
             // Arrange
+            SimpleHttpClientFactory.ResetStaticStateForTest();
             var factory = new SimpleHttpClientFactory();
             Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> customCallback = (sender, cert, chain, errors) => true;
 
-            // Act
+            // Act - same delegate instance passed on both calls
             HttpClient client1 = factory.GetHttpClient(customCallback);
             HttpClient client2 = factory.GetHttpClient(customCallback);
 
-            // Assert
+            // Assert - same delegate → same cached HttpClient (avoids socket exhaustion)
+            Assert.IsNotNull(client1);
+            Assert.AreSame(client1, client2);
+        }
+
+        [TestMethod]
+        public void TestHttpClientWithDifferentCallbacks_ReturnsDifferentInstances()
+        {
+            // Arrange
+            SimpleHttpClientFactory.ResetStaticStateForTest();
+            var factory = new SimpleHttpClientFactory();
+            Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> callback1 = (sender, cert, chain, errors) => true;
+            Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> callback2 = (sender, cert, chain, errors) => false;
+
+            // Act - different delegate instances passed
+            HttpClient client1 = factory.GetHttpClient(callback1);
+            HttpClient client2 = factory.GetHttpClient(callback2);
+
+            // Assert - different callbacks → different HttpClient instances
             Assert.IsNotNull(client1);
             Assert.IsNotNull(client2);
-            Assert.AreNotSame(client1, client2); // A new instance should be created each time to ensure callback is applied
+            Assert.AreNotSame(client1, client2);
         }
 
         [TestMethod]
