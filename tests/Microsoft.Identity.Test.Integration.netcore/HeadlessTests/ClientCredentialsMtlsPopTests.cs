@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -7,6 +7,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Test.Common.Core.Helpers;
@@ -21,7 +22,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     // POP tests only work on the allow listed SNI app
     // and tenant ("bea21ebe-8b64-4d06-9f6d-6a889b120a7c") - MSI team tenant
     [TestClass]
-    public class ClientCredentialsMtlsPopTests 
+    public class ClientCredentialsMtlsPopTests
     {
         private const string MsiAllowListedAppIdforSNI = "163ffef9-a313-45b4-ab2f-c7e2f5e0e23e";
         private const string TokenExchangeUrl = "api://AzureADTokenExchange/.default";
@@ -46,7 +47,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             IConfidentialClientApplication confidentialApp = ConfidentialClientApplicationBuilder.Create(MsiAllowListedAppIdforSNI)
                 .WithAuthority("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c")
                 .WithAzureRegion("westus3") //test slice region 
-                .WithCertificate(cert, true)  
+                .WithCertificate(cert, true)
                 .WithTestLogging()
                 .Build();
 
@@ -66,6 +67,68 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(cert.Thumbprint,
                             authResult.BindingCertificate.Thumbprint,
                             "BindingCertificate must match the certificate supplied via WithCertificate().");
+
+            // Simulate cache retrieval to verify MTLS configuration is cached properly
+            authResult = await confidentialApp
+               .AcquireTokenForClient(appScopes)
+               .WithMtlsProofOfPossession()
+               .ExecuteAsync()
+               .ConfigureAwait(false);
+
+            // Assert: Verify that the token was fetched from cache on the second request
+            Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource, "Token should be retrieved from cache");
+
+            Assert.IsNotNull(authResult.BindingCertificate, "BindingCertificate should be set in SNI flow.");
+            Assert.AreEqual(cert.Thumbprint,
+                            authResult.BindingCertificate.Thumbprint,
+                            "BindingCertificate must match the certificate supplied via WithCertificate().");
+        }
+
+        [RunOn(SkipConditions.Linux)] // POP is not supported on Linux
+        public async Task Sni_Gets_Pop_Token_WithGlobalEndpoint_TestAsync()
+        {
+            // Arrange: validate lab setup before executing the test flow.
+            _ = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
+
+            X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
+
+            string[] appScopes = new[] { "https://vault.azure.net/.default" };
+
+            // Build Confidential Client Application with SNI certificate — NO region configured
+            IConfidentialClientApplication confidentialApp = ConfidentialClientApplicationBuilder.Create(MsiAllowListedAppIdforSNI)
+                .WithAuthority("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c")
+                .WithCertificate(cert, true)
+                .WithTestLogging()
+                .Build();
+
+            // Act: Acquire token with MTLS Proof of Possession at Request level (global endpoint)
+            AuthenticationResult authResult = await confidentialApp
+                .AcquireTokenForClient(appScopes)
+                .WithMtlsProofOfPossession()
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            // Assert: Check that the MTLS PoP token acquisition was successful
+            Assert.IsNotNull(authResult, "The authentication result should not be null.");
+            Assert.AreEqual(Constants.MtlsPoPTokenType, authResult.TokenType, "Token type should be MTLS PoP");
+            Assert.IsNotNull(authResult.AccessToken, "Access token should not be null");
+
+            Assert.IsNotNull(authResult.BindingCertificate, "BindingCertificate should be set in SNI flow.");
+            Assert.AreEqual(cert.Thumbprint,
+                            authResult.BindingCertificate.Thumbprint,
+                            "BindingCertificate must match the certificate supplied via WithCertificate().");
+
+            // Verify global mTLS endpoint was used (no region prefix)
+            Assert.IsTrue(
+                System.Uri.TryCreate(
+                    authResult.AuthenticationResultMetadata.TokenEndpoint,
+                    System.UriKind.Absolute,
+                    out System.Uri tokenEndpointUri),
+                "Token endpoint should be a valid absolute URI.");
+            Assert.AreEqual(
+                "mtlsauth.microsoft.com",
+                tokenEndpointUri.Host,
+                "Should use global mtlsauth endpoint when no region is configured.");
 
             // Simulate cache retrieval to verify MTLS configuration is cached properly
             authResult = await confidentialApp
@@ -118,7 +181,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Guid expectedCorrelationId = Guid.NewGuid();
 
             IConfidentialClientApplication assertionApp = ConfidentialClientApplicationBuilder.Create(MsiAllowListedAppIdforSNI)
-                .WithExperimentalFeatures()
                 .WithAuthority("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c")
                 .WithAzureRegion("westus3")
                 .WithClientAssertion((AssertionRequestOptions options, CancellationToken ct) =>
@@ -218,7 +280,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             bool sawClientAssertionTypeParam = false;
 
             IConfidentialClientApplication assertionApp = ConfidentialClientApplicationBuilder.Create(MsiAllowListedAppIdforSNI)
-                .WithExperimentalFeatures()
                 .WithAuthority("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c")
                 .WithAzureRegion("westus3")
                 .WithClientAssertion((AssertionRequestOptions options, CancellationToken ct) =>
@@ -276,6 +337,166 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             // Optional: if you rely on regional mTLS endpoints, check the host
             StringAssert.Contains(requestUriSeen ?? "", "mtlsauth.microsoft.com");
+        }
+
+        [RunOn(SkipConditions.Linux)] // mTLS is not supported on Linux
+        public async Task Sni_Over_Mtls_Gets_Bearer_Token_Successfully_TestAsync()
+        {
+            X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
+
+            string[] appScopes = new[] { "https://vault.azure.net/.default" };
+
+            var certificateOptions = new CertificateOptions
+            {
+                SendCertificateOverMtls = true
+            };
+
+            // Build Confidential Client Application with mTLS Bearer transport
+            IConfidentialClientApplication confidentialApp = ConfidentialClientApplicationBuilder.Create(MsiAllowListedAppIdforSNI)
+                .WithAuthority("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c")
+                .WithAzureRegion("westus3") //test slice region
+                .WithCertificate(cert, certificateOptions)
+                .WithTestLogging()
+                .Build();
+
+            // Act: Acquire token - should be Bearer via mTLS transport
+            AuthenticationResult authResult = await confidentialApp
+                .AcquireTokenForClient(appScopes)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            // Assert: Check that a Bearer token was acquired
+            Assert.IsNotNull(authResult, "The authentication result should not be null.");
+            Assert.AreEqual("Bearer", authResult.TokenType, "Token type should be Bearer for mTLS Bearer flow");
+            Assert.IsNotNull(authResult.AccessToken, "Access token should not be null");
+
+            // Verify the mTLS transport was actually used (regional mTLS endpoint)
+            Assert.IsNotNull(authResult.AuthenticationResultMetadata.TokenEndpoint,
+                "TokenEndpoint should be set for network requests.");
+            StringAssert.Contains(authResult.AuthenticationResultMetadata.TokenEndpoint, "mtlsauth",
+                "SendCertificateOverMtls should route through the mTLS regional endpoint.");
+
+            // Verify cache retrieval still works with mTLS Bearer configuration
+            AuthenticationResult cachedResult = await confidentialApp
+               .AcquireTokenForClient(appScopes)
+               .ExecuteAsync()
+               .ConfigureAwait(false);
+
+            Assert.AreEqual(TokenSource.Cache, cachedResult.AuthenticationResultMetadata.TokenSource, "Token should be retrieved from cache");
+        }
+
+        [RunOn(SkipConditions.Linux)]
+        public async Task Sni_Gets_Pop_Token_WithSendCertificateOverMtls_False_TestAsync()
+        {
+            await Sni_Gets_Pop_Token_WithCertificateOptionsAsync(sendCertificateOverMtls: false).ConfigureAwait(false);
+        }
+
+        [RunOn(SkipConditions.Linux)]
+        public async Task Sni_Gets_Pop_Token_WithSendCertificateOverMtls_True_TestAsync()
+        {
+            await Sni_Gets_Pop_Token_WithCertificateOptionsAsync(sendCertificateOverMtls: true).ConfigureAwait(false);
+        }
+
+        private static async Task Sni_Gets_Pop_Token_WithCertificateOptionsAsync(bool sendCertificateOverMtls)
+        {
+            // Arrange
+            X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
+
+            string[] appScopes = new[] { "https://vault.azure.net/.default" };
+
+            var certificateOptions = new CertificateOptions
+            {
+                SendCertificateOverMtls = sendCertificateOverMtls
+            };
+
+            // Build with CertificateOptions overload
+            IConfidentialClientApplication confidentialApp = ConfidentialClientApplicationBuilder.Create(MsiAllowListedAppIdforSNI)
+                .WithAuthority("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c")
+                .WithAzureRegion("westus3")
+                .WithCertificate(cert, certificateOptions)
+                .WithTestLogging()
+                .Build();
+
+            // Act: WithMtlsProofOfPossession should always produce PoP, regardless of SendCertificateOverMtls
+            AuthenticationResult authResult = await confidentialApp
+                .AcquireTokenForClient(appScopes)
+                .WithMtlsProofOfPossession()
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            // Assert
+            Assert.IsNotNull(authResult, "The authentication result should not be null.");
+            Assert.AreEqual(Constants.MtlsPoPTokenType, authResult.TokenType, "Token type should be MTLS PoP");
+            Assert.IsNotNull(authResult.AccessToken, "Access token should not be null");
+            Assert.IsNotNull(authResult.BindingCertificate, "BindingCertificate should be set in SNI flow.");
+            Assert.AreEqual(cert.Thumbprint, authResult.BindingCertificate.Thumbprint,
+                "BindingCertificate must match the certificate supplied via WithCertificate().");
+        }
+
+        [RunOn(SkipConditions.Linux)]
+        public async Task Sni_AssertionFlow_GlobalEndpoint_Uses_JwtPop_And_Succeeds_TestAsync()
+        {
+            X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
+
+            // Step 1: obtain a real JWT to reuse as the "assertion" — using regional for first leg
+            IConfidentialClientApplication firstApp = ConfidentialClientApplicationBuilder.Create(MsiAllowListedAppIdforSNI)
+                .WithAuthority("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c")
+                .WithAzureRegion("westus3")
+                .WithCertificate(cert, true)
+                .WithTestLogging()
+                .Build();
+
+            AuthenticationResult first = await firstApp
+                .AcquireTokenForClient(new[] { TokenExchangeUrl })
+                .WithMtlsProofOfPossession()
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            string assertionJwt = first.AccessToken;
+            Assert.IsFalse(string.IsNullOrEmpty(assertionJwt), "First leg did not return an access token to reuse as assertion.");
+
+            // Step 2: build the assertion-based app — NO region configured (global endpoint)
+            bool assertionProviderCalled = false;
+            string requestUriSeen = null;
+
+            IConfidentialClientApplication assertionApp = ConfidentialClientApplicationBuilder.Create(MsiAllowListedAppIdforSNI)
+                .WithExperimentalFeatures()
+                .WithAuthority("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c")
+                .WithClientAssertion((AssertionRequestOptions options, CancellationToken ct) =>
+                {
+                    assertionProviderCalled = true;
+
+                    return Task.FromResult(new ClientSignedAssertion
+                    {
+                        Assertion = assertionJwt,
+                        TokenBindingCertificate = cert
+                    });
+                })
+                .WithTestLogging()
+                .Build();
+
+            // Step 3: second leg should succeed using global mTLS endpoint
+            AuthenticationResult second = await assertionApp
+                .AcquireTokenForClient(new[] { "https://vault.azure.net/.default" })
+                .WithMtlsProofOfPossession()
+                .OnBeforeTokenRequest(data =>
+                {
+                    requestUriSeen = data.RequestUri?.ToString();
+                    return Task.CompletedTask;
+                })
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            // Success assertions
+            Assert.IsNotNull(second, "Second leg returned null AuthenticationResult.");
+            Assert.IsFalse(string.IsNullOrEmpty(second.AccessToken), "Second leg did not return an access token.");
+            Assert.IsTrue(assertionProviderCalled, "Client assertion provider should have been invoked.");
+
+            // Verify global mTLS endpoint was used
+            Assert.IsFalse(string.IsNullOrEmpty(requestUriSeen), "Expected token request URI to be captured.");
+            var requestUri = new System.Uri(requestUriSeen);
+            Assert.AreEqual("mtlsauth.microsoft.com", requestUri.Host,
+                "Should use global mtlsauth endpoint when no region is configured.");
         }
     }
 }
