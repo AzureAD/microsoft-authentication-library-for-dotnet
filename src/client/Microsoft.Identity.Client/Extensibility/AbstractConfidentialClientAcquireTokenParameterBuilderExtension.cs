@@ -65,7 +65,9 @@ namespace Microsoft.Identity.Client.Extensibility
         /// <b>Mixing attributed and non-attributed reads against the same user assertion can
         /// return unintended cache entries or fail with <c>multiple_matching_tokens_detected</c>.</b>
         /// Be consistent: if you used <c>WithAttributeTokens</c> on a write, use it on every
-        /// subsequent read for that assertion.
+        /// subsequent read for that assertion. Callers that require strict per-set cache isolation
+        /// across different attribute-token sets should use separate <see cref="IConfidentialClientApplication"/>
+        /// instances.
         /// </para>
         /// </remarks>
         /// <exception cref="ArgumentException">Thrown when any token contains embedded whitespace.</exception>
