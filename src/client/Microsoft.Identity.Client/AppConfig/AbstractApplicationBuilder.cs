@@ -190,6 +190,13 @@ namespace Microsoft.Identity.Client
                     MsalErrorMessage.InternalCacheDisabledMutuallyExclusiveMessage);
             }
 
+            if (CacheOptions.IsDisabledFor(options) && Config.IsPublicClient)
+            {
+                throw new MsalClientException(
+                    MsalError.InvalidRequest,
+                    MsalErrorMessage.InternalCacheDisabledNotSupportedForPublicClient);
+            }
+
             Config.AccessorOptions = options;
             return this as T;
 #endif

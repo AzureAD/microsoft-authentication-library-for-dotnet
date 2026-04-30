@@ -346,27 +346,20 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             }
         }
 
-        /// <summary>AcquireTokenSilent throws MsalUiRequiredException (the established "silent failed" contract) when the internal cache is disabled.</summary>
+        /// <summary>DisableInternalCacheOptions throws at configuration time for public client applications — the feature is confidential client only.</summary>
         [TestMethod]
-        public async Task DisableInternalCacheOptions_AcquireTokenSilent_ThrowsWithCorrectError_Async()
+        public void DisableInternalCacheOptions_PublicClient_ThrowsOnWithCacheOptions()
         {
-            var app = PublicClientApplicationBuilder
-                .Create(TestConstants.ClientId)
-                .WithCacheOptions(CacheOptions.DisableInternalCacheOptions)
-                .Build();
+            var ex = AssertException.Throws<MsalClientException>(
+                () => PublicClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithCacheOptions(CacheOptions.DisableInternalCacheOptions)
+                    .Build());
 
-            var account = new Account("aid.tid", "user@contoso.com", "login.microsoftonline.com");
-
-            var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(
-                () => app.AcquireTokenSilent(TestConstants.s_scope, account).ExecuteAsync())
-                .ConfigureAwait(false);
-
-            Assert.AreEqual(MsalError.InternalCacheDisabled, ex.ErrorCode,
-                "The error code should identify that the internal cache is disabled.");
-            StringAssert.Contains(ex.Message, "AcquireTokenByRefreshToken",
-                "The error message should guide the caller towards AcquireTokenByRefreshToken.");
-            Assert.AreEqual(UiRequiredExceptionClassification.AcquireTokenSilentFailed, ex.Classification,
-                "Classification should signal that silent auth failed.");
+            Assert.AreEqual(MsalError.InvalidRequest, ex.ErrorCode,
+                "The error code should be InvalidRequest.");
+            StringAssert.Contains(ex.Message, "public client",
+                "The error message should explain that this option is not supported for public clients.");
         }
 
         /// <summary>Mutual exclusivity: IsInternalCacheDisabled and UseSharedCache cannot both be set.</summary>

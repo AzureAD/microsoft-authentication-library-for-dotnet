@@ -469,5 +469,9 @@ namespace Microsoft.Identity.Client
         public const string InternalCacheDisabledMutuallyExclusiveMessage =
             "CacheOptions.IsInternalCacheDisabled and CacheOptions.UseSharedCache are mutually exclusive. " +
             "Set only one of these options.";
+
+        public const string InternalCacheDisabledNotSupportedForPublicClient =
+            "CacheOptions.DisableInternalCacheOptions is not supported for public client applications. " +
+            "This option is intended for confidential client flows where the application manages its own token cache.";
     }
 }
