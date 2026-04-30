@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System.Globalization;
@@ -460,5 +460,18 @@ namespace Microsoft.Identity.Client
             "configured via WithCertificate(). Non-certificate credentials (client secrets, static signed " +
             "assertions, and string-returning assertion delegates) are not supported. " +
             "Remove SendCertificateOverMtls or switch to a certificate credential.";
+
+        public const string InternalCacheDisabledMessage =
+            "Silent token acquisition is not supported when the internal cache is disabled via CacheOptions.DisableInternalCacheOptions. " +
+            "For confidential client flows, retrieve the refresh token using AuthenticationResultExtensions.GetRefreshToken() and call AcquireTokenByRefreshToken, " +
+            "or use another interactive flow.";
+
+        public const string InternalCacheDisabledMutuallyExclusiveMessage =
+            "CacheOptions.IsInternalCacheDisabled and CacheOptions.UseSharedCache are mutually exclusive. " +
+            "Set only one of these options.";
+
+        public const string InternalCacheDisabledNotSupportedForPublicClient =
+            "CacheOptions.DisableInternalCacheOptions is not supported for public client applications. " +
+            "This option is intended for confidential client flows where the application manages its own token cache.";
     }
 }

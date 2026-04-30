@@ -1,10 +1,9 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache.Items;
@@ -42,34 +41,73 @@ namespace Microsoft.Identity.Client.Cache
         #region ICacheSessionManager implementation
         public ITokenCacheInternal TokenCacheInternal { get; }
 
+        private bool IsInternalCacheDisabled =>
+            CacheOptions.IsDisabledFor(_requestParams.RequestContext.ServiceBundle.Config.AccessorOptions);
+
+        private bool ShouldSkipInternalCacheRead(string operationName)
+        {
+            if (!IsInternalCacheDisabled)
+            {
+                return false;
+            }
+            _requestParams.RequestContext.Logger.Verbose(
+                () => $"[Cache Session Manager] Internal cache disabled. Skipping {operationName}.");
+            return true;
+        }
+
+        private async Task RefreshCacheForReadOperationsIfEnabledAsync(string operationName)
+        {
+            if (ShouldSkipInternalCacheRead(operationName))
+            {
+                return;
+            }
+            await RefreshCacheForReadOperationsAsync().ConfigureAwait(false);
+        }
+
         public async Task<MsalAccessTokenCacheItem> FindAccessTokenAsync()
         {
-            await RefreshCacheForReadOperationsAsync().ConfigureAwait(false);
+            await RefreshCacheForReadOperationsIfEnabledAsync("access token lookup").ConfigureAwait(false);
+            if (IsInternalCacheDisabled)
+            {
+                return null;
+            }
             return await TokenCacheInternal.FindAccessTokenAsync(_requestParams).ConfigureAwait(false);
         }
 
         public async Task<Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem, Account>> SaveTokenResponseAsync(MsalTokenResponse tokenResponse)
         {
             var result = await TokenCacheInternal.SaveTokenResponseAsync(_requestParams, tokenResponse).ConfigureAwait(false);
-            RequestContext.ApiEvent.CachedAccessTokenCount = TokenCacheInternal.Accessor.EntryCount;
+            RequestContext.ApiEvent.CachedAccessTokenCount = GetInternalCacheEntryCountForTelemetry();
             return result;
         }
 
         public async Task<Account> GetAccountAssociatedWithAccessTokenAsync(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
         {
-            await RefreshCacheForReadOperationsAsync().ConfigureAwait(false);
+            await RefreshCacheForReadOperationsIfEnabledAsync("account lookup for access token").ConfigureAwait(false);
+            if (IsInternalCacheDisabled)
+            {
+                return null;
+            }
             return await TokenCacheInternal.GetAccountAssociatedWithAccessTokenAsync(_requestParams, msalAccessTokenCacheItem).ConfigureAwait(false);
         }
 
         public async Task<MsalIdTokenCacheItem> GetIdTokenCacheItemAsync(MsalAccessTokenCacheItem accessTokenCacheItem)
         {
-            await RefreshCacheForReadOperationsAsync().ConfigureAwait(false);
+            await RefreshCacheForReadOperationsIfEnabledAsync("ID token lookup").ConfigureAwait(false);
+            if (IsInternalCacheDisabled)
+            {
+                return null;
+            }
             return TokenCacheInternal.GetIdTokenCacheItem(accessTokenCacheItem);
         }
 
         public async Task<MsalRefreshTokenCacheItem> FindFamilyRefreshTokenAsync(string familyId)
         {
-            await RefreshCacheForReadOperationsAsync().ConfigureAwait(false);
+            await RefreshCacheForReadOperationsIfEnabledAsync("family refresh token lookup").ConfigureAwait(false);
+            if (IsInternalCacheDisabled)
+            {
+                return null;
+            }
 
             if (string.IsNullOrEmpty(familyId))
             {
@@ -81,19 +119,31 @@ namespace Microsoft.Identity.Client.Cache
 
         public async Task<MsalRefreshTokenCacheItem> FindRefreshTokenAsync()
         {
-            await RefreshCacheForReadOperationsAsync().ConfigureAwait(false);
+            await RefreshCacheForReadOperationsIfEnabledAsync("refresh token lookup").ConfigureAwait(false);
+            if (IsInternalCacheDisabled)
+            {
+                return null;
+            }
             return await TokenCacheInternal.FindRefreshTokenAsync(_requestParams).ConfigureAwait(false);
         }
 
         public async Task<bool?> IsAppFociMemberAsync(string familyId)
         {
-            await RefreshCacheForReadOperationsAsync().ConfigureAwait(false);
+            await RefreshCacheForReadOperationsIfEnabledAsync("FOCI membership lookup").ConfigureAwait(false);
+            if (IsInternalCacheDisabled)
+            {
+                return null;
+            }
             return await TokenCacheInternal.IsFociMemberAsync(_requestParams, familyId).ConfigureAwait(false);
         }
 
         public async Task<IEnumerable<IAccount>> GetAccountsAsync()
         {
-            await RefreshCacheForReadOperationsAsync().ConfigureAwait(false);
+            await RefreshCacheForReadOperationsIfEnabledAsync("accounts lookup").ConfigureAwait(false);
+            if (IsInternalCacheDisabled)
+            {
+                return System.Array.Empty<IAccount>();
+            }
             return await TokenCacheInternal.GetAccountsAsync(_requestParams).ConfigureAwait(false);
         }
 
@@ -184,7 +234,17 @@ namespace Microsoft.Identity.Client.Cache
                 RequestContext.ApiEvent.CacheLevel = CacheLevel.L1Cache;
             }
 
-            RequestContext.ApiEvent.CachedAccessTokenCount = TokenCacheInternal.Accessor.EntryCount;
+            RequestContext.ApiEvent.CachedAccessTokenCount = GetInternalCacheEntryCountForTelemetry();
+        }
+
+        private int GetInternalCacheEntryCountForTelemetry()
+        {
+            if (IsInternalCacheDisabled)
+            {
+                return 0;
+            }
+
+            return TokenCacheInternal.Accessor.EntryCount;
         }
     }
 }

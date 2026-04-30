@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -404,15 +404,95 @@ namespace Microsoft.Identity.Test.Unit
             Assert.IsNotNull(exClient.ErrorCode);
         }
 
-        private void CreateApplication()
+        private void CreateApplication(CacheOptions cacheOptions = null)
         {
-            _cca = ConfidentialClientApplicationBuilder
+            var builder = ConfidentialClientApplicationBuilder
                         .Create(TestConstants.ClientId)
                         .WithExperimentalFeatures()
                         .WithAuthority(TestConstants.AuthorityUtidTenant)
                         .WithClientSecret(TestConstants.ClientSecret)
-                        .WithHttpManager(_harness.HttpManager)
-                        .BuildConcrete();
+                        .WithHttpManager(_harness.HttpManager);
+
+            if (cacheOptions != null)
+            {
+                builder = builder.WithCacheOptions(cacheOptions);
+            }
+
+            _cca = builder.BuildConcrete();
+        }
+
+        [TestMethod]
+        public async Task DisableInternalCacheOptions_AcquireTokenForClient_OTelEmitsCacheDisabledReason_Async()
+        {
+            using (_harness = CreateTestHarness())
+            {
+                CreateApplication(cacheOptions: CacheOptions.DisableInternalCacheOptions);
+
+                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                _harness.HttpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                AuthenticationResult result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.AreEqual(CacheRefreshReason.CacheDisabled, result.AuthenticationResultMetadata.CacheRefreshReason);
+
+                s_meterProvider.ForceFlush();
+
+                var msalSuccess = _exportedMetrics.FirstOrDefault(m => m.Name == "MsalSuccess");
+                Assert.IsNotNull(msalSuccess, "MsalSuccess metric should be emitted.");
+
+                foreach (var metricPoint in msalSuccess.GetMetricPoints())
+                {
+                    AssertTagValue(metricPoint.Tags, TelemetryConstants.CacheRefreshReason, CacheRefreshReason.CacheDisabled);
+                }
+            }
+        }
+
+        [TestMethod]
+        public async Task DisableInternalCacheOptions_AcquireTokenOnBehalfOf_OTelEmitsCacheDisabledReason_Async()
+        {
+            using (_harness = CreateTestHarness())
+            {
+                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost();
+
+                var cca = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithAuthority(TestConstants.AuthorityCommonTenant)
+                    .WithHttpManager(_harness.HttpManager)
+                    .WithCacheOptions(CacheOptions.DisableInternalCacheOptions)
+                    .BuildConcrete();
+
+                AuthenticationResult result = await cca.AcquireTokenOnBehalfOf(
+                    TestConstants.s_scope, new UserAssertion(TestConstants.DefaultAccessToken))
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.AreEqual(CacheRefreshReason.CacheDisabled, result.AuthenticationResultMetadata.CacheRefreshReason);
+
+                s_meterProvider.ForceFlush();
+
+                var msalSuccess = _exportedMetrics.FirstOrDefault(m => m.Name == "MsalSuccess");
+                Assert.IsNotNull(msalSuccess, "MsalSuccess metric should be emitted.");
+
+                foreach (var metricPoint in msalSuccess.GetMetricPoints())
+                {
+                    AssertTagValue(metricPoint.Tags, TelemetryConstants.CacheRefreshReason, CacheRefreshReason.CacheDisabled);
+                }
+            }
+        }
+
+        private void AssertTagValue(ReadOnlyTagCollection tags, string tagKey, object expectedValue)
+        {
+            IDictionary<string, object> tagDictionary = new Dictionary<string, object>();
+            foreach (var tag in tags)
+            {
+                tagDictionary[tag.Key] = tag.Value;
+            }
+            Assert.IsTrue(tagDictionary.ContainsKey(tagKey), $"Tag '{tagKey}' is missing from metric point.");
+            Assert.AreEqual(expectedValue, tagDictionary[tagKey], $"Tag '{tagKey}' has unexpected value.");
         }
 
         [TestMethod]
