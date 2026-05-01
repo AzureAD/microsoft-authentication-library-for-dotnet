@@ -5,11 +5,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
-#if SUPPORTS_SYSTEM_TEXT_JSON
 using Microsoft.Identity.Client.Platforms.net;
-#else
-using Microsoft.Identity.Json;
-#endif
 namespace Microsoft.Identity.Client.UI
 {
     internal enum AuthorizationStatus
@@ -169,24 +165,12 @@ namespace Microsoft.Identity.Client.UI
 
         public AuthorizationStatus Status { get; private set; }
 
-#if !SUPPORTS_SYSTEM_TEXT_JSON
-        [JsonProperty]
-#endif
         public string Code { get; set; }
 
-#if !SUPPORTS_SYSTEM_TEXT_JSON
-        [JsonProperty]
-#endif
         public string Error { get; set; }
 
-#if !SUPPORTS_SYSTEM_TEXT_JSON
-        [JsonProperty]
-#endif
         public string ErrorDescription { get; set; }
 
-#if !SUPPORTS_SYSTEM_TEXT_JSON
-        [JsonProperty]
-#endif
         public string CloudInstanceHost { get; set; }
 
         public string ClientInfo { get; set; }

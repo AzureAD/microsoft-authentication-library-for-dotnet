@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -9,7 +9,8 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Newtonsoft.Json.Linq;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace Microsoft.Identity.Test.Unit.CacheTests
 {
@@ -31,16 +32,21 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         private const string Scopes = "tasks.read user.read openid profile offline_access";
         private const string RedirectUri = "msalb6c69a37-df96-4db0-9088-2ab96e1d8215://auth";
 
-        // Our json schemas are flat.  This will NOT work for deeply nested json values.  You could check Assert.IsTrue(JToken.DeepEquals()) if you need that.
+        // Our json schemas are flat.  This will NOT work for deeply nested json values.
         private void AssertAreJsonStringsEquivalent(string expectedJson, string actualJson)
         {
-            var expectedObj = JObject.Parse(expectedJson);
-            var actualObj = JObject.Parse(actualJson);
-
-            var expectedDict = expectedObj.ToObject<Dictionary<string, object>>();
-            var actualDict = actualObj.ToObject<Dictionary<string, object>>();
+            var expectedObj = JsonNode.Parse(expectedJson).AsObject();
+            var actualObj = JsonNode.Parse(actualJson).AsObject();
 
             string message = $"{Environment.NewLine}{Environment.NewLine}Json Expected <{expectedJson}> {Environment.NewLine}{Environment.NewLine}Json Actual <{actualJson}>";
+
+            var expectedDict = new Dictionary<string, string>();
+            foreach (var kvp in expectedObj)
+                expectedDict[kvp.Key] = kvp.Value?.ToJsonString() ?? "null";
+
+            var actualDict = new Dictionary<string, string>();
+            foreach (var kvp in actualObj)
+                actualDict[kvp.Key] = kvp.Value?.ToJsonString() ?? "null";
 
             foreach (var kvp in expectedDict)
             {
@@ -51,7 +57,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             foreach (var kvp in actualDict)
             {
                 Assert.IsTrue(expectedDict.ContainsKey(kvp.Key), $"actualJson has unexpected key: {kvp.Key} {message}");
-                Assert.AreEqual(kvp.Value, expectedDict[kvp.Key], $"actualJson has different value for ({kvp.Key}).  Expected: <{expectedDict[kvp.Key]}>  Actual: <{kvp.Key}> {message}");
+                Assert.AreEqual(expectedDict[kvp.Key], kvp.Value, $"actualJson has different value for ({kvp.Key}).  Expected: <{expectedDict[kvp.Key]}>  Actual: <{kvp.Value}> {message}");
             }
         }
 
@@ -72,7 +78,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             string cachedAt = DateTimeHelpers.DateTimeToUnixTimestamp(currentDate);
 
             // 1. Verify payload
-            var expectedJsonObject = new JObject
+            var expectedJsonObject = new JsonObject
             {
                 ["secret"] = "<removed_at>",
                 ["target"] = "Calendars.Read email openid profile Tasks.Read User.Read",
@@ -88,7 +94,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 ["client_info"] = "eyJ1aWQiOiI5ZjQ4ODBkOC04MGJhLTRjNDAtOTdiYy1mN2EyM2M3MDMwODQiLCJ1dGlkIjoiZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhIn0"
             };
 
-            AssertAreJsonStringsEquivalent(expectedJsonObject.ToString(), credential.ToJsonString());
+            AssertAreJsonStringsEquivalent(expectedJsonObject.ToJsonString(), credential.ToJsonString());
 
             // 2. Verify cache key
             IiOSKey key = credential.iOSCacheKey;
@@ -117,7 +123,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 AadTenantId,
                 homeAccountId);
 
-            var expectedJsonObject = new JObject
+            var expectedJsonObject = new JsonObject
             {
                 ["secret"] = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJiNmM2OWEzNy1kZjk2LTRkYjAtOTA4OC0yYWI5NmUxZDgyMTUiLCJpc3MiOiJodHRwczovL2xvZ2luLm1pY3Jvc29mdG9ubGluZS5jb20vZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhL3YyLjAiLCJpYXQiOjE1Mzg1Mzg0MjIsIm5iZiI6MTUzODUzODQyMiwiZXhwIjoxNTM4NTQyMzIyLCJuYW1lIjoiQ2xvdWQgSURMQUIgQmFzaWMgVXNlciIsIm9pZCI6IjlmNDg4MGQ4LTgwYmEtNGM0MC05N2JjLWY3YTIzYzcwMzA4NCIsInByZWZlcnJlZF91c2VybmFtZSI6ImlkbGFiQG1zaWRsYWI0Lm9ubWljcm9zb2Z0LmNvbSIsInN1YiI6Ilk2WWtCZEhOTkxITm1US2VsOUtoUno4d3Jhc3hkTFJGaVAxNEJSUFdybjQiLCJ0aWQiOiJmNjQ1YWQ5Mi1lMzhkLTRkMWEtYjUxMC1kMWIwOWE3NGE4Y2EiLCJ1dGkiOiI2bmNpWDAyU01raTlrNzMtRjFzWkFBIiwidmVyIjoiMi4wIn0.",
                 ["credential_type"] = "IdToken",
@@ -128,7 +134,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 ["client_info"] = "eyJ1aWQiOiI5ZjQ4ODBkOC04MGJhLTRjNDAtOTdiYy1mN2EyM2M3MDMwODQiLCJ1dGlkIjoiZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhIn0"
             };
 
-            AssertAreJsonStringsEquivalent(expectedJsonObject.ToString(), credential.ToJsonString());
+            AssertAreJsonStringsEquivalent(expectedJsonObject.ToJsonString(), credential.ToJsonString());
 
             IiOSKey key = credential.iOSCacheKey;
 
@@ -156,7 +162,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 response,
                 homeAccountId);
 
-            var expectedJsonObject = new JObject
+            var expectedJsonObject = new JsonObject
             {
                 ["secret"] = "<removed_rt>",
                 ["credential_type"] = "RefreshToken",
@@ -166,7 +172,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 ["client_info"] = "eyJ1aWQiOiI5ZjQ4ODBkOC04MGJhLTRjNDAtOTdiYy1mN2EyM2M3MDMwODQiLCJ1dGlkIjoiZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhIn0"
             };
 
-            AssertAreJsonStringsEquivalent(expectedJsonObject.ToString(), credential.ToJsonString());
+            AssertAreJsonStringsEquivalent(expectedJsonObject.ToJsonString(), credential.ToJsonString());
 
             IiOSKey key = credential.iOSCacheKey;
 
@@ -199,7 +205,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 AadTenantId,
                 null);
 
-            var expectedJsonObject = new JObject
+            var expectedJsonObject = new JsonObject
             {
                 ["local_account_id"] = "9f4880d8-80ba-4c40-97bc-f7a23c703084",
                 ["home_account_id"] = "9f4880d8-80ba-4c40-97bc-f7a23c703084.f645ad92-e38d-4d1a-b510-d1b09a74a8ca",
@@ -211,7 +217,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 ["client_info"] = "eyJ1aWQiOiI5ZjQ4ODBkOC04MGJhLTRjNDAtOTdiYy1mN2EyM2M3MDMwODQiLCJ1dGlkIjoiZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhIn0"
             };
 
-            AssertAreJsonStringsEquivalent(expectedJsonObject.ToString(), credential.ToJsonString());
+            AssertAreJsonStringsEquivalent(expectedJsonObject.ToJsonString(), credential.ToJsonString());
 
             IiOSKey key = credential.iOSCacheKey;
 
@@ -246,7 +252,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             string cachedAt = DateTimeHelpers.DateTimeToUnixTimestamp(currentDate);
 
             // 1. Verify payload
-            var expectedJsonObject = new JObject
+            var expectedJsonObject = new JsonObject
             {
                 ["secret"] = "<removed_at>",
                 ["target"] = "openid profile Tasks.Read User.Read",
@@ -262,7 +268,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 ["client_info"] = "eyJ2ZXIiOiIxLjAiLCJzdWIiOiJBQUFBQUFBQUFBQUFBQUFBQUFBQUFNTmVBRnBTTGdsSGlPVHI5SVpISkVBIiwibmFtZSI6Ik9sZ2EgRGFsdG9tIiwicHJlZmVycmVkX3VzZXJuYW1lIjoibXNhbHNka3Rlc3RAb3V0bG9vay5jb20iLCJvaWQiOiIwMDAwMDAwMC0wMDAwLTAwMDAtNDBjMC0zYmFjMTg4ZDAxZDEiLCJ0aWQiOiI5MTg4MDQwZC02YzY3LTRjNWItYjExMi0zNmEzMDRiNjZkYWQiLCJob21lX29pZCI6IjAwMDAwMDAwLTAwMDAtMDAwMC00MGMwLTNiYWMxODhkMDFkMSIsInVpZCI6IjAwMDAwMDAwLTAwMDAtMDAwMC00MGMwLTNiYWMxODhkMDFkMSIsInV0aWQiOiI5MTg4MDQwZC02YzY3LTRjNWItYjExMi0zNmEzMDRiNjZkYWQifQ"
             };
 
-            AssertAreJsonStringsEquivalent(expectedJsonObject.ToString(), credential.ToJsonString());
+            AssertAreJsonStringsEquivalent(expectedJsonObject.ToJsonString(), credential.ToJsonString());
 
             // 2. Verify cache key
             IiOSKey key = credential.iOSCacheKey;
@@ -292,7 +298,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 MsaTenantId,
                 homeAccountId: homeAccountId);
 
-            var expectedJsonObject = new JObject
+            var expectedJsonObject = new JsonObject
             {
                 ["secret"] = "eyJ2ZXIiOiIyLjAiLCJpc3MiOiJodHRwczovL2xvZ2luLm1pY3Jvc29mdG9ubGluZS5jb20vOTE4ODA0MGQtNmM2Ny00YzViLWIxMTItMzZhMzA0YjY2ZGFkL3YyLjAiLCJzdWIiOiJBQUFBQUFBQUFBQUFBQUFBQUFBQUFNTmVBRnBTTGdsSGlPVHI5SVpISkVBIiwiYXVkIjoiYjZjNjlhMzctZGY5Ni00ZGIwLTkwODgtMmFiOTZlMWQ4MjE1IiwiZXhwIjoxNTM4ODg1MjU0LCJpYXQiOjE1Mzg3OTg1NTQsIm5iZiI6MTUzODc5ODU1NCwibmFtZSI6IlRlc3QgVXNlcm5hbWUiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJtc2Fsc2RrdGVzdEBvdXRsb29rLmNvbSIsIm9pZCI6IjAwMDAwMDAwLTAwMDAtMDAwMC00MGMwLTNiYWMxODhkMDFkMSIsInRpZCI6IjkxODgwNDBkLTZjNjctNGM1Yi1iMTEyLTM2YTMwNGI2NmRhZCIsImFpbyI6IkRXZ0tubCFFc2ZWa1NVOGpGVmJ4TTZQaFphUjJFeVhzTUJ5bVJHU1h2UkV1NGkqRm1CVTFSQmw1aEh2TnZvR1NHbHFkQkpGeG5kQXNBNipaM3FaQnIwYzl2YUlSd1VwZUlDVipTWFpqdzghQiIsImFsZyI6IkhTMjU2In0.",
                 ["credential_type"] = "IdToken",
@@ -303,7 +309,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 ["client_info"] = "eyJ2ZXIiOiIxLjAiLCJzdWIiOiJBQUFBQUFBQUFBQUFBQUFBQUFBQUFNTmVBRnBTTGdsSGlPVHI5SVpISkVBIiwibmFtZSI6Ik9sZ2EgRGFsdG9tIiwicHJlZmVycmVkX3VzZXJuYW1lIjoibXNhbHNka3Rlc3RAb3V0bG9vay5jb20iLCJvaWQiOiIwMDAwMDAwMC0wMDAwLTAwMDAtNDBjMC0zYmFjMTg4ZDAxZDEiLCJ0aWQiOiI5MTg4MDQwZC02YzY3LTRjNWItYjExMi0zNmEzMDRiNjZkYWQiLCJob21lX29pZCI6IjAwMDAwMDAwLTAwMDAtMDAwMC00MGMwLTNiYWMxODhkMDFkMSIsInVpZCI6IjAwMDAwMDAwLTAwMDAtMDAwMC00MGMwLTNiYWMxODhkMDFkMSIsInV0aWQiOiI5MTg4MDQwZC02YzY3LTRjNWItYjExMi0zNmEzMDRiNjZkYWQifQ"
             };
 
-            AssertAreJsonStringsEquivalent(expectedJsonObject.ToString(), credential.ToJsonString());
+            AssertAreJsonStringsEquivalent(expectedJsonObject.ToJsonString(), credential.ToJsonString());
 
             IiOSKey key = credential.iOSCacheKey;
 
@@ -331,7 +337,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 response,
                 homeAccountId);
 
-            var expectedJsonObject = new JObject
+            var expectedJsonObject = new JsonObject
             {
                 ["secret"] = "<removed_rt>",
                 ["credential_type"] = "RefreshToken",
@@ -341,7 +347,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 ["client_info"] = "eyJ2ZXIiOiIxLjAiLCJzdWIiOiJBQUFBQUFBQUFBQUFBQUFBQUFBQUFNTmVBRnBTTGdsSGlPVHI5SVpISkVBIiwibmFtZSI6Ik9sZ2EgRGFsdG9tIiwicHJlZmVycmVkX3VzZXJuYW1lIjoibXNhbHNka3Rlc3RAb3V0bG9vay5jb20iLCJvaWQiOiIwMDAwMDAwMC0wMDAwLTAwMDAtNDBjMC0zYmFjMTg4ZDAxZDEiLCJ0aWQiOiI5MTg4MDQwZC02YzY3LTRjNWItYjExMi0zNmEzMDRiNjZkYWQiLCJob21lX29pZCI6IjAwMDAwMDAwLTAwMDAtMDAwMC00MGMwLTNiYWMxODhkMDFkMSIsInVpZCI6IjAwMDAwMDAwLTAwMDAtMDAwMC00MGMwLTNiYWMxODhkMDFkMSIsInV0aWQiOiI5MTg4MDQwZC02YzY3LTRjNWItYjExMi0zNmEzMDRiNjZkYWQifQ"
             };
 
-            AssertAreJsonStringsEquivalent(expectedJsonObject.ToString(), credential.ToJsonString());
+            AssertAreJsonStringsEquivalent(expectedJsonObject.ToJsonString(), credential.ToJsonString());
 
             IiOSKey key = credential.iOSCacheKey;
 
@@ -376,7 +382,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             string cachedAt = DateTimeHelpers.DateTimeToUnixTimestamp(currentDate);
 
             // 1. Verify payload
-            var expectedJsonObject = new JObject
+            var expectedJsonObject = new JsonObject
             {
                 ["secret"] = "<removed_at>",
                 ["target"] = "https://iosmsalb2c.onmicrosoft.com/webapitest/user.read",
@@ -392,7 +398,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 ["client_info"] = "eyJ1aWQiOiJhZDAyMGY4ZS1iMWJhLTQ0YjItYmQ2OS1jMjJiZTg2NzM3ZjUtYjJjXzFfc2lnbmluIiwidXRpZCI6ImJhNmMwZDk0LWE4ZGEtNDViMi04M2FlLTMzODcxZjljMmRkOCJ9"
             };
 
-            AssertAreJsonStringsEquivalent(expectedJsonObject.ToString(), credential.ToJsonString());
+            AssertAreJsonStringsEquivalent(expectedJsonObject.ToJsonString(), credential.ToJsonString());
 
             // 2. Verify cache key
             IiOSKey key = credential.iOSCacheKey;
@@ -422,7 +428,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 B2CTenantId,
                 homeAccountId);
 
-            var expectedJsonObject = new JObject
+            var expectedJsonObject = new JsonObject
             {
                 ["secret"] = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1Mzg4MDQ4NjAsIm5iZiI6MTUzODgwMTI2MCwidmVyIjoiMS4wIiwiaXNzIjoiaHR0cHM6Ly9sb2dpbi5taWNyb3NvZnRvbmxpbmUuY29tL2JhNmMwZDk0LWE4ZGEtNDViMi04M2FlLTMzODcxZjljMmRkOC92Mi4wLyIsInN1YiI6ImFkMDIwZjhlLWIxYmEtNDRiMi1iZDY5LWMyMmJlODY3MzdmNSIsImF1ZCI6IjBhN2Y1MmRkLTI2MGUtNDMyZi05NGRlLWI0NzgyOGMzZjM3MiIsImlhdCI6MTUzODgwMTI2MCwiYXV0aF90aW1lIjoxNTM4ODAxMjYwLCJpZHAiOiJsaXZlLmNvbSIsIm5hbWUiOiJNU0FMIFNESyBUZXN0Iiwib2lkIjoiYWQwMjBmOGUtYjFiYS00NGIyLWJkNjktYzIyYmU4NjczN2Y1IiwiZmFtaWx5X25hbWUiOiJTREsgVGVzdCIsImdpdmVuX25hbWUiOiJNU0FMIiwiZW1haWxzIjpbIm1zYWxzZGt0ZXN0QG91dGxvb2suY29tIl0sInRmcCI6IkIyQ18xX1NpZ25pbiIsImF0X2hhc2giOiJRNE8zSERDbGNhTGw3eTB1VS1iSkFnIn0.",
                 ["credential_type"] = "IdToken",
@@ -433,7 +439,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 ["client_info"] = "eyJ1aWQiOiJhZDAyMGY4ZS1iMWJhLTQ0YjItYmQ2OS1jMjJiZTg2NzM3ZjUtYjJjXzFfc2lnbmluIiwidXRpZCI6ImJhNmMwZDk0LWE4ZGEtNDViMi04M2FlLTMzODcxZjljMmRkOCJ9"
             };
 
-            AssertAreJsonStringsEquivalent(expectedJsonObject.ToString(), credential.ToJsonString());
+            AssertAreJsonStringsEquivalent(expectedJsonObject.ToJsonString(), credential.ToJsonString());
 
             IiOSKey key = credential.iOSCacheKey;
 
@@ -461,7 +467,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 response,
                 homeAccountId);
 
-            var expectedJsonObject = new JObject
+            var expectedJsonObject = new JsonObject
             {
                 ["secret"] = "<removed_rt>",
                 ["credential_type"] = "RefreshToken",
@@ -471,7 +477,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 ["client_info"] = "eyJ1aWQiOiJhZDAyMGY4ZS1iMWJhLTQ0YjItYmQ2OS1jMjJiZTg2NzM3ZjUtYjJjXzFfc2lnbmluIiwidXRpZCI6ImJhNmMwZDk0LWE4ZGEtNDViMi04M2FlLTMzODcxZjljMmRkOCJ9"
             };
 
-            AssertAreJsonStringsEquivalent(expectedJsonObject.ToString(), credential.ToJsonString());
+            AssertAreJsonStringsEquivalent(expectedJsonObject.ToJsonString(), credential.ToJsonString());
 
             IiOSKey key = credential.iOSCacheKey;
 
@@ -504,7 +510,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 B2CTenantId,
                 null);
 
-            var expectedJsonObject = new JObject
+            var expectedJsonObject = new JsonObject
             {
                 ["family_name"] = "SDK Test",
                 ["given_name"] = "MSAL",
@@ -518,7 +524,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 ["client_info"] = "eyJ1aWQiOiJhZDAyMGY4ZS1iMWJhLTQ0YjItYmQ2OS1jMjJiZTg2NzM3ZjUtYjJjXzFfc2lnbmluIiwidXRpZCI6ImJhNmMwZDk0LWE4ZGEtNDViMi04M2FlLTMzODcxZjljMmRkOCJ9"
             };
 
-            AssertAreJsonStringsEquivalent(expectedJsonObject.ToString(), credential.ToJsonString());
+            AssertAreJsonStringsEquivalent(expectedJsonObject.ToJsonString(), credential.ToJsonString());
 
             IiOSKey key = credential.iOSCacheKey;
 
@@ -552,7 +558,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             string cachedAt = DateTimeHelpers.DateTimeToUnixTimestamp(currentDate);
 
             // 1. Verify payload
-            var expectedJsonObject = new JObject
+            var expectedJsonObject = new JsonObject
             {
                 ["secret"] = "<removed_at>",
                 ["target"] = "https://iosmsalb2c.onmicrosoft.com/webapitest/user.read",
@@ -568,7 +574,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 ["client_info"] = "eyJ1aWQiOiJhZDAyMGY4ZS1iMWJhLTQ0YjItYmQ2OS1jMjJiZTg2NzM3ZjUtYjJjXzFfc2lnbmluIiwidXRpZCI6ImJhNmMwZDk0LWE4ZGEtNDViMi04M2FlLTMzODcxZjljMmRkOCJ9"
             };
 
-            AssertAreJsonStringsEquivalent(expectedJsonObject.ToString(), credential.ToJsonString());
+            AssertAreJsonStringsEquivalent(expectedJsonObject.ToJsonString(), credential.ToJsonString());
 
             // 2. Verify cache key
             IiOSKey key = credential.iOSCacheKey;
@@ -598,7 +604,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 B2CTenantId,
                 homeAccountId);
 
-            var expectedJsonObject = new JObject
+            var expectedJsonObject = new JsonObject
             {
                 ["secret"] = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1Mzg4MDQ4NjAsIm5iZiI6MTUzODgwMTI2MCwidmVyIjoiMS4wIiwiaXNzIjoiaHR0cHM6Ly9sb2dpbi5taWNyb3NvZnRvbmxpbmUuY29tL2JhNmMwZDk0LWE4ZGEtNDViMi04M2FlLTMzODcxZjljMmRkOC92Mi4wLyIsInN1YiI6ImFkMDIwZjhlLWIxYmEtNDRiMi1iZDY5LWMyMmJlODY3MzdmNSIsImF1ZCI6IjBhN2Y1MmRkLTI2MGUtNDMyZi05NGRlLWI0NzgyOGMzZjM3MiIsImlhdCI6MTUzODgwMTI2MCwiYXV0aF90aW1lIjoxNTM4ODAxMjYwLCJpZHAiOiJsaXZlLmNvbSIsIm5hbWUiOiJNU0FMIFNESyBUZXN0Iiwib2lkIjoiYWQwMjBmOGUtYjFiYS00NGIyLWJkNjktYzIyYmU4NjczN2Y1IiwiZmFtaWx5X25hbWUiOiJTREsgVGVzdCIsImdpdmVuX25hbWUiOiJNU0FMIiwiZW1haWxzIjpbIm1zYWxzZGt0ZXN0QG91dGxvb2suY29tIl0sInRmcCI6IkIyQ18xX1NpZ25pbiIsImF0X2hhc2giOiJRNE8zSERDbGNhTGw3eTB1VS1iSkFnIiwidGlkIjoiYmE2YzBkOTQtYThkYS00NWIyLTgzYWUtMzM4NzFmOWMyZGQ4IiwicHJlZmVycmVkX3VzZXJuYW1lIjoibXNhbHNka3Rlc3RAb3V0bG9vay5jb20ifQ.",
                 ["credential_type"] = "IdToken",
@@ -609,7 +615,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 ["client_info"] = "eyJ1aWQiOiJhZDAyMGY4ZS1iMWJhLTQ0YjItYmQ2OS1jMjJiZTg2NzM3ZjUtYjJjXzFfc2lnbmluIiwidXRpZCI6ImJhNmMwZDk0LWE4ZGEtNDViMi04M2FlLTMzODcxZjljMmRkOCJ9"
             };
 
-            AssertAreJsonStringsEquivalent(expectedJsonObject.ToString(), credential.ToJsonString());
+            AssertAreJsonStringsEquivalent(expectedJsonObject.ToJsonString(), credential.ToJsonString());
 
             IiOSKey key = credential.iOSCacheKey;
 
@@ -637,7 +643,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 TestConstants.CreateB2CTestTokenResponseWithTenantId(),
                 homeAccountId);
 
-            var expectedJsonObject = new JObject
+            var expectedJsonObject = new JsonObject
             {
                 ["secret"] = "<removed_rt>",
                 ["credential_type"] = "RefreshToken",
@@ -647,7 +653,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 ["client_info"] = "eyJ1aWQiOiJhZDAyMGY4ZS1iMWJhLTQ0YjItYmQ2OS1jMjJiZTg2NzM3ZjUtYjJjXzFfc2lnbmluIiwidXRpZCI6ImJhNmMwZDk0LWE4ZGEtNDViMi04M2FlLTMzODcxZjljMmRkOCJ9"
             };
 
-            AssertAreJsonStringsEquivalent(expectedJsonObject.ToString(), credential.ToJsonString());
+            AssertAreJsonStringsEquivalent(expectedJsonObject.ToJsonString(), credential.ToJsonString());
 
             IiOSKey key = credential.iOSCacheKey;
 
@@ -679,7 +685,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 B2CTenantId,
                 null);
 
-            var expectedJsonObject = new JObject
+            var expectedJsonObject = new JsonObject
             {
                 ["family_name"] = "SDK Test",
                 ["given_name"] = "MSAL",
@@ -693,7 +699,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 ["client_info"] = "eyJ1aWQiOiJhZDAyMGY4ZS1iMWJhLTQ0YjItYmQ2OS1jMjJiZTg2NzM3ZjUtYjJjXzFfc2lnbmluIiwidXRpZCI6ImJhNmMwZDk0LWE4ZGEtNDViMi04M2FlLTMzODcxZjljMmRkOCJ9"
             };
 
-            AssertAreJsonStringsEquivalent(expectedJsonObject.ToString(), credential.ToJsonString());
+            AssertAreJsonStringsEquivalent(expectedJsonObject.ToJsonString(), credential.ToJsonString());
 
             IiOSKey key = credential.iOSCacheKey;
 
@@ -728,7 +734,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             string cachedAt = DateTimeHelpers.DateTimeToUnixTimestamp(currentDate);
 
             // 1. Verify payload
-            var expectedJsonObject = new JObject
+            var expectedJsonObject = new JsonObject
             {
                 ["secret"] = "<removed_at>",
                 ["target"] = "Calendars.Read email openid profile Tasks.Read User.Read",
@@ -744,7 +750,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 ["client_info"] = "eyJ1aWQiOiI5ZjQ4ODBkOC04MGJhLTRjNDAtOTdiYy1mN2EyM2M3MDMwODQiLCJ1dGlkIjoiZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhIn0"
             };
 
-            AssertAreJsonStringsEquivalent(expectedJsonObject.ToString(), credential.ToJsonString());
+            AssertAreJsonStringsEquivalent(expectedJsonObject.ToJsonString(), credential.ToJsonString());
 
             // 2. Verify cache key
             IiOSKey key = credential.iOSCacheKey;
@@ -774,7 +780,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 AadTenantId,
                 homeAccountId);
 
-            var expectedJsonObject = new JObject
+            var expectedJsonObject = new JsonObject
             {
                 ["secret"] = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJiNmM2OWEzNy1kZjk2LTRkYjAtOTA4OC0yYWI5NmUxZDgyMTUiLCJpc3MiOiJodHRwczovL2xvZ2luLm1pY3Jvc29mdG9ubGluZS5jb20vZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhL3YyLjAiLCJpYXQiOjE1Mzg1Mzg0MjIsIm5iZiI6MTUzODUzODQyMiwiZXhwIjoxNTM4NTQyMzIyLCJuYW1lIjoiQ2xvdWQgSURMQUIgQmFzaWMgVXNlciIsIm9pZCI6IjlmNDg4MGQ4LTgwYmEtNGM0MC05N2JjLWY3YTIzYzcwMzA4NCIsInByZWZlcnJlZF91c2VybmFtZSI6ImlkbGFiQG1zaWRsYWI0Lm9ubWljcm9zb2Z0LmNvbSIsInN1YiI6Ilk2WWtCZEhOTkxITm1US2VsOUtoUno4d3Jhc3hkTFJGaVAxNEJSUFdybjQiLCJ0aWQiOiJmNjQ1YWQ5Mi1lMzhkLTRkMWEtYjUxMC1kMWIwOWE3NGE4Y2EiLCJ1dGkiOiI2bmNpWDAyU01raTlrNzMtRjFzWkFBIiwidmVyIjoiMi4wIn0.",
                 ["credential_type"] = "IdToken",
@@ -785,7 +791,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 ["client_info"] = "eyJ1aWQiOiI5ZjQ4ODBkOC04MGJhLTRjNDAtOTdiYy1mN2EyM2M3MDMwODQiLCJ1dGlkIjoiZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhIn0"
             };
 
-            AssertAreJsonStringsEquivalent(expectedJsonObject.ToString(), credential.ToJsonString());
+            AssertAreJsonStringsEquivalent(expectedJsonObject.ToJsonString(), credential.ToJsonString());
 
             IiOSKey key = credential.iOSCacheKey;
 
@@ -808,7 +814,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         public void TestSchemaComplianceForRefreshToken_WhenMSSTSResponse_WithAADAccountAndFociClient()
         {
             var credential = new MsalRefreshTokenCacheItem(MsalEnvironment, ClientId, TestConstants.CreateAadTestTokenResponseWithFoci(), AadTenantId);
-            var expectedJsonObject = new JObject
+            var expectedJsonObject = new JsonObject
             {
                 ["secret"] = "<removed_rt>",
                 ["credential_type"] = "RefreshToken",
@@ -819,7 +825,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 ["family_id"] = "1",
             };
 
-            AssertAreJsonStringsEquivalent(expectedJsonObject.ToString(), credential.ToJsonString());
+            AssertAreJsonStringsEquivalent(expectedJsonObject.ToJsonString(), credential.ToJsonString());
 
             IiOSKey key = credential.iOSCacheKey;
 
@@ -847,7 +853,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 response,
                 homeAccountId: homeAccountId);
 
-            var expectedJsonObject = new JObject
+            var expectedJsonObject = new JsonObject
             {
                 ["secret"] = "<removed_rt>",
                 ["credential_type"] = "RefreshToken",
@@ -858,7 +864,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 ["family_id"] = "1",
             };
 
-            AssertAreJsonStringsEquivalent(expectedJsonObject.ToString(), credential.ToJsonString());
+            AssertAreJsonStringsEquivalent(expectedJsonObject.ToJsonString(), credential.ToJsonString());
 
             IiOSKey key = credential.iOSCacheKey;
 
@@ -890,7 +896,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 AadTenantId,
                 null);
 
-            var expectedJsonObject = new JObject
+            var expectedJsonObject = new JsonObject
             {
                 ["local_account_id"] = "9f4880d8-80ba-4c40-97bc-f7a23c703084",
                 ["home_account_id"] = "9f4880d8-80ba-4c40-97bc-f7a23c703084.f645ad92-e38d-4d1a-b510-d1b09a74a8ca",
@@ -902,7 +908,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 ["client_info"] = "eyJ1aWQiOiI5ZjQ4ODBkOC04MGJhLTRjNDAtOTdiYy1mN2EyM2M3MDMwODQiLCJ1dGlkIjoiZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhIn0"
             };
 
-            AssertAreJsonStringsEquivalent(expectedJsonObject.ToString(), credential.ToJsonString());
+            AssertAreJsonStringsEquivalent(expectedJsonObject.ToJsonString(), credential.ToJsonString());
 
             IiOSKey key = credential.iOSCacheKey;
 
@@ -923,14 +929,14 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             var credential = new MsalAppMetadataCacheItem(ClientId, MsalEnvironment, "1");
 
-            var expectedJsonObject = new JObject
+            var expectedJsonObject = new JsonObject
             {
                 ["client_id"] = "b6c69a37-df96-4db0-9088-2ab96e1d8215",
                 ["environment"] = "login.microsoftonline.com",
                 ["family_id"] = "1",
             };
 
-            AssertAreJsonStringsEquivalent(expectedJsonObject.ToString(), credential.ToJsonString());
+            AssertAreJsonStringsEquivalent(expectedJsonObject.ToJsonString(), credential.ToJsonString());
 
             IiOSKey iOSKey = credential.iOSCacheKey;
 

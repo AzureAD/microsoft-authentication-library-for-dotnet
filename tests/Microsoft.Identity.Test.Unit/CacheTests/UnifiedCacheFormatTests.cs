@@ -16,8 +16,8 @@ using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace Microsoft.Identity.Test.Unit.CacheTests
 {
@@ -68,39 +68,39 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             using (StreamReader r = new StreamReader(fileName))
             {
                 string json = r.ReadToEnd();
-                var configJson = JsonConvert.DeserializeObject<JObject>(json);
+                var configJson = JsonNode.Parse(json).AsObject();
 
-                _clientId = configJson.GetValue("client_id").ToString();
-                _requestAuthority = configJson.GetValue("authority").ToString();
+                _clientId = configJson["client_id"]?.GetValue<string>();
+                _requestAuthority = configJson["authority"]?.GetValue<string>();
 
-                _tokenResponse = configJson.GetValue("token_response").ToString();
-                _idTokenResponse = configJson.GetValue("id_token_response").ToString();
+                _tokenResponse = configJson["token_response"]?.ToJsonString();
+                _idTokenResponse = configJson["id_token_response"]?.ToJsonString();
 
-                _expectedAtCacheKey = configJson.GetValue("at_cache_key").ToString();
-                _expectedAtCacheKeyIosService = configJson.GetValue("at_cache_key_ios_service").ToString();
-                _expectedAtCacheKeyIosAccount = configJson.GetValue("at_cache_key_ios_account").ToString();
-                _expectedAtCacheKeyIosGeneric = configJson.GetValue("at_cache_key_ios_generic").ToString();
-                _expectedAtCacheKey = configJson.GetValue("at_cache_key").ToString();
+                _expectedAtCacheKey = configJson["at_cache_key"]?.GetValue<string>();
+                _expectedAtCacheKeyIosService = configJson["at_cache_key_ios_service"]?.GetValue<string>();
+                _expectedAtCacheKeyIosAccount = configJson["at_cache_key_ios_account"]?.GetValue<string>();
+                _expectedAtCacheKeyIosGeneric = configJson["at_cache_key_ios_generic"]?.GetValue<string>();
+                _expectedAtCacheKey = configJson["at_cache_key"]?.GetValue<string>();
 
-                _expectedAtCacheValue = configJson.GetValue("at_cache_value").ToString();
+                _expectedAtCacheValue = configJson["at_cache_value"]?.ToJsonString();
 
-                _expectedIdTokenCacheKey = configJson.GetValue("id_token_cache_key").ToString();
-                _expectedIdTokenCacheKeyIosService = configJson.GetValue("id_token_cache_key_ios_service").ToString();
-                _expectedIdTokenCacheKeyIosAccount = configJson.GetValue("id_token_cache_key_ios_account").ToString();
-                _expectedIdTokenCacheKeyIosGeneric = configJson.GetValue("id_token_cache_key_ios_generic").ToString();
-                _expectedIdTokenCacheValue = configJson.GetValue("id_token_cache_value").ToString();
+                _expectedIdTokenCacheKey = configJson["id_token_cache_key"]?.GetValue<string>();
+                _expectedIdTokenCacheKeyIosService = configJson["id_token_cache_key_ios_service"]?.GetValue<string>();
+                _expectedIdTokenCacheKeyIosAccount = configJson["id_token_cache_key_ios_account"]?.GetValue<string>();
+                _expectedIdTokenCacheKeyIosGeneric = configJson["id_token_cache_key_ios_generic"]?.GetValue<string>();
+                _expectedIdTokenCacheValue = configJson["id_token_cache_value"]?.ToJsonString();
 
-                _expectedRtCacheKey = configJson.GetValue("rt_cache_key").ToString();
-                _expectedRtCacheKeyIosService = configJson.GetValue("rt_cache_key_ios_service").ToString();
-                _expectedRtCacheKeyIosAccount = configJson.GetValue("rt_cache_key_ios_account").ToString();
-                _expectedRtCacheKeyIosGeneric = configJson.GetValue("rt_cache_key_ios_generic").ToString();
-                _expectedRtCacheValue = configJson.GetValue("rt_cache_value").ToString();
+                _expectedRtCacheKey = configJson["rt_cache_key"]?.GetValue<string>();
+                _expectedRtCacheKeyIosService = configJson["rt_cache_key_ios_service"]?.GetValue<string>();
+                _expectedRtCacheKeyIosAccount = configJson["rt_cache_key_ios_account"]?.GetValue<string>();
+                _expectedRtCacheKeyIosGeneric = configJson["rt_cache_key_ios_generic"]?.GetValue<string>();
+                _expectedRtCacheValue = configJson["rt_cache_value"]?.ToJsonString();
 
-                _expectedAccountCacheKey = configJson.GetValue("account_cache_key").ToString();
-                _expectedAccountCacheKeyIosService = configJson.GetValue("account_cache_key_ios_service").ToString();
-                _expectedAccountCacheKeyIosAccount = configJson.GetValue("account_cache_key_ios_account").ToString();
-                _expectedAccountCacheKeyIosGeneric = configJson.GetValue("account_cache_key_ios_generic").ToString();
-                _expectedAccountCacheValue = configJson.GetValue("account_cache_value").ToString();
+                _expectedAccountCacheKey = configJson["account_cache_key"]?.GetValue<string>();
+                _expectedAccountCacheKeyIosService = configJson["account_cache_key_ios_service"]?.GetValue<string>();
+                _expectedAccountCacheKeyIosAccount = configJson["account_cache_key_ios_account"]?.GetValue<string>();
+                _expectedAccountCacheKeyIosGeneric = configJson["account_cache_key_ios_generic"]?.GetValue<string>();
+                _expectedAccountCacheValue = configJson["account_cache_value"]?.ToJsonString();
 
                 var idTokenSecret = CreateIdToken(_idTokenResponse);
 
@@ -191,26 +191,26 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             var atList = cache.Accessor.GetAllAccessTokens().ToList();
             Assert.HasCount(1, atList);
 
-            var actualPayload = JsonConvert.DeserializeObject<JObject>(atList.First().ToJsonString());
-            var expectedPayload = JsonConvert.DeserializeObject<JObject>(_expectedAtCacheValue);
+            var actualPayload = JsonNode.Parse(atList.First().ToJsonString()).AsObject();
+            var expectedPayload = JsonNode.Parse(_expectedAtCacheValue).AsObject();
 
-            foreach (KeyValuePair<string, JToken> prop in expectedPayload)
+            foreach (var prop in expectedPayload)
             {
                 string[] timeProperties = { "extended_expires_on", "expires_on", "cached_at" };
 
                 var propName = prop.Key;
                 var expectedPropValue = prop.Value;
-                var actualPropValue = actualPayload.GetValue(propName);
+                var actualPropValue = actualPayload[propName];
                 if (timeProperties.Contains(propName))
                 {
                     if (!"extended_expires_on".Equals(propName))
                     {
-                        Assert.AreEqual(JTokenType.String, actualPayload.GetValue(propName).Type);
+                        Assert.IsNotNull(actualPayload[propName]?.GetValue<string>());
                     }
                 }
                 else
                 {
-                    Assert.AreEqual(expectedPropValue, actualPropValue);
+                    Assert.AreEqual(expectedPropValue?.ToJsonString(), actualPropValue?.ToJsonString());
                 }
             }
             var atCacheItem = cache.Accessor.GetAllAccessTokens().First();
@@ -276,18 +276,18 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             Assert.HasCount(1, entities);
 
-            var actualPayload = JsonConvert.DeserializeObject<JObject>(entities.First());
-            var expectedPayload = JsonConvert.DeserializeObject<JObject>(expectedEntityValue);
+            var actualPayload = JsonNode.Parse(entities.First()).AsObject();
+            var expectedPayload = JsonNode.Parse(expectedEntityValue).AsObject();
 
             Assert.AreEqual(expectedPayload.Count, actualPayload.Count);
 
-            foreach (KeyValuePair<string, JToken> prop in expectedPayload)
+            foreach (var prop in expectedPayload)
             {
                 var propName = prop.Key;
                 var expectedPropValue = prop.Value;
-                var actualPropValue = actualPayload.GetValue(propName);
+                var actualPropValue = actualPayload[propName];
 
-                Assert.AreEqual(expectedPropValue, actualPropValue);
+                Assert.AreEqual(expectedPropValue?.ToJsonString(), actualPropValue?.ToJsonString());
             }
         }
     }
