@@ -13,6 +13,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 
+
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
 {
     [TestClass]
@@ -26,6 +27,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public TestContext TestContext { get; set; }
 
         private IPublicClientApplication pca = null;
+
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            ApplicationBase.ResetStateForTest();
+        }
 
         [TestMethod]
         public async Task SilentAuth_ForceRefresh_Async()

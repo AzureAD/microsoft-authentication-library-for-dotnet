@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -50,6 +50,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 logger.Error(MsalErrorMessage.ClientCredentialWrongAuthority);
             }
             AuthenticationResult authResult;
+
+            if (IsInternalCacheDisabled)
+            {
+                AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.CacheDisabled;
+                return await GetAccessTokenAsync(cancellationToken, logger).ConfigureAwait(false);
+            }
 
             // Skip cache if either:
             // 1) ForceRefresh is set, or
@@ -251,7 +257,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 var options = new AssertionRequestOptions(
                     AuthenticationRequestParameters.AppConfig, 
                     tokenEndpoint,
-                    AuthenticationRequestParameters.AuthorityManager.Authority.TenantId);
+                    AuthenticationRequestParameters.AuthorityManager.Authority.TenantId,
+                    AuthenticationRequestParameters.RequestContext.CorrelationId);
                 
                 var executionResult = new ExecutionResult
                 {
@@ -299,7 +306,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 var options = new AssertionRequestOptions(
                     AuthenticationRequestParameters.AppConfig, 
                     tokenEndpoint,
-                    AuthenticationRequestParameters.AuthorityManager.Authority.TenantId);
+                    AuthenticationRequestParameters.AuthorityManager.Authority.TenantId,
+                    AuthenticationRequestParameters.RequestContext.CorrelationId);
                 
                 var executionResult = new ExecutionResult
                 {
