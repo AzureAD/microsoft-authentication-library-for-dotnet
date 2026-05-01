@@ -63,5 +63,25 @@ namespace Microsoft.Identity.Test.E2E
             Assert.AreEqual(TokenSource.Cache, second.AuthenticationResultMetadata.TokenSource);
             Assert.AreEqual(result.AccessToken, second.AccessToken);
         }
+
+        [RunOnAzureDevOps]
+        [TestCategory("MI_E2E_Imds")]
+        [TestMethod]
+        public async Task GetComputeMetadata_OnImds_Succeeds()
+        {
+            var result = await ManagedIdentityApplication
+                .GetComputeMetadataAsync()
+                .ConfigureAwait(false);
+
+            Assert.IsNotNull(result, "ComputeMetadataResponse should not be null on an Azure VM.");
+            Assert.IsFalse(string.IsNullOrEmpty(result.OsType), "OsType should be populated.");
+            Assert.IsFalse(string.IsNullOrEmpty(result.VmId), "VmId should be populated.");
+            Assert.IsFalse(string.IsNullOrEmpty(result.Location), "Location should be populated.");
+            Assert.IsFalse(string.IsNullOrEmpty(result.VmSize), "VmSize should be populated.");
+            Assert.IsFalse(string.IsNullOrEmpty(result.AzEnvironment), "AzEnvironment should be populated.");
+            Assert.IsNotNull(result.SecurityProfile, "SecurityProfile should not be null.");
+            Assert.IsNotNull(result.SecurityProfile.SecureBootEnabled, "SecureBootEnabled should be populated.");
+            Assert.IsNotNull(result.SecurityProfile.VirtualTpmEnabled, "VirtualTpmEnabled should be populated.");
+        }
     }
 }

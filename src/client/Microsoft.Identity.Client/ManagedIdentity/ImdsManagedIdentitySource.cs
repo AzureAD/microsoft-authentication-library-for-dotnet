@@ -26,6 +26,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         public const string DefaultImdsBaseEndpoint= "http://169.254.169.254";
         public const string ImdsApiVersion = "2018-02-01";
         public const string ImdsTokenPath = "/metadata/identity/oauth2/token";
+        public const string ImdsComputePath = "/metadata/instance/compute";
+        public const string ImdsComputeApiVersion = "2021-02-01";
 
         private const string DefaultMessage = "[Managed Identity] Service request failed.";
 

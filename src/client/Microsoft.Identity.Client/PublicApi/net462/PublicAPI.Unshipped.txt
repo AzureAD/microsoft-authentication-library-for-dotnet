@@ -12,3 +12,32 @@ Microsoft.Identity.Client.Extensibility.AuthenticationResultExtensions
 const Microsoft.Identity.Client.MsalError.InternalCacheDisabled = "internal_cache_disabled" -> string
 static Microsoft.Identity.Client.CacheOptions.DisableInternalCacheOptions.get -> Microsoft.Identity.Client.CacheOptions
 static Microsoft.Identity.Client.Extensibility.AuthenticationResultExtensions.GetRefreshToken(this Microsoft.Identity.Client.AuthenticationResult result) -> string
+Microsoft.Identity.Client.ManagedIdentity.ComputeMetadataResponse
+Microsoft.Identity.Client.ManagedIdentity.ComputeMetadataResponse.AzEnvironment.get -> string
+Microsoft.Identity.Client.ManagedIdentity.ComputeMetadataResponse.AzEnvironment.set -> void
+Microsoft.Identity.Client.ManagedIdentity.ComputeMetadataResponse.ComputeMetadataResponse() -> void
+Microsoft.Identity.Client.ManagedIdentity.ComputeMetadataResponse.Location.get -> string
+Microsoft.Identity.Client.ManagedIdentity.ComputeMetadataResponse.Location.set -> void
+Microsoft.Identity.Client.ManagedIdentity.ComputeMetadataResponse.Name.get -> string
+Microsoft.Identity.Client.ManagedIdentity.ComputeMetadataResponse.Name.set -> void
+Microsoft.Identity.Client.ManagedIdentity.ComputeMetadataResponse.OsType.get -> string
+Microsoft.Identity.Client.ManagedIdentity.ComputeMetadataResponse.OsType.set -> void
+Microsoft.Identity.Client.ManagedIdentity.ComputeMetadataResponse.ResourceGroupName.get -> string
+Microsoft.Identity.Client.ManagedIdentity.ComputeMetadataResponse.ResourceGroupName.set -> void
+Microsoft.Identity.Client.ManagedIdentity.ComputeMetadataResponse.ResourceId.get -> string
+Microsoft.Identity.Client.ManagedIdentity.ComputeMetadataResponse.ResourceId.set -> void
+Microsoft.Identity.Client.ManagedIdentity.ComputeMetadataResponse.SecurityProfile.get -> Microsoft.Identity.Client.ManagedIdentity.ComputeSecurityProfile
+Microsoft.Identity.Client.ManagedIdentity.ComputeMetadataResponse.SecurityProfile.set -> void
+Microsoft.Identity.Client.ManagedIdentity.ComputeMetadataResponse.SubscriptionId.get -> string
+Microsoft.Identity.Client.ManagedIdentity.ComputeMetadataResponse.SubscriptionId.set -> void
+Microsoft.Identity.Client.ManagedIdentity.ComputeMetadataResponse.VmId.get -> string
+Microsoft.Identity.Client.ManagedIdentity.ComputeMetadataResponse.VmId.set -> void
+Microsoft.Identity.Client.ManagedIdentity.ComputeMetadataResponse.VmSize.get -> string
+Microsoft.Identity.Client.ManagedIdentity.ComputeMetadataResponse.VmSize.set -> void
+Microsoft.Identity.Client.ManagedIdentity.ComputeSecurityProfile
+Microsoft.Identity.Client.ManagedIdentity.ComputeSecurityProfile.ComputeSecurityProfile() -> void
+Microsoft.Identity.Client.ManagedIdentity.ComputeSecurityProfile.SecureBootEnabled.get -> string
+Microsoft.Identity.Client.ManagedIdentity.ComputeSecurityProfile.SecureBootEnabled.set -> void
+Microsoft.Identity.Client.ManagedIdentity.ComputeSecurityProfile.VirtualTpmEnabled.get -> string
+Microsoft.Identity.Client.ManagedIdentity.ComputeSecurityProfile.VirtualTpmEnabled.set -> void
+static Microsoft.Identity.Client.ManagedIdentityApplication.GetComputeMetadataAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Microsoft.Identity.Client.ManagedIdentity.ComputeMetadataResponse>
