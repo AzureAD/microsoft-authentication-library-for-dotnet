@@ -163,7 +163,8 @@ namespace Microsoft.Identity.Client
 
             Config.ClientCredential = new CertificateClientCredential(certificate);
             Config.SendX5C = certificateOptions?.SendX5C ?? false;
-            
+            Config.CertificateOptions = certificateOptions;
+
             return this;
         }
 
@@ -233,7 +234,7 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(clientSecret));
             }
 
-            Config.ClientCredential = new SecretStringClientCredential(clientSecret);
+            Config.ClientCredential = new ClientSecretCredential(clientSecret);
             return this;
         }
 
@@ -329,11 +330,15 @@ namespace Microsoft.Identity.Client
         /// langword="null"/>.</param>
         /// <returns>The <see cref="ConfidentialClientApplicationBuilder"/> instance configured with the specified client
         /// assertion.</returns>
-        /// <exception cref="MsalClientException">Thrown if <paramref name="clientSignedAssertionProvider"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="clientSignedAssertionProvider"/> is <see langword="null"/>.</exception>
         public ConfidentialClientApplicationBuilder WithClientAssertion(Func<AssertionRequestOptions,
             CancellationToken, Task<ClientSignedAssertion>> clientSignedAssertionProvider)
         {
-            ValidateUseOfExperimentalFeature();
+            if (clientSignedAssertionProvider == null)
+            {
+                throw new ArgumentNullException(nameof(clientSignedAssertionProvider));
+            }
+
             return WithClientAssertionInternal(
                 clientSignedAssertionProvider: clientSignedAssertionProvider);
         }
@@ -470,6 +475,16 @@ namespace Microsoft.Identity.Client
             }
 
             ValidateAndUpdateRegion();
+
+            // SendCertificateOverMtls is only supported with certificate-based credentials
+            // (both static WithCertificate(X509Certificate2, ...) and dynamic WithCertificate(Func<...>, ...)).
+            if (Config.CertificateOptions?.SendCertificateOverMtls == true
+                && Config.ClientCredential is not CertificateAndClaimsClientCredential)
+            {
+                throw new MsalClientException(
+                    MsalError.InvalidCredentialMaterial,
+                    MsalErrorMessage.SendCertificateOverMtlsRequiresCertificate);
+            }
         }
 
         private void ValidateAndUpdateRegion()
