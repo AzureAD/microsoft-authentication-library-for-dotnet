@@ -595,11 +595,9 @@ namespace Microsoft.Identity.Client
                 // OBO calls FindAccessTokenAsync directly, but we are not able to resolve the authority 
                 // unless the developer has configured a tenanted authority. If they have configured /common
                 // then we cannot filter by tenant and will use whatever is in the cache.
-                // The MSA GUID (9188040d-...) is a real tenant ID and should be filtered normally.
                 filterByTenantId =
                     !string.IsNullOrEmpty(requestTenantId) &&
-                    (!AadAuthority.IsCommonOrganizationsOrConsumersTenant(requestTenantId) ||
-                     AadAuthority.IsConsumersGuid(requestTenantId));
+                    !AadAuthority.IsCommonOrganizationsOrConsumersTenant(requestTenantId);
             }
 
             if (filterByTenantId)

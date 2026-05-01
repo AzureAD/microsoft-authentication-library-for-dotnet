@@ -381,6 +381,20 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         }
 
         [TestMethod]
+        public void IsCommonOrganizationsOrConsumersTenant_MsaGuid_ReturnsFalse()
+        {
+            // Regression test for https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5951
+            // The MSA GUID is a real tenant, not a tenantless alias — it must NOT match the tenantless predicate.
+            Assert.IsTrue(AadAuthority.IsCommonOrganizationsOrConsumersTenant("common"));
+            Assert.IsTrue(AadAuthority.IsCommonOrganizationsOrConsumersTenant("organizations"));
+            Assert.IsTrue(AadAuthority.IsCommonOrganizationsOrConsumersTenant("consumers"));
+            Assert.IsFalse(AadAuthority.IsCommonOrganizationsOrConsumersTenant(TestConstants.MsaTenantId),
+                "MSA GUID should not be treated as a tenantless authority");
+            Assert.IsFalse(AadAuthority.IsCommonOrganizationsOrConsumersTenant("some-real-tenant-guid"),
+                "Any real tenant GUID should not be treated as a tenantless authority");
+        }
+
+        [TestMethod]
         public async Task CreateAuthorityForRequestAsync_MSAPassthroughAsync()
         {
             var testAccount = new Account("TEST_ID.9188040d-6c67-4c5b-b112-36a304b66dad", "username", Authority.CreateAuthority("https://login.microsoftonline.com/9188040d-6c67-4c5b-b112-36a304b66dad").AuthorityInfo.Host);

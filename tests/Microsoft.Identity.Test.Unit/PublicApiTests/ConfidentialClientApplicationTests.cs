@@ -196,6 +196,48 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
+        [TestCategory(TestCategories.Regression)]
+        [WorkItem(5951)] // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5951
+        public async Task ClientCreds_WithTenantId_MsaGuid_UsesCorrectTokenEndpoint_Async()
+        {
+            // Regression test: the MSA tenant GUID (9188040d-...) is a real tenant.
+            // When .WithTenantId(msaGuid) is called on a common-authority app, the token
+            // request must target the MSA tenant endpoint — not silently fall back to common.
+            string expectedTokenEndpoint =
+                $"https://login.microsoftonline.com/{TestConstants.MsaTenantId}/oauth2/v2.0/token";
+
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                var tokenHandler = new MockHttpMessageHandler
+                {
+                    ExpectedUrl = expectedTokenEndpoint,
+                    ExpectedMethod = HttpMethod.Post,
+                    ResponseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage()
+                };
+                httpManager.AddMockHandler(tokenHandler);
+
+                ConfidentialClientApplication app =
+                    ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                        .WithClientSecret(TestConstants.ClientSecret)
+                        .WithAuthority(TestConstants.AuthorityCommonTenant)
+                        .WithHttpManager(httpManager)
+                        .BuildConcrete();
+
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                    .WithTenantId(TestConstants.MsaTenantId)
+                    .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+
+                Assert.IsNotNull(result.AccessToken);
+                // The cache entry should be keyed on the MSA tenant, not "common"
+                Assert.AreEqual(TestConstants.MsaTenantId,
+                    app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().TenantId,
+                    StringComparer.OrdinalIgnoreCase);
+            }
+        }
+
+        [TestMethod]
         public async Task ClientCreds_UsesDefaultPartitionedCacheCorrectly_Async()
         {
             using (var httpManager = new MockHttpManager())
