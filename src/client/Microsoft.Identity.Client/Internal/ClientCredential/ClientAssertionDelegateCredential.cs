@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
@@ -15,7 +16,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
     /// Handles client assertions supplied via a delegate that returns a
     /// <see cref="ClientSignedAssertion"/> (JWT + optional certificate bound for mTLS-PoP).
     /// </summary>
-    internal sealed class ClientAssertionDelegateCredential : IClientCredential, IClientSignedAssertionProvider
+    internal sealed class ClientAssertionDelegateCredential : IClientCredential, IMtlsBindingCertificateProvider
     {
         private readonly Func<AssertionRequestOptions, CancellationToken, Task<ClientSignedAssertion>> _provider;
 
@@ -25,13 +26,20 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             _provider = provider ?? throw new ArgumentNullException(nameof(provider));
         }
 
-        // Capability interface (only used where we intentionally cast to check the capability)
-        Task<ClientSignedAssertion> IClientSignedAssertionProvider.GetAssertionAsync(
-            AssertionRequestOptions options,
-            CancellationToken cancellationToken) =>
-            _provider(options, cancellationToken);
-
         public AssertionType AssertionType => AssertionType.ClientAssertion;
+
+        /// <summary>
+        /// Returns the binding certificate for mTLS transport setup.
+        /// Invokes the delegate to discover the certificate; the assertion itself is discarded
+        /// because it must be regenerated at send time with the correct resolved token endpoint.
+        /// </summary>
+        async Task<X509Certificate2> IMtlsBindingCertificateProvider.GetBindingCertificateAsync(
+            AssertionRequestOptions options,
+            CancellationToken cancellationToken)
+        {
+            ClientSignedAssertion result = await _provider(options, cancellationToken).ConfigureAwait(false);
+            return result?.TokenBindingCertificate;
+        }
 
         public async Task<CredentialMaterial> GetCredentialMaterialAsync(
             CredentialContext context,
@@ -41,6 +49,8 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
 
             var opts = context.ToAssertionRequestOptions(cancellationToken);
 
+            // Always call the delegate fresh — the assertion must be generated with
+            // the correct resolved token endpoint (audience claim).
             ClientSignedAssertion resp = await _provider(opts, cancellationToken).ConfigureAwait(false);
 
             if (string.IsNullOrWhiteSpace(resp?.Assertion))

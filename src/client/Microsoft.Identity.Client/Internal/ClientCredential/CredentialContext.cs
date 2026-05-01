@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
@@ -60,6 +61,14 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
 
         /// <summary>Logger for credential resolution diagnostics.</summary>
         public ILoggerAdapter Logger { get; init; }
+
+        /// <summary>
+        /// Pre-resolved mTLS certificate from preflight initialization.
+        /// When set and <see cref="Mode"/> is <see cref="CredentialTransportProtocol.Mtls"/>,
+        /// credentials should use this certificate instead of re-invoking their provider delegate.
+        /// This eliminates the double-invocation of cert providers in mTLS flows.
+        /// </summary>
+        public X509Certificate2 PreResolvedMtlsCertificate { get; init; }
 
         /// <summary>
         /// Creates an <see cref="AssertionRequestOptions"/> from this context.

@@ -54,20 +54,21 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         {
             context.Logger.Verbose(() => $"[CertificateAndClaimsClientCredential] Mode={context.Mode}");
 
-            // Resolve the certificate via the provider (used both for Regular and MtlsMode paths).
-            X509Certificate2 certificate = await ResolveCertificateAsync(context, cancellationToken)
-                .ConfigureAwait(false);
-
             if (context.Mode == CredentialTransportProtocol.Mtls)
             {
-                // mTLS path: the certificate authenticates the client at the TLS layer.
-                // No client_assertion is needed; return an empty parameter set.
+                // mTLS path: use pre-resolved cert from preflight if available,
+                // avoiding a second provider invocation for dynamic certificates.
+                X509Certificate2 mtlsCert = context.PreResolvedMtlsCertificate
+                    ?? await ResolveCertificateAsync(context, cancellationToken).ConfigureAwait(false);
+
                 return new CredentialMaterial(
                     CollectionHelpers.GetEmptyDictionary<string, string>(),
-                    certificate);
+                    mtlsCert);
             }
 
-            // Regular path: build a JWT-bearer client assertion.
+            // Regular path: resolve cert and build a JWT-bearer client assertion.
+            X509Certificate2 certificate = await ResolveCertificateAsync(context, cancellationToken)
+                .ConfigureAwait(false);
             JsonWebToken jwtToken;
             if (string.IsNullOrEmpty(context.ExtraClientAssertionClaims))
             {
@@ -103,9 +104,6 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         /// Resolves the certificate for use as an mTLS transport credential, without building a full
         /// JWT client assertion. Invokes the provider delegate (which may be a static lambda or a
         /// true async callback) and validates the result.
-        /// Called by <see cref="Microsoft.Identity.Client.ApiConfig.Parameters.MtlsPopParametersInitializer"/>
-        /// for the implicit Bearer-over-mTLS path when
-        /// <see cref="AppConfig.CertificateOptions.SendCertificateOverMtls"/> is <see langword="true"/>.
         /// </summary>
         internal async Task<X509Certificate2> ResolveCertificateForMtlsAsync(
             AssertionRequestOptions options)

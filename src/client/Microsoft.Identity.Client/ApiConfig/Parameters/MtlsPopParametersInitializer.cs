@@ -64,17 +64,17 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
                 return;
             }
 
-            // Case 2 – Only cert-capable credentials implement this capability interface.
-            if (serviceBundle.Config.ClientCredential is IClientSignedAssertionProvider signedProvider)
+            // Case 2 – Credential supports mTLS binding certificate discovery.
+            if (serviceBundle.Config.ClientCredential is IMtlsBindingCertificateProvider certProvider)
             {
                 var opts = CreateAssertionRequestOptions(tokenParameters, serviceBundle, ct);
 
-                ClientSignedAssertion ar =
-                    await signedProvider.GetAssertionAsync(opts, ct).ConfigureAwait(false);
+                X509Certificate2 cert =
+                    await certProvider.GetBindingCertificateAsync(opts, ct).ConfigureAwait(false);
 
-                if (ar?.TokenBindingCertificate != null)
+                if (cert != null)
                 {
-                    tokenParameters.MtlsCertificate = ar.TokenBindingCertificate;
+                    tokenParameters.MtlsCertificate = cert;
                 }
             }
         }
@@ -102,22 +102,22 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
                 return;
             }
 
-            // Case 2 – Signed assertion provider (JWT + optional cert)
-            if (serviceBundle.Config.ClientCredential is IClientSignedAssertionProvider signedProvider)
+            // Case 2 – Credential supports mTLS binding certificate discovery.
+            if (serviceBundle.Config.ClientCredential is IMtlsBindingCertificateProvider certProvider)
             {
                 var opts = CreateAssertionRequestOptions(p, serviceBundle, ct);
 
-                ClientSignedAssertion ar =
-                    await signedProvider.GetAssertionAsync(opts, ct).ConfigureAwait(false);
+                X509Certificate2 cert =
+                    await certProvider.GetBindingCertificateAsync(opts, ct).ConfigureAwait(false);
 
-                if (ar?.TokenBindingCertificate == null)
+                if (cert == null)
                 {
                     throw new MsalClientException(
                         MsalError.MtlsCertificateNotProvided,
                         MsalErrorMessage.MtlsCertificateNotProvidedMessage);
                 }
 
-                InitMtlsPopParameters(p, ar.TokenBindingCertificate, serviceBundle);
+                InitMtlsPopParameters(p, cert, serviceBundle);
                 return;
             }
 

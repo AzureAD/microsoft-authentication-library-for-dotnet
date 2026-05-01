@@ -74,7 +74,8 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                 Authority = requestParams.AuthorityManager.Authority.AuthorityInfo.CanonicalAuthority?.ToString(),
                 TenantId = requestParams.AuthorityManager.Authority.TenantId,
                 CorrelationId = requestParams.RequestContext.CorrelationId,
-                Logger = requestParams.RequestContext.Logger
+                Logger = requestParams.RequestContext.Logger,
+                PreResolvedMtlsCertificate = requestParams.MtlsCertificate,
             };
         }
     }

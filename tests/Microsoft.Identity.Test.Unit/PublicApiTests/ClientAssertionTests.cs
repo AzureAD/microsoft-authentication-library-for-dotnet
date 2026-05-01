@@ -948,7 +948,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestMethod]
         public void ClientAssertion_CredentialTypesAndCapabilities_AreCorrect()
         {
-            // Old overloads (returning string) should NOT be cert-capable and should NOT implement IClientSignedAssertionProvider
+            // Old overloads (returning string) should NOT be cert-capable and should NOT implement IMtlsBindingCertificateProvider
             var app1 = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                 .WithClientSecret(TestConstants.ClientSecret)
                 .WithClientAssertion((AssertionRequestOptions o) => Task.FromResult("jwt"))
@@ -959,10 +959,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             Assert.IsInstanceOfType(cc1, typeof(ClientAssertionStringDelegateCredential),
                 "String assertion overloads must use the string credential type.");
-            Assert.IsFalse(cc1 is IClientSignedAssertionProvider,
-                "String assertion credential must NOT be signed-assertion capable (cannot return TokenBindingCertificate).");
+            Assert.IsFalse(cc1 is IMtlsBindingCertificateProvider,
+                "String assertion credential must NOT be cert-capable (cannot return TokenBindingCertificate).");
 
-            // New overload (returning ClientSignedAssertion) SHOULD be cert-capable and implement IClientSignedAssertionProvider
+            // New overload (returning ClientSignedAssertion) SHOULD be cert-capable and implement IMtlsBindingCertificateProvider
             var app2 = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                 .WithClientSecret(TestConstants.ClientSecret)
                 .WithClientAssertion((AssertionRequestOptions o, CancellationToken ct) =>
@@ -974,8 +974,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             Assert.IsInstanceOfType(cc2, typeof(ClientAssertionDelegateCredential),
                 "ClientSignedAssertion overloads must use the signed-assertion credential type.");
-            Assert.IsTrue(cc2 is IClientSignedAssertionProvider,
-                "Signed assertion credential must implement IClientSignedAssertionProvider for mTLS preflight.");
+            Assert.IsTrue(cc2 is IMtlsBindingCertificateProvider,
+                "Signed assertion credential must implement IMtlsBindingCertificateProvider for mTLS cert discovery.");
         }
 
         [TestMethod]
