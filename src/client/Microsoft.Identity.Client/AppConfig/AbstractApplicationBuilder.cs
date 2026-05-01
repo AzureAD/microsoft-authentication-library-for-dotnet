@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -179,6 +179,19 @@ namespace Microsoft.Identity.Client
 #if !SUPPORTS_CUSTOM_CACHE 
             throw new PlatformNotSupportedException("WithCacheOptions is supported only on platforms where MSAL stores tokens in memory and not on mobile platforms.");
 #else
+            if (CacheOptions.IsDisabledFor(options) && options.UseSharedCache)
+            {
+                throw new MsalClientException(
+                    MsalError.InvalidRequest,
+                    MsalErrorMessage.InternalCacheDisabledMutuallyExclusiveMessage);
+            }
+
+            if (CacheOptions.IsDisabledFor(options) && Config.IsPublicClient)
+            {
+                throw new MsalClientException(
+                    MsalError.InvalidRequest,
+                    MsalErrorMessage.InternalCacheDisabledNotSupportedForPublicClient);
+            }
 
             Config.AccessorOptions = options;
             return this as T;

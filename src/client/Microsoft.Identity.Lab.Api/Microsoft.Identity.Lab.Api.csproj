@@ -37,7 +37,6 @@
     <PackageReference Include="System.Threading.Tasks" />
     <PackageReference Include="System.Threading.Tasks.Parallel" />
     <PackageReference Include="System.Threading.Thread" />
-    <PackageReference Include="System.ValueTuple" />
   </ItemGroup>
 
   <ItemGroup>

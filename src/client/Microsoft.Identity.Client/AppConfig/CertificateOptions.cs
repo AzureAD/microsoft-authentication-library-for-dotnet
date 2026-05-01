@@ -24,5 +24,30 @@ namespace Microsoft.Identity.Client.AppConfig
         /// by default it is set to <see langword="false"/> /></remarks>
         /// </summary>
         public bool AssociateTokensWithCertificate { get; init; } = false;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the certificate should be sent over mTLS
+        /// (TLS client certificate authentication) as the default transport for token requests.
+        /// When <see langword="true"/>, the certificate is sent in the TLS handshake instead of as a
+        /// JWT assertion in the request body. This controls transport only — the resulting token type
+        /// depends on request-level configuration: a plain request produces a Bearer token, while
+        /// <see cref="AcquireTokenForClientParameterBuilder.WithMtlsProofOfPossession"/> produces
+        /// an mTLS PoP token.
+        /// When <see langword="false"/> (default), the certificate is sent as a JWT assertion in the request body.
+        /// </summary>
+        /// <remarks>
+        /// <para>This property sets the default transport for requests that do not explicitly call
+        /// <see cref="AcquireTokenForClientParameterBuilder.WithMtlsProofOfPossession"/>.</para>
+        /// <para>Request-level <see cref="AcquireTokenForClientParameterBuilder.WithMtlsProofOfPossession"/>
+        /// always implies mTLS transport, regardless of this setting.</para>
+        /// <para>This option is supported with certificate-based credentials configured via
+        /// <see cref="ConfidentialClientApplicationBuilder.WithCertificate(System.Security.Cryptography.X509Certificates.X509Certificate2, CertificateOptions)"/>
+        /// (static certificate) or the dynamic certificate provider overload.
+        /// Non-certificate credentials will throw at build time.</para>
+        /// <para>When no Azure region is configured, requests are sent to the global mTLS endpoint.
+        /// When <see cref="ConfidentialClientApplicationBuilder.WithAzureRegion(string)"/> is also set,
+        /// requests are routed to the regional mTLS endpoint instead.</para>
+        /// </remarks>
+        public bool SendCertificateOverMtls { get; init; } = false;
     }
 }

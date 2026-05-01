@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -527,6 +527,73 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
                 Assert.IsFalse(requestHandler.ActualRequestPostData.ContainsKey(Constants.ManagedCertKey), 
                     "ManagedCert should not be sent to AAD in the request body");
+            }
+        }
+
+        [TestMethod]
+        public async Task DisableInternalCacheOptions_AcquireTokenForClient_EmitsCacheDisabledTelemetry_Async()
+        {
+            using (_harness = CreateTestHarness())
+            {
+                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                var requestHandler = _harness.HttpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithAuthority(TestConstants.AuthorityCommonTenant)
+                    .WithHttpManager(_harness.HttpManager)
+                    .WithCacheOptions(CacheOptions.DisableInternalCacheOptions)
+                    .BuildConcrete();
+
+                await cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                AssertCurrentTelemetry(requestHandler.ActualRequestMessage, ApiIds.AcquireTokenForClient, CacheRefreshReason.CacheDisabled);
+            }
+        }
+
+        [TestMethod]
+        public async Task DisableInternalCacheOptions_AcquireTokenOnBehalfOf_EmitsCacheDisabledTelemetry_Async()
+        {
+            using (_harness = CreateTestHarness())
+            {
+                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                var requestHandler = _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost();
+
+                var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithAuthority(TestConstants.AuthorityCommonTenant)
+                    .WithHttpManager(_harness.HttpManager)
+                    .WithCacheOptions(CacheOptions.DisableInternalCacheOptions)
+                    .BuildConcrete();
+
+                await cca.AcquireTokenOnBehalfOf(TestConstants.s_scope, new UserAssertion(TestConstants.DefaultAccessToken))
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                AssertCurrentTelemetry(requestHandler.ActualRequestMessage, ApiIds.AcquireTokenOnBehalfOf, CacheRefreshReason.CacheDisabled);
+            }
+        }
+
+        [TestMethod]
+        public async Task DisableInternalCacheOptions_InitiateLongRunningObo_EmitsCacheDisabledTelemetry_Async()
+        {
+            using (_harness = CreateTestHarness())
+            {
+                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                var requestHandler = _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost();
+
+                var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithAuthority(TestConstants.AuthorityCommonTenant)
+                    .WithHttpManager(_harness.HttpManager)
+                    .WithCacheOptions(CacheOptions.DisableInternalCacheOptions)
+                    .BuildConcrete();
+
+                var cacheKey = string.Empty;
+                await cca.InitiateLongRunningProcessInWebApi(TestConstants.s_scope, TestConstants.DefaultAccessToken, ref cacheKey)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                AssertCurrentTelemetry(requestHandler.ActualRequestMessage, ApiIds.InitiateLongRunningObo, CacheRefreshReason.CacheDisabled);
             }
         }
 
