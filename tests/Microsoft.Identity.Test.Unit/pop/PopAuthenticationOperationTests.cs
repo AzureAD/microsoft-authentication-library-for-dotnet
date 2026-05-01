@@ -17,7 +17,7 @@ using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Newtonsoft.Json.Linq;
+using System.Text.Json.Nodes;
 using NSubstitute;
 
 namespace Microsoft.Identity.Test.Unit.Pop
@@ -105,10 +105,10 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 string nonce = AssertSimpleClaim(decodedPopToken, "nonce");
                 Assert.IsFalse(string.IsNullOrEmpty(nonce));
                 string jwk = AssertSimpleClaim(decodedPopToken, "cnf");
-                var jwkFromPopAssertion = JToken.Parse(jwk);
+                var jwkFromPopAssertion = JsonNode.Parse(jwk);
 
-                var initialJwk = JToken.Parse(JWK);
-                Assert.IsTrue(JToken.DeepEquals(initialJwk, jwkFromPopAssertion["jwk"]));
+                var initialJwk = JsonNode.Parse(JWK);
+                Assert.AreEqual(initialJwk.ToJsonString(), jwkFromPopAssertion["jwk"].ToJsonString());
             }
         }
 
@@ -188,8 +188,8 @@ namespace Microsoft.Identity.Test.Unit.Pop
             var jsonToken = handler.ReadJwtToken(popToken);
 
             var jwtDecoded = Base64UrlHelpers.Decode(jsonToken.EncodedPayload);
-            var jObj = JObject.Parse(jsonToken.Payload.First().Value.ToString());
-            return jObj["jwk"]["n"].ToString();
+            var jObj = JsonNode.Parse(jsonToken.Payload.First().Value.ToString()).AsObject();
+            return jObj["jwk"]["n"]?.GetValue<string>();
         }
 
         private static string AssertSimpleClaim(JwtSecurityToken jwt, string expectedKey, string optionalExpectedValue = null)

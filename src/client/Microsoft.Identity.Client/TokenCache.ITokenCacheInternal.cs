@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -142,15 +142,26 @@ namespace Microsoft.Identity.Client
                              tenantId,
                              wamAccountIds);
 
-                // Add the newly obtained id token to the list of profiles
+                // Add the newly obtained id token to the list of profiles.
                 IDictionary<string, TenantProfile> tenantProfiles = null;
                 if (msalIdTokenCacheItem.TenantId != null)
                 {
-                    tenantProfiles = await GetTenantProfilesAsync(requestParams, homeAccountId).ConfigureAwait(false);
-                    if (tenantProfiles != null)
+                    if (CacheOptions.IsDisabledFor(ServiceBundle.Config.AccessorOptions))
                     {
-                        TenantProfile tenantProfile = new TenantProfile(msalIdTokenCacheItem);
-                        tenantProfiles[msalIdTokenCacheItem.TenantId] = tenantProfile;
+                        // When the internal cache is disabled, skip GetTenantProfilesAsync (which reads
+                        // from Accessor) and instead seed a fresh dict with just the current profile.
+                        tenantProfiles = new Dictionary<string, TenantProfile>
+                        {
+                            [msalIdTokenCacheItem.TenantId] = new TenantProfile(msalIdTokenCacheItem)
+                        };
+                    }
+                    else
+                    {
+                        tenantProfiles = await GetTenantProfilesAsync(requestParams, homeAccountId).ConfigureAwait(false);
+                        if (tenantProfiles != null)
+                        {
+                            tenantProfiles[msalIdTokenCacheItem.TenantId] = new TenantProfile(msalIdTokenCacheItem);
+                        }
                     }
                 }
 
@@ -164,6 +175,12 @@ namespace Microsoft.Identity.Client
             }
 
             #endregion
+
+            if (CacheOptions.IsDisabledFor(ServiceBundle.Config.AccessorOptions))
+            {
+                logger.Verbose(() => "[SaveTokenResponseAsync] Internal cache is disabled (CacheOptions.DisableInternalCacheOptions). Skipping all cache writes.");
+                return Tuple.Create(msalAccessTokenCacheItem, msalIdTokenCacheItem, account);
+            }
 
             logger.Verbose(() => $"[SaveTokenResponseAsync] Entering token cache semaphore. Count {_semaphoreSlim.GetCurrentCountLogMessage()}.");
             await _semaphoreSlim.WaitAsync(requestParams.RequestContext.UserCancellationToken).ConfigureAwait(false);

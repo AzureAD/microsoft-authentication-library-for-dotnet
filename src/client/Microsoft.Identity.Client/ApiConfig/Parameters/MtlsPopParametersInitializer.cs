@@ -35,7 +35,11 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
 
         /// <summary>
         /// NON-PoP request:
-        /// We may still need mTLS transport if the credential can return a TokenBindingCertificate.
+        /// We may still need mTLS transport in two situations:
+        /// Case 1 – The app-level SendCertificateOverMtls option is set and the credential is certificate-based
+        ///          (both static <see cref="CertificateClientCredential"/> and dynamic
+        ///          <see cref="DynamicCertificateClientCredential"/> are supported).
+        /// Case 2 – The credential is a signed-assertion provider that returns a TokenBindingCertificate.
         /// </summary>
         private static async Task TryInitImplicitBearerOverMtlsAsync(
             AcquireTokenCommonParameters tokenParameters,
@@ -44,11 +48,23 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         {
             if (tokenParameters.MtlsCertificate != null)
             {
-                ThrowIfRegionMissingForImplicitMtls(serviceBundle);
                 return;
             }
 
-            // Only cert-capable credentials implement this capability interface.
+            // Case 1 – App opted into mTLS Bearer via SendCertificateOverMtls on a certificate-based credential.
+            if (serviceBundle.Config.CertificateOptions?.SendCertificateOverMtls == true &&
+                serviceBundle.Config.ClientCredential is CertificateAndClaimsClientCredential certBasedCred)
+            {
+                // Static credentials have Certificate set directly
+                tokenParameters.MtlsCertificate = certBasedCred.Certificate
+                    ?? await certBasedCred.ResolveCertificateForMtlsAsync(
+                           CreateAssertionRequestOptions(tokenParameters, serviceBundle, ct))
+                       .ConfigureAwait(false);
+
+                return;
+            }
+
+            // Case 2 – Only cert-capable credentials implement this capability interface.
             if (serviceBundle.Config.ClientCredential is IClientSignedAssertionProvider signedProvider)
             {
                 var opts = CreateAssertionRequestOptions(tokenParameters, serviceBundle, ct);
@@ -59,7 +75,6 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
                 if (ar?.TokenBindingCertificate != null)
                 {
                     tokenParameters.MtlsCertificate = ar.TokenBindingCertificate;
-                    ThrowIfRegionMissingForImplicitMtls(serviceBundle);
                 }
             }
         }
@@ -146,29 +161,11 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
                         MsalError.MissingTenantedAuthority,
                         MsalErrorMessage.MtlsNonTenantedAuthorityNotAllowedMessage);
                 }
-
-                if (serviceBundle.Config.AzureRegion == null)
-                {
-                    throw new MsalClientException(
-                        MsalError.MtlsPopWithoutRegion,
-                        MsalErrorMessage.MtlsPopWithoutRegion);
-                }
             }
 
             p.AuthenticationOperation = new MtlsPopAuthenticationOperation(cert);
             p.MtlsCertificate = cert;
         }
 
-        private static void ThrowIfRegionMissingForImplicitMtls(IServiceBundle serviceBundle)
-        {
-            // Implicit bearer-over-mTLS requires region only for AAD
-            if (serviceBundle.Config.Authority.AuthorityInfo.AuthorityType == AuthorityType.Aad &&
-                serviceBundle.Config.AzureRegion == null)
-            {
-                throw new MsalClientException(
-                    MsalError.MtlsBearerWithoutRegion,
-                    MsalErrorMessage.MtlsBearerWithoutRegion);
-            }
-        }
     }
 }

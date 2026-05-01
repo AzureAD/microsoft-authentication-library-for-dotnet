@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -1259,11 +1259,24 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// <para>What happened?</para> The configured credential type is not compatible with the
         /// requested authentication mode. For example, a client secret cannot be used with mTLS
-        /// Proof-of-Possession because mTLS requires a certificate to bind the token to the TLS transport.
-        /// <para>Mitigation:</para> Use a certificate-based credential or a delegate that returns a
-        /// <see cref="ClientSignedAssertion"/> with a <see cref="ClientSignedAssertion.TokenBindingCertificate"/>
-        /// when mTLS Proof-of-Possession is required.
+        /// Proof-of-Possession or <c>SendCertificateOverMtls</c> because mTLS requires a certificate
+        /// to bind the token to the TLS transport.
+        /// <para>Mitigation:</para> Use a certificate-based credential via <c>WithCertificate()</c>,
+        /// or a delegate that returns a <see cref="ClientSignedAssertion"/> with a
+        /// <see cref="ClientSignedAssertion.TokenBindingCertificate"/> when mTLS Proof-of-Possession is required.
         /// </summary>
         public const string InvalidCredentialMaterial = "invalid_credential_material";
+
+        /// <summary>
+        /// <para>What happened?</para> A cache-dependent API was called, but MSAL's internal token cache is disabled via
+        /// <see cref="CacheOptions.DisableInternalCacheOptions"/>. This can occur with APIs such as
+        /// <see cref="IClientApplicationBase.AcquireTokenSilent(System.Collections.Generic.IEnumerable{string}, IAccount)"/>
+        /// and <c>AcquireTokenInLongRunningProcess(...)</c>.
+        /// <para>Mitigation</para> Use an authentication flow that does not depend on MSAL's internal cache, such as
+        /// <see cref="IByRefreshToken.AcquireTokenByRefreshToken(System.Collections.Generic.IEnumerable{string}, string)"/>
+        /// with the refresh token obtained from <see cref="Extensibility.AuthenticationResultExtensions.GetRefreshToken(AuthenticationResult)"/>,
+        /// or use another interactive flow, as appropriate for your application.
+        /// </summary>
+        public const string InternalCacheDisabled = "internal_cache_disabled";
     }
 }

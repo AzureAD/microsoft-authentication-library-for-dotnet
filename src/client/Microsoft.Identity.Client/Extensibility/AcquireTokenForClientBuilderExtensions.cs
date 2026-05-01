@@ -49,27 +49,14 @@ namespace Microsoft.Identity.Client.Extensibility
         /// <param name="builder"></param>
         /// <param name="extrabodyparams">List of additional body parameters</param>
         /// <returns></returns>
+        [EditorBrowsable(EditorBrowsableState.Never)] // Soft deprecate; prefer the generic overload on AbstractConfidentialClientAcquireTokenParameterBuilderExtension that also supports OBO and AuthorizationCode.
+        [Obsolete("Use AbstractConfidentialClientAcquireTokenParameterBuilderExtension.WithExtraBodyParameters instead, which also supports OBO and AuthorizationCode flows.", false)]
         public static AcquireTokenForClientParameterBuilder WithExtraBodyParameters(
             this AcquireTokenForClientParameterBuilder builder, 
             Dictionary<string, Func<CancellationToken, Task<string>>> extrabodyparams)
         {
-            builder.ValidateUseOfExperimentalFeature();
-            if (extrabodyparams == null || extrabodyparams.Count == 0)
-            {
-                return builder;
-            }
-            builder.OnBeforeTokenRequest(async (data) =>
-            {
-                foreach (var param in extrabodyparams)
-                {
-                    if (param.Value != null)
-                    {
-                        data.BodyParameters.Add(param.Key, await param.Value(data.CancellationToken).ConfigureAwait(false));
-                    }
-                }
-            });
-
-            builder.WithAdditionalCacheKeyComponents(extrabodyparams);
+            AbstractConfidentialClientAcquireTokenParameterBuilderExtension
+                .WithExtraBodyParameters<AcquireTokenForClientParameterBuilder>(builder, extrabodyparams);
             return builder;
         }
     }
