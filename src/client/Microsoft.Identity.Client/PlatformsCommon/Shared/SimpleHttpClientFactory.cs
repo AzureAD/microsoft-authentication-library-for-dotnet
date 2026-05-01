@@ -5,7 +5,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Net.Http;
 using System.Net.Security;
-using System.Runtime.CompilerServices;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using Microsoft.Identity.Client.Http;
@@ -119,7 +118,8 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         }
 
         // This method is used for Service Fabric scenarios where a custom server certificate validation callback is required.
-        // The HttpClient is cached per unique callback (identified by method handle and target identity) to avoid socket exhaustion.
+        // It allows the caller to provide a custom HttpClientHandler with the callback.
+        // The server cert rotates so we need a new HttpClient for each call.
         public HttpClient GetHttpClient(Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> validateServerCert)
         {
             if (validateServerCert == null)
@@ -128,31 +128,15 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             }
 
 #if NET471_OR_GREATER || NETSTANDARD || NET
-            // Build a stable key from the delegate's method and target identity.
-            // This correctly caches clients when the same method on the same object instance
-            // is used as the callback (the common Service Fabric case), while still creating
-            // distinct clients for genuinely different callbacks.
-            string key = "sf_" +
-                validateServerCert.Method.MethodHandle.Value.ToString() + "_" +
-                RuntimeHelpers.GetHashCode(validateServerCert.Target ?? validateServerCert).ToString();
-
-            return s_httpClientPool.GetOrAdd(
-                key,
-                _ => new Lazy<HttpClient>(() =>
+            var handler = new HttpClientHandler
+            {
+                ServerCertificateCustomValidationCallback = (message, cert, chain, sslPolicyErrors) =>
                 {
-                    Interlocked.Increment(ref s_httpClientCreationCount);
-                    CheckAndManageCache();
+                    return validateServerCert(message, cert, chain, sslPolicyErrors);
+                }
+            };
 
-                    var handler = new HttpClientHandler
-                    {
-                        ServerCertificateCustomValidationCallback = (message, cert, chain, sslPolicyErrors) =>
-                            validateServerCert(message, cert, chain, sslPolicyErrors)
-                    };
-
-                    var httpClient = new HttpClient(handler);
-                    HttpClientConfig.ConfigureRequestHeadersAndSize(httpClient);
-                    return httpClient;
-                }, LazyThreadSafetyMode.ExecutionAndPublication)).Value;
+            return new HttpClient(handler);
 #else
             return GetHttpClient();
 #endif
