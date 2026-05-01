@@ -17,10 +17,13 @@
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetIos)'">
     <DefineConstants>$(DefineConstants);iOS;SUPPORTS_BROKER</DefineConstants>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetMacCatalyst)'">
+    <DefineConstants>$(DefineConstants);MACCATALYST;iOS;SUPPORTS_BROKER</DefineConstants>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
     <DefineConstants>$(DefineConstants);NETSTANDARD;SUPPORTS_CONFIDENTIAL_CLIENT;SUPPORTS_BROKER;SUPPORTS_CUSTOM_CACHE;SUPPORTS_WIN32;</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetAndroid)' or '$(TargetFramework)' == '$(TargetFrameworkNetIos)'">
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetAndroid)' or '$(TargetFramework)' == '$(TargetFrameworkNetIos)' or '$(TargetFramework)' == '$(TargetFrameworkNetMacCatalyst)'">
     <DefineConstants>$(DefineConstants);MOBILE</DefineConstants>
   </PropertyGroup>
 </Project>
