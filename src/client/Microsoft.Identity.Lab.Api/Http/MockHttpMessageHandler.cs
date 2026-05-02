@@ -11,8 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Test.Common.Core.Helpers;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.Identity.Lab.Api.Helpers;
 
 namespace Microsoft.Identity.Test.Common.Core.Mocks
 {
@@ -117,7 +116,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
             if (ExpectedMtlsBindingCertificate != null)
             {
-                Assert.HasCount(1, base.ClientCertificates);
+                Assert.AreEqual(1, base.ClientCertificates.Count);
                 Assert.AreEqual(ExpectedMtlsBindingCertificate, base.ClientCertificates[0]);
             }
 

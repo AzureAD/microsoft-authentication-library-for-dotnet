@@ -2,6 +2,28 @@ Carefully review all markdown documents in the ../.clinerules folder. Those are 
 
 ---
 
+# Code Review Rules
+
+## ConcurrentDictionary.GetOrAdd — always use the factory delegate overload
+
+`ConcurrentDictionary.GetOrAdd(key, value)` **eagerly evaluates** the second argument before checking the dictionary. If the value is a constructor call or method invocation (e.g., `new HttpClient(...)`, `CreateFoo()`), a new object is created and discarded on every cache hit.
+
+**Bad** — object created on every call, discarded on cache hit:
+```csharp
+pool.GetOrAdd(key, new ExpensiveObject());
+pool.GetOrAdd(key, CreateExpensiveObject());
+```
+
+**Good** — factory lambda only runs on cache miss:
+```csharp
+pool.GetOrAdd(key, _ => new ExpensiveObject());
+pool.GetOrAdd(key, _ => CreateExpensiveObject());
+```
+
+When reviewing code, flag any `GetOrAdd` call where the second argument is **not** a delegate/lambda/method group. All other usages of GetOrAdd(key, value) should be justified.
+
+---
+
 # GitHub Copilot Agent Skills (Repository Skills)
 
 This repository defines **Copilot Agent Skills** under `.github/skills/`.
@@ -45,18 +67,24 @@ Copilot will automatically reference and describe:
 - `@msal-mtls-pop-guidance` - Foundational concepts
 - `@msal-mtls-pop-vanilla` - Direct token acquisition
 - `@msal-mtls-pop-fic-two-leg` - Token exchange patterns
+- `@msal-auth-code-flow` - Authorization Code Flow
+- `@msal-client-credentials` - Client Credentials Flow
+- `@msal-obo-flow` - On-Behalf-Of Flow
 
 ---
 
 ## 📚 Available Skills Overview
 
-This repository contains **three GitHub Agent Skills** for mTLS Proof-of-Possession (PoP) authentication:
+This repository contains **six GitHub Agent Skills** for MSAL.NET authentication:
 
 | Skill | Purpose | Best For |
 |-------|---------|----------|
 | **@msal-mtls-pop-guidance** | Foundational concepts, terminology, decision frameworks | Learning the fundamentals, comparing approaches |
 | **@msal-mtls-pop-vanilla** | Direct single-step token acquisition with complete code | Quick implementation with MSI or Confidential Client |
 | **@msal-mtls-pop-fic-two-leg** | Two-step token exchange patterns | Complex scenarios requiring token exchange |
+| **@msal-auth-code-flow** | Authorization Code Flow for web apps | User sign-in with server-side backend |
+| **@msal-client-credentials** | Client Credentials Flow for daemons | Service-to-service, no user context |
+| **@msal-obo-flow** | On-Behalf-Of Flow for multi-tier APIs | Propagating user identity through API chain |
 
 ---
 

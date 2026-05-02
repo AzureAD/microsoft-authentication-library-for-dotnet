@@ -3,13 +3,9 @@
 
 using System.Collections.Generic;
 using Microsoft.Identity.Client.OAuth2;
-#if SUPPORTS_SYSTEM_TEXT_JSON
 using Microsoft.Identity.Client.Platforms.net;
 using System.Text.Json.Nodes;
 using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
-#else
-using Microsoft.Identity.Json;
-#endif
 
 namespace Microsoft.Identity.Client.Instance.Validation
 {

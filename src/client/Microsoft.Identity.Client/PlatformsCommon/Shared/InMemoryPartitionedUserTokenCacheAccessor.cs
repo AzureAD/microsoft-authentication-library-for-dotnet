@@ -99,7 +99,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             string partitionKey = CacheKeyFactory.GetKeyFromCachedItem(item);
 
             RefreshTokenCacheDictionary
-                .GetOrAdd(partitionKey, new ConcurrentDictionary<string, MsalRefreshTokenCacheItem>())[itemKey] = item;
+                .GetOrAdd(partitionKey, _ => new ConcurrentDictionary<string, MsalRefreshTokenCacheItem>())[itemKey] = item;
         }
 
         public void SaveIdToken(MsalIdTokenCacheItem item)
@@ -108,7 +108,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             string partitionKey = CacheKeyFactory.GetKeyFromCachedItem(item);
 
             IdTokenCacheDictionary
-                .GetOrAdd(partitionKey, new ConcurrentDictionary<string, MsalIdTokenCacheItem>())[itemKey] = item;
+                .GetOrAdd(partitionKey, _ => new ConcurrentDictionary<string, MsalIdTokenCacheItem>())[itemKey] = item;
         }
 
         public void SaveAccount(MsalAccountCacheItem item)
@@ -117,7 +117,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             string partitionKey = CacheKeyFactory.GetKeyFromCachedItem(item);
 
             AccountCacheDictionary
-                .GetOrAdd(partitionKey, new ConcurrentDictionary<string, MsalAccountCacheItem>())[itemKey] = item;
+                .GetOrAdd(partitionKey, _ => new ConcurrentDictionary<string, MsalAccountCacheItem>())[itemKey] = item;
         }
 
         public void SaveAppMetadata(MsalAppMetadataCacheItem item)

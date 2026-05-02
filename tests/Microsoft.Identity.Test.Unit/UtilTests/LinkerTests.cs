@@ -9,7 +9,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Json;
+using Microsoft.Identity.Client.Platforms.net;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 

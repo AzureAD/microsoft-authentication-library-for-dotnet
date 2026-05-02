@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
         #endregion
 
-        [TestMethod]        // Regression test for: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/891
+        [RunOn(SkipConditions.OneBranchBuild)]        // Regression test for: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/891
         public async Task SeleniumGetAuthCode_RedeemForAt_CommonAuthority_Async()
         {
             // Arrange
@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             await RunTestForUserAsync(app.AppId, user, $"https://login.microsoftonline.com/{user.TenantId}", false).ConfigureAwait(false);
         }
 
-        [TestMethod]
+        [RunOn(SkipConditions.OneBranchBuild)]
         public async Task GetTokenByAuthCode_WithPKCE_Async()
         {
             // Arrange
@@ -77,7 +77,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             await RunTestForUserAsync(app.AppId, user, "https://login.microsoftonline.com/common", true).ConfigureAwait(false);
         }
 
-        [TestMethod]
+        [RunOn(SkipConditions.OneBranchBuild)]
         public async Task GetTokenByAuthCode_HybridSPA_Async()
         {
             // Arrange

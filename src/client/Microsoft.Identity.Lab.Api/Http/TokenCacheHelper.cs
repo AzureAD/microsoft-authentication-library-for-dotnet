@@ -12,7 +12,7 @@ using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Test.Common.Core.Helpers;
+using Microsoft.Identity.Lab.Api.Helpers;
 using Microsoft.Identity.Test.Unit;
 
 namespace Microsoft.Identity.Test.Common.Core.Mocks
@@ -361,12 +361,13 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         {
             IReadOnlyList<MsalAccessTokenCacheItem> allAccessTokens;
 
-            // avoid calling GetAllAccessTokens() on the strict accessors, as they will throw
-            if (tokenCache.Accessor is AppAccessorWithPartitionAsserts appPartitionedAccessor)
+            // avoid calling GetAllAccessTokens() on strict partition-assert accessors, as they will throw when partitionKey is null.
+            // Check against the base classes so this works regardless of which concrete subclass is in use.
+            if (tokenCache.Accessor is InMemoryPartitionedAppTokenCacheAccessor appPartitionedAccessor)
             {
                 allAccessTokens = appPartitionedAccessor.AccessTokenCacheDictionary.SelectMany(dict => dict.Value).Select(kv => kv.Value).ToList();
             }
-            else if (tokenCache.Accessor is UserAccessorWithPartitionAsserts userPartitionedAccessor)
+            else if (tokenCache.Accessor is InMemoryPartitionedUserTokenCacheAccessor userPartitionedAccessor)
             {
                 allAccessTokens = userPartitionedAccessor.AccessTokenCacheDictionary.SelectMany(dict => dict.Value).Select(kv => kv.Value).ToList();
             }

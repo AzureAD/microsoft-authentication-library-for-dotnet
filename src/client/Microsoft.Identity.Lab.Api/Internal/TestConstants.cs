@@ -10,7 +10,6 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit
 {
@@ -419,7 +418,7 @@ namespace Microsoft.Identity.Test.Unit
         /// <summary>
         /// Primary ADFS authority used in tests.
         /// </summary>
-        public const string ADFSAuthority = "https://fs.msidlab8.com/adfs/";
+        public const string ADFSAuthority = "https://fs.id4slab1.com/adfs/";
 
         /// <summary>
         /// Secondary ADFS authority used in tests.

@@ -25,7 +25,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="NSubstitute" />
     <PackageReference Include="NSubstitute.Analyzers.CSharp">
       <PrivateAssets>all</PrivateAssets>
@@ -33,15 +32,14 @@
     </PackageReference>
     <PackageReference Include="System.Net.Http" />
     <PackageReference Include="System.Reflection.TypeExtensions" />
+    <PackageReference Include="System.Text.Json" />
     <PackageReference Include="System.Threading" />
     <PackageReference Include="System.Threading.Tasks" />
     <PackageReference Include="System.Threading.Tasks.Parallel" />
     <PackageReference Include="System.Threading.Thread" />
-    <PackageReference Include="System.ValueTuple" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\tests\Microsoft.Identity.Test.Common\Microsoft.Identity.Test.Common.csproj" />
     <ProjectReference Include="..\Microsoft.Identity.Client.Extensions.Msal\Microsoft.Identity.Client.Extensions.Msal.csproj" />
     <ProjectReference Include="..\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
   </ItemGroup>

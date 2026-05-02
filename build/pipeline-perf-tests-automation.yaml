@@ -37,6 +37,12 @@ jobs:
       inputs:
         restoreSolution: PerformanceTests.sln
 
+    - task: DotNetCoreCLI@2
+      displayName: 'dotnet restore'
+      inputs:
+        command: 'restore'
+        projects: 'PerformanceTests.sln'
+
     - task: MSBuild@1
       displayName: Build PerformanceTests.sln
       inputs:

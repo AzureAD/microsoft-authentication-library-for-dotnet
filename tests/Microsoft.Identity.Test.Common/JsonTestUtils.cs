@@ -1,8 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Identity.Test.Common.Core.Helpers
 {
@@ -20,10 +21,10 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
         /// <returns>The modified JSON string.</returns>    
         public static string AddKeyValue(string json, string key, string value)
         {
-            JObject jobj = JObject.Parse(json);
-            jobj[key] = value;
+            JsonObject jobj = JsonNode.Parse(json).AsObject();
+            jobj[key] = JsonValue.Create(value);
 
-            return jobj.ToString();
+            return jobj.ToJsonString();
         }
 
         /// <summary>
@@ -33,10 +34,12 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
         /// <param name="actualJson">The actual JSON string.</param>
         public static void AssertJsonDeepEquals(string expectedJson, string actualJson)
         {
-            JToken expected = JToken.Parse(expectedJson);
-            JToken actual = JToken.Parse(actualJson);
-
-            if (!JToken.DeepEquals(expected, actual))
+            // Normalize by round-tripping through JsonDocument
+            using var expectedDoc = JsonDocument.Parse(expectedJson);
+            using var actualDoc = JsonDocument.Parse(actualJson);
+            string normalizedExpected = JsonSerializer.Serialize(expectedDoc.RootElement);
+            string normalizedActual = JsonSerializer.Serialize(actualDoc.RootElement);
+            if (normalizedExpected != normalizedActual)
             {
                 Assert.Fail($"The 2 JSON strings are not the same. Expected {expectedJson} Actual {actualJson}");
             }
