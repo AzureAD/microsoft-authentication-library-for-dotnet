@@ -13,7 +13,7 @@ These rules apply when reviewing test files in this repository.
 
 ## Test conventions
 
-- Use MSTest SDK v3 with NSubstitute for mocking
+- Use MSTest SDK v4 with NSubstitute for mocking
 - Use `// Arrange`, `// Act`, `// Assert` comments
 - Prefer deterministic tests: avoid `Thread.Sleep`, timing dependencies, or environment-specific behavior
 - Copy existing style in nearby files for test method names

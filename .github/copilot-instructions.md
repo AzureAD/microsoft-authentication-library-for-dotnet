@@ -41,7 +41,7 @@ These patterns are correct in this repo. Do not suggest changes:
 
 ## Testing standards
 
-- MSTest SDK v3 with NSubstitute for mocking
+- MSTest SDK v4 with NSubstitute for mocking
 - Use `// Arrange`, `// Act`, `// Assert` comments
 - Prefer deterministic tests (no timing flakiness)
 
