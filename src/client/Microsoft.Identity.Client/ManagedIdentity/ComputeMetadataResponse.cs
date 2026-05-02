@@ -1,12 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-#if SUPPORTS_SYSTEM_TEXT_JSON
 using Microsoft.Identity.Client.Platforms.net;
 using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
-#else
-using Microsoft.Identity.Json;
-#endif
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
@@ -53,7 +49,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         [JsonProperty("vmSize")]
         public string VmSize { get; set; }
 
-        /// <summary>Security profile indicating platform security posture.</summary>
+        /// <summary>
+        /// Security profile indicating platform security posture. May be null when IMDS
+        /// does not return security profile information for the current VM.
+        /// </summary>
         [JsonProperty("securityProfile")]
         public ComputeSecurityProfile SecurityProfile { get; set; }
     }
@@ -65,11 +64,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity
     [Preserve(AllMembers = true)]
     public class ComputeSecurityProfile
     {
-        /// <summary>Whether Secure Boot is enabled on the VM.</summary>
+        /// <summary>Whether Secure Boot is enabled on the VM, when returned by IMDS.</summary>
         [JsonProperty("secureBootEnabled")]
         public string SecureBootEnabled { get; set; }
 
-        /// <summary>Whether a virtual TPM is enabled on the VM.</summary>
+        /// <summary>Whether a virtual TPM is enabled on the VM, when returned by IMDS.</summary>
         [JsonProperty("virtualTpmEnabled")]
         public string VirtualTpmEnabled { get; set; }
     }

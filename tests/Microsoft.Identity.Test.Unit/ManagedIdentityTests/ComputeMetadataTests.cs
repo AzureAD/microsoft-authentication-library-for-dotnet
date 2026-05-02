@@ -80,7 +80,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        public async Task GetComputeMetadata_NoSecurityProfile_ReturnsNullSecurityProfile()
+        public async Task GetComputeMetadata_MissingSecurityProfile_ParsesCoreFieldsAndLeavesSecurityProfileNull()
         {
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
@@ -316,5 +316,88 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.IsNotNull(result);
             }
         }
+
+        [TestMethod]
+        public async Task GetComputeMetadata_PartialSecurityProfile_ParsesAvailableFields()
+        {
+            string response = @"{
+                ""osType"": ""Linux"",
+                ""vmId"": ""vm-guid-9999"",
+                ""securityProfile"": {
+                    ""secureBootEnabled"": ""true""
+                }
+            }";
+
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                ImdsManagedIdentitySource.ResetEndpointCacheForTest();
+
+                httpManager.AddMockHandler(
+                    new MockHttpMessageHandler
+                    {
+                        ExpectedMethod = HttpMethod.Get,
+                        ResponseMessage = MockHelpers.CreateSuccessResponseMessage(response)
+                    });
+
+                var result = await ImdsComputeMetadataManager
+                    .GetComputeMetadataAsync(httpManager, CancellationToken.None)
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.AreEqual("Linux", result.OsType);
+                Assert.AreEqual("vm-guid-9999", result.VmId);
+                Assert.IsNotNull(result.SecurityProfile);
+                Assert.AreEqual("true", result.SecurityProfile.SecureBootEnabled);
+                Assert.IsNull(result.SecurityProfile.VirtualTpmEnabled);
+            }
+        }
+
+        [TestMethod]
+        public async Task GetComputeMetadata_MalformedJson_ReturnsNull()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                ImdsManagedIdentitySource.ResetEndpointCacheForTest();
+
+                httpManager.AddMockHandler(
+                    new MockHttpMessageHandler
+                    {
+                        ExpectedMethod = HttpMethod.Get,
+                        ResponseMessage = MockHelpers.CreateSuccessResponseMessage("{ invalid json")
+                    });
+
+                var result = await ImdsComputeMetadataManager
+                    .GetComputeMetadataAsync(httpManager, CancellationToken.None)
+                    .ConfigureAwait(false);
+
+                Assert.IsNull(result);
+            }
+        }
+
+        [TestMethod]
+        public async Task GetComputeMetadata_EmptyBody_ReturnsNull()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                ImdsManagedIdentitySource.ResetEndpointCacheForTest();
+
+                httpManager.AddMockHandler(
+                    new MockHttpMessageHandler
+                    {
+                        ExpectedMethod = HttpMethod.Get,
+                        ResponseMessage = MockHelpers.CreateSuccessResponseMessage(string.Empty)
+                    });
+
+                var result = await ImdsComputeMetadataManager
+                    .GetComputeMetadataAsync(httpManager, CancellationToken.None)
+                    .ConfigureAwait(false);
+
+                Assert.IsNull(result);
+            }
+        }
+
     }
 }

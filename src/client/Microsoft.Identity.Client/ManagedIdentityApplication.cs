@@ -85,10 +85,14 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Retrieves compute metadata from the Azure Instance Metadata Service (IMDS).
-        /// Returns VM properties including security profile, OS type, and location.
+        /// Returns VM properties such as OS type, location, VM size, and security profile when available.
         /// </summary>
         /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>Compute metadata from IMDS, or null if IMDS is unreachable, returns a non-200 response, or the response cannot be deserialized.</returns>
+        /// <returns>
+        /// Compute metadata from IMDS, or null if IMDS is unreachable, returns a non-200 response,
+        /// or the response cannot be deserialized. The returned object's SecurityProfile property
+        /// may be null when IMDS does not provide security profile information for the current VM.
+        /// </returns>
         public static Task<ComputeMetadataResponse> GetComputeMetadataAsync(
             CancellationToken cancellationToken = default)
         {

@@ -79,9 +79,29 @@ namespace Microsoft.Identity.Test.E2E
             Assert.IsFalse(string.IsNullOrEmpty(result.Location), "Location should be populated.");
             Assert.IsFalse(string.IsNullOrEmpty(result.VmSize), "VmSize should be populated.");
             Assert.IsFalse(string.IsNullOrEmpty(result.AzEnvironment), "AzEnvironment should be populated.");
-            Assert.IsNotNull(result.SecurityProfile, "SecurityProfile should not be null.");
-            Assert.IsNotNull(result.SecurityProfile.SecureBootEnabled, "SecureBootEnabled should be populated.");
-            Assert.IsNotNull(result.SecurityProfile.VirtualTpmEnabled, "VirtualTpmEnabled should be populated.");
+
+            // securityProfile is not guaranteed to be present on all VM types/generations.
+            // When it is returned, validate the boolean-like values that are present.
+            if (result.SecurityProfile != null)
+            {
+                AssertOptionalBooleanString(
+                    result.SecurityProfile.SecureBootEnabled,
+                    nameof(result.SecurityProfile.SecureBootEnabled));
+
+                AssertOptionalBooleanString(
+                    result.SecurityProfile.VirtualTpmEnabled,
+                    nameof(result.SecurityProfile.VirtualTpmEnabled));
+            }
+        }
+
+        private static void AssertOptionalBooleanString(string value, string propertyName)
+        {
+            if (!string.IsNullOrEmpty(value))
+            {
+                Assert.IsTrue(
+                    bool.TryParse(value, out _),
+                    $"{propertyName} should be 'true' or 'false' when returned. Actual value: '{value}'.");
+            }
         }
     }
 }

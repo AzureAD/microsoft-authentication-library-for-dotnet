@@ -36,27 +36,39 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 { "Metadata", "true" }
             };
 
-            string queryParams = $"{ImdsManagedIdentitySource.ApiVersionQueryParam}={ImdsManagedIdentitySource.ImdsComputeApiVersion}";
-            Uri endpoint = ImdsManagedIdentitySource.GetValidatedEndpoint(
-                new NullLogger(),
-                ImdsManagedIdentitySource.ImdsComputePath,
-                queryParams);
+            var logger = new NullLogger();
 
-            HttpResponse response;
             try
             {
-                response = await httpManager.SendRequestAsync(
+                string queryParams =
+                    $"{ImdsManagedIdentitySource.ApiVersionQueryParam}={ImdsManagedIdentitySource.ImdsComputeApiVersion}";
+
+                // Reuse existing IMDS endpoint resolution so compute metadata follows the same
+                // endpoint override behavior as managed identity token requests.
+                Uri endpoint = ImdsManagedIdentitySource.GetValidatedEndpoint(
+                    logger,
+                    ImdsManagedIdentitySource.ImdsComputePath,
+                    queryParams);
+
+                HttpResponse response = await httpManager.SendRequestAsync(
                     endpoint,
                     headers,
                     body: null,
                     method: HttpMethod.Get,
-                    logger: new NullLogger(),
+                    logger: logger,
                     doNotThrow: true,
                     mtlsCertificate: null,
                     validateServerCertificate: null,
                     cancellationToken: cancellationToken,
                     retryPolicy: new ImdsRetryPolicy())
                     .ConfigureAwait(false);
+
+                if (response == null || response.StatusCode != HttpStatusCode.OK)
+                {
+                    return null;
+                }
+
+                return JsonHelper.TryToDeserializeFromJson<ComputeMetadataResponse>(response.Body);
             }
             catch (OperationCanceledException)
             {
@@ -66,13 +78,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             {
                 return null;
             }
-
-            if (response == null || response.StatusCode != HttpStatusCode.OK)
-            {
-                return null;
-            }
-
-            return JsonHelper.TryToDeserializeFromJson<ComputeMetadataResponse>(response.Body);
         }
     }
 }
