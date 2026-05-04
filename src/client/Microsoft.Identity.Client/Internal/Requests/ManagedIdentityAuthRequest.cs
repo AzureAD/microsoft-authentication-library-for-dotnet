@@ -41,6 +41,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             AuthenticationResult authResult = null;
             ILoggerAdapter logger = AuthenticationRequestParameters.RequestContext.Logger;
+
+            // Propagate client-originated claims (from WithClaimsFromClient) to MI parameters.
+            // These are forwarded to IMDS but do NOT bypass the cache.
+            if (!string.IsNullOrEmpty(AuthenticationRequestParameters.ClientClaims))
+            {
+                _managedIdentityParameters.ClientClaims = AuthenticationRequestParameters.ClientClaims;
+                logger.Info("[ManagedIdentityRequest] Client-originated claims present; will be forwarded to MI endpoint.");
+            }
             
             // Prime the scheme before any cache lookup if we already have a binding cert from a prior mint
             if (AuthenticationRequestParameters.IsMtlsPopRequested)

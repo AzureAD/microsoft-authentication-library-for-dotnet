@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -22,37 +23,75 @@ namespace Microsoft.Identity.Client.Internal
             string claims,
             IEnumerable<string> clientCapabilities)
         {
+            return GetMergedClaimsAndClientCapabilities(claims, clientCapabilities, clientClaims: null);
+        }
+
+        /// <summary>
+        /// Merges server claims (from WithClaims), client-originated claims (from WithClaimsFromClient),
+        /// and client capabilities into a single OIDC-compliant claims JSON string.
+        /// </summary>
+        internal static string GetMergedClaimsAndClientCapabilities(
+            string claims,
+            IEnumerable<string> clientCapabilities,
+            string clientClaims)
+        {
             if (clientCapabilities != null && clientCapabilities.Any())
             {
                 JObject capabilitiesJson = CreateClientCapabilitiesRequestJson(clientCapabilities);
-                JObject mergedClaimsAndCapabilities = MergeClaimsIntoCapabilityJson(claims, capabilitiesJson);
+                // Merge client claims first, then server claims — server claims take precedence on conflicts
+                capabilitiesJson = MergeClaimsIntoCapabilityJson(clientClaims, capabilitiesJson);
+                capabilitiesJson = MergeClaimsIntoCapabilityJson(claims, capabilitiesJson);
 
-                return JsonHelper.JsonObjectToString(mergedClaimsAndCapabilities);
+                return JsonHelper.JsonObjectToString(capabilitiesJson);
             }
 
-            return claims;
+            // No capabilities — merge client claims first, server claims second (server wins on conflicts)
+            if (!string.IsNullOrEmpty(claims) && !string.IsNullOrEmpty(clientClaims))
+            {
+                JObject clientClaimsJson = ParseClaimsJson(clientClaims);
+                JObject serverClaimsJson = ParseClaimsJson(claims);
+                JObject merged = JsonHelper.Merge(clientClaimsJson, serverClaimsJson);
+                return JsonHelper.JsonObjectToString(merged);
+            }
+
+            return !string.IsNullOrEmpty(clientClaims) ? clientClaims : claims;
         }
 
         internal static JObject MergeClaimsIntoCapabilityJson(string claims, JObject capabilitiesJson)
         {
             if (!string.IsNullOrEmpty(claims))
             {
-                JObject claimsJson;
-                try
-                {
-                    claimsJson = JsonHelper.ParseIntoJsonObject(claims);
-                }
-                catch (JsonException ex)
-                {
-                    throw new MsalClientException(
-                        MsalError.InvalidJsonClaimsFormat,
-                        MsalErrorMessage.InvalidJsonClaimsFormat(claims),
-                        ex);
-                }
+                JObject claimsJson = ParseClaimsJson(claims);
                 capabilitiesJson = JsonHelper.Merge(capabilitiesJson, claimsJson);
             }
 
             return capabilitiesJson;
+        }
+
+        private static JObject ParseClaimsJson(string claims)
+        {
+            try
+            {
+                var parsed = JsonHelper.ParseIntoJsonObject(claims);
+                if (parsed is null)
+                {
+                    throw new MsalClientException(
+                        MsalError.InvalidJsonClaimsFormat,
+                        "The claims parameter must be a valid JSON object. See https://openid.net/specs/openid-connect-core-1_0.html#ClaimsParameter.");
+                }
+                return parsed;
+            }
+            catch (MsalClientException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new MsalClientException(
+                    MsalError.InvalidJsonClaimsFormat,
+                    "The claims parameter is not valid JSON. Inspect the inner exception for details.",
+                    ex);
+            }
         }
 
         private static JObject CreateClientCapabilitiesRequestJson(IEnumerable<string> clientCapabilities)

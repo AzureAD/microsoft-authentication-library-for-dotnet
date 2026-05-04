@@ -74,6 +74,15 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     _requestContext.Logger);
             }
 
+            // Client-originated claims (WithClaimsFromClient) are forwarded as a query parameter to IMDS.
+            // Other MI sources may require different handling — extend per source as needed.
+            if (!string.IsNullOrEmpty(parameters.ClientClaims) &&
+                _sourceType == ManagedIdentitySource.Imds)
+            {
+                request.QueryParameters["claims"] = Uri.EscapeDataString(parameters.ClientClaims);
+                _requestContext.Logger.Info("[Managed Identity] Adding client-originated claims to request.");
+            }
+
             request.AddExtraQueryParams(
                 _requestContext.ServiceBundle.Config.ExtraQueryParameters,
                 _requestContext.Logger);

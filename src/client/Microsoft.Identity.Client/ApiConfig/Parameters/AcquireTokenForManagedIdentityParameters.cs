@@ -22,6 +22,8 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
 
         public string Claims { get; set; }
 
+        public string ClientClaims { get; set; }
+
         public string RevokedTokenHash { get; set; }
 
         public bool IsMtlsPopRequested { get; set; }
@@ -45,6 +47,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
                      ForceRefresh: {ForceRefresh}
                      Resource: {Resource}
                      Claims: {!string.IsNullOrEmpty(Claims)}
+                     ClientClaims: {!string.IsNullOrEmpty(ClientClaims)}
                      RevokedTokenHash: {!string.IsNullOrEmpty(RevokedTokenHash)}
                      IsMtlsPopRequested: {IsMtlsPopRequested}
                      """);

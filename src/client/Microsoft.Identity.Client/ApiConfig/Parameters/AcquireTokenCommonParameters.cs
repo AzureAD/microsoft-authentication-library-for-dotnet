@@ -43,6 +43,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public string ClientAssertionFmiPath { get; internal set; }
         public bool IsMtlsPopRequested { get; set; }
         public string ExtraClientAssertionClaims { get; internal set; }
+        public string ClientClaims { get; internal set; }
 
         /// <summary>
         /// Optional delegate for obtaining attestation JWT for Credential Guard keys.
