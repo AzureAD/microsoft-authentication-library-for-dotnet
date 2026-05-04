@@ -153,7 +153,7 @@ namespace Microsoft.Identity.Client
 
             canonicalAuthorityUri = TransformIfCiamAuthority(canonicalAuthorityUri);
 
-            var authorityType = GetAuthorityType(canonicalAuthorityUri);
+            var authorityType = AuthorityRegistry.DetectFromUri(canonicalAuthorityUri).AuthorityType;
 
             // Authority validation is only supported for AAD 
             if (authorityType == AuthorityType.B2C || authorityType == AuthorityType.Generic)
@@ -311,31 +311,7 @@ namespace Microsoft.Identity.Client
 
         internal Authority CreateAuthority()
         {
-            switch (AuthorityType)
-            {
-                case AuthorityType.Adfs:
-                    return new AdfsAuthority(this);
-
-                case AuthorityType.B2C:
-                    return new B2CAuthority(this);
-
-                case AuthorityType.Aad:
-                    return new AadAuthority(this);
-
-                case AuthorityType.Dsts:
-                    return new DstsAuthority(this);
-
-                case AuthorityType.Ciam:
-                    return new CiamAuthority(this);
-
-                case AuthorityType.Generic:
-                    return new GenericAuthority(this);
-
-                default:
-                    throw new MsalClientException(
-                        MsalError.InvalidAuthorityType,
-                        $"Unsupported authority type {AuthorityType}");
-            }
+            return AuthorityRegistry.Create(this);
         }
 
         #endregion
@@ -466,20 +442,7 @@ namespace Microsoft.Identity.Client
         {
             public static IAuthorityValidator CreateAuthorityValidator(AuthorityInfo authorityInfo, RequestContext requestContext)
             {
-                switch (authorityInfo.AuthorityType)
-                {
-                    case AuthorityType.Adfs:
-                        return new AdfsAuthorityValidator(requestContext);
-                    case AuthorityType.Aad:
-                        return new AadAuthorityValidator(requestContext);
-                    case AuthorityType.B2C:
-                    case AuthorityType.Dsts:
-                    case AuthorityType.Ciam:
-                    case AuthorityType.Generic:
-                        return new NullAuthorityValidator();
-                    default:
-                        throw new InvalidOperationException("Invalid AuthorityType");
-                }
+                return AuthorityRegistry.CreateValidator(authorityInfo, requestContext);
             }
 
             /// <summary>
