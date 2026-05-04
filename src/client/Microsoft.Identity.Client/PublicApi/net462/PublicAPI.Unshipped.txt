@@ -12,3 +12,5 @@ Microsoft.Identity.Client.Extensibility.AuthenticationResultExtensions
 const Microsoft.Identity.Client.MsalError.InternalCacheDisabled = "internal_cache_disabled" -> string
 static Microsoft.Identity.Client.CacheOptions.DisableInternalCacheOptions.get -> Microsoft.Identity.Client.CacheOptions
 static Microsoft.Identity.Client.Extensibility.AuthenticationResultExtensions.GetRefreshToken(this Microsoft.Identity.Client.AuthenticationResult result) -> string
+Microsoft.Identity.Client.AcquireTokenForManagedIdentityParameterBuilder.WithClaimsFromClient(string claimsJson) -> Microsoft.Identity.Client.AcquireTokenForManagedIdentityParameterBuilder
+Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder.WithClaimsFromClient(string claimsJson) -> Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder

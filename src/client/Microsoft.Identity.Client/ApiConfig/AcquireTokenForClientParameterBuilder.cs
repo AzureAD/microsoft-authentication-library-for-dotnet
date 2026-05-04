@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
@@ -180,6 +181,68 @@ namespace Microsoft.Identity.Client
             this.WithAdditionalCacheKeyComponents(cacheKey);
 
             CommonParameters.FmiPathSuffix = pathSuffix;
+
+            return this;
+        }
+
+        /// <summary>
+        /// Adds stable, client-originated claims (e.g., NSP network perimeter claims) to the token request.
+        /// Unlike <see cref="AbstractAcquireTokenParameterBuilder{T}.WithClaims(string)"/>, these claims
+        /// do NOT bypass the token cache. Tokens are cached and partitioned by the claims value —
+        /// different claims produce different cache entries, while identical claims reuse cached tokens.
+        /// The claims JSON must follow the OIDC claims request format (Section 5.5 of OpenID Connect Core 1.0).
+        /// </summary>
+        /// <param name="claimsJson">A JSON string in OIDC claims request format, e.g.,
+        /// <c>{"access_token":{"xms_nsp_id":{"essential":true,"value":"nsp-perimeter-001"}}}</c>.</param>
+        /// <returns>The builder to chain .With methods.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="claimsJson"/> is null or whitespace.</exception>
+        /// <exception cref="MsalClientException">Thrown when <paramref name="claimsJson"/> is not a valid JSON object.</exception>
+        /// <remarks>
+        /// This is an experimental API. Call <c>.WithExperimentalFeatures(true)</c> on the application builder to enable it.
+        /// When both <see cref="AbstractAcquireTokenParameterBuilder{T}.WithClaims(string)"/> and
+        /// <see cref="WithClaimsFromClient(string)"/> are used, the claims are JSON-merged into a single
+        /// OIDC-compliant <c>claims</c> body parameter sent to the token endpoint.
+        /// </remarks>
+        public AcquireTokenForClientParameterBuilder WithClaimsFromClient(string claimsJson)
+        {
+            ValidateUseOfExperimentalFeature();
+
+            if (string.IsNullOrWhiteSpace(claimsJson))
+            {
+                throw new ArgumentNullException(nameof(claimsJson));
+            }
+
+            // Validate JSON is an object — OIDC claims parameter must be a JSON object
+            try
+            {
+                using var doc = JsonDocument.Parse(claimsJson);
+                if (doc.RootElement.ValueKind != System.Text.Json.JsonValueKind.Object)
+                {
+                    throw new MsalClientException(
+                        MsalError.InvalidJsonClaimsFormat,
+                        "The claims parameter must be a JSON object. See https://openid.net/specs/openid-connect-core-1_0.html#ClaimsParameter.");
+                }
+            }
+            catch (JsonException ex)
+            {
+                throw new MsalClientException(
+                    MsalError.InvalidJsonClaimsFormat,
+                    "The claims parameter is not valid JSON. Inspect the inner exception for details. See https://openid.net/specs/openid-connect-core-1_0.html#ClaimsParameter.",
+                    ex);
+            }
+
+            CommonParameters.ClientClaims = claimsJson;
+
+            // Add the claims to the cache key so different claims produce different cache entries.
+            // Remove existing key first to allow calling WithClaimsFromClient multiple times (last wins).
+            CommonParameters.CacheKeyComponents?.Remove("client_claims");
+
+            var cacheKey = new SortedList<string, Func<CancellationToken, Task<string>>>
+            {
+                { "client_claims", _ => Task.FromResult(claimsJson) }
+            };
+
+            this.WithAdditionalCacheKeyComponents(cacheKey);
 
             return this;
         }

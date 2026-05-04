@@ -71,7 +71,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             ClaimsAndClientCapabilities = ClaimsHelper.GetMergedClaimsAndClientCapabilities(
                 _commonParameters.Claims,
-                _serviceBundle.Config.ClientCapabilities);
+                _serviceBundle.Config.ClientCapabilities,
+                _commonParameters.ClientClaims);
 
             HomeAccountId = homeAccountId;
             CacheKeyComponents = cacheKeyComponents;
@@ -134,6 +135,18 @@ namespace Microsoft.Identity.Client.Internal.Requests
             get
             {
                 return _commonParameters.Claims;
+            }
+        }
+
+        /// <summary>
+        /// Stable, client-originated claims from .WithClaimsFromClient.
+        /// Unlike <see cref="Claims"/>, these do NOT bypass the cache.
+        /// </summary>
+        public string ClientClaims
+        {
+            get
+            {
+                return _commonParameters.ClientClaims;
             }
         }
 
