@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client.Instance.Validation;
 using Microsoft.Identity.Client.Internal;
 
@@ -29,5 +30,16 @@ namespace Microsoft.Identity.Client.Instance
 
         /// <summary>Creates the appropriate validator for this authority type.</summary>
         IAuthorityValidator CreateValidator(RequestContext requestContext);
+
+        /// <summary>
+        /// Resolves the final authority to use for a token request, applying any type-specific
+        /// tenant or environment overrides. Shared validation (type mismatch, same host) is
+        /// performed by the caller before this method is invoked.
+        /// </summary>
+        Task<Authority> ResolveForRequestAsync(
+            Authority configAuthority,
+            AuthorityInfo requestAuthorityInfo,
+            IAccount account,
+            RequestContext requestContext);
     }
 }

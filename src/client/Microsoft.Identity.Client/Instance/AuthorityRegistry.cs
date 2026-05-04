@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client.Instance.Handlers;
 using Microsoft.Identity.Client.Instance.Validation;
 using Microsoft.Identity.Client.Internal;
@@ -73,5 +74,14 @@ namespace Microsoft.Identity.Client.Instance
         /// <summary>Creates the appropriate validator for the given AuthorityInfo.</summary>
         internal static IAuthorityValidator CreateValidator(AuthorityInfo authorityInfo, RequestContext requestContext)
             => GetByType(authorityInfo.AuthorityType).CreateValidator(requestContext);
+
+        /// <summary>Resolves the authority for a token request, dispatching to the correct handler.</summary>
+        internal static Task<Authority> ResolveForRequestAsync(
+            Authority configAuthority,
+            AuthorityInfo requestAuthorityInfo,
+            IAccount account,
+            RequestContext requestContext)
+            => GetByType(configAuthority.AuthorityInfo.AuthorityType)
+                .ResolveForRequestAsync(configAuthority, requestAuthorityInfo, account, requestContext);
     }
 }

@@ -2,11 +2,14 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Handlers;
 using Microsoft.Identity.Client.Instance.Validation;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
@@ -305,5 +308,112 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         }
 
         #endregion
+    }
+
+    [TestClass]
+    public class AuthorityHandlerResolveTests : TestBase
+    {
+        // Test: simple handlers return requestAuthorityInfo when provided
+        [TestMethod]
+        public async Task AdfsHandler_WithRequestAuthority_ReturnsRequestAuthority()
+        {
+            using var harness = CreateTestHarness();
+            var requestContext = new RequestContext(harness.ServiceBundle, Guid.NewGuid(), null);
+            var configInfo = AuthorityInfo.FromAdfsAuthority("https://fs.contoso.com/adfs/", false);
+            requestContext.ServiceBundle.Config.Authority = new AdfsAuthority(configInfo);
+
+            var requestInfo = AuthorityInfo.FromAdfsAuthority("https://fs.contoso.com/adfs/", false);
+            var configAuthority = Authority.CreateAuthority(configInfo);
+            var handler = new AdfsAuthorityHandler();
+
+            var result = await handler.ResolveForRequestAsync(configAuthority, requestInfo, null, requestContext).ConfigureAwait(false);
+
+            Assert.IsInstanceOfType(result, typeof(AdfsAuthority));
+            Assert.AreEqual(configInfo.CanonicalAuthority, result.AuthorityInfo.CanonicalAuthority);
+        }
+
+        // Test: simple handlers fall back to config when no request authority
+        [TestMethod]
+        public async Task AdfsHandler_WithNoRequestAuthority_ReturnsConfigAuthority()
+        {
+            using var harness = CreateTestHarness();
+            var requestContext = new RequestContext(harness.ServiceBundle, Guid.NewGuid(), null);
+            var configInfo = AuthorityInfo.FromAdfsAuthority("https://fs.contoso.com/adfs/", false);
+            requestContext.ServiceBundle.Config.Authority = new AdfsAuthority(configInfo);
+
+            var configAuthority = Authority.CreateAuthority(configInfo);
+            var handler = new AdfsAuthorityHandler();
+
+            var result = await handler.ResolveForRequestAsync(configAuthority, null, null, requestContext).ConfigureAwait(false);
+
+            Assert.IsInstanceOfType(result, typeof(AdfsAuthority));
+            Assert.AreEqual(configInfo.CanonicalAuthority, result.AuthorityInfo.CanonicalAuthority);
+        }
+
+        // Test: AAD handler falls back to config when no request authority and no account
+        [TestMethod]
+        public async Task AadHandler_WithNoRequestAuthority_NoAccount_ReturnsConfigAuthority()
+        {
+            using var harness = CreateTestHarness();
+            var requestContext = new RequestContext(harness.ServiceBundle, Guid.NewGuid(), null);
+            var configAuthority = Authority.CreateAuthority("https://login.microsoftonline.com/mytenant/");
+            requestContext.ServiceBundle.Config.Authority = configAuthority;
+            var handler = new AadAuthorityHandler();
+
+            var result = await handler.ResolveForRequestAsync(configAuthority, null, null, requestContext).ConfigureAwait(false);
+
+            Assert.IsInstanceOfType(result, typeof(AadAuthority));
+        }
+
+        // Test: B2C handler returns config authority when no request authority
+        [TestMethod]
+        public async Task B2CHandler_WithNoRequestAuthority_ReturnsConfigAuthority()
+        {
+            using var harness = CreateTestHarness();
+            var requestContext = new RequestContext(harness.ServiceBundle, Guid.NewGuid(), null);
+            var configInfo = AuthorityInfo.FromB2CAuthority("https://mytenant.b2clogin.com/tfp/mytenant.onmicrosoft.com/policy/");
+            requestContext.ServiceBundle.Config.Authority = new B2CAuthority(configInfo);
+
+            var configAuthority = Authority.CreateAuthority(configInfo);
+            var handler = new B2CAuthorityHandler();
+
+            var result = await handler.ResolveForRequestAsync(configAuthority, null, null, requestContext).ConfigureAwait(false);
+
+            Assert.IsInstanceOfType(result, typeof(B2CAuthority));
+            Assert.AreEqual(configInfo.CanonicalAuthority, result.AuthorityInfo.CanonicalAuthority);
+        }
+
+        // Test: registry dispatches ResolveForRequestAsync through the correct handler
+        [TestMethod]
+        public async Task AuthorityRegistry_ResolveForRequestAsync_DispatchesToCorrectHandler()
+        {
+            using var harness = CreateTestHarness();
+            var requestContext = new RequestContext(harness.ServiceBundle, Guid.NewGuid(), null);
+            var configInfo = AuthorityInfo.FromAdfsAuthority("https://fs.contoso.com/adfs/", false);
+            requestContext.ServiceBundle.Config.Authority = new AdfsAuthority(configInfo);
+            var configAuthority = requestContext.ServiceBundle.Config.Authority;
+
+            var result = await AuthorityRegistry.ResolveForRequestAsync(
+                configAuthority, null, null, requestContext).ConfigureAwait(false);
+
+            Assert.IsInstanceOfType(result, typeof(AdfsAuthority));
+        }
+
+        // Test: generic handler falls back to config when no request authority
+        [TestMethod]
+        public async Task GenericHandler_WithNoRequestAuthority_ReturnsConfigAuthority()
+        {
+            using var harness = CreateTestHarness();
+            var requestContext = new RequestContext(harness.ServiceBundle, Guid.NewGuid(), null);
+            var configInfo = AuthorityInfo.FromGenericAuthority("https://somegenericidp.com/");
+            requestContext.ServiceBundle.Config.Authority = new GenericAuthority(configInfo);
+
+            var configAuthority = Authority.CreateAuthority(configInfo);
+            var handler = new GenericAuthorityHandler();
+
+            var result = await handler.ResolveForRequestAsync(configAuthority, null, null, requestContext).ConfigureAwait(false);
+
+            Assert.IsInstanceOfType(result, typeof(GenericAuthority));
+        }
     }
 }

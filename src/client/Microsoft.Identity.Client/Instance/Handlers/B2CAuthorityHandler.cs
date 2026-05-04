@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client.Instance.Validation;
 using Microsoft.Identity.Client.Internal;
 
@@ -20,5 +21,15 @@ namespace Microsoft.Identity.Client.Instance.Handlers
 
         public IAuthorityValidator CreateValidator(RequestContext requestContext)
             => new NullAuthorityValidator();
+
+        public Task<Authority> ResolveForRequestAsync(
+            Authority configAuthority,
+            AuthorityInfo requestAuthorityInfo,
+            IAccount account,
+            RequestContext requestContext)
+        {
+            AuthorityInfo requestOrConfig = requestAuthorityInfo ?? configAuthority.AuthorityInfo;
+            return Task.FromResult(Create(requestOrConfig));
+        }
     }
 }

@@ -481,74 +481,8 @@ namespace Microsoft.Identity.Client
 
                 await ValidateSameHostAsync(requestAuthorityInfo, requestContext).ConfigureAwait(false);
 
-                AuthorityInfo requestOrConfig = requestAuthorityInfo ?? configAuthorityInfo;
-
-                switch (configAuthorityInfo.AuthorityType)
-                {
-                    // ADFS is tenant-less, no need to consider tenant
-                    case AuthorityType.Adfs:
-                        return new AdfsAuthority(requestOrConfig);
-
-                    case AuthorityType.Dsts:
-                        return new DstsAuthority(requestOrConfig);
-
-                    case AuthorityType.B2C:
-                        return new B2CAuthority(requestOrConfig);
-
-                    case AuthorityType.Ciam:
-                        return new CiamAuthority(requestOrConfig);
-
-                    case AuthorityType.Generic:
-                        return new GenericAuthority(requestOrConfig);
-
-                    case AuthorityType.Aad:
-
-                        bool updateEnvironment = requestContext.ServiceBundle.Config.MultiCloudSupportEnabled && account != null && !PublicClientApplication.IsOperatingSystemAccount(account);
-
-                        if (requestAuthorityInfo == null)
-                        {
-                            return updateEnvironment ?
-                                CreateAuthorityWithTenant(
-                                    CreateAuthorityWithEnvironment(configAuthorityInfo, account.Environment),
-                                    account?.HomeAccountId?.TenantId,
-                                    forceSpecifiedTenant: false) :
-                                CreateAuthorityWithTenant(
-                                    configAuthority,
-                                    account?.HomeAccountId?.TenantId,
-                                    forceSpecifiedTenant: false);
-                        }
-
-                        // In case the authority is defined only at the request level
-                        if (configAuthorityInfo.IsDefaultAuthority &&
-                            requestAuthorityInfo.AuthorityType != AuthorityType.Aad)
-                        {
-                            return requestAuthorityInfo.CreateAuthority();
-                        }
-
-                        var requestAuthority = updateEnvironment ?
-                            new AadAuthority(CreateAuthorityWithEnvironment(requestAuthorityInfo, account?.Environment).AuthorityInfo) :
-                            new AadAuthority(requestAuthorityInfo);
-                        if (!requestAuthority.IsCommonOrganizationsOrConsumersTenant() ||
-                            requestAuthority.IsOrganizationsTenantWithMsaPassthroughEnabled(requestContext.ServiceBundle.Config.IsBrokerEnabled && requestContext.ServiceBundle.Config.BrokerOptions != null && requestContext.ServiceBundle.Config.BrokerOptions.MsaPassthrough, account?.HomeAccountId?.TenantId))
-                        {
-                            return requestAuthority;
-                        }
-
-                        return updateEnvironment ?
-                                CreateAuthorityWithTenant(
-                                    CreateAuthorityWithEnvironment(configAuthorityInfo, account.Environment),
-                                    account?.HomeAccountId?.TenantId,
-                                    forceSpecifiedTenant: false) :
-                                CreateAuthorityWithTenant(
-                                    configAuthority,
-                                    account?.HomeAccountId?.TenantId,
-                                    forceSpecifiedTenant: false);
-
-                    default:
-                        throw new MsalClientException(
-                            MsalError.InvalidAuthorityType,
-                            "Unsupported authority type");
-                }
+                return await AuthorityRegistry.ResolveForRequestAsync(
+                    configAuthority, requestAuthorityInfo, account, requestContext).ConfigureAwait(false);
             }
 
             internal static Authority CreateAuthorityWithTenant(Authority authority, string tenantId, bool forceSpecifiedTenant)
