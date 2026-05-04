@@ -7,80 +7,52 @@ using System.Text;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.ManagedIdentity;
-using Microsoft.Identity.Test.Common.Core.Mocks;
 
 namespace Microsoft.Identity.Test.Common.Core.Helpers
 {
     /// <summary>
     /// ManagedIdentityTestUtil provides utility methods for setting up and managing environment variables
-    /// related to managed identities in test scenarios. These utilities help simulate different managed
-    /// identity sources and configurations, facilitating comprehensive testing of MSAL's managed identity
-    /// integration.
+    /// related to managed identities in test scenarios.
     /// </summary>
     public static class ManagedIdentityTestUtil
     {
         /// <summary>
-        /// user assigned identity identifier types for testing. This enum is used to specify the type of identifier (ClientId, ResourceId, ObjectId) when creating a user-assigned managed identity in tests.
+        /// User assigned identity identifier types for testing.
         /// </summary>
         public enum UserAssignedIdentityId
         {
-            /// <summary>
-            /// represents the absence of a user-assigned identity identifier. This value is used when creating a managed identity without specifying any identifier, allowing tests to verify behavior when no user-assigned identity is configured.
-            /// </summary>
+            /// <summary>No user-assigned identity.</summary>
             None,
-            /// <summary>
-            /// represents a user-assigned identity identified by its client ID. This value is used when creating a managed identity with a specific client ID, allowing tests to verify behavior when a client ID is provided.
-            /// </summary>  
+            /// <summary>Identified by client ID.</summary>
             ClientId,
-            /// <summary>
-            /// represents a user-assigned identity identified by its resource ID. This value is used when creating a managed identity with a specific resource ID, allowing tests to verify behavior when a resource ID is provided.    
-            /// </summary>
+            /// <summary>Identified by resource ID.</summary>
             ResourceId,
-            /// <summary>
-            /// represents a user-assigned identity identified by its object ID. This value is used when creating a managed identity with a specific object ID, allowing tests to verify behavior when an object ID is provided.
-            /// </summary>
+            /// <summary>Identified by object ID.</summary>
             ObjectId
         }
 
-        //MSI Azure resources
         /// <summary>
-        /// MSI Azure resource types for testing. This enum is used to specify the type of Azure resource (WebApp, Function, VM, AzureArc, CloudShell, ServiceFabric) when creating a managed identity in tests.
+        /// MSI Azure resource types for testing.
         /// </summary>
         public enum MsiAzureResource
         {
-            /// <summary>
-            /// Web App resource type for managed identity testing. This value is used when simulating a managed identity associated with an Azure Web App, allowing tests to verify behavior specific to this resource type.
-            /// </summary>
+            /// <summary>Azure Web App.</summary>
             WebApp,
-            /// <summary>
-            /// Function resource type for managed identity testing. This value is used when simulating a managed identity associated with an Azure Function, allowing tests to verify behavior specific to this resource type.    
-            /// </summary>
+            /// <summary>Azure Function.</summary>
             Function,
-            /// <summary>
-            /// VM resource type for managed identity testing. This value is used when simulating a managed identity associated with an Azure Virtual Machine, allowing tests to verify behavior specific to this resource type.
-            /// </summary>
+            /// <summary>Azure Virtual Machine.</summary>
             VM,
-            /// <summary>
-            /// Azure Arc resource type for managed identity testing. This value is used when simulating a managed identity associated with Azure Arc, allowing tests to verify behavior specific to this resource type.
-            /// </summary>
+            /// <summary>Azure Arc.</summary>
             AzureArc,
-            /// <summary>
-            /// Cloud Shell resource type for managed identity testing. This value is used when simulating a managed identity associated with Azure Cloud Shell, allowing tests to verify behavior specific to this resource type.
-            /// </summary>
+            /// <summary>Azure Cloud Shell.</summary>
             CloudShell,
-            /// <summary>
-            /// Service Fabric resource type for managed identity testing. This value is used when simulating a managed identity associated with Azure Service Fabric, allowing tests to verify behavior specific to this resource type.
-            /// </summary>
+            /// <summary>Azure Service Fabric.</summary>
             ServiceFabric
         }
 
         /// <summary>
         /// Sets environment variables for the specified managed identity source.
         /// </summary>
-        /// <param name="managedIdentitySource">The managed identity source.</param>
-        /// <param name="endpoint">The endpoint URL.</param>
-        /// <param name="secret">The secret value (default is "secret").</param>
-        /// <param name="thumbprint">The certificate thumbprint (default is "thumbprint").</param>
         public static void SetEnvironmentVariables(ManagedIdentitySource managedIdentitySource, string endpoint, string secret = "secret", string thumbprint = "thumbprint")
         {
             switch (managedIdentitySource)
@@ -123,30 +95,11 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
 
         /// <summary>
         /// Sets environment variables for testing upgrade scenarios.
-        /// This method mimics a scenario where older environment variables
-        /// (e.g., MSI_ENDPOINT and MSI_SECRET) from previous versions of
-        /// App Service (2017) still exist after an upgrade to newer versions (2019).
-        /// It ensures that MSAL's Managed Identity source detection can correctly
-        /// handle both legacy and new variables.
         /// </summary>
-        /// <param name="managedIdentitySource">
-        /// The type of managed identity source being tested (e.g., AppService, MachineLearning).
-        /// </param>
-        /// <param name="endpoint">
-        /// The endpoint URL to be set as part of the environment variables.
-        /// </param>
-        /// <param name="secret">
-        /// Optional: The secret value to be set (default is "secret").
-        /// </param>
-        /// <param name="thumbprint">
-        /// Optional: The certificate thumbprint to be set (default is "thumbprint").
-        /// </param>
         internal static void SetUpgradeScenarioEnvironmentVariables(ManagedIdentitySource managedIdentitySource, string endpoint, string secret = "secret", string thumbprint = "thumbprint")
         {
-            // Use the common method to set base environment variables
             SetEnvironmentVariables(managedIdentitySource, endpoint, secret, thumbprint);
 
-            // Add upgrade-specific variables where needed
             switch (managedIdentitySource)
             {
                 case ManagedIdentitySource.AppService:
@@ -159,9 +112,6 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
         /// <summary>
         /// Create the MIA with the http proxy
         /// </summary>
-        /// <param name="userAssignedId"></param>
-        /// <param name="userAssignedIdentityId"></param>
-        /// <returns></returns>
         public static ManagedIdentityApplicationBuilder CreateMIABuilder(string userAssignedId = "", UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.ClientId)
         {
             var builder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.WithUserAssignedClientId(userAssignedId));
@@ -177,7 +127,6 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
                     break;
             }
 
-            
             builder.Config.AccessorOptions = null;
 
             return builder;

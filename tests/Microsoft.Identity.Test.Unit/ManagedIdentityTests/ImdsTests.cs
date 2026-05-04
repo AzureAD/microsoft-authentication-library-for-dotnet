@@ -2,13 +2,16 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.ManagedIdentity.V2;
+using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Unit.Helpers;
@@ -59,7 +62,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 }
 
                 // Final success
-                httpManager.AddManagedIdentityMockHandler(
+                var successHandler = httpManager.AddManagedIdentityMockHandler(
                     ManagedIdentityTests.ImdsEndpoint,
                     ManagedIdentityTests.Resource,
                     MockHelpers.GetMsiSuccessfulResponse(),
@@ -76,6 +79,15 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 const int NumRequests = 1 + Num404Errors; // initial request + 2 retries
                 int requestsMade = NumRequests - httpManager.QueueSize;
                 Assert.AreEqual(NumRequests, requestsMade);
+
+                // Verify client metadata headers are forwarded to IMDS on the successful request
+                Assert.IsTrue(successHandler.ActualRequestHeaders.TryGetValues(MsalIdParameter.Product, out var skuValues));
+                string actualSku = skuValues.FirstOrDefault();
+                Assert.StartsWith("MSAL.", actualSku, $"SKU should start with 'MSAL.' but was '{actualSku}'");
+                Assert.IsTrue(successHandler.ActualRequestHeaders.TryGetValues(MsalIdParameter.Version, out var verValues));
+                Assert.IsFalse(string.IsNullOrEmpty(verValues.FirstOrDefault()));
+                Assert.IsTrue(successHandler.ActualRequestHeaders.TryGetValues(OAuth2Header.XMsCorrelationId, out var corrIdValues));
+                Assert.IsTrue(Guid.TryParse(corrIdValues.FirstOrDefault(), out _));
             }
         }
 

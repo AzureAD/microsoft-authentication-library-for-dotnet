@@ -133,6 +133,10 @@
       <Project>{5ec9968e-2cb0-0cbb-6fba-cbeebb26fcea}</Project>
       <Name>Microsoft.Identity.Lab.Api</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\Microsoft.Identity.Test.Common\Microsoft.Identity.Test.Common.csproj">
+      <Project>{f484dc37-bb44-45b5-a78e-06819d261f53}</Project>
+      <Name>Microsoft.Identity.Test.Common</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

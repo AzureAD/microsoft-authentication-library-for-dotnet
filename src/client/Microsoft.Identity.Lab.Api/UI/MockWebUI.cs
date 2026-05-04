@@ -10,7 +10,7 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.Identity.Lab.Api.Helpers;
 
 namespace Microsoft.Identity.Test.Common.Mocks
 {

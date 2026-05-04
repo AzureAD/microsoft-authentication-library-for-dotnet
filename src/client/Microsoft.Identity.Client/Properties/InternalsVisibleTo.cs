@@ -24,6 +24,7 @@ using Microsoft.Identity.Client;
 
 [assembly: InternalsVisibleTo("Microsoft.Identity.Client.Extensions.Msal" + KeyTokens.MSAL)]
 [assembly: InternalsVisibleTo("Microsoft.Identity.Test.Unit" + KeyTokens.MSAL)]
+[assembly: InternalsVisibleTo("Microsoft.Identity.Test.Common" + KeyTokens.MSAL)]
 [assembly: InternalsVisibleTo("Microsoft.Identity.Client.Extensions.Web" + KeyTokens.MSAL)]
 [assembly: InternalsVisibleTo("Microsoft.Identity.Client.Extensions.Web.UnitTests" + KeyTokens.MSAL)]
 

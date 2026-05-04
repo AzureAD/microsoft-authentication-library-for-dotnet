@@ -2,7 +2,7 @@
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <!-- Version of the Microsoft.Identity.Client.NativeInterop package. -->
-    <MSALRuntimeNativeInteropVersion>0.20.3</MSALRuntimeNativeInteropVersion>
+    <MSALRuntimeNativeInteropVersion>0.20.4</MSALRuntimeNativeInteropVersion>
     <!-- Version of MSAL if not defined by the CI-->
     <MsalInternalVersion>4.61.0</MsalInternalVersion>
     <!-- Version of Microsoft.Identity.Lab.Api if not defined by the CI-->
@@ -69,8 +69,8 @@
     <PackageVersion Include="NuGet.Versioning" Version="6.8.0" />
     <PackageVersion Include="NUnit" Version="3.13.3" />
     <PackageVersion Include="NUnit3TestAdapter" Version="4.5.0" />
-    <PackageVersion Include="OpenTelemetry.Exporter.Console" Version="1.6.0" />
-    <PackageVersion Include="OpenTelemetry.Exporter.InMemory" Version="1.6.0" />
+    <PackageVersion Include="OpenTelemetry.Exporter.Console" Version="1.15.3" />
+    <PackageVersion Include="OpenTelemetry.Exporter.InMemory" Version="1.15.3" />
     <PackageVersion Include="Polly" Version="7.2.3" />
     <PackageVersion Include="Selenium.Support" Version="4.19.0" />
     <PackageVersion Include="Selenium.WebDriver" Version="4.19.0" />

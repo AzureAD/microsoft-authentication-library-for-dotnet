@@ -9,11 +9,7 @@ using System.Text;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
 using System.Security.Cryptography;
-#if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text.Json;
-#else
-using Microsoft.Identity.Json.Linq;
-#endif
 
 namespace Microsoft.Identity.Client.Internal
 {
@@ -103,7 +99,6 @@ namespace Microsoft.Identity.Client.Internal
             // Handle claims from dictionary
             else if (hasClaimsFromDictionary)
             {
-#if SUPPORTS_SYSTEM_TEXT_JSON
                 using (var stream = new MemoryStream())
                 {
                     using (var writer = new Utf8JsonWriter(stream))
@@ -123,19 +118,6 @@ namespace Microsoft.Identity.Client.Internal
                     //Remove extra brackets from JSON result
                     payload.Append(jsonClaims.Substring(1, jsonClaims.Length - 2));
                 }
-#else
-                var json = new JObject();
-
-                foreach (var claim in _claimsToSign)
-                {
-                    json[claim.Key] = claim.Value;
-                }
-
-                var jsonClaims = JsonHelper.JsonObjectToString(json);
-
-                //Remove extra brackets from JSON result
-                payload.Append(jsonClaims.Substring(1, jsonClaims.Length - 2));
-#endif
             }
 
             payload.Append('}');

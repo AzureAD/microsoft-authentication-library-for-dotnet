@@ -17,7 +17,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Http.Retry;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.Identity.Lab.Api.Helpers;
 
 namespace Microsoft.Identity.Test.Common.Core.Mocks
 {

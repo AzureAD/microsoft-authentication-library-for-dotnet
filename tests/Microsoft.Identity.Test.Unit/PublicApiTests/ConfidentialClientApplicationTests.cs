@@ -899,7 +899,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             // Build a CCA whose assertion‑delegate returns NO JWT (error case)
             var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                        .WithExperimentalFeatures(true)
                         .WithClientSecret(TestConstants.ClientSecret)
                         .WithClientAssertion(
                             (opts, ct) => Task.FromResult(new ClientSignedAssertion
@@ -1986,6 +1985,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             options.TokenEndpoint = "https://login.microsoft.com/v2.0/token";
             options.CancellationToken = CancellationToken.None;
             options.Claims = TestConstants.Claims;
+            options.CorrelationId = Guid.NewGuid();
         }
 
         [TestMethod]
