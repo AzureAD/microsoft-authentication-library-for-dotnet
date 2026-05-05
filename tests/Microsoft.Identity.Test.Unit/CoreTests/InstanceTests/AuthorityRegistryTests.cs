@@ -299,9 +299,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         public void GenericHandler_CanHandle_AlwaysReturnsFalse()
         {
             var handler = AuthorityRegistry.GetByType(AuthorityType.Generic);
-            Assert.IsFalse(handler.CanHandle(new Uri("https://somegenericidp.com/")));
-            Assert.IsFalse(handler.CanHandle(new Uri("https://login.microsoftonline.com/common/")));
-            Assert.IsFalse(handler.CanHandle(new Uri("https://mytenant.ciamlogin.com/")));
+            Assert.IsFalse(handler.CanHandle(new Uri("https://somegenericidp.com/"), "somegenericidp.com", null));
+            Assert.IsFalse(handler.CanHandle(new Uri("https://login.microsoftonline.com/common/"), "login.microsoftonline.com", "common"));
+            Assert.IsFalse(handler.CanHandle(new Uri("https://mytenant.ciamlogin.com/"), "mytenant.ciamlogin.com", null));
         }
 
         #endregion

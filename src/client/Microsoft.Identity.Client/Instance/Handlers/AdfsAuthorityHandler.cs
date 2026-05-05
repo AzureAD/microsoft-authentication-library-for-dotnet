@@ -14,20 +14,8 @@ namespace Microsoft.Identity.Client.Instance.Handlers
 
         public AuthorityType AuthorityType => AuthorityType.Adfs;
 
-        public bool CanHandle(Uri authorityUri)
-        {
-            try
-            {
-                return string.Equals(
-                    AuthorityInfo.GetFirstPathSegment(authorityUri),
-                    AdfsPathSegment,
-                    StringComparison.OrdinalIgnoreCase);
-            }
-            catch (InvalidOperationException)
-            {
-                return false;
-            }
-        }
+        public bool CanHandle(Uri authorityUri, string host, string firstPathSegment)
+            => string.Equals(firstPathSegment, AdfsPathSegment, StringComparison.OrdinalIgnoreCase);
 
         public Authority Create(AuthorityInfo authorityInfo)
             => new AdfsAuthority(authorityInfo);

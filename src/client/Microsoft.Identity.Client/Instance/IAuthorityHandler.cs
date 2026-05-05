@@ -19,8 +19,10 @@ namespace Microsoft.Identity.Client.Instance
         /// <summary>
         /// Returns true if this handler can process the given authority URI.
         /// Handlers are evaluated in registration order; the first match wins.
+        /// The <paramref name="host"/> and <paramref name="firstPathSegment"/> are pre-computed
+        /// by <see cref="AuthorityRegistry.DetectFromUri"/> so that URI parsing happens only once.
         /// </summary>
-        bool CanHandle(Uri authorityUri);
+        bool CanHandle(Uri authorityUri, string host, string firstPathSegment);
 
         /// <summary>Creates the concrete <see cref="Authority"/> subclass for the given info.</summary>
         Authority Create(AuthorityInfo authorityInfo);

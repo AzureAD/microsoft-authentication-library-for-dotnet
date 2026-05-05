@@ -15,8 +15,8 @@ namespace Microsoft.Identity.Client.Instance.Handlers
     {
         public AuthorityType AuthorityType => AuthorityType.Ciam;
 
-        public bool CanHandle(Uri authorityUri)
-            => authorityUri.Host.EndsWith(Constants.CiamAuthorityHostSuffix, StringComparison.OrdinalIgnoreCase);
+        public bool CanHandle(Uri authorityUri, string host, string firstPathSegment)
+            => host.EndsWith(Constants.CiamAuthorityHostSuffix, StringComparison.OrdinalIgnoreCase);
 
         public Authority Create(AuthorityInfo authorityInfo)
             => new CiamAuthority(authorityInfo);

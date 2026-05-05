@@ -14,20 +14,8 @@ namespace Microsoft.Identity.Client.Instance.Handlers
 
         public AuthorityType AuthorityType => AuthorityType.Dsts;
 
-        public bool CanHandle(Uri authorityUri)
-        {
-            try
-            {
-                return string.Equals(
-                    AuthorityInfo.GetFirstPathSegment(authorityUri),
-                    DstsPathSegment,
-                    StringComparison.OrdinalIgnoreCase);
-            }
-            catch (InvalidOperationException)
-            {
-                return false;
-            }
-        }
+        public bool CanHandle(Uri authorityUri, string host, string firstPathSegment)
+            => string.Equals(firstPathSegment, DstsPathSegment, StringComparison.OrdinalIgnoreCase);
 
         public Authority Create(AuthorityInfo authorityInfo)
             => new DstsAuthority(authorityInfo);

@@ -32,11 +32,23 @@ namespace Microsoft.Identity.Client.Instance
 
         /// <summary>
         /// Detects the correct handler by inspecting a raw authority URI.
+        /// URI components are parsed once and passed to each handler to avoid redundant string operations.
         /// Used when parsing a new authority string (will replace GetAuthorityType).
         /// </summary>
         internal static IAuthorityHandler DetectFromUri(Uri authorityUri)
         {
-            return s_handlers.FirstOrDefault(h => h.CanHandle(authorityUri))
+            string host = authorityUri.Host;
+            string firstPathSegment;
+            try
+            {
+                firstPathSegment = AuthorityInfo.GetFirstPathSegment(authorityUri);
+            }
+            catch (InvalidOperationException)
+            {
+                firstPathSegment = null;
+            }
+
+            return s_handlers.FirstOrDefault(h => h.CanHandle(authorityUri, host, firstPathSegment))
                 ?? throw new MsalClientException(
                     MsalError.InvalidAuthorityType,
                     $"No authority handler found for URI: {authorityUri}");

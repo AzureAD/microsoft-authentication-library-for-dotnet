@@ -19,7 +19,7 @@ namespace Microsoft.Identity.Client.Instance.Handlers
         /// Catch-all: any URI not claimed by a more-specific handler is treated as AAD.
         /// This handler must be registered last among URI-detectable handlers.
         /// </summary>
-        public bool CanHandle(Uri authorityUri) => true;
+        public bool CanHandle(Uri authorityUri, string host, string firstPathSegment) => true;
 
         public Authority Create(AuthorityInfo authorityInfo)
             => new AadAuthority(authorityInfo);

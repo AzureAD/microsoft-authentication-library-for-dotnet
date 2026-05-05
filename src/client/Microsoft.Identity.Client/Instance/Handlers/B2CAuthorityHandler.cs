@@ -12,20 +12,8 @@ namespace Microsoft.Identity.Client.Instance.Handlers
     {
         public AuthorityType AuthorityType => AuthorityType.B2C;
 
-        public bool CanHandle(Uri authorityUri)
-        {
-            try
-            {
-                return string.Equals(
-                    AuthorityInfo.GetFirstPathSegment(authorityUri),
-                    B2CAuthority.Prefix,
-                    StringComparison.OrdinalIgnoreCase);
-            }
-            catch (InvalidOperationException)
-            {
-                return false;
-            }
-        }
+        public bool CanHandle(Uri authorityUri, string host, string firstPathSegment)
+            => string.Equals(firstPathSegment, B2CAuthority.Prefix, StringComparison.OrdinalIgnoreCase);
 
         public Authority Create(AuthorityInfo authorityInfo)
             => new B2CAuthority(authorityInfo);

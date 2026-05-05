@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client.Instance.Handlers
         public AuthorityType AuthorityType => AuthorityType.Generic;
 
         /// <summary>Generic authorities are never URI-detected; return false always.</summary>
-        public bool CanHandle(Uri authorityUri) => false;
+        public bool CanHandle(Uri authorityUri, string host, string firstPathSegment) => false;
 
         public Authority Create(AuthorityInfo authorityInfo)
             => new GenericAuthority(authorityInfo);
