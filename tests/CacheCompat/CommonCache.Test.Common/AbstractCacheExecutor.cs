@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
+using System.Text.Json;
 
 namespace CommonCache.Test.Common
 {
@@ -35,7 +35,7 @@ namespace CommonCache.Test.Common
 
         private void WriteResultsFile(string resultsFilePath, ExecutionContent results)
         {
-            File.WriteAllText(resultsFilePath, JsonConvert.SerializeObject(results));
+            File.WriteAllText(resultsFilePath, JsonSerializer.Serialize(results));
         }
     }
 }

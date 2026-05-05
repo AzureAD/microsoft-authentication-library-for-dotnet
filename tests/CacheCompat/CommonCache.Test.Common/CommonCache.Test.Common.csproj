@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="CommandLineParser"  />
-    <PackageReference Include="Newtonsoft.Json"  />
+    <PackageReference Include="System.Text.Json" />
   </ItemGroup>
 
 </Project>
