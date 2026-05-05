@@ -17,8 +17,10 @@ namespace Microsoft.Identity.Client.Instance
     /// </summary>
     internal class AuthorityManager
     {
+        // ConcurrentDictionary<string, byte> used as a concurrent set (byte is a dummy value).
+        // OrdinalIgnoreCase because hostnames are case-insensitive.
         private static readonly ConcurrentDictionary<string, byte> s_validatedEnvironments =
-            new ConcurrentDictionary<string, byte>();
+            new(StringComparer.OrdinalIgnoreCase);
 
         private readonly RequestContext _requestContext;
 
