@@ -470,9 +470,6 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         [TestMethod]
         public void ValidatedEnvironmentsCache_IsCaseInsensitive()
         {
-            // Arrange
-            AuthorityManager.ClearValidationCache();
-
             // Act - add an uppercase hostname directly into the internal cache
             AuthorityManager.s_validatedEnvironments.TryAdd("LOGIN.MICROSOFTONLINE.COM", 0);
 
