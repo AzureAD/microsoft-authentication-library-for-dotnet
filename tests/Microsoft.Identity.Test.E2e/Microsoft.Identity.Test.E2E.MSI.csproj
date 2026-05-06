@@ -16,7 +16,6 @@
     <PackageReference Include="MSTest.TestAdapter" />
     <PackageReference Include="MSTest.TestFramework" />
 
-    <PackageReference Include="Azure.Security.KeyVault.Secrets" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" />
     <PackageReference Include="System.Net.Http" />
     <PackageReference Include="System.Text.Json" />
