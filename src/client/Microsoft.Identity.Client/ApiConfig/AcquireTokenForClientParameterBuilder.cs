@@ -156,7 +156,8 @@ namespace Microsoft.Identity.Client
                 { OAuth2Parameter.Attributes, _ => Task.FromResult(attributeJson) }
             };
 
-            this.WithExtraBodyParameters(extraBodyParams);
+            AbstractConfidentialClientAcquireTokenParameterBuilderExtension
+                .WithExtraBodyParameters<AcquireTokenForClientParameterBuilder>(this, extraBodyParams);
 
             return this;
         }
@@ -193,20 +194,6 @@ namespace Microsoft.Identity.Client
         /// <seealso cref="ConfidentialClientApplicationBuilder.Validate"/> for a comment inside this function for AzureRegion.
         protected override void Validate()
         {
-            if (CommonParameters.MtlsCertificate != null)
-            {
-                // Check for Azure region only if the authority is AAD
-                // AzureRegion is by default set to null or set to null when the application is created
-                // with region set to DisableForceRegion (see ConfidentialClientApplicationBuilder.Validate)
-                if (ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType == AuthorityType.Aad &&
-                    ServiceBundle.Config.AzureRegion == null)
-                {
-                    throw new MsalClientException(
-                        MsalError.MtlsPopWithoutRegion,
-                        MsalErrorMessage.MtlsPopWithoutRegion);
-                }
-            }
-
             base.Validate();
 
             // Force refresh + AccessTokenHashToRefresh APIs cannot be used together

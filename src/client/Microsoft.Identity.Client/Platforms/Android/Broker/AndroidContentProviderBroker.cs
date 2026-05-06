@@ -17,7 +17,7 @@ using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Json.Linq;
+using System.Text.Json.Nodes;
 using System.Diagnostics.CodeAnalysis;
 using AndroidNative = Android;
 using AndroidUri = Android.Net.Uri;
@@ -74,16 +74,16 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                 return negotiatedBrokerProtocolKey;
             }
 
-            JObject errorResultObj = JObject.Parse(bundleResult?.GetString(BrokerConstants.BrokerResultV2) ?? "{}");
+            JsonObject errorResultObj = JsonNode.Parse(bundleResult?.GetString(BrokerConstants.BrokerResultV2) ?? "{}").AsObject();
             string errorCode = null;
             string errorDescription = null;
 
             if (errorResultObj != null && errorResultObj.Count > 0)
             {
-                JToken errorCodeToken = errorResultObj[BrokerResponseConst.BrokerErrorCode];
+                JsonNode errorCodeToken = errorResultObj[BrokerResponseConst.BrokerErrorCode];
                 errorCode = errorCodeToken?.ToString();
                 
-                JToken errorMessageToken = errorResultObj[BrokerResponseConst.BrokerErrorMessage];
+                JsonNode errorMessageToken = errorResultObj[BrokerResponseConst.BrokerErrorMessage];
                 string errorMessage = errorMessageToken?.ToString();
                 
                 errorDescription = $"[Android broker] An error occurred during hand shake with the broker. Error: {errorCode} Error Message: {errorMessage}";

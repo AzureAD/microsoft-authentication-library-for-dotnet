@@ -38,7 +38,7 @@ if [ $PACKAGE_MANAGER == 'apt' ]; then
         x11-xserver-utils \
         xorg \
         libp11-kit-dev \
-        libwebkit2gtk-4.0-dev
+        libwebkit2gtk-4.1-dev
 fi
 
 echo "Installing JavaBroker"

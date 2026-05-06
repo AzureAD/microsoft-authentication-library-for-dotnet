@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 var result = await app.AcquireTokenByUsernamePassword(
                     TestConstants.s_scope,
                     TestConstants.Username,
-                    TestConstants.DefaultPassword)
+                    TestConstants.PlaceholderCredential)
                     .WithTenantIdFromAuthority(authorityUri)
                     .ExecuteAsync()
                     .ConfigureAwait(false);

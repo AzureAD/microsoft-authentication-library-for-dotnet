@@ -125,6 +125,7 @@ namespace Microsoft.Identity.Client
         public bool IsConfidentialClient { get; }
         public bool IsPublicClient => !IsConfidentialClient && !IsManagedIdentity;
         public string CertificateIdToAssociateWithToken { get; set; }
+        public CertificateOptions CertificateOptions { get; internal set; }
 
         public Func<AppTokenProviderParameters, Task<AppTokenProviderResult>> AppTokenProvider;
 
@@ -158,7 +159,7 @@ namespace Microsoft.Identity.Client
         {
             get
             {
-                if (ClientCredential is SecretStringClientCredential secretCred)
+                if (ClientCredential is ClientSecretCredential secretCred)
                 {
                     return secretCred.Secret;
                 }

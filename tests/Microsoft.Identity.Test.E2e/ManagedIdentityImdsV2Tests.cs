@@ -1,18 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
+using System.Net.Http;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.KeyAttestation;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Test.E2E
 {
@@ -24,7 +24,9 @@ namespace Microsoft.Identity.Test.E2E
     [DoNotParallelize]
     public class ManagedIdentityImdsV2Tests
     {
-        private const string ArmScope = "https://graph.microsoft.com";
+        private const string GraphResource = "https://graph.microsoft.com";
+        private const string AkvResource = "https://vault.azure.net";
+        private const string AkvSecretUrl = "https://tokenbinding.vault.azure.net/secrets/boundsecret/?api-version=2015-06-01";
 
         // UAMI identifiers for MSALMSIV2 pool
         private const string UamiClientId = "6325cd32-9911-41f3-819c-416cdf9104e7";
@@ -72,7 +74,7 @@ namespace Microsoft.Identity.Test.E2E
 
             try
             {
-                var result = await mi.AcquireTokenForManagedIdentity(ArmScope)
+                var result = await mi.AcquireTokenForManagedIdentity(GraphResource)
                     .WithMtlsProofOfPossession()
                     .WithAttestationSupport()
                     .ExecuteAsync()
@@ -124,7 +126,7 @@ namespace Microsoft.Identity.Test.E2E
                 // Temporarily clear the endpoint to simulate unavailability
                 Environment.SetEnvironmentVariable("TOKEN_ATTESTATION_ENDPOINT", null);
 
-                var result = await mi.AcquireTokenForManagedIdentity(ArmScope)
+                var result = await mi.AcquireTokenForManagedIdentity(GraphResource)
                     .WithMtlsProofOfPossession()
                     .WithAttestationSupport()
                     .ExecuteAsync()
@@ -141,6 +143,65 @@ namespace Microsoft.Identity.Test.E2E
             {
                 // Restore original endpoint
                 Environment.SetEnvironmentVariable("TOKEN_ATTESTATION_ENDPOINT", originalEndpoint);
+            }
+        }
+
+        #endregion
+
+        #region AKV mTLS PoP Tests
+        /// <summary>
+        /// Tests mTLS PoP token acquisition and Azure Key Vault resource call with attestation.
+        /// </summary>
+        [RunOnAzureDevOps]
+        [TestCategory("MI_E2E_ImdsV2_Attested")]
+        [TestMethod]
+        public async Task AcquireTokenAndCallAKV_OnImdsV2_MtlsPoP_WithAttestation_Succeeds()
+        {
+            if (!OperatingSystem.IsWindows())
+            {
+                Assert.Inconclusive("Credential Guard attestation is only available on Windows.");
+            }
+
+            var mi = BuildMi();
+
+            try
+            {
+                var tokenResult = await mi.AcquireTokenForManagedIdentity(AkvResource)
+                    .WithMtlsProofOfPossession()
+                    .WithAttestationSupport()
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.IsFalse(string.IsNullOrEmpty(tokenResult.AccessToken), "AccessToken should not be empty.");
+                Assert.AreEqual("mtls_pop", tokenResult.TokenType, "Token type should be 'mtls_pop'.");
+                Assert.IsNotNull(tokenResult.BindingCertificate, "BindingCertificate should not be null.");
+
+                // Validate the certificate is backed by Credential Guard (RSACng with proper properties)
+                ValidateCredentialGuardCertificate(tokenResult.BindingCertificate);
+
+                ValidateMtlsPopBinding(tokenResult.AccessToken, tokenResult.BindingCertificate);
+
+                await CallAkvSecretAsync(
+                    AkvSecretUrl,
+                    tokenResult.BindingCertificate,
+                    tokenResult.TokenType,
+                    tokenResult.AccessToken)
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual(TokenSource.IdentityProvider, tokenResult.AuthenticationResultMetadata.TokenSource,
+                    "Token should come from MSI endpoint.");
+            }
+            catch (MsalClientException ex) when (ex.ErrorCode == "credential_guard_not_available")
+            {
+                Assert.Inconclusive("Credential Guard is not available.");
+            }
+            catch (CryptographicException ex)
+            {
+                Assert.Inconclusive($"Cryptographic operation failed: {ex.Message}");
+            }
+            catch (HttpRequestException ex)
+            {
+                Assert.Inconclusive($"AKV call could not be completed: {ex.Message}");
             }
         }
 
@@ -270,6 +331,50 @@ namespace Microsoft.Identity.Test.E2E
                 // Not an RSACng - could be software-backed fallback
                 Assert.Inconclusive($"Certificate uses {rsa.GetType().Name} instead of RSACng. May be using fallback provider.");
             }
+        }
+
+        /// <summary>
+        /// Calls AKV secret endpoint over mTLS with client certificate and token.
+        /// </summary>
+        private static async Task CallAkvSecretAsync(
+            string secretUrl,
+            X509Certificate2 clientCertificate,
+            string tokenType,
+            string accessToken)
+        {
+            Assert.IsNotNull(clientCertificate, "Client certificate required.");
+            Assert.IsFalse(string.IsNullOrEmpty(accessToken), "Access token required.");
+
+            using var httpClient = new HttpClient(new HttpClientHandler
+            {
+                ClientCertificateOptions = ClientCertificateOption.Manual,
+                SslProtocols = System.Security.Authentication.SslProtocols.Tls12 |
+                               System.Security.Authentication.SslProtocols.Tls13,
+                ClientCertificates = { clientCertificate }
+            });
+
+            httpClient.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue(tokenType, accessToken);
+            httpClient.DefaultRequestHeaders.Accept.Add(
+                new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+            httpClient.DefaultRequestHeaders.Add("x-ms-tokenboundauth", "true");
+
+            using var response = await httpClient.GetAsync(new Uri(secretUrl)).ConfigureAwait(false);
+            var responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                // AKV failures are infrastructure-related and should not fail the build.
+                // The core test validates mTLS PoP token acquisition; AKV is a downstream call.
+                Assert.Inconclusive(
+                    $"AKV secret GET returned non-success status: {(int)response.StatusCode} {response.StatusCode}. Body: {responseContent}");
+            }
+
+            using var jsonDoc = System.Text.Json.JsonDocument.Parse(responseContent);
+            var root = jsonDoc.RootElement;
+
+            Assert.IsTrue(root.TryGetProperty("value", out var secretValue), "Response missing 'value' property.");
+            Assert.IsFalse(string.IsNullOrEmpty(secretValue.GetString()), "Secret value is empty.");
         }
 
         #endregion

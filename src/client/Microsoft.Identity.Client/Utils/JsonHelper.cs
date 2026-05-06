@@ -7,17 +7,11 @@ using System.Linq;
 using System.Text;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
-#if SUPPORTS_SYSTEM_TEXT_JSON
 using Microsoft.Identity.Client.Platforms.net;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using JObject = System.Text.Json.Nodes.JsonObject;
 using JToken = System.Text.Json.Nodes.JsonNode;
-using System.Buffers;
-#else
-using Microsoft.Identity.Json;
-using Microsoft.Identity.Json.Linq;
-#endif
 
 namespace Microsoft.Identity.Client.Utils
 {
@@ -25,11 +19,7 @@ namespace Microsoft.Identity.Client.Utils
     {
         internal static string SerializeToJson<T>(T toEncode)
         {
-#if SUPPORTS_SYSTEM_TEXT_JSON
             return JsonSerializer.Serialize(toEncode, typeof(T), MsalJsonSerializerContext.Custom);
-#else
-            return JsonConvert.SerializeObject(toEncode);
-#endif
         }
 
         internal static T DeserializeFromJson<T>(string json)
@@ -38,14 +28,7 @@ namespace Microsoft.Identity.Client.Utils
             {
                 return default;
             }
-#if SUPPORTS_SYSTEM_TEXT_JSON
             return (T)JsonSerializer.Deserialize(json, typeof(T), MsalJsonSerializerContext.Custom);
-#else
-            
-            return JsonConvert.DeserializeObject<T>(json, new JsonSerializerSettings() { 
-                DateParseHandling = DateParseHandling.None, // Newtonsoft tries to be smart about dates, but System.Text.Json does not                
-            });
-#endif
         }
 
         internal static T TryToDeserializeFromJson<T>(string json, RequestContext requestContext = null)
@@ -76,12 +59,7 @@ namespace Microsoft.Identity.Client.Utils
             }
 
             using var stream = new MemoryStream(jsonByteArray);
-#if SUPPORTS_SYSTEM_TEXT_JSON
             return (T)JsonSerializer.Deserialize(stream, typeof(T), MsalJsonSerializerContext.Custom);
-#else
-            using var reader = new StreamReader(stream, Encoding.UTF8);
-            return (T)JsonSerializer.Create().Deserialize(reader, typeof(T));
-#endif
         }
 
         internal static string GetExistingOrEmptyString(JObject json, string key)
@@ -144,7 +122,6 @@ namespace Microsoft.Identity.Client.Utils
             return 0;
         }
 
-#if SUPPORTS_SYSTEM_TEXT_JSON
         internal static string JsonObjectToString(JsonObject jsonObject) => jsonObject.ToJsonString();
 
         internal static JsonObject ParseIntoJsonObject(string json) => JsonNode.Parse(json).AsObject();
@@ -168,22 +145,16 @@ namespace Microsoft.Identity.Client.Utils
         /// </remarks>
         internal static JObject Merge(JObject originalJson, JObject newContent)
         {
-            // Output buffer to store the merged JSON
-            var outputBuffer = new ArrayBufferWriter<byte>();
+            using var outputStream = new System.IO.MemoryStream();
 
-            // Parse the original and new JSON content
             using (JsonDocument jDoc1 = JsonDocument.Parse(originalJson.ToJsonString()))
             using (JsonDocument jDoc2 = JsonDocument.Parse(newContent.ToJsonString()))
-            using (var jsonWriter = new Utf8JsonWriter(outputBuffer, new JsonWriterOptions { Indented = true }))
+            using (var jsonWriter = new Utf8JsonWriter(outputStream, new JsonWriterOptions { Indented = true }))
             {
-                // Merge the JSON elements
                 MergeJsonElements(jsonWriter, jDoc1.RootElement, jDoc2.RootElement);
             }
 
-            // Convert the merged JSON to a UTF-8 encoded string
-            string mergedJsonString = Encoding.UTF8.GetString(outputBuffer.WrittenSpan);
-
-            // Parse the merged JSON string to a JObject
+            string mergedJsonString = Encoding.UTF8.GetString(outputStream.ToArray());
             return ParseIntoJsonObject(mergedJsonString);
         }
 
@@ -284,17 +255,6 @@ namespace Microsoft.Identity.Client.Utils
             // End writing the merged array
             jsonWriter.WriteEndArray();
         }
-#else
-        internal static string JsonObjectToString(JObject jsonObject) => jsonObject.ToString(Formatting.None);
-
-        internal static JObject ParseIntoJsonObject(string json) => JObject.Parse(json);
-
-        internal static JObject ToJsonObject(JToken jsonNode) => (JObject)jsonNode;
-
-        internal static bool TryGetValue(JObject json, string propertyName, out JToken value) => json.TryGetValue(propertyName, out value);
-
-        internal static T GetValue<T>(JToken json) => json.Value<T>();
-#endif
     }
 
 }
