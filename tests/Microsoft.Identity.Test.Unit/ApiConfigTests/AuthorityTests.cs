@@ -45,7 +45,6 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         [TestCleanup]
         public override void TestCleanup()
         {
-            AuthorityManager.ClearValidationCache();
             _harness.Dispose();
             base.TestCleanup();
         }
