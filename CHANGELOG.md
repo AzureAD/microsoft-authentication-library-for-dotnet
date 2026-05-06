@@ -1,3 +1,29 @@
+4.84.0
+======
+
+### New Features
+- Added `CacheOptions.DisableInternalCacheOptions` static property and `CacheOptions.IsInternalCacheDisabled` to allow disabling MSAL's internal token cache. Added `CacheRefreshReason.CacheDisabled` and `MsalError.InternalCacheDisabled` to support this scenario. [#5947](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5947)
+- Added `AuthenticationResultExtensions.GetRefreshToken()` extension method for accessing refresh tokens from `AuthenticationResult`. [#5947](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5947)
+- Added `WithAttributeTokens` and `WithExtraBodyParameters` extension methods on `AbstractConfidentialClientAcquireTokenParameterBuilder` for enhanced extensibility. [#5888](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5888)
+- Added `CertificateOptions.SendCertificateOverMtls` for mTLS Proof-of-Possession certificate support. [#5849](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5849)
+- Added `AssertionRequestOptions.CorrelationId` property for correlation ID support in FIC assertion requests. [#5937](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5937)
+
+### Changes
+- Removed experimental feature gate from `WithClientAssertion(ClientSignedAssertion)` overload. [#5945](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5945)
+- Removed embedded Newtonsoft.Json dependency, migrated to `System.Text.Json` exclusively. [#5959](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5959)
+- Removed mTLS PoP region as a hard requirement. [#5902](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5902)
+- Refactored client credential material resolution. [#5835](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5835)
+- Added in-process MAA token caching to PopKeyAttestor. [#5887](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5887)
+- Added raw STS error code to MsalFailure metric. [#5961](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5961)
+- Support forwarding MSAL client metadata headers through IMDS to ESTS. [#5912](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5912)
+
+### Bug Fixes
+- Fixed eager evaluation in `ConcurrentDictionary.GetOrAdd` calls. [#5950](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5950)
+- Fixed `System.ValueTuple` conditional dependency to `net462` only. [#5894](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5894)
+- Validated `clientSignedAssertionProvider` delegate is non-null in `WithClientAssertion`. [#5956](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5956)
+- Improved `MtlsPopTokenNotSupportedinImdsV1` error message clarity. [#5908](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5908)
+- Added additional checks for issuer validation. [#5931](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5931)
+
 4.83.3
 ======
 
