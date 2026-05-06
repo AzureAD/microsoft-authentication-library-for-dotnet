@@ -7,6 +7,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.KeyAttestation;
 using Microsoft.Identity.Test.Common.Core.Helpers;
+using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.E2E
@@ -17,6 +18,10 @@ namespace Microsoft.Identity.Test.E2E
     /// Flow:
     ///   Leg 1 — MSI acquires an mTLS PoP token for api://AzureADTokenExchange
     ///   Leg 2 — ConfApp uses the Leg 1 token as a ClientSignedAssertion to obtain a bearer token
+    ///
+    /// The Leg 2 ConfApp configuration (client ID, tenant, authority) is retrieved from Key Vault
+    /// via LabResponseHelper so no credentials are hardcoded. The app must be registered with a
+    /// Federated Identity Credential (FIC) that trusts the MSI on the MSALMSIV2 pool.
     ///
     /// These tests run on the MSALMSIV2 pool (IMDSv2 + Credential Guard).
     /// </summary>
@@ -30,13 +35,6 @@ namespace Microsoft.Identity.Test.E2E
         // UAMI identifiers (same pool as ManagedIdentityImdsV2Tests)
         private const string UamiClientId = "6325cd32-9911-41f3-819c-416cdf9104e7";
 
-        // TODO: Replace with the client ID of the ConfApp configured with a Federated Identity
-        //       Credential (FIC) that trusts the MSI on the MSALMSIV2 pool.
-        private const string FicConfAppClientId = "TODO_FIC_CONF_APP_CLIENT_ID";
-
-        // TODO: Replace with the AAD tenant ID for the FIC ConfApp.
-        private const string TenantId = "TODO_TENANT_ID";
-
         private static IManagedIdentityApplication BuildMsi(string userAssignedClientId = null)
         {
             ManagedIdentityId miId = userAssignedClientId is null
@@ -48,14 +46,14 @@ namespace Microsoft.Identity.Test.E2E
             return builder.Build();
         }
 
-        private static IConfidentialClientApplication BuildConfApp(AuthenticationResult leg1Result)
+        private static IConfidentialClientApplication BuildConfApp(AppConfig appConfig, AuthenticationResult leg1Result)
         {
             // For bearer Leg 2: pass the binding certificate to prove possession of the
             // Leg 1 mTLS PoP token, but do not call .WithMtlsProofOfPossession() on the
             // AcquireTokenForClient request — that keeps the final token as Bearer.
             return ConfidentialClientApplicationBuilder
-                .Create(FicConfAppClientId)
-                .WithTenantId(TenantId)
+                .Create(appConfig.AppId)
+                .WithAuthority(appConfig.Authority)
                 .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
                 .WithClientAssertion((_, ct) => Task.FromResult(new ClientSignedAssertion
                 {
@@ -80,6 +78,10 @@ namespace Microsoft.Identity.Test.E2E
             {
                 Assert.Inconclusive("Credential Guard attestation is only available on Windows.");
             }
+
+            // Retrieve ConfApp configuration from Key Vault (app must have FIC configured for MSI)
+            AppConfig appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S)
+                .ConfigureAwait(false);
 
             // --- Leg 1: MSI acquires mTLS PoP token for api://AzureADTokenExchange ---
 
@@ -112,7 +114,7 @@ namespace Microsoft.Identity.Test.E2E
 
             // --- Leg 2: ConfApp exchanges Leg 1 token for a bearer token ---
 
-            var confApp = BuildConfApp(leg1Result);
+            var confApp = BuildConfApp(appConfig, leg1Result);
 
             var leg2Result = await confApp
                 .AcquireTokenForClient(new[] { GraphScope })
