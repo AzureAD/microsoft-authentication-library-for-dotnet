@@ -19,7 +19,7 @@ namespace Microsoft.Identity.Client.Instance
     {
         // ConcurrentDictionary<string, byte> used as a concurrent set (byte is a dummy value).
         // OrdinalIgnoreCase because hostnames are case-insensitive.
-        private static readonly ConcurrentDictionary<string, byte> s_validatedEnvironments =
+        internal static readonly ConcurrentDictionary<string, byte> s_validatedEnvironments =
             new(StringComparer.OrdinalIgnoreCase);
 
         private readonly RequestContext _requestContext;
@@ -86,16 +86,6 @@ namespace Microsoft.Identity.Client.Instance
         public static /* for test */ void ClearValidationCache()
         {
             s_validatedEnvironments.Clear();
-        }
-
-        public static /* for test */ void AddValidatedEnvironmentForTest(string host)
-        {
-            s_validatedEnvironments.TryAdd(host, 0);
-        }
-
-        public static /* for test */ bool IsEnvironmentValidated(string host)
-        {
-            return s_validatedEnvironments.ContainsKey(host);
         }
 
         private async Task ValidateAuthorityAsync(Authority authority)
