@@ -7,6 +7,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.OAuth2;
 
 namespace Microsoft.Identity.Client.Extensibility
@@ -40,6 +41,132 @@ namespace Microsoft.Identity.Client.Extensibility
             }
 
             return builder;
+        }
+
+        /// <summary>
+        /// Sends <paramref name="attributeTokens"/> as the <c>attribute_tokens</c> body parameter
+        /// and includes them in the cache key. Null/empty/whitespace entries are ignored;
+        /// a null or empty collection is a no-op.
+        /// </summary>
+        /// <typeparam name="T">The concrete confidential client builder type.</typeparam>
+        /// <param name="builder">The builder to chain options to.</param>
+        /// <param name="attributeTokens">Attribute tokens to include. Individual tokens must not contain whitespace.</param>
+        /// <returns>The builder to chain method calls.</returns>
+        /// <remarks>
+        /// <para>
+        /// For <c>AcquireTokenForClient</c> the <c>attribute_tokens</c> set is part of the cache
+        /// partition key, so different sets are fully isolated.
+        /// </para>
+        /// <para>
+        /// For <c>AcquireTokenOnBehalfOf</c> the partition key is the user assertion hash; the
+        /// <c>attribute_tokens</c> set is stored as an item-level cache component within that
+        /// partition. Multiple variants for the same assertion coexist and are disambiguated on
+        /// read only when the caller supplies the same <c>WithAttributeTokens</c> set.
+        /// <b>Mixing attributed and non-attributed reads against the same user assertion can
+        /// return unintended cache entries or fail with <c>multiple_matching_tokens_detected</c>.</b>
+        /// Be consistent: if you used <c>WithAttributeTokens</c> on a write, use it on every
+        /// subsequent read for that assertion. Callers that require strict per-set cache isolation
+        /// across different attribute-token sets should use separate <see cref="IConfidentialClientApplication"/>
+        /// instances.
+        /// </para>
+        /// </remarks>
+        /// <exception cref="ArgumentException">Thrown when any token contains embedded whitespace.</exception>
+        /// <exception cref="MsalClientException">
+        /// Thrown when the application was not configured to allow experimental features
+        /// (this method transitively calls <see cref="WithExtraBodyParameters{T}"/>, which requires
+        /// experimental features to be enabled via <c>WithExperimentalFeatures()</c> on the application builder).
+        /// </exception>
+        public static T WithAttributeTokens<T>(
+            this AbstractConfidentialClientAcquireTokenParameterBuilder<T> builder,
+            IEnumerable<string> attributeTokens)
+            where T : AbstractConfidentialClientAcquireTokenParameterBuilder<T>
+        {
+            ILoggerAdapter logger = builder.ServiceBundle?.ApplicationLogger;
+
+            if (attributeTokens is null)
+            {
+                logger?.Verbose(() => "[WithAttributeTokens] No attribute tokens passed.");
+                return (T)builder;
+            }
+
+            var normalizedTokens = new List<string>();
+            foreach (string token in attributeTokens)
+            {
+                if (!string.IsNullOrWhiteSpace(token))
+                {
+                    string trimmed = token.Trim();
+                    if (trimmed.Any(char.IsWhiteSpace))
+                    {
+                        throw new ArgumentException(
+                            $"Attribute tokens must not contain whitespace. Invalid token: '{trimmed}'",
+                            nameof(attributeTokens));
+                    }
+
+                    normalizedTokens.Add(trimmed);
+                }
+            }
+
+            if (normalizedTokens.Count == 0)
+            {
+                logger?.Verbose(() => "[WithAttributeTokens] collection contained no usable tokens.");
+                return (T)builder;
+            }
+
+            // Deduplicate and sort so that callers passing the same logical set of tokens
+            // (in any order, with possible duplicates) hit the same cache entry and
+            // produce the same request body.
+            normalizedTokens = normalizedTokens.Distinct(StringComparer.Ordinal).ToList();
+            normalizedTokens.Sort(StringComparer.Ordinal);
+
+            string joinedTokens = string.Join(" ", normalizedTokens);
+
+            int count = normalizedTokens.Count;
+            logger?.Info(() => $"[WithAttributeTokens] Attaching {count} attribute token(s) " +
+                               "to the request body and including them in the cache key partition.");
+
+            var extraBodyParams = new Dictionary<string, Func<CancellationToken, Task<string>>>
+            {
+                { OAuth2Parameter.AttributeTokens, _ => Task.FromResult(joinedTokens) }
+            };
+
+            return builder.WithExtraBodyParameters(extraBodyParams);
+        }
+
+        /// <summary>
+        /// Add extra body parameters to the token request. These parameters are added to the cache key
+        /// to associate these parameters with the acquired token. Works for confidential client flows
+        /// (AcquireTokenForClient, AcquireTokenOnBehalfOf, AcquireTokenByAuthorizationCode).
+        /// </summary>
+        /// <typeparam name="T">The concrete confidential client builder type.</typeparam>
+        /// <param name="builder">The builder to chain options to.</param>
+        /// <param name="extraBodyParams">List of additional body parameters.</param>
+        /// <returns>The concrete builder to chain method calls.</returns>
+        public static T WithExtraBodyParameters<T>(
+            this AbstractConfidentialClientAcquireTokenParameterBuilder<T> builder,
+            Dictionary<string, Func<CancellationToken, Task<string>>> extraBodyParams)
+            where T : AbstractConfidentialClientAcquireTokenParameterBuilder<T>
+        {
+            builder.ValidateUseOfExperimentalFeature();
+
+            if (extraBodyParams == null || extraBodyParams.Count == 0)
+            {
+                return (T)builder;
+            }
+
+            builder.OnBeforeTokenRequest(async data =>
+            {
+                foreach (var param in extraBodyParams)
+                {
+                    if (param.Value != null)
+                    {
+                        data.BodyParameters.Add(param.Key, await param.Value(data.CancellationToken).ConfigureAwait(false));
+                    }
+                }
+            });
+
+            builder.WithAdditionalCacheKeyComponents(extraBodyParams);
+
+            return (T)builder;
         }
 
         /// <summary>

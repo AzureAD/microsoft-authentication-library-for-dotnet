@@ -75,6 +75,7 @@ namespace Microsoft.Identity.Client.Extensibility
                 certificateProvider: certificateProvider);
 
             builder.Config.SendX5C = certificateOptions?.SendX5C ?? false;
+            builder.Config.CertificateOptions = certificateOptions;
 
             return builder;
         }

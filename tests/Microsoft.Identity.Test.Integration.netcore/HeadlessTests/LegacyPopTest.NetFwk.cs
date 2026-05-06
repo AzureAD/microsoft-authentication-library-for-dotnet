@@ -17,8 +17,8 @@ using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
 {
@@ -522,11 +522,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
            RsaSecurityKey popKey,
            bool includeX5cClaim)
         {
-            var header = new JObject
+            var header = new JsonObject
             {
-                { JwtClaimTypes.Typ, "JWT" },
-                { JwtClaimTypes.Alg, signingCredentials.Algorithm },
-                { JwtClaimTypes.Kid, signingCredentials.Key.KeyId }
+                [JwtClaimTypes.Typ] = "JWT",
+                [JwtClaimTypes.Alg] = signingCredentials.Algorithm,
+                [JwtClaimTypes.Kid] = signingCredentials.Key.KeyId
             };
 
             if (signingCredentials.Key is X509SecurityKey x509SecurityKey)
@@ -534,31 +534,31 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 header[JwtClaimTypes.Kid] = Base64UrlEncoder.Encode(x509SecurityKey.Certificate.GetCertHash());
 
                 if (includeX5cClaim)
-                    header[JwtClaimTypes.X5c] = JArray.FromObject(new List<string>() { Convert.ToBase64String(x509SecurityKey.Certificate.GetRawCertData()) });
+                    header[JwtClaimTypes.X5c] = new JsonArray(new List<string>() { Convert.ToBase64String(x509SecurityKey.Certificate.GetRawCertData()) }.Select(s => (JsonNode)JsonValue.Create(s)).ToArray());
             }
 
             long nbf = EpochTime.GetIntDate(DateTime.UtcNow);
-            var payload = new JObject
+            var payload = new JsonObject
             {
-                {JwtClaimTypes.Iss, clientId},
-                {JwtClaimTypes.Aud, audience},
-                {JwtClaimTypes.Sub, clientId},
-                {JwtClaimTypes.Nbf, nbf},
-                {JwtClaimTypes.Iat, nbf},
-                {JwtClaimTypes.Exp, nbf + 600 },
-                {"pop_jwk", CreateJwkClaim(popKey, signingCredentials.Algorithm)}
+                [JwtClaimTypes.Iss] = clientId,
+                [JwtClaimTypes.Aud] = audience,
+                [JwtClaimTypes.Sub] = clientId,
+                [JwtClaimTypes.Nbf] = nbf,
+                [JwtClaimTypes.Iat] = nbf,
+                [JwtClaimTypes.Exp] = nbf + 600,
+                ["pop_jwk"] = CreateJwkClaim(popKey, signingCredentials.Algorithm)
             };
 
-            return CreateJWS(payload.ToString(Formatting.None), header.ToString(Formatting.None), signingCredentials);
+            return CreateJWS(payload.ToJsonString(), header.ToJsonString(), signingCredentials);
         }
 
         private static string CreateJWS(string payload, string header, SigningCredentials signingCredentials)
         {
-            var actualHeader = header != null ? JObject.Parse(header) : new JObject
+            var actualHeader = header != null ? JsonNode.Parse(header).AsObject() : new JsonObject
             {
-                { JwtClaimTypes.Alg, signingCredentials.Algorithm },
-                { JwtClaimTypes.Kid, signingCredentials.Key.KeyId },
-                { JwtClaimTypes.Typ, "JWT"}
+                [JwtClaimTypes.Alg] = signingCredentials.Algorithm,
+                [JwtClaimTypes.Kid] = signingCredentials.Key.KeyId,
+                [JwtClaimTypes.Typ] = "JWT"
             };
 
             if (header == null && signingCredentials.Key is X509SecurityKey x509SecurityKey)
@@ -569,7 +569,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             try
             {
-                var message = Base64UrlEncoder.Encode(Encoding.UTF8.GetBytes(actualHeader.ToString(Formatting.None))) + "." + Base64UrlEncoder.Encode(payload);
+                var message = Base64UrlEncoder.Encode(Encoding.UTF8.GetBytes(actualHeader.ToJsonString())) + "." + Base64UrlEncoder.Encode(payload);
                 return message + "." + Base64UrlEncoder.Encode(signatureProvider.Sign(Encoding.UTF8.GetBytes(message)));
             }
             finally
