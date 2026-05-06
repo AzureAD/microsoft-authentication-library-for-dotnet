@@ -5,7 +5,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
 namespace Microsoft.Identity.Client.Utils
@@ -23,7 +22,6 @@ namespace Microsoft.Identity.Client.Utils
     /// Based on the implementation from: https://github.com/i3arnon/ConcurrentHashSet/blob/main/src/ConcurrentHashSet/ConcurrentHashSet.cs
     /// </remarks>
     [DebuggerDisplay("Count = {Count}")]
-    [ExcludeFromCodeCoverage]
     internal class ConcurrentHashSet<T> : IReadOnlyCollection<T>, ICollection<T>
     {
         private const int DefaultCapacity = 31;
