@@ -88,6 +88,16 @@ namespace Microsoft.Identity.Client.Instance
             s_validatedEnvironments.Clear();
         }
 
+        public static /* for test */ void AddValidatedEnvironmentForTest(string host)
+        {
+            s_validatedEnvironments.TryAdd(host, 0);
+        }
+
+        public static /* for test */ bool IsEnvironmentValidated(string host)
+        {
+            return s_validatedEnvironments.ContainsKey(host);
+        }
+
         private async Task ValidateAuthorityAsync(Authority authority)
         {
             // race conditions could occur here, where multiple requests validate the authority at the same time
