@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Test.E2E
         /// Verifies the full FIC two-leg exchange produces a valid bearer token.
         /// </summary>
         [RunOnAzureDevOps]
-        [TestCategory("MI_E2E_ImdsV2_Fic")]
+        [TestCategory("MI_E2E_ImdsV2")]
         [TestMethod]
         [DataRow(null, DisplayName = "FicTwoLeg_Bearer_SAMI")]
         [DataRow(UamiClientId, DisplayName = "FicTwoLeg_Bearer_UAMI-ClientId")]
