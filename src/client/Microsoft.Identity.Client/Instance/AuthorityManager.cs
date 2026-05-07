@@ -2,12 +2,12 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Instance.Validation;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
-using Microsoft.Identity.Client.Utils;
 using static Microsoft.Identity.Client.AuthorityInfo;
 
 namespace Microsoft.Identity.Client.Instance
@@ -17,8 +17,10 @@ namespace Microsoft.Identity.Client.Instance
     /// </summary>
     internal class AuthorityManager
     {
-        private static readonly ConcurrentHashSet<string> s_validatedEnvironments =
-            new ConcurrentHashSet<string>();
+        // ConcurrentDictionary<string, byte> used as a concurrent set (byte is a dummy value).
+        // OrdinalIgnoreCase because hostnames are case-insensitive.
+        internal static readonly ConcurrentDictionary<string, byte> s_validatedEnvironments =
+            new(StringComparer.OrdinalIgnoreCase);
 
         private readonly RequestContext _requestContext;
 
@@ -91,13 +93,13 @@ namespace Microsoft.Identity.Client.Instance
             // race conditions could occur here, where multiple requests validate the authority at the same time
             // but this is acceptable and once the cache is filled, no more HTTP requests will be made
             if (
-                !s_validatedEnvironments.Contains(authority.AuthorityInfo.Host))
+                !s_validatedEnvironments.ContainsKey(authority.AuthorityInfo.Host))
             {
                 // validate the original authority, as the resolved authority might be regionalized and we cannot validate regionalized authorities.
                 var validator = AuthorityInfoHelper.CreateAuthorityValidator(authority.AuthorityInfo, _requestContext);
                 await validator.ValidateAuthorityAsync(authority.AuthorityInfo).ConfigureAwait(false);
 
-                s_validatedEnvironments.Add(authority.AuthorityInfo.Host);
+                s_validatedEnvironments.TryAdd(authority.AuthorityInfo.Host, 0);
             }
         }
     }
