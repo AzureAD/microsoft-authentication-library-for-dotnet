@@ -6,7 +6,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Extensibility;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
@@ -357,14 +359,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestMethod]
         public async Task WithAttributeTokens_OnBehalfOf_SentInRequestBody_Async()
         {
-            // Note: WithAttributeTokens stores attribute_tokens in the AT's
-            // AdditionalCacheKeyComponents (item-level), NOT in the OBO partition key
-            // (which is the UserAssertion hash). Multiple attribute-token variants for
-            // the same assertion are stored side-by-side in the same partition and are
-            // disambiguated on read by FilterTokensByAdditionalKeyComponents — provided
-            // every read passes the same WithAttributeTokens set. Mixing attributed and
-            // non-attributed reads against the same assertion can return unintended
-            // cache entries (see the dedicated OBO cache tests at the bottom of this file).
+            // attribute_tokens lives on the AT's AdditionalCacheKeyComponents, not in the
+            // OBO partition key. Read disambiguation is symmetric per GH #5963 (see OBO
+            // cache tests at the bottom of this file).
             using (var httpManager = new MockHttpManager())
             {
                 var app = ConfidentialClientApplicationBuilder
@@ -828,36 +825,17 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.Contains("Attribute tokens must not contain whitespace", ex.Message);
         }
 
-        // ---------------------------------------------------------------------
-        // OBO cache-partition behavior tests
-        //
-        // These tests exercise the claim documented in
-        // WithAttributeTokens_OnBehalfOf_SentInRequestBody_Async that "MSAL does
-        // not currently keep entries with different cache-key components
-        // side-by-side in the same partition" for OBO.
-        //
-        // What the OBO partition key actually is (CacheKeyFactory.GetOboKey):
-        //   OboCacheKey ?? UserAssertion.AssertionHash ?? HomeAccountId
-        //
-        // The partition key does NOT include AdditionalCacheKeyComponents (and
-        // thus does not include attribute_tokens). This means two OBO calls
-        // that use the same user assertion but different attribute_tokens DO
-        // land in the same in-memory partition — but they are stored as two
-        // distinct cache items, distinguished by AdditionalCacheKeyComponents,
-        // and FilterTokensByAdditionalKeyComponents disambiguates them on read
-        // when the caller supplies WithAttributeTokens with the matching set.
-        // ---------------------------------------------------------------------
+        // OBO cache-partition tests.
+        // OBO partition key (CacheKeyFactory.GetOboKey) does not include
+        // AdditionalCacheKeyComponents, so attributed/non-attributed ATs for the same
+        // assertion share a partition and are disambiguated on read by the symmetric
+        // FilterTokensByAdditionalKeyComponents (GH #5963).
 
         [TestMethod]
         public async Task WithAttributeTokens_OnBehalfOf_SameAssertion_DifferentAttributeTokens_StoredSideBySide_Async()
         {
-            // NOTE on scope choice: TokenCache.DeleteAccessTokensWithIntersectingScopes runs
-            // before every cache write and removes any prior AT whose ScopeSet *overlaps*
-            // the new one — and it does NOT honor AdditionalCacheKeyComponents. So two
-            // attributed ATs in the same OBO partition can only coexist if their scope
-            // sets are DISJOINT. Two attributed ATs with overlapping scopes is therefore
-            // not demonstrable through the public API today (see GH issue tracking the
-            // intersect-delete-ignores-AdditionalCacheKeyComponents bug).
+            // Scopes must be DISJOINT: DeleteAccessTokensWithIntersectingScopes ignores
+            // AdditionalCacheKeyComponents and would evict the first AT otherwise.
             using (var httpManager = new MockHttpManager())
             {
                 var app = ConfidentialClientApplicationBuilder
@@ -1046,17 +1024,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        public async Task WithAttributeTokens_OnBehalfOf_NoAttributeTokens_ReturnsAttributedEntry_GotchaAsync()
+        public async Task WithAttributeTokens_OnBehalfOf_NoAttributeTokens_DoesNotReturnAttributedEntry_Async()
         {
-            // Edge case / real gotcha: an attributed AT is in cache; a follow-up OBO call
-            // for the same assertion that does NOT pass WithAttributeTokens will:
-            //   - bypass FilterTokensByAdditionalKeyComponents (because requestParams.CacheKeyComponents is null)
-            //   - therefore match the attributed AT on every other filter
-            //   - return it from cache as if it were a plain unattributed token.
-            // This demonstrates the actual limitation: callers who mix attributed and
-            // non-attributed reads on the same assertion can get unexpected token reuse.
+            // GH #5963 regression: a non-attributed OBO read must not return a cached
+            // attributed AT. Post-fix the symmetric filter excludes it and MSAL hits IDP.
             using (var httpManager = new MockHttpManager())
             {
+                // Arrange
                 var app = ConfidentialClientApplicationBuilder
                     .Create(ClientId)
                     .WithAuthority("https://login.microsoftonline.com/", TenantId)
@@ -1068,6 +1042,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddInstanceDiscoveryMockHandler();
                 var userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
 
+                // Seed the OBO partition with an attributed AT.
                 httpManager.AddMockHandler(new MockHttpMessageHandler()
                 {
                     ExpectedMethod = System.Net.Http.HttpMethod.Post,
@@ -1079,43 +1054,63 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         { OAuth2Parameter.AttributeTokens, "attrA" }
                     }
                 });
-                await app.AcquireTokenOnBehalfOf(_scope, userAssertion)
+                var attributedResult = await app.AcquireTokenOnBehalfOf(_scope, userAssertion)
                     .WithAttributeTokens(new[] { "attrA" })
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
-                // No mock handler queued for the second call. If MSAL went to IDP the test
-                // would throw on missing handler. Therefore reaching the assertion below
-                // proves the lookup was served from the cache.
+                Assert.AreEqual(TokenSource.IdentityProvider, attributedResult.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual("obo_at_with_attrs", attributedResult.AccessToken);
+
+                // A non-attributed read must NOT return the attributed AT. It must go to IDP.
+                // Queue a handler that asserts attribute_tokens is absent from the request body.
+                httpManager.AddMockHandler(new MockHttpMessageHandler()
+                {
+                    ExpectedMethod = System.Net.Http.HttpMethod.Post,
+                    ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
+                        TestConstants.UniqueId, TestConstants.DisplayableId, _scope,
+                        accessToken: "obo_at_no_attrs"),
+                    UnExpectedPostData = new Dictionary<string, string>
+                    {
+                        { OAuth2Parameter.AttributeTokens, null }
+                    }
+                });
+
+                // Act
                 var resultNoAttr = await app.AcquireTokenOnBehalfOf(_scope, userAssertion)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
-                Assert.AreEqual(TokenSource.Cache, resultNoAttr.AuthenticationResultMetadata.TokenSource);
-                Assert.AreEqual("obo_at_with_attrs", resultNoAttr.AccessToken,
-                    "Non-attributed OBO call returned the attributed AT — this is the documented gotcha.");
+                // Assert: fresh, non-attributed AT minted from IDP — NOT the cached attributed one.
+                Assert.AreEqual(TokenSource.IdentityProvider, resultNoAttr.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual("obo_at_no_attrs", resultNoAttr.AccessToken);
+
+                // The newly-cached non-attributed AT must NOT carry AdditionalCacheKeyComponents.
+                var nonAttributedAt = app.UserTokenCacheInternal.Accessor
+                    .GetAllAccessTokens()
+                    .Single(at => at.Secret == "obo_at_no_attrs");
+                Assert.IsNull(nonAttributedAt.AdditionalCacheKeyComponents);
+
+                // A follow-up non-attributed read must hit that newly-cached entry, NOT IDP.
+                // No mock handler is queued; if MSAL went to IDP the test would throw on the
+                // missing handler.
+                var resultNoAttrCached = await app.AcquireTokenOnBehalfOf(_scope, userAssertion)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual(TokenSource.Cache, resultNoAttrCached.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual("obo_at_no_attrs", resultNoAttrCached.AccessToken);
             }
         }
 
         [TestMethod]
-        [Ignore("Not demonstrable through the public OBO API today. The MultipleTokensMatched path " +
-                "requires two attributed ATs in the same OBO partition that BOTH match a non-attributed " +
-                "read by scope (i.e. with overlapping scopes). However, " +
-                "TokenCache.DeleteAccessTokensWithIntersectingScopes runs on every write and removes " +
-                "any prior AT whose ScopeSet overlaps the new one — without honoring " +
-                "AdditionalCacheKeyComponents — so the precondition cannot be set up via " +
-                "AcquireTokenOnBehalfOf alone. Re-enable once the intersect-delete logic is updated " +
-                "to also key off AdditionalCacheKeyComponents (tracked in the GH issue for OBO + " +
-                "AdditionalCacheKeyComponents asymmetry).")]
-        public async Task WithAttributeTokens_OnBehalfOf_NoAttributeTokens_TwoAttributedEntries_ThrowsMultipleMatchingTokens_Async()
+        public async Task WithAttributeTokens_OnBehalfOf_DisjointScopes_AttributedAndNonAttributedCoexist_Async()
         {
-            // Edge case 2 (the second documented failure mode): when the OBO partition holds
-            // multiple attributed ATs (different attribute_tokens for the same assertion) and
-            // a follow-up read does NOT pass WithAttributeTokens, the additional-key-components
-            // filter is bypassed → both attributed ATs survive scope/env/clientId filters →
-            // GetSingleToken sees count > 1 → throws MsalClientException(multiple_matching_tokens_detected).
+            // Disjoint scopes sidestep intersect-delete and prove the symmetric filter
+            // keeps attributed and non-attributed ATs separated within one OBO partition.
             using (var httpManager = new MockHttpManager())
             {
+                // Arrange
                 var app = ConfidentialClientApplicationBuilder
                     .Create(ClientId)
                     .WithAuthority("https://login.microsoftonline.com/", TenantId)
@@ -1127,7 +1122,92 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddInstanceDiscoveryMockHandler();
                 var userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
 
-                // Seed cache with two attributed ATs in the same OBO partition.
+                var scopeAttributed = new[] { "api://AzureFMITokenExchange/scopeA" };
+                var scopeNonAttributed = new[] { "api://AzureFMITokenExchange/scopeB" };
+
+                // Seed an attributed AT for scopeA.
+                httpManager.AddMockHandler(new MockHttpMessageHandler()
+                {
+                    ExpectedMethod = System.Net.Http.HttpMethod.Post,
+                    ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
+                        TestConstants.UniqueId, TestConstants.DisplayableId, scopeAttributed,
+                        accessToken: "obo_at_attributed"),
+                    ExpectedPostData = new Dictionary<string, string>
+                    {
+                        { OAuth2Parameter.AttributeTokens, "attrA" }
+                    }
+                });
+                await app.AcquireTokenOnBehalfOf(scopeAttributed, userAssertion)
+                    .WithAttributeTokens(new[] { "attrA" })
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Seed a non-attributed AT for scopeB (disjoint from scopeA — intersect-delete won't fire).
+                httpManager.AddMockHandler(new MockHttpMessageHandler()
+                {
+                    ExpectedMethod = System.Net.Http.HttpMethod.Post,
+                    ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
+                        TestConstants.UniqueId, TestConstants.DisplayableId, scopeNonAttributed,
+                        accessToken: "obo_at_plain"),
+                    UnExpectedPostData = new Dictionary<string, string>
+                    {
+                        { OAuth2Parameter.AttributeTokens, null }
+                    }
+                });
+                await app.AcquireTokenOnBehalfOf(scopeNonAttributed, userAssertion)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Both ATs should now coexist in the same OBO partition.
+                var allAts = app.UserTokenCacheInternal.Accessor.GetAllAccessTokens();
+                Assert.HasCount(2, allAts);
+                Assert.AreEqual(userAssertion.AssertionHash, allAts[0].OboCacheKey);
+                Assert.AreEqual(userAssertion.AssertionHash, allAts[1].OboCacheKey);
+
+                var attributedAt = allAts.Single(at => at.Secret == "obo_at_attributed");
+                var plainAt = allAts.Single(at => at.Secret == "obo_at_plain");
+                Assert.IsNotNull(attributedAt.AdditionalCacheKeyComponents);
+                Assert.IsNull(plainAt.AdditionalCacheKeyComponents);
+
+                // Act + Assert: each subsequent read hits its own cache entry. No mock handler
+                // is queued; if MSAL went to IDP for either read the test would throw.
+                var attributedHit = await app.AcquireTokenOnBehalfOf(scopeAttributed, userAssertion)
+                    .WithAttributeTokens(new[] { "attrA" })
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+                Assert.AreEqual(TokenSource.Cache, attributedHit.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual("obo_at_attributed", attributedHit.AccessToken);
+
+                var plainHit = await app.AcquireTokenOnBehalfOf(scopeNonAttributed, userAssertion)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+                Assert.AreEqual(TokenSource.Cache, plainHit.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual("obo_at_plain", plainHit.AccessToken);
+            }
+        }
+
+        [TestMethod]
+        public async Task WithAttributeTokens_OnBehalfOf_NoAttributeTokens_TwoAttributedEntries_NoMultipleMatch_Async()
+        {
+            // GH #5963 regression: with two attributed ATs sharing one OBO partition, a
+            // non-attributed read must not throw multiple_matching_tokens_detected. The
+            // second AT is injected via the accessor because intersect-delete (which
+            // ignores AdditionalCacheKeyComponents) would otherwise evict the first.
+            using (var httpManager = new MockHttpManager())
+            {
+                // Arrange
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(ClientId)
+                    .WithAuthority("https://login.microsoftonline.com/", TenantId)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithExperimentalFeatures()
+                    .WithHttpManager(httpManager)
+                    .BuildConcrete();
+
+                httpManager.AddInstanceDiscoveryMockHandler();
+                var userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
+
+                // Seed one attributed AT through the public API.
                 httpManager.AddMockHandler(new MockHttpMessageHandler()
                 {
                     ExpectedMethod = System.Net.Http.HttpMethod.Post,
@@ -1144,31 +1224,55 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
+                // Inject a second attributed AT with the SAME scope and OBO key but a
+                // different attribute_tokens set. Direct injection bypasses
+                // DeleteAccessTokensWithIntersectingScopes so both ATs coexist.
+                string clientInfo = MockHelpers.CreateClientInfo();
+                string homeAccountId = ClientInfo.CreateFromJson(clientInfo).ToAccountIdentifier();
+
+                var secondAttributedAt = new MsalAccessTokenCacheItem(
+                    preferredCacheEnv: TestConstants.ProductionPrefCacheEnvironment,
+                    clientId: ClientId,
+                    scopes: _scope[0],
+                    tenantId: TenantId,
+                    secret: "obo_at_B_injected",
+                    cachedAt: DateTimeOffset.UtcNow,
+                    expiresOn: DateTimeOffset.UtcNow + TimeSpan.FromSeconds(3600),
+                    extendedExpiresOn: DateTimeOffset.UtcNow + TimeSpan.FromSeconds(7200),
+                    rawClientInfo: clientInfo,
+                    homeAccountId: homeAccountId,
+                    oboCacheKey: userAssertion.AssertionHash,
+                    cacheKeyComponents: new SortedList<string, string>
+                    {
+                        { OAuth2Parameter.AttributeTokens, "attrB" }
+                    });
+
+                app.UserTokenCacheInternal.Accessor.SaveAccessToken(secondAttributedAt);
+
+                Assert.HasCount(2, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens(),
+                    "Precondition: two attributed ATs must be present in the same OBO partition.");
+
+                // Act + Assert: a non-attributed read must NOT throw multiple_matching_tokens_detected.
+                // Post-fix the symmetric filter excludes both attributed ATs, the cache
+                // reports a miss, and MSAL goes to IDP for a fresh non-attributed token.
                 httpManager.AddMockHandler(new MockHttpMessageHandler()
                 {
                     ExpectedMethod = System.Net.Http.HttpMethod.Post,
                     ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
                         TestConstants.UniqueId, TestConstants.DisplayableId, _scope,
-                        accessToken: "obo_at_B"),
-                    ExpectedPostData = new Dictionary<string, string>
+                        accessToken: "obo_at_no_attrs"),
+                    UnExpectedPostData = new Dictionary<string, string>
                     {
-                        { OAuth2Parameter.AttributeTokens, "attrB" }
+                        { OAuth2Parameter.AttributeTokens, null }
                     }
                 });
-                await app.AcquireTokenOnBehalfOf(_scope, userAssertion)
-                    .WithAttributeTokens(new[] { "attrB" })
+
+                var result = await app.AcquireTokenOnBehalfOf(_scope, userAssertion)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
-                Assert.HasCount(2, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens());
-
-                // Non-attributed read against the same partition → ambiguous.
-                var ex = await AssertException.TaskThrowsAsync<MsalClientException>(() =>
-                    app.AcquireTokenOnBehalfOf(_scope, userAssertion)
-                        .ExecuteAsync())
-                    .ConfigureAwait(false);
-
-                Assert.AreEqual(MsalError.MultipleTokensMatchedError, ex.ErrorCode);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual("obo_at_no_attrs", result.AccessToken);
             }
         }
     }
