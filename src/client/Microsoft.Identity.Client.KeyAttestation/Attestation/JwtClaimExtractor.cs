@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Text.Json;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.KeyAttestation.Attestation
@@ -42,6 +43,24 @@ namespace Microsoft.Identity.Client.KeyAttestation.Attestation
                     return false;
 
                 // Parse the exp claim (Unix timestamp in seconds)
+                // STJ deserializes numbers in Dictionary<string,object> as JsonElement, not long
+                if (expObj is JsonElement jsonElement)
+                {
+                    if (jsonElement.TryGetInt64(out long elementLong))
+                    {
+                        expiresOn = DateTimeOffset.FromUnixTimeSeconds(elementLong);
+                        return true;
+                    }
+                    // Handle number-as-string in JSON
+                    if (jsonElement.ValueKind == JsonValueKind.String &&
+                        long.TryParse(jsonElement.GetString(), out long parsedFromElement))
+                    {
+                        expiresOn = DateTimeOffset.FromUnixTimeSeconds(parsedFromElement);
+                        return true;
+                    }
+                }
+
+                // Fallback: direct long (shouldn't happen with STJ but kept for safety)
                 if (expObj is long expLong)
                 {
                     expiresOn = DateTimeOffset.FromUnixTimeSeconds(expLong);

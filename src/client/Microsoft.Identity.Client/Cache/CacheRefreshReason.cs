@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 namespace Microsoft.Identity.Client
@@ -27,6 +27,10 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// When the token request goes to the identity provider because refresh_in was used and the existing token needs to be refreshed
         /// </summary>
-        ProactivelyRefreshed = 4
+        ProactivelyRefreshed = 4,
+        /// <summary>
+        /// When the token request goes to the identity provider because the internal token cache has been disabled via <see cref="CacheOptions.DisableInternalCacheOptions"/>.
+        /// </summary>
+        CacheDisabled = 5
     }
 }

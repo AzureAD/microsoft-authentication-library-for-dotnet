@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache.Items;
@@ -124,7 +125,8 @@ namespace Microsoft.Identity.Client.Internal
                         callerSdkId,
                         callerSdkVersion,
                         CacheRefreshReason.ProactivelyRefreshed,
-                        apiEvent.TokenType);
+                        apiEvent.TokenType,
+                        ex.ErrorCodes?.FirstOrDefault());
                 }
                 catch (OperationCanceledException ex)
                 {

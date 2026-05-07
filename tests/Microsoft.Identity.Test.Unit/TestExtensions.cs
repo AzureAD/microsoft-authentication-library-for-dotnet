@@ -9,7 +9,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Newtonsoft.Json.Linq;
+using System.Text.Json.Nodes;
 
 namespace Microsoft.Identity.Test.Unit
 {
@@ -40,18 +40,18 @@ namespace Microsoft.Identity.Test.Unit
         {
             if (updateATExpiry)
             {
-                var cacheJson = JObject.Parse(content);
+                var cacheJson = JsonNode.Parse(content).AsObject();
 
-                JEnumerable<JToken> tokens = cacheJson["AccessToken"].Children();
-                foreach (JToken token in tokens)
+                var tokens = cacheJson["AccessToken"].AsObject();
+                foreach (var token in tokens)
                 {
-                    var obj = token.Children().Single() as JObject;
+                    var obj = token.Value.AsObject();
 
-                    obj["expires_on"] = DateTimeHelpers.DateTimeToUnixTimestamp(DateTimeOffset.Now.AddMinutes(100));
-                    obj["extended_expires_on"] = DateTimeHelpers.DateTimeToUnixTimestamp(DateTimeOffset.Now.AddMinutes(100));
+                    obj["expires_on"] = JsonValue.Create(DateTimeHelpers.DateTimeToUnixTimestamp(DateTimeOffset.Now.AddMinutes(100)));
+                    obj["extended_expires_on"] = JsonValue.Create(DateTimeHelpers.DateTimeToUnixTimestamp(DateTimeOffset.Now.AddMinutes(100)));
                 }
 
-                content = cacheJson.ToString();
+                content = cacheJson.ToJsonString();
 
             }
 

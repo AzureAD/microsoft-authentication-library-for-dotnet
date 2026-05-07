@@ -361,6 +361,12 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public ClaimsPrincipal ClaimsPrincipal { get; set; }
 
+        /// <summary>
+        /// The refresh token returned in the authentication response, if any.
+        /// Access via <see cref="Extensibility.AuthenticationResultExtensions.GetRefreshToken"/>.
+        /// </summary>
+        internal string RefreshToken { get; set; }
+
         internal ApiEvent ApiEvent { get; set; }
 
         /// <summary>

@@ -2,8 +2,8 @@
 // Licensed under the MIT License.
 
 using Microsoft.Identity.Client.AuthScheme.PoP;
+using System.Text.Json.Nodes;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Identity.Test.Unit.Pop
 {
@@ -17,11 +17,11 @@ namespace Microsoft.Identity.Test.Unit.Pop
         {
             var provider = new InMemoryCryptoProvider();
             string jwk = provider.CannonicalPublicKeyJwk;
-            JObject jwkObj = JObject.Parse(jwk);
+            JsonObject jwkObj = JsonNode.Parse(jwk).AsObject();
 
             Assert.IsNotNull(jwkObj["e"]);
             Assert.IsNotNull(jwkObj["n"]);
-            Assert.AreEqual("RSA", jwkObj["kty"].ToString());
+            Assert.AreEqual("RSA", jwkObj["kty"]?.GetValue<string>());
         }
     }
 }

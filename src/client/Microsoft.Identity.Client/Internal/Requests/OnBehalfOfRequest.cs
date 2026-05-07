@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System.Collections.Generic;
@@ -50,12 +50,33 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             CacheRefreshReason cacheInfoTelemetry = CacheRefreshReason.NotApplicable;
 
+            if (IsInternalCacheDisabled)
+            {
+                AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.CacheDisabled;
+            }
+
             //Check if initiating a long running process
             if (AuthenticationRequestParameters.ApiId == ApiEvent.ApiIds.InitiateLongRunningObo && !_onBehalfOfParameters.SearchInCacheForLongRunningObo)
             {
                 //Long running OBO doesn't search in cache by default
                 logger.Info("[OBO Request] Initiating long running process. Fetching OBO token from ESTS.");
                 return await FetchNewAccessTokenAsync(cancellationToken).ConfigureAwait(false);
+            }
+
+            if (IsInternalCacheDisabled)
+            {
+                if (_onBehalfOfParameters.UserAssertion != null)
+                {
+                    return await FetchNewAccessTokenAsync(cancellationToken).ConfigureAwait(false);
+                }
+
+                // AcquireTokenInLongRunningProcess (UserAssertion == null) cannot go to the network
+                // because there is no assertion to exchange. Surface the root cause directly.
+                throw new MsalUiRequiredException(
+                    MsalError.InternalCacheDisabled,
+                    MsalErrorMessage.InternalCacheDisabledMessage,
+                    null,
+                    UiRequiredExceptionClassification.AcquireTokenSilentFailed);
             }
 
             if (!_onBehalfOfParameters.ForceRefresh && string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
