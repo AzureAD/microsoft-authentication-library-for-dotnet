@@ -1,26 +1,68 @@
-Carefully review all markdown documents in the ../.clinerules folder. Those are your custom instructions.
+# Code Review Rules
+
+These rules apply to Copilot code review. Read all rules before commenting.
+
+## Review scope
+
+- Only comment on lines added or modified in the PR diff
+- Do not comment on pre-existing code unless the PR directly introduces the issue
+- Do not comment on style, formatting, or indentation
+- Focus exclusively on: bugs, security issues, logic errors, API contract violations
+- If unsure whether something is a bug, do not comment
+- Prefer no comment over a speculative comment
+- Do not re-post a comment already made on an earlier commit in the same PR
+
+## Repo-specific patterns — do NOT flag these
+
+These patterns are correct in this repo. Do not suggest changes:
+
+- `[RunOn]` inherits from `TestMethodAttribute`. Do not flag as missing `[TestMethod]`
+- `Client.AppConfig.X` resolves via parent namespace `Microsoft.Identity`. Do not flag as unresolved namespace
+- `Assert.IsTrue(bool?)` is a valid MSTest overload. Do not flag nullable bool as a type mismatch
+- `Assert.DoesNotContain(substring, value)` — MSTest v4 signature is substring first, value second
+- `ConfigureAwait(false)` is intentional in library code. Do not suggest removal
+
+## ConcurrentDictionary.GetOrAdd — always use factory delegate
+
+`GetOrAdd(key, value)` eagerly evaluates the value arg. Flag any call where the second argument is not a delegate/lambda/method group:
+
+- Bad: `pool.GetOrAdd(key, new ExpensiveObject());`
+- Good: `pool.GetOrAdd(key, _ => new ExpensiveObject());`
+
+## C# coding standards
+
+- Use `is null` / `is not null` instead of `== null` / `!= null`
+- No reflection in product code (`/src`). Acceptable in tests
+- Static fields: `s_camelCase` (e.g., `s_knownHosts`)
+- Ordinal string comparisons for protocol values, identifiers, cache keys
+- Validate inputs at method boundaries (fail fast with specific exception types)
+- Do not include secrets/tokens/PII in exception messages or logs
+- Use `nameof` instead of string literals for member names
+
+## Testing standards
+
+- MSTest SDK v4 with NSubstitute for mocking
+- Use `// Arrange`, `// Act`, `// Assert` comments
+- Prefer deterministic tests (no timing flakiness)
+
+## Public API changes
+
+- Update `PublicAPI.Unshipped.txt` for any public API additions/removals
+- XML doc comments required on all public APIs
+- Maintain backward compatibility
+
+## MSAL-specific rules
+
+- Use certificate-based auth over client secrets when possible
+- Use async APIs consistently
+- Keep dependencies minimal and well-justified
 
 ---
 
-# Code Review Rules
+<!-- Everything below this line is for Copilot Chat and Copilot Agent only. -->
+<!-- Copilot code review reads only the first 4,000 characters of this file. -->
 
-## ConcurrentDictionary.GetOrAdd — always use the factory delegate overload
-
-`ConcurrentDictionary.GetOrAdd(key, value)` **eagerly evaluates** the second argument before checking the dictionary. If the value is a constructor call or method invocation (e.g., `new HttpClient(...)`, `CreateFoo()`), a new object is created and discarded on every cache hit.
-
-**Bad** — object created on every call, discarded on cache hit:
-```csharp
-pool.GetOrAdd(key, new ExpensiveObject());
-pool.GetOrAdd(key, CreateExpensiveObject());
-```
-
-**Good** — factory lambda only runs on cache miss:
-```csharp
-pool.GetOrAdd(key, _ => new ExpensiveObject());
-pool.GetOrAdd(key, _ => CreateExpensiveObject());
-```
-
-When reviewing code, flag any `GetOrAdd` call where the second argument is **not** a delegate/lambda/method group. All other usages of GetOrAdd(key, value) should be justified.
+Carefully review all markdown documents in the ../.clinerules folder. Those are your custom instructions.
 
 ---
 
