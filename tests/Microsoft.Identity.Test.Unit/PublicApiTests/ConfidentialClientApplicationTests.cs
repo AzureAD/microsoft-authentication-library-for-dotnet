@@ -201,10 +201,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         public async Task ClientCreds_WithTenantId_MsaGuid_UsesCorrectTokenEndpoint_Async()
         {
             // Regression test: the MSA tenant GUID (9188040d-...) is a real tenant.
-            // When .WithTenantId(msaGuid) is called on a common-authority app, the token
-            // request must target the MSA tenant endpoint — not silently fall back to common.
+            // App is configured with the MSA GUID authority at app level. A request-level
+            // .WithTenantId() override with a different tenant must be honored — the token
+            // request must target the override tenant endpoint, not silently use the MSA GUID.
             string expectedTokenEndpoint =
-                $"https://login.microsoftonline.com/{TestConstants.MsaTenantId}/oauth2/v2.0/token";
+                $"https://login.microsoftonline.com/{TestConstants.Utid}/oauth2/v2.0/token";
 
             using (var httpManager = new MockHttpManager())
             {
@@ -221,17 +222,17 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 ConfidentialClientApplication app =
                     ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                         .WithClientSecret(TestConstants.ClientSecret)
-                        .WithAuthority(TestConstants.AuthorityCommonTenant)
+                        .WithAuthority(TestConstants.AuthorityConsumerTidTenant)
                         .WithHttpManager(httpManager)
                         .BuildConcrete();
 
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
-                    .WithTenantId(TestConstants.MsaTenantId)
+                    .WithTenantId(TestConstants.Utid)
                     .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
 
                 Assert.IsNotNull(result.AccessToken);
-                // The cache entry should be keyed on the MSA tenant, not "common"
-                Assert.AreEqual(TestConstants.MsaTenantId,
+                // The cache entry should be keyed on the override tenant, not the MSA GUID
+                Assert.AreEqual(TestConstants.Utid,
                     app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().TenantId,
                     StringComparer.OrdinalIgnoreCase);
             }
