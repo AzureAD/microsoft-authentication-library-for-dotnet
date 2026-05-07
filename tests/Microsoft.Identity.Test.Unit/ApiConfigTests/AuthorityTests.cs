@@ -466,5 +466,24 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
             var resultAuthority = Authority.CreateAuthorityForRequestAsync(requestContext, requestAuthority?.AuthorityInfo, account).Result;
             Assert.AreEqual(expectedTenantId, resultAuthority.TenantId);
         }
+
+        [TestMethod]
+        public void ValidatedEnvironmentsCache_IsCaseInsensitive()
+        {
+            // Act - add an uppercase hostname directly into the internal cache
+            AuthorityManager.s_validatedEnvironments.TryAdd("LOGIN.MICROSOFTONLINE.COM", 0);
+
+            // Assert - the lowercase variant must be found, proving OrdinalIgnoreCase is in effect.
+            // If the comparer were case-sensitive (the default), this would return false and the test
+            // would fail, catching any regression where StringComparer.OrdinalIgnoreCase is removed.
+            Assert.IsTrue(
+                AuthorityManager.s_validatedEnvironments.ContainsKey("login.microsoftonline.com"),
+                "s_validatedEnvironments must use OrdinalIgnoreCase — hostnames are case-insensitive.");
+
+            // Verify a completely different host is not found
+            Assert.IsFalse(
+                AuthorityManager.s_validatedEnvironments.ContainsKey("login.windows.net"),
+                "A different host should not be considered validated.");
+        }
     }
 }
