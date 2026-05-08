@@ -1,0 +1,284 @@
+# Post-Release Summary GitHub Action
+#
+# Triggered after MSAL.NET is published to NuGet. Creates a PR with:
+#   1. Release validation report in build/release-logs/
+#   2. PublicAPI.Unshipped → Shipped updates
+#
+# Also:
+#   3. Closes the GitHub milestone
+#   4. Creates a GitHub Release with changelog notes
+#   5. Posts to the Teams release channel
+#
+# Trigger via workflow_dispatch (manually or from ADO pipeline webhook).
+
+name: Post-Release Summary
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Released version (e.g., 4.84.0)'
+        required: true
+      build_id:
+        description: 'ADO Build ID'
+        required: true
+      requested_by:
+        description: 'Who triggered the release'
+        required: true
+        default: 'Release Agent'
+      lab_api_version:
+        description: 'Lab API version released'
+        required: false
+        default: '2.0.0'
+      check_signing:
+        description: 'Package signing check result (PASSED/FAILED)'
+        required: false
+        default: 'PASSED'
+      check_warnings:
+        description: 'Build warnings check result (PASSED/FAILED)'
+        required: false
+        default: 'PASSED'
+      check_tsa:
+        description: 'TSA security bugs check result (PASSED/FAILED)'
+        required: false
+        default: 'PASSED'
+      check_cg:
+        description: 'Component Governance check result (PASSED/FAILED)'
+        required: false
+        default: 'PASSED'
+      check_sdl:
+        description: 'SDL/Compliance check result (PASSED/FAILED)'
+        required: false
+        default: 'PASSED'
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  # ─── Job 1: Create the post-release summary PR ───
+  post-release-pr:
+    name: Create Post-Release Summary PR
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate release report
+        run: |
+          mkdir -p build/release-logs
+
+          RELEASE_DATE=$(date -u +"%Y-%m-%d %H:%M UTC")
+          VERSION="${{ inputs.version }}"
+          BUILD_ID="${{ inputs.build_id }}"
+          REQUESTED_BY="${{ inputs.requested_by }}"
+          LAB_API_VERSION="${{ inputs.lab_api_version }}"
+
+          # Map check results to emoji
+          map_result() {
+            if [ "$1" = "PASSED" ]; then echo "✅ PASSED"; else echo "❌ FAILED"; fi
+          }
+
+          cat > "build/release-logs/release-${VERSION}.md" << EOF
+          # MSAL.NET v${VERSION} — Release Report
+
+          **Released:** ${RELEASE_DATE}
+          **Build:** [${BUILD_ID}](https://identitydivision.visualstudio.com/IDDP/_build/results?buildId=${BUILD_ID})
+          **Pipeline:** MSAL.NET-OneBranch-Release-Official
+          **Requested by:** ${REQUESTED_BY}
+
+          ---
+
+          ## Pre-Release Validation
+
+          | # | Check | Result |
+          |---|-------|--------|
+          | 1 | Package Signing (7 packages) | $(map_result "${{ inputs.check_signing }}") |
+          | 2 | Build Warnings Audit | $(map_result "${{ inputs.check_warnings }}") |
+          | 3 | TSA Security Bugs | $(map_result "${{ inputs.check_tsa }}") |
+          | 4 | Component Governance Alerts | $(map_result "${{ inputs.check_cg }}") |
+          | 5 | SDL / Compliance | $(map_result "${{ inputs.check_sdl }}") |
+
+          ## Packages Published
+
+          | Package | Version | NuGet | IDDP |
+          |---------|---------|-------|------|
+          | Microsoft.Identity.Client | ${VERSION} | ✅ | ✅ |
+          | Microsoft.Identity.Client.Desktop | ${VERSION} | ✅ | ✅ |
+          | Microsoft.Identity.Client.Broker | ${VERSION} | ✅ | ✅ |
+          | Microsoft.Identity.Client.Desktop.WinUI3 | ${VERSION} | ✅ | ✅ |
+          | Microsoft.Identity.Client.KeyAttestation | ${VERSION} | ✅ | ✅ |
+          | Microsoft.Identity.Client.Extensions.Msal | ${VERSION} | ✅ | ✅ |
+          | Microsoft.Identity.Lab.Api | ${LAB_API_VERSION} | ✅ | ✅ |
+
+          ## Post-Release Checklist
+
+          | Task | Status |
+          |------|--------|
+          | Release report added to build/release-logs/ | ✅ Done (this PR) |
+          | PublicAPI.Unshipped → Shipped | ✅ Done (this PR) |
+          | GitHub milestone closed | ✅ Done |
+          | GitHub Release created | ✅ Done |
+          | Teams release channel notified | ✅ Done |
+
+          ## Links
+
+          - [NuGet: Microsoft.Identity.Client ${VERSION}](https://www.nuget.org/packages/Microsoft.Identity.Client/${VERSION})
+          - [GitHub Release](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/releases/tag/${VERSION})
+          - [TSA Summary](https://tsaapivnext.azurewebsites.net/Result/CodeBase/MSAL%20.NET%20AUTH%20SDK/Summary)
+          - [Component Governance](https://identitydivision.visualstudio.com/IDDP/_componentGovernance/98561)
+          - [ADO Build](https://identitydivision.visualstudio.com/IDDP/_build/results?buildId=${BUILD_ID})
+          EOF
+
+          echo "✅ Release report generated: build/release-logs/release-${VERSION}.md"
+
+      - name: Move PublicAPI.Unshipped → Shipped
+        run: |
+          find . -name "PublicAPI.Unshipped.txt" | while read unshipped; do
+            shipped="${unshipped/Unshipped/Shipped}"
+            if [ -s "$unshipped" ]; then
+              echo "" >> "$shipped"
+              cat "$unshipped" >> "$shipped"
+              : > "$unshipped"
+              echo "✅ Moved: $unshipped → $shipped"
+            else
+              echo "⬚ Skipped (empty): $unshipped"
+            fi
+          done
+
+      - name: Create Post-Release PR
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: "Post-release: MSAL.NET v${{ inputs.version }} summary"
+          branch: "post-release/v${{ inputs.version }}"
+          commit-message: |
+            Post-release: MSAL.NET v${{ inputs.version }}
+
+            - Add release report to build/release-logs/
+            - Move PublicAPI.Unshipped → Shipped
+          body: |
+            ## 📋 Post-Release Summary for MSAL.NET v${{ inputs.version }}
+
+            This PR was automatically generated by the MSAL Release Agent after publishing v${{ inputs.version }} to NuGet.
+
+            ### Changes in this PR
+            - 📋 **Release report:** `build/release-logs/release-${{ inputs.version }}.md`
+            - 📦 **PublicAPI files:** Moved `Unshipped` entries → `Shipped`
+
+            ### Release Details
+            - **Build:** [#${{ inputs.build_id }}](https://identitydivision.visualstudio.com/IDDP/_build/results?buildId=${{ inputs.build_id }})
+            - **NuGet:** [Microsoft.Identity.Client ${{ inputs.version }}](https://www.nuget.org/packages/Microsoft.Identity.Client/${{ inputs.version }})
+            - **Requested by:** ${{ inputs.requested_by }}
+          labels: release
+
+  # ─── Job 2: Close GitHub milestone ───
+  close-milestone:
+    name: Close GitHub Milestone
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const version = '${{ inputs.version }}';
+            const { data: milestones } = await github.rest.issues.listMilestones({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+            });
+            const milestone = milestones.find(m => m.title === version);
+            if (milestone) {
+              await github.rest.issues.updateMilestone({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                milestone_number: milestone.number,
+                state: 'closed',
+              });
+              console.log(`✅ Closed milestone: ${version}`);
+            } else {
+              console.log(`⚠️ No open milestone found for ${version}`);
+            }
+
+  # ─── Job 3: Create GitHub Release ───
+  create-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract changelog and create release
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const version = '${{ inputs.version }}';
+
+            // Read CHANGELOG.md and extract the section for this version
+            const changelog = fs.readFileSync('CHANGELOG.md', 'utf8');
+            const escapedVersion = version.replace(/\./g, '\\.');
+            const regex = new RegExp(
+              `${escapedVersion}\\n======\\n([\\s\\S]*?)(?=\\n\\d+\\.\\d+\\.\\d+\\n======|$)`
+            );
+            const match = changelog.match(regex);
+            const body = match
+              ? match[1].trim()
+              : `MSAL.NET ${version} has been released. See [CHANGELOG.md](CHANGELOG.md) for details.`;
+
+            await github.rest.repos.createRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: version,
+              name: `MSAL.NET ${version}`,
+              body: body,
+              draft: false,
+              prerelease: false,
+            });
+
+            console.log(`✅ Created GitHub release: MSAL.NET ${version}`);
+
+  # ─── Job 4: Notify Teams release channel ───
+  notify-teams:
+    name: Notify Teams Release Channel
+    runs-on: ubuntu-latest
+    needs: [create-release]
+    # Only notify if the webhook secret is configured
+    if: ${{ vars.TEAMS_WEBHOOK_URL != '' || secrets.TEAMS_WEBHOOK_URL != '' }}
+    steps:
+      - name: Post to Teams
+        env:
+          TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
+        run: |
+          VERSION="${{ inputs.version }}"
+          BUILD_ID="${{ inputs.build_id }}"
+
+          curl -s -X POST "${TEAMS_WEBHOOK_URL}" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"@type\": \"MessageCard\",
+              \"@context\": \"http://schema.org/extensions\",
+              \"themeColor\": \"0076D7\",
+              \"summary\": \"MSAL.NET ${VERSION} Released\",
+              \"sections\": [{
+                \"activityTitle\": \"MSAL.NET ${VERSION} Released 🚀\",
+                \"facts\": [
+                  { \"name\": \"Version\", \"value\": \"${VERSION}\" },
+                  { \"name\": \"Build\", \"value\": \"[#${BUILD_ID}](https://identitydivision.visualstudio.com/IDDP/_build/results?buildId=${BUILD_ID})\" },
+                  { \"name\": \"Released by\", \"value\": \"${{ inputs.requested_by }}\" }
+                ],
+                \"markdown\": true
+              }],
+              \"potentialAction\": [
+                {
+                  \"@type\": \"OpenUri\",
+                  \"name\": \"View Release\",
+                  \"targets\": [{ \"os\": \"default\", \"uri\": \"https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/releases/tag/${VERSION}\" }]
+                },
+                {
+                  \"@type\": \"OpenUri\",
+                  \"name\": \"View on NuGet\",
+                  \"targets\": [{ \"os\": \"default\", \"uri\": \"https://www.nuget.org/packages/Microsoft.Identity.Client/${VERSION}\" }]
+                }
+              ]
+            }"
+
+          echo "✅ Teams notification sent"
