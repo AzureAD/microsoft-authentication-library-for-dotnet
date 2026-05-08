@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;
@@ -161,6 +162,16 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
                         MsalError.MissingTenantedAuthority,
                         MsalErrorMessage.MtlsNonTenantedAuthorityNotAllowedMessage);
                 }
+            }
+
+            // If the current operation supports mTLS POP injection (IAuthenticationOperation3),
+            // inject the cert instead of replacing the operation. This enables CDT + mTLS POP
+            // composition where CDT's operation handles both constraint signing and POP binding.
+            if (p.AuthenticationOperation is IAuthenticationOperation3 op3)
+            {
+                op3.MtlsCertificate = cert;
+                p.MtlsCertificate = cert;
+                return;
             }
 
             p.AuthenticationOperation = new MtlsPopAuthenticationOperation(cert);

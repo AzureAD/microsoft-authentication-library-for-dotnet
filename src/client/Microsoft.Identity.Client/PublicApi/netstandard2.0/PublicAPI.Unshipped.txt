@@ -1,0 +1,3 @@
+Microsoft.Identity.Client.AuthScheme.IAuthenticationOperation3
+Microsoft.Identity.Client.AuthScheme.IAuthenticationOperation3.MtlsCertificate.set -> void
+
