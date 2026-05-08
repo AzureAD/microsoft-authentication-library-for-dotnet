@@ -828,14 +828,22 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         // OBO cache-partition tests.
         // OBO partition key (CacheKeyFactory.GetOboKey) does not include
         // AdditionalCacheKeyComponents, so attributed/non-attributed ATs for the same
-        // assertion share a partition and are disambiguated on read by the symmetric
-        // FilterTokensByAdditionalKeyComponents (GH #5963).
+        // assertion share a partition. They are kept separate by symmetric handling
+        // on BOTH sides (GH #5963):
+        //   * read:  FilterTokensByAdditionalKeyComponents only returns items whose
+        //            AdditionalCacheKeyComponents match the request's components
+        //            (both populated, or both null/empty).
+        //   * write: DeleteAccessTokensWithIntersectingScopes only evicts existing
+        //            items whose AdditionalCacheKeyComponents match the saving item's
+        //            components. An attributed AT no longer evicts a non-attributed
+        //            AT (or vice versa) sharing the same OBO/scope/tenant.
 
         [TestMethod]
         public async Task WithAttributeTokens_OnBehalfOf_SameAssertion_DifferentAttributeTokens_StoredSideBySide_Async()
         {
-            // Scopes must be DISJOINT: DeleteAccessTokensWithIntersectingScopes ignores
-            // AdditionalCacheKeyComponents and would evict the first AT otherwise.
+            // Uses disjoint scopes (one attribute-token set per scope). Coexistence is
+            // independently exercised on overlapping scopes by the
+            // OverlappingScopes_AttributedAndNonAttributed_CoexistAfterWrite test below.
             using (var httpManager = new MockHttpManager())
             {
                 var app = ConfidentialClientApplicationBuilder
@@ -850,7 +858,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 var userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
 
-                // Disjoint scope sets so the write-time intersect-delete keeps both ATs.
+                // Disjoint scope sets so this test isolates the read-side filter.
+                // (Coexistence on overlapping scopes is exercised independently by
+                // OverlappingScopes_AttributedAndNonAttributed_CoexistAfterWrite.)
                 var scopeA = new[] { "api://AzureFMITokenExchange/scopeA" };
                 var scopeB = new[] { "api://AzureFMITokenExchange/scopeB" };
 
@@ -1106,8 +1116,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestMethod]
         public async Task WithAttributeTokens_OnBehalfOf_DisjointScopes_AttributedAndNonAttributedCoexist_Async()
         {
-            // Disjoint scopes sidestep intersect-delete and prove the symmetric filter
-            // keeps attributed and non-attributed ATs separated within one OBO partition.
+            // Disjoint scopes isolate the read-side filter from intersect-delete.
+            // (Same-scope coexistence is covered by the OverlappingScopes test.)
             using (var httpManager = new MockHttpManager())
             {
                 // Arrange
@@ -1142,7 +1152,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
-                // Seed a non-attributed AT for scopeB (disjoint from scopeA — intersect-delete won't fire).
+                // Seed a non-attributed AT for scopeB (disjoint scope keeps the test
+                // focused on the read-side filter rather than the write-side fix).
                 httpManager.AddMockHandler(new MockHttpMessageHandler()
                 {
                     ExpectedMethod = System.Net.Http.HttpMethod.Post,
@@ -1187,12 +1198,103 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
+        public async Task WithAttributeTokens_OnBehalfOf_OverlappingScopes_AttributedAndNonAttributed_CoexistAfterWrite_Async()
+        {
+            // GH #5963 (write-side): an attributed AT and a non-attributed AT for the
+            // SAME OBO assertion + SAME scope must coexist. Pre-fix, the second write
+            // ran DeleteAccessTokensWithIntersectingScopes which ignored
+            // AdditionalCacheKeyComponents and silently evicted the first AT. Post-fix
+            // intersect-delete is symmetric: it only evicts items whose components match
+            // the saving item's components (both populated, or both null/empty).
+            using (var httpManager = new MockHttpManager())
+            {
+                // Arrange
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(ClientId)
+                    .WithAuthority("https://login.microsoftonline.com/", TenantId)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithExperimentalFeatures()
+                    .WithHttpManager(httpManager)
+                    .BuildConcrete();
+
+                httpManager.AddInstanceDiscoveryMockHandler();
+                var userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
+
+                // Both calls use the SAME scope set so intersect-delete is exercised.
+                // First: attributed AT -> IDP.
+                httpManager.AddMockHandler(new MockHttpMessageHandler()
+                {
+                    ExpectedMethod = System.Net.Http.HttpMethod.Post,
+                    ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
+                        TestConstants.UniqueId, TestConstants.DisplayableId, _scope,
+                        accessToken: "obo_at_attributed"),
+                    ExpectedPostData = new Dictionary<string, string>
+                    {
+                        { OAuth2Parameter.AttributeTokens, "attrA" }
+                    }
+                });
+                var attributedResult = await app.AcquireTokenOnBehalfOf(_scope, userAssertion)
+                    .WithAttributeTokens(new[] { "attrA" })
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+                Assert.AreEqual(TokenSource.IdentityProvider, attributedResult.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual("obo_at_attributed", attributedResult.AccessToken);
+
+                // Second: non-attributed AT, SAME scope -> IDP. Must NOT evict the attributed AT.
+                httpManager.AddMockHandler(new MockHttpMessageHandler()
+                {
+                    ExpectedMethod = System.Net.Http.HttpMethod.Post,
+                    ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
+                        TestConstants.UniqueId, TestConstants.DisplayableId, _scope,
+                        accessToken: "obo_at_plain"),
+                    UnExpectedPostData = new Dictionary<string, string>
+                    {
+                        { OAuth2Parameter.AttributeTokens, null }
+                    }
+                });
+                var plainResult = await app.AcquireTokenOnBehalfOf(_scope, userAssertion)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+                Assert.AreEqual(TokenSource.IdentityProvider, plainResult.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual("obo_at_plain", plainResult.AccessToken);
+
+                // Both ATs must coexist in the same OBO partition.
+                var allAts = app.UserTokenCacheInternal.Accessor.GetAllAccessTokens();
+                Assert.HasCount(2, allAts,
+                    "Regression of GH #5963 (write-side): non-attributed write evicted the attributed AT.");
+                Assert.AreEqual(userAssertion.AssertionHash, allAts[0].OboCacheKey);
+                Assert.AreEqual(userAssertion.AssertionHash, allAts[1].OboCacheKey);
+
+                var attributedAt = allAts.Single(at => at.Secret == "obo_at_attributed");
+                var plainAt = allAts.Single(at => at.Secret == "obo_at_plain");
+                Assert.IsNotNull(attributedAt.AdditionalCacheKeyComponents);
+                Assert.IsNull(plainAt.AdditionalCacheKeyComponents);
+
+                // Subsequent reads on the same scope must hit each item from cache.
+                // No mock handler is queued; an IDP call would fail the test.
+                var attributedHit = await app.AcquireTokenOnBehalfOf(_scope, userAssertion)
+                    .WithAttributeTokens(new[] { "attrA" })
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+                Assert.AreEqual(TokenSource.Cache, attributedHit.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual("obo_at_attributed", attributedHit.AccessToken);
+
+                var plainHit = await app.AcquireTokenOnBehalfOf(_scope, userAssertion)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+                Assert.AreEqual(TokenSource.Cache, plainHit.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual("obo_at_plain", plainHit.AccessToken);
+            }
+        }
+
+        [TestMethod]
         public async Task WithAttributeTokens_OnBehalfOf_NoAttributeTokens_TwoAttributedEntries_NoMultipleMatch_Async()
         {
             // GH #5963 regression: with two attributed ATs sharing one OBO partition, a
-            // non-attributed read must not throw multiple_matching_tokens_detected. The
-            // second AT is injected via the accessor because intersect-delete (which
-            // ignores AdditionalCacheKeyComponents) would otherwise evict the first.
+            // non-attributed read must not throw multiple_matching_tokens_detected. We
+            // inject the second AT directly via the accessor (rather than going through
+            // a second AcquireTokenOnBehalfOf) to keep this test focused on the
+            // read-side multi-match guard without depending on a second mock HTTP exchange.
             using (var httpManager = new MockHttpManager())
             {
                 // Arrange
@@ -1225,8 +1327,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ConfigureAwait(false);
 
                 // Inject a second attributed AT with the SAME scope and OBO key but a
-                // different attribute_tokens set. Direct injection bypasses
-                // DeleteAccessTokensWithIntersectingScopes so both ATs coexist.
+                // different attribute_tokens set. We inject directly via the accessor
+                // (rather than going through a second AcquireTokenOnBehalfOf) only to
+                // keep this test focused on the read-side multi-match guard without
+                // depending on a second mock HTTP exchange.
                 string clientInfo = MockHelpers.CreateClientInfo();
                 string homeAccountId = ClientInfo.CreateFromJson(clientInfo).ToAccountIdentifier();
 
@@ -1249,8 +1353,18 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 app.UserTokenCacheInternal.Accessor.SaveAccessToken(secondAttributedAt);
 
-                Assert.HasCount(2, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens(),
+                var atsAfterInject = app.UserTokenCacheInternal.Accessor.GetAllAccessTokens();
+                Assert.HasCount(2, atsAfterInject,
                     "Precondition: two attributed ATs must be present in the same OBO partition.");
+
+                // Guard against partition-key drift: if homeAccountId / preferredCacheEnv
+                // diverge from what the mock HTTP stack produces, the injected AT lands
+                // in a different partition and the test no longer exercises the
+                // "two ATs in the SAME OBO partition" scenario.
+                Assert.AreEqual(userAssertion.AssertionHash, atsAfterInject[0].OboCacheKey);
+                Assert.AreEqual(userAssertion.AssertionHash, atsAfterInject[1].OboCacheKey);
+                Assert.AreEqual(atsAfterInject[0].OboCacheKey, atsAfterInject[1].OboCacheKey,
+                    "Both attributed ATs must share the same OboCacheKey to exercise the multi-match guard.");
 
                 // Act + Assert: a non-attributed read must NOT throw multiple_matching_tokens_detected.
                 // Post-fix the symmetric filter excludes both attributed ATs, the cache
@@ -1267,12 +1381,30 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     }
                 });
 
-                var result = await app.AcquireTokenOnBehalfOf(_scope, userAssertion)
-                    .ExecuteAsync()
-                    .ConfigureAwait(false);
+                AuthenticationResult result;
+                try
+                {
+                    result = await app.AcquireTokenOnBehalfOf(_scope, userAssertion)
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
+                }
+                catch (MsalClientException ex) when (ex.ErrorCode == MsalError.MultipleTokensMatchedError)
+                {
+                    Assert.Fail(
+                        "Regression of GH #5963: a non-attributed AcquireTokenOnBehalfOf call threw " +
+                        $"'{MsalError.MultipleTokensMatchedError}' when two attributed ATs share an OBO partition. " +
+                        "FilterTokensByAdditionalKeyComponents must exclude attributed ATs on the non-attributed path. " +
+                        $"Inner: {ex.Message}");
+                    return;
+                }
 
+                // Guard against a silent regression where the filter leaks an attributed
+                // AT (which would also report TokenSource.Cache and slip past a naive
+                // assertion). The result must be the freshly minted non-attributed AT.
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
                 Assert.AreEqual("obo_at_no_attrs", result.AccessToken);
+                Assert.AreNotEqual("obo_at_A", result.AccessToken);
+                Assert.AreNotEqual("obo_at_B_injected", result.AccessToken);
             }
         }
     }

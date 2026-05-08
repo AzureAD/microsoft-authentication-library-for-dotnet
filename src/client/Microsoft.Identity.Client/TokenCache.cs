@@ -120,7 +120,8 @@ namespace Microsoft.Identity.Client
             string tenantId,
             HashSet<string> scopeSet,
             string homeAccountId,
-            string tokenType)
+            string tokenType,
+            SortedList<string, string> additionalCacheKeyComponents)
         {
             if (requestParams.RequestContext.Logger.IsLoggingEnabled(LogLevel.Info))
             {
@@ -128,6 +129,10 @@ namespace Microsoft.Identity.Client
                     () => "Looking for scopes for the authority in the cache which intersect with " +
                     requestParams.Scope.AsSingleString());
             }
+
+            bool savingHasComponents =
+                additionalCacheKeyComponents != null &&
+                additionalCacheKeyComponents.Count > 0;
 
             var accessTokensToDelete = new List<MsalAccessTokenCacheItem>();
             var partitionKeyFromResponse = CacheKeyFactory.GetInternalPartitionKeyFromResponse(requestParams, homeAccountId);
@@ -139,7 +144,8 @@ namespace Microsoft.Identity.Client
                     environmentAliases.Contains(accessToken.Environment) &&
                     string.Equals(accessToken.TokenType ?? "", tokenType ?? "", StringComparison.OrdinalIgnoreCase) &&
                     string.Equals(accessToken.TenantId ?? "", tenantId ?? "", StringComparison.OrdinalIgnoreCase) &&
-                    accessToken.ScopeSet.Overlaps(scopeSet))
+                    accessToken.ScopeSet.Overlaps(scopeSet) &&
+                    AreAdditionalCacheKeyComponentsEqual(accessToken.AdditionalCacheKeyComponents, additionalCacheKeyComponents, savingHasComponents))
                 {
                     requestParams.RequestContext.Logger.Verbose(() => $"Intersecting scopes found: {scopeSet}");
                     accessTokensToDelete.Add(accessToken);
@@ -162,6 +168,34 @@ namespace Microsoft.Identity.Client
             {
                 Accessor.DeleteAccessToken(cacheItem);
             }
+        }
+
+        // Symmetric AdditionalCacheKeyComponents match for write-side intersect-delete
+        // (GH #5963): an attributed AT must not evict a non-attributed AT (or vice
+        // versa) sharing the same OBO/scope/tenant. Two ATs are "the same key
+        // partition" only when their AdditionalCacheKeyComponents agree.
+        //   saving WITH components    -> delete only items with equal components
+        //   saving WITHOUT components -> delete only items without components
+        private static bool AreAdditionalCacheKeyComponentsEqual(
+            SortedList<string, string> existingComponents,
+            SortedList<string, string> savingComponents,
+            bool savingHasComponents)
+        {
+            bool existingHasComponents =
+                existingComponents != null &&
+                existingComponents.Count > 0;
+
+            if (savingHasComponents != existingHasComponents)
+            {
+                return false;
+            }
+
+            if (!savingHasComponents)
+            {
+                return true;
+            }
+
+            return CollectionHelpers.AreDictionariesEqual(existingComponents, savingComponents);
         }
 
         private static string GetAccessTokenExpireLogMessageContent(MsalAccessTokenCacheItem msalAccessTokenCacheItem)

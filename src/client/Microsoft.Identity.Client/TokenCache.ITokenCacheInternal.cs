@@ -229,7 +229,8 @@ namespace Microsoft.Identity.Client
                             tenantId,
                             msalAccessTokenCacheItem.ScopeSet,
                             msalAccessTokenCacheItem.HomeAccountId,
-                            msalAccessTokenCacheItem.TokenType);
+                            msalAccessTokenCacheItem.TokenType,
+                            msalAccessTokenCacheItem.AdditionalCacheKeyComponents);
 
                         Accessor.SaveAccessToken(msalAccessTokenCacheItem);
                     }
@@ -523,6 +524,8 @@ namespace Microsoft.Identity.Client
                 requestParams.CacheKeyComponents != null &&
                 requestParams.CacheKeyComponents.Count > 0;
 
+            int countBeforeFilter = accessTokens.Count;
+
             if (requestHasComponents)
             {
                 accessTokens.FilterWithLogging(item =>
@@ -540,7 +543,9 @@ namespace Microsoft.Identity.Client
                     "Filtering out tokens that have additional key components");
             }
 
-            if (accessTokens.Count == 0)
+            // Only attribute the miss to this filter if it is actually responsible for
+            // emptying the candidate set (i.e., entered with > 0 and exited with 0).
+            if (countBeforeFilter > 0 && accessTokens.Count == 0)
             {
                 requestParams.RequestContext.Logger.Verbose(() => "No tokens found that match the additional key components filter. ");
             }
