@@ -4,6 +4,7 @@
 using System;
 using System.Linq;
 using System.Globalization;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.OAuth2;
@@ -21,15 +22,24 @@ namespace Microsoft.Identity.Client.Instance.Discovery
         private readonly IHttpManager _httpManager;
         private readonly INetworkCacheMetadataProvider _networkCacheMetadataProvider;
         private readonly Uri _userProvidedInstanceDiscoveryUri; // can be null
+        private readonly int _instanceDiscoveryTimeoutMs;
+
+        /// <summary>
+        /// Default timeout for instance discovery network calls.
+        /// Prevents waiting for the full HttpClient timeout (100s) when the discovery endpoint is unreachable.
+        /// </summary>
+        internal const int DefaultInstanceDiscoveryTimeoutMs = 10_000;
 
         public NetworkMetadataProvider(
             IHttpManager httpManager,
             INetworkCacheMetadataProvider networkCacheMetadataProvider,
-            Uri userProvidedInstanceDiscoveryUri = null)
+            Uri userProvidedInstanceDiscoveryUri = null,
+            int instanceDiscoveryTimeoutMs = DefaultInstanceDiscoveryTimeoutMs)
         {
             _httpManager = httpManager ?? throw new ArgumentNullException(nameof(httpManager));
             _networkCacheMetadataProvider = networkCacheMetadataProvider ?? throw new ArgumentNullException(nameof(networkCacheMetadataProvider));
             _userProvidedInstanceDiscoveryUri = userProvidedInstanceDiscoveryUri; // can be null
+            _instanceDiscoveryTimeoutMs = instanceDiscoveryTimeoutMs;
         }
 
         public async Task<InstanceDiscoveryMetadataEntry> GetMetadataAsync(Uri authority, RequestContext requestContext)
@@ -57,10 +67,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
         {
             foreach (InstanceDiscoveryMetadataEntry entry in instanceDiscoveryResponse.Metadata ?? Enumerable.Empty<InstanceDiscoveryMetadataEntry>())
             {
-                foreach (string aliasedEnvironment in entry.Aliases ?? Enumerable.Empty<string>())
-                {
-                    _networkCacheMetadataProvider.AddMetadata(aliasedEnvironment, entry);
-                }
+                _networkCacheMetadataProvider.AddMetadataWithAliases(entry, fallbackEnvironment: null);
             }
         }
 
@@ -83,11 +90,25 @@ namespace Microsoft.Identity.Client.Instance.Discovery
 
             Uri instanceDiscoveryEndpoint = ComputeHttpEndpoint(authority, requestContext);
 
-            InstanceDiscoveryResponse discoveryResponse = await client
-                .DiscoverAadInstanceAsync(instanceDiscoveryEndpoint, requestContext)
-                .ConfigureAwait(false);
+            using var timeoutCts = new CancellationTokenSource(_instanceDiscoveryTimeoutMs);
+            using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(
+                requestContext.UserCancellationToken, timeoutCts.Token);
 
-            return discoveryResponse;
+            CancellationToken originalToken = requestContext.UserCancellationToken;
+            requestContext.UserCancellationToken = linkedCts.Token;
+
+            try
+            {
+                InstanceDiscoveryResponse discoveryResponse = await client
+                    .DiscoverAadInstanceAsync(instanceDiscoveryEndpoint, requestContext)
+                    .ConfigureAwait(false);
+
+                return discoveryResponse;
+            }
+            finally
+            {
+                requestContext.UserCancellationToken = originalToken;
+            }
         }
 
         private Uri ComputeHttpEndpoint(Uri authority, RequestContext requestContext)
