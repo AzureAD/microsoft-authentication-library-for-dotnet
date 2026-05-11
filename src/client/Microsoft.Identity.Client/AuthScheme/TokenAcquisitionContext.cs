@@ -12,11 +12,23 @@ namespace Microsoft.Identity.Client.AuthScheme
     /// and prepares to format the result.
     /// </summary>
     /// <remarks>
+    /// <para>
     /// Implementations must not retain a reference to the context past the
-    /// <see cref="IAuthenticationOperation3.AfterCredentialEvaluation"/> call.
+    /// <see cref="IAuthenticationOperation3.AfterCredentialEvaluationAsync"/> call.
+    /// </para>
+    /// <para>
     /// New properties may be added to this class in future MSAL versions; existing
     /// implementations remain source- and binary-compatible because the type is
     /// sealed and consumed only by property access.
+    /// </para>
+    /// <para>
+    /// <b>KeyId contract:</b> Implementations that receive an mTLS certificate via
+    /// <see cref="MtlsCertificate"/> must incorporate the certificate's identity
+    /// (e.g., thumbprint) into <see cref="IAuthenticationOperation.KeyId"/>.
+    /// MSAL uses <c>KeyId</c> as part of the token cache key — a hardcoded or
+    /// cert-independent <c>KeyId</c> will cause stale tokens to be served after
+    /// certificate rotation.
+    /// </para>
     /// </remarks>
     public sealed class TokenAcquisitionContext
     {

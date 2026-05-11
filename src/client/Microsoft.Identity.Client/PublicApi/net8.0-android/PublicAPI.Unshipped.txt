@@ -1,6 +1,6 @@
 Microsoft.Identity.Client.AuthScheme.IAuthenticationOperation3
-Microsoft.Identity.Client.AuthScheme.IAuthenticationOperation3.AfterCredentialEvaluation(Microsoft.Identity.Client.AuthScheme.TokenAcquisitionContext context) -> void
 Microsoft.Identity.Client.AuthScheme.TokenAcquisitionContext
 Microsoft.Identity.Client.AuthScheme.TokenAcquisitionContext.TokenAcquisitionContext() -> void
 Microsoft.Identity.Client.AuthScheme.TokenAcquisitionContext.MtlsCertificate.get -> System.Security.Cryptography.X509Certificates.X509Certificate2
 Microsoft.Identity.Client.AuthScheme.TokenAcquisitionContext.MtlsCertificate.init -> void
+Microsoft.Identity.Client.AuthScheme.IAuthenticationOperation3.AfterCredentialEvaluationAsync(Microsoft.Identity.Client.AuthScheme.TokenAcquisitionContext context, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task

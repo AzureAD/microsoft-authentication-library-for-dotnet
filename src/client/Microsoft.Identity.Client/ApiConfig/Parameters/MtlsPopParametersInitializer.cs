@@ -99,7 +99,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
                         MsalErrorMessage.MtlsCertificateNotProvidedMessage);
                 }
 
-                InitMtlsPopParameters(p, certCred.Certificate, serviceBundle);
+                await InitMtlsPopParametersAsync(p, certCred.Certificate, serviceBundle, ct).ConfigureAwait(false);
                 return;
             }
 
@@ -118,7 +118,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
                         MsalErrorMessage.MtlsCertificateNotProvidedMessage);
                 }
 
-                InitMtlsPopParameters(p, ar.TokenBindingCertificate, serviceBundle);
+                await InitMtlsPopParametersAsync(p, ar.TokenBindingCertificate, serviceBundle, ct).ConfigureAwait(false);
                 return;
             }
 
@@ -147,10 +147,11 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
             };
         }
 
-        private static void InitMtlsPopParameters(
+        private static async Task InitMtlsPopParametersAsync(
             AcquireTokenCommonParameters p,
             X509Certificate2 cert,
-            IServiceBundle serviceBundle)
+            IServiceBundle serviceBundle,
+            CancellationToken ct = default)
         {
             // AAD only validation
             if (serviceBundle.Config.Authority.AuthorityInfo.AuthorityType == AuthorityType.Aad)
@@ -169,10 +170,10 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
             // composition (e.g., CDT + mTLS POP) where the operation handles both concerns.
             if (p.AuthenticationOperation is IAuthenticationOperation3 op3)
             {
-                op3.AfterCredentialEvaluation(new TokenAcquisitionContext
+                await op3.AfterCredentialEvaluationAsync(new TokenAcquisitionContext
                 {
                     MtlsCertificate = cert,
-                });
+                }, ct).ConfigureAwait(false);
                 p.MtlsCertificate = cert;
                 return;
             }

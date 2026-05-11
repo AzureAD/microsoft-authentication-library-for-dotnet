@@ -269,7 +269,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.AreEqual(0, fakeOp.CallbackInvocationCount);
 
             // Act
-            fakeOp.AfterCredentialEvaluation(new TokenAcquisitionContext
+            fakeOp.AfterCredentialEvaluationAsync_Sync(new TokenAcquisitionContext
             {
                 MtlsCertificate = s_testCertificate
             });
@@ -287,7 +287,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             // Arrange
             var fakeOp = new FakeAuthOp3();
-            fakeOp.AfterCredentialEvaluation(new TokenAcquisitionContext
+            fakeOp.AfterCredentialEvaluationAsync_Sync(new TokenAcquisitionContext
             {
                 MtlsCertificate = s_testCertificate
             });
@@ -332,7 +332,75 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         #endregion
 
-        #region Test Fake
+        #region Cert rotation
+
+        [TestMethod]
+        public void AfterCredentialEvaluationAsync_CertRotation_OperationSeesNewCert()
+        {
+            // Arrange
+            var fakeOp = new FakeAuthOp3();
+            var cert1 = CertHelper.GetOrCreateTestCert();
+            var cert2 = CertHelper.GetOrCreateTestCert(regenerateCert: true);
+
+            // Act — call 1 with cert1
+            fakeOp.AfterCredentialEvaluationAsync_Sync(new TokenAcquisitionContext { MtlsCertificate = cert1 });
+            var observed1 = fakeOp.LastCertificate.Thumbprint;
+
+            // Act — rotate to cert2
+            fakeOp.AfterCredentialEvaluationAsync_Sync(new TokenAcquisitionContext { MtlsCertificate = cert2 });
+            var observed2 = fakeOp.LastCertificate.Thumbprint;
+
+            // Assert — operation must see the rotated cert
+            Assert.AreNotEqual(observed1, observed2, "After rotation, callback must provide the new cert");
+            Assert.AreEqual(cert2.Thumbprint, observed2);
+        }
+
+        #endregion
+
+        #region Exception propagation
+
+        [TestMethod]
+        public async Task AfterCredentialEvaluationAsync_Throws_PropagatesDirectlyToExecuteAsync()
+        {
+            // Arrange
+            const string region = "eastus";
+
+            using (var envContext = new EnvVariableContext())
+            {
+                Environment.SetEnvironmentVariable("REGION_NAME", region);
+
+                using (var httpManager = new MockHttpManager())
+                {
+                    // No mock handler — exception fires before any HTTP call
+                    var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                        .WithCertificate(s_testCertificate)
+                        .WithAuthority($"https://login.microsoftonline.com/123456-1234-2345-1234561234")
+                        .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
+                        .WithHttpManager(httpManager)
+                        .BuildConcrete();
+
+                    var throwingOp = new ThrowingAuthOp3();
+
+                    // Act & Assert — exception propagates unwrapped to ExecuteAsync
+                    var ex = await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+                        await app.AcquireTokenForClient(TestConstants.s_scope)
+                            .WithMtlsProofOfPossession()
+                            .WithAuthenticationExtension(new MsalAuthenticationExtension
+                            {
+                                AuthenticationOperation = throwingOp
+                            })
+                            .ExecuteAsync()
+                            .ConfigureAwait(false))
+                        .ConfigureAwait(false);
+
+                    Assert.AreEqual("Test: cert fetch failed", ex.Message);
+                }
+            }
+        }
+
+        #endregion
+
+        #region Test Fakes
 
         /// <summary>
         /// Fake implementation of IAuthenticationOperation3 that tracks
@@ -343,14 +411,22 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             public int CallbackInvocationCount { get; private set; }
             public X509Certificate2 LastCertificate { get; private set; }
 
-            public void AfterCredentialEvaluation(TokenAcquisitionContext context)
+            public void AfterCredentialEvaluationAsync_Sync(TokenAcquisitionContext context)
             {
                 CallbackInvocationCount++;
                 LastCertificate = context.MtlsCertificate;
             }
 
+            public Task AfterCredentialEvaluationAsync(TokenAcquisitionContext context, System.Threading.CancellationToken cancellationToken = default)
+            {
+                AfterCredentialEvaluationAsync_Sync(context);
+                return Task.CompletedTask;
+            }
+
             public string AccessTokenType => LastCertificate is not null ? "mtls_pop" : "Bearer";
             public string AuthorizationHeaderPrefix => LastCertificate is not null ? "mtls_pop" : "Bearer";
+            // KeyId is hardcoded — this test validates callback invocation, not cache partitioning.
+            // Real implementations should derive KeyId from the cert (see CdtCryptoProvider.KeyId).
             public string KeyId => "test-key-id";
             public int TelemetryTokenType => 4;
 
@@ -389,6 +465,28 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
+        /// <summary>
+        /// Fake that throws from AfterCredentialEvaluationAsync to test exception propagation.
+        /// </summary>
+        private sealed class ThrowingAuthOp3 : IAuthenticationOperation3
+        {
+            public Task AfterCredentialEvaluationAsync(TokenAcquisitionContext context, System.Threading.CancellationToken cancellationToken = default)
+            {
+                throw new InvalidOperationException("Test: cert fetch failed");
+            }
+
+            public string AccessTokenType => "mtls_pop";
+            public string AuthorizationHeaderPrefix => "mtls_pop";
+            public string KeyId => "test-key-id";
+            public int TelemetryTokenType => 4;
+            public IReadOnlyDictionary<string, string> GetTokenRequestParams() => new Dictionary<string, string>();
+            public void FormatResult(AuthenticationResult authenticationResult) { }
+            public Task FormatResultAsync(AuthenticationResult authenticationResult, System.Threading.CancellationToken cancellationToken = default) => Task.CompletedTask;
+            public Task<bool> ValidateCachedTokenAsync(MsalCacheValidationData cachedTokenData) => Task.FromResult(true);
+        }
+
         #endregion
+
     }
 }
+
