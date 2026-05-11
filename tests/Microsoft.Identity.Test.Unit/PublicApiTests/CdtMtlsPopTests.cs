@@ -119,7 +119,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        public async Task MtlsPopWithIAuthenticationOperation3_CacheHit_CallbackStillFires()
+        public async Task MtlsPopWithIAuthenticationOperation3_CallbackFiresOnEveryExecuteAsync()
         {
             // Arrange
             const string region = "eastus";
