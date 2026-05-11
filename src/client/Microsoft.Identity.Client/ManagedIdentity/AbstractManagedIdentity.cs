@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             {
                 if (request.Method == System.Net.Http.HttpMethod.Get)
                 {
-                    request.QueryParameters["claims"] = parameters.ClientClaims;
+                    request.QueryParameters["claims"] = Uri.EscapeDataString(parameters.ClientClaims);
                     _requestContext.Logger.Info("[Managed Identity] Adding client claims to IMDS request as query parameter.");
                 }
                 else
