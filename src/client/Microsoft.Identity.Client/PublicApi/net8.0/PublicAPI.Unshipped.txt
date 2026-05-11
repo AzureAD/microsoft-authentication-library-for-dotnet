@@ -1,0 +1,2 @@
+Microsoft.Identity.Client.AcquireTokenForManagedIdentityParameterBuilder.WithClientClaims(string claimsJson) -> Microsoft.Identity.Client.AcquireTokenForManagedIdentityParameterBuilder
+static Microsoft.Identity.Client.Extensibility.AbstractConfidentialClientAcquireTokenParameterBuilderExtension.WithClientClaims<T>(this Microsoft.Identity.Client.AbstractConfidentialClientAcquireTokenParameterBuilder<T> builder, string claimsJson) -> T

@@ -69,8 +69,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
             }
 
-            ClaimsAndClientCapabilities = ClaimsHelper.GetMergedClaimsAndClientCapabilities(
+            // Merge server-issued claims and client-originated claims before computing
+            // ClaimsAndClientCapabilities. Server claims drive cache bypass (handled by request handlers);
+            // client claims are stable and cached — they just need to appear in the ESTS body.
+            string mergedClaims = ClaimsHelper.MergeClaimsObjects(
                 _commonParameters.Claims,
+                _commonParameters.ClientClaims);
+
+            ClaimsAndClientCapabilities = ClaimsHelper.GetMergedClaimsAndClientCapabilities(
+                mergedClaims,
                 _serviceBundle.Config.ClientCapabilities);
 
             HomeAccountId = homeAccountId;
@@ -136,6 +143,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 return _commonParameters.Claims;
             }
         }
+
+        /// <summary>
+        /// Client-originated claims set via .WithClientClaims(). These are cached (no bypass) and
+        /// keyed on the normalized claims value.
+        /// </summary>
+        public string ClientClaims => _commonParameters.ClientClaims;
 
         private IAuthenticationOperation _requestOverrideScheme;
 

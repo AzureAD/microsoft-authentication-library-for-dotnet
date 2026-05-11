@@ -57,6 +57,23 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             ManagedIdentityRequest request = await CreateRequestAsync(resource).ConfigureAwait(false);
 
+            // Forward client-originated claims to the correct location:
+            // - GET requests (IMDS/MSIv1): append as "claims" query parameter
+            // - POST requests (ImdsV2 / ESTS): append as "claims" body parameter
+            if (!string.IsNullOrEmpty(parameters.ClientClaims))
+            {
+                if (request.Method == System.Net.Http.HttpMethod.Get)
+                {
+                    request.QueryParameters["claims"] = parameters.ClientClaims;
+                    _requestContext.Logger.Info("[Managed Identity] Adding client claims to IMDS request as query parameter.");
+                }
+                else
+                {
+                    request.BodyParameters["claims"] = parameters.ClientClaims;
+                    _requestContext.Logger.Info("[Managed Identity] Adding client claims to ESTS POST body.");
+                }
+            }
+
             // When IMDSv2 mints a binding certificate during this request (via CSR),
             // it's exposed via request.MtlsCertificate. Bubble it up so the request
             // layer can set the mtls_pop scheme

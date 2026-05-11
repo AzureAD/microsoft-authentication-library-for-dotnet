@@ -216,6 +216,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             _managedIdentityParameters.IsMtlsPopRequested = AuthenticationRequestParameters.IsMtlsPopRequested;
 
+            // Propagate client-originated claims to the MI parameters for transport.
+            // Unlike server-issued Claims (which bypass the cache), ClientClaims are cached normally.
+            if (!string.IsNullOrEmpty(AuthenticationRequestParameters.ClientClaims))
+            {
+                _managedIdentityParameters.ClientClaims = AuthenticationRequestParameters.ClientClaims;
+            }
+
             ManagedIdentityResponse managedIdentityResponse =
                 await _managedIdentityClient
                 .SendTokenRequestForManagedIdentityAsync(AuthenticationRequestParameters.RequestContext, _managedIdentityParameters, cancellationToken)

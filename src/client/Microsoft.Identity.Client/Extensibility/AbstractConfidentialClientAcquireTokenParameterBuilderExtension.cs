@@ -8,6 +8,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 
 namespace Microsoft.Identity.Client.Extensibility
@@ -19,7 +20,41 @@ namespace Microsoft.Identity.Client.Extensibility
     public static class AbstractConfidentialClientAcquireTokenParameterBuilderExtension
     {
         /// <summary>
-        /// Intervenes in the request pipeline, by executing a user provided delegate before MSAL makes the token request. 
+        /// Specifies client-originated claims to include in the token request.
+        /// Unlike <see cref="AbstractAcquireTokenParameterBuilder{T}.WithClaims"/> (for server-issued
+        /// claims challenges), tokens acquired with client claims <b>are cached</b> and the cache entry
+        /// is keyed on the normalized claims value. Different claims values produce separate cache entries.
+        /// Use stable, non-dynamic values to avoid unbounded cache growth.
+        /// </summary>
+        /// <typeparam name="T">The concrete confidential client builder type.</typeparam>
+        /// <param name="builder">The builder to chain options to.</param>
+        /// <param name="claimsJson">A JSON string containing the client-originated claims. Must be valid JSON.</param>
+        /// <returns>The builder to chain the .With methods.</returns>
+        public static T WithClientClaims<T>(
+            this AbstractConfidentialClientAcquireTokenParameterBuilder<T> builder,
+            string claimsJson)
+            where T : AbstractConfidentialClientAcquireTokenParameterBuilder<T>
+        {
+            if (string.IsNullOrWhiteSpace(claimsJson))
+            {
+                return (T)builder;
+            }
+
+            string normalized = ClaimsHelper.NormalizeClaimsJson(claimsJson);
+            builder.CommonParameters.ClientClaims = normalized;
+
+            var cacheKey = new SortedList<string, Func<CancellationToken, Task<string>>>
+            {
+                { "client_claims", _ => Task.FromResult(normalized) }
+            };
+
+            WithAdditionalCacheKeyComponents(builder, cacheKey);
+
+            return (T)builder;
+        }
+
+        /// <summary>
+        /// Intervenes in the request pipeline, by executing a user provided delegate before MSAL makes the token request.
         /// The delegate can modify the request payload by adding or removing  body parameters and headers. <see cref="OnBeforeTokenRequestData"/>
         /// </summary>
         /// <typeparam name="T"></typeparam>

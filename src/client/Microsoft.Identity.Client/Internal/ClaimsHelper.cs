@@ -10,6 +10,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using Microsoft.Identity.Client.Utils;
 using JObject = System.Text.Json.Nodes.JsonObject;
+using System;
 
 namespace Microsoft.Identity.Client.Internal
 {
@@ -17,6 +18,66 @@ namespace Microsoft.Identity.Client.Internal
     {
         private const string AccessTokenClaim = "access_token";
         private const string XmsClientCapability = "xms_cc";
+
+        /// <summary>
+        /// Normalizes a claims JSON string so that semantically identical claims always produce
+        /// the same string. This prevents cache key fragmentation when callers pass the same
+        /// logical claims in different whitespace or key-ordering variants.
+        /// </summary>
+        internal static string NormalizeClaimsJson(string claimsJson)
+        {
+            if (string.IsNullOrWhiteSpace(claimsJson))
+            {
+                return claimsJson;
+            }
+
+            try
+            {
+                JObject parsed = JsonHelper.ParseIntoJsonObject(claimsJson);
+                JObject sorted = SortJsonObjectKeys(parsed);
+                return JsonHelper.JsonObjectToString(sorted);
+            }
+            catch (JsonException ex)
+            {
+                throw new MsalClientException(
+                    MsalError.InvalidJsonClaimsFormat,
+                    MsalErrorMessage.InvalidJsonClaimsFormat(claimsJson),
+                    ex);
+            }
+        }
+
+        /// <summary>
+        /// Merges two JSON claims objects. If either is null/empty the other is returned as-is.
+        /// </summary>
+        internal static string MergeClaimsObjects(string claims1, string claims2)
+        {
+            if (string.IsNullOrEmpty(claims1)) return claims2;
+            if (string.IsNullOrEmpty(claims2)) return claims1;
+
+            JObject obj1 = JsonHelper.ParseIntoJsonObject(claims1);
+            JObject obj2 = JsonHelper.ParseIntoJsonObject(claims2);
+            JObject merged = JsonHelper.Merge(obj1, obj2);
+            return JsonHelper.JsonObjectToString(merged);
+        }
+
+        private static JObject SortJsonObjectKeys(JObject obj)
+        {
+            var sorted = new JObject();
+            foreach (var key in obj.Select(kvp => kvp.Key).OrderBy(k => k, StringComparer.Ordinal))
+            {
+                var value = obj[key];
+                if (value is JObject nestedObj)
+                {
+                    sorted[key] = SortJsonObjectKeys(nestedObj);
+                }
+                else
+                {
+                    // JsonNode.DeepClone is .NET 6+; use Parse(ToJsonString()) for portability.
+                    sorted[key] = value is null ? null : JsonNode.Parse(value.ToJsonString());
+                }
+            }
+            return sorted;
+        }
 
         internal static string GetMergedClaimsAndClientCapabilities(
             string claims,
