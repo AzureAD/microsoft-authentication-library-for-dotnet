@@ -1092,7 +1092,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .GetResult();
 #pragma warning restore CS0618 // Type or member is obsolete
 
-                Assert.StartsWith(Constants.Common, authorizationRequestUrl.Segments[1]);
+                Assert.StartsWith(Constants.Consumers, authorizationRequestUrl.Segments[1]);
             }
         }
 
