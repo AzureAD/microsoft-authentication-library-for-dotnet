@@ -164,12 +164,15 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
                 }
             }
 
-            // If the current operation supports mTLS POP injection (IAuthenticationOperation3),
-            // inject the cert instead of replacing the operation. This enables CDT + mTLS POP
-            // composition where CDT's operation handles both constraint signing and POP binding.
+            // If the current operation supports the AfterCredentialEvaluation lifecycle hook,
+            // invoke it with the cert instead of replacing the operation. This enables
+            // composition (e.g., CDT + mTLS POP) where the operation handles both concerns.
             if (p.AuthenticationOperation is IAuthenticationOperation3 op3)
             {
-                op3.MtlsCertificate = cert;
+                op3.AfterCredentialEvaluation(new TokenAcquisitionContext
+                {
+                    MtlsCertificate = cert,
+                });
                 p.MtlsCertificate = cert;
                 return;
             }

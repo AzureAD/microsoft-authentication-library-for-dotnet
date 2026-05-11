@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Extensibility;
@@ -36,7 +35,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             // and managed by the static CertHelper dictionary.
         }
 
-        #region IAuthenticationOperation3 Integration Tests
+        #region Integration Tests — real MtlsPopParametersInitializer code path
 
         [TestMethod]
         public async Task MtlsPopWithIAuthenticationOperation3_InjectsCertAndPreservesOperation()
@@ -60,22 +59,24 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         .WithHttpManager(httpManager)
                         .BuildConcrete();
 
-                    var mockOp3 = new MockAuthenticationOperation3();
+                    var fakeOp = new FakeAuthOp3();
 
-                    // Act — chain WithMtlsProofOfPossession + WithAuthenticationExtension (simulates CDT)
+                    // Act — chain WithMtlsProofOfPossession + WithAuthenticationExtension
                     AuthenticationResult result = await app.AcquireTokenForClient(TestConstants.s_scope)
                         .WithMtlsProofOfPossession()
                         .WithAuthenticationExtension(new MsalAuthenticationExtension
                         {
-                            AuthenticationOperation = mockOp3
+                            AuthenticationOperation = fakeOp
                         })
                         .ExecuteAsync()
                         .ConfigureAwait(false);
 
-                    // Assert — cert was injected, operation was NOT replaced
-                    Assert.IsNotNull(mockOp3.InjectedCertificate,
-                        "MtlsPopParametersInitializer should inject cert via IAuthenticationOperation3");
-                    Assert.AreEqual(s_testCertificate.Thumbprint, mockOp3.InjectedCertificate.Thumbprint);
+                    // Assert — AfterCredentialEvaluation was called, operation was NOT replaced
+                    Assert.AreEqual(1, fakeOp.CallbackInvocationCount,
+                        "AfterCredentialEvaluation must fire exactly once per token request");
+                    Assert.IsNotNull(fakeOp.LastCertificate,
+                        "AfterCredentialEvaluation must receive the mTLS certificate");
+                    Assert.AreEqual(s_testCertificate.Thumbprint, fakeOp.LastCertificate.Thumbprint);
                     Assert.IsNotNull(result.BindingCertificate,
                         "BindingCertificate should be set by the operation's FormatResult");
                 }
@@ -117,118 +118,240 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
+        [TestMethod]
+        public async Task MtlsPopWithIAuthenticationOperation3_CacheHit_CallbackStillFires()
+        {
+            // Arrange
+            const string region = "eastus";
+
+            using (var envContext = new EnvVariableContext())
+            {
+                Environment.SetEnvironmentVariable("REGION_NAME", region);
+
+                using (var httpManager = new MockHttpManager())
+                {
+                    httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(
+                        tokenType: "mtls_pop");
+                    // Second handler for cache-hit path — TryInitAsync may trigger
+                    // a new token request if the cache key doesn't match
+                    httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(
+                        tokenType: "mtls_pop");
+
+                    var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                        .WithCertificate(s_testCertificate)
+                        .WithAuthority($"https://login.microsoftonline.com/123456-1234-2345-1234561234")
+                        .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
+                        .WithHttpManager(httpManager)
+                        .BuildConcrete();
+
+                    var fakeOp = new FakeAuthOp3();
+
+                    // Act — first call (cache miss)
+                    await app.AcquireTokenForClient(TestConstants.s_scope)
+                        .WithMtlsProofOfPossession()
+                        .WithAuthenticationExtension(new MsalAuthenticationExtension
+                        {
+                            AuthenticationOperation = fakeOp
+                        })
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
+
+                    Assert.AreEqual(1, fakeOp.CallbackInvocationCount,
+                        "First call must fire the callback");
+
+                    // Act — second call
+                    await app.AcquireTokenForClient(TestConstants.s_scope)
+                        .WithMtlsProofOfPossession()
+                        .WithAuthenticationExtension(new MsalAuthenticationExtension
+                        {
+                            AuthenticationOperation = fakeOp
+                        })
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
+
+                    // Assert — callback must fire on every ExecuteAsync call
+                    Assert.AreEqual(2, fakeOp.CallbackInvocationCount,
+                        "Second call must also fire the callback");
+                    Assert.IsNotNull(fakeOp.LastCertificate,
+                        "Cert must be provided on every callback invocation");
+                }
+            }
+        }
+
+        [TestMethod]
+        public async Task MtlsPopWithIAuthenticationOperation3_ReceivesCorrectCert()
+        {
+            // Arrange
+            const string region = "eastus";
+
+            using (var envContext = new EnvVariableContext())
+            {
+                Environment.SetEnvironmentVariable("REGION_NAME", region);
+
+                using (var httpManager = new MockHttpManager())
+                {
+                    httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(
+                        tokenType: "mtls_pop");
+
+                    var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                        .WithCertificate(s_testCertificate)
+                        .WithAuthority($"https://login.microsoftonline.com/123456-1234-2345-1234561234")
+                        .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
+                        .WithHttpManager(httpManager)
+                        .BuildConcrete();
+
+                    var fakeOp = new FakeAuthOp3();
+
+                    // Act
+                    await app.AcquireTokenForClient(TestConstants.s_scope)
+                        .WithMtlsProofOfPossession()
+                        .WithAuthenticationExtension(new MsalAuthenticationExtension
+                        {
+                            AuthenticationOperation = fakeOp
+                        })
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
+
+                    // Assert — cert must match what was configured on the CCA
+                    Assert.AreSame(s_testCertificate, fakeOp.LastCertificate,
+                        "Callback must receive the exact cert instance configured via WithCertificate");
+                }
+            }
+        }
+
+        [TestMethod]
+        public async Task WithoutMtlsPop_IAuthenticationOperation3_CallbackNotFired()
+        {
+            // Arrange
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithAuthority($"https://login.microsoftonline.com/123456-1234-2345-1234561234")
+                    .WithHttpManager(httpManager)
+                    .BuildConcrete();
+
+                var fakeOp = new FakeAuthOp3();
+
+                // Act — NO WithMtlsProofOfPossession, just the IAuthOp3 extension
+                await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithAuthenticationExtension(new MsalAuthenticationExtension
+                    {
+                        AuthenticationOperation = fakeOp
+                    })
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert — callback should NOT fire when mTLS POP is not requested
+                Assert.AreEqual(0, fakeOp.CallbackInvocationCount,
+                    "Without WithMtlsProofOfPossession, AfterCredentialEvaluation must not be called");
+                Assert.IsNull(fakeOp.LastCertificate);
+                Assert.AreEqual("Bearer", fakeOp.AccessTokenType,
+                    "Without mTLS POP, operation should stay in Bearer mode");
+            }
+        }
+
         #endregion
 
-        #region IAuthenticationOperation3 Unit Tests
+        #region Unit Tests — AfterCredentialEvaluation behavior
 
         [TestMethod]
-        public void IAuthenticationOperation3_AccessTokenType_AdaptsBasedOnCert()
+        public void AfterCredentialEvaluation_InjectsCert_OperationAdapts()
         {
             // Arrange
-            var mockOp = new MockAuthenticationOperation3();
+            var fakeOp = new FakeAuthOp3();
 
-            // Act & Assert — before cert injection
-            Assert.AreEqual("Bearer", mockOp.AccessTokenType,
-                "Without cert, AccessTokenType should be Bearer");
+            // Assert — before callback
+            Assert.AreEqual("Bearer", fakeOp.AccessTokenType);
+            Assert.AreEqual(0, fakeOp.CallbackInvocationCount);
 
-            // Act — inject cert
-            mockOp.MtlsCertificate = s_testCertificate;
+            // Act
+            fakeOp.AfterCredentialEvaluation(new TokenAcquisitionContext
+            {
+                MtlsCertificate = s_testCertificate
+            });
 
-            // Assert — after cert injection
-            Assert.AreEqual("mtls_pop", mockOp.AccessTokenType,
-                "With cert, AccessTokenType should be mtls_pop");
+            // Assert — after callback
+            Assert.AreEqual(1, fakeOp.CallbackInvocationCount);
+            Assert.AreEqual("mtls_pop", fakeOp.AccessTokenType);
+            Assert.AreEqual("mtls_pop", fakeOp.AuthorizationHeaderPrefix);
+            Assert.IsTrue(fakeOp.GetTokenRequestParams().ContainsKey("token_type"));
+            Assert.AreEqual("mtls_pop", fakeOp.GetTokenRequestParams()["token_type"]);
         }
 
         [TestMethod]
-        public void IAuthenticationOperation3_GetTokenRequestParams_IncludesTokenTypeWhenCertPresent()
+        public void AfterCredentialEvaluation_SetsBindingCertOnFormatResult()
         {
             // Arrange
-            var mockOp = new MockAuthenticationOperation3();
-
-            // Act & Assert — before cert injection
-            var paramsBefore = mockOp.GetTokenRequestParams();
-            Assert.IsFalse(paramsBefore.ContainsKey("token_type"),
-                "Without cert, token_type should not be in params");
-
-            // Act — inject cert
-            mockOp.MtlsCertificate = s_testCertificate;
-            var paramsAfter = mockOp.GetTokenRequestParams();
-
-            // Assert — after cert injection
-            Assert.IsTrue(paramsAfter.ContainsKey("token_type"));
-            Assert.AreEqual("mtls_pop", paramsAfter["token_type"]);
-        }
-
-        [TestMethod]
-        public void IAuthenticationOperation3_FormatResult_SetsBindingCertificate()
-        {
-            // Arrange
-            var mockOp = new MockAuthenticationOperation3();
-            mockOp.MtlsCertificate = s_testCertificate;
+            var fakeOp = new FakeAuthOp3();
+            fakeOp.AfterCredentialEvaluation(new TokenAcquisitionContext
+            {
+                MtlsCertificate = s_testCertificate
+            });
             var authResult = new AuthenticationResult();
 
             // Act
-            mockOp.FormatResult(authResult);
+            fakeOp.FormatResult(authResult);
 
             // Assert
-            Assert.AreSame(s_testCertificate, authResult.BindingCertificate,
-                "FormatResult should set BindingCertificate when mTLS cert is injected");
+            Assert.AreSame(s_testCertificate, authResult.BindingCertificate);
         }
 
         [TestMethod]
-        public void IAuthenticationOperation3_FormatResult_NoBindingCertWithoutMtls()
+        public void AfterCredentialEvaluation_NotCalled_BearerDefaults()
         {
             // Arrange
-            var mockOp = new MockAuthenticationOperation3();
+            var fakeOp = new FakeAuthOp3();
             var authResult = new AuthenticationResult();
 
             // Act
-            mockOp.FormatResult(authResult);
+            fakeOp.FormatResult(authResult);
 
             // Assert
-            Assert.IsNull(authResult.BindingCertificate,
-                "FormatResult should NOT set BindingCertificate when no mTLS cert");
+            Assert.AreEqual("Bearer", fakeOp.AccessTokenType);
+            Assert.AreEqual("Bearer", fakeOp.AuthorizationHeaderPrefix);
+            Assert.IsFalse(fakeOp.GetTokenRequestParams().ContainsKey("token_type"));
+            Assert.IsNull(authResult.BindingCertificate);
         }
 
         [TestMethod]
-        public void IAuthenticationOperation3_AuthorizationHeaderPrefix_AdaptsBasedOnCert()
+        public void TokenAcquisitionContext_ExposesExpectedProperties()
         {
-            // Arrange
-            var mockOp = new MockAuthenticationOperation3();
+            // Arrange & Act
+            var context = new TokenAcquisitionContext
+            {
+                MtlsCertificate = s_testCertificate
+            };
 
-            // Assert — before cert
-            Assert.AreEqual("Bearer", mockOp.AuthorizationHeaderPrefix);
-
-            // Act
-            mockOp.MtlsCertificate = s_testCertificate;
-
-            // Assert — after cert
-            Assert.AreEqual("mtls_pop", mockOp.AuthorizationHeaderPrefix);
+            // Assert
+            Assert.AreSame(s_testCertificate, context.MtlsCertificate);
         }
 
         #endregion
 
-        #region Mock IAuthenticationOperation3
+        #region Test Fake
 
         /// <summary>
-        /// Mock implementation of IAuthenticationOperation3 that simulates
-        /// CDT's behavior of adapting to mTLS POP when cert is injected.
+        /// Fake implementation of IAuthenticationOperation3 that tracks
+        /// AfterCredentialEvaluation invocations and adapts behavior based on cert.
         /// </summary>
-        private class MockAuthenticationOperation3 : IAuthenticationOperation3
+        private sealed class FakeAuthOp3 : IAuthenticationOperation3
         {
-            public X509Certificate2 InjectedCertificate { get; private set; }
+            public int CallbackInvocationCount { get; private set; }
+            public X509Certificate2 LastCertificate { get; private set; }
 
-            public X509Certificate2 MtlsCertificate
+            public void AfterCredentialEvaluation(TokenAcquisitionContext context)
             {
-                set => InjectedCertificate = value;
+                CallbackInvocationCount++;
+                LastCertificate = context.MtlsCertificate;
             }
 
-            public string AccessTokenType => InjectedCertificate is not null ? "mtls_pop" : "Bearer";
-
-            public string AuthorizationHeaderPrefix => InjectedCertificate is not null ? "mtls_pop" : "Bearer";
-
+            public string AccessTokenType => LastCertificate is not null ? "mtls_pop" : "Bearer";
+            public string AuthorizationHeaderPrefix => LastCertificate is not null ? "mtls_pop" : "Bearer";
             public string KeyId => "test-key-id";
-
             public int TelemetryTokenType => 4;
 
             public IReadOnlyDictionary<string, string> GetTokenRequestParams()
@@ -238,7 +361,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     { "req_ds_cnf", "test-cnf-value" }
                 };
 
-                if (InjectedCertificate is not null)
+                if (LastCertificate is not null)
                 {
                     dict["token_type"] = "mtls_pop";
                 }
@@ -248,9 +371,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             public void FormatResult(AuthenticationResult authenticationResult)
             {
-                if (InjectedCertificate is not null)
+                if (LastCertificate is not null)
                 {
-                    authenticationResult.BindingCertificate = InjectedCertificate;
+                    authenticationResult.BindingCertificate = LastCertificate;
                 }
             }
 
