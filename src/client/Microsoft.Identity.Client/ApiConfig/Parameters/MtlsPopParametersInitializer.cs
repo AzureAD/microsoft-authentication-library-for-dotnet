@@ -155,7 +155,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
             if (serviceBundle.Config.Authority.AuthorityInfo.AuthorityType == AuthorityType.Aad)
             {
                 string tenant = AuthorityInfo.GetFirstPathSegment(serviceBundle.Config.Authority.AuthorityInfo.CanonicalAuthority);
-                if (AadAuthority.IsCommonOrganizationsOrConsumersTenant(tenant))
+                if (AadAuthority.IsCommonOrOrganizationsTenant(tenant))
                 {
                     throw new MsalClientException(
                         MsalError.MissingTenantedAuthority,

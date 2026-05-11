@@ -460,19 +460,19 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
 
         /// <summary>
         /// Regression test for https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5951
-        /// When WithTenantId is called with the MSA GUID at request level, it should be honored regardless
-        /// of the app-level authority, because the GUID is a real tenant ID (not a tenantless alias).
-        /// The "consumers" string alias is a different case and is still ignored at request level.
+        /// When WithTenantId is called with a real tenant (MSA GUID or "consumers" alias) at request level,
+        /// it should be honored regardless of the app-level authority. Only "common" and "organizations"
+        /// are truly tenantless and are ignored at request level.
         /// </summary>
         [TestMethod]
         [DataRow(TestConstants.AuthorityUtidTenant, TestConstants.AuthorityConsumerTidTenant, TestConstants.MsaTenantId,
             DisplayName = "AppSpecificTenant_RequestMsaGuid_MsaGuidWins")]
         [DataRow(TestConstants.AuthorityCommonTenant, TestConstants.AuthorityConsumerTidTenant, TestConstants.MsaTenantId,
             DisplayName = "AppCommon_RequestMsaGuid_MsaGuidWins")]
-        [DataRow(TestConstants.AuthorityUtidTenant, TestConstants.AuthorityConsumersTenant, TestConstants.Utid,
-            DisplayName = "AppSpecificTenant_RequestConsumersAlias_AppTenantWins")]
-        [DataRow(TestConstants.AuthorityCommonTenant, TestConstants.AuthorityConsumersTenant, "common",
-            DisplayName = "AppCommon_RequestConsumersAlias_CommonUsed")]
+        [DataRow(TestConstants.AuthorityUtidTenant, TestConstants.AuthorityConsumersTenant, TestConstants.Consumers,
+            DisplayName = "AppSpecificTenant_RequestConsumersAlias_ConsumersWins")]
+        [DataRow(TestConstants.AuthorityCommonTenant, TestConstants.AuthorityConsumersTenant, TestConstants.Consumers,
+            DisplayName = "AppCommon_RequestConsumersAlias_ConsumersWins")]
         [DataRow(TestConstants.AuthorityConsumerTidTenant, null, TestConstants.MsaTenantId,
             DisplayName = "AppMsaGuid_NoRequestOverride_MsaGuidUsed")]
         public void WithTenantId_ConsumerGuid_IsHonoredAtRequestLevel(

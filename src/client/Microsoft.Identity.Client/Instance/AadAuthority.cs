@@ -23,7 +23,6 @@ namespace Microsoft.Identity.Client.Instance
           {
                 Constants.Common,
                 Constants.Organizations,
-                Constants.Consumers,
           },
           StringComparer.OrdinalIgnoreCase);
 
@@ -51,19 +50,6 @@ namespace Microsoft.Identity.Client.Instance
                    tenantId.Equals(Constants.MsaTenantId, StringComparison.OrdinalIgnoreCase);
         }
 
-        internal bool IsCommonOrganizationsOrConsumersTenant()
-        {
-            return IsCommonOrganizationsOrConsumersTenant(TenantId);
-        }
-
-        internal static bool IsCommonOrganizationsOrConsumersTenant(string tenantId)
-        {
-            // The MSA GUID (9188040d-...) is a real tenant — only the "consumers" string alias is tenantless.
-            return !string.IsNullOrEmpty(tenantId) &&
-                (IsCommonOrOrganizationsTenant(tenantId) ||
-                 tenantId.Equals(Constants.Consumers, StringComparison.OrdinalIgnoreCase));
-        }
-
         internal bool IsOrganizationsTenantWithMsaPassthroughEnabled(bool isMsaPassthrough, string accountTenantId)
         {
             return accountTenantId!= null && isMsaPassthrough && TenantId.Equals(Constants.Organizations, StringComparison.OrdinalIgnoreCase) &&
@@ -85,7 +71,7 @@ namespace Microsoft.Identity.Client.Instance
         internal override string GetTenantedAuthority(string tenantId, bool forceSpecifiedTenant = false)
         {
             if (!string.IsNullOrEmpty(tenantId) &&
-                (forceSpecifiedTenant || IsCommonOrganizationsOrConsumersTenant()))
+                (forceSpecifiedTenant || IsCommonOrOrganizationsTenant()))
             {
                 var authorityUri = AuthorityInfo.CanonicalAuthority;
 
