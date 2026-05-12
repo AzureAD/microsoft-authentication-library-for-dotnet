@@ -129,16 +129,19 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private void LogSuccessTelemetryToOtel(AuthenticationResult authenticationResult, ApiEvent apiEvent, long durationInUs)
         {
+            CacheLevel cacheLevel = GetCacheLevel(authenticationResult);
+
             // Log metrics
             ServiceBundle.PlatformProxy.OtelInstrumentation.LogSuccessMetrics(
                         ServiceBundle.PlatformProxy.GetProductName(),
                         apiEvent.ApiId,
                         apiEvent.CallerSdkApiId,
                         apiEvent.CallerSdkVersion,
-                        GetCacheLevel(authenticationResult),
+                        cacheLevel,
                         durationInUs,
                         authenticationResult.AuthenticationResultMetadata,
-                        AuthenticationRequestParameters.RequestContext.Logger);
+                        AuthenticationRequestParameters.RequestContext.Logger,
+                        authenticationResult.ExpiresOn);
         }
 
         private void LogFailureTelemetryToOtel(string errorCodeToLog, ApiEvent apiEvent, CacheRefreshReason cacheRefreshReason, string rawStsErrorCode = null)
