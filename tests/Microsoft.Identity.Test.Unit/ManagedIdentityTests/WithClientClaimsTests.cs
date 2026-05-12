@@ -3,8 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Net.Http;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
@@ -76,6 +74,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 SetEnvironmentVariables(ManagedIdentitySource.Imds, ManagedIdentityTests.ImdsEndpoint);
                 var mi = ManagedIdentityApplicationBuilder
                     .Create(ManagedIdentityId.SystemAssigned)
+                    .WithExperimentalFeatures(true)
                     .Build();
 
                 // Act
@@ -102,6 +101,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 SetEnvironmentVariables(ManagedIdentitySource.Imds, ManagedIdentityTests.ImdsEndpoint);
                 var mi = ManagedIdentityApplicationBuilder
                     .Create(ManagedIdentityId.SystemAssigned)
+                    .WithExperimentalFeatures(true)
                     .Build();
 
                 // Act
@@ -124,6 +124,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 SetEnvironmentVariables(ManagedIdentitySource.Imds, ManagedIdentityTests.ImdsEndpoint);
                 var mi = ManagedIdentityApplicationBuilder
                     .Create(ManagedIdentityId.SystemAssigned)
+                    .WithExperimentalFeatures(true)
                     .Build();
 
                 // Act
@@ -156,6 +157,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var mi = ManagedIdentityApplicationBuilder
                     .Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager)
+                    .WithExperimentalFeatures(true)
+
                     .Build();
 
                 // The mock handler is set up to expect claims=<normalizedNspClaims> in the query string.
@@ -192,6 +195,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var mi = ManagedIdentityApplicationBuilder
                     .Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager)
+                    .WithExperimentalFeatures(true)
+
                     .Build();
 
                 // Only one network mock — second call must come from cache.
@@ -236,6 +241,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var mi = ManagedIdentityApplicationBuilder
                     .Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager)
+                    .WithExperimentalFeatures(true)
+
                     .Build();
 
                 string normalizedClaims = Client.Internal.ClaimsHelper.NormalizeClaimsJson(NspClaims);
@@ -278,6 +285,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var mi = ManagedIdentityApplicationBuilder
                     .Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager)
+                    .WithExperimentalFeatures(true)
+
                     .Build();
 
                 string normalizedNsp = Client.Internal.ClaimsHelper.NormalizeClaimsJson(NspClaims);
@@ -330,6 +339,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var mi = ManagedIdentityApplicationBuilder
                     .Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager)
+                    .WithExperimentalFeatures(true)
+
                     .Build();
 
                 string normalizedClaims = Client.Internal.ClaimsHelper.NormalizeClaimsJson(NspClaims);
@@ -371,6 +382,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var mi = ManagedIdentityApplicationBuilder
                     .Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager)
+                    .WithExperimentalFeatures(true)
+
                     .Build();
 
                 // Standard mock handler with no claims expectation
@@ -407,6 +420,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithAuthority(AzureCloudInstance.AzurePublic, TestConstants.Utid)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(harness.HttpManager)
+                    .WithExperimentalFeatures(true)
                     .BuildConcrete();
 
                 string normalizedClaims = Client.Internal.ClaimsHelper.NormalizeClaimsJson(NspClaims);
@@ -445,6 +459,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithAuthority(AzureCloudInstance.AzurePublic, TestConstants.Utid)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(harness.HttpManager)
+                    .WithExperimentalFeatures(true)
                     .BuildConcrete();
 
                 string normalizedClaims = Client.Internal.ClaimsHelper.NormalizeClaimsJson(NspClaims);
@@ -486,6 +501,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithAuthority(AzureCloudInstance.AzurePublic, TestConstants.Utid)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(harness.HttpManager)
+                    .WithExperimentalFeatures(true)
                     .BuildConcrete();
 
                 string normalizedNsp = Client.Internal.ClaimsHelper.NormalizeClaimsJson(NspClaims);
@@ -532,6 +548,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithAuthority(AzureCloudInstance.AzurePublic, TestConstants.Utid)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(harness.HttpManager)
+                    .WithExperimentalFeatures(true)
                     .BuildConcrete();
 
                 string normalizedClaims = Client.Internal.ClaimsHelper.NormalizeClaimsJson(NspClaims);
@@ -573,6 +590,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithAuthority(AzureCloudInstance.AzurePublic, TestConstants.Utid)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(harness.HttpManager)
+                    .WithExperimentalFeatures(true)
                     .BuildConcrete();
 
                 string normalizedClientClaims = Client.Internal.ClaimsHelper.NormalizeClaimsJson(NspClaims);
@@ -617,6 +635,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithAuthority(AzureCloudInstance.AzurePublic, TestConstants.Utid)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(harness.HttpManager)
+                    .WithExperimentalFeatures(true)
                     .BuildConcrete();
 
                 // Standard success response — no body parameter expectation
@@ -647,6 +666,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 SetEnvironmentVariables(ManagedIdentitySource.Imds, ManagedIdentityTests.ImdsEndpoint);
                 var mi = ManagedIdentityApplicationBuilder
                     .Create(ManagedIdentityId.SystemAssigned)
+                    .WithExperimentalFeatures(true)
                     .Build();
 
                 // Act & Assert
@@ -659,3 +679,5 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
     }
 }
+
+

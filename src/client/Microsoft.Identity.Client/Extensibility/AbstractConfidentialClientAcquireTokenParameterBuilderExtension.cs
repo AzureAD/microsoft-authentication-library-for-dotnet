@@ -40,15 +40,14 @@ namespace Microsoft.Identity.Client.Extensibility
                 return (T)builder;
             }
 
+            builder.ValidateUseOfExperimentalFeature();
+
             string normalized = ClaimsHelper.NormalizeClaimsJson(claimsJson);
             builder.CommonParameters.ClientClaims = normalized;
 
-            var cacheKey = new SortedList<string, Func<CancellationToken, Task<string>>>
-            {
-                { "client_claims", _ => Task.FromResult(normalized) }
-            };
-
-            WithAdditionalCacheKeyComponents(builder, cacheKey);
+            // Use indexer (not SortedList.Add) so repeated calls are last-write-wins rather than throwing.
+            builder.CommonParameters.CacheKeyComponents ??= new SortedList<string, Func<CancellationToken, Task<string>>>();
+            builder.CommonParameters.CacheKeyComponents["client_claims"] = _ => Task.FromResult(normalized);
 
             return (T)builder;
         }

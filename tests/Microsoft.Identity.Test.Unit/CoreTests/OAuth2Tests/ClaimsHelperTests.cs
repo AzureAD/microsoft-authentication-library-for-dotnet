@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Text.Json;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
@@ -178,6 +179,105 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
 
             // Assert — empty string is treated as null, so first is returned
             Assert.AreEqual(claims1, result);
+        }
+
+        [TestMethod]
+        public void MergeClaimsObjects_InvalidJson_ThrowsMsalClientException()
+        {
+            // Arrange — one side is invalid JSON
+            string valid = @"{""a"":1}";
+            string invalid = "not-json";
+
+            // Act & Assert
+            MsalClientException ex = Assert.ThrowsExactly<MsalClientException>(
+                () => ClaimsHelper.MergeClaimsObjects(invalid, valid));
+
+            Assert.AreEqual(MsalError.InvalidJsonClaimsFormat, ex.ErrorCode);
+        }
+
+        #endregion
+
+        #region OIDC §5.5 canonicalization edge cases
+
+        [TestMethod]
+        public void NormalizeClaimsJson_ArrayElementOrderIsPreserved()
+        {
+            // Arrange — OIDC §5.5 acr.values array; element order is semantically meaningful
+            string input = @"{""id_token"":{""acr"":{""values"":[""urn:mace:incommon:iap:bronze"",""urn:mace:incommon:iap:silver""]}}}";
+
+            // Act
+            string result = ClaimsHelper.NormalizeClaimsJson(input);
+            string result2 = ClaimsHelper.NormalizeClaimsJson(result);
+
+            // Assert — array order must be preserved after normalization
+            Assert.IsLessThan(result.IndexOf("silver", StringComparison.Ordinal), result.IndexOf("bronze", StringComparison.Ordinal),
+                "Array element order must be preserved — bronze must come before silver.");
+
+            // Idempotency: normalizing twice gives the same result
+            Assert.AreEqual(result, result2, "NormalizeClaimsJson must be idempotent.");
+        }
+
+        [TestMethod]
+        public void NormalizeClaimsJson_NullClaimValue_IsPreserved()
+        {
+            // Arrange — voluntary claim with null value (OIDC §5.5)
+            string input = @"{""userinfo"":{""picture"":null}}";
+
+            // Act
+            string result = ClaimsHelper.NormalizeClaimsJson(input);
+
+            // Assert
+            using var doc = System.Text.Json.JsonDocument.Parse(result);
+            var picture = doc.RootElement.GetProperty("userinfo").GetProperty("picture");
+            Assert.AreEqual(System.Text.Json.JsonValueKind.Null, picture.ValueKind, "null claim value must be preserved.");
+        }
+
+        [TestMethod]
+        public void NormalizeClaimsJson_Idempotent()
+        {
+            // Arrange — complex real-world claims value
+            string input = @"{""z"":{""essential"":true},""a"":{""values"":[""v2"",""v1""]},""m"":null}";
+
+            // Act
+            string once = ClaimsHelper.NormalizeClaimsJson(input);
+            string twice = ClaimsHelper.NormalizeClaimsJson(once);
+
+            // Assert
+            Assert.AreEqual(once, twice, "Normalize(Normalize(x)) must equal Normalize(x).");
+        }
+
+        [TestMethod]
+        public void NormalizeClaimsJson_UriNamedClaim_IsHandled()
+        {
+            // Arrange — URI-named claim (valid per OIDC §5.5)
+            string input = @"{""http://example.info/claims/groups"":{""essential"":true}}";
+
+            // Act
+            string result = ClaimsHelper.NormalizeClaimsJson(input);
+
+            // Assert — round-trips cleanly
+            using var doc = System.Text.Json.JsonDocument.Parse(result);
+            Assert.IsTrue(doc.RootElement.TryGetProperty("http://example.info/claims/groups", out _),
+                "URI-named claim key must survive normalization.");
+        }
+
+        [TestMethod]
+        public void NormalizeClaimsJson_CombinedUserinfoAndIdToken_BothKeysPresent()
+        {
+            // Arrange — canonical OIDC §5.5 shape with both top-level sections
+            string input = @"{""userinfo"":{""given_name"":{""essential"":true},""email"":null},""id_token"":{""auth_time"":{""essential"":true},""acr"":{""values"":[""urn:mace:incommon:iap:silver""]}}}";
+
+            // Act
+            string result = ClaimsHelper.NormalizeClaimsJson(input);
+
+            // Assert — both top-level keys survive, sorted (id_token < userinfo)
+            using var doc = System.Text.Json.JsonDocument.Parse(result);
+            Assert.IsTrue(doc.RootElement.TryGetProperty("userinfo", out _), "userinfo must be present.");
+            Assert.IsTrue(doc.RootElement.TryGetProperty("id_token", out _), "id_token must be present.");
+
+            // id_token sorts before userinfo
+            Assert.IsLessThan(result.IndexOf("userinfo", StringComparison.Ordinal), result.IndexOf("id_token", StringComparison.Ordinal),
+                "id_token must appear before userinfo after ordinal key sort.");
         }
 
         #endregion

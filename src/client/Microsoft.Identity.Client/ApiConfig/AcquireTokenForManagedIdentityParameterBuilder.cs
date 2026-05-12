@@ -98,6 +98,8 @@ namespace Microsoft.Identity.Client
                 return this;
             }
 
+            ValidateUseOfExperimentalFeature();
+
             string normalized = ClaimsHelper.NormalizeClaimsJson(claimsJson);
             CommonParameters.ClientClaims = normalized;
 

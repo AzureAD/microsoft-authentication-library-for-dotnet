@@ -39,9 +39,11 @@ namespace Microsoft.Identity.Client.Internal
             }
             catch (JsonException ex)
             {
+                // Do not include the raw claimsJson in the message — it may contain sensitive data.
                 throw new MsalClientException(
                     MsalError.InvalidJsonClaimsFormat,
-                    MsalErrorMessage.InvalidJsonClaimsFormat(claimsJson),
+                    "The client_claims value is not valid JSON. Inspect the inner exception for parsing details. " +
+                    "See https://openid.net/specs/openid-connect-core-1_0.html#ClaimsParameter.",
                     ex);
             }
         }
@@ -54,10 +56,20 @@ namespace Microsoft.Identity.Client.Internal
             if (string.IsNullOrEmpty(claims1)) return claims2;
             if (string.IsNullOrEmpty(claims2)) return claims1;
 
-            JObject obj1 = JsonHelper.ParseIntoJsonObject(claims1);
-            JObject obj2 = JsonHelper.ParseIntoJsonObject(claims2);
-            JObject merged = JsonHelper.Merge(obj1, obj2);
-            return JsonHelper.JsonObjectToString(merged);
+            try
+            {
+                JObject obj1 = JsonHelper.ParseIntoJsonObject(claims1);
+                JObject obj2 = JsonHelper.ParseIntoJsonObject(claims2);
+                JObject merged = JsonHelper.Merge(obj1, obj2);
+                return JsonHelper.JsonObjectToString(merged);
+            }
+            catch (JsonException ex)
+            {
+                throw new MsalClientException(
+                    MsalError.InvalidJsonClaimsFormat,
+                    MsalErrorMessage.InvalidJsonClaimsFormat(claims1),
+                    ex);
+            }
         }
 
         private static JObject SortJsonObjectKeys(JObject obj)
