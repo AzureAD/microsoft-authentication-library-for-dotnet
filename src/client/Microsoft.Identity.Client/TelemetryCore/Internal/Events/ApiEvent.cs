@@ -42,6 +42,9 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
             // UserFIC
             AcquireTokenByUserFederatedIdentityCredential = 1019,
 
+            // Agent identity (FMI + UserFIC orchestration)
+            AcquireTokenForAgent = 1020,
+
             // "2002" is reserved for 1p OTEL signal that telemetry is disabled
         }
 

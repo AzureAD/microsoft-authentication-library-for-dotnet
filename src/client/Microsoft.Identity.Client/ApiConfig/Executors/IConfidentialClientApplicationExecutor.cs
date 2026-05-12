@@ -42,5 +42,10 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenCommonParameters commonParameters,
             AcquireTokenByUserFederatedIdentityCredentialParameters userFicParameters,
             CancellationToken cancellationToken);
+
+        Task<AuthenticationResult> ExecuteAsync(
+            AcquireTokenCommonParameters commonParameters,
+            AcquireTokenForAgentParameters agentParameters,
+            CancellationToken cancellationToken);
     }
 }
