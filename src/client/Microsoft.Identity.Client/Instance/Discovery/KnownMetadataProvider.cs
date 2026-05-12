@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Utils;
 
@@ -17,6 +18,15 @@ namespace Microsoft.Identity.Client.Instance.Discovery
 
         private static readonly ISet<string> s_knownEnvironments = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         private static readonly ISet<string> s_knownPublicEnvironments = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        // Shape check for the {region} label in a regional host, e.g. "westus2" in
+        // "westus2.login.microsoft.com". DNS-label rules per RFC 1035/1123:
+        // lowercase alphanumeric + optional internal hyphens, max 63 chars.
+        // Uri.Host is already lowercased, so IgnoreCase isn't needed. The real allow-list
+        // is the base-host lookup in TryResolveKnownCloud.
+        private static readonly Regex s_regionPrefixRegex = new Regex(
+            "^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$",
+            RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
         static KnownMetadataProvider()
         {
@@ -146,6 +156,60 @@ namespace Microsoft.Identity.Client.Instance.Discovery
         public static bool IsKnownEnvironment(string environment)
         {
             return s_knownEnvironments.Contains(environment);
+        }
+
+        /// <summary>
+        /// True only when both hosts resolve to the same Microsoft sovereign cloud.
+        /// e.g. (login.microsoftonline.com, sts.windows.net) → true; (Public, China) → false;
+        /// either host unknown → false. Regional variants share their base host's cloud.
+        /// </summary>
+        internal static bool AreInSameCloud(string hostA, string hostB)
+        {
+            if (!TryResolveKnownCloud(hostA, out InstanceDiscoveryMetadataEntry entryA))
+            {
+                return false;
+            }
+
+            if (!TryResolveKnownCloud(hostB, out InstanceDiscoveryMetadataEntry entryB))
+            {
+                return false;
+            }
+
+            return ReferenceEquals(entryA, entryB);
+        }
+
+        // Exact lookup, else strip a single well-formed regional prefix ("westus2.") and
+        // re-lookup the base host. Anything else (multi-label, bad shape) → false.
+        // Returns the singleton entry per cloud (see ctor); callers may compare via ReferenceEquals.
+        internal static bool TryResolveKnownCloud(string host, out InstanceDiscoveryMetadataEntry entry)
+        {
+            if (string.IsNullOrEmpty(host))
+            {
+                entry = null;
+                return false;
+            }
+
+            if (s_knownEntries.TryGetValue(host, out entry))
+            {
+                return true;
+            }
+
+            int firstDot = host.IndexOf('.');
+            if (firstDot > 0 && firstDot < host.Length - 1)
+            {
+                string regionPrefix = host.Substring(0, firstDot);
+                if (s_regionPrefixRegex.IsMatch(regionPrefix))
+                {
+                    string baseHost = host.Substring(firstDot + 1);
+                    if (s_knownEntries.TryGetValue(baseHost, out entry))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            entry = null;
+            return false;
         }
 
         public static bool TryGetKnownEnviromentPreferredNetwork(string environment, out string preferredNetworkEnvironment)

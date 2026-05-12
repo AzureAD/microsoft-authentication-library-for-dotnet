@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -51,7 +52,16 @@ namespace Microsoft.Identity.Client.Instance.Oidc
 
                 // Validate the issuer before caching the configuration
                 requestContext.Logger.Verbose(() => $"[OIDC Discovery] Validating issuer: {configuration.Issuer} against authority: {authority}");
-                ValidateIssuer(new Uri(authority), configuration.Issuer);
+                Uri authorityUri = new Uri(authority);
+                ValidateIssuer(authorityUri, configuration.Issuer);
+
+                // Endpoint same-cloud check: when the configured authority is a known Microsoft
+                // host, both token_endpoint and authorization_endpoint MUST resolve to the SAME
+                // sovereign cloud. Catches a tampered discovery doc that swaps the endpoint to
+                // a different MS cloud OR to an unrelated host. Runs BEFORE the cache write so
+                // a bad doc never gets cached.
+                EnsureKnownAuthorityEndpointSameCloud(authorityUri, configuration.TokenEndpoint, "token_endpoint", requestContext.Logger);
+                EnsureKnownAuthorityEndpointSameCloud(authorityUri, configuration.AuthorizationEndpoint, "authorization_endpoint", requestContext.Logger);
 
                 s_cache[authority] = configuration;
                 requestContext.Logger.Verbose(() => $"[OIDC Discovery] OIDC discovery retrieved metadata from the network for {authority}");
@@ -77,54 +87,43 @@ namespace Microsoft.Identity.Client.Instance.Oidc
         }
 
         /// <summary>
-        /// Validates that the issuer in the OIDC metadata matches the authority.
-        /// An issuer is valid if any of the following is true:
-        /// 1. Same scheme and host as the authority (path can differ)
-        /// 2. The issuer host is a well-known Microsoft authority host (HTTPS only)
-        /// 3. The issuer host is a regional variant of a well-known host (HTTPS only)
-        /// 4. CIAM-specific: the issuer matches {tenant}.ciamlogin.com patterns
+        /// Accepts an issuer if any of:
+        ///   1. Scheme + host match the authority (path may differ).
+        ///      e.g. authority <c>login.microsoftonline.com/contoso</c>, issuer <c>login.microsoftonline.com/contoso/v2.0</c>.
+        ///   2. HTTPS issuer hosted on a known Microsoft cloud, AND either:
+        ///      2a. Authority host is a custom domain (federation case, issue #5927).
+        ///          e.g. authority <c>clientlogin.test.parentpay.com/...</c>, issuer <c>login.microsoftonline.com/...</c>.
+        ///      2b. Authority host is also a known Microsoft host in the SAME sovereign cloud.
+        ///          Rejects e.g. Public authority + China issuer.
+        ///   3. CIAM: issuer matches <c>{tenant}.ciamlogin.com</c>.
         /// </summary>
-        /// <param name="authority">The authority URL.</param>
-        /// <param name="issuer">The issuer from the OIDC metadata - the single source of truth.</param>
-        /// <exception cref="MsalServiceException">Thrown when issuer validation fails.</exception>
         internal static void ValidateIssuer(Uri authority, string issuer)
         {
-            // Normalize both URLs to handle trailing slash differences
-            string normalizedAuthority = authority.AbsoluteUri.TrimEnd('/');
             string normalizedIssuer = issuer?.TrimEnd('/');
 
-            // OIDC validation: if the issuer's scheme and host match the authority's, consider it valid
             if (!string.IsNullOrEmpty(issuer) && Uri.TryCreate(issuer, UriKind.Absolute, out Uri issuerUri))
             {
-                // Rule 1: Same scheme and host
+                // Rule 1
                 if (string.Equals(authority.Scheme, issuerUri.Scheme, StringComparison.OrdinalIgnoreCase) &&
                     string.Equals(authority.Host, issuerUri.Host, StringComparison.OrdinalIgnoreCase))
                 {
                     return;
                 }
 
-                // Rule 2: The issuer host is a well-known Microsoft authority host (HTTPS only)
+                // Rule 2: known-MS issuer over HTTPS. Single lookup per host (no double-resolve).
                 if (string.Equals(issuerUri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase) &&
-                    KnownMetadataProvider.IsKnownEnvironment(issuerUri.Host))
+                    KnownMetadataProvider.TryResolveKnownCloud(issuerUri.Host, out InstanceDiscoveryMetadataEntry issuerEntry))
                 {
-                    return;
-                }
-
-                // Rule 3: The issuer host is a regional variant ({region}.{host}) of a well-known host
-                // (HTTPS only). E.g. westus2.login.microsoft.com
-                if (string.Equals(issuerUri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
-                {
-                    string issuerHost = issuerUri.Host;
-                    int firstDot = issuerHost.IndexOf('.');
-                    if (firstDot > 0 && firstDot < issuerHost.Length - 1)
+                    // 2a: custom-domain authority federating with Microsoft (#5927)
+                    if (!KnownMetadataProvider.TryResolveKnownCloud(authority.Host, out InstanceDiscoveryMetadataEntry authorityEntry))
                     {
-                        string hostWithoutRegion = issuerHost.Substring(firstDot + 1);
+                        return;
+                    }
 
-                        // Regional variant of a well-known host (e.g. westus2.login.microsoft.com)
-                        if (KnownMetadataProvider.IsKnownEnvironment(hostWithoutRegion))
-                        {
-                            return;
-                        }
+                    // 2b: known-MS authority must share the issuer's cloud (singleton entry per cloud)
+                    if (ReferenceEquals(issuerEntry, authorityEntry))
+                    {
+                        return;
                     }
                 }
             }
@@ -166,6 +165,42 @@ namespace Microsoft.Identity.Client.Instance.Oidc
             throw new MsalServiceException(
                 MsalError.AuthorityValidationFailed,
                 string.Format(MsalErrorMessage.IssuerValidationFailed, authority, issuer));
+        }
+
+        // Defense-in-depth endpoint check. When the configured authority is itself a known
+        // Microsoft cloud host, every endpoint published by the discovery doc MUST resolve to
+        // the same sovereign cloud. Custom-domain authorities (federation, third-party IdPs)
+        // are not constrained: the caller has chosen to trust that domain.
+        // e.g. authority=login.microsoftonline.com (Public)
+        //      token_endpoint=login.chinacloudapi.cn (China)        -> throw
+        //      token_endpoint=attacker.example.com                  -> throw
+        //      token_endpoint=sts.windows.net (Public alias)        -> pass
+        private static void EnsureKnownAuthorityEndpointSameCloud(Uri authority, string endpoint, string endpointName, ILoggerAdapter logger)
+        {
+            if (string.IsNullOrEmpty(endpoint) || !Uri.TryCreate(endpoint, UriKind.Absolute, out Uri endpointUri))
+            {
+                return;
+            }
+
+            if (!KnownMetadataProvider.TryResolveKnownCloud(authority.Host, out InstanceDiscoveryMetadataEntry authorityEntry))
+            {
+                return;
+            }
+
+            if (!KnownMetadataProvider.TryResolveKnownCloud(endpointUri.Host, out InstanceDiscoveryMetadataEntry endpointEntry) ||
+                !ReferenceEquals(authorityEntry, endpointEntry))
+            {
+                string message = string.Format(
+                    CultureInfo.InvariantCulture,
+                    MsalErrorMessage.CrossCloudEndpointMismatch,
+                    authority.AbsoluteUri,
+                    endpointName,
+                    endpoint);
+
+                logger.Error("[OIDC Discovery] " + message);
+
+                throw new MsalServiceException(MsalError.CrossCloudEndpointMismatch, message);
+            }
         }
 
         // For testing purposes only

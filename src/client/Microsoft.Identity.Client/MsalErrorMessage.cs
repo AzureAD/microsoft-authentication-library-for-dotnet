@@ -473,5 +473,9 @@ namespace Microsoft.Identity.Client
         public const string InternalCacheDisabledNotSupportedForPublicClient =
             "CacheOptions.DisableInternalCacheOptions is not supported for public client applications. " +
             "This option is intended for confidential client flows where the application manages its own token cache.";
+
+        public const string CrossCloudEndpointMismatch =
+            "OIDC discovery for authority '{0}' returned a {1} '{2}' whose host is not in the same Microsoft sovereign cloud as the authority. " +
+            "MSAL refused to use that endpoint. Verify the OIDC discovery endpoint is not being intercepted and that the configured authority points at the correct sovereign cloud.";
     }
 }

@@ -1,0 +1,1 @@
+const Microsoft.Identity.Client.MsalError.CrossCloudEndpointMismatch = "cross_cloud_endpoint_mismatch" -> string

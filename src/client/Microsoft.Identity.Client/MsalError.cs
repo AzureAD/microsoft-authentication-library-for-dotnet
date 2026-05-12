@@ -1278,5 +1278,20 @@ namespace Microsoft.Identity.Client
         /// or use another interactive flow, as appropriate for your application.
         /// </summary>
         public const string InternalCacheDisabled = "internal_cache_disabled";
+
+        /// <summary>
+        /// <para>What happens?</para> An OIDC discovery document returned an endpoint
+        /// (<c>token_endpoint</c> or <c>authorization_endpoint</c>) whose host does not belong
+        /// to the same Microsoft sovereign cloud as the configured authority. MSAL refused to
+        /// use that endpoint because doing so would risk crossing a trust boundary (e.g. an
+        /// authority in the Public cloud being asked to POST credentials to a host in the China
+        /// or US Gov cloud, or to an unrelated host entirely).
+        /// <para>Mitigation</para> Verify the OIDC discovery endpoint is not being intercepted
+        /// (no rogue proxy, MITM, or DNS hijack) and that the configured authority points at the
+        /// correct sovereign cloud for your tenant. This check only fires when the configured
+        /// authority host is itself a recognized Microsoft cloud host; custom-domain OIDC
+        /// identity providers are not constrained.
+        /// </summary>
+        public const string CrossCloudEndpointMismatch = "cross_cloud_endpoint_mismatch";
     }
 }

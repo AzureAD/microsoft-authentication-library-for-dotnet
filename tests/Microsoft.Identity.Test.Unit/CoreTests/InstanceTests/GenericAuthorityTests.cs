@@ -469,6 +469,138 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             }
         }
 
+        // When the discovery document publishes a token_endpoint whose host belongs to a
+        // different Microsoft sovereign cloud than the configured authority, MSAL must
+        // refuse the document at retrieval time so the bad doc never gets cached and no
+        // outbound POST ever happens. The discovery response here is internally consistent
+        // (issuer matches the configured authority, passes Rule 1) - the endpoint check
+        // catches the cross-cloud token_endpoint swap.
+        [TestMethod]
+        public async Task OidcDiscovery_CrossCloudTokenEndpoint_Refused_Async()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                string authority = "https://login.microsoftonline.com/contoso";
+                string spoofedTokenEndpoint = "https://login.partner.microsoftonline.cn/contoso/oauth2/v2.0/token";
+
+                IConfidentialClientApplication app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithHttpManager(httpManager)
+                    .WithOidcAuthority(authority)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .Build();
+
+                // Build an OIDC document where the issuer matches the configured authority
+                // (passes Rule 1) but the token_endpoint points at a *different* MS cloud.
+                string oidcDocument = TestConstants.GetOidcResponse(authority);
+                oidcDocument = oidcDocument.Replace(
+                    $"{authority}/connect/token",
+                    spoofedTokenEndpoint);
+
+                httpManager.AddMockHandler(new MockHttpMessageHandler
+                {
+                    ExpectedMethod = HttpMethod.Get,
+                    ExpectedUrl = $"{authority}/{Constants.WellKnownOpenIdConfigurationPath}",
+                    ResponseMessage = MockHelpers.CreateSuccessResponseMessage(oidcDocument)
+                });
+
+                var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
+                    app.AcquireTokenForClient(new[] { "api" }).ExecuteAsync()
+                ).ConfigureAwait(false);
+
+                Assert.AreEqual(MsalError.CrossCloudEndpointMismatch, ex.ErrorCode);
+                Assert.Contains(spoofedTokenEndpoint, ex.Message,
+                    "Error message should mention the spoofed token_endpoint.");
+
+                // Critical: no token request must have been made. Only the OIDC discovery
+                // GET should be in flight; the POST to the spoofed endpoint must never happen.
+                Assert.AreEqual(0, httpManager.QueueSize,
+                    "Outbound credentials must not be sent to a cross-cloud token_endpoint.");
+            }
+        }
+
+        // A known-MS authority must not accept a custom (attacker-controlled) token_endpoint
+        // either. The endpoint check fires whenever the configured authority is a known MS
+        // host: the endpoint MUST resolve to the SAME sovereign cloud (custom hosts cannot).
+        [TestMethod]
+        public async Task OidcDiscovery_KnownAuthority_CustomEndpoint_Refused_Async()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                string authority = "https://login.microsoftonline.com/contoso";
+                string attackerTokenEndpoint = "https://attacker.example.com/oauth2/v2.0/token";
+
+                IConfidentialClientApplication app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithHttpManager(httpManager)
+                    .WithOidcAuthority(authority)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .Build();
+
+                string oidcDocument = TestConstants.GetOidcResponse(authority);
+                oidcDocument = oidcDocument.Replace(
+                    $"{authority}/connect/token",
+                    attackerTokenEndpoint);
+
+                httpManager.AddMockHandler(new MockHttpMessageHandler
+                {
+                    ExpectedMethod = HttpMethod.Get,
+                    ExpectedUrl = $"{authority}/{Constants.WellKnownOpenIdConfigurationPath}",
+                    ResponseMessage = MockHelpers.CreateSuccessResponseMessage(oidcDocument)
+                });
+
+                var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
+                    app.AcquireTokenForClient(new[] { "api" }).ExecuteAsync()
+                ).ConfigureAwait(false);
+
+                Assert.AreEqual(MsalError.CrossCloudEndpointMismatch, ex.ErrorCode);
+                Assert.Contains(attackerTokenEndpoint, ex.Message);
+                Assert.AreEqual(0, httpManager.QueueSize,
+                    "Outbound credentials must not be sent to a custom endpoint under a known-MS authority.");
+            }
+        }
+
+        // Custom OIDC IdPs are NOT subject to the endpoint same-cloud check: legitimate
+        // custom identity providers may publish endpoints on any host. The check fires
+        // only when the configured authority is itself a known Microsoft cloud host.
+        // Uses a unique authority host (not shared with other tests in this file) so the
+        // process-static OidcRetrieverWithCache.s_cache cannot leak state between tests.
+        [TestMethod]
+        public async Task OidcDiscovery_CustomIdpEndpoint_Allowed_Async()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                string authority = "https://idp.example.com";
+
+                IConfidentialClientApplication app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithHttpManager(httpManager)
+                    .WithOidcAuthority(authority)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .Build();
+
+                httpManager.AddMockHandler(
+                    CreateOidcHttpHandler(authority + @"/" + Constants.WellKnownOpenIdConfigurationPath, authority));
+
+                httpManager.AddMockHandler(
+                    CreateTokenResponseHttpHandler(
+                        authority + "/connect/token",
+                        scopesInRequest: "api",
+                        scopesInResponse: "api",
+                        grant: "client_credentials"));
+
+                AuthenticationResult result = await app
+                    .AcquireTokenForClient(new[] { "api" })
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(0, httpManager.QueueSize,
+                    "Custom OIDC IdPs must not be blocked by the cross-cloud endpoint check.");
+            }
+        }
+
         private static MockHttpMessageHandler CreateTokenResponseHttpHandler(
             string tokenEndpoint,
             string scopesInRequest,
