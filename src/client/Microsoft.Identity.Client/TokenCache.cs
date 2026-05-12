@@ -130,10 +130,6 @@ namespace Microsoft.Identity.Client
                     requestParams.Scope.AsSingleString());
             }
 
-            bool savingHasComponents =
-                additionalCacheKeyComponents != null &&
-                additionalCacheKeyComponents.Count > 0;
-
             var accessTokensToDelete = new List<MsalAccessTokenCacheItem>();
             var partitionKeyFromResponse = CacheKeyFactory.GetInternalPartitionKeyFromResponse(requestParams, homeAccountId);
             Debug.Assert(partitionKeyFromResponse != null || !requestParams.AppConfig.IsConfidentialClient, "On confidential client, cache must be partitioned.");
@@ -145,7 +141,7 @@ namespace Microsoft.Identity.Client
                     string.Equals(accessToken.TokenType ?? "", tokenType ?? "", StringComparison.OrdinalIgnoreCase) &&
                     string.Equals(accessToken.TenantId ?? "", tenantId ?? "", StringComparison.OrdinalIgnoreCase) &&
                     accessToken.ScopeSet.Overlaps(scopeSet) &&
-                    AreAdditionalCacheKeyComponentsEqual(accessToken.AdditionalCacheKeyComponents, additionalCacheKeyComponents, savingHasComponents))
+                    AreAdditionalCacheKeyComponentsEqual(accessToken.AdditionalCacheKeyComponents, additionalCacheKeyComponents))
                 {
                     requestParams.RequestContext.Logger.Verbose(() => $"Intersecting scopes found: {scopeSet}");
                     accessTokensToDelete.Add(accessToken);
@@ -178,9 +174,12 @@ namespace Microsoft.Identity.Client
         //   saving WITHOUT components -> delete only items without components
         private static bool AreAdditionalCacheKeyComponentsEqual(
             SortedList<string, string> existingComponents,
-            SortedList<string, string> savingComponents,
-            bool savingHasComponents)
+            SortedList<string, string> savingComponents)
         {
+            bool savingHasComponents =
+                savingComponents != null &&
+                savingComponents.Count > 0;
+
             bool existingHasComponents =
                 existingComponents != null &&
                 existingComponents.Count > 0;
