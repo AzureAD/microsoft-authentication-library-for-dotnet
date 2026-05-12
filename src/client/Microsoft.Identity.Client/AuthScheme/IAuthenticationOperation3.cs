@@ -45,6 +45,7 @@ namespace Microsoft.Identity.Client.AuthScheme
         /// Runtime state owned by MSAL. Never <c>null</c>. Must not be retained past this call.
         /// </param>
         /// <param name="cancellationToken">Cancellation token.</param>
-        Task AfterCredentialEvaluationAsync(TokenAcquisitionContext context, CancellationToken cancellationToken = default);
+        Task AfterCredentialEvaluationAsync(CredentialEvaluationContext context, CancellationToken cancellationToken = default);
     }
 }
+

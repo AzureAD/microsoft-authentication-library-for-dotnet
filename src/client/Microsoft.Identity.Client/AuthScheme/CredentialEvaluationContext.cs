@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Security.Cryptography.X509Certificates;
 
 namespace Microsoft.Identity.Client.AuthScheme
@@ -30,12 +31,21 @@ namespace Microsoft.Identity.Client.AuthScheme
     /// certificate rotation.
     /// </para>
     /// </remarks>
-    public sealed class TokenAcquisitionContext
+    public sealed class CredentialEvaluationContext
     {
+        /// <summary>
+        /// Initializes a new instance of <see cref="CredentialEvaluationContext"/>.
+        /// </summary>
+        /// <param name="mtlsCertificate">The mTLS certificate for the current request. Must not be null.</param>
+        public CredentialEvaluationContext(X509Certificate2 mtlsCertificate)
+        {
+            MtlsCertificate = mtlsCertificate ?? throw new ArgumentNullException(nameof(mtlsCertificate));
+        }
+
         /// <summary>
         /// The mTLS certificate MSAL will use on the wire for the current token request.
         /// Refreshed per request — operations must not cache this value across requests.
         /// </summary>
-        public X509Certificate2 MtlsCertificate { get; init; }
+        public X509Certificate2 MtlsCertificate { get; }
     }
 }

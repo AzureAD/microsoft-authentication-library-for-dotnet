@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System.Threading;
@@ -170,10 +170,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
             // composition (e.g., CDT + mTLS POP) where the operation handles both concerns.
             if (p.AuthenticationOperation is IAuthenticationOperation3 op3)
             {
-                await op3.AfterCredentialEvaluationAsync(new TokenAcquisitionContext
-                {
-                    MtlsCertificate = cert,
-                }, ct).ConfigureAwait(false);
+                await op3.AfterCredentialEvaluationAsync(new CredentialEvaluationContext(cert), ct).ConfigureAwait(false);
                 p.MtlsCertificate = cert;
                 return;
             }
@@ -184,3 +181,5 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
 
     }
 }
+
+

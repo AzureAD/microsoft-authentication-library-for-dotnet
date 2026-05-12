@@ -213,7 +213,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         .ConfigureAwait(false);
 
                     // Assert — cert must match what was configured on the CCA
-                    Assert.AreSame(s_testCertificate, fakeOp.LastCertificate,
+                    Assert.AreEqual(s_testCertificate.Thumbprint, fakeOp.LastCertificate.Thumbprint,
                         "Callback must receive the exact cert instance configured via WithCertificate");
                 }
             }
@@ -269,10 +269,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.AreEqual(0, fakeOp.CallbackInvocationCount);
 
             // Act
-            fakeOp.AfterCredentialEvaluationAsync_Sync(new TokenAcquisitionContext
-            {
-                MtlsCertificate = s_testCertificate
-            });
+            fakeOp.InvokeAfterCredentialEvaluation(new CredentialEvaluationContext(s_testCertificate
+            ));
 
             // Assert — after callback
             Assert.AreEqual(1, fakeOp.CallbackInvocationCount);
@@ -287,10 +285,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             // Arrange
             var fakeOp = new FakeAuthOp3();
-            fakeOp.AfterCredentialEvaluationAsync_Sync(new TokenAcquisitionContext
-            {
-                MtlsCertificate = s_testCertificate
-            });
+            fakeOp.InvokeAfterCredentialEvaluation(new CredentialEvaluationContext(s_testCertificate
+            ));
             var authResult = new AuthenticationResult();
 
             // Act
@@ -318,13 +314,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        public void TokenAcquisitionContext_ExposesExpectedProperties()
+        public void CredentialEvaluationContext_ExposesExpectedProperties()
         {
             // Arrange & Act
-            var context = new TokenAcquisitionContext
-            {
-                MtlsCertificate = s_testCertificate
-            };
+            var context = new CredentialEvaluationContext(s_testCertificate
+            );
 
             // Assert
             Assert.AreSame(s_testCertificate, context.MtlsCertificate);
@@ -343,11 +337,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             var cert2 = CertHelper.GetOrCreateTestCert(regenerateCert: true);
 
             // Act — call 1 with cert1
-            fakeOp.AfterCredentialEvaluationAsync_Sync(new TokenAcquisitionContext { MtlsCertificate = cert1 });
+            fakeOp.InvokeAfterCredentialEvaluation(new CredentialEvaluationContext(cert1 ));
             var observed1 = fakeOp.LastCertificate.Thumbprint;
 
             // Act — rotate to cert2
-            fakeOp.AfterCredentialEvaluationAsync_Sync(new TokenAcquisitionContext { MtlsCertificate = cert2 });
+            fakeOp.InvokeAfterCredentialEvaluation(new CredentialEvaluationContext(cert2 ));
             var observed2 = fakeOp.LastCertificate.Thumbprint;
 
             // Assert — operation must see the rotated cert
@@ -411,15 +405,15 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             public int CallbackInvocationCount { get; private set; }
             public X509Certificate2 LastCertificate { get; private set; }
 
-            public void AfterCredentialEvaluationAsync_Sync(TokenAcquisitionContext context)
+            public void InvokeAfterCredentialEvaluation(CredentialEvaluationContext context)
             {
                 CallbackInvocationCount++;
                 LastCertificate = context.MtlsCertificate;
             }
 
-            public Task AfterCredentialEvaluationAsync(TokenAcquisitionContext context, System.Threading.CancellationToken cancellationToken = default)
+            public Task AfterCredentialEvaluationAsync(CredentialEvaluationContext context, System.Threading.CancellationToken cancellationToken = default)
             {
-                AfterCredentialEvaluationAsync_Sync(context);
+                InvokeAfterCredentialEvaluation(context);
                 return Task.CompletedTask;
             }
 
@@ -470,7 +464,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         /// </summary>
         private sealed class ThrowingAuthOp3 : IAuthenticationOperation3
         {
-            public Task AfterCredentialEvaluationAsync(TokenAcquisitionContext context, System.Threading.CancellationToken cancellationToken = default)
+            public Task AfterCredentialEvaluationAsync(CredentialEvaluationContext context, System.Threading.CancellationToken cancellationToken = default)
             {
                 throw new InvalidOperationException("Test: cert fetch failed");
             }
@@ -489,4 +483,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
     }
 }
+
+
+
+
 
