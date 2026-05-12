@@ -12,13 +12,6 @@ namespace Microsoft.Identity.Client.Instance
             base(authorityInfo)
         { }
 
-        // CIAM authorities are always fully-qualified (e.g. https://contoso.ciamlogin.com/contoso.onmicrosoft.com).
-        // Tenant overrides are not applicable; return the canonical authority unchanged, matching B2C's behavior.
-        internal override string GetTenantedAuthority(string tenantId, bool forceSpecifiedTenant = false)
-        {
-            return AuthorityInfo.CanonicalAuthority.AbsoluteUri;
-        }
-
         /// <summary>
         /// Translates CIAM authorities into a usable form. This is needed only until ESTS is updated to support the north star format
         /// North star format: https://idgciamdemo.ciamlogin.com

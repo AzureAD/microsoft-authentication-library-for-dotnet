@@ -22,10 +22,23 @@ namespace Microsoft.Identity.Client.Instance
             TenantId = AuthorityInfo.GetSecondPathSegment(AuthorityInfo.CanonicalAuthority);
         }
 
-        // DSTS authorities are always fully-qualified (e.g. https://host/dstsv2/{tenantId}/).
-        // Tenant overrides are not applicable; return the canonical authority unchanged, matching B2C's behavior.
+        // DSTS authorities use their own URL template (dstsv2/{tenantId}/), not the AAD template.
+        // Only honor tenant overrides when forceSpecifiedTenant=true (i.e., .WithTenantId() at request level).
+        // The old non-forced path (IsCommonOrOrganizationsTenant) was dead because DSTS authorities
+        // always carry a real tenant, never "common" or "organizations".
         internal override string GetTenantedAuthority(string tenantId, bool forceSpecifiedTenant = false)
         {
+            if (!string.IsNullOrEmpty(tenantId) && forceSpecifiedTenant)
+            {
+                var authorityUri = AuthorityInfo.CanonicalAuthority;
+
+                return string.Format(
+                    CultureInfo.InvariantCulture,
+                    DstsCanonicalAuthorityTemplate,
+                    authorityUri.Authority,
+                    tenantId);
+            }
+
             return AuthorityInfo.CanonicalAuthority.ToString();
         }
 
