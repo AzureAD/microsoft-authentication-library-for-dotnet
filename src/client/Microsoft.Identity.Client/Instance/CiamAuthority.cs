@@ -2,11 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.Instance
@@ -17,20 +12,10 @@ namespace Microsoft.Identity.Client.Instance
             base(authorityInfo)
         { }
 
+        // CIAM authorities are always fully-qualified (e.g. https://contoso.ciamlogin.com/contoso.onmicrosoft.com).
+        // Tenant overrides are not applicable; return the canonical authority unchanged, matching B2C's behavior.
         internal override string GetTenantedAuthority(string tenantId, bool forceSpecifiedTenant = false)
         {
-            if (!string.IsNullOrEmpty(tenantId) &&
-               (forceSpecifiedTenant || IsCommonOrOrganizationsTenant()))
-            {
-                var authorityUri = AuthorityInfo.CanonicalAuthority;
-
-                return string.Format(
-                    CultureInfo.InvariantCulture,
-                    AADCanonicalAuthorityTemplate,
-                    authorityUri.Authority,
-                    tenantId);
-            }
-
             return AuthorityInfo.CanonicalAuthority.AbsoluteUri;
         }
 
