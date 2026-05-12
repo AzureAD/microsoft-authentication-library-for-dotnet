@@ -229,7 +229,8 @@ namespace Microsoft.Identity.Client
                             tenantId,
                             msalAccessTokenCacheItem.ScopeSet,
                             msalAccessTokenCacheItem.HomeAccountId,
-                            msalAccessTokenCacheItem.TokenType);
+                            msalAccessTokenCacheItem.TokenType,
+                            msalAccessTokenCacheItem.AdditionalCacheKeyComponents);
 
                         Accessor.SaveAccessToken(msalAccessTokenCacheItem);
                     }
@@ -514,20 +515,39 @@ namespace Microsoft.Identity.Client
             return msalAccessTokenCacheItem;
         }
 
+        // Symmetric filter for AdditionalCacheKeyComponents (GH #5963):
+        //   request WITH components    -> keep ONLY items with matching components
+        //   request WITHOUT components -> keep ONLY items without components
         private void FilterTokensByAdditionalKeyComponents(List<MsalAccessTokenCacheItem> accessTokens, AuthenticationRequestParameters requestParams)
         {
-            if (requestParams.CacheKeyComponents != null)
+            bool requestHasComponents =
+                requestParams.CacheKeyComponents != null &&
+                requestParams.CacheKeyComponents.Count > 0;
+
+            int countBeforeFilter = accessTokens.Count;
+
+            if (requestHasComponents)
             {
                 accessTokens.FilterWithLogging(item =>
                     item.AdditionalCacheKeyComponents != null &&
                     CollectionHelpers.AreDictionariesEqual(item.AdditionalCacheKeyComponents, requestParams.CacheKeyComponents),
                     requestParams.RequestContext.Logger,
                     "Filtering by additional key components");
+            }
+            else
+            {
+                accessTokens.FilterWithLogging(item =>
+                    item.AdditionalCacheKeyComponents == null ||
+                    item.AdditionalCacheKeyComponents.Count == 0,
+                    requestParams.RequestContext.Logger,
+                    "Filtering out tokens that have additional key components");
+            }
 
-                if (accessTokens.Count == 0)
-                {
-                    requestParams.RequestContext.Logger.Verbose(() => "No tokens found that match the provided key components. ");
-                }
+            // Only attribute the miss to this filter if it is actually responsible for
+            // emptying the candidate set (i.e., entered with > 0 and exited with 0).
+            if (countBeforeFilter > 0 && accessTokens.Count == 0)
+            {
+                requestParams.RequestContext.Logger.Verbose(() => "No tokens found that match the additional key components filter. ");
             }
         }
 
