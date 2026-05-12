@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
@@ -60,6 +61,16 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
 
         /// <summary>Logger for credential resolution diagnostics.</summary>
         public ILoggerAdapter Logger { get; init; }
+
+        /// <summary>
+        /// Certificate already resolved during preflight (by
+        /// <see cref="Microsoft.Identity.Client.ApiConfig.Parameters.MtlsPopParametersInitializer"/>)
+        /// and stashed on the active request. When set and <see cref="Mode"/> is
+        /// <see cref="CredentialTransportProtocol.Mtls"/>, credential implementations MUST
+        /// reuse this certificate instead of invoking their provider delegate again.
+        /// Honors the single-invocation principle stated on issue #5943.
+        /// </summary>
+        public X509Certificate2 PreResolvedCertificate { get; init; }
 
         /// <summary>
         /// Creates an <see cref="AssertionRequestOptions"/> from this context.

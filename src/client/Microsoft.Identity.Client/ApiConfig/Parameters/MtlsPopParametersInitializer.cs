@@ -104,16 +104,22 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
             }
 
             // Case 2 – Dynamic certificate credential (WithCertificate(() => x509))
-            // The provider is invoked here for preflight; it will be invoked again during
-            // credential material resolution in TokenClient. This is accepted tech debt — see #5886.
+            // The provider is invoked here for preflight; the resolved certificate is stashed
+            // on the request (p.MtlsCertificate) and reused during credential material
+            // resolution via CredentialContext.PreResolvedCertificate, so the provider is
+            // invoked exactly once per token request — honoring the single-invocation
+            // principle from issue #5943.
             if (serviceBundle.Config.ClientCredential is DynamicCertificateClientCredential dynamicCertCred)
             {
                 var opts = CreateAssertionRequestOptions(p, serviceBundle, ct);
                 X509Certificate2 cert = await dynamicCertCred
-                    .ResolveCertificateForPreflightAsync(opts)
+                    .ResolveCertificateForMtlsAsync(
+                        opts,
+                        MsalError.MtlsCertificateNotProvided,
+                        MsalErrorMessage.MtlsCertificateNotProvidedMessage)
                     .ConfigureAwait(false);
 
-                InitMtlsPopParameters(p, cert, serviceBundle);
+                await InitMtlsPopParametersAsync(p, cert, serviceBundle, ct).ConfigureAwait(false);
                 return;
             }
 
@@ -160,7 +166,11 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
                 // IMPORTANT: use AbsoluteUri, not Uri.Authority (host only).
                 TokenEndpoint = serviceBundle.Config.Authority.AuthorityInfo.CanonicalAuthority.AbsoluteUri,
                 Authority = serviceBundle.Config.Authority.AuthorityInfo.CanonicalAuthority.AbsoluteUri,
-                TenantId = AuthorityInfo.GetFirstPathSegment(serviceBundle.Config.Authority.AuthorityInfo.CanonicalAuthority)
+                // GetFirstPathSegment throws for Generic authorities; only AAD/B2C have a tenant-as-first-segment shape.
+                // For ADFS / DSTS / Generic / Managed-Identity, TenantId is left null at preflight — runtime resolution fills it.
+                TenantId = serviceBundle.Config.Authority.AuthorityInfo.AuthorityType == AuthorityType.Aad
+                    ? AuthorityInfo.GetFirstPathSegment(serviceBundle.Config.Authority.AuthorityInfo.CanonicalAuthority)
+                    : null
             };
         }
 

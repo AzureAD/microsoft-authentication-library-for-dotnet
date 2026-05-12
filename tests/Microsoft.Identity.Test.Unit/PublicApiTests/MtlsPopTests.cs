@@ -88,25 +88,39 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        public async Task MtlsPop_WithDynamicCertificate_ThrowsWithoutRegionAsync()
+        public async Task MtlsPop_WithDynamicCertificate_WithoutRegion_UsesGlobalMtlsEndpointAsync()
         {
-            // Dynamic cert + mTLS PoP without region should throw the same as static cert
+            // Dynamic cert + mTLS PoP without region should fall through to the global mTLS endpoint,
+            // matching the static-cert behavior validated by MtlsPop_WithoutRegion_UsesGlobalMtlsEndpoint.
+            const string globalEndpoint = "mtlsauth.microsoft.com";
+            string expectedTokenEndpoint = $"https://{globalEndpoint}/{TestConstants.TenantId}/oauth2/v2.0/token";
+
             using (var envContext = new EnvVariableContext())
             {
-                var app = ConfidentialClientApplicationBuilder
-                    .Create(TestConstants.ClientId)
-                    .WithExperimentalFeatures()
-                    .WithAuthority(TestConstants.AuthorityTenant)
-                    .WithCertificate(_ => Task.FromResult(s_testCertificate), new CertificateOptions())
-                    .Build();
+                Environment.SetEnvironmentVariable("REGION_NAME", null);
+                Environment.SetEnvironmentVariable("MSAL_FORCE_REGION", null);
 
-                MsalClientException ex = await AssertException.TaskThrowsAsync<MsalClientException>(() =>
-                    app.AcquireTokenForClient(TestConstants.s_scope)
-                       .WithMtlsProofOfPossession()
-                       .ExecuteAsync())
-                    .ConfigureAwait(false);
+                using (var httpManager = new MockHttpManager())
+                {
+                    httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(
+                        tokenType: "mtls_pop");
 
-                Assert.AreEqual(MsalError.MtlsPopWithoutRegion, ex.ErrorCode);
+                    var app = ConfidentialClientApplicationBuilder
+                        .Create(TestConstants.ClientId)
+                        .WithExperimentalFeatures()
+                        .WithAuthority(TestConstants.AuthorityTenant)
+                        .WithCertificate(_ => Task.FromResult(s_testCertificate), new CertificateOptions())
+                        .WithHttpManager(httpManager)
+                        .Build();
+
+                    AuthenticationResult result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                        .WithMtlsProofOfPossession()
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
+
+                    Assert.AreEqual(Constants.MtlsPoPAuthHeaderPrefix, result.TokenType);
+                    Assert.AreEqual(expectedTokenEndpoint, result.AuthenticationResultMetadata.TokenEndpoint);
+                }
             }
         }
 
@@ -180,8 +194,11 @@ namespace Microsoft.Identity.Test.Unit
                     Assert.IsNotNull(result.BindingCertificate, "BindingCertificate should be present.");
                     Assert.AreEqual(s_testCertificate.Thumbprint, result.BindingCertificate.Thumbprint);
 
-                    // Provider is called during preflight + credential material resolution (#5886)
-                    Assert.IsGreaterThan(0, providerCallCount, "Provider should be invoked at least once.");
+                    // Provider must be invoked exactly once per mTLS PoP request.
+                    // Preflight resolves the cert and stashes it on the request; credential
+                    // material resolution reuses it via CredentialContext.PreResolvedCertificate.
+                    // This locks in the single-invocation principle from issue #5943.
+                    Assert.AreEqual(1, providerCallCount, "The certificate provider must be invoked exactly once per mTLS PoP token request (#5943 principle). If this assertion fails with count=2, the preflight-resolved cert is no longer being plumbed through CredentialContext.PreResolvedCertificate.");
                 }
             }
         }
