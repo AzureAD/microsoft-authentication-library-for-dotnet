@@ -57,10 +57,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             ManagedIdentityRequest request = await CreateRequestAsync(resource).ConfigureAwait(false);
 
-            // Forward client-originated claims to the correct location:
-            // - GET requests (IMDS/MSIv1): append as "claims" query parameter
-            // - POST requests (ImdsV2 / ESTS): append as "claims" body parameter
-            if (!string.IsNullOrEmpty(parameters.ClientClaims))
+            // Forward client-originated claims to the correct location for IMDS/MSIv2 only.
+            // Other MI sources (App Service, Azure Arc, Service Fabric, etc.) do not have a
+            // confirmed contract for the "claims" parameter; forwarding to them could cause
+            // token-acquisition failures or cache keying on a parameter that was ignored.
+            if (!string.IsNullOrEmpty(parameters.ClientClaims) &&
+                (_sourceType == ManagedIdentitySource.Imds || _sourceType == ManagedIdentitySource.ImdsV2))
             {
                 if (request.Method == System.Net.Http.HttpMethod.Get)
                 {

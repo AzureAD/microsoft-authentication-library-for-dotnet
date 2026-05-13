@@ -44,6 +44,18 @@ namespace Microsoft.Identity.Client.Extensibility
                 return (T)builder;
             }
 
+            // Client claims must not appear in front-channel authorization URLs because they can
+            // contain sensitive data and because the resulting cache key cannot be reproduced by
+            // silent token calls. Only token-acquisition flows (AcquireTokenForClient, OBO, etc.)
+            // are supported.
+            if (builder is GetAuthorizationRequestUrlParameterBuilder)
+            {
+                throw new MsalClientException(
+                    MsalError.InvalidRequest,
+                    "WithClientClaims is not supported for GetAuthorizationRequestUrl. " +
+                    "Client claims are intended for token-acquisition flows (AcquireTokenForClient, AcquireTokenOnBehalfOf).");
+            }
+
             builder.ValidateUseOfExperimentalFeature();
 
             string normalized = ClaimsHelper.NormalizeClaimsJson(claimsJson);

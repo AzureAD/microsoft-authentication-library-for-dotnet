@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -10,7 +11,6 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using Microsoft.Identity.Client.Utils;
 using JObject = System.Text.Json.Nodes.JsonObject;
-using System;
 
 namespace Microsoft.Identity.Client.Internal
 {
@@ -90,7 +90,10 @@ namespace Microsoft.Identity.Client.Internal
                 }
                 else
                 {
-                    // JsonNode.DeepClone is .NET 6+; use Parse(ToJsonString()) for portability.
+                    // Array elements are cloned as-is. Per OIDC §5.5, array element *order* is
+                    // semantically significant (e.g. acr.values preference order), so we must not
+                    // reorder elements. NSP claims do not use arrays-of-objects, so there is no
+                    // cache-fragmentation risk from not sorting inside array elements.
                     sorted[key] = value is null ? null : JsonNode.Parse(value.ToJsonString());
                 }
             }
@@ -121,11 +124,15 @@ namespace Microsoft.Identity.Client.Internal
                 {
                     claimsJson = JsonHelper.ParseIntoJsonObject(claims);
                 }
-                catch (JsonException ex)
+                catch (Exception ex) when (ex is JsonException || ex is InvalidOperationException)
                 {
+                    // InvalidOperationException is thrown by JsonNode.AsObject() when the root token is
+                    // valid JSON but not an object (e.g. an array, a scalar, or the literal 'null').
+                    // This method also handles server-issued claims from .WithClaims(), so use a neutral
+                    // message rather than naming client_claims specifically.
                     throw new MsalClientException(
                         MsalError.InvalidJsonClaimsFormat,
-                        "The client_claims value is not valid JSON. Inspect the inner exception for parsing details. " +
+                        "The claims value is not a valid JSON object. Inspect the inner exception for parsing details. " +
                         "See https://openid.net/specs/openid-connect-core-1_0.html#ClaimsParameter.",
                         ex);
                 }
