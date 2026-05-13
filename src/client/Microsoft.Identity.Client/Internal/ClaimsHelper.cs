@@ -88,10 +88,6 @@ namespace Microsoft.Identity.Client.Internal
                 }
                 else
                 {
-                    // TODO: Objects nested inside arrays are not recursively key-sorted here.
-                    // In practice the OIDC §5.5 claims parameter uses string arrays (e.g. acr.values),
-                    // so this gap is theoretical for current callers. If support for object-valued array
-                    // elements is needed in the future, recurse into JsonArray elements here.
                     // JsonNode.DeepClone is .NET 6+; use Parse(ToJsonString()) for portability.
                     sorted[key] = value is null ? null : JsonNode.Parse(value.ToJsonString());
                 }
