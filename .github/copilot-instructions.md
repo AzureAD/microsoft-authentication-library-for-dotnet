@@ -1,3 +1,67 @@
+# Code Review Rules
+
+These rules apply to Copilot code review. Read all rules before commenting.
+
+## Review scope
+
+- Only comment on lines added or modified in the PR diff
+- Do not comment on pre-existing code unless the PR directly introduces the issue
+- Do not comment on style, formatting, or indentation
+- Focus exclusively on: bugs, security issues, logic errors, API contract violations
+- If unsure whether something is a bug, do not comment
+- Prefer no comment over a speculative comment
+- Do not re-post a comment already made on an earlier commit in the same PR
+
+## Repo-specific patterns — do NOT flag these
+
+These patterns are correct in this repo. Do not suggest changes:
+
+- `[RunOn]` inherits from `TestMethodAttribute`. Do not flag as missing `[TestMethod]`
+- `Client.AppConfig.X` resolves via parent namespace `Microsoft.Identity`. Do not flag as unresolved namespace
+- `Assert.IsTrue(bool?)` is a valid MSTest overload. Do not flag nullable bool as a type mismatch
+- `Assert.DoesNotContain(substring, value)` — MSTest v4 signature is substring first, value second
+- `ConfigureAwait(false)` is intentional in library code. Do not suggest removal
+
+## ConcurrentDictionary.GetOrAdd — always use factory delegate
+
+`GetOrAdd(key, value)` eagerly evaluates the value arg. Flag any call where the second argument is not a delegate/lambda/method group:
+
+- Bad: `pool.GetOrAdd(key, new ExpensiveObject());`
+- Good: `pool.GetOrAdd(key, _ => new ExpensiveObject());`
+
+## C# coding standards
+
+- Use `is null` / `is not null` instead of `== null` / `!= null`
+- No reflection in product code (`/src`). Acceptable in tests
+- Static fields: `s_camelCase` (e.g., `s_knownHosts`)
+- Ordinal string comparisons for protocol values, identifiers, cache keys
+- Validate inputs at method boundaries (fail fast with specific exception types)
+- Do not include secrets/tokens/PII in exception messages or logs
+- Use `nameof` instead of string literals for member names
+
+## Testing standards
+
+- MSTest SDK v4 with NSubstitute for mocking
+- Use `// Arrange`, `// Act`, `// Assert` comments
+- Prefer deterministic tests (no timing flakiness)
+
+## Public API changes
+
+- Update `PublicAPI.Unshipped.txt` for any public API additions/removals
+- XML doc comments required on all public APIs
+- Maintain backward compatibility
+
+## MSAL-specific rules
+
+- Use certificate-based auth over client secrets when possible
+- Use async APIs consistently
+- Keep dependencies minimal and well-justified
+
+---
+
+<!-- Everything below this line is for Copilot Chat and Copilot Agent only. -->
+<!-- Copilot code review reads only the first 4,000 characters of this file. -->
+
 Carefully review all markdown documents in the ../.clinerules folder. Those are your custom instructions.
 
 ---
@@ -45,18 +109,24 @@ Copilot will automatically reference and describe:
 - `@msal-mtls-pop-guidance` - Foundational concepts
 - `@msal-mtls-pop-vanilla` - Direct token acquisition
 - `@msal-mtls-pop-fic-two-leg` - Token exchange patterns
+- `@msal-auth-code-flow` - Authorization Code Flow
+- `@msal-client-credentials` - Client Credentials Flow
+- `@msal-obo-flow` - On-Behalf-Of Flow
 
 ---
 
 ## 📚 Available Skills Overview
 
-This repository contains **three GitHub Agent Skills** for mTLS Proof-of-Possession (PoP) authentication:
+This repository contains **six GitHub Agent Skills** for MSAL.NET authentication:
 
 | Skill | Purpose | Best For |
 |-------|---------|----------|
 | **@msal-mtls-pop-guidance** | Foundational concepts, terminology, decision frameworks | Learning the fundamentals, comparing approaches |
 | **@msal-mtls-pop-vanilla** | Direct single-step token acquisition with complete code | Quick implementation with MSI or Confidential Client |
 | **@msal-mtls-pop-fic-two-leg** | Two-step token exchange patterns | Complex scenarios requiring token exchange |
+| **@msal-auth-code-flow** | Authorization Code Flow for web apps | User sign-in with server-side backend |
+| **@msal-client-credentials** | Client Credentials Flow for daemons | Service-to-service, no user context |
+| **@msal-obo-flow** | On-Behalf-Of Flow for multi-tier APIs | Propagating user identity through API chain |
 
 ---
 

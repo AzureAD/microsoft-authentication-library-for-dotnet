@@ -18,11 +18,7 @@ using Microsoft.Identity.Client.Utils;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client.Http.Retry;
 
-#if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text.Json;
-#else
-using Microsoft.Identity.Json;
-#endif
 
 namespace Microsoft.Identity.Client.OAuth2
 {

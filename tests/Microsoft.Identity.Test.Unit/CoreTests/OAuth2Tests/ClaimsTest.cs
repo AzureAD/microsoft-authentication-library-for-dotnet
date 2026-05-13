@@ -108,7 +108,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
                 Trace.WriteLine("1. Setup an app with a token cache with a valid AT + Client Capabilities");
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                                             .WithHttpManager(harness.HttpManager)
-                                                                            .WithClientCapabilities(TestConstants.ClientCapabilities)
+                                                                            .WithClientCapabilities(TestConstants.s_clientCapabilities)
                                                                             .BuildConcrete();
 
                 TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor, addSecondAt: false);
@@ -166,7 +166,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
 
                 var app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                               .WithHttpManager(harness.HttpManager)
-                              .WithClientCapabilities(TestConstants.ClientCapabilities)
+                              .WithClientCapabilities(TestConstants.s_clientCapabilities)
                               .BuildConcrete();
 
                 var mockUi =
@@ -200,7 +200,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
 
                 var app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                 .WithHttpManager(harness.HttpManager)
-                                .WithClientCapabilities(TestConstants.ClientCapabilities)
+                                .WithClientCapabilities(TestConstants.s_clientCapabilities)
                                 .BuildConcrete();
 
                 var mockUi =
@@ -229,7 +229,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
         public async Task Claims_Fail_WhenClaimsIsNotJson_Async()
         {
             var app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                            .WithClientCapabilities(TestConstants.ClientCapabilities)
+                            .WithClientCapabilities(TestConstants.s_clientCapabilities)
                             .BuildConcrete();
 
             var ex = await AssertException.TaskThrowsAsync<MsalClientException>(

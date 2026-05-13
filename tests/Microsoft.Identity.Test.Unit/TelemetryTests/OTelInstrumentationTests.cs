@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Test.Unit
                 await AcquireTokenMsalClientExceptionAsync().ConfigureAwait(false);
 
                 s_meterProvider.ForceFlush();
-                VerifyMetrics(6, _exportedMetrics, 2, 2);
+                VerifyMetrics(7, _exportedMetrics, 2, 2);
             }
         }
 
@@ -91,7 +91,7 @@ namespace Microsoft.Identity.Test.Unit
                 await AcquireTokenMsalClientExceptionAsync().ConfigureAwait(false);
 
                 s_meterProvider.ForceFlush();
-                VerifyMetrics(6, _exportedMetrics, 2, 2);
+                VerifyMetrics(7, _exportedMetrics, 2, 2);
             }
         }
 
@@ -147,7 +147,7 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(CacheRefreshReason.NotApplicable, result.AuthenticationResultMetadata.CacheRefreshReason);
 
                 s_meterProvider.ForceFlush();
-                VerifyMetrics(5, _exportedMetrics, 4, 0);
+                VerifyMetrics(6, _exportedMetrics, 4, 0);
             }
         }
 
@@ -222,7 +222,7 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(CacheRefreshReason.NotApplicable, result.AuthenticationResultMetadata.CacheRefreshReason);
 
                 s_meterProvider.ForceFlush();
-                VerifyMetrics(5, _exportedMetrics, 4, 0);
+                VerifyMetrics(6, _exportedMetrics, 4, 0);
             }
         }
 
@@ -279,7 +279,7 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(CacheRefreshReason.NotApplicable, result.AuthenticationResultMetadata.CacheRefreshReason);
 
                 s_meterProvider.ForceFlush();
-                VerifyMetrics(5, _exportedMetrics, 4, 0);
+                VerifyMetrics(6, _exportedMetrics, 4, 0);
             }
         }
 
@@ -329,7 +329,7 @@ namespace Microsoft.Identity.Test.Unit
                 Thread.Sleep(1000);
 
                 s_meterProvider.ForceFlush();
-                VerifyMetrics(4, _exportedMetrics, 3, 1);
+                VerifyMetrics(5, _exportedMetrics, 3, 1);
             }
         }
 
@@ -570,18 +570,165 @@ namespace Microsoft.Identity.Test.Unit
             Assert.IsNotNull(exClient.ErrorCode);
         }
 
-        private void CreateApplication()
+        private void CreateApplication(CacheOptions cacheOptions = null)
         {
-            _cca = ConfidentialClientApplicationBuilder
+            var builder = ConfidentialClientApplicationBuilder
                         .Create(TestConstants.ClientId)
                         .WithExperimentalFeatures()
                         .WithAuthority(TestConstants.AuthorityUtidTenant)
                         .WithClientSecret(TestConstants.ClientSecret)
-                        .WithHttpManager(_harness.HttpManager)
-                        .BuildConcrete();
+                        .WithHttpManager(_harness.HttpManager);
+
+            if (cacheOptions != null)
+            {
+                builder = builder.WithCacheOptions(cacheOptions);
+            }
+
+            _cca = builder.BuildConcrete();
         }
 
-        private void VerifyMetrics(int expectedMetricCount, List<Metric> exportedMetrics, 
+        [TestMethod]
+        public async Task DisableInternalCacheOptions_AcquireTokenForClient_OTelEmitsCacheDisabledReason_Async()
+        {
+            using (_harness = CreateTestHarness())
+            {
+                CreateApplication(cacheOptions: CacheOptions.DisableInternalCacheOptions);
+
+                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                _harness.HttpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                AuthenticationResult result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.AreEqual(CacheRefreshReason.CacheDisabled, result.AuthenticationResultMetadata.CacheRefreshReason);
+
+                s_meterProvider.ForceFlush();
+
+                var msalSuccess = _exportedMetrics.FirstOrDefault(m => m.Name == "MsalSuccess");
+                Assert.IsNotNull(msalSuccess, "MsalSuccess metric should be emitted.");
+
+                foreach (var metricPoint in msalSuccess.GetMetricPoints())
+                {
+                    AssertTagValue(metricPoint.Tags, TelemetryConstants.CacheRefreshReason, CacheRefreshReason.CacheDisabled);
+                }
+            }
+        }
+
+        [TestMethod]
+        public async Task DisableInternalCacheOptions_AcquireTokenOnBehalfOf_OTelEmitsCacheDisabledReason_Async()
+        {
+            using (_harness = CreateTestHarness())
+            {
+                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost();
+
+                var cca = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithAuthority(TestConstants.AuthorityCommonTenant)
+                    .WithHttpManager(_harness.HttpManager)
+                    .WithCacheOptions(CacheOptions.DisableInternalCacheOptions)
+                    .BuildConcrete();
+
+                AuthenticationResult result = await cca.AcquireTokenOnBehalfOf(
+                    TestConstants.s_scope, new UserAssertion(TestConstants.DefaultAccessToken))
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.AreEqual(CacheRefreshReason.CacheDisabled, result.AuthenticationResultMetadata.CacheRefreshReason);
+
+                s_meterProvider.ForceFlush();
+
+                var msalSuccess = _exportedMetrics.FirstOrDefault(m => m.Name == "MsalSuccess");
+                Assert.IsNotNull(msalSuccess, "MsalSuccess metric should be emitted.");
+
+                foreach (var metricPoint in msalSuccess.GetMetricPoints())
+                {
+                    AssertTagValue(metricPoint.Tags, TelemetryConstants.CacheRefreshReason, CacheRefreshReason.CacheDisabled);
+                }
+            }
+        }
+
+        private void AssertTagValue(ReadOnlyTagCollection tags, string tagKey, object expectedValue)
+        {
+            IDictionary<string, object> tagDictionary = new Dictionary<string, object>();
+            foreach (var tag in tags)
+            {
+                tagDictionary[tag.Key] = tag.Value;
+            }
+            Assert.IsTrue(tagDictionary.ContainsKey(tagKey), $"Tag '{tagKey}' is missing from metric point.");
+            Assert.AreEqual(expectedValue, tagDictionary[tagKey], $"Tag '{tagKey}' has unexpected value.");
+        }
+
+        [TestMethod]
+        public async Task MsalFailure_ServiceException_RawStsErrorCodeTag_IncludedAsync()
+        {
+            using (_harness = CreateTestHarness())
+            {
+                CreateApplication();
+
+                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                _harness.HttpManager.AddTokenResponse(TokenResponseType.InvalidClient);
+
+                MsalServiceException ex = await AssertException.TaskThrowsAsync<MsalServiceException>(
+                    () => _cca.AcquireTokenForClient(TestConstants.s_scopeForAnotherResource)
+                        .WithExtraQueryParameters(extraQueryParams)
+                        .WithTenantId(TestConstants.Utid)
+                        .ExecuteAsync(CancellationToken.None)).ConfigureAwait(false);
+
+                Assert.IsNotNull(ex.ErrorCodes, "ErrorCodes should be populated from IDP response.");
+
+                s_meterProvider.ForceFlush();
+
+                var failureMetric = _exportedMetrics.First(m => m.Name == "MsalFailure");
+                foreach (var metricPoint in failureMetric.GetMetricPoints())
+                {
+                    var tags = GetTagDictionary(metricPoint.Tags);
+                    Assert.IsTrue(tags.ContainsKey(TelemetryConstants.RawStsErrorCode),
+                        "RawStsErrorCode tag should be present when the IDP response contains error_codes.");
+                    Assert.AreEqual(ex.ErrorCodes.FirstOrDefault(), tags[TelemetryConstants.RawStsErrorCode]);
+                }
+            }
+        }
+
+        [TestMethod]
+        public async Task MsalFailure_ClientException_RawStsErrorCodeTag_NotIncludedAsync()
+        {
+            using (_harness = CreateTestHarness())
+            {
+                CreateApplication();
+
+                // Null scope triggers MsalClientException before any HTTP call — no ErrorCodes
+                MsalClientException ex = await AssertException.TaskThrowsAsync<MsalClientException>(
+                    () => _cca.AcquireTokenForClient(null)
+                        .WithExtraQueryParameters(extraQueryParams)
+                        .WithTenantId(TestConstants.Utid)
+                        .ExecuteAsync(CancellationToken.None)).ConfigureAwait(false);
+
+                Assert.IsNotNull(ex);
+
+                s_meterProvider.ForceFlush();
+
+                var failureMetric = _exportedMetrics.First(m => m.Name == "MsalFailure");
+                foreach (var metricPoint in failureMetric.GetMetricPoints())
+                {
+                    var tags = GetTagDictionary(metricPoint.Tags);
+                    Assert.IsFalse(tags.ContainsKey(TelemetryConstants.RawStsErrorCode),
+                        "RawStsErrorCode tag should not be present for non-service exceptions.");
+                }
+            }
+        }
+
+        private static IDictionary<string, object> GetTagDictionary(ReadOnlyTagCollection tags)
+        {
+            var dict = new Dictionary<string, object>();
+            foreach (var tag in tags)
+                dict[tag.Key] = tag.Value;
+            return dict;
+        }
+
+        private void VerifyMetrics(int expectedMetricCount, List<Metric> exportedMetrics,
             long expectedSuccessfulRequests, long expectedFailedRequests)
         {
             Assert.HasCount(expectedMetricCount, exportedMetrics, "Count of metrics recorded is not as expected.");
@@ -633,7 +780,10 @@ namespace Microsoft.Identity.Test.Unit
                         foreach (var metricPoint in exportedItem.GetMetricPoints())
                         {
                             totalFailedRequests += metricPoint.GetSumLong();
-                            AssertTags(metricPoint.Tags, expectedTags, true);
+                            var pointExpectedTags = new List<string>(expectedTags);
+                            if (GetTagDictionary(metricPoint.Tags).ContainsKey(TelemetryConstants.RawStsErrorCode))
+                                pointExpectedTags.Add(TelemetryConstants.RawStsErrorCode);
+                            AssertTags(metricPoint.Tags, pointExpectedTags, true);
                         }
 
                         Assert.AreEqual(expectedFailedRequests, totalFailedRequests);
@@ -776,6 +926,26 @@ namespace Microsoft.Identity.Test.Unit
                         foreach (var metricPoint in exportedItem.GetMetricPoints())
                         {
                             AssertTags(metricPoint.Tags, expectedTags);
+                        }
+
+                        break;
+
+                    case "MsalRemainingTokenLifetime.1A":
+                        Trace.WriteLine("Verify the metrics captured for MsalRemainingTokenLifetime.1A histogram.");
+                        Assert.AreEqual(MetricType.Histogram, exportedItem.MetricType);
+
+                        expectedTags.Add(TelemetryConstants.MsalVersionPlatform);
+                        expectedTags.Add(TelemetryConstants.ApiId);
+                        expectedTags.Add(TelemetryConstants.TokenSource);
+                        expectedTags.Add(TelemetryConstants.CacheLevel);
+                        expectedTags.Add(TelemetryConstants.CacheRefreshReason);
+                        expectedTags.Add(TelemetryConstants.TokenType);
+
+                        foreach (var metricPoint in exportedItem.GetMetricPoints())
+                        {
+                            AssertTags(metricPoint.Tags, expectedTags);
+                            Assert.IsGreaterThan((long)0, metricPoint.GetHistogramCount(), "Histogram should have at least one recorded value.");
+                            Assert.IsGreaterThanOrEqualTo(0.0, metricPoint.GetHistogramSum(), "Remaining token lifetime should be non-negative.");
                         }
 
                         break;

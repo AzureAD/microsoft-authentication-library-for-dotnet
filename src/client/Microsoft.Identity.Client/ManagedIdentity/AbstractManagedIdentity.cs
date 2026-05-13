@@ -17,11 +17,7 @@ using System.Net.Security;
 using Microsoft.Identity.Client.Http.Retry;
 using System.Collections.Generic;
 using System.Linq;
-#if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text.Json;
-#else
-using Microsoft.Identity.Json;
-#endif
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {

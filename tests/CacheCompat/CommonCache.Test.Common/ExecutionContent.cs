@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace CommonCache.Test.Common
 {
@@ -14,7 +14,7 @@ namespace CommonCache.Test.Common
         public string ErrorMessage { get; set; }
         public string StackTrace { get; set; }
 
-        [JsonProperty("Results")]
+        [JsonPropertyName("Results")]
         public List<CacheExecutorAccountResult> Results { get; set; } = new List<CacheExecutorAccountResult>();
 
         public static ExecutionContent CreateFromException(Exception ex)

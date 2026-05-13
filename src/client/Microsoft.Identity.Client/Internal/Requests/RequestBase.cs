@@ -38,6 +38,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
         internal ICacheSessionManager CacheManager => AuthenticationRequestParameters.CacheSessionManager;
         internal IServiceBundle ServiceBundle { get; }
 
+        /// <summary>
+        /// Returns <c>true</c> if the internal token cache is disabled via <c>CacheOptions.DisableInternalCacheOptions</c>.
+        /// </summary>
+        protected bool IsInternalCacheDisabled =>
+            CacheOptions.IsDisabledFor(ServiceBundle.Config.AccessorOptions);
+
         protected RequestBase(
             IServiceBundle serviceBundle,
             AuthenticationRequestParameters authenticationRequestParameters,
@@ -108,7 +114,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
 
                 int httpStatusCode = ex is MsalServiceException serviceEx ? serviceEx.StatusCode : 0;
-                LogFailureTelemetryToOtel(apiEvent, apiEvent.ApiErrorCode, httpStatusCode, requestStopwatch.ElapsedMilliseconds + measureTelemetryDurationResult.Milliseconds);
+
+                LogFailureTelemetryToOtel(
+                    ex.ErrorCode,
+                    apiEvent,
+                    apiEvent.CacheInfo,
+                    httpStatusCode,
+                    requestStopwatch.ElapsedMilliseconds + measureTelemetryDurationResult.Milliseconds,
+                    (ex as MsalServiceException)?.ErrorCodes?.FirstOrDefault());
                 throw;
             }
             catch (Exception ex)
@@ -116,32 +129,41 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 apiEvent.ApiErrorCode = ex.GetType().Name;
                 AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
 
-                LogFailureTelemetryToOtel(apiEvent, apiEvent.ApiErrorCode, httpStatusCode: 0, requestStopwatch.ElapsedMilliseconds + measureTelemetryDurationResult.Milliseconds);
+                LogFailureTelemetryToOtel(ex.GetType().Name, apiEvent, apiEvent.CacheInfo, httpStatusCode: 0, requestStopwatch.ElapsedMilliseconds + measureTelemetryDurationResult.Milliseconds);
                 throw;
             }
         }
 
         private void LogSuccessTelemetryToOtel(AuthenticationResult authenticationResult, ApiEvent apiEvent, long durationInUs)
         {
+            CacheLevel cacheLevel = GetCacheLevel(authenticationResult);
+
+            // Log metrics
             ServiceBundle.PlatformProxy.OtelInstrumentation.LogSuccessMetrics(
-                ServiceBundle.PlatformProxy.GetProductName(),
-                apiEvent.ApiId,
-                apiEvent.CallerSdkApiId,
-                apiEvent.CallerSdkVersion,
-                GetCacheLevel(authenticationResult),
-                durationInUs,
-                authenticationResult.AuthenticationResultMetadata,
-                AuthenticationRequestParameters.RequestContext.Logger);
+                        ServiceBundle.PlatformProxy.GetProductName(),
+                        apiEvent.ApiId,
+                        apiEvent.CallerSdkApiId,
+                        apiEvent.CallerSdkVersion,
+                        cacheLevel,
+                        durationInUs,
+                        authenticationResult.AuthenticationResultMetadata,
+                        AuthenticationRequestParameters.RequestContext.Logger,
+                        authenticationResult.ExpiresOn);
         }
 
-        private void LogFailureTelemetryToOtel(ApiEvent apiEvent, string errorCode, int httpStatusCode, long totalDurationInMs)
+        private void LogFailureTelemetryToOtel(string errorCodeToLog, ApiEvent apiEvent, CacheRefreshReason cacheRefreshReason, int httpStatusCode, long totalDurationInMs, string rawStsErrorCode = null)
         {
             ServiceBundle.PlatformProxy.OtelInstrumentation.LogFailureMetrics(
-                ServiceBundle.PlatformProxy.GetProductName(),
-                apiEvent,
-                errorCode,
-                httpStatusCode,
-                totalDurationInMs);
+                        ServiceBundle.PlatformProxy.GetProductName(),
+                        errorCodeToLog,
+                        apiEvent,
+                        apiEvent.CallerSdkApiId,
+                        apiEvent.CallerSdkVersion,
+                        cacheRefreshReason,
+                        apiEvent.TokenType,
+                        httpStatusCode,
+                        totalDurationInMs,
+                        rawStsErrorCode);
         }
 
         private Tuple<string, string> ParseScopesForTelemetry()
@@ -344,7 +366,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 #if !MOBILE
             atItem?.AddAdditionalCacheParameters(clientInfoFromServer?.AdditionalResponseParameters);
 #endif
-            return await AuthenticationResult.CreateAsync(
+            var authResult = await AuthenticationResult.CreateAsync(
                 atItem,
                 idtItem,
                 AuthenticationRequestParameters.AuthenticationScheme,
@@ -355,6 +377,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 msalTokenResponse.SpaAuthCode,
                 msalTokenResponse.CreateExtensionDataStringMap(),
                 cancellationToken).ConfigureAwait(false);
+
+            authResult.RefreshToken = AuthenticationRequestParameters.AppConfig.IsConfidentialClient
+                ? msalTokenResponse.RefreshToken
+                : null;
+            return authResult;
         }
 
         protected virtual void ValidateAccountIdentifiers(ClientInfo fromServer)

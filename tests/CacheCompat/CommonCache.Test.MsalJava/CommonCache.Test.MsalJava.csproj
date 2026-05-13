@@ -8,7 +8,6 @@
   <ItemGroup>
     <ProjectReference Include="..\CommonCache.Test.Common\CommonCache.Test.Common.csproj" />
     <PackageReference Include="CommandLineParser"/>
-    <PackageReference Include="Newtonsoft.Json" />   
   </ItemGroup>
 
   <ItemGroup>

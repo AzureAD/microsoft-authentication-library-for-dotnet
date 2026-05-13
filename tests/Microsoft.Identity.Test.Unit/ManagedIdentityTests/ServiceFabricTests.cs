@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(ManagedIdentitySource.ServiceFabric, "http://localhost:40342/metadata/identity/oauth2/token", thumbprint: thumbprint);
-                var certificate = new X509Certificate2(ResourceHelper.GetTestResourceRelativePath("testCert.crtfile"), TestConstants.TestCertPassword);
+                var certificate = new X509Certificate2(ResourceHelper.GetTestResourceRelativePath("testCert.crtfile"), TestConstants.TestPlaceholderCredential);
                 var chain = new X509Chain();
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)

@@ -67,10 +67,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await RunHappyPathTestAsync(user, app, isPublicClient: false, cloud:Cloud.Arlington).ConfigureAwait(false);
         }
 
-        [RunOn(TargetFrameworks.NetCore)]
-#if IGNORE_FEDERATED
-        [Ignore]
-#endif
+        [RunOn(TargetFrameworks.NetCore, SkipConditions.FederatedDisabled)]
         public async Task ROPC_ADFSv4Federated_Async()
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserFederated).ConfigureAwait(false);
@@ -78,15 +75,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await RunHappyPathTestAsync(user, app).ConfigureAwait(false);
         }
 
-        [RunOn(TargetFrameworks.NetCore)]
         [TestCategory(TestCategories.ADFS)]
-#if IGNORE_FEDERATED
-        [Ignore]
-#endif
+        [RunOn(TargetFrameworks.NetCore, SkipConditions.FederatedDisabled)]
         public async Task AcquireTokenFromAdfsUsernamePasswordAsync()
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserFederated).ConfigureAwait(false);
-            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
+            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppAdfsNativeClient).ConfigureAwait(false);
 
             // Use the new ADFS authority and disable validation since ADFS infrastructure is not fully available
             Uri authorityUri = new Uri("https://fs.id4slab1.com/adfs");

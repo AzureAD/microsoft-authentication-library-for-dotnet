@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache.Items;
@@ -104,6 +105,15 @@ namespace Microsoft.Identity.Client.Internal
                         Cache.CacheLevel.None,
                         logger,
                         apiEvent.TokenType);
+
+                    serviceBundle.PlatformProxy.OtelInstrumentation.LogRemainingTokenLifetime(
+                        serviceBundle.PlatformProxy.GetProductName(),
+                        apiEvent.ApiId,
+                        TokenSource.IdentityProvider,
+                        Cache.CacheLevel.None,
+                        CacheRefreshReason.ProactivelyRefreshed,
+                        apiEvent.TokenType,
+                        authResult.ExpiresOn);
                     serviceBundle.PlatformProxy.OtelInstrumentation.LogSuccessHttpDuration(
                         serviceBundle.PlatformProxy.GetProductName(),
                         apiEvent.ApiId,
@@ -123,18 +133,27 @@ namespace Microsoft.Identity.Client.Internal
 
                     serviceBundle.PlatformProxy.OtelInstrumentation.LogFailureMetrics(
                         serviceBundle.PlatformProxy.GetProductName(),
-                        apiEvent,
                         ex.ErrorCode,
+                        apiEvent,                        
+                        callerSdkId,
+                        callerSdkVersion,
+                        CacheRefreshReason.ProactivelyRefreshed,
+                        apiEvent.TokenType,
                         ex.StatusCode,
-                        totalDurationInMs: 0);
+                        totalDurationInMs: 0,
+                        ex.ErrorCodes?.FirstOrDefault());
                 }
                 catch (OperationCanceledException ex)
                 {
                     logger.WarningPiiWithPrefix(ex, ProactiveRefreshCancellationError);
                     serviceBundle.PlatformProxy.OtelInstrumentation.LogFailureMetrics(
                         serviceBundle.PlatformProxy.GetProductName(),
-                        apiEvent,
                         ex.GetType().Name,
+                        apiEvent,
+                        callerSdkId,
+                        callerSdkVersion,
+                        CacheRefreshReason.ProactivelyRefreshed,
+                        apiEvent.TokenType,
                         httpStatusCode: 0,
                         totalDurationInMs: 0);
                 }
@@ -143,8 +162,12 @@ namespace Microsoft.Identity.Client.Internal
                     logger.ErrorPiiWithPrefix(ex, ProactiveRefreshGeneralError);
                     serviceBundle.PlatformProxy.OtelInstrumentation.LogFailureMetrics(
                         serviceBundle.PlatformProxy.GetProductName(),
-                        apiEvent,
                         ex.GetType().Name,
+                        apiEvent,
+                        callerSdkId,
+                        callerSdkVersion,
+                        CacheRefreshReason.ProactivelyRefreshed,
+                        apiEvent.TokenType,
                         httpStatusCode: 0,
                         totalDurationInMs: 0);
                 }

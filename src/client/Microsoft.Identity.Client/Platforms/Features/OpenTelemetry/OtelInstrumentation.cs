@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 using System;
+using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
@@ -43,6 +44,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
         private const string DurationInL2CacheHistogramName = "MsalDurationInL2Cache.1A";
         private const string DurationInHttpHistogramName = "MsalDurationInHttp.1A";
         private const string DurationInExtensionInMsHistogram = "MsalDurationInExtensionInMs.1B";
+        private const string RemainingTokenLifetimeHistogramName = "MsalRemainingTokenLifetime.1A";
         private const string TotalDurationV2HistogramName = "MsalTotalDuration.2";
         private const string DurationInHttpV2HistogramName = "MsalDurationInHttp.2";
 
@@ -123,6 +125,14 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             unit: "us",
             description: "Performance of token acquisition calls extension latency."));
 
+        /// <summary>
+        /// Histogram to record the remaining lifetime of acquired tokens in seconds.
+        /// </summary>
+        internal static readonly Lazy<Histogram<long>> s_remainingTokenLifetime = new(() => Meter.CreateHistogram<long>(
+            RemainingTokenLifetimeHistogramName,
+            unit: "s",
+            description: "Remaining lifetime of acquired tokens at the time of acquisition."));
+
         public OtelInstrumentation()
         {
             // Needed to fail fast if the runtime, like in-process Azure Functions, doesn't support OpenTelemetry
@@ -143,7 +153,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             CacheLevel cacheLevel,
             long totalDurationInUs,
             AuthenticationResultMetadata authResultMetadata,
-            ILoggerAdapter logger)
+            ILoggerAdapter logger,
+            DateTimeOffset expiresOn)
         {
             IncrementSuccessCounter(
                 platform,
@@ -240,6 +251,15 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                         new(TelemetryConstants.HttpStatusCode, 200));
                 }
             }
+
+            LogRemainingTokenLifetime(
+                platform,
+                apiId,
+                authResultMetadata.TokenSource,
+                cacheLevel,
+                authResultMetadata.CacheRefreshReason,
+                authResultMetadata.TelemetryTokenType,
+                expiresOn);
         }
 
         public void IncrementSuccessCounter(string platform,
@@ -302,21 +322,33 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
 
         public void LogFailureMetrics(
             string platform,
+            string errorCode,   
             ApiEvent apiEvent,
-            string errorCode,
+            string callerSdkId,
+            string callerSdkVersion,
+            CacheRefreshReason cacheRefreshReason,
+            int tokenType,
             int httpStatusCode,
-            long totalDurationInMs)
+            long totalDurationInMs,
+            string rawStsErrorCode = null)
         {
             if (s_failureCounter.Value.Enabled)
             {
-                s_failureCounter.Value.Add(1,
-                    new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
-                    new(TelemetryConstants.Platform, platform),
-                    new(TelemetryConstants.ErrorCode, errorCode),
-                    new(TelemetryConstants.ApiId, apiEvent.ApiId),
-                    new(TelemetryConstants.CallerSdkId, apiEvent.CallerSdkApiId ?? string.Empty + "," + apiEvent.CallerSdkVersion ?? string.Empty),
-                    new(TelemetryConstants.CacheRefreshReason, apiEvent.CacheInfo),
-                    new(TelemetryConstants.TokenType, apiEvent.TokenType));
+                var tags = new TagList
+                {
+                    { TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion() },
+                    { TelemetryConstants.Platform, platform },
+                    { TelemetryConstants.ErrorCode, errorCode },
+                    { TelemetryConstants.ApiId, apiEvent.ApiId },
+                    { TelemetryConstants.CallerSdkId, callerSdkId ?? string.Empty + "," + callerSdkVersion ?? string.Empty },
+                    { TelemetryConstants.CacheRefreshReason, cacheRefreshReason },
+                    { TelemetryConstants.TokenType, tokenType }
+                };
+
+                if (!string.IsNullOrEmpty(rawStsErrorCode))
+                    tags.Add(TelemetryConstants.RawStsErrorCode, rawStsErrorCode);
+
+                s_failureCounter.Value.Add(1, in tags);
             }
 
             if (_isExtendedMetricsEnabled)
@@ -327,11 +359,13 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                         new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                         new(TelemetryConstants.Platform, platform),
                         new(TelemetryConstants.ApiId, apiEvent.ApiId),
-                        new(TelemetryConstants.TokenSource, apiEvent.TokenSource),
-                        new(TelemetryConstants.CacheLevel, string.Empty),
+                        new(TelemetryConstants.CallerSdkId, callerSdkId ?? string.Empty + "," + callerSdkVersion ?? string.Empty),
                         new(TelemetryConstants.CacheRefreshReason, apiEvent.CacheInfo),
+                        new(TelemetryConstants.CacheLevel, string.Empty),
+                        new(TelemetryConstants.TokenSource, apiEvent.TokenSource),
                         new(TelemetryConstants.TokenType, apiEvent.TokenType),
                         new(TelemetryConstants.ErrorCode, errorCode),
+                        new(TelemetryConstants.RawStsErrorCode, rawStsErrorCode),
                         new(TelemetryConstants.Succeeded, false));
                 }
 
@@ -345,6 +379,29 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                         new(TelemetryConstants.TokenType, apiEvent.TokenType),
                         new(TelemetryConstants.HttpStatusCode, httpStatusCode));
                 }
+            }
+        }
+
+        public void LogRemainingTokenLifetime(
+            string platform,
+            ApiEvent.ApiIds apiId,
+            TokenSource tokenSource,
+            CacheLevel cacheLevel,
+            CacheRefreshReason cacheRefreshReason,
+            int tokenType,
+            DateTimeOffset expiresOn)
+        {
+            if (s_remainingTokenLifetime.Value.Enabled)
+            {
+                long remainingSeconds = Math.Max(0, (long)(expiresOn - DateTimeOffset.UtcNow).TotalSeconds);
+
+                s_remainingTokenLifetime.Value.Record(remainingSeconds,
+                    new(TelemetryConstants.MsalVersionPlatform, $"{MsalIdHelper.GetMsalVersion()},{platform}"),
+                    new(TelemetryConstants.ApiId, apiId),
+                    new(TelemetryConstants.TokenSource, tokenSource),
+                    new(TelemetryConstants.CacheLevel, cacheLevel),
+                    new(TelemetryConstants.CacheRefreshReason, cacheRefreshReason),
+                    new(TelemetryConstants.TokenType, tokenType));
             }
         }
     }

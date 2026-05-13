@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
         #endregion MSTest Hooks
 
-        [TestMethod]
+        [RunOn(SkipConditions.OneBranchBuild)]
         [Timeout(2 * 60 * 1000, CooperativeCancellation = true)] // 2 min timeout
         public async Task DeviceCodeFlowTestAsync()
         {
@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             await AcquireTokenWithDeviceCodeFlowAsync(user, app, "aad user").ConfigureAwait(false);
         }
 
-        [TestMethod]
+        [RunOn(SkipConditions.OneBranchBuild)]
         [Timeout(2 * 60 * 1000, CooperativeCancellation = true)] // 2 min timeout
         public async Task SilentTokenAfterDeviceCodeFlowWithBrokerTestAsync()
         {

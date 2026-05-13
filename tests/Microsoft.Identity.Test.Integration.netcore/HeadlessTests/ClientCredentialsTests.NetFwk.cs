@@ -64,6 +64,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 Assert.Inconclusive("Can't run regional on local devbox.");
             }
 
+#if ONEBRANCH_BUILD
+            // IMDS-based region auto-detection is not available on 1ES Hosted Pool agents
+            if (useRegional)
+            {
+                Assert.Inconclusive("Regional auto-detection via IMDS is not available on OneBranch 1ES agents.");
+            }
+#endif
+
             var cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
 
             var builder = ConfidentialClientApplicationBuilder.Create(LabAuthenticationHelper.LabAccessConfidentialClientId)
@@ -547,6 +555,13 @@ var confidentialApp = ConfidentialClientApplicationBuilder
                 .WithAuthority(authority, true)
                 .WithTestLogging();
 
+            var authorityUri = new Uri(authority);
+            bool isAdfs = authorityUri.AbsolutePath.Equals("/adfs", StringComparison.OrdinalIgnoreCase) ||
+                authorityUri.AbsolutePath.StartsWith("/adfs/", StringComparison.OrdinalIgnoreCase);
+            string adfsAud = isAdfs ?
+                authority + "/oauth2/token" :
+                authority + "/oauth2/v2.0/token";
+
             switch (credentialType)
             {
                 case CredentialType.Cert:
@@ -556,27 +571,18 @@ var confidentialApp = ConfidentialClientApplicationBuilder
                     builder.WithClientSecret(secret);
                     break;
                 case CredentialType.ClientAssertion_Manual:
-
-                    var aud = authority.Contains("/adfs/") ?
-                        authority + "/oauth2/token" :
-                        authority + "/oauth2/v2.0/token";
-
                     builder.WithClientAssertion(() => GetSignedClientAssertionManual(
                       clientId,
-                      aud, // for AAD use v2.0, but not for ADFS
+                      adfsAud, // for AAD use v2.0, but not for ADFS
                       cert,
                       useSha2AndPssForAssertion));
                     break;
 
                 case CredentialType.ClientAssertion_Wilson:
-                    var aud2 = authority.Contains("/adfs/") ?
-                       authority + "/oauth2/token" :
-                       authority + "/oauth2/v2.0/token";
-
                     builder.WithClientAssertion(
                         () => GetSignedClientAssertionUsingWilson(
                             clientId,
-                            aud2,
+                            adfsAud,
                             cert));
                     break;
 #pragma warning disable CS0618 // Type or member is obsolete

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -142,15 +142,26 @@ namespace Microsoft.Identity.Client
                              tenantId,
                              wamAccountIds);
 
-                // Add the newly obtained id token to the list of profiles
+                // Add the newly obtained id token to the list of profiles.
                 IDictionary<string, TenantProfile> tenantProfiles = null;
                 if (msalIdTokenCacheItem.TenantId != null)
                 {
-                    tenantProfiles = await GetTenantProfilesAsync(requestParams, homeAccountId).ConfigureAwait(false);
-                    if (tenantProfiles != null)
+                    if (CacheOptions.IsDisabledFor(ServiceBundle.Config.AccessorOptions))
                     {
-                        TenantProfile tenantProfile = new TenantProfile(msalIdTokenCacheItem);
-                        tenantProfiles[msalIdTokenCacheItem.TenantId] = tenantProfile;
+                        // When the internal cache is disabled, skip GetTenantProfilesAsync (which reads
+                        // from Accessor) and instead seed a fresh dict with just the current profile.
+                        tenantProfiles = new Dictionary<string, TenantProfile>
+                        {
+                            [msalIdTokenCacheItem.TenantId] = new TenantProfile(msalIdTokenCacheItem)
+                        };
+                    }
+                    else
+                    {
+                        tenantProfiles = await GetTenantProfilesAsync(requestParams, homeAccountId).ConfigureAwait(false);
+                        if (tenantProfiles != null)
+                        {
+                            tenantProfiles[msalIdTokenCacheItem.TenantId] = new TenantProfile(msalIdTokenCacheItem);
+                        }
                     }
                 }
 
@@ -164,6 +175,12 @@ namespace Microsoft.Identity.Client
             }
 
             #endregion
+
+            if (CacheOptions.IsDisabledFor(ServiceBundle.Config.AccessorOptions))
+            {
+                logger.Verbose(() => "[SaveTokenResponseAsync] Internal cache is disabled (CacheOptions.DisableInternalCacheOptions). Skipping all cache writes.");
+                return Tuple.Create(msalAccessTokenCacheItem, msalIdTokenCacheItem, account);
+            }
 
             logger.Verbose(() => $"[SaveTokenResponseAsync] Entering token cache semaphore. Count {_semaphoreSlim.GetCurrentCountLogMessage()}.");
             await _semaphoreSlim.WaitAsync(requestParams.RequestContext.UserCancellationToken).ConfigureAwait(false);
@@ -212,7 +229,8 @@ namespace Microsoft.Identity.Client
                             tenantId,
                             msalAccessTokenCacheItem.ScopeSet,
                             msalAccessTokenCacheItem.HomeAccountId,
-                            msalAccessTokenCacheItem.TokenType);
+                            msalAccessTokenCacheItem.TokenType,
+                            msalAccessTokenCacheItem.AdditionalCacheKeyComponents);
 
                         Accessor.SaveAccessToken(msalAccessTokenCacheItem);
                     }
@@ -497,20 +515,39 @@ namespace Microsoft.Identity.Client
             return msalAccessTokenCacheItem;
         }
 
+        // Symmetric filter for AdditionalCacheKeyComponents (GH #5963):
+        //   request WITH components    -> keep ONLY items with matching components
+        //   request WITHOUT components -> keep ONLY items without components
         private void FilterTokensByAdditionalKeyComponents(List<MsalAccessTokenCacheItem> accessTokens, AuthenticationRequestParameters requestParams)
         {
-            if (requestParams.CacheKeyComponents != null)
+            bool requestHasComponents =
+                requestParams.CacheKeyComponents != null &&
+                requestParams.CacheKeyComponents.Count > 0;
+
+            int countBeforeFilter = accessTokens.Count;
+
+            if (requestHasComponents)
             {
                 accessTokens.FilterWithLogging(item =>
                     item.AdditionalCacheKeyComponents != null &&
                     CollectionHelpers.AreDictionariesEqual(item.AdditionalCacheKeyComponents, requestParams.CacheKeyComponents),
                     requestParams.RequestContext.Logger,
                     "Filtering by additional key components");
+            }
+            else
+            {
+                accessTokens.FilterWithLogging(item =>
+                    item.AdditionalCacheKeyComponents == null ||
+                    item.AdditionalCacheKeyComponents.Count == 0,
+                    requestParams.RequestContext.Logger,
+                    "Filtering out tokens that have additional key components");
+            }
 
-                if (accessTokens.Count == 0)
-                {
-                    requestParams.RequestContext.Logger.Verbose(() => "No tokens found that match the provided key components. ");
-                }
+            // Only attribute the miss to this filter if it is actually responsible for
+            // emptying the candidate set (i.e., entered with > 0 and exited with 0).
+            if (countBeforeFilter > 0 && accessTokens.Count == 0)
+            {
+                requestParams.RequestContext.Logger.Verbose(() => "No tokens found that match the additional key components filter. ");
             }
         }
 

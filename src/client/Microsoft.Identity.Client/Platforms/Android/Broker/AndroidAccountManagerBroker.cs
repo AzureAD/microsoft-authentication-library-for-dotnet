@@ -12,7 +12,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.UI;
-using Microsoft.Identity.Json.Linq;
+using System.Text.Json.Nodes;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Http;
@@ -350,16 +350,16 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                             return;
                         }
 
-                        JObject errorResultObj = JObject.Parse(helloRequestResult.GetString(BrokerConstants.BrokerResultV2) ?? "{}");
+                        JsonObject errorResultObj = JsonNode.Parse(helloRequestResult.GetString(BrokerConstants.BrokerResultV2) ?? "{}").AsObject();
                         string errorCode = null;
                         string errorDescription = null;
 
                         if (errorResultObj != null && errorResultObj.Count > 0)
                         {
-                            JToken errorCodeToken = errorResultObj[BrokerResponseConst.BrokerErrorCode];
+                            JsonNode errorCodeToken = errorResultObj[BrokerResponseConst.BrokerErrorCode];
                             errorCode = errorCodeToken?.ToString();
                             
-                            JToken errorMsgToken = errorResultObj[BrokerResponseConst.BrokerErrorMessage];
+                            JsonNode errorMsgToken = errorResultObj[BrokerResponseConst.BrokerErrorMessage];
                             string errorMessage = errorMsgToken?.ToString();
                             errorDescription = $"[Android broker] An error occurred during hand shake with the broker. Error: {errorCode} Error Message: {errorMessage}";
                         }
