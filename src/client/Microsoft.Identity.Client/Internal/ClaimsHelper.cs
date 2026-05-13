@@ -37,8 +37,10 @@ namespace Microsoft.Identity.Client.Internal
                 JObject sorted = SortJsonObjectKeys(parsed);
                 return JsonHelper.JsonObjectToString(sorted);
             }
-            catch (JsonException ex)
+            catch (Exception ex) when (ex is JsonException || ex is InvalidOperationException)
             {
+                // InvalidOperationException is thrown by JsonNode.AsObject() when the root token is
+                // valid JSON but not an object (e.g. an array or a scalar).
                 // Do not include the raw claimsJson in the message — it may contain sensitive data.
                 throw new MsalClientException(
                     MsalError.InvalidJsonClaimsFormat,
@@ -63,8 +65,10 @@ namespace Microsoft.Identity.Client.Internal
                 JObject merged = JsonHelper.Merge(obj1, obj2);
                 return JsonHelper.JsonObjectToString(merged);
             }
-            catch (JsonException ex)
+            catch (Exception ex) when (ex is JsonException || ex is InvalidOperationException)
             {
+                // InvalidOperationException is thrown by JsonNode.AsObject() when a value is
+                // valid JSON but not an object (e.g. an array or a scalar).
                 throw new MsalClientException(
                     MsalError.InvalidJsonClaimsFormat,
                     MsalErrorMessage.InvalidJsonClaimsFormat(claims1),

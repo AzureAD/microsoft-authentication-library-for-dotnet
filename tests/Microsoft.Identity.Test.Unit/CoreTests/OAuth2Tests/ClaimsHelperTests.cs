@@ -96,6 +96,20 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
             Assert.AreEqual(MsalError.InvalidJsonClaimsFormat, ex.ErrorCode);
         }
 
+        [TestMethod]
+        [DataRow("[]")]          // JSON array — valid JSON but not an object
+        [DataRow("[1,2,3]")]
+        [DataRow("\"string\"")]  // JSON string — valid JSON but not an object
+        [DataRow("42")]          // JSON number
+        public void NormalizeClaimsJson_ValidJsonButNotObject_ThrowsMsalClientException(string nonObjectJson)
+        {
+            // Act & Assert — InvalidOperationException from JsonNode.AsObject() must be translated
+            MsalClientException ex = Assert.ThrowsExactly<MsalClientException>(
+                () => ClaimsHelper.NormalizeClaimsJson(nonObjectJson));
+
+            Assert.AreEqual(MsalError.InvalidJsonClaimsFormat, ex.ErrorCode);
+        }
+
         #endregion
 
         #region MergeClaimsObjects
@@ -191,6 +205,21 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
             // Act & Assert
             MsalClientException ex = Assert.ThrowsExactly<MsalClientException>(
                 () => ClaimsHelper.MergeClaimsObjects(invalid, valid));
+
+            Assert.AreEqual(MsalError.InvalidJsonClaimsFormat, ex.ErrorCode);
+        }
+
+        [TestMethod]
+        [DataRow("[]")]
+        [DataRow("\"string\"")]
+        public void MergeClaimsObjects_ValidJsonButNotObject_ThrowsMsalClientException(string nonObjectJson)
+        {
+            // Arrange — valid JSON that is not an object triggers InvalidOperationException in ParseIntoJsonObject
+            string valid = @"{""a"":1}";
+
+            // Act & Assert — must be translated to MsalClientException, not leak InvalidOperationException
+            MsalClientException ex = Assert.ThrowsExactly<MsalClientException>(
+                () => ClaimsHelper.MergeClaimsObjects(nonObjectJson, valid));
 
             Assert.AreEqual(MsalError.InvalidJsonClaimsFormat, ex.ErrorCode);
         }
