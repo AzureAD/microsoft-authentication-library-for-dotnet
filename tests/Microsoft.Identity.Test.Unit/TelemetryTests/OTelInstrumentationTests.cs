@@ -329,7 +329,7 @@ namespace Microsoft.Identity.Test.Unit
                 Thread.Sleep(1000);
 
                 s_meterProvider.ForceFlush();
-                VerifyMetrics(5, _exportedMetrics, 3, 1);
+                VerifyMetrics(6, _exportedMetrics, 3, 1);
             }
         }
 
