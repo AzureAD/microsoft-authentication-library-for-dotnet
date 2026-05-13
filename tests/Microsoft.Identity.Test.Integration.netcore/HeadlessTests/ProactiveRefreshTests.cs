@@ -92,7 +92,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         private long ValidateSuccessMetrics(MeterProvider meterProvider, List<Metric> exportedMetrics)
         {
-            Assert.HasCount(5, exportedMetrics);
+            Assert.HasCount(6, exportedMetrics);
 
             foreach (var metric in exportedMetrics)
             {
