@@ -677,6 +677,59 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.AreEqual(MsalError.InvalidJsonClaimsFormat, ex.ErrorCode);
             }
         }
+
+        [TestMethod]
+        public void WithClientClaims_JsonNullLiteral_ThrowsMsalClientException()
+        {
+            // "null" is valid JSON but not a JSON object — must produce MsalClientException,
+            // not a raw NullReferenceException from JsonNode.AsObject().
+            using (new EnvVariableContext())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, ManagedIdentityTests.ImdsEndpoint);
+                var mi = ManagedIdentityApplicationBuilder
+                    .Create(ManagedIdentityId.SystemAssigned)
+                    .WithExperimentalFeatures(true)
+                    .Build();
+
+                // Act & Assert
+                MsalClientException ex = Assert.ThrowsExactly<MsalClientException>(
+                    () => mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                            .WithClientClaims("null"));
+
+                Assert.AreEqual(MsalError.InvalidJsonClaimsFormat, ex.ErrorCode);
+            }
+        }
+
+        // ---------------------------------------------------------------------------------
+        // Non-IMDS sources — builder behavior
+        // ---------------------------------------------------------------------------------
+
+        [TestMethod]
+        public void WithClientClaims_NonImdsSource_SetsBuilderParameter()
+        {
+            // WithClientClaims() is available on AcquireTokenForManagedIdentity regardless of
+            // the underlying MI source. This test verifies the builder sets the parameter for
+            // a non-IMDS source (App Service). Whether and how the claim is forwarded on the
+            // wire is source-specific and subject to the POC open question on scope.
+            using (new EnvVariableContext())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.AppService, "http://127.0.0.1:41564/msi/token");
+                var mi = ManagedIdentityApplicationBuilder
+                    .Create(ManagedIdentityId.SystemAssigned)
+                    .WithExperimentalFeatures(true)
+                    .Build();
+
+                // Act
+                var builder = mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithClientClaims(NspClaims);
+
+                // Assert — parameter is stored regardless of source
+                Assert.IsNotNull(builder.CommonParameters.ClientClaims,
+                    "ClientClaims must be set on the builder even for non-IMDS sources.");
+                Assert.IsTrue(builder.CommonParameters.CacheKeyComponents.ContainsKey("client_claims"),
+                    "Cache key component must be registered.");
+            }
+        }
     }
 }
 

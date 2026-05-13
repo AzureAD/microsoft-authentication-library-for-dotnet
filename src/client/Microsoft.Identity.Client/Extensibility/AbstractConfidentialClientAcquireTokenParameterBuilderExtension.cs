@@ -26,6 +26,10 @@ namespace Microsoft.Identity.Client.Extensibility
         /// is keyed on the normalized claims value. Different claims values produce separate cache entries.
         /// Use stable, non-dynamic values to avoid unbounded cache growth.
         /// </summary>
+        /// <remarks>
+        /// This API is intended for MSI and cert/FIC flows (e.g., NSP claims for Azure Redis Cache).
+        /// Behavior for B2C, ADFS, and dSTS is undefined and unsupported.
+        /// </remarks>
         /// <typeparam name="T">The concrete confidential client builder type.</typeparam>
         /// <param name="builder">The builder to chain options to.</param>
         /// <param name="claimsJson">A JSON string containing the client-originated claims. Must be valid JSON.</param>

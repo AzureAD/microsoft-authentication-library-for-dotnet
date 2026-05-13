@@ -124,7 +124,18 @@ namespace Microsoft.Identity.Client.Utils
 
         internal static string JsonObjectToString(JsonObject jsonObject) => jsonObject.ToJsonString();
 
-        internal static JsonObject ParseIntoJsonObject(string json) => JsonNode.Parse(json).AsObject();
+        internal static JsonObject ParseIntoJsonObject(string json)
+        {
+            var node = JsonNode.Parse(json);
+            if (node is null)
+            {
+                // JsonNode.Parse("null") returns null — treat the JSON literal 'null' the same as
+                // any other non-object value so callers get InvalidOperationException, not NRE.
+                throw new InvalidOperationException("The JSON value is the literal 'null', not a JSON object.");
+            }
+
+            return node.AsObject();
+        }
 
         internal static JsonObject ToJsonObject(JsonNode jsonNode) => jsonNode.AsObject();
 

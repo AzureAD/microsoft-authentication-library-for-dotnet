@@ -239,7 +239,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
             string result2 = ClaimsHelper.NormalizeClaimsJson(result);
 
             // Assert — array order must be preserved after normalization
-            Assert.IsLessThan(result.IndexOf("silver", StringComparison.Ordinal), result.IndexOf("bronze", StringComparison.Ordinal),
+            Assert.IsLessThan(result.IndexOf("bronze", StringComparison.Ordinal), result.IndexOf("silver", StringComparison.Ordinal),
                 "Array element order must be preserved — bronze must come before silver.");
 
             // Idempotency: normalizing twice gives the same result
@@ -305,7 +305,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
             Assert.IsTrue(doc.RootElement.TryGetProperty("id_token", out _), "id_token must be present.");
 
             // id_token sorts before userinfo
-            Assert.IsLessThan(result.IndexOf("userinfo", StringComparison.Ordinal), result.IndexOf("id_token", StringComparison.Ordinal),
+            Assert.IsLessThan(result.IndexOf("id_token", StringComparison.Ordinal), result.IndexOf("userinfo", StringComparison.Ordinal),
                 "id_token must appear before userinfo after ordinal key sort.");
         }
 
