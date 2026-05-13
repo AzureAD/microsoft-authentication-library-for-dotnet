@@ -27,6 +27,11 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         private static readonly Authority s_b2cAuthority = Authority.CreateAuthority(TestConstants.B2CAuthority, true);
         private static readonly Authority s_commonNetAuthority = Authority.CreateAuthority(TestConstants.PrefCacheAuthorityCommonTenant, true);
 
+        private static readonly Authority s_consumersTenantAuthority =
+            Authority.CreateAuthority(TestConstants.AuthorityConsumersTenant, true);
+        private static readonly Authority s_consumerTidAuthority =
+            Authority.CreateAuthority(TestConstants.AuthorityConsumerTidTenant, true);
+
         private MockHttpAndServiceBundle _harness;
         private RequestContext _testRequestContext;
 
@@ -451,6 +456,41 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
 
             Assert.IsInstanceOfType(app.ServiceBundle.Config.Authority, authorityTypeInstance);
             Assert.AreEqual(app.AuthorityInfo.AuthorityType.ToString(), authorityType);
+        }
+
+        /// <summary>
+        /// Regression test for https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5951
+        /// When WithTenantId is called with a real tenant (MSA GUID or "consumers" alias) at request level,
+        /// it should be honored regardless of the app-level authority. Only "common" and "organizations"
+        /// are truly tenantless and are ignored at request level.
+        /// </summary>
+        [TestMethod]
+        [DataRow(TestConstants.AuthorityUtidTenant, TestConstants.AuthorityConsumerTidTenant, TestConstants.MsaTenantId,
+            DisplayName = "AppSpecificTenant_RequestMsaGuid_MsaGuidWins")]
+        [DataRow(TestConstants.AuthorityCommonTenant, TestConstants.AuthorityConsumerTidTenant, TestConstants.MsaTenantId,
+            DisplayName = "AppCommon_RequestMsaGuid_MsaGuidWins")]
+        [DataRow(TestConstants.AuthorityUtidTenant, TestConstants.AuthorityConsumersTenant, TestConstants.Consumers,
+            DisplayName = "AppSpecificTenant_RequestConsumersAlias_ConsumersWins")]
+        [DataRow(TestConstants.AuthorityCommonTenant, TestConstants.AuthorityConsumersTenant, TestConstants.Consumers,
+            DisplayName = "AppCommon_RequestConsumersAlias_ConsumersWins")]
+        [DataRow(TestConstants.AuthorityConsumerTidTenant, null, TestConstants.MsaTenantId,
+            DisplayName = "AppMsaGuid_NoRequestOverride_MsaGuidUsed")]
+        public void WithTenantId_ConsumerGuid_IsHonoredAtRequestLevel(
+            string configAuthorityUrl,
+            string requestAuthorityUrl,
+            string expectedTenantId)
+        {
+            var configAuthority = Authority.CreateAuthority(configAuthorityUrl, true);
+            Authority requestAuthority = requestAuthorityUrl == null
+                ? null
+                : Authority.CreateAuthority(requestAuthorityUrl, true);
+
+            VerifyAuthority(
+                configAuthority: configAuthority,
+                requestAuthority: requestAuthority,
+                account: null,
+                expectedTenantId: expectedTenantId,
+                _testRequestContext);
         }
 
         private static void VerifyAuthority(
