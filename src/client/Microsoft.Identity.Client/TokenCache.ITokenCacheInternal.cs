@@ -617,7 +617,7 @@ namespace Microsoft.Identity.Client
                 // then we cannot filter by tenant and will use whatever is in the cache.
                 filterByTenantId =
                     !string.IsNullOrEmpty(requestTenantId) &&
-                    !AadAuthority.IsCommonOrganizationsOrConsumersTenant(requestTenantId);
+                    !AadAuthority.IsCommonOrOrganizationsTenant(requestTenantId);
             }
 
             if (filterByTenantId)
