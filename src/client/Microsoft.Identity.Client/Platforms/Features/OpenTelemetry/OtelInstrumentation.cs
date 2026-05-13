@@ -22,6 +22,20 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
         /// </summary>
         public const string MeterName = "MicrosoftIdentityClient_Common_Meter";
 
+        internal const string EnableExtendedTokenMetricsEnvVariable = "MSAL_ENABLE_EXTENDED_TOKEN_METRICS";
+
+        // Captured at construction time (once per app build, mirroring MSAL_FORCE_REGION semantics).
+        // Changing the env var after the OtelInstrumentation instance is created has no effect on that instance.
+        private readonly bool _isExtendedMetricsEnabled;
+
+        private static bool ReadExtendedMetricsEnvVar()
+        {
+            string value = Environment.GetEnvironmentVariable(EnableExtendedTokenMetricsEnvVariable);
+            return !string.IsNullOrEmpty(value) &&
+                (value.Equals("1", StringComparison.OrdinalIgnoreCase) ||
+                 value.Equals("true", StringComparison.OrdinalIgnoreCase));
+        }
+
         private const string SuccessCounterName = "MsalSuccess";
         private const string FailedCounterName = "MsalFailure";
         private const string TotalDurationHistogramName = "MsalTotalDuration.1A";
@@ -61,7 +75,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
 
         /// <summary>
         /// Histogram to record total duration in milliseconds of token acquisition calls, covering both successes and failures.
-        /// Emitted only when extended metrics are enabled via WithExtendedTokenAcquisitionMetrics().
+        /// Emitted only when extended metrics are enabled via the MSAL_ENABLE_EXTENDED_TOKEN_METRICS environment variable.
         /// </summary>
         internal static readonly Lazy<Histogram<long>> s_durationTotalV2 = new(() => Meter.CreateHistogram<long>(
             TotalDurationV2HistogramName,
@@ -94,7 +108,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
 
         /// <summary>
         /// Histogram to record duration in milliseconds in http when the token is fetched from identity provider, covering both successes and failures.
-        /// Emitted only when extended metrics are enabled via WithExtendedTokenAcquisitionMetrics().
+        /// Emitted only when extended metrics are enabled via the MSAL_ENABLE_EXTENDED_TOKEN_METRICS environment variable.
         /// </summary>
         internal static readonly Lazy<Histogram<long>> s_durationInHttpV2 = new(() => Meter.CreateHistogram<long>(
             DurationInHttpV2HistogramName,
@@ -111,14 +125,16 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
 
         public OtelInstrumentation()
         {
-            // Needed to fail fast if the runtime, like in-process Azure Functions, doesn't support OpenTelemetry 
+            // Needed to fail fast if the runtime, like in-process Azure Functions, doesn't support OpenTelemetry
             _ = Meter.Version;
+
+            _isExtendedMetricsEnabled = ReadExtendedMetricsEnvVar();
         }
 
         // Aggregates the successful requests based on token source and cache refresh reason.
         // Counter, L1, L2, and extension are always emitted.
-        // When isExtendedMetricsEnabled is false: V1 total duration and V1 HTTP duration are emitted.
-        // When isExtendedMetricsEnabled is true:  V2 total duration (Succeeded=true) and V2 HTTP duration (HttpStatusCode=200) are emitted instead.
+        // When the MSAL_ENABLE_EXTENDED_TOKEN_METRICS env var is not set: V1 total duration and V1 HTTP duration are emitted.
+        // When it is set: V2 total duration (Succeeded=true) and V2 HTTP duration (HttpStatusCode=200) are emitted instead.
         public void LogSuccessMetrics(
             string platform,
             ApiEvent.ApiIds apiId,
@@ -127,8 +143,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             CacheLevel cacheLevel,
             long totalDurationInUs,
             AuthenticationResultMetadata authResultMetadata,
-            ILoggerAdapter logger,
-            bool isExtendedMetricsEnabled)
+            ILoggerAdapter logger)
         {
             IncrementSuccessCounter(
                 platform,
@@ -174,7 +189,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                     new(TelemetryConstants.TokenType, authResultMetadata.TelemetryTokenType));
             }
 
-            if (!isExtendedMetricsEnabled)
+            if (!_isExtendedMetricsEnabled)
             {
                 if (s_durationTotal.Value.Enabled)
                 {
@@ -255,13 +270,12 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
         public void LogSuccessHttpDuration(
             string platform,
             ApiEvent.ApiIds apiId,
-            AuthenticationResultMetadata authResultMetadata,
-            bool isExtendedMetricsEnabled)
+            AuthenticationResultMetadata authResultMetadata)
         {
             if (authResultMetadata.TokenSource != TokenSource.IdentityProvider)
                 return;
 
-            if (!isExtendedMetricsEnabled)
+            if (!_isExtendedMetricsEnabled)
             {
                 if (s_durationInHttp.Value.Enabled)
                 {
@@ -291,8 +305,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             ApiEvent apiEvent,
             string errorCode,
             int httpStatusCode,
-            long totalDurationInMs,
-            bool isExtendedMetricsEnabled)
+            long totalDurationInMs)
         {
             if (s_failureCounter.Value.Enabled)
             {
@@ -306,7 +319,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                     new(TelemetryConstants.TokenType, apiEvent.TokenType));
             }
 
-            if (isExtendedMetricsEnabled)
+            if (_isExtendedMetricsEnabled)
             {
                 if (totalDurationInMs > 0 && s_durationTotalV2.Value.Enabled)
                 {

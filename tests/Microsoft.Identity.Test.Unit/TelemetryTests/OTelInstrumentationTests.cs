@@ -334,19 +334,21 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        [Description("WithExtendedTokenAcquisitionMetrics emits MsalTotalDuration.2 tagged with Succeeded and " +
+        [Description("MSAL_ENABLE_EXTENDED_TOKEN_METRICS opt-in emits MsalTotalDuration.2 tagged with Succeeded and " +
             "MsalDurationInHttp.2 tagged with HttpStatusCode instead of V1 equivalents.")]
         public async Task AcquireToken_WithExtendedMetrics_EmitsV2HistogramsAsync()
         {
+            using (new EnvVariableContext())
             using (_harness = base.CreateTestHarness())
             {
+                Environment.SetEnvironmentVariable(OtelInstrumentation.EnableExtendedTokenMetricsEnvVariable, "true");
+
                 var cca = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
                     .WithExperimentalFeatures()
                     .WithAuthority(TestConstants.AuthorityUtidTenant)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(_harness.HttpManager)
-                    .WithExtendedTokenAcquisitionMetrics()
                     .BuildConcrete();
 
                 // 1. Acquire token from IDP (success)
@@ -439,15 +441,17 @@ namespace Microsoft.Identity.Test.Unit
             "with the HTTP status code but does not emit MsalTotalDuration.2 for the background failure path.")]
         public async Task ProactiveTokenRefresh_AadUnavailable_WithExtendedMetrics_RecordsHttpStatusCodeNotTotalDurationAsync()
         {
+            using (new EnvVariableContext())
             using (_harness = base.CreateTestHarness())
             {
+                Environment.SetEnvironmentVariable(OtelInstrumentation.EnableExtendedTokenMetricsEnvVariable, "true");
+
                 var cca = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
                     .WithExperimentalFeatures()
                     .WithAuthority(TestConstants.AuthorityUtidTenant)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(_harness.HttpManager)
-                    .WithExtendedTokenAcquisitionMetrics()
                     .BuildConcrete();
 
                 TokenCacheHelper.PopulateCache(cca.AppTokenCacheInternal.Accessor, addSecondAt: false);

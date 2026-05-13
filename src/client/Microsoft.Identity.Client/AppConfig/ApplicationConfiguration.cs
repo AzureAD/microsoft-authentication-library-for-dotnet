@@ -121,8 +121,6 @@ namespace Microsoft.Identity.Client
         public ManagedIdentityId ManagedIdentityId { get; internal set; }
         public bool DisableInternalRetries { get; internal set; } = false;
 
-        public bool IsExtendedTokenAcquisitionMetricsEnabled { get; internal set; } = false;
-
         public bool IsManagedIdentity { get; }
         public bool IsConfidentialClient { get; }
         public bool IsPublicClient => !IsConfidentialClient && !IsManagedIdentity;

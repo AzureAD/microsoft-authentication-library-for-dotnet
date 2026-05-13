@@ -107,8 +107,7 @@ namespace Microsoft.Identity.Client.Internal
                     serviceBundle.PlatformProxy.OtelInstrumentation.LogSuccessHttpDuration(
                         serviceBundle.PlatformProxy.GetProductName(),
                         apiEvent.ApiId,
-                        authResult.AuthenticationResultMetadata,
-                        serviceBundle.Config.IsExtendedTokenAcquisitionMetricsEnabled);
+                        authResult.AuthenticationResultMetadata);
                 }
                 catch (MsalServiceException ex)
                 {
@@ -127,8 +126,7 @@ namespace Microsoft.Identity.Client.Internal
                         apiEvent,
                         ex.ErrorCode,
                         ex.StatusCode,
-                        totalDurationInMs: 0,
-                        serviceBundle.Config.IsExtendedTokenAcquisitionMetricsEnabled);
+                        totalDurationInMs: 0);
                 }
                 catch (OperationCanceledException ex)
                 {
@@ -138,8 +136,7 @@ namespace Microsoft.Identity.Client.Internal
                         apiEvent,
                         ex.GetType().Name,
                         httpStatusCode: 0,
-                        totalDurationInMs: 0,
-                        serviceBundle.Config.IsExtendedTokenAcquisitionMetricsEnabled);
+                        totalDurationInMs: 0);
                 }
                 catch (Exception ex)
                 {
@@ -149,8 +146,7 @@ namespace Microsoft.Identity.Client.Internal
                         apiEvent,
                         ex.GetType().Name,
                         httpStatusCode: 0,
-                        totalDurationInMs: 0,
-                        serviceBundle.Config.IsExtendedTokenAcquisitionMetricsEnabled);
+                        totalDurationInMs: 0);
                 }
             });
         }

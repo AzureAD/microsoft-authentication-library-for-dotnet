@@ -22,8 +22,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             CacheLevel cacheLevel,
             long totalDurationInUs,
             AuthenticationResultMetadata authResultMetadata,
-            ILoggerAdapter logger,
-            bool isExtendedMetricsEnabled)
+            ILoggerAdapter logger)
         {
             // No op
         }
@@ -31,8 +30,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
         public void LogSuccessHttpDuration(
             string platform,
             ApiEvent.ApiIds apiId,
-            AuthenticationResultMetadata authResultMetadata,
-            bool isExtendedMetricsEnabled)
+            AuthenticationResultMetadata authResultMetadata)
         {
             // No op
         }
@@ -42,8 +40,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             ApiEvent apiEvent,
             string errorCode,
             int httpStatusCode,
-            long totalDurationInMs,
-            bool isExtendedMetricsEnabled)
+            long totalDurationInMs)
         {
             // No op
         }

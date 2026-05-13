@@ -131,8 +131,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 GetCacheLevel(authenticationResult),
                 durationInUs,
                 authenticationResult.AuthenticationResultMetadata,
-                AuthenticationRequestParameters.RequestContext.Logger,
-                ServiceBundle.Config.IsExtendedTokenAcquisitionMetricsEnabled);
+                AuthenticationRequestParameters.RequestContext.Logger);
         }
 
         private void LogFailureTelemetryToOtel(ApiEvent apiEvent, string errorCode, int httpStatusCode, long totalDurationInMs)
@@ -142,8 +141,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 apiEvent,
                 errorCode,
                 httpStatusCode,
-                totalDurationInMs,
-                ServiceBundle.Config.IsExtendedTokenAcquisitionMetricsEnabled);
+                totalDurationInMs);
         }
 
         private Tuple<string, string> ParseScopesForTelemetry()
