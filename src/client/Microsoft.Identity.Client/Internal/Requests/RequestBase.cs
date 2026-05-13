@@ -129,7 +129,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 apiEvent.ApiErrorCode = ex.GetType().Name;
                 AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
 
-                LogFailureTelemetryToOtel(ex.GetType().Name, apiEvent, apiEvent.CacheInfo, httpStatusCode: 0, requestStopwatch.ElapsedMilliseconds + measureTelemetryDurationResult.Milliseconds);
+                LogFailureTelemetryToOtel(ex.GetType().Name, apiEvent, apiEvent.CacheInfo, httpStatusCode: 0, totalDurationInMs: requestStopwatch.ElapsedMilliseconds + measureTelemetryDurationResult.Milliseconds);
                 throw;
             }
         }

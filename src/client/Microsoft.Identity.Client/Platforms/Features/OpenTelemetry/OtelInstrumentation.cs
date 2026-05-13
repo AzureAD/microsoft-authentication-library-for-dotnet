@@ -359,13 +359,11 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                         new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                         new(TelemetryConstants.Platform, platform),
                         new(TelemetryConstants.ApiId, apiEvent.ApiId),
-                        new(TelemetryConstants.CallerSdkId, callerSdkId ?? string.Empty + "," + callerSdkVersion ?? string.Empty),
-                        new(TelemetryConstants.CacheRefreshReason, apiEvent.CacheInfo),
-                        new(TelemetryConstants.CacheLevel, string.Empty),
                         new(TelemetryConstants.TokenSource, apiEvent.TokenSource),
+                        new(TelemetryConstants.CacheLevel, string.Empty),
+                        new(TelemetryConstants.CacheRefreshReason, apiEvent.CacheInfo),
                         new(TelemetryConstants.TokenType, apiEvent.TokenType),
                         new(TelemetryConstants.ErrorCode, errorCode),
-                        new(TelemetryConstants.RawStsErrorCode, rawStsErrorCode),
                         new(TelemetryConstants.Succeeded, false));
                 }
 
