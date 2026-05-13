@@ -45,6 +45,10 @@ MSIv2 uses a different protocol from MSIv1. It acquires an mTLS binding certific
 
 Add `WithClientClaims(string claimsJson)` across the MSI, client credentials, and FIC request builders.
 
+### Naming note: coexistence with the existing obsolete `WithClientClaims`
+
+`ConfidentialClientApplicationBuilder` already has an **obsolete, app-level** `WithClientClaims(X509Certificate2, IDictionary<string,string>, ...)` that signs extra claims into the client assertion JWT. The new API described here is a **request-level** method on `AcquireTokenForManagedIdentityParameterBuilder` and `AcquireTokenForClientParameterBuilder` that takes a JSON string. The two APIs are on different classes with different signatures and coexist without ambiguity. The obsolete app-level overload remains for backward compatibility and is unaffected by this change.
+
 ### Distinction from `WithClaims()`
 
 | API | Who originates | Cache behavior | Use case |
@@ -77,6 +81,26 @@ If dynamic claims truly cannot be avoided, the following options are available (
 | Caller normalizes claims | Strip dynamic fields before passing to `WithClientClaims`; send dynamic parts separately via `WithExtraQueryParameters` with `IncludeInCacheKey: false` | Requires caller to understand the claims structure |
 
 For the NSP use case specifically, the claims represent a network security perimeter identifier, which is stable per workload deployment. Dynamic values are not expected to be an issue here.
+
+### Why the API is request-level, not app-level
+
+`WithClientClaims` is intentionally placed on the request builder, not the application builder, to support scenarios where claims change at runtime — for example, when an admin toggles NSP enforcement mode, the NSP SDK vends updated claims and the workload needs MSAL to acquire a new token scoped to those claims. If claims were baked into the application object, the caller would have to destroy and recreate the `ManagedIdentityApplication` on every enforcement change.
+
+Typical NSP usage:
+
+```csharp
+// nspContext is updated by the NSP SDK when enforcement mode changes.
+// Each distinct claims value maps to its own cache entry.
+string currentNspClaims = nspContext.GetCurrentClaimsJson();
+
+AuthenticationResult result = await miApp
+    .AcquireTokenForManagedIdentity("https://management.azure.com/")
+    .WithClientClaims(currentNspClaims)
+    .ExecuteAsync(cancellationToken)
+    .ConfigureAwait(false);
+```
+
+The per-request placement means the caller doesn't need to recreate the app when claims update — a new request with new claims produces a new cache entry automatically.
 
 ## Open Questions
 
