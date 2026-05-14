@@ -250,14 +250,14 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         /// <param name="ex">The exception to check for stale-binding AADSTS codes.</param>
         internal static bool IsStaleBindingAadstsError(MsalServiceException ex)
         {
-            if (ex.ErrorCode != MsalError.ManagedIdentityRequestFailed || string.IsNullOrEmpty(ex.Message))
+            if (ex is null || ex.ErrorCode != MsalError.ManagedIdentityRequestFailed || string.IsNullOrEmpty(ex.Message))
             {
                 return false;
             }
 
             foreach (string code in s_staleBindingAadstsCodes)
             {
-                if (ex.Message.Contains(code, StringComparison.Ordinal))
+                if (ex.Message.Contains(code, StringComparison.OrdinalIgnoreCase))
                 {
                     return true;
                 }

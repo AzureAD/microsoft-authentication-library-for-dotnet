@@ -824,6 +824,16 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             Assert.IsFalse(result, "Expected wrong MSAL error code to not be detected as a stale binding error.");
         }
 
+        [TestMethod]
+        public void IsStaleBindingAadstsError_ReturnsFalse_For_NullException()
+        {
+            // Act
+            var result = ImdsV2ManagedIdentitySource.IsStaleBindingAadstsError(null);
+
+            // Assert
+            Assert.IsFalse(result, "Expected null exception to return false.");
+        }
+
         private static X509Certificate2 CreateSelfSignedCert(TimeSpan lifetime, string subjectCn = "CN=RemoveBadCertTest")
         {
             using var rsa = RSA.Create(2048);
