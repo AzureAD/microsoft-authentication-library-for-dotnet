@@ -39,6 +39,14 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         private const string AttestationTagEnabled = "#att=1";
         private const string AttestationTagDisabled = "#att=0";
 
+        // AADSTS codes returned by Entra when the bound mTLS cert is no longer acceptable.
+        // Each of these is remediated by evicting the cached cert and retrying once.
+        private static readonly string[] s_staleBindingAadstsCodes = new[]
+        {
+            "AADSTS1000901", // token_not_after on cert has elapsed
+            // add future codes here
+        };
+
         public static async Task<CsrMetadata> GetCsrMetadataAsync(RequestContext requestContext)
         {
             var queryParams = ImdsManagedIdentitySource.ImdsQueryParamsHelper(requestContext, ApiVersionQueryParam, ImdsV2ApiVersion);
@@ -189,14 +197,30 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             // Capture the attestation token provider delegate before calling base
             _attestationTokenProvider = parameters.AttestationTokenProvider;
 
+            return await ExecuteWithMtlsSelfHealingAsync(
+                () => base.AuthenticateAsync(parameters, cancellationToken)).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Runs <paramref name="operation"/> and, on the first stale-binding failure (either a
+        /// SCHANNEL/TLS transport error or an Entra AADSTS rejection of the bound cert), evicts
+        /// the cached certificate and retries the operation exactly once with a freshly-minted cert.
+        /// Adding a new AADSTS trigger is a one-line change in <see cref="s_staleBindingAadstsCodes"/>.
+        /// </summary>
+        private async Task<ManagedIdentityResponse> ExecuteWithMtlsSelfHealingAsync(
+            Func<Task<ManagedIdentityResponse>> operation)
+        {
             try
             {
-                return await base.AuthenticateAsync(parameters, cancellationToken).ConfigureAwait(false);
+                return await operation().ConfigureAwait(false);
             }
-            catch (MsalServiceException ex) when (ex.ErrorCode == MsalError.ManagedIdentityUnreachableNetwork && IsSchanelFailure(ex))
+            catch (MsalServiceException ex) when (
+                (ex.ErrorCode == MsalError.ManagedIdentityUnreachableNetwork && IsSchanelFailure(ex)) ||
+                IsStaleBindingAadstsError(ex))
             {
+                string trigger = IsSchanelFailure(ex) ? "SCHANNEL mTLS failure" : "stale mTLS binding AADSTS error";
                 _requestContext.Logger.Verbose(() =>
-                    "[ImdsV2] SCHANNEL mTLS failure detected. Removing bad persisted cert and retrying with fresh mint.");
+                    $"[ImdsV2] {trigger} detected. Removing bad persisted cert and retrying with fresh mint.");
 
                 // Remove the bad cert from both caches
                 string certCacheKey = GetMtlsCertCacheKey();
@@ -213,8 +237,31 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 }
 
                 // Retry - will mint fresh cert since we just deleted the bad one
-                return await base.AuthenticateAsync(parameters, cancellationToken).ConfigureAwait(false);
+                return await operation().ConfigureAwait(false);
             }
+        }
+
+        /// <summary>
+        /// Returns <see langword="true"/> if the exception indicates that the cached mTLS binding
+        /// certificate was rejected by Entra (STS layer) with one of the known stale-binding
+        /// AADSTS codes listed in <see cref="s_staleBindingAadstsCodes"/>.
+        /// </summary>
+        internal static bool IsStaleBindingAadstsError(MsalServiceException ex)
+        {
+            if (ex.ErrorCode != MsalError.ManagedIdentityRequestFailed || string.IsNullOrEmpty(ex.Message))
+            {
+                return false;
+            }
+
+            foreach (string code in s_staleBindingAadstsCodes)
+            {
+                if (ex.Message.Contains(code, StringComparison.Ordinal))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>

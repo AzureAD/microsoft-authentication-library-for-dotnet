@@ -777,6 +777,52 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             Assert.IsTrue(result, "Expected 10054 chain to be detected as SCHANNEL failure.");
         }
 
+        [TestMethod]
+        public void IsStaleBindingAadstsError_ReturnsTrue_For_AADSTS1000901_In_Message()
+        {
+            // Arrange - build an exception whose message contains AADSTS1000901,
+            // as produced by AbstractManagedIdentity.HandleResponseAsync when Entra
+            // rejects the cert with "token_not_after has elapsed".
+            var message = "ManagedIdentity: Error Code: invalid_client Error Description: " +
+                          "AADSTS1000901: The provided certificate cannot be used for requesting tokens. " +
+                          "The value of token_not_after extension on the certificate should be greater than the current time.";
+            var ex = new MsalServiceException(MsalError.ManagedIdentityRequestFailed, message);
+
+            // Act
+            var result = ImdsV2ManagedIdentitySource.IsStaleBindingAadstsError(ex);
+
+            // Assert
+            Assert.IsTrue(result, "Expected AADSTS1000901 to be detected as a stale binding error.");
+        }
+
+        [TestMethod]
+        public void IsStaleBindingAadstsError_ReturnsFalse_For_UnrelatedError()
+        {
+            // Arrange - a generic managed identity request failure with a different error description
+            var ex = new MsalServiceException(MsalError.ManagedIdentityRequestFailed, "ManagedIdentity: Error Code: server_error Error Description: An unexpected error occurred.");
+
+            // Act
+            var result = ImdsV2ManagedIdentitySource.IsStaleBindingAadstsError(ex);
+
+            // Assert
+            Assert.IsFalse(result, "Expected unrelated error to not be detected as a stale binding error.");
+        }
+
+        [TestMethod]
+        public void IsStaleBindingAadstsError_ReturnsFalse_For_WrongErrorCode()
+        {
+            // Arrange - the AADSTS code is present in the message but the MSAL error code is not
+            // managed_identity_request_failed (e.g. it is managed_identity_unreachable_network).
+            var ex = new MsalServiceException(MsalError.ManagedIdentityUnreachableNetwork,
+                "AADSTS1000901: The provided certificate cannot be used for requesting tokens.");
+
+            // Act
+            var result = ImdsV2ManagedIdentitySource.IsStaleBindingAadstsError(ex);
+
+            // Assert
+            Assert.IsFalse(result, "Expected wrong MSAL error code to not be detected as a stale binding error.");
+        }
+
         private static X509Certificate2 CreateSelfSignedCert(TimeSpan lifetime, string subjectCn = "CN=RemoveBadCertTest")
         {
             using var rsa = RSA.Create(2048);
