@@ -39,6 +39,14 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         private const string AttestationTagEnabled = "#att=1";
         private const string AttestationTagDisabled = "#att=0";
 
+        // AADSTS codes returned by Entra when the bound mTLS cert is no longer acceptable.
+        // Each of these is remediated by evicting the cached cert and retrying once.
+        private static readonly string[] s_staleBindingAadstsCodes = new[]
+        {
+            "AADSTS1000901", // token_not_after on cert has elapsed
+            // add future codes here
+        };
+
         public static async Task<CsrMetadata> GetCsrMetadataAsync(RequestContext requestContext)
         {
             var queryParams = ImdsManagedIdentitySource.ImdsQueryParamsHelper(requestContext, ApiVersionQueryParam, ImdsV2ApiVersion);
@@ -189,14 +197,30 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             // Capture the attestation token provider delegate before calling base
             _attestationTokenProvider = parameters.AttestationTokenProvider;
 
+            return await ExecuteWithMtlsSelfHealingAsync(
+                () => base.AuthenticateAsync(parameters, cancellationToken)).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Runs <paramref name="operation"/> and, on the first stale-binding failure (either a
+        /// SCHANNEL/TLS transport error or an Entra AADSTS rejection of the bound cert), evicts
+        /// the cached certificate and retries the operation exactly once with a freshly-minted cert.
+        /// Adding a new AADSTS trigger is a one-line change in <see cref="s_staleBindingAadstsCodes"/>.
+        /// </summary>
+        /// <param name="operation">The async operation to execute and potentially retry.</param>
+        private async Task<ManagedIdentityResponse> ExecuteWithMtlsSelfHealingAsync(
+            Func<Task<ManagedIdentityResponse>> operation)
+        {
             try
             {
-                return await base.AuthenticateAsync(parameters, cancellationToken).ConfigureAwait(false);
+                return await operation().ConfigureAwait(false);
             }
-            catch (MsalServiceException ex) when (ex.ErrorCode == MsalError.ManagedIdentityUnreachableNetwork && IsSchanelFailure(ex))
+            catch (MsalServiceException ex) when (TryGetStaleBindingReason(ex, out string trigger))
             {
+                // 'trigger' is captured from the filter's out-parameter and is in scope here.
+                // The helper is invoked exactly once across filter + handler.
                 _requestContext.Logger.Verbose(() =>
-                    "[ImdsV2] SCHANNEL mTLS failure detected. Removing bad persisted cert and retrying with fresh mint.");
+                    $"[ImdsV2] {trigger} detected. Removing bad persisted cert and retrying with fresh mint.");
 
                 // Remove the bad cert from both caches
                 string certCacheKey = GetMtlsCertCacheKey();
@@ -213,8 +237,69 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 }
 
                 // Retry - will mint fresh cert since we just deleted the bad one
-                return await base.AuthenticateAsync(parameters, cancellationToken).ConfigureAwait(false);
+                return await operation().ConfigureAwait(false);
             }
+        }
+
+        /// <summary>
+        /// Single point of truth that decides whether <paramref name="ex"/> represents a stale
+        /// mTLS-binding failure that should trigger a one-shot cert eviction + retry. Returns
+        /// <see langword="true"/> with a human-readable <paramref name="reason"/> for logging.
+        /// Bundling both the SCHANNEL transport check (with its required outer
+        /// <see cref="MsalError.ManagedIdentityUnreachableNetwork"/> guard) and the AADSTS
+        /// stale-binding STS-layer check into one helper avoids the prior bug where the trigger
+        /// label could be computed from <c>IsSchanelFailure</c> alone — without the outer
+        /// error-code guard — and mislabel an AADSTS-only match as "SCHANNEL".
+        /// </summary>
+        internal static bool TryGetStaleBindingReason(MsalServiceException ex, out string reason)
+        {
+            if (ex is null)
+            {
+                reason = null;
+                return false;
+            }
+
+            if (ex.ErrorCode == MsalError.ManagedIdentityUnreachableNetwork && IsSchanelFailure(ex))
+            {
+                reason = "SCHANNEL mTLS failure";
+                return true;
+            }
+
+            if (IsStaleBindingAadstsError(ex))
+            {
+                reason = "stale mTLS binding AADSTS error";
+                return true;
+            }
+
+            reason = null;
+            return false;
+        }
+
+        /// <summary>
+        /// Returns <see langword="true"/> if the exception indicates that the cached mTLS binding
+        /// certificate was rejected by Entra (STS layer) with one of the known stale-binding
+        /// AADSTS codes listed in <see cref="s_staleBindingAadstsCodes"/>.
+        /// </summary>
+        /// <param name="ex">The exception to check for stale-binding AADSTS codes.</param>
+        internal static bool IsStaleBindingAadstsError(MsalServiceException ex)
+        {
+            if (ex is null || ex.ErrorCode != MsalError.ManagedIdentityRequestFailed || string.IsNullOrEmpty(ex.Message))
+            {
+                return false;
+            }
+
+            // Append ":" so that e.g. "AADSTS1000901:" never false-matches a longer
+            // code like "AADSTS10009010:" that shares the same prefix.
+            // Entra always formats AADSTS codes as "<CODE>: <description>".
+            foreach (string code in s_staleBindingAadstsCodes)
+            {
+                if (ex.Message.Contains(code + ":", StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>

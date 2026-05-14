@@ -777,6 +777,155 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             Assert.IsTrue(result, "Expected 10054 chain to be detected as SCHANNEL failure.");
         }
 
+        [TestMethod]
+        public void IsStaleBindingAadstsError_ReturnsTrue_For_AADSTS1000901_In_Message()
+        {
+            // Arrange - build an exception whose message contains AADSTS1000901 followed by a colon,
+            // as produced by AbstractManagedIdentity.HandleResponseAsync when Entra
+            // rejects the cert with "token_not_after has elapsed".
+            var message =
+                "ManagedIdentity: Error Code: invalid_client Error Description: " +
+                "AADSTS1000901: The provided certificate cannot be used for requesting tokens. " +
+                "The value of token_not_after extension on the certificate should be greater than the current time.";
+            var ex = new MsalServiceException(MsalError.ManagedIdentityRequestFailed, message);
+
+            // Act
+            var result = ImdsV2ManagedIdentitySource.IsStaleBindingAadstsError(ex);
+
+            // Assert
+            Assert.IsTrue(result, "Expected AADSTS1000901 to be detected as a stale binding error.");
+        }
+
+        [TestMethod]
+        public void IsStaleBindingAadstsError_ReturnsFalse_For_LongerCodeWithSamePrefix()
+        {
+            // Arrange - message contains a longer code that shares the AADSTS1000901 prefix
+            // (e.g. a hypothetical AADSTS10009010 or AADSTS100090123).
+            // The colon-terminated match must NOT fire on these.
+            var message =
+                "ManagedIdentity: Error Code: invalid_client Error Description: " +
+                "AADSTS10009010: Some future error that starts with AADSTS1000901.";
+            var ex = new MsalServiceException(MsalError.ManagedIdentityRequestFailed, message);
+
+            // Act
+            var result = ImdsV2ManagedIdentitySource.IsStaleBindingAadstsError(ex);
+
+            // Assert
+            Assert.IsFalse(result, "A longer code sharing the AADSTS1000901 prefix must not trigger a false match.");
+        }
+
+        [TestMethod]
+        public void IsStaleBindingAadstsError_ReturnsFalse_For_UnrelatedError()
+        {
+            // Arrange - a generic managed identity request failure with a different error description
+            var ex = new MsalServiceException(MsalError.ManagedIdentityRequestFailed, "ManagedIdentity: Error Code: server_error Error Description: An unexpected error occurred.");
+
+            // Act
+            var result = ImdsV2ManagedIdentitySource.IsStaleBindingAadstsError(ex);
+
+            // Assert
+            Assert.IsFalse(result, "Expected unrelated error to not be detected as a stale binding error.");
+        }
+
+        [TestMethod]
+        public void IsStaleBindingAadstsError_ReturnsFalse_For_WrongErrorCode()
+        {
+            // Arrange - the AADSTS code is present in the message but the MSAL error code is not
+            // managed_identity_request_failed (e.g. it is managed_identity_unreachable_network).
+            var ex = new MsalServiceException(MsalError.ManagedIdentityUnreachableNetwork,
+                "AADSTS1000901: The provided certificate cannot be used for requesting tokens.");
+
+            // Act
+            var result = ImdsV2ManagedIdentitySource.IsStaleBindingAadstsError(ex);
+
+            // Assert
+            Assert.IsFalse(result, "Expected wrong MSAL error code to not be detected as a stale binding error.");
+        }
+
+        [TestMethod]
+        public void IsStaleBindingAadstsError_ReturnsFalse_For_NullException()
+        {
+            // Act
+            var result = ImdsV2ManagedIdentitySource.IsStaleBindingAadstsError(null);
+
+            // Assert
+            Assert.IsFalse(result, "Expected null exception to return false.");
+        }
+
+        [TestMethod]
+        public void TryGetStaleBindingReason_ReturnsTrue_With_Schannel_Label_For_Schannel_Failure()
+        {
+            // Arrange - SCHANNEL chain with the required outer ManagedIdentityUnreachableNetwork code
+            var sock = new SocketException(10054);
+            var io = new IOException("forcibly closed", sock);
+            var http = new HttpRequestException("send failed", io);
+            var ex = new MsalServiceException(MsalError.ManagedIdentityUnreachableNetwork, "send failed", http);
+
+            // Act
+            var result = ImdsV2ManagedIdentitySource.TryGetStaleBindingReason(ex, out string reason);
+
+            // Assert
+            Assert.IsTrue(result);
+            Assert.AreEqual("SCHANNEL mTLS failure", reason);
+        }
+
+        [TestMethod]
+        public void TryGetStaleBindingReason_ReturnsTrue_With_Aadsts_Label_For_AADSTS1000901()
+        {
+            // Arrange - AADSTS error, no socket chain
+            var ex = new MsalServiceException(
+                MsalError.ManagedIdentityRequestFailed,
+                "ManagedIdentity: AADSTS1000901: token_not_after has elapsed.");
+
+            // Act
+            var result = ImdsV2ManagedIdentitySource.TryGetStaleBindingReason(ex, out string reason);
+
+            // Assert - critical: the AADSTS branch must NOT be mislabeled as SCHANNEL
+            Assert.IsTrue(result);
+            Assert.AreEqual("stale mTLS binding AADSTS error", reason);
+        }
+
+        [TestMethod]
+        public void TryGetStaleBindingReason_DoesNotMislabel_AsSchannel_When_Only_AADSTS_Matches_And_Inner_Has_Socket()
+        {
+            // Arrange - exercises the exact bug the reviewer raised: an AADSTS exception that happens
+            // to carry an unrelated SocketException(10054) in its inner chain. The outer ErrorCode is
+            // ManagedIdentityRequestFailed (NOT ManagedIdentityUnreachableNetwork), so the SCHANNEL
+            // branch must NOT win and the label must be the AADSTS one.
+            var sock = new SocketException(10054);
+            var ex = new MsalServiceException(
+                MsalError.ManagedIdentityRequestFailed,
+                "AADSTS1000901: stale cert.",
+                sock);
+
+            // Act
+            var result = ImdsV2ManagedIdentitySource.TryGetStaleBindingReason(ex, out string reason);
+
+            // Assert
+            Assert.IsTrue(result);
+            Assert.AreEqual("stale mTLS binding AADSTS error", reason);
+        }
+
+        [TestMethod]
+        public void TryGetStaleBindingReason_ReturnsFalse_For_NullException()
+        {
+            var result = ImdsV2ManagedIdentitySource.TryGetStaleBindingReason(null, out string reason);
+
+            Assert.IsFalse(result);
+            Assert.IsNull(reason);
+        }
+
+        [TestMethod]
+        public void TryGetStaleBindingReason_ReturnsFalse_For_Unrelated_Error()
+        {
+            var ex = new MsalServiceException(MsalError.ManagedIdentityRequestFailed, "some other error");
+
+            var result = ImdsV2ManagedIdentitySource.TryGetStaleBindingReason(ex, out string reason);
+
+            Assert.IsFalse(result);
+            Assert.IsNull(reason);
+        }
+
         private static X509Certificate2 CreateSelfSignedCert(TimeSpan lifetime, string subjectCn = "CN=RemoveBadCertTest")
         {
             using var rsa = RSA.Create(2048);
