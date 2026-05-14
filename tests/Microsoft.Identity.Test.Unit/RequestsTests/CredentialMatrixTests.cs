@@ -545,9 +545,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
-        public async Task DynamicCert_MtlsMode_NullCertFromProvider_ThrowsMsalClientExceptionAsync()
+        public async Task DynamicCert_MtlsMode_NullCertFromProvider_ThrowsMtlsCertificateNotProvidedAsync()
         {
-            // Dynamic provider returning null in mTLS mode should throw.
+            // Dynamic provider returning null in mTLS mode should throw
+            // MtlsCertificateNotProvided (mode-aware error mapping).
             var credential = new CertificateAndClaimsClientCredential(
                 certificateProvider: _ => Task.FromResult<X509Certificate2>(null),
                 claimsToSign: null,
@@ -555,6 +556,23 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
             MsalClientException ex = await Assert.ThrowsExactlyAsync<MsalClientException>(
                 () => credential.GetCredentialMaterialAsync(MtlsContext(), CancellationToken.None))
+                .ConfigureAwait(false);
+
+            Assert.AreEqual(MsalError.MtlsCertificateNotProvided, ex.ErrorCode);
+        }
+
+        [TestMethod]
+        public async Task DynamicCert_RegularMode_NullCertFromProvider_ThrowsInvalidClientAssertionAsync()
+        {
+            // Regular (JWT-bearer) mode keeps the historical InvalidClientAssertion error code
+            // when the provider returns null; only mTLS mode swaps in MtlsCertificateNotProvided.
+            var credential = new CertificateAndClaimsClientCredential(
+                certificateProvider: _ => Task.FromResult<X509Certificate2>(null),
+                claimsToSign: null,
+                appendDefaultClaims: true);
+
+            MsalClientException ex = await Assert.ThrowsExactlyAsync<MsalClientException>(
+                () => credential.GetCredentialMaterialAsync(RegularContext(), CancellationToken.None))
                 .ConfigureAwait(false);
 
             Assert.AreEqual(MsalError.InvalidClientAssertion, ex.ErrorCode);
@@ -588,22 +606,21 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
-        public async Task DynamicCert_MtlsMode_WithClaims_ReturnsEmptyParamsAndCertAsync()
+        public async Task DynamicCert_MtlsMode_WithClaims_ThrowsMtlsCertificateNotProvidedAsync()
         {
-            // Even with claimsToSign, mTLS mode should return empty params (no assertion).
+            // WithClientClaims is JWT-bearer only. Combining it with mTLS PoP is a misconfiguration:
+            // the cert is meant to sign the assertion, not bind the TLS transport. Reject early
+            // with MtlsCertificateNotProvided rather than silently re-purposing the certificate.
             var credential = new CertificateAndClaimsClientCredential(
                 certificateProvider: _ => Task.FromResult(s_cert),
                 claimsToSign: new Dictionary<string, string> { { "custom_claim", "value" } },
                 appendDefaultClaims: true);
 
-            CredentialMaterial material = await credential
-                .GetCredentialMaterialAsync(MtlsContext(), CancellationToken.None)
+            MsalClientException ex = await Assert.ThrowsExactlyAsync<MsalClientException>(
+                () => credential.GetCredentialMaterialAsync(MtlsContext(), CancellationToken.None))
                 .ConfigureAwait(false);
 
-            Assert.IsNotNull(material);
-            Assert.AreSame(s_cert, material.ResolvedCertificate);
-            Assert.IsEmpty(material.TokenRequestParameters,
-                "mTLS mode should not add any token request parameters, even with claimsToSign.");
+            Assert.AreEqual(MsalError.MtlsCertificateNotProvided, ex.ErrorCode);
         }
     }
 }
