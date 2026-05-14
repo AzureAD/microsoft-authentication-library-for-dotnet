@@ -136,6 +136,8 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
 
         public CacheLevel CacheLevel { get; set; }
 
+        public TokenSource TokenSource { get; set; } = TokenSource.IdentityProvider;
+
         public string MsalRuntimeTelemetry { get; set; }
 
         public string CallerSdkApiId { get; set; }

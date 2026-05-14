@@ -28,13 +28,23 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             // No op
         }
 
+        public void LogSuccessHttpDuration(
+            string platform,
+            ApiEvent.ApiIds apiId,
+            AuthenticationResultMetadata authResultMetadata)
+        {
+            // No op
+        }
+
         public void LogFailureMetrics(string platform,
             string errorCode,
-            ApiEvent.ApiIds apiId,
+            ApiEvent apiEvent,
             string callerSdkId,
             string callerSdkVersion,
             CacheRefreshReason cacheRefreshReason,
             int tokenType,
+            int httpStatusCode,
+            long totalDurationInMs,
             string rawStsErrorCode = null)
         {
             // No op
