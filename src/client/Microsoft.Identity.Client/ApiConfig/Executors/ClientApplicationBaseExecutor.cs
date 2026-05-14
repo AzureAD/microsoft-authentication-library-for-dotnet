@@ -47,6 +47,9 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenByRefreshTokenParameters refreshTokenParameters,
             CancellationToken cancellationToken)
         {
+            await commonParameters.TryInitMtlsPopParametersAsync(ServiceBundle, cancellationToken)
+                .ConfigureAwait(false);
+
             var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, commonParameters.MtlsCertificate, cancellationToken);
             if (commonParameters.Scopes == null || !commonParameters.Scopes.Any())
             {
