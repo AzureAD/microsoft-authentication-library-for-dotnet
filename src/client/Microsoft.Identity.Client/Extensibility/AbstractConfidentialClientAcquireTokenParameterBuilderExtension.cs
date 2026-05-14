@@ -56,6 +56,21 @@ namespace Microsoft.Identity.Client.Extensibility
                     "Client claims are intended for token-acquisition flows (AcquireTokenForClient, AcquireTokenOnBehalfOf).");
             }
 
+            // User-token flows (auth code, username/password, federated identity) cache tokens
+            // that AcquireTokenSilent would later retrieve — but AcquireTokenSilent has no
+            // WithClientClaims equivalent, so those tokens can never be found silently. Block
+            // these flows to avoid permanent cache pollution.
+            if (builder is AcquireTokenByAuthorizationCodeParameterBuilder ||
+                builder is AcquireTokenByUsernameAndPasswordConfidentialParameterBuilder ||
+                builder is AcquireTokenByUserFederatedIdentityCredentialParameterBuilder)
+            {
+                throw new MsalClientException(
+                    MsalError.InvalidRequest,
+                    "WithClientClaims is not supported for user-token flows (AcquireTokenByAuthorizationCode, " +
+                    "AcquireTokenByUsernameAndPassword, AcquireTokenByUserFederatedIdentityCredential). " +
+                    "Use WithClientClaims with AcquireTokenForClient or AcquireTokenOnBehalfOf.");
+            }
+
             builder.ValidateUseOfExperimentalFeature();
 
             string normalized = ClaimsHelper.NormalizeClaimsJson(claimsJson);

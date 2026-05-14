@@ -59,11 +59,19 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             // Forward client-originated claims to the correct location for IMDS/MSIv2 only.
             // Other MI sources (App Service, Azure Arc, Service Fabric, etc.) do not have a
-            // confirmed contract for the "claims" parameter; forwarding to them could cause
-            // token-acquisition failures or cache keying on a parameter that was ignored.
-            if (!string.IsNullOrEmpty(parameters.ClientClaims) &&
-                (_sourceType == ManagedIdentitySource.Imds || _sourceType == ManagedIdentitySource.ImdsV2))
+            // confirmed contract for the "claims" parameter; fail fast rather than silently
+            // ignoring the value and polluting the cache with keys the endpoint never saw.
+            if (!string.IsNullOrEmpty(parameters.ClientClaims))
             {
+                if (_sourceType != ManagedIdentitySource.Imds && _sourceType != ManagedIdentitySource.ImdsV2)
+                {
+                    throw new MsalClientException(
+                        MsalError.InvalidRequest,
+                        $"WithClientClaims is only supported for IMDS-based managed identity sources. " +
+                        $"The detected source is {_sourceType}. " +
+                        "Only ManagedIdentitySource.Imds and ManagedIdentitySource.ImdsV2 support the 'claims' parameter.");
+                }
+
                 if (request.Method == System.Net.Http.HttpMethod.Get)
                 {
                     request.QueryParameters["claims"] = Uri.EscapeDataString(parameters.ClientClaims);

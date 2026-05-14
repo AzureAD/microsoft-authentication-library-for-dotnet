@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client.Internal
                 // Do not include the raw claimsJson in the message — it may contain sensitive data.
                 throw new MsalClientException(
                     MsalError.InvalidJsonClaimsFormat,
-                    "The client_claims value is not valid JSON. Inspect the inner exception for parsing details. " +
+                    "The claims value is not a valid JSON object. Inspect the inner exception for parsing details. " +
                     "See https://openid.net/specs/openid-connect-core-1_0.html#ClaimsParameter.",
                     ex);
             }
@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Client.Internal
                 // Do not include the raw claimsJson in the message — it may contain sensitive data.
                 throw new MsalClientException(
                     MsalError.InvalidJsonClaimsFormat,
-                    "The client_claims value is not valid JSON. Inspect the inner exception for parsing details. " +
+                    "The claims value is not a valid JSON object. Inspect the inner exception for parsing details. " +
                     "See https://openid.net/specs/openid-connect-core-1_0.html#ClaimsParameter.",
                     ex);
             }
