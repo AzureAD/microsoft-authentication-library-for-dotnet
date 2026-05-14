@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Client.Instance
         internal override string GetTenantedAuthority(string tenantId, bool forceSpecifiedTenant = false)
         {
             if (!string.IsNullOrEmpty(tenantId) &&
-                (forceSpecifiedTenant || AadAuthority.IsCommonOrganizationsOrConsumersTenant(TenantId)))
+                (forceSpecifiedTenant || AadAuthority.IsCommonOrOrganizationsTenant(TenantId)))
             {
                 var authorityUri = AuthorityInfo.CanonicalAuthority;
 

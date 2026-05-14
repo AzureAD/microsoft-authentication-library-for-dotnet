@@ -491,16 +491,16 @@ namespace Microsoft.Identity.Client
             /// 1. If there is no request authority (i.e. no authority override), use the config authority.
             ///     1.1. For AAD, if the config authority is "common" etc, try to use the tenanted version with the home account tenant ID
             /// 2. If there is a request authority, try to use it.
-            ///     2.1. If the request authority is not "common", then use it
-            ///     2.2  If the request authority is "common", ignore it, and use 1.1
+            ///     2.1. If the request authority is not "common" or "organizations", use it (full relaxation)
+            ///     2.2  If the request authority is "common" or "organizations", ignore it, and use 1.1
             ///
             /// Special cases:
             ///
             /// - if the authority is not defined at the application level and the request level is not AAD, use the request authority
             /// - if the authority is defined at app level, and the request level authority is of different type, throw an exception
-            /// 
-            /// - if the intended authority is consumers, please define it at the app level and not at the request level. 
-            /// known issue: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2929
+            ///
+            /// Note: "consumers" and the MSA tenant GUID (9188040d-6c67-4c5b-b112-36a304b66dad) are both real tenant
+            /// identifiers — they are honored when specified at the request level, unlike "common" and "organizations".
             /// </summary>
             public static async Task<Authority> CreateAuthorityForRequestAsync(RequestContext requestContext,
                 AuthorityInfo requestAuthorityInfo,
@@ -565,7 +565,7 @@ namespace Microsoft.Identity.Client
                         var requestAuthority = updateEnvironment ?
                             new AadAuthority(CreateAuthorityWithEnvironment(requestAuthorityInfo, account?.Environment).AuthorityInfo) :
                             new AadAuthority(requestAuthorityInfo);
-                        if (!requestAuthority.IsCommonOrganizationsOrConsumersTenant() ||
+                        if (!requestAuthority.IsCommonOrOrganizationsTenant() ||
                             requestAuthority.IsOrganizationsTenantWithMsaPassthroughEnabled(requestContext.ServiceBundle.Config.IsBrokerEnabled && requestContext.ServiceBundle.Config.BrokerOptions != null && requestContext.ServiceBundle.Config.BrokerOptions.MsaPassthrough, account?.HomeAccountId?.TenantId))
                         {
                             return requestAuthority;
