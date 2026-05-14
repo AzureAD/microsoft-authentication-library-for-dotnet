@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         /// <summary>
-        /// Verifies that an OBO token requestwith <c>SendCertificateOverMtls = true</c>:
+        /// Verifies that an OBO token request with <c>SendCertificateOverMtls = true</c>:
         ///   1. Targets the global mTLS endpoint (mtlsauth.microsoft.com).
         ///   2. Does NOT include <c>client_assertion</c> in the POST body.
         /// </summary>
@@ -242,7 +242,7 @@ namespace Microsoft.Identity.Test.Unit
                         ExpectedUrl = expectedTokenEndpoint,
                         ExpectedMethod = HttpMethod.Post,
                         ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
-                        // client_assertion MUST be present (cert credential → JWT serialized)
+                        // client_assertion_type MUST be present (indicates cert credential is being serialized as a JWT)
                         ExpectedPostData = new Dictionary<string, string>
                         {
                             { OAuth2Parameter.ClientId, TestConstants.ClientId },
