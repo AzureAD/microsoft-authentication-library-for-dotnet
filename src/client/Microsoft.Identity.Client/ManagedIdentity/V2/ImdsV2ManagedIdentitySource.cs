@@ -215,11 +215,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             {
                 return await operation().ConfigureAwait(false);
             }
-            catch (MsalServiceException ex) when (
-                (ex.ErrorCode == MsalError.ManagedIdentityUnreachableNetwork && IsSchanelFailure(ex)) ||
-                IsStaleBindingAadstsError(ex))
+            catch (MsalServiceException ex) when (TryGetStaleBindingReason(ex, out string trigger))
             {
-                string trigger = IsSchanelFailure(ex) ? "SCHANNEL mTLS failure" : "stale mTLS binding AADSTS error";
+                // 'trigger' is captured from the filter's out-parameter and is in scope here.
+                // The helper is invoked exactly once across filter + handler.
                 _requestContext.Logger.Verbose(() =>
                     $"[ImdsV2] {trigger} detected. Removing bad persisted cert and retrying with fresh mint.");
 
@@ -240,6 +239,40 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 // Retry - will mint fresh cert since we just deleted the bad one
                 return await operation().ConfigureAwait(false);
             }
+        }
+
+        /// <summary>
+        /// Single point of truth that decides whether <paramref name="ex"/> represents a stale
+        /// mTLS-binding failure that should trigger a one-shot cert eviction + retry. Returns
+        /// <see langword="true"/> with a human-readable <paramref name="reason"/> for logging.
+        /// Bundling both the SCHANNEL transport check (with its required outer
+        /// <see cref="MsalError.ManagedIdentityUnreachableNetwork"/> guard) and the AADSTS
+        /// stale-binding STS-layer check into one helper avoids the prior bug where the trigger
+        /// label could be computed from <c>IsSchanelFailure</c> alone — without the outer
+        /// error-code guard — and mislabel an AADSTS-only match as "SCHANNEL".
+        /// </summary>
+        internal static bool TryGetStaleBindingReason(MsalServiceException ex, out string reason)
+        {
+            if (ex is null)
+            {
+                reason = null;
+                return false;
+            }
+
+            if (ex.ErrorCode == MsalError.ManagedIdentityUnreachableNetwork && IsSchanelFailure(ex))
+            {
+                reason = "SCHANNEL mTLS failure";
+                return true;
+            }
+
+            if (IsStaleBindingAadstsError(ex))
+            {
+                reason = "stale mTLS binding AADSTS error";
+                return true;
+            }
+
+            reason = null;
+            return false;
         }
 
         /// <summary>
