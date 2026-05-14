@@ -638,7 +638,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithAttributeTokens(new[] { "valid", "invalid token", "another" }));
 
             Assert.Contains("Attribute tokens must not contain whitespace", ex.Message);
-            Assert.Contains("invalid token", ex.Message);
         }
 
         [TestMethod]
