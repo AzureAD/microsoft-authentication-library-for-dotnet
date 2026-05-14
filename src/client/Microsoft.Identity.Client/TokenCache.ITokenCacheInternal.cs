@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Client
                 msalAccessTokenCacheItem =
                     new MsalAccessTokenCacheItem(
                         instanceDiscoveryMetadata.PreferredCache,
-                        requestParams.AppConfig.ClientId,
+                        requestParams.EffectiveClientId,
                         response,
                         tenantId,
                         homeAccountId,
@@ -98,7 +98,7 @@ namespace Microsoft.Identity.Client
 
                 msalRefreshTokenCacheItem = new MsalRefreshTokenCacheItem(
                                     instanceDiscoveryMetadata.PreferredCache,
-                                    requestParams.AppConfig.ClientId,
+                                    requestParams.EffectiveClientId,
                                     response,
                                     homeAccountId)
                 {
@@ -125,7 +125,7 @@ namespace Microsoft.Identity.Client
 
                 msalIdTokenCacheItem = new MsalIdTokenCacheItem(
                     instanceDiscoveryMetadata.PreferredCache,
-                    requestParams.AppConfig.ClientId,
+                    requestParams.EffectiveClientId,
                     response,
                     tenantId,
                     homeAccountId);
@@ -489,7 +489,7 @@ namespace Microsoft.Identity.Client
             FilterTokensByTokenType(accessTokens, requestParams);
             FilterTokensByScopes(accessTokens, requestParams);
             accessTokens = await FilterTokensByEnvironmentAsync(accessTokens, requestParams).ConfigureAwait(false);
-            FilterTokensByClientId(accessTokens);
+            FilterTokensByClientId(accessTokens, requestParams);
             FilterTokensByAdditionalKeyComponents(accessTokens, requestParams);
 
             CacheRefreshReason cacheInfoTelemetry = CacheRefreshReason.NotApplicable;
@@ -784,6 +784,12 @@ namespace Microsoft.Identity.Client
             tokenCacheItems.RemoveAll(x => !x.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase));
         }
 
+        private void FilterTokensByClientId<T>(List<T> tokenCacheItems, AuthenticationRequestParameters requestParams) where T : MsalCredentialCacheItemBase
+        {
+            string effectiveClientId = requestParams.EffectiveClientId;
+            tokenCacheItems.RemoveAll(x => !x.ClientId.Equals(effectiveClientId, StringComparison.OrdinalIgnoreCase));
+        }
+
         /// <summary>
         /// For testing purposes only. Expires ALL access tokens in memory and fires OnAfterAccessAsync event with no cache key
         /// </summary>
@@ -881,7 +887,7 @@ namespace Microsoft.Identity.Client
                     requestParams.RequestContext.Logger,
                     LegacyCachePersistence,
                     aliases,
-                    requestParams.AppConfig.ClientId,
+                    requestParams.EffectiveClientId,
                     requestParams.Account);
             }
 
@@ -924,7 +930,7 @@ namespace Microsoft.Identity.Client
             if (string.IsNullOrEmpty(familyId))
             {
                 cacheItems.FilterWithLogging(item => item.ClientId.Equals(
-                            requestParams.AppConfig.ClientId, StringComparison.OrdinalIgnoreCase),
+                            requestParams.EffectiveClientId, StringComparison.OrdinalIgnoreCase),
                             requestParams.RequestContext.Logger,
                             "Filtering RT by client id");
             }
@@ -988,7 +994,7 @@ namespace Microsoft.Identity.Client
             if (filterByClientId)
             {
                 refreshTokenCacheItems.FilterWithLogging(item =>
-                    string.Equals(item.ClientId, ClientId, StringComparison.OrdinalIgnoreCase),
+                    string.Equals(item.ClientId, requestParameters.EffectiveClientId, StringComparison.OrdinalIgnoreCase),
                     logger,
                     "[GetAccounts] Filtering RTs by clientID",
                     true);
@@ -1042,7 +1048,7 @@ namespace Microsoft.Identity.Client
             {
                 foreach (MsalAccountCacheItem account in accountCacheItems)
                 {
-                    if (RtMatchesAccount(rtItem, account))
+                    if (RtMatchesAccount(rtItem, account, requestParameters.EffectiveClientId))
                     {
                         var tenantProfiles = await GetTenantProfilesAsync(requestParameters, account.HomeAccountId).ConfigureAwait(false);
 

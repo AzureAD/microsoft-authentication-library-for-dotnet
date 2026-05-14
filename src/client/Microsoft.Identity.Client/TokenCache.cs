@@ -136,7 +136,7 @@ namespace Microsoft.Identity.Client
 
             foreach (var accessToken in Accessor.GetAllAccessTokens(partitionKeyFromResponse))
             {
-                if (accessToken.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase) &&
+                if (accessToken.ClientId.Equals(requestParams.EffectiveClientId, StringComparison.OrdinalIgnoreCase) &&
                     environmentAliases.Contains(accessToken.Environment) &&
                     string.Equals(accessToken.TokenType ?? "", tokenType ?? "", StringComparison.OrdinalIgnoreCase) &&
                     string.Equals(accessToken.TenantId ?? "", tenantId ?? "", StringComparison.OrdinalIgnoreCase) &&
@@ -207,12 +207,12 @@ namespace Microsoft.Identity.Client
                 msalAccessTokenCacheItem.ExtendedExpiresOn);
         }
 
-        private bool RtMatchesAccount(MsalRefreshTokenCacheItem rtItem, MsalAccountCacheItem account)
+        private bool RtMatchesAccount(MsalRefreshTokenCacheItem rtItem, MsalAccountCacheItem account, string effectiveClientId = null)
         {
             bool homeAccIdMatch = rtItem.HomeAccountId.Equals(account.HomeAccountId, StringComparison.OrdinalIgnoreCase);
             bool clientIdMatch =
                 rtItem.IsFRT || // Cannot filter by client ID if the RT can be used by multiple clients
-                rtItem.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase);
+                rtItem.ClientId.Equals(effectiveClientId ?? ClientId, StringComparison.OrdinalIgnoreCase);
 
             return homeAccIdMatch && clientIdMatch;
         }

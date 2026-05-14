@@ -207,6 +207,17 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public string ExtraClientAssertionClaims => _commonParameters.ExtraClientAssertionClaims;
 
+        /// <summary>
+        /// Per-request client ID override. When set, this value is used instead of AppConfig.ClientId
+        /// in the HTTP body and in all cache key computations.
+        /// </summary>
+        public string ClientIdOverride => _commonParameters.ClientIdOverride;
+
+        /// <summary>
+        /// Returns the effective client ID for this request: the override if set, otherwise AppConfig.ClientId.
+        /// </summary>
+        public string EffectiveClientId => ClientIdOverride ?? AppConfig.ClientId;
+
         public void LogParameters()
         {
             var logger = RequestContext.Logger;

@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Client.Cache
                 requestParameters.ApiId == ApiEvent.ApiIds.AcquireTokenForUserAssignedManagedIdentity)
             {
                 string tenantId = requestParameters.Authority.TenantId ?? "";
-                key = GetAppTokenCacheItemKey(requestParameters.AppConfig.ClientId, tenantId, requestParameters.AuthenticationScheme?.KeyId, requestParameters.CacheKeyComponents);
+                key = GetAppTokenCacheItemKey(requestParameters.EffectiveClientId, tenantId, requestParameters.AuthenticationScheme?.KeyId, requestParameters.CacheKeyComponents);
                 return true;
             }
 

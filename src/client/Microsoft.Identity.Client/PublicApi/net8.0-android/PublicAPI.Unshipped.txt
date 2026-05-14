@@ -3,3 +3,5 @@ Microsoft.Identity.Client.AuthScheme.IAuthenticationOperation3.AfterCredentialEv
 Microsoft.Identity.Client.AuthScheme.CredentialEvaluationContext
 Microsoft.Identity.Client.AuthScheme.CredentialEvaluationContext.CredentialEvaluationContext(System.Security.Cryptography.X509Certificates.X509Certificate2 mtlsCertificate) -> void
 Microsoft.Identity.Client.AuthScheme.CredentialEvaluationContext.MtlsCertificate.get -> System.Security.Cryptography.X509Certificates.X509Certificate2
+Microsoft.Identity.Client.AcquireTokenSilentParameterBuilder.WithClientIdOverride(string clientId) -> Microsoft.Identity.Client.AcquireTokenSilentParameterBuilder
+Microsoft.Identity.Client.AbstractConfidentialClientAcquireTokenParameterBuilder<T>.WithClientIdOverride(string clientId) -> T
