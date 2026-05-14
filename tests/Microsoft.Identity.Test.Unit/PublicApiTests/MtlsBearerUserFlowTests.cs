@@ -117,6 +117,7 @@ namespace Microsoft.Identity.Test.Unit
             using (var envContext = new EnvVariableContext())
             {
                 Environment.SetEnvironmentVariable("REGION_NAME", region);
+                Environment.SetEnvironmentVariable("MSAL_FORCE_REGION", null);
 
                 using (var harness = new MockHttpAndServiceBundle())
                 {

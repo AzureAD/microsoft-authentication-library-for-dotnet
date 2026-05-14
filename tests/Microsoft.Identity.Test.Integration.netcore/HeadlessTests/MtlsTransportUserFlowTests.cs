@@ -103,7 +103,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNotNull(oboResult.AccessToken, "OBO access token should not be null.");
             Assert.AreEqual(TokenSource.IdentityProvider, oboResult.AuthenticationResultMetadata.TokenSource);
             Assert.IsGreaterThan(0, trackingFactory.GetHttpClientCallCount,
-                "The mTLS factory's GetHttpClient should have been called at least once for the OBO flow.");
+                "The mTLS-specific GetHttpClient(X509Certificate2) overload should have been called at least once for the OBO flow.");
 
             Console.WriteLine($"[MtlsTransport OBO] Success. Factory invoked {trackingFactory.GetHttpClientCallCount}x. " +
                               $"mTLS client used {trackingFactory.MtlsClientUsedCount}x.");
@@ -164,7 +164,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNotNull(refreshResult, "Refresh token result should not be null.");
             Assert.IsNotNull(refreshResult.AccessToken, "Access token should not be null after refresh.");
             Assert.IsGreaterThan(0, trackingFactory.GetHttpClientCallCount,
-                "The mTLS factory's GetHttpClient should have been called at least once for the refresh_token flow.");
+                "The mTLS-specific GetHttpClient(X509Certificate2) overload should have been called at least once for the refresh_token flow.");
 
             Console.WriteLine($"[MtlsTransport RT] Success. Factory invoked {trackingFactory.GetHttpClientCallCount}x. " +
                               $"mTLS client used {trackingFactory.MtlsClientUsedCount}x.");
