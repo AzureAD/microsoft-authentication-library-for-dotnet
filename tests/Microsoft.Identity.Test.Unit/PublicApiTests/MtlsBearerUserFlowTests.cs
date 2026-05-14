@@ -41,14 +41,8 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
-        [ClassCleanup]
-        public static void ClassCleanup()
-        {
-            s_testCertificate.Dispose();
-        }
-
         /// <summary>
-        /// Verifies that an OBO token request with <c>SendCertificateOverMtls = true</c>:
+        /// Verifies that an OBO token requestwith <c>SendCertificateOverMtls = true</c>:
         ///   1. Targets the global mTLS endpoint (mtlsauth.microsoft.com).
         ///   2. Does NOT include <c>client_assertion</c> in the POST body.
         /// </summary>
