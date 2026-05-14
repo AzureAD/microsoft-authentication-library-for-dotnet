@@ -5,7 +5,6 @@ using System;
 using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Region;
-using Microsoft.Identity.Client;
 
 namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
 {
