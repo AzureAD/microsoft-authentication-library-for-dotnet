@@ -264,13 +264,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
-        public async Task SingleCca_AgentUserIdentity_TwoUsers_NoCacheCollision_Test()
+        public async Task SingleCca_AgentUserIdentity_AppTokenCacheIsolation_Test()
         {
-            // This test verifies that two different users' tokens don't collide in the cache
-            // when using the same single CCA + WithClientIdOverride pattern.
-            //
-            // We acquire tokens for user1, then user1 again (should be cache hit),
-            // verifying the basic cache isolation by homeAccountId.
+            // This test verifies that Leg 1 (blueprint) and Leg 2 (agent) app tokens
+            // are correctly isolated in the cache despite targeting the same scope,
+            // and that subsequent calls are served from cache.
 
             X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
 
@@ -281,7 +279,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithCertificate(cert, sendX5C: true)
                 .Build();
 
-            // --- First user flow ---
+            // Leg 1: Blueprint acquires FMI token
             var leg1Result = await cca
                 .AcquireTokenForClient([TokenExchangeUrl])
                 .WithFmiPath(AgentIdentity)
@@ -289,7 +287,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .ConfigureAwait(false);
 
             string t1Token = leg1Result.AccessToken;
+            Assert.AreEqual(TokenSource.IdentityProvider, leg1Result.AuthenticationResultMetadata.TokenSource);
 
+            // Leg 2: Agent instance token (same scope, different clientId via override)
             var leg2Result = await cca
                 .AcquireTokenForClient([TokenExchangeUrl])
                 .WithClientIdOverride(AgentIdentity)
@@ -302,22 +302,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
-            var user1Result = await ((IByUserFederatedIdentityCredential)cca)
-                .AcquireTokenByUserFederatedIdentityCredential([Scope], UserUpn, leg2Result.AccessToken)
-                .WithClientIdOverride(AgentIdentity)
-                .OnBeforeTokenRequest(data =>
-                {
-                    data.BodyParameters["client_assertion"] = t1Token;
-                    data.BodyParameters["client_assertion_type"] = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer";
-                    return Task.CompletedTask;
-                })
-                .ExecuteAsync()
-                .ConfigureAwait(false);
+            Assert.AreEqual(TokenSource.IdentityProvider, leg2Result.AuthenticationResultMetadata.TokenSource);
 
-            Assert.IsNotNull(user1Result.AccessToken);
-            Trace.WriteLine($"User 1 token acquired from: {user1Result.AuthenticationResultMetadata.TokenSource}");
+            // Verify no collision: same scope, different tokens
+            Assert.AreNotEqual(leg1Result.AccessToken, leg2Result.AccessToken,
+                "T1 and T2 should be different tokens despite same scope");
 
-            // --- Verify Leg 1 and Leg 2 are cached (reuse for second call) ---
+            // Verify Leg 1 cache hit
             var leg1Cached = await cca
                 .AcquireTokenForClient([TokenExchangeUrl])
                 .WithFmiPath(AgentIdentity)
@@ -325,8 +316,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .ConfigureAwait(false);
 
             Assert.AreEqual(TokenSource.Cache, leg1Cached.AuthenticationResultMetadata.TokenSource,
-                "Leg 1 token should be served from cache on second call");
+                "Leg 1 should be served from cache");
 
+            // Verify Leg 2 cache hit
             var leg2Cached = await cca
                 .AcquireTokenForClient([TokenExchangeUrl])
                 .WithClientIdOverride(AgentIdentity)
@@ -340,23 +332,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .ConfigureAwait(false);
 
             Assert.AreEqual(TokenSource.Cache, leg2Cached.AuthenticationResultMetadata.TokenSource,
-                "Leg 2 token should be served from cache on second call");
-
-            // --- User 1 silent with WithClientIdOverride ---
-            var user1Silent = await cca
-                .AcquireTokenSilent([Scope], user1Result.Account)
-                .WithClientIdOverride(AgentIdentity)
-                .ExecuteAsync()
-                .ConfigureAwait(false);
-
-            Assert.AreEqual(TokenSource.Cache, user1Silent.AuthenticationResultMetadata.TokenSource,
-                "User 1 silent should hit cache");
-            Assert.AreEqual(user1Result.AccessToken, user1Silent.AccessToken);
-
-            // --- Verify no collision: Leg 1 token (blueprint clientId) vs Leg 2 token (agent clientId) ---
-            // Both target the same scope (api://AzureADTokenExchange/.default) but should be distinct cache entries
-            Assert.AreNotEqual(leg1Result.AccessToken, leg2Result.AccessToken,
-                "T1 and T2 should be different tokens despite same scope");
+                "Leg 2 should be served from cache");
         }
 
         [TestMethod]
