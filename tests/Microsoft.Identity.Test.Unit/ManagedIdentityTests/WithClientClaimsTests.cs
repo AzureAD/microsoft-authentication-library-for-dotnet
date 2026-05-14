@@ -705,12 +705,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         // ---------------------------------------------------------------------------------
 
         [TestMethod]
-        public void WithClientClaims_NonImdsSource_SetsBuilderParameter()
+        public void WithClientClaims_NonImdsSource_SetsBuilderParameterButThrowsOnExecution()
         {
-            // WithClientClaims() is available on AcquireTokenForManagedIdentity regardless of
-            // the underlying MI source. This test verifies the builder sets the parameter for
-            // a non-IMDS source (App Service). Whether and how the claim is forwarded on the
-            // wire is source-specific and subject to the POC open question on scope.
+            // WithClientClaims() sets the builder parameter for any MI source — the guard that
+            // rejects non-IMDS sources fires at request-execution time (in AbstractManagedIdentity),
+            // not at builder construction time. This test verifies the builder state; a full
+            // execution-level test requires mocking the App Service endpoint and is deferred.
             using (new EnvVariableContext())
             {
                 SetEnvironmentVariables(ManagedIdentitySource.AppService, "http://127.0.0.1:41564/msi/token");
@@ -723,7 +723,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var builder = mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .WithClientClaims(NspClaims);
 
-                // Assert — parameter is stored regardless of source
+                // Assert — parameter is stored on the builder regardless of source;
+                // MsalClientException is thrown later when the request is executed.
                 Assert.IsNotNull(builder.CommonParameters.ClientClaims,
                     "ClientClaims must be set on the builder even for non-IMDS sources.");
                 Assert.IsTrue(builder.CommonParameters.CacheKeyComponents.ContainsKey("client_claims"),
