@@ -70,6 +70,34 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Overrides the client ID used for cache lookups and token refresh requests.
+        /// Use this when tokens were acquired with a different client ID than the one configured on the application,
+        /// for example in agent identity scenarios where <c>WithClientIdOverride</c> was used during acquisition.
+        /// </summary>
+        /// <param name="clientId">The client ID to use for cache lookup and token refresh.</param>
+        /// <returns>The builder to chain the .With methods.</returns>
+        /// <remarks>
+        /// This is an experimental API. It is only supported on confidential client applications.
+        /// </remarks>
+#if !SUPPORTS_CONFIDENTIAL_CLIENT
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+#endif
+        public AcquireTokenSilentParameterBuilder WithClientIdOverride(string clientId)
+        {
+            ValidateUseOfExperimentalFeature();
+
+            if (!ServiceBundle.Config.IsConfidentialClient)
+            {
+                throw new MsalClientException(
+                    MsalError.ExperimentalFeature,
+                    "WithClientIdOverride is only supported on confidential client applications.");
+            }
+
+            CommonParameters.ClientIdOverride = clientId ?? throw new ArgumentNullException(nameof(clientId));
+            return this;
+        }
+
+        /// <summary>
         /// Specifies if the client application should ignore access tokens when reading the token cache.
         /// Refresh tokens will still be used. Any new tokens from the Identity Provider will still be written to the token cache.
         /// By default the token is taken from the the user token cache (forceRefresh=false)

@@ -62,6 +62,27 @@ namespace Microsoft.Identity.Client
         internal IConfidentialClientApplicationExecutor ConfidentialClientApplicationExecutor { get; }
 
         /// <summary>
+        /// Overrides the client_id sent in the token request body and used in cache key
+        /// computation for this request only. The CCA's configured credentials are still
+        /// used for authentication (client_assertion), but the client_id in the request
+        /// body and all cache lookups will use the specified value instead.
+        /// </summary>
+        /// <param name="clientId">The client ID to use for this request.</param>
+        /// <returns>The builder to chain .With methods.</returns>
+        /// <remarks>
+        /// This is designed for federated identity scenarios where an app (blueprint)
+        /// authenticates on behalf of another app (agent) that has a different client ID.
+        /// The CCA's own credentials prove the blueprint's identity, while the overridden
+        /// client_id tells the token service which app the token is being requested for.
+        /// </remarks>
+        public T WithClientIdOverride(string clientId)
+        {
+            ValidateUseOfExperimentalFeature();
+            CommonParameters.ClientIdOverride = clientId ?? throw new ArgumentNullException(nameof(clientId));
+            return this as T;
+        }
+
+        /// <summary>
         ///  Modifies the token acquisition request so that the acquired token is a Proof-of-Possession token (PoP), rather than a Bearer token. 
         ///  PoP tokens are similar to Bearer tokens, but are bound to the HTTP request and to a cryptographic key, which MSAL can manage on Windows.
         ///  See https://aka.ms/msal-net-pop

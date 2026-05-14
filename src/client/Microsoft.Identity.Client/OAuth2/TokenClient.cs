@@ -130,7 +130,7 @@ namespace Microsoft.Identity.Client.OAuth2
             string tokenEndpoint,
             CancellationToken cancellationToken)
         {
-            _oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientId, _requestParams.AppConfig.ClientId);
+            _oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientId, _requestParams.EffectiveClientId);
 
             // credentialToUse can be null, e.g. for public client apps (no client credential configured).
             IClientCredential credentialToUse = _serviceBundle.Config.ClientCredential;
