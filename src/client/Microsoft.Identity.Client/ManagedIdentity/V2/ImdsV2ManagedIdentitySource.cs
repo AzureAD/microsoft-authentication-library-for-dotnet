@@ -255,9 +255,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 return false;
             }
 
+            // Append ":" so that e.g. "AADSTS1000901:" never false-matches a longer
+            // code like "AADSTS10009010:" that shares the same prefix.
+            // Entra always formats AADSTS codes as "<CODE>: <description>".
             foreach (string code in s_staleBindingAadstsCodes)
             {
-                if (ex.Message.Contains(code, StringComparison.OrdinalIgnoreCase))
+                if (ex.Message.Contains(code + ":", StringComparison.OrdinalIgnoreCase))
                 {
                     return true;
                 }

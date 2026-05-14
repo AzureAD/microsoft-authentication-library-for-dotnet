@@ -780,7 +780,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [TestMethod]
         public void IsStaleBindingAadstsError_ReturnsTrue_For_AADSTS1000901_In_Message()
         {
-            // Arrange - build an exception whose message contains AADSTS1000901,
+            // Arrange - build an exception whose message contains AADSTS1000901 followed by a colon,
             // as produced by AbstractManagedIdentity.HandleResponseAsync when Entra
             // rejects the cert with "token_not_after has elapsed".
             var message =
@@ -794,6 +794,24 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
             // Assert
             Assert.IsTrue(result, "Expected AADSTS1000901 to be detected as a stale binding error.");
+        }
+
+        [TestMethod]
+        public void IsStaleBindingAadstsError_ReturnsFalse_For_LongerCodeWithSamePrefix()
+        {
+            // Arrange - message contains a longer code that shares the AADSTS1000901 prefix
+            // (e.g. a hypothetical AADSTS10009010 or AADSTS100090123).
+            // The colon-terminated match must NOT fire on these.
+            var message =
+                "ManagedIdentity: Error Code: invalid_client Error Description: " +
+                "AADSTS10009010: Some future error that starts with AADSTS1000901.";
+            var ex = new MsalServiceException(MsalError.ManagedIdentityRequestFailed, message);
+
+            // Act
+            var result = ImdsV2ManagedIdentitySource.IsStaleBindingAadstsError(ex);
+
+            // Assert
+            Assert.IsFalse(result, "A longer code sharing the AADSTS1000901 prefix must not trigger a false match.");
         }
 
         [TestMethod]
