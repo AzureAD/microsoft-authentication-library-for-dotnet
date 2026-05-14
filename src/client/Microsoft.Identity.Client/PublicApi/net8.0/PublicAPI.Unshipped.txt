@@ -1,3 +1,5 @@
+Microsoft.Identity.Client.AcquireTokenForManagedIdentityParameterBuilder.WithClientClaims(string claimsJson) -> Microsoft.Identity.Client.AcquireTokenForManagedIdentityParameterBuilder
+static Microsoft.Identity.Client.Extensibility.AbstractConfidentialClientAcquireTokenParameterBuilderExtension.WithClientClaims<T>(this Microsoft.Identity.Client.AbstractConfidentialClientAcquireTokenParameterBuilder<T> builder, string claimsJson) -> T
 Microsoft.Identity.Client.AuthScheme.IAuthenticationOperation3
 Microsoft.Identity.Client.AuthScheme.IAuthenticationOperation3.AfterCredentialEvaluationAsync(Microsoft.Identity.Client.AuthScheme.CredentialEvaluationContext context, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task
 Microsoft.Identity.Client.AuthScheme.CredentialEvaluationContext

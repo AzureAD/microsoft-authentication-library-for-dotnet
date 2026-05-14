@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -17,6 +18,87 @@ namespace Microsoft.Identity.Client.Internal
     {
         private const string AccessTokenClaim = "access_token";
         private const string XmsClientCapability = "xms_cc";
+
+        /// <summary>
+        /// Normalizes a claims JSON string so that semantically identical claims always produce
+        /// the same string. This prevents cache key fragmentation when callers pass the same
+        /// logical claims in different whitespace or key-ordering variants.
+        /// </summary>
+        internal static string NormalizeClaimsJson(string claimsJson)
+        {
+            if (string.IsNullOrWhiteSpace(claimsJson))
+            {
+                return claimsJson;
+            }
+
+            try
+            {
+                JObject parsed = JsonHelper.ParseIntoJsonObject(claimsJson);
+                JObject sorted = SortJsonObjectKeys(parsed);
+                return JsonHelper.JsonObjectToString(sorted);
+            }
+            catch (Exception ex) when (ex is JsonException || ex is InvalidOperationException)
+            {
+                // InvalidOperationException is thrown by JsonNode.AsObject() when the root token is
+                // valid JSON but not an object (e.g. an array or a scalar).
+                // Do not include the raw claimsJson in the message — it may contain sensitive data.
+                throw new MsalClientException(
+                    MsalError.InvalidJsonClaimsFormat,
+                    "The claims value is not a valid JSON object. Inspect the inner exception for parsing details. " +
+                    "See https://openid.net/specs/openid-connect-core-1_0.html#ClaimsParameter.",
+                    ex);
+            }
+        }
+
+        /// <summary>
+        /// Merges two JSON claims objects. If either is null/empty the other is returned as-is.
+        /// </summary>
+        internal static string MergeClaimsObjects(string claims1, string claims2)
+        {
+            if (string.IsNullOrEmpty(claims1)) return claims2;
+            if (string.IsNullOrEmpty(claims2)) return claims1;
+
+            try
+            {
+                JObject obj1 = JsonHelper.ParseIntoJsonObject(claims1);
+                JObject obj2 = JsonHelper.ParseIntoJsonObject(claims2);
+                JObject merged = JsonHelper.Merge(obj1, obj2);
+                return JsonHelper.JsonObjectToString(merged);
+            }
+            catch (Exception ex) when (ex is JsonException || ex is InvalidOperationException)
+            {
+                // InvalidOperationException is thrown by JsonNode.AsObject() when the root token is
+                // valid JSON but not an object (e.g. an array, a scalar, or the literal 'null').
+                // Do not include the raw claimsJson in the message — it may contain sensitive data.
+                throw new MsalClientException(
+                    MsalError.InvalidJsonClaimsFormat,
+                    "The claims value is not a valid JSON object. Inspect the inner exception for parsing details. " +
+                    "See https://openid.net/specs/openid-connect-core-1_0.html#ClaimsParameter.",
+                    ex);
+            }
+        }
+
+        private static JObject SortJsonObjectKeys(JObject obj)
+        {
+            var sorted = new JObject();
+            foreach (var key in obj.Select(kvp => kvp.Key).OrderBy(k => k, StringComparer.Ordinal))
+            {
+                var value = obj[key];
+                if (value is JObject nestedObj)
+                {
+                    sorted[key] = SortJsonObjectKeys(nestedObj);
+                }
+                else
+                {
+                    // Array elements are cloned as-is. Per OIDC §5.5, array element *order* is
+                    // semantically significant (e.g. acr.values preference order), so we must not
+                    // reorder elements. NSP claims do not use arrays-of-objects, so there is no
+                    // cache-fragmentation risk from not sorting inside array elements.
+                    sorted[key] = value is null ? null : JsonNode.Parse(value.ToJsonString());
+                }
+            }
+            return sorted;
+        }
 
         internal static string GetMergedClaimsAndClientCapabilities(
             string claims,
@@ -42,11 +124,16 @@ namespace Microsoft.Identity.Client.Internal
                 {
                     claimsJson = JsonHelper.ParseIntoJsonObject(claims);
                 }
-                catch (JsonException ex)
+                catch (Exception ex) when (ex is JsonException || ex is InvalidOperationException)
                 {
+                    // InvalidOperationException is thrown by JsonNode.AsObject() when the root token is
+                    // valid JSON but not an object (e.g. an array, a scalar, or the literal 'null').
+                    // This method also handles server-issued claims from .WithClaims(), so use a neutral
+                    // message rather than naming client_claims specifically.
                     throw new MsalClientException(
                         MsalError.InvalidJsonClaimsFormat,
-                        MsalErrorMessage.InvalidJsonClaimsFormat(claims),
+                        "The claims value is not a valid JSON object. Inspect the inner exception for parsing details. " +
+                        "See https://openid.net/specs/openid-connect-core-1_0.html#ClaimsParameter.",
                         ex);
                 }
                 capabilitiesJson = JsonHelper.Merge(capabilitiesJson, claimsJson);

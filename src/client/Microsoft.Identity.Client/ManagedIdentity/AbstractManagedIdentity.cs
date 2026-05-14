@@ -57,6 +57,33 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             ManagedIdentityRequest request = await CreateRequestAsync(resource).ConfigureAwait(false);
 
+            // Forward client-originated claims to the correct location for IMDS/MSIv2 only.
+            // Other MI sources (App Service, Azure Arc, Service Fabric, etc.) do not have a
+            // confirmed contract for the "claims" parameter; fail fast rather than silently
+            // ignoring the value and polluting the cache with keys the endpoint never saw.
+            if (!string.IsNullOrEmpty(parameters.ClientClaims))
+            {
+                if (_sourceType != ManagedIdentitySource.Imds && _sourceType != ManagedIdentitySource.ImdsV2)
+                {
+                    throw new MsalClientException(
+                        MsalError.InvalidRequest,
+                        $"WithClientClaims is only supported for IMDS-based managed identity sources. " +
+                        $"The detected source is {_sourceType}. " +
+                        "Only ManagedIdentitySource.Imds and ManagedIdentitySource.ImdsV2 support the 'claims' parameter.");
+                }
+
+                if (request.Method == System.Net.Http.HttpMethod.Get)
+                {
+                    request.QueryParameters["claims"] = Uri.EscapeDataString(parameters.ClientClaims);
+                    _requestContext.Logger.Info("[Managed Identity] Adding client claims to IMDS request as query parameter.");
+                }
+                else
+                {
+                    request.BodyParameters["claims"] = parameters.ClientClaims;
+                    _requestContext.Logger.Info("[Managed Identity] Adding client claims to ESTS POST body.");
+                }
+            }
+
             // When IMDSv2 mints a binding certificate during this request (via CSR),
             // it's exposed via request.MtlsCertificate. Bubble it up so the request
             // layer can set the mtls_pop scheme
