@@ -783,9 +783,10 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             // Arrange - build an exception whose message contains AADSTS1000901,
             // as produced by AbstractManagedIdentity.HandleResponseAsync when Entra
             // rejects the cert with "token_not_after has elapsed".
-            var message = "ManagedIdentity: Error Code: invalid_client Error Description: " +
-                          "AADSTS1000901: The provided certificate cannot be used for requesting tokens. " +
-                          "The value of token_not_after extension on the certificate should be greater than the current time.";
+            var message =
+                "ManagedIdentity: Error Code: invalid_client Error Description: " +
+                "AADSTS1000901: The provided certificate cannot be used for requesting tokens. " +
+                "The value of token_not_after extension on the certificate should be greater than the current time.";
             var ex = new MsalServiceException(MsalError.ManagedIdentityRequestFailed, message);
 
             // Act

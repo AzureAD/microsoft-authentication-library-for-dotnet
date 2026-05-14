@@ -207,6 +207,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         /// the cached certificate and retries the operation exactly once with a freshly-minted cert.
         /// Adding a new AADSTS trigger is a one-line change in <see cref="s_staleBindingAadstsCodes"/>.
         /// </summary>
+        /// <param name="operation">The async operation to execute and potentially retry.</param>
         private async Task<ManagedIdentityResponse> ExecuteWithMtlsSelfHealingAsync(
             Func<Task<ManagedIdentityResponse>> operation)
         {
@@ -246,6 +247,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         /// certificate was rejected by Entra (STS layer) with one of the known stale-binding
         /// AADSTS codes listed in <see cref="s_staleBindingAadstsCodes"/>.
         /// </summary>
+        /// <param name="ex">The exception to check for stale-binding AADSTS codes.</param>
         internal static bool IsStaleBindingAadstsError(MsalServiceException ex)
         {
             if (ex.ErrorCode != MsalError.ManagedIdentityRequestFailed || string.IsNullOrEmpty(ex.Message))
