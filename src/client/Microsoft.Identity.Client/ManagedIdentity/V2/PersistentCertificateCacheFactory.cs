@@ -9,23 +9,46 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 {
     internal static class PersistentCertificateCacheFactory
     {
-        private const string DisableEnvVar = "MSAL_MI_DISABLE_PERSISTENT_CERT_CACHE";
+        private const string EnableEnvVar = "MSAL_MI_ENABLE_PERSISTENT_CERT_CACHE";
 
         public static IPersistentCertificateCache Create(ILoggerAdapter logger)
         {
-            var disable = Environment.GetEnvironmentVariable(DisableEnvVar);
-            if (!string.IsNullOrEmpty(disable) &&
-                (disable.Equals("1", StringComparison.OrdinalIgnoreCase) ||
-                 disable.Equals("true", StringComparison.OrdinalIgnoreCase)))
+            string raw;
+            try
             {
-                logger.Info(() => "[PersistentCert] No-op persistent cache enabled via " + DisableEnvVar + ".");
+                raw = Environment.GetEnvironmentVariable(EnableEnvVar);
+            }
+            catch (System.Security.SecurityException)
+            {
+                // Persistence must never block authentication; if we cannot read the
+                // environment we silently default to in-memory (NoOp) behavior.
                 return new NoOpPersistentCertificateCache();
             }
 
-            // We persist only on Windows because FriendlyName tagging is required.
-            return DesktopOsHelper.IsWindows()
-                ? new WindowsPersistentCertificateCache()
-                : new NoOpPersistentCertificateCache();
+            string value = raw?.Trim();
+            if (string.IsNullOrEmpty(value))
+            {
+                return new NoOpPersistentCertificateCache();
+            }
+
+            bool optedIn =
+                value.Equals("1", StringComparison.OrdinalIgnoreCase) ||
+                value.Equals("true", StringComparison.OrdinalIgnoreCase);
+
+            if (!optedIn)
+            {
+                logger.Info(() => "[PersistentCert] " + EnableEnvVar + " is set to an unrecognized value (expected '1' or 'true'). Persistent cache will not be enabled.");
+                return new NoOpPersistentCertificateCache();
+            }
+
+            if (DesktopOsHelper.IsWindows())
+            {
+                logger.Info(() => "[PersistentCert] Windows persistent cache enabled via " + EnableEnvVar + ".");
+                return new WindowsPersistentCertificateCache();
+            }
+
+            logger.Info(() => "[PersistentCert] " + EnableEnvVar + " is set but persistent cache is only supported on Windows. Falling back to no-op.");
+            return new NoOpPersistentCertificateCache();
         }
     }
 }

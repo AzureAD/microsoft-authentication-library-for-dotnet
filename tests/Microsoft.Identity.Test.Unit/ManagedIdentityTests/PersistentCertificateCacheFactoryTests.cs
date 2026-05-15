@@ -14,32 +14,20 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
     [TestClass]
     public class PersistentCertificateCacheFactoryTests
     {
-        private const string DisableEnvVar = "MSAL_MI_DISABLE_PERSISTENT_CERT_CACHE";
+        private const string EnableEnvVar = "MSAL_MI_ENABLE_PERSISTENT_CERT_CACHE";
 
         [TestMethod]
         [DataRow("true")]
         [DataRow("TRUE")]
+        [DataRow("TruE")]
         [DataRow("1")]
-        public void Factory_Disabled_ByEnvVar(string environmentVariableValue)
+        [DataRow(" true ")]
+        [DataRow("\t1\t")]
+        public void Factory_Enabled_ByEnvVar(string environmentVariableValue)
         {
             using (new EnvVariableContext())
             {
-                Environment.SetEnvironmentVariable(DisableEnvVar, environmentVariableValue);
-
-                var logger = Substitute.For<ILoggerAdapter>();
-                var cache = PersistentCertificateCacheFactory.Create(logger);
-
-                Assert.IsInstanceOfType(cache, typeof(NoOpPersistentCertificateCache));
-            }
-        }
-
-        [TestMethod]
-        public void Factory_Defaults_To_Platform_When_EnvVar_Unset()
-        {
-            using (new EnvVariableContext())
-            {
-                // Ensure unset
-                Environment.SetEnvironmentVariable(DisableEnvVar, null);
+                Environment.SetEnvironmentVariable(EnableEnvVar, environmentVariableValue);
 
                 var logger = Substitute.For<ILoggerAdapter>();
                 var cache = PersistentCertificateCacheFactory.Create(logger);
@@ -52,6 +40,48 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 {
                     Assert.IsInstanceOfType(cache, typeof(NoOpPersistentCertificateCache));
                 }
+            }
+        }
+
+        [TestMethod]
+        [DataRow(null)]
+        [DataRow("")]
+        [DataRow(" ")]
+        [DataRow("\t")]
+        public void Factory_Defaults_To_NoOp_When_EnvVar_Unset(string environmentVariableValue)
+        {
+            using (new EnvVariableContext())
+            {
+                Environment.SetEnvironmentVariable(EnableEnvVar, environmentVariableValue);
+
+                var logger = Substitute.For<ILoggerAdapter>();
+                var cache = PersistentCertificateCacheFactory.Create(logger);
+
+                Assert.IsInstanceOfType(cache, typeof(NoOpPersistentCertificateCache));
+            }
+        }
+
+        [TestMethod]
+        [DataRow("0")]
+        [DataRow("false")]
+        [DataRow("False")]
+        [DataRow("FALSE")]
+        [DataRow("yes")]
+        [DataRow("no")]
+        [DataRow("on")]
+        [DataRow("off")]
+        [DataRow("enabled")]
+        [DataRow("ture")]
+        public void Factory_Ignores_Unrecognized_Values(string environmentVariableValue)
+        {
+            using (new EnvVariableContext())
+            {
+                Environment.SetEnvironmentVariable(EnableEnvVar, environmentVariableValue);
+
+                var logger = Substitute.For<ILoggerAdapter>();
+                var cache = PersistentCertificateCacheFactory.Create(logger);
+
+                Assert.IsInstanceOfType(cache, typeof(NoOpPersistentCertificateCache));
             }
         }
     }
