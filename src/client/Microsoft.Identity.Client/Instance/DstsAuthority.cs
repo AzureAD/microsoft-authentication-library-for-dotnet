@@ -22,10 +22,13 @@ namespace Microsoft.Identity.Client.Instance
             TenantId = AuthorityInfo.GetSecondPathSegment(AuthorityInfo.CanonicalAuthority);
         }
 
+        // DSTS authorities use their own URL template (dstsv2/{tenantId}/), not the AAD template.
+        // Only honor tenant overrides when forceSpecifiedTenant=true (i.e., .WithTenantId() at request level).
+        // The old non-forced path (IsCommonOrOrganizationsTenant) was dead because DSTS authorities
+        // always carry a real tenant, never "common" or "organizations".
         internal override string GetTenantedAuthority(string tenantId, bool forceSpecifiedTenant = false)
         {
-            if (!string.IsNullOrEmpty(tenantId) &&
-                (forceSpecifiedTenant || AadAuthority.IsCommonOrOrganizationsTenant(TenantId)))
+            if (!string.IsNullOrEmpty(tenantId) && forceSpecifiedTenant)
             {
                 var authorityUri = AuthorityInfo.CanonicalAuthority;
 

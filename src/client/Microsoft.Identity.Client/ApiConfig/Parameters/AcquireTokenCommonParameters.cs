@@ -31,6 +31,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public IEnumerable<string> Scopes { get; set; }
         public IDictionary<string, string> ExtraQueryParameters { get; set; }
         public string Claims { get; set; }
+        public string ClientClaims { get; internal set; }
         public AuthorityInfo AuthorityOverride { get; set; }
         public IAuthenticationOperation AuthenticationOperation { get; set; } = new BearerAuthenticationOperation();
         public IDictionary<string, string> ExtraHttpHeaders { get; set; }
