@@ -23,6 +23,9 @@
 # RunIdWebIntegration='true' and IdWebRef in its Variables UI, and attaches
 # a scheduled trigger in its Triggers UI.
 #
+# IdWeb's default branch is 'master' (not 'main') -- this template's
+# PowerShell fallback defaults to 'master' if IdWebRef is unset.
+#
 # Scope: by design we restore/build/test ONLY the
 #   tests/Microsoft.Identity.Web.Test/Microsoft.Identity.Web.Test.csproj
 # csproj. Project references pull in the IdWeb libraries we care about
@@ -145,10 +148,11 @@ stages:
 
           # Resolve the ref. We deliberately do NOT declare $(IdWebRef) at
           # YAML root (UI-precedence issue), so it can be unset on this
-          # pipeline. Default to 'main' when undefined or unresolved.
+          # pipeline. Default to 'master' when undefined or unresolved
+          # (Microsoft.Identity.Web's default branch is 'master', not 'main').
           $ref = '$(IdWebRef)'
           if ([string]::IsNullOrWhiteSpace($ref) -or $ref -eq '$(IdWebRef)') {
-            $ref = 'main'
+            $ref = 'master'
           }
 
           # Allowlist: refs must look like branch/tag/sha names. Blocks

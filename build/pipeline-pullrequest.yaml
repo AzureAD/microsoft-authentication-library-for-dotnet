@@ -27,8 +27,8 @@ variables:
 #   zero agent time, zero impact on PR gating.
 # - On the separate ADO pipeline definition (.NET MSAL Nightly IdWeb
 #   Integration), the Variables UI sets RunIdWebIntegration='true' and
-#   IdWebRef='main' (or any branch/tag), and the Triggers UI attaches a
-#   scheduled trigger.
+#   IdWebRef='master' (IdWeb's default branch; or any branch/tag/SHA),
+#   and the Triggers UI attaches a scheduled trigger.
 
 #BUILD PHASE 
 
