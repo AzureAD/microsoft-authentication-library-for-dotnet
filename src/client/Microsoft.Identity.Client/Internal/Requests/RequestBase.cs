@@ -65,11 +65,23 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         /// <summary>
         /// Return a custom set of scopes to override the default MSAL logic of merging
-        /// input scopes with reserved scopes (openid, profile etc.)
-        /// Leave as is / return null otherwise
+        /// input scopes with reserved scopes (openid, profile, offline_access).
+        /// Leave as is / return null otherwise.
         /// </summary>
         protected virtual SortedSet<string> GetOverriddenScopes(ISet<string> inputScopes)
         {
+            if (AuthenticationRequestParameters.SendOfflineAccessScope is false)
+            {
+                var overriddenScopes = new SortedSet<string>(
+                    inputScopes.Where(scope => !string.Equals(scope, OAuth2Value.ScopeOfflineAccess, StringComparison.OrdinalIgnoreCase)),
+                    StringComparer.OrdinalIgnoreCase);
+
+                overriddenScopes.Add(OAuth2Value.ScopeOpenId);
+                overriddenScopes.Add(OAuth2Value.ScopeProfile);
+
+                return overriddenScopes;
+            }
+
             return null;
         }
 
