@@ -3,7 +3,9 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Globalization;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
@@ -21,12 +23,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
     /// </summary>
     internal sealed class MtlsBindingCache : IMtlsCertificateCache
     {
-        // ESS credentials have a 14-day X.509 NotAfter window but Entra only accepts them for
-        // token requests during the first 7 days (enforced via the token_not_after cert extension).
-        // We proactively evict a cached cert when it has been alive longer than this threshold,
-        // so fresh-mint happens before the first AADSTS1000901 rejection ever occurs.
-        // The threshold matches the known token_not_after window; adjust if IMDS changes it.
-        internal static readonly TimeSpan CertTokenNotAfterThreshold = TimeSpan.FromDays(7);
+        // OID 1.3.6.1.4.1.311.90.2.1 is the Microsoft-defined token_not_after X.509 extension.
+        // ESS embeds this in issued credentials to indicate when the cert can no longer be used
+        // to acquire tokens (even while the X.509 NotAfter is still in the future for renewal).
+        // MSAL reads this OID to proactively evict a cached cert before it would be rejected.
+        internal const string TokenNotAfterOid = "1.3.6.1.4.1.311.90.2.1";
         private readonly KeyedSemaphorePool _gates = new();
         private readonly ICertificateCache _memory;
         private readonly IPersistentCertificateCache _persisted;
@@ -178,17 +179,17 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         }
 
         /// <summary>
-        /// Returns <see langword="true"/> if the cached cert has been alive longer than
-        /// <see cref="CertTokenNotAfterThreshold"/> and should therefore be treated as a cache
-        /// miss so a fresh cert is minted before the next token request.
+        /// Returns <see langword="true"/> if the cached cert's token validity window has closed
+        /// and the cert should therefore be treated as a cache miss so a fresh cert is minted.
         /// </summary>
         /// <remarks>
-        /// ESS-issued credentials embed a <c>token_not_after</c> X.509 extension that Entra uses
-        /// to reject token requests even while the cert's standard X.509 <c>NotAfter</c> is still
-        /// in the future (cert lifetime ≈ 14 days; token validity ≈ 7 days). By proactively
-        /// checking at retrieval time we avoid ever hitting AADSTS1000901 on a cached cert.
-        /// The threshold is derived from <c>cert.NotBefore</c> so no knowledge of a proprietary
-        /// OID is required; if IMDS changes the token validity window this constant can be updated.
+        /// ESS-issued credentials embed a <c>token_not_after</c> X.509 extension (OID
+        /// <see cref="TokenNotAfterOid"/>) that Entra uses to reject token requests even while
+        /// the X.509 <c>NotAfter</c> is still in the future (the cert remains usable for renewal
+        /// after the token window closes). MSAL reads the OID directly so the check is always
+        /// accurate regardless of the configured validity window. For certs that do not carry the
+        /// OID (old format or CSK certs where token validity == cert validity), the standard
+        /// X.509 <c>NotAfter</c> is used as the fallback boundary.
         /// </remarks>
         internal static bool IsCertTokenExpiredForTokenRequests(X509Certificate2 cert, ILoggerAdapter logger)
         {
@@ -197,16 +198,102 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 return true;
             }
 
-            var certAge = DateTimeOffset.UtcNow - new DateTimeOffset(cert.NotBefore, TimeSpan.Zero);
-            if (certAge >= CertTokenNotAfterThreshold)
+            DateTimeOffset tokenNotAfter;
+            var oidExt = cert.Extensions[TokenNotAfterOid];
+
+            if (oidExt is not null && TryParseTokenNotAfterExtension(oidExt.RawData, out DateTimeOffset parsedNotAfter))
+            {
+                tokenNotAfter = parsedNotAfter;
+                logger?.Verbose(() =>
+                    $"[PersistentCert] Read token_not_after OID: {tokenNotAfter:u}.");
+            }
+            else
+            {
+                // OID absent or unparseable — fall back to the X.509 NotAfter as the token boundary.
+                tokenNotAfter = new DateTimeOffset(cert.NotAfter, TimeSpan.Zero);
+                logger?.Verbose(() =>
+                    $"[PersistentCert] token_not_after OID not present; using cert NotAfter {tokenNotAfter:u} as boundary.");
+            }
+
+            var now = DateTimeOffset.UtcNow;
+            if (now >= tokenNotAfter)
             {
                 logger?.Verbose(() =>
-                    $"[PersistentCert] Cert issued at {cert.NotBefore:u} is {certAge.TotalDays:F1} days old " +
-                    $"(threshold: {CertTokenNotAfterThreshold.TotalDays} days). Treating as expired for token requests.");
+                    $"[PersistentCert] Cert token validity window has closed. " +
+                    $"token_not_after={tokenNotAfter:u}, now={now:u}. Evicting.");
                 return true;
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Attempts to parse a DER-encoded <c>GeneralizedTime</c> or <c>UTCTime</c> value from the
+        /// raw bytes of the <c>token_not_after</c> X.509 extension (OID <see cref="TokenNotAfterOid"/>).
+        /// Returns <see langword="false"/> on any parse failure so callers can apply a safe fallback.
+        /// </summary>
+        internal static bool TryParseTokenNotAfterExtension(byte[] rawData, out DateTimeOffset result)
+        {
+            result = default;
+            try
+            {
+                if (rawData is null || rawData.Length < 4)
+                    return false;
+
+                int pos = 0;
+
+                // Skip an optional outer SEQUENCE wrapper (0x30 tag).
+                if (rawData[pos] == 0x30)
+                {
+                    pos++; // skip tag
+                    if (pos >= rawData.Length) return false;
+                    if ((rawData[pos] & 0x80) != 0)
+                        pos += 1 + (rawData[pos] & 0x7F); // long-form length
+                    else
+                        pos++; // short-form length
+                }
+
+                if (pos + 2 > rawData.Length) return false;
+
+                byte tag = rawData[pos++];
+                if (tag != 0x18 && tag != 0x17) return false; // must be GeneralizedTime or UTCTime
+
+                int len = rawData[pos++];
+                if ((len & 0x80) != 0)
+                {
+                    int extraBytes = len & 0x7F;
+                    len = 0;
+                    for (int i = 0; i < extraBytes; i++)
+                        len = (len << 8) | rawData[pos++];
+                }
+
+                if (pos + len > rawData.Length) return false;
+
+                string timeStr = Encoding.ASCII.GetString(rawData, pos, len).TrimEnd('Z');
+
+                // DER GeneralizedTime: YYYYMMDDHHMMSS[.fff]
+                if (tag == 0x18)
+                {
+                    return DateTimeOffset.TryParseExact(
+                        timeStr,
+                        new[] { "yyyyMMddHHmmss", "yyyyMMddHHmmss.fff" },
+                        CultureInfo.InvariantCulture,
+                        DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal,
+                        out result);
+                }
+
+                // DER UTCTime: YYMMDDHHMMSS
+                return DateTimeOffset.TryParseExact(
+                    timeStr,
+                    "yyMMddHHmmss",
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal,
+                    out result);
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         /// <summary>
