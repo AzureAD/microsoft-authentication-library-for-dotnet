@@ -63,6 +63,12 @@ namespace Microsoft.Identity.Client.OAuth2
 
                 string scopes = !string.IsNullOrEmpty(scopeOverride) ? scopeOverride : GetDefaultScopes(_requestParams.Scope);
 
+                if (_requestParams.SendOfflineAccessScope is false)
+                {
+                    scopes = string.Join(" ", scopes.Split(' ')
+                        .Where(s => !string.Equals(s, OAuth2Value.ScopeOfflineAccess, StringComparison.OrdinalIgnoreCase)));
+                }
+
                 await AddBodyParamsAndHeadersAsync(additionalBodyParameters, scopes, tokenEndpoint, cancellationToken).ConfigureAwait(false);
 
                 AddThrottlingHeader();
