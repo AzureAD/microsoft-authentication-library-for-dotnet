@@ -21,6 +21,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
     /// </summary>
     internal sealed class MtlsBindingCache : IMtlsCertificateCache
     {
+        // ESS credentials have a 14-day X.509 NotAfter window but Entra only accepts them for
+        // token requests during the first 7 days (enforced via the token_not_after cert extension).
+        // We proactively evict a cached cert when it has been alive longer than this threshold,
+        // so fresh-mint happens before the first AADSTS1000901 rejection ever occurs.
+        // The threshold matches the known token_not_after window; adjust if IMDS changes it.
+        internal static readonly TimeSpan CertTokenNotAfterThreshold = TimeSpan.FromDays(7);
         private readonly KeyedSemaphorePool _gates = new();
         private readonly ICertificateCache _memory;
         private readonly IPersistentCertificateCache _persisted;
@@ -66,13 +72,21 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             // 1) In-memory cache first
             if (!forceMint && _memory.TryGet(cacheKey, out var cachedEntry, logger))
             {
-                logger.Verbose(() =>
-                    $"[PersistentCert] mTLS binding cache HIT (memory) for '{cacheKey}'.");
+                if (!IsCertTokenExpiredForTokenRequests(cachedEntry.Certificate, logger))
+                {
+                    logger.Verbose(() =>
+                        $"[PersistentCert] mTLS binding cache HIT (memory) for '{cacheKey}'.");
 
-                return new MtlsBindingInfo(
-                    cachedEntry.Certificate,
-                    cachedEntry.Endpoint,
-                    cachedEntry.ClientId);
+                    return new MtlsBindingInfo(
+                        cachedEntry.Certificate,
+                        cachedEntry.Endpoint,
+                        cachedEntry.ClientId);
+                }
+
+                // Cert is past its token_not_after window; evict and fall through to mint.
+                logger.Verbose(() =>
+                    $"[PersistentCert] mTLS binding cache HIT (memory) for '{cacheKey}' but cert is past token validity window. Evicting and minting fresh.");
+                _memory.Remove(cacheKey, logger);
             }
 
             // 2) Per-key gate (dedupe concurrent mint)
@@ -85,13 +99,20 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 // Re-check after acquiring the gate
                 if (!forceMint && _memory.TryGet(cacheKey, out cachedEntry, logger))
                 {
-                    logger.Verbose(() =>
-                        $"[PersistentCert] mTLS binding cache HIT (memory-after-gate) for '{cacheKey}'.");
+                    if (!IsCertTokenExpiredForTokenRequests(cachedEntry.Certificate, logger))
+                    {
+                        logger.Verbose(() =>
+                            $"[PersistentCert] mTLS binding cache HIT (memory-after-gate) for '{cacheKey}'.");
 
-                    return new MtlsBindingInfo(
-                        cachedEntry.Certificate,
-                        cachedEntry.Endpoint,
-                        cachedEntry.ClientId);
+                        return new MtlsBindingInfo(
+                            cachedEntry.Certificate,
+                            cachedEntry.Endpoint,
+                            cachedEntry.ClientId);
+                    }
+
+                    logger.Verbose(() =>
+                        $"[PersistentCert] mTLS binding (memory-after-gate) for '{cacheKey}' is past token validity window. Evicting and minting fresh.");
+                    _memory.Remove(cacheKey, logger);
                 }
 
                 // 3) Persistent cache (best-effort)
@@ -100,7 +121,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                     logger.Verbose(() =>
                         $"[PersistentCert] mTLS binding cache HIT (persistent) for '{cacheKey}'.");
 
-                    if (persistedEntry.Certificate.HasPrivateKey)
+                    if (persistedEntry.Certificate.HasPrivateKey &&
+                        !IsCertTokenExpiredForTokenRequests(persistedEntry.Certificate, logger))
                     {
                         var memoryEntry = new CertificateCacheValue(
                             persistedEntry.Certificate,
@@ -153,6 +175,38 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             {
                 _gates.Release(cacheKey);
             }
+        }
+
+        /// <summary>
+        /// Returns <see langword="true"/> if the cached cert has been alive longer than
+        /// <see cref="CertTokenNotAfterThreshold"/> and should therefore be treated as a cache
+        /// miss so a fresh cert is minted before the next token request.
+        /// </summary>
+        /// <remarks>
+        /// ESS-issued credentials embed a <c>token_not_after</c> X.509 extension that Entra uses
+        /// to reject token requests even while the cert's standard X.509 <c>NotAfter</c> is still
+        /// in the future (cert lifetime ≈ 14 days; token validity ≈ 7 days). By proactively
+        /// checking at retrieval time we avoid ever hitting AADSTS1000901 on a cached cert.
+        /// The threshold is derived from <c>cert.NotBefore</c> so no knowledge of a proprietary
+        /// OID is required; if IMDS changes the token validity window this constant can be updated.
+        /// </remarks>
+        internal static bool IsCertTokenExpiredForTokenRequests(X509Certificate2 cert, ILoggerAdapter logger)
+        {
+            if (cert is null)
+            {
+                return true;
+            }
+
+            var certAge = DateTimeOffset.UtcNow - new DateTimeOffset(cert.NotBefore, TimeSpan.Zero);
+            if (certAge >= CertTokenNotAfterThreshold)
+            {
+                logger?.Verbose(() =>
+                    $"[PersistentCert] Cert issued at {cert.NotBefore:u} is {certAge.TotalDays:F1} days old " +
+                    $"(threshold: {CertTokenNotAfterThreshold.TotalDays} days). Treating as expired for token requests.");
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>

@@ -11,6 +11,7 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.ManagedIdentity.V2;
@@ -840,6 +841,278 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
 
             return false;
+        }
+
+        #region IsStaleBindingAadstsError tests
+
+        [TestMethod]
+        public void IsStaleBindingAadstsError_ReturnsTrue_For_AADSTS1000901_In_Message()
+        {
+            // Arrange - message format matches what AbstractManagedIdentity.HandleResponseAsync produces
+            // when Entra rejects the cert with "token_not_after has elapsed".
+            var message =
+                "ManagedIdentity: Error Code: invalid_client Error Description: " +
+                "AADSTS1000901: The provided certificate cannot be used for requesting tokens. " +
+                "The value of token_not_after extension on the certificate should be greater than the current time.";
+            var ex = new MsalServiceException(MsalError.ManagedIdentityRequestFailed, message);
+
+            // Act
+            bool result = ImdsV2ManagedIdentitySource.IsStaleBindingAadstsError(ex);
+
+            // Assert
+            Assert.IsTrue(result, "Expected AADSTS1000901 to be detected as a stale binding error.");
+        }
+
+        [TestMethod]
+        public void IsStaleBindingAadstsError_ReturnsFalse_For_LongerCodeWithSamePrefix()
+        {
+            // Arrange - a hypothetical future code that shares the AADSTS1000901 prefix;
+            // the colon boundary must prevent a false-positive match.
+            var message = "AADSTS10009010: some other error";
+            var ex = new MsalServiceException(MsalError.ManagedIdentityRequestFailed, message);
+
+            // Act
+            bool result = ImdsV2ManagedIdentitySource.IsStaleBindingAadstsError(ex);
+
+            // Assert
+            Assert.IsFalse(result, "A longer code sharing the prefix must not match AADSTS1000901.");
+        }
+
+        [TestMethod]
+        public void IsStaleBindingAadstsError_ReturnsFalse_For_UnrelatedError()
+        {
+            // Arrange
+            var ex = new MsalServiceException(MsalError.ManagedIdentityRequestFailed, "AADSTS70011: some unrelated error.");
+
+            // Act
+            bool result = ImdsV2ManagedIdentitySource.IsStaleBindingAadstsError(ex);
+
+            // Assert
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public void IsStaleBindingAadstsError_ReturnsFalse_For_WrongErrorCode()
+        {
+            // Arrange - correct AADSTS code in message but wrong MsalErrorCode (not ManagedIdentityRequestFailed)
+            var message = "AADSTS1000901: The value of token_not_after extension on the certificate should be greater than the current time.";
+            var ex = new MsalServiceException(MsalError.ManagedIdentityUnreachableNetwork, message);
+
+            // Act
+            bool result = ImdsV2ManagedIdentitySource.IsStaleBindingAadstsError(ex);
+
+            // Assert
+            Assert.IsFalse(result, "Wrong outer ErrorCode must not trigger stale-binding detection.");
+        }
+
+        [TestMethod]
+        public void IsStaleBindingAadstsError_ReturnsFalse_For_NullException()
+        {
+            // Act
+            bool result = ImdsV2ManagedIdentitySource.IsStaleBindingAadstsError(null);
+
+            // Assert
+            Assert.IsFalse(result);
+        }
+
+        #endregion
+
+        #region TryGetStaleBindingReason tests
+
+        [TestMethod]
+        public void TryGetStaleBindingReason_ReturnsTrue_WithSchannel_Label_For_Schannel_Failure()
+        {
+            // Arrange
+            var sock = new SocketException(10054);
+            var io = new IOException("connection reset", sock);
+            var http = new HttpRequestException("request failed", io);
+            var ex = new MsalServiceException(MsalError.ManagedIdentityUnreachableNetwork, "error", http);
+
+            // Act
+            bool result = ImdsV2ManagedIdentitySource.TryGetStaleBindingReason(ex, out string reason);
+
+            // Assert
+            Assert.IsTrue(result);
+            bool reasonHasSchannel = reason.IndexOf("SCHANNEL", StringComparison.OrdinalIgnoreCase) >= 0;
+            Assert.IsTrue(reasonHasSchannel, $"Expected SCHANNEL label, got: '{reason}'");
+        }
+
+        [TestMethod]
+        public void TryGetStaleBindingReason_ReturnsTrue_WithAadsts_Label_For_AADSTS1000901()
+        {
+            // Arrange
+            var message = "AADSTS1000901: The provided certificate cannot be used for requesting tokens.";
+            var ex = new MsalServiceException(MsalError.ManagedIdentityRequestFailed, message);
+
+            // Act
+            bool result = ImdsV2ManagedIdentitySource.TryGetStaleBindingReason(ex, out string reason);
+
+            // Assert
+            Assert.IsTrue(result);
+            bool reasonHasAadsts = reason.IndexOf("AADSTS", StringComparison.OrdinalIgnoreCase) >= 0;
+            Assert.IsTrue(reasonHasAadsts, $"Expected AADSTS label, got: '{reason}'");
+        }
+
+        [TestMethod]
+        public void TryGetStaleBindingReason_DoesNotMislabel_AsSchannel_When_Only_AADSTS_Matches_And_Inner_Has_Socket()
+        {
+            // Arrange - AADSTS exception that carries a SocketException inner;
+            // it must be labeled as an AADSTS stale-binding error, not SCHANNEL.
+            var innerSocket = new SocketException(10054);
+            var message = "AADSTS1000901: The provided certificate cannot be used for requesting tokens.";
+            var ex = new MsalServiceException(MsalError.ManagedIdentityRequestFailed, message, innerSocket);
+
+            // Act
+            bool result = ImdsV2ManagedIdentitySource.TryGetStaleBindingReason(ex, out string reason);
+
+            // Assert
+            Assert.IsTrue(result, "Exception should be recognized as a stale-binding failure.");
+            bool reasonHasSchannel = reason.IndexOf("SCHANNEL", StringComparison.OrdinalIgnoreCase) >= 0;
+            Assert.IsFalse(reasonHasSchannel, $"Must not be mislabeled as SCHANNEL; got: '{reason}'");
+            bool reasonHasAadsts = reason.IndexOf("AADSTS", StringComparison.OrdinalIgnoreCase) >= 0;
+            Assert.IsTrue(reasonHasAadsts, $"Expected AADSTS label; got: '{reason}'");
+        }
+
+        [TestMethod]
+        public void TryGetStaleBindingReason_ReturnsFalse_For_NullException()
+        {
+            // Act
+            bool result = ImdsV2ManagedIdentitySource.TryGetStaleBindingReason(null, out string reason);
+
+            // Assert
+            Assert.IsFalse(result);
+            Assert.IsNull(reason);
+        }
+
+        [TestMethod]
+        public void TryGetStaleBindingReason_ReturnsFalse_For_Unrelated_Error()
+        {
+            // Arrange
+            var ex = new MsalServiceException(MsalError.ManagedIdentityRequestFailed, "AADSTS70011: unrelated.");
+
+            // Act
+            bool result = ImdsV2ManagedIdentitySource.TryGetStaleBindingReason(ex, out string reason);
+
+            // Assert
+            Assert.IsFalse(result);
+            Assert.IsNull(reason);
+        }
+
+        #endregion
+
+        #region IsCertTokenExpiredForTokenRequests tests
+
+        [TestMethod]
+        public void IsCertTokenExpiredForTokenRequests_ReturnsFalse_For_FreshCert()
+        {
+            // Arrange - cert issued moments ago, well within the 7-day token validity window
+            using var cert = CreateSelfSignedCert(TimeSpan.FromDays(14), "CN=FreshCertTest");
+            var logger = Substitute.For<ILoggerAdapter>();
+
+            // Act
+            bool result = MtlsBindingCache.IsCertTokenExpiredForTokenRequests(cert, logger);
+
+            // Assert
+            Assert.IsFalse(result, "A freshly-minted cert should not be considered token-expired.");
+        }
+
+        [TestMethod]
+        public void IsCertTokenExpiredForTokenRequests_ReturnsTrue_For_Cert_Older_Than_Threshold()
+        {
+            // Arrange - cert issued 8 days ago (past the 7-day token_not_after window)
+            using var cert = CreateSelfSignedCertWithNotBefore(
+                notBefore: DateTimeOffset.UtcNow.AddDays(-8),
+                lifetime: TimeSpan.FromDays(14));
+            var logger = Substitute.For<ILoggerAdapter>();
+
+            // Act
+            bool result = MtlsBindingCache.IsCertTokenExpiredForTokenRequests(cert, logger);
+
+            // Assert
+            Assert.IsTrue(result, "A cert older than the threshold should be considered token-expired.");
+        }
+
+        [TestMethod]
+        public void IsCertTokenExpiredForTokenRequests_ReturnsTrue_For_Cert_ExactlyAt_Threshold()
+        {
+            // Arrange - cert issued exactly 7 days ago (at boundary, should refresh)
+            using var cert = CreateSelfSignedCertWithNotBefore(
+                notBefore: DateTimeOffset.UtcNow - MtlsBindingCache.CertTokenNotAfterThreshold,
+                lifetime: TimeSpan.FromDays(14));
+            var logger = Substitute.For<ILoggerAdapter>();
+
+            // Act
+            bool result = MtlsBindingCache.IsCertTokenExpiredForTokenRequests(cert, logger);
+
+            // Assert
+            Assert.IsTrue(result, "A cert at exactly the threshold boundary should trigger refresh.");
+        }
+
+        [TestMethod]
+        public void IsCertTokenExpiredForTokenRequests_ReturnsTrue_For_NullCert()
+        {
+            // Act
+            bool result = MtlsBindingCache.IsCertTokenExpiredForTokenRequests(null, null);
+
+            // Assert
+            Assert.IsTrue(result, "Null cert should be treated as expired.");
+        }
+
+        [TestMethod]
+        public async Task GetOrCreateAsync_EvictsStaleToken_And_MintsNew()
+        {
+            // Arrange
+            var memory = new InMemoryCertificateCache();
+            var persisted = Substitute.For<IPersistentCertificateCache>();
+            var logger = Substitute.For<ILoggerAdapter>();
+            var cache = new MtlsBindingCache(memory, persisted);
+
+            const string key = "key-stale-eviction";
+            const string ep = "https://mtls/ep";
+            const string cid = "22222222-2222-2222-2222-222222222222";
+
+            // Seed a "stale" cert: issued 8 days ago, still X.509 valid but past token_not_after
+            using var staleCert = CreateSelfSignedCertWithNotBefore(
+                notBefore: DateTimeOffset.UtcNow.AddDays(-8),
+                lifetime: TimeSpan.FromDays(14));
+            memory.Set(key, new CertificateCacheValue(staleCert, ep, cid));
+
+            using var freshCert = CreateSelfSignedCert(TimeSpan.FromDays(14), "CN=FreshMinted");
+            var freshBinding = new MtlsBindingInfo(freshCert, ep, cid);
+            int factoryCallCount = 0;
+
+            // Act
+            var result = await cache.GetOrCreateAsync(
+                key,
+                () =>
+                {
+                    factoryCallCount++;
+                    return Task.FromResult(freshBinding);
+                },
+                CancellationToken.None,
+                logger).ConfigureAwait(false);
+
+            // Assert
+            Assert.AreEqual(1, factoryCallCount, "Factory should be called exactly once to mint a fresh cert.");
+            Assert.AreEqual(freshCert, result.Certificate, "Returned cert should be the freshly-minted one.");
+        }
+
+        #endregion
+
+        private static X509Certificate2 CreateSelfSignedCertWithNotBefore(
+            DateTimeOffset notBefore,
+            TimeSpan lifetime,
+            string subjectCn = "CN=TokenNotAfterTest")
+        {
+            using var rsa = RSA.Create(2048);
+            var req = new System.Security.Cryptography.X509Certificates.CertificateRequest(
+                new X500DistinguishedName(subjectCn),
+                rsa,
+                HashAlgorithmName.SHA256,
+                RSASignaturePadding.Pkcs1);
+
+            var notAfter = notBefore.Add(lifetime);
+            return req.CreateSelfSigned(notBefore, notAfter);
         }
 
         #endregion
