@@ -15,8 +15,8 @@ Microsoft.Identity.Client.Extensions.Msal.MsalCacheHelper.UnregisterCache(Micros
 Microsoft.Identity.Client.Extensions.Msal.MsalCacheHelper.VerifyPersistence() -> void
 Microsoft.Identity.Client.Extensions.Msal.MsalCachePersistenceException
 Microsoft.Identity.Client.Extensions.Msal.MsalCachePersistenceException.MsalCachePersistenceException() -> void
-Microsoft.Identity.Client.Extensions.Msal.MsalCachePersistenceException.MsalCachePersistenceException(string message) -> void
 Microsoft.Identity.Client.Extensions.Msal.MsalCachePersistenceException.MsalCachePersistenceException(string message, System.Exception innerException) -> void
+Microsoft.Identity.Client.Extensions.Msal.MsalCachePersistenceException.MsalCachePersistenceException(string message) -> void
 Microsoft.Identity.Client.Extensions.Msal.MsalCachePersistenceException.MsalCachePersistenceException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
 Microsoft.Identity.Client.Extensions.Msal.SharedUtilities
 Microsoft.Identity.Client.Extensions.Msal.Storage
@@ -31,8 +31,8 @@ Microsoft.Identity.Client.Extensions.Msal.StorageCreationProperties.ClientId.get
 Microsoft.Identity.Client.Extensions.Msal.StorageCreationPropertiesBuilder
 Microsoft.Identity.Client.Extensions.Msal.StorageCreationPropertiesBuilder.Build() -> Microsoft.Identity.Client.Extensions.Msal.StorageCreationProperties
 Microsoft.Identity.Client.Extensions.Msal.StorageCreationPropertiesBuilder.CustomizeLockRetry(int lockRetryDelay, int lockRetryCount) -> Microsoft.Identity.Client.Extensions.Msal.StorageCreationPropertiesBuilder
-Microsoft.Identity.Client.Extensions.Msal.StorageCreationPropertiesBuilder.StorageCreationPropertiesBuilder(string cacheFileName, string cacheDirectory) -> void
 Microsoft.Identity.Client.Extensions.Msal.StorageCreationPropertiesBuilder.StorageCreationPropertiesBuilder(string cacheFileName, string cacheDirectory, string clientId) -> void
+Microsoft.Identity.Client.Extensions.Msal.StorageCreationPropertiesBuilder.StorageCreationPropertiesBuilder(string cacheFileName, string cacheDirectory) -> void
 Microsoft.Identity.Client.Extensions.Msal.StorageCreationPropertiesBuilder.WithCacheChangedEvent(string clientId, string authority = "https://login.microsoftonline.com/common") -> Microsoft.Identity.Client.Extensions.Msal.StorageCreationPropertiesBuilder
 Microsoft.Identity.Client.Extensions.Msal.StorageCreationPropertiesBuilder.WithLinuxKeyring(string schemaName, string collection, string secretLabel, System.Collections.Generic.KeyValuePair<string, string> attribute1, System.Collections.Generic.KeyValuePair<string, string> attribute2) -> Microsoft.Identity.Client.Extensions.Msal.StorageCreationPropertiesBuilder
 Microsoft.Identity.Client.Extensions.Msal.StorageCreationPropertiesBuilder.WithLinuxUnprotectedFile() -> Microsoft.Identity.Client.Extensions.Msal.StorageCreationPropertiesBuilder
