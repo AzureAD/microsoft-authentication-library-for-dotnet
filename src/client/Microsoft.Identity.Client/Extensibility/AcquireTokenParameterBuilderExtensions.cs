@@ -67,9 +67,14 @@ namespace Microsoft.Identity.Client.Extensibility
             string value)
             where T : BaseAbstractAcquireTokenParameterBuilder<T>
         {
-            if (string.IsNullOrEmpty(key))
+            if (key is null)
             {
                 throw new ArgumentNullException(nameof(key));
+            }
+
+            if (key.Length == 0)
+            {
+                throw new ArgumentException("Value cannot be empty.", nameof(key));
             }
 
             if (value is null)
