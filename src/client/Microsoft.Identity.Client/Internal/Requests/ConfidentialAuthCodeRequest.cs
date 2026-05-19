@@ -1,7 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
@@ -29,6 +31,24 @@ namespace Microsoft.Identity.Client.Internal.Requests
             await ResolveAuthorityAsync().ConfigureAwait(false);
             var msalTokenResponse = await SendTokenRequestAsync(GetBodyParameters(), cancellationToken).ConfigureAwait(false);
             return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse, cancellationToken).ConfigureAwait(false);
+        }
+
+        protected override SortedSet<string> GetOverriddenScopes(ISet<string> inputScopes)
+        {
+            if (AuthenticationRequestParameters.SendOfflineAccessScope is false)
+            {
+                var overriddenScopes = new SortedSet<string>(
+                    inputScopes.Where(scope =>
+                        !string.Equals(scope, OAuth2Value.ScopeOfflineAccess, StringComparison.OrdinalIgnoreCase)),
+                    StringComparer.OrdinalIgnoreCase);
+
+                overriddenScopes.Add(OAuth2Value.ScopeOpenId);
+                overriddenScopes.Add(OAuth2Value.ScopeProfile);
+
+                return overriddenScopes;
+            }
+
+            return null;
         }
 
         private Dictionary<string, string> GetBodyParameters()

@@ -70,18 +70,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
         /// </summary>
         protected virtual SortedSet<string> GetOverriddenScopes(ISet<string> inputScopes)
         {
-            if (AuthenticationRequestParameters.SendOfflineAccessScope is false)
-            {
-                var overriddenScopes = new SortedSet<string>(
-                    inputScopes.Where(scope => !string.Equals(scope, OAuth2Value.ScopeOfflineAccess, StringComparison.OrdinalIgnoreCase)),
-                    StringComparer.OrdinalIgnoreCase);
-
-                overriddenScopes.Add(OAuth2Value.ScopeOpenId);
-                overriddenScopes.Add(OAuth2Value.ScopeProfile);
-
-                return overriddenScopes;
-            }
-
             return null;
         }
 
