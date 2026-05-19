@@ -1,4 +1,3 @@
-
 abstract Microsoft.Identity.Client.BaseAbstractAcquireTokenParameterBuilder<T>.ExecuteAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.Identity.Client.AuthenticationResult>
 const Microsoft.Identity.Client.ConfidentialClientApplication.AttemptRegionDiscovery = "TryAutoDetect" -> string
 const Microsoft.Identity.Client.MsalError.AccessDenied = "access_denied" -> string

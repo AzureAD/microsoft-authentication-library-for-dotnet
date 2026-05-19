@@ -19,7 +19,7 @@ function MarkShipped([Parameter(mandatory=$true)][string]$dir,
     Write-Host "Processing $dir : $access"
 
     foreach ($item in $unshipped) {
-        if ($item.Length -gt 0) {
+        if (-not [string]::IsNullOrWhiteSpace($item)) {
             if ($item.StartsWith($removedPrefix)) {
                 $item = $item.Substring($removedPrefix.Length)
                 $removed += $item
@@ -30,17 +30,21 @@ function MarkShipped([Parameter(mandatory=$true)][string]$dir,
         }
     }
 
-    $shipped | Sort-Object -Unique |Where-Object { -not $removed.Contains($_) } | Out-File $shippedFilePath -Encoding Ascii
+    $shipped |
+        Where-Object { -not [string]::IsNullOrWhiteSpace($_) } |
+        Where-Object { -not $removed.Contains($_) } |
+        Sort-Object -Unique -Culture ([System.Globalization.CultureInfo]::InvariantCulture) |
+        Out-File $shippedFilePath -Encoding Ascii
     Clear-Content $unshippedFilePath
 }
 
 try {
-    foreach ($file in Get-ChildItem -re -in "PublicApi.Shipped.txt") {
+    foreach ($file in Get-ChildItem -re -in "PublicAPI.Shipped.txt") {
         $dir = Split-Path -parent $file
         MarkShipped $dir "Public"
     }
 
-    foreach ($file in Get-ChildItem -re -in "InternalApi.Shipped.txt") {
+    foreach ($file in Get-ChildItem -re -in "InternalAPI.Shipped.txt") {
         $dir = Split-Path -parent $file
         MarkShipped $dir "Internal"
     }
