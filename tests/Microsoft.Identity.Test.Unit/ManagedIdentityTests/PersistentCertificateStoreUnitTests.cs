@@ -919,7 +919,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         public void IsCertTokenExpiredForTokenRequests_ReturnsTrue_For_CertWithoutOid_ExpiredNotAfter()
         {
             // Arrange - no OID; cert NotAfter is in the past (created with 1 min lifetime, so now-1 min)
-            using var cert = CreateSelfSignedCert(TimeSpan.FromMinutes(1));
+            using var cert = CreateSelfSignedCert(TimeSpan.FromMinutes(1), "CN=ExpiredNotAfterTest");
             var logger = Substitute.For<ILoggerAdapter>();
 
             // Act
@@ -938,6 +938,10 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             // Assert
             Assert.IsTrue(result, "Null cert should be treated as expired.");
         }
+
+        #endregion
+
+        #region TryParseTokenNotAfterExtension tests
 
         [TestMethod]
         public void TryParseTokenNotAfterExtension_Parses_GeneralizedTime()
@@ -960,18 +964,75 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        public void TryParseTokenNotAfterExtension_ReturnsFalse_For_InvalidData()
+        public void TryParseTokenNotAfterExtension_Parses_SequenceWrappedGeneralizedTime()
         {
-            // Null
-            Assert.IsFalse(MtlsBindingCache.TryParseTokenNotAfterExtension(null, out _),
-                "Null rawData should return false.");
-            // Empty
-            Assert.IsFalse(MtlsBindingCache.TryParseTokenNotAfterExtension(new byte[0], out _),
-                "Empty rawData should return false.");
-            // Non-time DER tag (INTEGER = 0x02)
-            Assert.IsFalse(MtlsBindingCache.TryParseTokenNotAfterExtension(new byte[] { 0x02, 0x01, 0x01 }, out _),
-                "Non-time DER tag should return false.");
+            // Arrange - SEQUENCE wrapper (0x30) around a GeneralizedTime, as produced by some ASN.1 encoders
+            var expected = new DateTimeOffset(2026, 6, 1, 12, 0, 0, TimeSpan.Zero);
+            string timeStr = expected.UtcDateTime.ToString("yyyyMMddHHmmss") + "Z";
+            byte[] timeBytes = Encoding.ASCII.GetBytes(timeStr);
+
+            // Build inner GeneralizedTime TLV
+            byte[] innerTlv = new byte[2 + timeBytes.Length];
+            innerTlv[0] = 0x18; // GeneralizedTime tag
+            innerTlv[1] = (byte)timeBytes.Length;
+            Array.Copy(timeBytes, 0, innerTlv, 2, timeBytes.Length);
+
+            // Wrap in SEQUENCE
+            byte[] rawData = new byte[2 + innerTlv.Length];
+            rawData[0] = 0x30; // SEQUENCE tag
+            rawData[1] = (byte)innerTlv.Length;
+            Array.Copy(innerTlv, 0, rawData, 2, innerTlv.Length);
+
+            // Act
+            bool ok = MtlsBindingCache.TryParseTokenNotAfterExtension(rawData, out DateTimeOffset result);
+
+            // Assert
+            Assert.IsTrue(ok, "Should successfully parse a SEQUENCE-wrapped DER GeneralizedTime.");
+            Assert.AreEqual(expected, result, "Parsed value must match the encoded timestamp.");
         }
+
+        [TestMethod]
+        public void TryParseTokenNotAfterExtension_ReturnsFalse_For_NullData()
+        {
+            // Arrange (no setup needed)
+
+            // Act
+            bool result = MtlsBindingCache.TryParseTokenNotAfterExtension(null, out _);
+
+            // Assert
+            Assert.IsFalse(result, "Null rawData should return false.");
+        }
+
+        [TestMethod]
+        public void TryParseTokenNotAfterExtension_ReturnsFalse_For_EmptyData()
+        {
+            // Arrange
+            byte[] rawData = Array.Empty<byte>();
+
+            // Act
+            bool result = MtlsBindingCache.TryParseTokenNotAfterExtension(rawData, out _);
+
+            // Assert
+            Assert.IsFalse(result, "Empty rawData should return false.");
+        }
+
+        [TestMethod]
+        public void TryParseTokenNotAfterExtension_ReturnsFalse_For_NonTimeTag()
+        {
+            // Arrange - DER INTEGER (tag 0x02), 4 bytes so the minimum-length guard passes
+            // and the tag check is actually exercised.
+            byte[] rawData = { 0x02, 0x02, 0x00, 0x01 };
+
+            // Act
+            bool result = MtlsBindingCache.TryParseTokenNotAfterExtension(rawData, out _);
+
+            // Assert
+            Assert.IsFalse(result, "A non-time DER tag (INTEGER = 0x02) should return false.");
+        }
+
+        #endregion
+
+        #region GetOrCreateAsync eviction tests
 
         [TestMethod]
         public async Task GetOrCreateAsync_EvictsStaleToken_And_MintsNew()
