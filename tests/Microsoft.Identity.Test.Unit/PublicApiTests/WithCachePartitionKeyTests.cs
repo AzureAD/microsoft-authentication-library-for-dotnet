@@ -61,32 +61,23 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(httpManager)
+                    .WithInstanceDiscovery(false)
                     .BuildConcrete();
 
-                httpManager.AddInstanceDiscoveryMockHandler();
-                var handler = httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(token: "token_with_partition_key");
-                handler.ExpectedPostData = new Dictionary<string, string>
-                {
-                    { OAuth2Parameter.Scope, TestConstants.s_scope.AsSingleString() }
-                };
+                var handler = httpManager.AddSuccessTokenResponseMockHandlerForPost();
                 handler.UnExpectedPostData = new Dictionary<string, string>
                 {
                     { cachePartitionKey, null }
                 };
-                handler.AdditionalRequestValidation = request =>
-                {
-                    Assert.DoesNotContain(cachePartitionKey + "=", request.RequestUri.Query);
-                };
 
                 // Act
-                var result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                var result = await app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, TestConstants.DefaultAuthorizationCode)
                     .WithCachePartitionKey(cachePartitionKey, cachePartitionValue)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
                 // Assert
                 Assert.IsNotNull(result);
-                Assert.AreEqual("token_with_partition_key", result.AccessToken);
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
             }
         }

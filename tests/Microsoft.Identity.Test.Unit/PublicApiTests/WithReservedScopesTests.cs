@@ -27,6 +27,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(httpManager)
+                    .WithInstanceDiscovery(false)
                     .BuildConcrete();
 
                 var handler = httpManager.AddSuccessTokenResponseMockHandlerForPost();
@@ -57,6 +58,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(httpManager)
+                    .WithInstanceDiscovery(false)
                     .BuildConcrete();
 
                 var handler = httpManager.AddSuccessTokenResponseMockHandlerForPost();
@@ -86,6 +88,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(httpManager)
+                    .WithInstanceDiscovery(false)
                     .BuildConcrete();
 
                 var handler = httpManager.AddSuccessTokenResponseMockHandlerForPost();
