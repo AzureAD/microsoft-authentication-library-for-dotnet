@@ -32,7 +32,6 @@ function MarkShipped([Parameter(mandatory=$true)][string]$dir,
 
     $shipped | Sort-Object -Unique |Where-Object { -not $removed.Contains($_) } | Out-File $shippedFilePath -Encoding Ascii
     Clear-Content $unshippedFilePath
-    "#nullable enable" | Set-Content -Path $unshippedFilePath
 }
 
 try {
