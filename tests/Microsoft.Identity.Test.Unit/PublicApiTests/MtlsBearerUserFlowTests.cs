@@ -102,11 +102,15 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         /// <summary>
-        /// Verifies that an OBO token request with <c>SendCertificateOverMtls = true</c> and a
-        /// region set uses the regional mTLS endpoint (e.g. eastus.mtlsauth.microsoft.com).
+        /// Verifies that a user flow token request with <c>SendCertificateOverMtls = true</c> and a
+        /// region configured uses the regional mTLS endpoint (e.g. eastus.mtlsauth.microsoft.com).
+        ///
+        /// OBO is used as the representative user flow here. The regional routing code
+        /// (<c>RegionAndMtlsDiscoveryProvider</c>) is shared across all user flows (OBO, refresh_token,
+        /// auth_code), so a single general-purpose test is sufficient to verify the routing logic.
         /// </summary>
         [TestMethod]
-        public async Task OboFlow_WithSendCertificateOverMtls_WithRegion_UsesRegionalMtlsEndpointAsync()
+        public async Task UserFlow_WithSendCertificateOverMtls_WithRegion_UsesRegionalMtlsEndpointAsync()
         {
             string tenantId = "123456-1234-2345-1234561234";
             string authorityUrl = $"https://login.microsoftonline.com/{tenantId}";

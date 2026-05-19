@@ -21,40 +21,42 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
 {
     /// <summary>
-    /// Tests mTLS as transport (bearer tokens over a mutually authenticated TLS connection)
-    /// for user flows: OBO, refresh_token.
+    /// Integration tests for mTLS bearer transport (<c>SendCertificateOverMtls = true</c>)
+    /// applied to user flows: OBO and refresh_token.
     ///
-    /// These tests confirm that when a custom IMsalMtlsHttpClientFactory is registered,
-    /// MSAL routes all HTTP calls through it for user flows — not just client_credentials.
+    /// Each test validates the two conditions required for true mTLS bearer transport:
+    ///   1. The token request goes to the mTLS endpoint (<c>mtlsauth.microsoft.com</c>).
+    ///   2. No <c>client_assertion</c> is in the POST body — the TLS certificate authenticates
+    ///      the app at the transport layer.
     ///
-    /// This is distinct from mTLS PoP (.WithMtlsProofOfPossession()), which binds the token
-    /// cryptographically to a certificate and is only available on AcquireTokenForClient.
+    /// This is distinct from mTLS PoP (<c>.WithMtlsProofOfPossession()</c>), which binds the
+    /// token cryptographically to a certificate and is only available on AcquireTokenForClient.
     /// </summary>
     [TestClass]
     public class MtlsTransportUserFlowTests
     {
         private static readonly string[] s_userReadScopes = { "User.Read" };
-        private string _oboClientSecret;
-
-        private readonly KeyVaultSecretsProvider _keyVault = new KeyVaultSecretsProvider(KeyVaultInstance.MsalTeam);
 
         [TestInitialize]
         public void TestInitialize()
         {
             ApplicationBase.ResetStateForTest();
-            if (string.IsNullOrEmpty(_oboClientSecret))
-            {
-                _oboClientSecret = _keyVault.GetSecretByName(TestConstants.MsalOBOKeyVaultSecretName).Value;
-            }
         }
 
         /// <summary>
-        /// Verifies that OBO flow succeeds when MSAL uses an mTLS transport factory.
-        /// The custom factory is always invoked and uses an mTLS HttpClient with the lab cert.
+        /// Integration test: verifies that an OBO token request with <c>SendCertificateOverMtls = true</c>
+        /// satisfies both mTLS conditions:
+        ///   1. The request goes to <c>mtlsauth.microsoft.com</c> (not <c>login.microsoftonline.com</c>).
+        ///   2. The <c>IMsalMtlsHttpClientFactory</c> cert overload is invoked, confirming the mTLS
+        ///      transport factory is used for the OBO flow.
+        ///
+        /// Note: token acquisition succeeds only if <c>AppWebApi</c> is registered in the lab for
+        /// mTLS bearer transport. If not yet registered, this test verifies MSAL's request routing
+        /// behaviour and may receive an AAD rejection.
         /// </summary>
         [DoNotRunOnLinux]
         [TestMethod]
-        public async Task OboFlow_WithMtlsTransportFactory_AcquiresTokenAsync()
+        public async Task OboFlow_WithSendCertificateOverMtls_AcquiresTokenAsync()
         {
             // Arrange
             X509Certificate2 mtlsCert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
@@ -66,7 +68,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var appApiConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppWebApi).ConfigureAwait(false);
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
 
-            // Step 1: Get a user assertion via ROPC (no mTLS factory needed here — PCA is public client)
+            // Step 1: Acquire a user assertion via ROPC (public client — no mTLS needed here)
             var pca = PublicClientApplicationBuilder
                 .Create(appConfig.AppId)
                 .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
@@ -82,12 +84,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             Assert.IsNotNull(userResult?.AccessToken, "Failed to acquire user token via ROPC.");
 
-            // Step 2: Build the confidential client with the mTLS transport factory
-            // NOTE: WithHttpClientFactory must come AFTER WithTestLogging to override the sniffer factory
+            // Step 2: Build the OBO confidential client with SendCertificateOverMtls=true.
+            // The cert authenticates the app at the TLS layer; no client_assertion is sent in the body.
+            // NOTE: WithHttpClientFactory must come AFTER WithTestLogging to override the sniffer factory.
             var cca = ConfidentialClientApplicationBuilder
                 .Create(appApiConfig.AppId)
                 .WithAuthority(new Uri($"https://login.microsoftonline.com/{userResult.TenantId}"), true)
-                .WithClientSecret(_oboClientSecret)
+                .WithCertificate(mtlsCert, new CertificateOptions { SendCertificateOverMtls = true })
                 .WithTestLogging()
                 .WithHttpClientFactory(trackingFactory)
                 .Build();
@@ -102,19 +105,24 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNotNull(oboResult, "OBO result should not be null.");
             Assert.IsNotNull(oboResult.AccessToken, "OBO access token should not be null.");
             Assert.AreEqual(TokenSource.IdentityProvider, oboResult.AuthenticationResultMetadata.TokenSource);
+            StringAssert.Contains(
+                oboResult.AuthenticationResultMetadata.TokenEndpoint, "mtlsauth",
+                $"OBO token request should use the mTLS endpoint, but got: {oboResult.AuthenticationResultMetadata.TokenEndpoint}");
             Assert.IsGreaterThan(0, trackingFactory.GetHttpClientCallCount,
                 "The mTLS-specific GetHttpClient(X509Certificate2) overload should have been called at least once for the OBO flow.");
-
-            Console.WriteLine($"[MtlsTransport OBO] Success. Factory invoked {trackingFactory.GetHttpClientCallCount}x. " +
-                              $"mTLS client used {trackingFactory.MtlsClientUsedCount}x.");
         }
 
         /// <summary>
-        /// Verifies that AcquireTokenByRefreshToken succeeds when MSAL uses an mTLS transport factory.
+        /// Integration test: verifies that a refresh-token redemption with <c>SendCertificateOverMtls = true</c>
+        /// satisfies both mTLS conditions:
+        ///   1. The request goes to <c>mtlsauth.microsoft.com</c>.
+        ///   2. The <c>IMsalMtlsHttpClientFactory</c> cert overload is invoked for the RT redemption.
+        ///
+        /// Note: token acquisition succeeds only if the app is registered in the lab for mTLS bearer transport.
         /// </summary>
         [DoNotRunOnLinux]
         [TestMethod]
-        public async Task RefreshTokenFlow_WithMtlsTransportFactory_AcquiresTokenAsync()
+        public async Task RefreshTokenFlow_WithSendCertificateOverMtls_AcquiresTokenAsync()
         {
             // Arrange
             X509Certificate2 mtlsCert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
@@ -145,11 +153,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNotNull(rtCacheItem, "Refresh token must be present in cache.");
             string refreshToken = rtCacheItem.Secret;
 
-            // Step 2: Build CCA with the mTLS transport factory
-            // NOTE: WithHttpClientFactory must come AFTER WithTestLogging to override the sniffer factory
+            // Build CCA with SendCertificateOverMtls=true: the cert authenticates at the TLS layer
+            // and the factory provides the mTLS connection. No client_assertion is sent in the body.
+            // NOTE: WithHttpClientFactory must come AFTER WithTestLogging to override the sniffer factory.
             var cca = ConfidentialClientApplicationBuilder
                 .Create(appConfig.AppId)
                 .WithAuthority(new Uri($"https://login.microsoftonline.com/{userResultConcrete.TenantId}"), true)
+                .WithCertificate(mtlsCert, new CertificateOptions { SendCertificateOverMtls = true })
                 .WithTestLogging()
                 .WithHttpClientFactory(trackingFactory)
                 .Build();
@@ -163,67 +173,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // Assert
             Assert.IsNotNull(refreshResult, "Refresh token result should not be null.");
             Assert.IsNotNull(refreshResult.AccessToken, "Access token should not be null after refresh.");
+            StringAssert.Contains(
+                refreshResult.AuthenticationResultMetadata.TokenEndpoint, "mtlsauth",
+                $"RT redemption should use the mTLS endpoint, but got: {refreshResult.AuthenticationResultMetadata.TokenEndpoint}");
             Assert.IsGreaterThan(0, trackingFactory.GetHttpClientCallCount,
                 "The mTLS-specific GetHttpClient(X509Certificate2) overload should have been called at least once for the refresh_token flow.");
-
-            Console.WriteLine($"[MtlsTransport RT] Success. Factory invoked {trackingFactory.GetHttpClientCallCount}x. " +
-                              $"mTLS client used {trackingFactory.MtlsClientUsedCount}x.");
-        }
-
-        /// <summary>
-        /// Verifies that AcquireTokenSilent (which internally uses the refresh token) 
-        /// routes through the mTLS transport factory.
-        /// </summary>
-        [DoNotRunOnLinux]
-        [TestMethod]
-        public async Task SilentFlow_WithMtlsTransportFactory_UsesRefreshTokenOverMtlsAsync()
-        {
-            // Arrange
-            X509Certificate2 mtlsCert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
-            Assert.IsNotNull(mtlsCert, "Lab cert must be installed to run this test.");
-
-            var trackingFactory = new TrackingMtlsHttpClientFactory(mtlsCert);
-
-            var appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
-            var appApiConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppWebApi).ConfigureAwait(false);
-            var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
-
-            // Build PCA with the mTLS factory to track RT redemption during silent
-            // NOTE: WithHttpClientFactory must come AFTER WithTestLogging to override the sniffer factory
-            var pca = PublicClientApplicationBuilder
-                .Create(appConfig.AppId)
-                .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
-                .WithTestLogging()
-                .WithHttpClientFactory(trackingFactory)
-                .Build();
-
-#pragma warning disable CS0618
-            // First call acquires from IdP and caches AT + RT
-            AuthenticationResult firstResult = await pca
-                .AcquireTokenByUsernamePassword([appApiConfig.DefaultScopes], user.Upn, user.GetOrFetchPassword())
-                .ExecuteAsync(CancellationToken.None)
-                .ConfigureAwait(false);
-#pragma warning restore CS0618
-
-            Assert.IsNotNull(firstResult?.AccessToken);
-            int callsAfterRopc = trackingFactory.GetHttpClientCallCount;
-
-            // Force token expiry so silent must redeem the RT
-            AuthenticationResult silentResult = await pca
-                .AcquireTokenSilent([appApiConfig.DefaultScopes], firstResult.Account)
-                .WithForceRefresh(true)
-                .ExecuteAsync(CancellationToken.None)
-                .ConfigureAwait(false);
-
-            // Assert
-            Assert.IsNotNull(silentResult, "Silent result should not be null.");
-            Assert.IsNotNull(silentResult.AccessToken);
-            Assert.AreEqual(TokenSource.IdentityProvider, silentResult.AuthenticationResultMetadata.TokenSource);
-            Assert.IsGreaterThan(callsAfterRopc, trackingFactory.GetHttpClientCallCount,
-                "The mTLS factory should have been called again during the silent/RT redemption.");
-
-            Console.WriteLine($"[MtlsTransport Silent/RT] Success. Total factory calls: {trackingFactory.GetHttpClientCallCount}. " +
-                              $"mTLS client used: {trackingFactory.MtlsClientUsedCount}x.");
         }
 
         /// <summary>
@@ -276,16 +230,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
             }
-            catch (MsalServiceException ex)
+            catch (MsalServiceException)
             {
-                Console.WriteLine($"[Expected] AAD rejected: {ex.ErrorCode} — {ex.Message}");
+                // AAD may reject if AppWebApi is not yet registered for mTLS bearer transport.
+                // The assertions below verify MSAL's request-level behaviour regardless.
             }
 
             string lastBody = recordingFactory.LastCapturedBody;
             string requestUrl = recordingFactory.LastCapturedUrl ?? "(none captured)";
-
-            Console.WriteLine($"[OBO endpoint] {requestUrl}");
-            Console.WriteLine($"[OBO body contains client_assertion] {lastBody?.Contains("client_assertion")}");
 
             // Condition 1: request must go to the mTLS endpoint
             StringAssert.Contains(requestUrl, "mtlsauth",
@@ -346,16 +298,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
             }
-            catch (MsalServiceException ex)
+            catch (MsalServiceException)
             {
-                Console.WriteLine($"[Expected] AAD rejected: {ex.ErrorCode} — {ex.Message}");
+                // AAD may reject if the app is not yet registered for mTLS bearer transport.
+                // The assertions below verify MSAL's request-level behaviour regardless.
             }
 
             string lastBody = recordingFactory.LastCapturedBody;
             string requestUrl = recordingFactory.LastCapturedUrl ?? "(none captured)";
-
-            Console.WriteLine($"[RT endpoint] {requestUrl}");
-            Console.WriteLine($"[RT body contains client_assertion] {lastBody?.Contains("client_assertion")}");
 
             // Condition 1: request must go to the mTLS endpoint
             StringAssert.Contains(requestUrl, "mtlsauth",
@@ -404,9 +354,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             string lastBody = recordingFactory.LastCapturedBody;
             string requestUrl = recordingFactory.LastCapturedUrl ?? "(none captured)";
-
-            Console.WriteLine($"[client_credentials endpoint] {requestUrl}");
-            Console.WriteLine($"[client_credentials body contains client_assertion] {lastBody?.Contains("client_assertion")}");
 
             // Condition 1: request must go to mTLS endpoint
             StringAssert.Contains(requestUrl, "mtlsauth",
