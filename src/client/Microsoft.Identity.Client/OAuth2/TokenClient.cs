@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Client.OAuth2
 
                 if (_requestParams.SendOfflineAccessScope is false)
                 {
-                    scopes = string.Join(" ", scopes.Split(' ')
+                    scopes = string.Join(" ", scopes.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)
                         .Where(s => !string.Equals(s, OAuth2Value.ScopeOfflineAccess, StringComparison.OrdinalIgnoreCase)));
                 }
 
