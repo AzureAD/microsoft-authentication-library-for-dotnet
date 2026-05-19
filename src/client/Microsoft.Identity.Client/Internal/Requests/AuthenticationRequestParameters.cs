@@ -97,6 +97,17 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public AuthorityInfo AuthorityInfo => AuthorityManager.Authority.AuthorityInfo;
 
+        /// <summary>
+        /// Returns the authority info appropriate for cache alias resolution.
+        /// When mTLS is active, the current authority may be rewritten to mtlsauth.microsoft.com,
+        /// which is not a valid host for instance discovery. Use the original login.* authority
+        /// for all cache environment/alias lookups.
+        /// </summary>
+        public AuthorityInfo CacheAuthorityInfo =>
+            RequestContext.IsMtlsRequested
+                ? AuthorityManager.OriginalAuthority.AuthorityInfo
+                : AuthorityInfo;
+
         public AuthorityInfo AuthorityOverride => _commonParameters.AuthorityOverride;
 
         #endregion

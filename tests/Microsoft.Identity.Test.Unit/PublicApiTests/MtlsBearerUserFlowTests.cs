@@ -277,5 +277,87 @@ namespace Microsoft.Identity.Test.Unit
                 }
             }
         }
+
+        /// <summary>
+        /// Regression test: verifies that a second OBO call with the same user assertion
+        /// retrieves the token from cache (not the network) when <c>SendCertificateOverMtls = true</c>.
+        ///
+        /// After <c>ResolveAuthorityAsync</c>, <c>requestParams.AuthorityInfo</c> points to
+        /// <c>mtlsauth.microsoft.com</c>. The cache alias lookup in <c>FilterTokensByEnvironmentAsync</c>
+        /// must still resolve aliases from the original <c>login.*</c> host so the cached token
+        /// (stored under <c>login.microsoftonline.com</c>) is found.
+        ///
+        /// If the fix is missing, the second call will either throw
+        /// <c>MsalClientException(MtlsPopNotSupportedForEnvironment)</c> or miss the cache and
+        /// fail because no mock HTTP handler is queued for a second network call.
+        /// </summary>
+        [TestMethod]
+        public async Task OboFlow_WithSendCertificateOverMtls_SecondCall_ReturnsCachedTokenAsync()
+        {
+            // Arrange
+            string tenantId = "123456-1234-2345-1234561234";
+            string authorityUrl = $"https://login.microsoftonline.com/{tenantId}";
+            string expectedTokenEndpoint = $"https://mtlsauth.microsoft.com/{tenantId}/oauth2/v2.0/token";
+            string fakeUserAssertion = "fake.user.assertion.token";
+
+            using (var envContext = new EnvVariableContext())
+            {
+                Environment.SetEnvironmentVariable("REGION_NAME", null);
+                Environment.SetEnvironmentVariable("MSAL_FORCE_REGION", null);
+
+                using (var harness = new MockHttpAndServiceBundle())
+                {
+                    // Only ONE mock handler — the second call must come from cache
+                    var tokenHttpCallHandler = new MockHttpMessageHandler()
+                    {
+                        ExpectedUrl = expectedTokenEndpoint,
+                        ExpectedMethod = HttpMethod.Post,
+                        ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
+                        ExpectedPostData = new Dictionary<string, string>
+                        {
+                            { OAuth2Parameter.ClientId, TestConstants.ClientId },
+                            { OAuth2Parameter.GrantType, OAuth2GrantType.JwtBearer },
+                            { OAuth2Parameter.RequestedTokenUse, OAuth2RequestedTokenUse.OnBehalfOf },
+                        },
+                        UnExpectedPostData = new Dictionary<string, string>
+                        {
+                            { OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtBearer },
+                            { OAuth2Parameter.ClientAssertion, "placeholder" }
+                        }
+                    };
+
+                    harness.HttpManager.AddMockHandler(tokenHttpCallHandler);
+
+                    var app = ConfidentialClientApplicationBuilder
+                        .Create(TestConstants.ClientId)
+                        .WithAuthority(authorityUrl)
+                        .WithHttpManager(harness.HttpManager)
+                        .WithCertificate(s_testCertificate, new CertificateOptions { SendCertificateOverMtls = true })
+                        .Build();
+
+                    // Act — first call hits the (mocked) identity provider
+                    var firstResult = await app
+                        .AcquireTokenOnBehalfOf(TestConstants.s_scope, new UserAssertion(fakeUserAssertion))
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
+
+                    Assert.IsNotNull(firstResult.AccessToken);
+                    Assert.AreEqual(TokenSource.IdentityProvider, firstResult.AuthenticationResultMetadata.TokenSource);
+
+                    // Act — second call with same assertion should return from cache
+                    var secondResult = await app
+                        .AcquireTokenOnBehalfOf(TestConstants.s_scope, new UserAssertion(fakeUserAssertion))
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
+
+                    // Assert
+                    Assert.IsNotNull(secondResult.AccessToken);
+                    Assert.AreEqual(TokenSource.Cache, secondResult.AuthenticationResultMetadata.TokenSource,
+                        "Second OBO call with same assertion should return a cached token, not hit the network. " +
+                        "If this fails, FilterTokensByEnvironmentAsync is likely passing the mTLS-rewritten authority " +
+                        "(mtlsauth.microsoft.com) to instance discovery, which either throws or returns incorrect aliases.");
+                }
+            }
+        }
     }
 }
