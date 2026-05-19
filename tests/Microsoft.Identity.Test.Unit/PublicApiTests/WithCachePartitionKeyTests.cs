@@ -104,7 +104,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             // Act
             ArgumentNullException nullKeyException = AssertException.Throws<ArgumentNullException>(() => builder.WithCachePartitionKey(null, "value"));
-            ArgumentNullException emptyKeyException = AssertException.Throws<ArgumentNullException>(() => builder.WithCachePartitionKey(string.Empty, "value"));
+            ArgumentException emptyKeyException = AssertException.Throws<ArgumentException>(() => builder.WithCachePartitionKey(string.Empty, "value"));
 
             // Assert
             Assert.AreEqual("key", nullKeyException.ParamName);

@@ -90,7 +90,7 @@ namespace Microsoft.Identity.Client.Extensibility
 
         /// <summary>
         /// Controls whether MSAL sends the reserved <c>offline_access</c> scope while continuing to
-        /// send <c>openid</c> and <c>profile</c>.
+        /// send <c>openid</c> and <c>profile</c>. Only applicable to authorization code redemption flows.
         /// </summary>
         /// <param name="builder">The builder to chain .With methods.</param>
         /// <param name="offlineAccessScope">
@@ -98,13 +98,12 @@ namespace Microsoft.Identity.Client.Extensibility
         /// to preserve the default MSAL behavior of sending all reserved scopes.
         /// </param>
         /// <returns>The builder to chain .With methods.</returns>
-        public static T WithReservedScopes<T>(
-            this BaseAbstractAcquireTokenParameterBuilder<T> builder,
+        public static AcquireTokenByAuthorizationCodeParameterBuilder WithReservedScopes(
+            this AcquireTokenByAuthorizationCodeParameterBuilder builder,
             bool offlineAccessScope)
-            where T : BaseAbstractAcquireTokenParameterBuilder<T>
         {
             builder.CommonParameters.SendOfflineAccessScope = offlineAccessScope;
-            return (T)builder;
+            return builder;
         }
     }
 }
