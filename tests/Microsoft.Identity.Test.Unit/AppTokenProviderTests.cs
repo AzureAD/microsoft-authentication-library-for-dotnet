@@ -159,6 +159,111 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
+        [TestMethod]
+        public async Task AppTokenProvider_CacheKey_PartitionsCacheAsync()
+        {
+            using (var harness = CreateTestHarness())
+            {
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+
+                string currentCacheKey = "tenantA";
+                int callbackInvoked = 0;
+
+                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                              .WithAppTokenProvider((AppTokenProviderParameters _) =>
+                                                              {
+                                                                  Interlocked.Increment(ref callbackInvoked);
+                                                                  return Task.FromResult(new AppTokenProviderResult
+                                                                  {
+                                                                      AccessToken = TestConstants.DefaultAccessToken + "_" + currentCacheKey,
+                                                                      ExpiresInSeconds = 3600,
+                                                                      RefreshInSeconds = 1000,
+                                                                      CacheKey = currentCacheKey,
+                                                                  });
+                                                              })
+                                                              .WithHttpManager(harness.HttpManager)
+                                                              .BuildConcrete();
+
+                // Arrange & Act - First call with provider-supplied CacheKey "tenantA".
+                AuthenticationResult result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                                                       .ExecuteAsync(new CancellationToken()).ConfigureAwait(false);
+
+                // Assert - Token came from IdP.
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(TestConstants.DefaultAccessToken + "_tenantA", result.AccessToken);
+                Assert.AreEqual(1, callbackInvoked);
+
+                // Act - Second call with different provider-supplied CacheKey "tenantB".
+                currentCacheKey = "tenantB";
+                result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                                  .ExecuteAsync(new CancellationToken()).ConfigureAwait(false);
+
+                // Assert - Token came from IdP again (provider supplies its own key), distinct partition created.
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(TestConstants.DefaultAccessToken + "_tenantB", result.AccessToken);
+                Assert.AreEqual(2, callbackInvoked);
+
+                // Assert - Two distinct cache entries exist, each carrying the "appTokenProviderKey" component
+                // with the value provided by the AppTokenProviderResult.CacheKey.
+                var allTokens = app.AppTokenCacheInternal.Accessor.GetAllAccessTokens();
+                Assert.HasCount(2, allTokens);
+
+                foreach (var t in allTokens)
+                {
+                    Assert.IsNotNull(t.AdditionalCacheKeyComponents,
+                        "Cached AT is missing AdditionalCacheKeyComponents.");
+                    Assert.IsTrue(
+                        t.AdditionalCacheKeyComponents.TryGetValue("appTokenProviderKey", out string _),
+                        "Cached AT does not contain the 'appTokenProviderKey' cache component.");
+                }
+
+                var keysSeen = allTokens
+                    .Select(t => t.AdditionalCacheKeyComponents["appTokenProviderKey"])
+                    .ToList();
+
+                CollectionAssert.AreEquivalent(new[] { "tenantA", "tenantB" }, keysSeen);
+            }
+        }
+
+        [TestMethod]
+        public async Task AppTokenProvider_NoCacheKey_DoesNotAddCacheKeyComponentAsync()
+        {
+            using (var harness = CreateTestHarness())
+            {
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+
+                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                              .WithAppTokenProvider((AppTokenProviderParameters _) =>
+                                                                  Task.FromResult(new AppTokenProviderResult
+                                                                  {
+                                                                      AccessToken = TestConstants.DefaultAccessToken,
+                                                                      ExpiresInSeconds = 3600,
+                                                                      RefreshInSeconds = 1000,
+                                                                  }))
+                                                              .WithHttpManager(harness.HttpManager)
+                                                              .BuildConcrete();
+
+                AuthenticationResult result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                                                       .ExecuteAsync(new CancellationToken()).ConfigureAwait(false);
+
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+
+                var allTokens = app.AppTokenCacheInternal.Accessor.GetAllAccessTokens();
+                Assert.HasCount(1, allTokens);
+
+                var token = allTokens.Single();
+                bool hasProviderKey = token.AdditionalCacheKeyComponents != null &&
+                                      token.AdditionalCacheKeyComponents.ContainsKey("appTokenProviderKey");
+                Assert.IsFalse(hasProviderKey,
+                    "When AppTokenProviderResult.CacheKey is not set, the 'appTokenProviderKey' component must not be added.");
+
+                // Second call should hit cache, since no extra partition key was added.
+                result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                                  .ExecuteAsync(new CancellationToken()).ConfigureAwait(false);
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+
         private AppTokenProviderResult GetAppTokenProviderResult(string differentScopesForAt = "", long? refreshIn = 1000)
         {
             var token = new AppTokenProviderResult();

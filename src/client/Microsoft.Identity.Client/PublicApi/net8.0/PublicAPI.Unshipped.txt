@@ -5,3 +5,5 @@ Microsoft.Identity.Client.AuthScheme.CredentialEvaluationContext.CredentialEvalu
 Microsoft.Identity.Client.AuthScheme.CredentialEvaluationContext.MtlsCertificate.get -> System.Security.Cryptography.X509Certificates.X509Certificate2
 static Microsoft.Identity.Client.Extensibility.AcquireTokenParameterBuilderExtensions.WithCachePartitionKey<T>(this Microsoft.Identity.Client.BaseAbstractAcquireTokenParameterBuilder<T> builder, string key, string value) -> T
 static Microsoft.Identity.Client.Extensibility.AcquireTokenParameterBuilderExtensions.WithReservedScopes(this Microsoft.Identity.Client.AcquireTokenByAuthorizationCodeParameterBuilder builder, bool offlineAccessScope) -> Microsoft.Identity.Client.AcquireTokenByAuthorizationCodeParameterBuilder
+Microsoft.Identity.Client.Extensibility.AppTokenProviderResult.CacheKey.get -> string
+Microsoft.Identity.Client.Extensibility.AppTokenProviderResult.CacheKey.set -> void
