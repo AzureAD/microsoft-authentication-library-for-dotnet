@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client.Core;
@@ -33,6 +34,16 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
     {
         public bool Read(string alias, out CertificateCacheValue value, ILoggerAdapter logger)
         {
+            return Read(alias, out value, logger, MtlsBindingCache.IsCertKeyOrphaned);
+        }
+
+        // Internal overload for testability: accepts an injectable orphan-check delegate.
+        internal bool Read(
+            string alias,
+            out CertificateCacheValue value,
+            ILoggerAdapter logger,
+            Func<X509Certificate2, ILoggerAdapter, bool> isOrphaned)
+        {
             value = default;
 
             try
@@ -56,6 +67,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 X509Certificate2 best = null;
                 string bestEndpoint = null;
                 DateTime bestNotAfter = DateTime.MinValue;
+                List<string> orphanedThumbprints = null;
 
                 foreach (var candidate in items)
                 {
@@ -86,9 +98,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 
                         // Skip certs whose CNG container key no longer matches the cert's public key.
                         // This detects orphaned certs left on disk after a reboot regenerates the KG per-boot key.
-                        if (MtlsBindingCache.IsCertKeyOrphaned(candidate, logger))
+                        // Collect thumbprints for post-loop removal so the store is only opened once for writes.
+                        if (isOrphaned(candidate, logger))
                         {
                             logger.Verbose(() => "[PersistentCert] Candidate skipped: CNG container key does not match cert public key (orphaned post-reboot).");
+                            orphanedThumbprints ??= new List<string>();
+                            orphanedThumbprints.Add(candidate.Thumbprint);
                             continue;
                         }
 
@@ -104,6 +119,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                     {
                         candidate.Dispose();
                     }
+                }
+
+                // Remove any orphaned certs discovered during the scan.
+                if (orphanedThumbprints is { Count: > 0 })
+                {
+                    RemoveByThumbprints(alias, orphanedThumbprints, logger);
                 }
 
                 if (best != null)
@@ -137,6 +158,50 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             }
 
             return false;
+        }
+
+        private static void RemoveByThumbprints(string alias, List<string> thumbprints, ILoggerAdapter logger)
+        {
+            try
+            {
+                using var store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
+                store.Open(OpenFlags.ReadWrite);
+
+                X509Certificate2[] items;
+                try
+                {
+                    items = new X509Certificate2[store.Certificates.Count];
+                    store.Certificates.CopyTo(items, 0);
+                }
+                catch (Exception ex)
+                {
+                    logger.Verbose(() => "[PersistentCert] Orphan-removal snapshot via CopyTo failed; falling back to enumeration. Details: " + ex.Message);
+                    items = store.Certificates.Cast<X509Certificate2>().ToArray();
+                }
+
+                int removed = 0;
+                foreach (var cert in items)
+                {
+                    try
+                    {
+                        if (thumbprints.Contains(cert.Thumbprint))
+                        {
+                            store.Remove(cert);
+                            removed++;
+                        }
+                    }
+                    finally
+                    {
+                        cert.Dispose();
+                    }
+                }
+
+                logger.Verbose(() => $"[PersistentCert] Removed {removed} orphaned cert(s) for alias '{alias}'.");
+            }
+            catch (Exception ex)
+            {
+                logger.Verbose(() => "[PersistentCert] Orphan removal failed (best-effort): " + ex.Message);
+            }
         }
 
         public void Write(string alias, X509Certificate2 cert, string endpointBase, ILoggerAdapter logger)

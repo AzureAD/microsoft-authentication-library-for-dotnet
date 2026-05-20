@@ -920,6 +920,38 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             Assert.IsFalse(result, "A different key than the one used to create the cert should produce a modulus mismatch.");
         }
 
+        [TestMethod]
+        public void Read_RemovesOrphanedCert_FromStore()
+        {
+            WindowsOnly();
+
+            // Arrange
+            var alias = "alias-orphan-remove-" + Guid.NewGuid().ToString("N");
+            var ep = "https://fake_mtls/orphan";
+            var guid = Guid.NewGuid().ToString("D");
+
+            try
+            {
+                using var cert = CreateSelfSignedWithKey("CN=" + guid, TimeSpan.FromDays(14));
+                _cache.Write(alias, cert, ep, Logger);
+
+                // Verify cert is in the store
+                Assert.AreEqual(1, CountAliasInStore(alias), "Cert should be in store after Write.");
+
+                // Act — use the injectable overload: treat every cert as orphaned
+                var concreteCache = (WindowsPersistentCertificateCache)_cache;
+                bool readResult = concreteCache.Read(alias, out _, Logger, (_, __) => true);
+
+                // Assert
+                Assert.IsFalse(readResult, "Read should return false when all candidates are orphaned.");
+                Assert.IsTrue(WaitForAliasCount(alias, 0), "Orphaned cert should have been removed from the store.");
+            }
+            finally
+            {
+                RemoveAliasFromStore(alias);
+            }
+        }
+
         #endregion
     }
 }
