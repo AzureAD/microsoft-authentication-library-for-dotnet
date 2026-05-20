@@ -875,6 +875,27 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
+        public void IsCertKeyOrphaned_ReturnsTrue_For_RsaCert_WithNoPrivateKey()
+        {
+            // Arrange - public-only RSA cert (no private key associated)
+            using var rsa = RSA.Create(2048);
+            var req = new System.Security.Cryptography.X509Certificates.CertificateRequest(
+                new X500DistinguishedName("CN=NoPrivKeyTest"),
+                rsa,
+                HashAlgorithmName.SHA256,
+                RSASignaturePadding.Pkcs1);
+            // Create a cert without associating the private key (CopyWithPrivateKey not called)
+            using var cert = req.CreateSelfSigned(DateTimeOffset.UtcNow.AddMinutes(-1), DateTimeOffset.UtcNow.AddDays(14));
+            using var publicOnlyCert = new X509Certificate2(cert.Export(X509ContentType.Cert));
+
+            // Act — public-only RSA cert: GetRSAPrivateKey() returns null, GetRSAPublicKey() succeeds
+            bool result = MtlsBindingCache.IsCertKeyOrphaned(publicOnlyCert, null);
+
+            // Assert
+            Assert.IsTrue(result, "An RSA cert with no accessible private key should be treated as orphaned.");
+        }
+
+        [TestMethod]
         public void PublicKeyMatchesCert_ReturnsTrue_When_KeyMatchesCert()
         {
             WindowsOnly();

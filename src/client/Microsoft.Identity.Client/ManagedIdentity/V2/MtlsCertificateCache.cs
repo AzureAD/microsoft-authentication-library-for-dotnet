@@ -201,9 +201,20 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             try
             {
                 using var rsaKey = cert.GetRSAPrivateKey();
+                if (rsaKey is null)
+                {
+                    // GetRSAPrivateKey() returns null for non-RSA certs (e.g. ECDSA) AND for RSA
+                    // certs where the private key is inaccessible. Distinguish the two cases:
+                    // if the cert has an RSA public key, the private key should be present but isn't
+                    // → the cert is unusable. If there is no RSA public key, it's a non-RSA cert
+                    // that we can't check → accept on faith.
+                    using var pubKey = cert.GetRSAPublicKey();
+                    return pubKey is not null; // RSA cert + inaccessible private key = orphaned
+                }
+
                 if (rsaKey is not RSACng rsaCng)
                 {
-                    // Non-CNG key (e.g. software CSP) — cannot perform KG container check; accept.
+                    // Non-CNG RSA key (e.g. software CSP) — cannot perform KG container check; accept.
                     return false;
                 }
 
