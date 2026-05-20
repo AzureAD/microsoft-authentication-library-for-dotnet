@@ -84,6 +84,14 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                             continue;
                         }
 
+                        // Skip certs whose CNG container key no longer matches the cert's public key.
+                        // This detects orphaned certs left on disk after a reboot regenerates the KG per-boot key.
+                        if (MtlsBindingCache.IsCertKeyOrphaned(candidate, logger))
+                        {
+                            logger.Verbose(() => "[PersistentCert] Candidate skipped: CNG container key does not match cert public key (orphaned post-reboot).");
+                            continue;
+                        }
+
                         if (candidate.NotAfter > bestNotAfter)
                         {
                             best?.Dispose();

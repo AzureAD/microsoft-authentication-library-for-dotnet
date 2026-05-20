@@ -843,5 +843,87 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         #endregion
+
+        #region IsCertKeyOrphaned tests
+
+        [TestMethod]
+        public void IsCertKeyOrphaned_ReturnsTrue_For_NullCert()
+        {
+            // Arrange (no setup needed)
+
+            // Act
+            bool result = MtlsBindingCache.IsCertKeyOrphaned(null, null);
+
+            // Assert
+            Assert.IsTrue(result, "Null cert should be treated as orphaned.");
+        }
+
+        [TestMethod]
+        public void IsCertKeyOrphaned_ReturnsFalse_For_ValidCert()
+        {
+            WindowsOnly();
+
+            // Arrange - cert whose private key in the CNG container matches the cert's embedded public key
+            using var cert = CreateSelfSignedCert(TimeSpan.FromDays(14), "CN=ValidCertOrphanTest");
+            var logger = Substitute.For<ILoggerAdapter>();
+
+            // Act
+            bool result = MtlsBindingCache.IsCertKeyOrphaned(cert, logger);
+
+            // Assert
+            Assert.IsFalse(result, "A cert whose private key matches its embedded public key should not be considered orphaned.");
+        }
+
+        [TestMethod]
+        public void PublicKeyMatchesCert_ReturnsTrue_When_KeyMatchesCert()
+        {
+            WindowsOnly();
+
+            // Arrange - cert created with key1; pass key1 as the container key
+            using var key1 = RSA.Create(2048);
+            var rsaCng1 = key1 as RSACng;
+            Assert.IsNotNull(rsaCng1, "Expected RSACng on Windows.");
+
+            var req = new System.Security.Cryptography.X509Certificates.CertificateRequest(
+                new X500DistinguishedName("CN=KeyMatchTest"),
+                key1,
+                HashAlgorithmName.SHA256,
+                RSASignaturePadding.Pkcs1);
+            using var cert = req.CreateSelfSigned(DateTimeOffset.UtcNow.AddMinutes(-1), DateTimeOffset.UtcNow.AddDays(14));
+
+            // Act
+            bool result = MtlsBindingCache.PublicKeyMatchesCert(rsaCng1, cert, null);
+
+            // Assert
+            Assert.IsTrue(result, "The key used to create the cert should match the cert's embedded public key.");
+        }
+
+        [TestMethod]
+        public void PublicKeyMatchesCert_ReturnsFalse_When_ModulusMismatch()
+        {
+            WindowsOnly();
+
+            // Arrange - cert created with key1, but we pass key2 as the container key
+            // (simulates post-reboot KG regeneration: same container, new key material)
+            using var key1 = RSA.Create(2048);
+            using var key2 = RSA.Create(2048);
+            var rsaCng2 = key2 as RSACng;
+            Assert.IsNotNull(rsaCng2, "Expected RSACng on Windows.");
+
+            var req = new System.Security.Cryptography.X509Certificates.CertificateRequest(
+                new X500DistinguishedName("CN=KeyMismatchTest"),
+                key1,
+                HashAlgorithmName.SHA256,
+                RSASignaturePadding.Pkcs1);
+            using var cert = req.CreateSelfSigned(DateTimeOffset.UtcNow.AddMinutes(-1), DateTimeOffset.UtcNow.AddDays(14));
+
+            // Act
+            bool result = MtlsBindingCache.PublicKeyMatchesCert(rsaCng2, cert, null);
+
+            // Assert
+            Assert.IsFalse(result, "A different key than the one used to create the cert should produce a modulus mismatch.");
+        }
+
+        #endregion
     }
 }
