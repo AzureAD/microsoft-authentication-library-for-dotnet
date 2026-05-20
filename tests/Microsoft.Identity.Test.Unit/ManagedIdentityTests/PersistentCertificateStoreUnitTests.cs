@@ -880,9 +880,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             WindowsOnly();
 
             // Arrange - cert created with key1; pass key1 as the container key
-            using var key1 = RSA.Create(2048);
-            var rsaCng1 = key1 as RSACng;
-            Assert.IsNotNull(rsaCng1, "Expected RSACng on Windows.");
+            using var key1 = new RSACng(2048);
 
             var req = new System.Security.Cryptography.X509Certificates.CertificateRequest(
                 new X500DistinguishedName("CN=KeyMatchTest"),
@@ -892,7 +890,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using var cert = req.CreateSelfSigned(DateTimeOffset.UtcNow.AddMinutes(-1), DateTimeOffset.UtcNow.AddDays(14));
 
             // Act
-            bool result = MtlsBindingCache.PublicKeyMatchesCert(rsaCng1, cert, null);
+            bool result = MtlsBindingCache.PublicKeyMatchesCert(key1, cert, null);
 
             // Assert
             Assert.IsTrue(result, "The key used to create the cert should match the cert's embedded public key.");
@@ -905,10 +903,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
             // Arrange - cert created with key1, but we pass key2 as the container key
             // (simulates post-reboot KG regeneration: same container, new key material)
-            using var key1 = RSA.Create(2048);
-            using var key2 = RSA.Create(2048);
-            var rsaCng2 = key2 as RSACng;
-            Assert.IsNotNull(rsaCng2, "Expected RSACng on Windows.");
+            using var key1 = new RSACng(2048);
+            using var key2 = new RSACng(2048);
 
             var req = new System.Security.Cryptography.X509Certificates.CertificateRequest(
                 new X500DistinguishedName("CN=KeyMismatchTest"),
@@ -918,7 +914,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using var cert = req.CreateSelfSigned(DateTimeOffset.UtcNow.AddMinutes(-1), DateTimeOffset.UtcNow.AddDays(14));
 
             // Act
-            bool result = MtlsBindingCache.PublicKeyMatchesCert(rsaCng2, cert, null);
+            bool result = MtlsBindingCache.PublicKeyMatchesCert(key2, cert, null);
 
             // Assert
             Assert.IsFalse(result, "A different key than the one used to create the cert should produce a modulus mismatch.");
