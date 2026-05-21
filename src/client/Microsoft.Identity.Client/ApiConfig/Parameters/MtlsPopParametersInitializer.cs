@@ -66,7 +66,10 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
             }
 
             // Case 2 – Only cert-capable credentials implement this capability interface.
-            if (serviceBundle.Config.ClientCredential is IClientSignedAssertionProvider signedProvider)
+            // Guarded by SendCertificateOverMtls == true (same as Case 1) to avoid invoking
+            // the assertion callback on every request for apps that don't opt into mTLS.
+            if (serviceBundle.Config.CertificateOptions?.SendCertificateOverMtls == true &&
+                serviceBundle.Config.ClientCredential is IClientSignedAssertionProvider signedProvider)
             {
                 var opts = CreateAssertionRequestOptions(tokenParameters, serviceBundle, ct);
 
