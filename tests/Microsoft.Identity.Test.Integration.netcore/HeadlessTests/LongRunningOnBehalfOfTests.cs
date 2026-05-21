@@ -25,7 +25,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         private X509Certificate2 _labAuthCert;
 
-        private readonly KeyVaultSecretsProvider _keyVault = new KeyVaultSecretsProvider(KeyVaultInstance.MsalTeam);
         private readonly KeyVaultSecretsProvider _keyVaultMsidLab = new KeyVaultSecretsProvider(KeyVaultInstance.MSIDLab);
 
         #region Test Hooks

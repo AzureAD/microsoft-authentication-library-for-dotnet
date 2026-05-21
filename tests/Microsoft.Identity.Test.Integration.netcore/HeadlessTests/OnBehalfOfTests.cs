@@ -29,7 +29,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private static InMemoryTokenCache s_inMemoryTokenCache = new InMemoryTokenCache();
         private X509Certificate2 _labAuthCert;
 
-        private readonly KeyVaultSecretsProvider _keyVault = new KeyVaultSecretsProvider(KeyVaultInstance.MsalTeam);
         private readonly KeyVaultSecretsProvider _keyVaultMsidLab = new KeyVaultSecretsProvider(KeyVaultInstance.MSIDLab);
 
         #region Test Hooks
@@ -521,24 +520,17 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         private async Task<ConfidentialClientApplication> BuildCcaAsync(string tenantId, bool withRegion = false)
         {
-            var appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
             var appApiConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppOBOService).ConfigureAwait(false);
-            string secret = LabResponseHelper.FetchSecretString(appConfig.SecretName, LabResponseHelper.KeyVaultSecretsProviderMsal);
 
             var builder = ConfidentialClientApplicationBuilder
-             .Create(withRegion ? appApiConfig.AppId : appConfig.AppId)
+             .Create(appApiConfig.AppId)
              .WithAuthority(new Uri($"https://login.microsoftonline.com/{tenantId}"), true)
+             .WithCertificate(_labAuthCert, true)
              .WithLegacyCacheCompatibility(false);
 
             if (withRegion)
             {
-                builder
-                    .WithCertificate(_labAuthCert, true)
-                    .WithAzureRegion(TestConstants.Region);
-            }
-            else
-            {
-                builder.WithClientSecret(secret);
+                builder.WithAzureRegion(TestConstants.Region);
             }
 
             return builder.BuildConcrete();
