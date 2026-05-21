@@ -961,7 +961,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 // Act — use the injectable overload: treat every cert as orphaned
                 var concreteCache = (WindowsPersistentCertificateCache)_cache;
-                bool readResult = concreteCache.Read(alias, out _, Logger, (_, __) => true);
+                bool readResult = concreteCache.TryRead(alias, Logger, (_, __) => true, out _);
 
                 // Assert
                 Assert.IsFalse(readResult, "Read should return false when all candidates are orphaned.");

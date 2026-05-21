@@ -34,15 +34,15 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
     {
         public bool Read(string alias, out CertificateCacheValue value, ILoggerAdapter logger)
         {
-            return Read(alias, out value, logger, MtlsBindingCache.IsCertKeyOrphaned);
+            return TryRead(alias, logger, MtlsBindingCache.IsCertKeyOrphaned, out value);
         }
 
-        // Internal overload for testability: accepts an injectable orphan-check delegate.
-        internal bool Read(
+        // Overload for testability: accepts an injectable orphan-check delegate.
+        public bool TryRead(
             string alias,
-            out CertificateCacheValue value,
             ILoggerAdapter logger,
-            Func<X509Certificate2, ILoggerAdapter, bool> isOrphaned)
+            Func<X509Certificate2, ILoggerAdapter, bool> isOrphaned,
+            out CertificateCacheValue value)
         {
             value = default;
 
@@ -52,17 +52,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 store.Open(OpenFlags.OpenExistingOnly | OpenFlags.ReadOnly);
 
                 // Snapshot first to avoid provider quirks ("collection modified" during enumeration).
-                X509Certificate2[] items;
-                try
-                {
-                    items = new X509Certificate2[store.Certificates.Count];
-                    store.Certificates.CopyTo(items, 0);
-                }
-                catch (Exception ex)
-                {
-                    logger.Verbose(() => "[PersistentCert] Store snapshot via CopyTo failed; falling back to enumeration. Details: " + ex.Message);
-                    items = store.Certificates.Cast<X509Certificate2>().ToArray();
-                }
+                var items = SnapshotCertificates(store, logger);
 
                 X509Certificate2 best = null;
                 string bestEndpoint = null;
@@ -162,46 +152,43 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 
         private static void RemoveByThumbprints(string alias, List<string> thumbprints, ILoggerAdapter logger)
         {
-            try
-            {
-                using var store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
-                store.Open(OpenFlags.ReadWrite);
-
-                X509Certificate2[] items;
-                try
-                {
-                    items = new X509Certificate2[store.Certificates.Count];
-                    store.Certificates.CopyTo(items, 0);
-                }
-                catch (Exception ex)
-                {
-                    logger.Verbose(() => "[PersistentCert] Orphan-removal snapshot via CopyTo failed; falling back to enumeration. Details: " + ex.Message);
-                    items = store.Certificates.Cast<X509Certificate2>().ToArray();
-                }
-
-                int removed = 0;
-                foreach (var cert in items)
+            InterprocessLock.TryWithAliasLock(
+                alias,
+                timeout: TimeSpan.FromMilliseconds(300),
+                action: () =>
                 {
                     try
                     {
-                        if (thumbprints.Contains(cert.Thumbprint))
-                        {
-                            store.Remove(cert);
-                            removed++;
-                        }
-                    }
-                    finally
-                    {
-                        cert.Dispose();
-                    }
-                }
+                        using var store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
+                        store.Open(OpenFlags.ReadWrite);
 
-                logger.Verbose(() => $"[PersistentCert] Removed {removed} orphaned cert(s) for alias '{alias}'.");
-            }
-            catch (Exception ex)
-            {
-                logger.Verbose(() => "[PersistentCert] Orphan removal failed (best-effort): " + ex.Message);
-            }
+                        var items = SnapshotCertificates(store, logger);
+                        int removed = 0;
+
+                        foreach (var cert in items)
+                        {
+                            try
+                            {
+                                if (thumbprints.Contains(cert.Thumbprint))
+                                {
+                                    store.Remove(cert);
+                                    removed++;
+                                }
+                            }
+                            finally
+                            {
+                                cert.Dispose();
+                            }
+                        }
+
+                        logger.Verbose(() => $"[PersistentCert] Removed {removed} orphaned cert(s) for alias '{alias}'.");
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.Verbose(() => "[PersistentCert] Orphan removal failed (best-effort): " + ex.Message);
+                    }
+                },
+                logVerbose: s => logger.Verbose(() => s));
         }
 
         public void Write(string alias, X509Certificate2 cert, string endpointBase, ILoggerAdapter logger)
@@ -241,17 +228,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                         // Skip write if a newer/equal, non-expired binding for this alias already exists.
                         DateTime newestForAliasUtc = DateTime.MinValue;
 
-                        X509Certificate2[] present;
-                        try
-                        {
-                            present = new X509Certificate2[store.Certificates.Count];
-                            store.Certificates.CopyTo(present, 0);
-                        }
-                        catch (Exception ex)
-                        {
-                            logger.Verbose(() => "[PersistentCert] Store snapshot via CopyTo failed; falling back to enumeration. Details: " + ex.Message);
-                            present = store.Certificates.Cast<X509Certificate2>().ToArray();
-                        }
+                        var present = SnapshotCertificates(store, logger);
 
                         foreach (var existing in present)
                         {
@@ -356,18 +333,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                         using var store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
                         store.Open(OpenFlags.ReadWrite);
 
-                        X509Certificate2[] items;
-                        try
-                        {
-                            items = new X509Certificate2[store.Certificates.Count];
-                            store.Certificates.CopyTo(items, 0);
-                        }
-                        catch (Exception ex)
-                        {
-                            logger.Verbose(() => "[PersistentCert] Store snapshot via CopyTo failed; falling back to enumeration. Details: " + ex.Message);
-                            items = store.Certificates.Cast<X509Certificate2>().ToArray();
-                        }
-
+                        var items = SnapshotCertificates(store, logger);
                         int removed = 0;
 
                         foreach (var existing in items)
@@ -399,6 +365,25 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         }
 
         /// <summary>
+        /// Safely snapshots all certificates in <paramref name="store"/> into an array.
+        /// Falls back to LINQ enumeration if <c>CopyTo</c> throws (some providers don't support it).
+        /// </summary>
+        private static X509Certificate2[] SnapshotCertificates(X509Store store, ILoggerAdapter logger)
+        {
+            try
+            {
+                var items = new X509Certificate2[store.Certificates.Count];
+                store.Certificates.CopyTo(items, 0);
+                return items;
+            }
+            catch (Exception ex)
+            {
+                logger.Verbose(() => "[PersistentCert] Store snapshot via CopyTo failed; falling back to enumeration. Details: " + ex.Message);
+                return store.Certificates.Cast<X509Certificate2>().ToArray();
+            }
+        }
+
+        /// <summary>
         /// Deletes only certificates that are actually expired (NotAfter &lt; nowUtc),
         /// scoped to the given alias (cache key) via FriendlyName.
         /// </summary>
@@ -408,19 +393,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             DateTime nowUtc,
             ILoggerAdapter logger)
         {
-            X509Certificate2[] items;
-            try
-            {
-                items = new X509Certificate2[store.Certificates.Count];
-                // Safe snapshot for providers that throw if removing while iterating
-                store.Certificates.CopyTo(items, 0);
-            }
-            catch (Exception ex)
-            {
-                logger.Verbose(() => "[PersistentCert] Prune snapshot via CopyTo failed; falling back to enumeration. Details: " + ex.Message);
-                items = store.Certificates.Cast<X509Certificate2>().ToArray();
-            }
-
+            var items = SnapshotCertificates(store, logger);
             int removed = 0;
 
             foreach (var existing in items)
