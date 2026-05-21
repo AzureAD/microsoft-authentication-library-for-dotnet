@@ -722,8 +722,10 @@ namespace Microsoft.Identity.Client
             }
 
             // at this point we need environment aliases, try to get them without a discovery call
+            // Use OriginalAuthority so that mTLS-transformed authorities (mtlsauth.microsoft.com) don't
+            // propagate into alias resolution — the cache stores tokens under login.* environments.
             var instanceMetadata = await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
-                                     requestParams.AuthorityInfo,
+                                     requestParams.AuthorityManager.OriginalAuthority.AuthorityInfo,
                                      tokenCacheItems.Select(at => at.Environment),  // if all environments are known, a network call can be avoided
                                      requestParams.RequestContext)
                             .ConfigureAwait(false);
@@ -841,7 +843,7 @@ namespace Microsoft.Identity.Client
                 {
                     var metadata =
                     await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
-                        requestParams.AuthorityInfo,
+                        requestParams.AuthorityManager.OriginalAuthority.AuthorityInfo,
                         refreshTokens.Select(rt => rt.Environment),  // if all environments are known, a network call can be avoided
                         requestParams.RequestContext)
                     .ConfigureAwait(false);
@@ -871,7 +873,7 @@ namespace Microsoft.Identity.Client
             {
                 var metadata =
                   await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
-                      requestParams.AuthorityInfo,
+                      requestParams.AuthorityManager.OriginalAuthority.AuthorityInfo,
                       refreshTokens.Select(rt => rt.Environment),  // if all environments are known, a network call can be avoided
                       requestParams.RequestContext)
                   .ConfigureAwait(false);

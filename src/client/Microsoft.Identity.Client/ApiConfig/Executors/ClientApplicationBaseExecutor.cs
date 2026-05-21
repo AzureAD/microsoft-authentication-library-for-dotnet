@@ -28,6 +28,9 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenSilentParameters silentParameters,
             CancellationToken cancellationToken)
         {
+            await commonParameters.TryInitMtlsPopParametersAsync(ServiceBundle, cancellationToken)
+                .ConfigureAwait(false);
+
             var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, commonParameters.MtlsCertificate, cancellationToken);
 
             var requestParameters = await _clientApplicationBase.CreateRequestParametersAsync(

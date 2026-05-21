@@ -222,6 +222,70 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         /// <summary>
+        /// Regression test for Bug #1: a second <c>AcquireTokenOnBehalfOf</c> call on the same app
+        /// instance must NOT throw <c>MsalClientException(MtlsPopNotSupportedForEnvironment)</c>.
+        ///
+        /// Root cause: after the first call, the AT cache is populated with an entry whose
+        /// Environment is <c>mtlsauth.microsoft.com</c>. On the second call, <c>FilterTokensByEnvironmentAsync</c>
+        /// passes <c>requestParams.AuthorityInfo</c> (which is <c>mtlsauth.microsoft.com</c> after authority
+        /// resolution) to <c>GetMetadataEntryTryAvoidNetworkAsync</c>, which throws because
+        /// <c>RegionAndMtlsDiscoveryProvider</c> only accepts <c>login.*</c> hosts.
+        /// The fix uses <c>requestParams.AuthorityManager.OriginalAuthority.AuthorityInfo</c> instead.
+        /// </summary>
+        [TestMethod]
+        public async Task OboFlow_WithSendCertificateOverMtls_SecondCallDoesNotCrashAsync()
+        {
+            string tenantId = "123456-1234-2345-1234561234";
+            string authorityUrl = $"https://login.microsoftonline.com/{tenantId}";
+            string expectedTokenEndpoint = $"https://mtlsauth.microsoft.com/{tenantId}/oauth2/v2.0/token";
+            string fakeUserAssertion = "fake.user.assertion.token";
+
+            using (var envContext = new EnvVariableContext())
+            {
+                Environment.SetEnvironmentVariable("REGION_NAME", null);
+                Environment.SetEnvironmentVariable("MSAL_FORCE_REGION", null);
+
+                using (var harness = new MockHttpAndServiceBundle())
+                {
+                    // Only one network response — the second call must be served from cache.
+                    harness.HttpManager.AddMockHandler(new MockHttpMessageHandler()
+                    {
+                        ExpectedUrl = expectedTokenEndpoint,
+                        ExpectedMethod = HttpMethod.Post,
+                        ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
+                    });
+
+                    var app = ConfidentialClientApplicationBuilder
+                        .Create(TestConstants.ClientId)
+                        .WithAuthority(authorityUrl)
+                        .WithHttpManager(harness.HttpManager)
+                        .WithCertificate(s_testCertificate, new CertificateOptions { SendCertificateOverMtls = true })
+                        .Build();
+
+                    var assertion = new UserAssertion(fakeUserAssertion);
+
+                    // First call — hits network, populates cache.
+                    var result1 = await app
+                        .AcquireTokenOnBehalfOf(TestConstants.s_scope, assertion)
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
+
+                    Assert.IsNotNull(result1.AccessToken);
+
+                    // Second call — must not throw MsalClientException(MtlsPopNotSupportedForEnvironment).
+                    // Should be served from cache without a network call.
+                    var result2 = await app
+                        .AcquireTokenOnBehalfOf(TestConstants.s_scope, assertion)
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
+
+                    Assert.IsNotNull(result2.AccessToken);
+                    Assert.AreEqual(result1.AccessToken, result2.AccessToken, "Second call should return the cached token.");
+                }
+            }
+        }
+
+        /// <summary>
         /// Regression test: without <c>SendCertificateOverMtls</c>, a cert-credential OBO request
         /// still uses the regular (non-mTLS) endpoint and sends <c>client_assertion</c>.
         /// </summary>
