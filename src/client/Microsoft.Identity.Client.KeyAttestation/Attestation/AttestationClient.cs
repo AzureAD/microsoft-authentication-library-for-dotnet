@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Client.KeyAttestation.Attestation
                 keyHandle.DangerousAddRef(ref addRef);
 
                 int rc = AttestationClientLib.AttestKeyGuardImportKey(
-                    endpoint, null, null, keyHandle, out buf, clientId);
+                    endpoint, null, "{}", keyHandle, out buf, clientId);
 
                 if (rc != 0)
                     return new(AttestationStatus.NativeError, null, null, rc, null);
