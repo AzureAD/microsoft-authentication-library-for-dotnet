@@ -1,10 +1,11 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
@@ -24,11 +25,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     public class OnBehalfOfTests
     {
         private static readonly string[] s_scopes = { "User.Read" };
-        //private static readonly string[] s_oboServiceScope = { "api://23c64cd8-21e4-41dd-9756-ab9e2c23f58c/access_as_user" };
-        //const string OboConfidentialClientID = "23c64cd8-21e4-41dd-9756-ab9e2c23f58c";
 
         private static InMemoryTokenCache s_inMemoryTokenCache = new InMemoryTokenCache();
-        private string _confidentialClientSecret;
+        private X509Certificate2 _labAuthCert;
 
         private readonly KeyVaultSecretsProvider _keyVault = new KeyVaultSecretsProvider(KeyVaultInstance.MsalTeam);
         private readonly KeyVaultSecretsProvider _keyVaultMsidLab = new KeyVaultSecretsProvider(KeyVaultInstance.MSIDLab);
@@ -36,12 +35,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         #region Test Hooks
 
         [TestInitialize]
-        public void TestInitialize()
+        public async Task TestInitializeAsync()
         {
             ApplicationBase.ResetStateForTest();
-            if (string.IsNullOrEmpty(_confidentialClientSecret))
+            if (_labAuthCert is null)
             {
-                _confidentialClientSecret = _keyVault.GetSecretByName(TestConstants.MsalOBOKeyVaultSecretName).Value;
+                _labAuthCert = await _keyVaultMsidLab.GetCertificateWithPrivateMaterialAsync("LabAuth").ConfigureAwait(false);
             }
         }
 
@@ -61,7 +60,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var user1 = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
             var user2 = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud2).ConfigureAwait(false);
             var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
-            var appApi = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppWebApi).ConfigureAwait(false);
+            var appApi = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppOBOService).ConfigureAwait(false);
 
             var partitionedInMemoryTokenCache = new InMemoryPartitionedTokenCache();
             var nonPartitionedInMemoryTokenCache = new InMemoryTokenCache();
@@ -152,7 +151,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 var app = ConfidentialClientApplicationBuilder
                 .Create(appApi.AppId)
                 .WithAuthority(new Uri($"https://login.microsoftonline.com/{user1AuthResult.TenantId}"), true)
-                .WithClientSecret(_confidentialClientSecret)
+                .WithCertificate(_labAuthCert)
                 .WithLegacyCacheCompatibility(false)
                 .Build();
 
@@ -182,7 +181,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // Setup: Get lab user, create PCA and get user tokens
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
             var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
-            var appApi = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppWebApi).ConfigureAwait(false);
+            var appApi = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppOBOService).ConfigureAwait(false);
 
             // Use the correct public client ID from KeyVault for all tests
             var publicClientId = app.AppId;
@@ -305,7 +304,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
             var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
-            var appApi = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppWebApi).ConfigureAwait(false);
+            var appApi = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppOBOService).ConfigureAwait(false);
 
             var factory = new HttpSnifferClientFactory();
 
@@ -325,7 +324,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(appApi.AppId)
                 .WithAuthority(new Uri("https://login.microsoftonline.com/" + authResult.TenantId), true)
-                .WithClientSecret(_confidentialClientSecret)
+                .WithCertificate(_labAuthCert)
                 .WithTestLogging()
                 .BuildConcrete();
 
@@ -378,7 +377,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var confidentialApp2 = ConfidentialClientApplicationBuilder
                 .Create(appApi.AppId)
                 .WithAuthority(new Uri("https://login.microsoftonline.com/" + authResult.TenantId), true)
-                .WithClientSecret(_confidentialClientSecret)
+                .WithCertificate(_labAuthCert)
                 .WithTestLogging()
                 .WithHttpClientFactory(factory)
                 .BuildConcrete();
@@ -438,7 +437,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 multiTenantAppId = app.AppId;
             }
 
-            var appApi = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppWebApi).ConfigureAwait(false);
+            var appApi = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppOBOService).ConfigureAwait(false);
 
             var pca = PublicClientApplicationBuilder
                 .Create(multiTenantAppId)
@@ -475,7 +474,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .Create(appApi.AppId)
                 .WithAuthority(new Uri("https://login.microsoftonline.com/" + authResult.TenantId), true)
                 .WithTestLogging(out HttpSnifferClientFactory factory)
-                .WithClientSecret(_confidentialClientSecret)
+                .WithCertificate(_labAuthCert)
                 .Build();
             s_inMemoryTokenCache.Bind(cca.UserTokenCache);
 
@@ -523,19 +522,23 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private async Task<ConfidentialClientApplication> BuildCcaAsync(string tenantId, bool withRegion = false)
         {
             var appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
-            var appApiConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppWebApi).ConfigureAwait(false);
+            var appApiConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppOBOService).ConfigureAwait(false);
             string secret = LabResponseHelper.FetchSecretString(appConfig.SecretName, LabResponseHelper.KeyVaultSecretsProviderMsal);
 
             var builder = ConfidentialClientApplicationBuilder
              .Create(withRegion ? appApiConfig.AppId : appConfig.AppId)
              .WithAuthority(new Uri($"https://login.microsoftonline.com/{tenantId}"), true)
-             .WithClientSecret(withRegion ? _confidentialClientSecret : secret)
              .WithLegacyCacheCompatibility(false);
 
             if (withRegion)
             {
                 builder
+                    .WithCertificate(_labAuthCert, true)
                     .WithAzureRegion(TestConstants.Region);
+            }
+            else
+            {
+                builder.WithClientSecret(secret);
             }
 
             return builder.BuildConcrete();

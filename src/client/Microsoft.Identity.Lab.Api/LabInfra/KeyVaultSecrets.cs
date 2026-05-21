@@ -79,9 +79,28 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         /// </summary>
         public const string MsalAppAzureAdMultipleOrgsRegional = "MSAL-APP-AzureADMultipleOrgsRegional-JSON";
         /// <summary>
+        /// Multiple orgs app in public cloud (id4slab1 tenant). Used for client credentials and regional token acquisition tests.
+        /// </summary>
+        public const string MsalAppAzureAdMultipleOrgs = "MSAL-APP-AzureADMultipleOrgs-JSON";
+        /// <summary>
+        /// Regional app in id4slab1 tenant with SN+I claims (xms_idrel, xms_ds_cnf). Used for regional ESTS token acquisition tests.
+        /// </summary>
+        public const string MsalAppRegion = "MSAL-App-Region-JSON";
+        /// <summary>
         /// Represents the application identifier used for Arlington CCA test scenarios in the MSAL App Arlington CCA JSON configuration.
         /// </summary>
         public const string MsalAppArlingtonCCA = "MSAL-App-ArlingtonCCA-JSON";
+
+        /// <summary>
+        /// OBO service app (MSAL-APP-TodoListService) in ID4SLAB1 tenant. Used for On-Behalf-Of flow integration tests
+        /// with certificate-based authentication (LabAuth cert from msidlabs vault).
+        /// </summary>
+        public const string AppOBOService = "MSAL-APP-TodoListService-JSON";
+        /// <summary>
+        /// OBO public client app (MSAL-APP-TodoListClient) in ID4SLAB1 tenant. Used as the public client
+        /// that acquires user tokens for On-Behalf-Of flow integration tests.
+        /// </summary>
+        public const string AppOBOClient = "MSAL-APP-TodoListClient-JSON";
 
         // Name of key vault secrets for app secrets and certificates
         /// <summary>
