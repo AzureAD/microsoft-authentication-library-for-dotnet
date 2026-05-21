@@ -190,33 +190,23 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         /// <summary>
-        /// Baseline test — 2x2 matrix cell (OBO × client_secret):
-        /// Verifies that <c>AcquireTokenOnBehalfOf</c> succeeds with standard client-secret authentication.
+        /// Negative test: verifies that OBO WITHOUT <c>SendCertificateOverMtls = true</c> does NOT
+        /// route to the mTLS endpoint. The certificate is presented as a JWT <c>client_assertion</c>
+        /// in the POST body via the regular <c>login.microsoftonline.com</c> endpoint.
         ///
-        /// Purpose: proves the OBO grant itself works end-to-end with normal app auth.
-        /// When <see cref="OboFlow_WithSendCertificateOverMtls_AcquiresTokenAsync"/> fails with
-        /// <c>AADSTS51000: MtlsClientAuth is/are disabled</c>, this test confirms the failure is
-        /// purely an AAD app-configuration gap (mTLS not enabled on AppWebApi), NOT a limitation of
-        /// the OBO grant over mTLS transport.
-        ///
-        /// Full 2x2 matrix:
-        ///   client_credentials + mTLS    → ClientCredentialsMtlsPopTests.Sni_Over_Mtls_Gets_Bearer_Token_Successfully_TestAsync (PASSES)
-        ///   client_credentials + secret  → ClientCredentialsTests (PASSES)
-        ///   OBO + mTLS                   → <see cref="OboFlow_WithSendCertificateOverMtls_AcquiresTokenAsync"/> (FAILS until AppWebApi is mTLS-enabled)
-        ///   OBO + secret                 → this test (PASSES)
+        /// This is the contrast case for <see cref="OboFlow_WithSendCertificateOverMtls_BothMtlsConditionsMet"/>:
+        /// the opt-in flag is what distinguishes mTLS transport from standard cert-assertion auth.
         /// </summary>
         [DoNotRunOnLinux]
         [TestMethod]
-        public async Task OboFlow_WithClientSecret_BaselineAsync()
+        public async Task OboFlow_WithoutSendCertificateOverMtls_UsesRegularEndpointAsync()
         {
+            X509Certificate2 mtlsCert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
+            Assert.IsNotNull(mtlsCert, "Lab cert must be installed to run this test.");
+
             var appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
             var appApiConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppWebApi).ConfigureAwait(false);
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
-
-            // Get the AppWebApi client secret from Key Vault (same secret used by OnBehalfOfTests).
-            string oboClientSecret = LabResponseHelper.FetchSecretString(
-                TestConstants.MsalOBOKeyVaultSecretName,
-                LabResponseHelper.KeyVaultSecretsProviderMsal);
 
             // Step 1: Acquire user assertion via ROPC
             var pca = PublicClientApplicationBuilder
@@ -234,26 +224,38 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             Assert.IsNotNull(userResult?.AccessToken, "Failed to acquire user token via ROPC.");
 
-            // Step 2: OBO with standard client_secret auth (no mTLS).
-            // This sends client_secret in the POST body to login.microsoftonline.com.
+            // Step 2: OBO with cert but WITHOUT SendCertificateOverMtls — cert goes in the body as
+            // client_assertion, NOT at the TLS layer. Request goes to login.microsoftonline.com.
+            var recordingFactory = new RecordingMtlsHttpClientFactory();
             var cca = ConfidentialClientApplicationBuilder
                 .Create(appApiConfig.AppId)
                 .WithAuthority(new Uri($"https://login.microsoftonline.com/{userResult.TenantId}"), true)
-                .WithClientSecret(oboClientSecret)
-                .WithTestLogging()
+                .WithCertificate(mtlsCert)  // no SendCertificateOverMtls
+                .WithHttpClientFactory(recordingFactory)
                 .Build();
 
-            AuthenticationResult oboResult = await cca
-                .AcquireTokenOnBehalfOf(s_userReadScopes, new UserAssertion(userResult.AccessToken))
-                .ExecuteAsync(CancellationToken.None)
-                .ConfigureAwait(false);
+            try
+            {
+                await cca
+                    .AcquireTokenOnBehalfOf(s_userReadScopes, new UserAssertion(userResult.AccessToken))
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+            }
+            catch (MsalServiceException)
+            {
+                // AAD may reject for cert/config reasons — we only care about the request format.
+            }
 
-            Assert.IsNotNull(oboResult?.AccessToken, "OBO with client_secret should succeed.");
-            Assert.AreEqual(TokenSource.IdentityProvider, oboResult.AuthenticationResultMetadata.TokenSource,
-                "First OBO call should hit the network.");
-            StringAssert.Contains(
-                oboResult.AuthenticationResultMetadata.TokenEndpoint, "login.microsoftonline.com",
-                "Standard client_secret OBO should route to the regular login endpoint, not mtlsauth.");
+            string requestUrl = recordingFactory.LastCapturedUrl ?? "(none captured)";
+            string requestBody = recordingFactory.LastCapturedBody ?? "";
+
+            // Without SendCertificateOverMtls, request must NOT go to mtlsauth
+            Assert.DoesNotContain(requestUrl, "mtlsauth",
+                $"OBO without SendCertificateOverMtls should use login.microsoftonline.com, but got: {requestUrl}");
+
+            // The cert is sent as client_assertion in the body (standard cert auth)
+            StringAssert.Contains(requestBody, "client_assertion",
+                "OBO without SendCertificateOverMtls should include client_assertion in the body.");
         }
 
         /// <summary>
@@ -438,6 +440,59 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // Condition 2: no client_assertion in body
             Assert.DoesNotContain(lastBody, "client_assertion",
                 "client_assertion should NOT be in the body when SendCertificateOverMtls=true.");
+        }
+
+        /// <summary>
+        /// Tests the two conditions required for mTLS transport on the auth_code flow:
+        ///   1. Token request goes to the mTLS endpoint (mtlsauth.microsoft.com).
+        ///   2. No <c>client_assertion</c> in the POST body.
+        ///
+        /// Uses a fake/expired auth code to trigger the token request without a real browser session.
+        /// AAD will reject the code, but the assertions verify MSAL's request format before the response.
+        /// </summary>
+        [DoNotRunOnLinux]
+        [TestMethod]
+        public async Task AuthCodeFlow_WithSendCertificateOverMtls_BothMtlsConditionsMetAsync()
+        {
+            X509Certificate2 mtlsCert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
+            Assert.IsNotNull(mtlsCert, "Lab cert must be installed to run this test.");
+
+            var appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
+            var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
+
+            var recordingFactory = new RecordingMtlsHttpClientFactory();
+            var cca = ConfidentialClientApplicationBuilder
+                .Create(appConfig.AppId)
+                .WithAuthority(new Uri($"https://login.microsoftonline.com/{user.TenantId}"), true)
+                .WithCertificate(mtlsCert, new CertificateOptions { SendCertificateOverMtls = true })
+                .WithRedirectUri("http://localhost")
+                .WithHttpClientFactory(recordingFactory)
+                .Build();
+
+            try
+            {
+                // Use a fake auth code to trigger the token request.
+                // AAD will reject it, but MSAL sends the request first — we capture and assert on it.
+                await cca
+                    .AcquireTokenByAuthorizationCode(s_userReadScopes, "fake_auth_code_for_mtls_format_test")
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+            }
+            catch (MsalServiceException)
+            {
+                // Expected — AAD rejects the fake code. We assert on the captured request below.
+            }
+
+            string requestUrl = recordingFactory.LastCapturedUrl ?? "(none captured)";
+            string requestBody = recordingFactory.LastCapturedBody ?? "";
+
+            // Condition 1: request must go to the mTLS endpoint
+            StringAssert.Contains(requestUrl, "mtlsauth",
+                $"Condition 1 FAILED: auth_code token request went to '{requestUrl}' instead of mtlsauth.microsoft.com.");
+
+            // Condition 2: no client_assertion in body
+            Assert.DoesNotContain(requestBody, "client_assertion",
+                "Condition 2 FAILED: client_assertion IS present in the auth_code POST body — should be absent for mTLS transport.");
         }
 
         /// <summary>
