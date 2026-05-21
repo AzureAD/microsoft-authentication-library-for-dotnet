@@ -11,13 +11,11 @@ This is enabled by the `SendCertificateOverMtls = true` option. When set:
 - `client_assertion` is **not** included in the POST body
 - The TLS certificate authenticates the app
 
-## AAD Prerequisite: Allowlisting
+## AAD Prerequisite: App Enablement (Preview)
 
-> ⚠️ **Your app must be allowlisted for mTLS client auth on the AAD/ESTS side.**
+> ⚠️ **This feature is in preview. Your app must be enabled for mTLS client auth by Microsoft Entra before token requests will succeed.**
 >
-> There is no self-serve portal. Contact the ESTS team to enable mTLS for your app registration.
->
-> Without allowlisting, AAD returns `AADSTS51000: MtlsClientAuth is/are disabled`.
+> There is no self-serve portal today. Without enablement, AAD returns `AADSTS51000: MtlsClientAuth is/are disabled`.
 
 ## How to Opt In
 
@@ -108,7 +106,7 @@ Use a recording `IMsalMtlsHttpClientFactory` (see `RecordingMtlsHttpClientFactor
 ## Known Limitations
 
 - **Windows only** — the mTLS client certificate stack depends on `System.Net.Security` behavior that is not supported on Linux in the current test configuration.
-- **AAD allowlisting required** — no self-serve portal; contact ESTS.
+- **AAD-side enablement required (preview)** — there is no self-serve portal today; app enablement requires Microsoft Entra configuration.
 - **Certificate credential required** — `SendCertificateOverMtls = true` is incompatible with client secrets and throws at `Build()` time.
 
 ## Related Docs
