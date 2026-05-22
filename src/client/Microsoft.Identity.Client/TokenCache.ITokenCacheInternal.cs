@@ -723,7 +723,10 @@ namespace Microsoft.Identity.Client
 
             // at this point we need environment aliases, try to get them without a discovery call
             // Use OriginalAuthority so that mTLS-transformed authorities (mtlsauth.microsoft.com) don't
-            // propagate into alias resolution — the cache stores tokens under login.* environments.
+            // propagate into alias resolution. After ResolveAuthorityAsync, requestParams.AuthorityInfo
+            // may reflect the mtlsauth host; passing that to GetMetadataEntryTryAvoidNetworkAsync causes
+            // RegionAndMtlsDiscoveryProvider to throw MtlsPopNotSupportedForEnvironment. Using the
+            // original login.* authority ensures alias lookup always succeeds via instance discovery.
             var instanceMetadata = await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
                                      requestParams.AuthorityManager.OriginalAuthority.AuthorityInfo,
                                      tokenCacheItems.Select(at => at.Environment),  // if all environments are known, a network call can be avoided
