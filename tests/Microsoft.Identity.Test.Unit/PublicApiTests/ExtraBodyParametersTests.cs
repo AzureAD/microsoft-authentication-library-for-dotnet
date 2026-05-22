@@ -11,8 +11,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Client.Extensibility;
 
-#pragma warning disable CS0618 // Tests intentionally exercise the obsolete AcquireTokenForClientBuilderExtensions.WithExtraBodyParameters overload.
-
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {
     [TestClass]
