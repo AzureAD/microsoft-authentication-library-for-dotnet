@@ -162,7 +162,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             requestContext.Logger.Info($"[Managed Identity] {MsalErrorMessage.ManagedIdentityAllSourcesUnavailable}");
             return CacheDiscoveryResult(new ManagedIdentitySourceResult(ManagedIdentitySource.None)
             {
-                ImdsV1FailureReason = imdsV1Failure
+                ImdsFailureReason = imdsV1Failure
             });
         }
 
@@ -258,9 +258,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         {
             string errorMessage = MsalErrorMessage.ManagedIdentityAllSourcesUnavailable;
 
-            if (sourceResult != null && !string.IsNullOrEmpty(sourceResult.ImdsV1FailureReason))
+            if (sourceResult != null && !string.IsNullOrEmpty(sourceResult.ImdsFailureReason))
             {
-                errorMessage += $" MSAL was not able to detect the Azure Instance Metadata Service (IMDS) that runs on VMs: {sourceResult.ImdsV1FailureReason}.";
+                errorMessage += $" MSAL was not able to detect the Azure Instance Metadata Service (IMDS) that runs on VMs: {sourceResult.ImdsFailureReason}.";
             }
 
             return new MsalClientException(MsalError.ManagedIdentityAllSourcesUnavailable, errorMessage);

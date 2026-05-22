@@ -24,22 +24,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         public ManagedIdentitySource Source { get; }
 
         /// <summary>
-        /// Gets or sets the failure reason from the IMDSv1 probe, if it failed.
+        /// Gets or sets the failure reason from the IMDS probe, if it failed.
         /// </summary>
         /// <value>
-        /// A string describing why the IMDSv1 probe failed, or <c>null</c> if the probe succeeded or was not attempted.
+        /// A string describing why the IMDS probe failed, or <c>null</c> if the probe succeeded or was not attempted.
         /// </value>
-        public string ImdsV1FailureReason { get; set; }
-
-        /// <summary>
-        /// Gets or sets the failure reason from the IMDSv2 probe, if it failed.
-        /// </summary>
-        /// <value>
-        /// A string describing why the IMDSv2 probe failed, or <c>null</c> if the probe succeeded or was not attempted.
-        /// This property is no longer populated since MSAL now only probes IMDSv1 and assumes IMDSv2 is available
-        /// when IMDS infrastructure is detected. It is retained for backward compatibility.
-        /// </value>
-        public string ImdsV2FailureReason { get; set; }
+        public string ImdsFailureReason { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ManagedIdentitySourceResult"/> class.
