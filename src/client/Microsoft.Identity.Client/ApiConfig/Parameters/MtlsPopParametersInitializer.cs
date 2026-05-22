@@ -67,9 +67,17 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
 
             // Case 2 – Only cert-capable credentials implement this capability interface.
             // No SendCertificateOverMtls guard here: the TokenBindingCertificate pattern is a
-            // separate opt-in mechanism where the assertion delegate signals mTLS intent by
-            // returning a non-null cert. GetAssertionAsync is called once per request; the
-            // cert is only set if the delegate actually returns one.
+            // distinct opt-in where the assertion delegate itself signals mTLS intent by returning
+            // a non-null cert. This is separate from Case 1 (SendCertificateOverMtls + cert-based
+            // credential).
+            //
+            // Call pattern per request:
+            //   - This call always fires (even cache hits) to check for TokenBindingCertificate
+            //     and set MtlsCertificate for proper endpoint routing.
+            //   - GetCredentialMaterialAsync (in ClientAssertionDelegateCredential) calls the
+            //     delegate a second time on network requests to produce the signed assertion JWT.
+            //   - Cache hits: delegate called once (here only). Network requests: twice.
+            //   - Delegates are expected to be cheap (return a pre-generated/cached assertion).
             if (serviceBundle.Config.ClientCredential is IClientSignedAssertionProvider signedProvider)
             {
                 var opts = CreateAssertionRequestOptions(tokenParameters, serviceBundle, ct);
