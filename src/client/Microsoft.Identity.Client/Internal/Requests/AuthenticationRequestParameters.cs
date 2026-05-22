@@ -118,6 +118,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         }
 
         public bool IsMtlsPopRequested => _commonParameters.IsMtlsPopRequested;
+        public bool? SendOfflineAccessScope => _commonParameters.SendOfflineAccessScope;
 
         /// <summary>
         /// The certificate resolved and used for client authentication (if certificate-based authentication was used).
