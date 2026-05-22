@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Test.Unit
                         // client_assertion value is a signed JWT — assert presence only, not value
                         AdditionalRequestValidation = req =>
                         {
-                            string body = req.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                            string body = req.Content.ReadAsStringAsync().ConfigureAwait(false).GetAwaiter().GetResult();
                             StringAssert.Contains(body, "client_assertion=",
                                 "client_assertion must be present in the OBO POST body.");
                         }
@@ -141,7 +141,7 @@ namespace Microsoft.Identity.Test.Unit
                         // client_assertion value is a signed JWT — assert presence only, not value
                         AdditionalRequestValidation = req =>
                         {
-                            string body = req.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                            string body = req.Content.ReadAsStringAsync().ConfigureAwait(false).GetAwaiter().GetResult();
                             StringAssert.Contains(body, "client_assertion=",
                                 "client_assertion must be present in the regional OBO POST body.");
                         }
@@ -206,7 +206,7 @@ namespace Microsoft.Identity.Test.Unit
                         // client_assertion value is a signed JWT — assert presence only, not value
                         AdditionalRequestValidation = req =>
                         {
-                            string body = req.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                            string body = req.Content.ReadAsStringAsync().ConfigureAwait(false).GetAwaiter().GetResult();
                             StringAssert.Contains(body, "client_assertion=",
                                 "client_assertion must be present in the RT POST body.");
                         }

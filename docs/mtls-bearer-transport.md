@@ -105,7 +105,7 @@ Use a recording `IMsalMtlsHttpClientFactory` (see `RecordingMtlsHttpClientFactor
 
 ## Known Limitations
 
-- **Windows only** — the mTLS client certificate stack depends on `System.Net.Security` behavior that is not supported on Linux in the current test configuration.
+- **Integration test setup is Windows-only** — the provided integration tests use `[DoNotRunOnLinux]` due to test infrastructure constraints. The mTLS bearer transport feature itself works cross-platform wherever `HttpClientHandler` client certificate authentication is supported.
 - **AAD-side enablement required (preview)** — there is no self-serve portal today; app enablement requires Microsoft Entra configuration.
 - **Certificate credential required** — `SendCertificateOverMtls = true` is incompatible with client secrets and throws at `Build()` time.
 

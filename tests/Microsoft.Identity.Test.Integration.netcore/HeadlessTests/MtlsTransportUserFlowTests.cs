@@ -506,8 +506,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             public IReadOnlyList<(string Url, string Body)> Captured => _captured;
 
-            public string LastCapturedUrl => _captured.LastOrDefault(c => c.Url.Contains("/oauth2/")).Url;
-            public string LastCapturedBody => _captured.LastOrDefault(c => !string.IsNullOrEmpty(c.Body)).Body;
+            public string LastCapturedUrl { get { lock (_captured) { return _captured.LastOrDefault(c => c.Url.Contains("/oauth2/")).Url; } } }
+            public string LastCapturedBody { get { lock (_captured) { return _captured.LastOrDefault(c => !string.IsNullOrEmpty(c.Body)).Body; } } }
 
             private HttpClient BuildRecordingClient(X509Certificate2 cert = null)
             {
@@ -519,8 +519,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     string body = null;
                     if (req.Content != null)
                     {
-                        req.Content.LoadIntoBufferAsync().GetAwaiter().GetResult();
-                        body = req.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                        req.Content.LoadIntoBufferAsync().ConfigureAwait(false).GetAwaiter().GetResult();
+                        body = req.Content.ReadAsStringAsync().ConfigureAwait(false).GetAwaiter().GetResult();
                     }
                     lock (_captured) { _captured.Add((req.RequestUri?.AbsoluteUri ?? "", body ?? "")); }
                 });
