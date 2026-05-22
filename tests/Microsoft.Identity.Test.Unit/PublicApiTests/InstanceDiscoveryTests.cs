@@ -176,6 +176,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddMockHandler(new MockHttpMessageHandler()
                 {
                     ExpectedMethod = HttpMethod.Get,
+                    ExpectedUrl = "https://login.microsoftonline.com/common/discovery/instance",
                     ResponseMessage = new HttpResponseMessage(errorStatusCode)
                     {
                         Content = new StringContent("error")
@@ -231,6 +232,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddMockHandler(new MockHttpMessageHandler()
                 {
                     ExpectedMethod = HttpMethod.Get,
+                    ExpectedUrl = "https://login.microsoftonline.com/common/discovery/instance",
                     ExceptionToThrow = new TaskCanceledException("simulated timeout")
                 });
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
@@ -277,6 +279,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddMockHandler(new MockHttpMessageHandler()
                 {
                     ExpectedMethod = HttpMethod.Get,
+                    ExpectedUrl = "https://login.microsoftonline.com/common/discovery/instance",
                     ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
                     {
                         Content = new StringContent("{}")
