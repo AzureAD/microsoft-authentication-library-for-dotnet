@@ -6,6 +6,14 @@ Azure Redis Cache operates in a Backing resource VM/VMSS and uses MSAL with Mana
 
 This document proposes a new `WithClientClaims()` API to support this scenario in a consistent, safe, and harmonized way across all MSAL auth flows.
 
+## Scope and Initial Rollout
+
+> **Important:** This feature is initially scoped to a specific scenario. The IMDS/MIRP team will gate it in the service layer.
+
+- **First consumer**: Azure Redis Cache
+- **Initial service-side scope**: MIRP will enable this only for **delegated identities** in Redis Cache
+- **General availability**: Depends on IMDS/MIRP team's rollout plan; do not assume this is a general-purpose NSP claims mechanism at this time
+
 ## Problem Statement
 
 The existing `WithClaims()` API in MSAL is designed for **server-issued** claims challenges — situations where ESTS or a downstream web API rejects a token and asks the client to re-authenticate with specific claims (e.g., CAE, MFA step-up). Its behavior is:
@@ -37,9 +45,7 @@ For the NSP scenario, claims need to be sent to IMDS as a query parameter **and*
 
 ### MSIv2 (IMDS v2)
 
-MSIv2 uses a different protocol from MSIv1. It acquires an mTLS binding certificate from IMDS, then makes a POST directly to an ESTS token endpoint (`/oauth2/v2.0/token`). Claims are not forwarded in that POST request today.
-
-> **Open question for IMDS team**: Does the MSIv2 ESTS endpoint accept a `claims` body parameter the same way the standard ESTS token endpoint does?
+MSIv2 uses a different protocol from MSIv1. It acquires an mTLS binding certificate from IMDS, then makes a POST directly to an ESTS token endpoint (`/oauth2/v2.0/token`). The MSIv2 design for `WithClientClaims` is not finalized — the IMDS team is still working on it. See the **ETAs** section.
 
 ## Proposed API: `WithClientClaims(string claimsJson)`
 
@@ -61,13 +67,21 @@ Add `WithClientClaims(string claimsJson)` across the MSI, client credentials, an
 1. **Does not bypass the cache.** Tokens are cached and keyed on the claims value. Different claims values produce separate cache entries.
 
 2. **Transport-agnostic API.** MSAL routes the claims to the correct location per flow:
-   - MSIv1: query parameter to IMDS
-   - MSIv2: body parameter in the ESTS POST request
-   - Cert-based / FIC: body parameter sent to ESTS
+   - MSIv1: percent-encoded query parameter (`claims=...`) to IMDS
+   - MSIv2: body parameter in the ESTS POST request *(design pending IMDS team confirmation)*
+   - Cert-based / FIC: `claims` body parameter sent to ESTS — **not** embedded in the client assertion JWT
 
-3. **MSAL owns the JSON merge.** If a server-issued claims challenge (e.g., CAE) arrives while `WithClientClaims` is set, MSAL merges the two claims objects using the existing `ClaimsHelper` infrastructure. This infrastructure already performs JSON merging for cert-based flows today.
+3. **CCA: claims go in the request body, not the JWT.** For confidential client flows, `WithClientClaims` sends the NSP claim as a standard ESTS `claims` body parameter. It is **not** placed inside the signed client assertion JWT. The existing `WithExtraClientAssertionClaims` API (separate, unrelated) handles the JWT-embedding path. These two APIs are distinct and serve different purposes.
 
-4. **Stable claims only.** Callers should avoid dynamic values (timestamps, nonces) in the claims string — each unique claims value creates a distinct cache entry, and frequently changing values will create an unbounded cache.
+4. **MSAL owns the JSON merge.** If a server-issued claims challenge (e.g., CAE) arrives while `WithClientClaims` is set, MSAL merges the two claims objects using the existing `ClaimsHelper` infrastructure. This infrastructure already performs JSON merging for cert-based flows today.
+
+5. **Stable claims only.** Callers should avoid dynamic values (timestamps, nonces) in the claims string — each unique claims value creates a distinct cache entry, and frequently changing values will create an unbounded cache.
+
+### MSIv1 claim restriction
+
+MSIv1 (IMDS v1) only accepts a single custom claim: `xms_az_nwperimid`. Any other claim key in the JSON causes IMDS to return HTTP 400 Bad Request with no diagnostic detail.
+
+To avoid this silent failure, MSAL validates the claims JSON upfront for MSIv1 requests. If any top-level key other than `xms_az_nwperimid` is present, MSAL throws `MsalClientException(MsalError.InvalidRequest)` before making any network call.
 
 ### Handling Dynamic Claims
 
@@ -102,15 +116,36 @@ AuthenticationResult result = await miApp
 
 The per-request placement means the caller doesn't need to recreate the app when claims update — a new request with new claims produces a new cache entry automatically.
 
+## ETAs
+
+| Flow | Owner | Status | ETA |
+|------|-------|--------|-----|
+| CCA (cert-based / FIC) | Robbie | ✅ Done — included in POC PR | — |
+| MSIv1 (IMDS v1) | Raghu | In progress | Canary by June 30 |
+| MSIv2 (IMDS v2) | TBD | Blocked — IMDS team design pending | Q2/Q3 |
+
+## E2E Testing Plan
+
+E2E testing requires the Redis Cache team's help because this feature is gated in MIRP for Redis Cache delegated identities only.
+
+- **MSI flows**: Requires a test VM with Managed Identity configured inside an NSP. The Redis Cache team will coordinate access to a suitable test environment.
+- **CCA flow**: Can be tested with an existing MSAL test tenant app registration. Verify that the `claims` body parameter is forwarded to ESTS and the returned token contains `xms_az_nwperimid`.
+- **Status**: Nidhi is confirming test environment availability with the internal team and the Redis Cache team.
+
+## Resolved Questions
+
+| # | Question | Resolution |
+|---|----------|------------|
+| 1 | Is `WithClientClaims` the right name? | Yes — agreed across teams |
+| 2 | CCA: request body or client assertion JWT? | **Request body only.** Claims are sent as the ESTS `claims` body parameter. They are not embedded in the signed client assertion JWT. |
+| 3 | MSIv1 claims param name | `claims` query parameter (OIDC standard), percent-encoded |
+| 4 | Rollout scope | MSIv1 first; MSIv2 and CCA follow once MSIv2 design is ready from IMDS team |
+
 ## Open Questions
 
-1. **API shape**: Is `WithClientClaims` the right name and signature for all teams involved?
+1. **MSIv2 protocol** *(for IMDS team)*: What additional changes are needed in the `/issuecredential` request body to signal that custom claims are in use? The IMDS team is designing this; MSAL implementation will follow once the contract is confirmed.
 
-2. **MSIv2 protocol** *(for IMDS team)*: Does the MSIv2 ESTS endpoint accept a `claims` body parameter? This cannot be confirmed from the MSAL code alone.
-
-3. **MSIv1 claims param name**: Should the NSP claim be sent as `claims` (OIDC standard) or under a different query parameter name specific to IMDS?
-
-4. **Rollout scope**: Implement for all flows in one PR, or start with MSIv1 and extend MSIv2/cert/FIC in follow-ups?
+2. **E2E test environment**: What test VM and tenant are available? *(Nidhi coordinating with internal team and Redis Cache)*
 
 ## Related
 
@@ -119,3 +154,5 @@ The per-request placement means the caller doesn't need to recreate the app when
 - `ClaimsHelper.GetMergedClaimsAndClientCapabilities()` — `ClaimsHelper.cs`
 - `ManagedIdentitySourceExtensions.SupportsClaimsAndCapabilities()` — `ManagedIdentitySourceExtensions.cs`
 - `CacheKeyFactory.GetAppTokenCacheItemKey()` — `CacheKeyFactory.cs`
+- POC implementation — PR #5999
+
