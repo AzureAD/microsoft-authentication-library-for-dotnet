@@ -67,7 +67,10 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                 Claims = requestParams.Claims,
                 ClientCapabilities = requestParams.AppConfig.ClientCapabilities,
                 CryptographyManager = requestParams.RequestContext.ServiceBundle.PlatformProxy.CryptographyManager,
-                SendX5C = requestParams.SendX5C,
+                // When SendCertificateOverMtls=true, the client_assertion JWT must include the x5c chain
+                // so that AAD can validate the assertion against the SNI-registered certificate.
+                SendX5C = requestParams.SendX5C
+                    || (requestParams.AppConfig.CertificateOptions?.SendCertificateOverMtls == true),
                 UseSha2 = requestParams.AuthorityManager.Authority.AuthorityInfo.IsSha2CredentialSupported,
                 ExtraClientAssertionClaims = requestParams.ExtraClientAssertionClaims,
                 ClientAssertionFmiPath = requestParams.ClientAssertionFmiPath,
