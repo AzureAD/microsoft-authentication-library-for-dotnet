@@ -731,6 +731,102 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     "Cache key component must be registered.");
             }
         }
+
+        // ---------------------------------------------------------------------------------
+        // MSIv1 claim allowlist validation — only xms_az_nwperimid is permitted
+        // ---------------------------------------------------------------------------------
+
+        private const string ValidNspClaim = @"{""xms_az_nwperimid"":{""values"":[""perimid-1234""]}}";
+        private const string UnsupportedClaim = @"{""custom_claim"":{""essential"":true}}";
+        private const string MixedClaims = @"{""xms_az_nwperimid"":{""values"":[""perimid-1234""]},""other_claim"":{""essential"":true}}";
+
+        [TestMethod]
+        public async Task WithClientClaims_Imds_ValidXmsAzNwperimid_SucceedsAsync()
+        {
+            // xms_az_nwperimid is the only allowed claim for MSIv1; a request carrying it must succeed.
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, ManagedIdentityTests.ImdsEndpoint);
+
+                var mi = ManagedIdentityApplicationBuilder
+                    .Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpManager(httpManager)
+                    .WithExperimentalFeatures(true)
+                    .Build();
+
+                string normalizedClaims = Client.Internal.ClaimsHelper.NormalizeClaimsJson(ValidNspClaim);
+                httpManager.AddManagedIdentityMockHandler(
+                    ManagedIdentityTests.ImdsEndpoint,
+                    ManagedIdentityTests.Resource,
+                    MockHelpers.GetMsiSuccessfulResponse(),
+                    ManagedIdentitySource.Imds,
+                    extraQueryParameters: new Dictionary<string, string> { { "claims", Uri.EscapeDataString(normalizedClaims) } });
+
+                // Act
+                var result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithClientClaims(ValidNspClaim)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+
+        [TestMethod]
+        public async Task WithClientClaims_Imds_UnsupportedClaim_ThrowsMsalClientExceptionAsync()
+        {
+            // Any claim key other than xms_az_nwperimid must be rejected before the network call,
+            // so the caller gets a clear error instead of an opaque HTTP 400 from IMDS.
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, ManagedIdentityTests.ImdsEndpoint);
+
+                var mi = ManagedIdentityApplicationBuilder
+                    .Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpManager(httpManager)
+                    .WithExperimentalFeatures(true)
+                    .Build();
+
+                // Act & Assert — MsalClientException must be thrown before any HTTP request is made
+                MsalClientException ex = await Assert.ThrowsExactlyAsync<MsalClientException>(
+                    () => mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                            .WithClientClaims(UnsupportedClaim)
+                            .ExecuteAsync())
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual(MsalError.InvalidRequest, ex.ErrorCode);
+                Assert.Contains("xms_az_nwperimid", ex.Message, "Error message should name the only allowed claim.");
+            }
+        }
+
+        [TestMethod]
+        public async Task WithClientClaims_Imds_MixedClaims_ThrowsMsalClientExceptionAsync()
+        {
+            // Even if xms_az_nwperimid is present, any additional claims must be rejected.
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, ManagedIdentityTests.ImdsEndpoint);
+
+                var mi = ManagedIdentityApplicationBuilder
+                    .Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpManager(httpManager)
+                    .WithExperimentalFeatures(true)
+                    .Build();
+
+                // Act & Assert
+                MsalClientException ex = await Assert.ThrowsExactlyAsync<MsalClientException>(
+                    () => mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                            .WithClientClaims(MixedClaims)
+                            .ExecuteAsync())
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual(MsalError.InvalidRequest, ex.ErrorCode);
+            }
+        }
     }
 }
 

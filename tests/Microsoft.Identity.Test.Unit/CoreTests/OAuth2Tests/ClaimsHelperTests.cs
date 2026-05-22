@@ -304,8 +304,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
             Assert.IsTrue(doc.RootElement.TryGetProperty("userinfo", out _), "userinfo must be present.");
             Assert.IsTrue(doc.RootElement.TryGetProperty("id_token", out _), "id_token must be present.");
 
-            // id_token sorts before userinfo
-            Assert.IsLessThan(result.IndexOf("userinfo", StringComparison.Ordinal), result.IndexOf("id_token", StringComparison.Ordinal),
+            // id_token sorts before userinfo (ordinal: 'i' < 'u')
+            Assert.IsLessThan(result.IndexOf("id_token", StringComparison.Ordinal), result.IndexOf("userinfo", StringComparison.Ordinal),
                 "id_token must appear before userinfo after ordinal key sort.");
         }
 

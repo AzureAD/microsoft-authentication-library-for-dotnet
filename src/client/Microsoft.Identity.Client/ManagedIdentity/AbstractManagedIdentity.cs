@@ -38,6 +38,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             _sourceType = sourceType;
         }
 
+        private const string XmsAzNwperimid = "xms_az_nwperimid";
+
         public virtual async Task<ManagedIdentityResponse> AuthenticateAsync(
             AcquireTokenForManagedIdentityParameters parameters,
             CancellationToken cancellationToken)
@@ -70,6 +72,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                         $"WithClientClaims is only supported for IMDS-based managed identity sources. " +
                         $"The detected source is {_sourceType}. " +
                         "Only ManagedIdentitySource.Imds and ManagedIdentitySource.ImdsV2 support the 'claims' parameter.");
+                }
+
+                if (_sourceType == ManagedIdentitySource.Imds)
+                {
+                    ValidateMsiv1Claims(parameters.ClientClaims);
                 }
 
                 if (request.Method == System.Net.Http.HttpMethod.Get)
@@ -355,6 +362,27 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 null);
 
             throw exception;
+        }
+
+        /// <summary>
+        /// MSIv1 (IMDS v1) only supports a single custom claim: <c>xms_az_nwperimid</c>.
+        /// Any other top-level key in the claims JSON will cause IMDS to return HTTP 400 Bad Request
+        /// with no useful diagnostic. Validate early so the caller gets a clear MSAL error.
+        /// </summary>
+        private static void ValidateMsiv1Claims(string claimsJson)
+        {
+            var parsed = JsonHelper.ParseIntoJsonObject(claimsJson);
+            foreach (var kvp in parsed)
+            {
+                if (!string.Equals(kvp.Key, XmsAzNwperimid, StringComparison.Ordinal))
+                {
+                    throw new MsalClientException(
+                        MsalError.InvalidRequest,
+                        $"MSIv1 (IMDS v1) only supports the `{XmsAzNwperimid}` custom claim. " +
+                        $"The claims JSON contained the unsupported key `{kvp.Key}`. " +
+                        $"Remove all keys other than `{XmsAzNwperimid}` when using WithClientClaims with MSIv1.");
+                }
+            }
         }
     }
 }
