@@ -4,11 +4,11 @@
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
     /// <summary>
-    /// Result of managed identity source detection, including the detected source and any failure information from IMDS probes.
+    /// Result of managed identity source detection, including the detected source and any failure information from the IMDS probe.
     /// </summary>
     /// <remarks>
     /// This class is returned by <see cref="ManagedIdentityApplication.GetManagedIdentitySourceAsync"/> to provide
-    /// detailed information about managed identity source detection, including failure reasons when IMDS probes fail.
+    /// detailed information about managed identity source detection, including failure reasons when the IMDS probe fails.
     /// This information is useful for credential chains like DefaultAzureCredential to determine whether to skip
     /// managed identity authentication entirely.
     /// </remarks>
@@ -36,6 +36,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         /// </summary>
         /// <value>
         /// A string describing why the IMDSv2 probe failed, or <c>null</c> if the probe succeeded or was not attempted.
+        /// This property is no longer populated since MSAL now only probes IMDSv1 and assumes IMDSv2 is available
+        /// when IMDS infrastructure is detected. It is retained for backward compatibility.
         /// </value>
         public string ImdsV2FailureReason { get; set; }
 

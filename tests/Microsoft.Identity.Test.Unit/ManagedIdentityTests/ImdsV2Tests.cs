@@ -126,7 +126,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
             if (imdsVersion == ImdsVersion.V1)
             {
-                // New discovery order: V1 probed first (succeeds) → ImdsV1 cached
+                // Discovery probes V1 (succeeds) → Imds cached
                 httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V1, userAssignedIdentityId, userAssignedId));
 
                 if (addSourceCheck)
@@ -140,15 +140,14 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
             if (addProbeMock)
             {
-                // New discovery order: V1 probed first (fails), then V2 (succeeds)
-                httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V1, userAssignedIdentityId, userAssignedId));
-                httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V2, userAssignedIdentityId, userAssignedId));
+                // Discovery probes V1 (succeeds) → Imds cached; mTLS PoP requests are routed to IMDSv2 automatically
+                httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V1, userAssignedIdentityId, userAssignedId));
             }
 
             if (addSourceCheck)
             {
                 var miSourceResult = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync(ManagedIdentityTests.ImdsProbesCancellationToken).ConfigureAwait(false);
-                Assert.AreEqual(ManagedIdentitySource.ImdsV2, miSourceResult.Source);
+                Assert.AreEqual(ManagedIdentitySource.Imds, miSourceResult.Source);
             }
 
             // Choose deterministic key source for tests.
@@ -433,55 +432,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [TestMethod]
-        [DataRow(UserAssignedIdentityId.None, null)]                             // SAMI
-        [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId)]       // UAMI
-        [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId)] // UAMI
-        [DataRow(UserAssignedIdentityId.ObjectId, TestConstants.ObjectId)]       // UAMI
-        public async Task ApplicationsCannotSwitchBetweenImdsVersionsForPreview(
-            UserAssignedIdentityId userAssignedIdentityId,
-            string userAssignedId)
-        {
-            using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager())
-            {
-                SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
-
-                var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, userAssignedIdentityId, userAssignedId, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
-
-                // IMDSv1 request mock
-                httpManager.AddManagedIdentityMockHandler(
-                    ManagedIdentityTests.ImdsEndpoint,
-                    ManagedIdentityTests.Resource,
-                    MockHelpers.GetMsiSuccessfulResponse(),
-                    ManagedIdentitySource.Imds,
-                    userAssignedId: userAssignedId,
-                    userAssignedIdentityId: userAssignedIdentityId);
-
-                var result = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                    //.WithMtlsProofOfPossession() - excluding this will cause fallback to ImdsV1
-                    //.WithAttestationSupport()
-                    .ExecuteAsync().ConfigureAwait(false);
-
-                Assert.IsNotNull(result);
-                Assert.AreEqual(Bearer, result.TokenType);
-                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-
-                // even though the app fell back to ImdsV1, the source should still be ImdsV2
-                var miSourceResult = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync(ManagedIdentityTests.ImdsProbesCancellationToken).ConfigureAwait(false);
-                Assert.AreEqual(ManagedIdentitySource.ImdsV2, miSourceResult.Source);
-
-                // none of the mocks from AddMocksToGetEntraToken are needed since checking the cache occurs before the network requests
-                var ex = await Assert.ThrowsAsync<MsalClientException>(async () =>
-                    await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                    .WithMtlsProofOfPossession() // this will cause an error to be thrown since the app already fell back to ImdsV1
-                    .WithAttestationSupport()
-                    .ExecuteAsync().ConfigureAwait(false)
-                ).ConfigureAwait(false);
-
-                Assert.AreEqual(MsalError.CannotSwitchBetweenImdsVersionsForPreview, ex.ErrorCode);
-            }
-        }
         #endregion Failure Tests
 
         #region Probe Tests
@@ -570,11 +520,11 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         #endregion Probe Tests
 
         #region Fallback Behavior Tests
-        // Verifies non-mTLS request after IMDSv2 detection falls back per-request to IMDSv1 (Bearer),
+        // Verifies non-mTLS request after IMDS detection uses IMDSv1 (Bearer),
         [TestMethod]
         [DataRow(UserAssignedIdentityId.None, null)]
         [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId)]
-        public async Task NonMtlsRequest_FallsBackToImdsV1(
+        public async Task NonMtlsRequest_UsesImdsV1(
             UserAssignedIdentityId userAssignedIdentityId,
             string userAssignedId)
         {
@@ -582,7 +532,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (var httpManager = new MockHttpManager())
             {
                 ManagedIdentityClient.ResetSourceForTest();
-                SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
 
                 var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, userAssignedIdentityId, userAssignedId, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
 
@@ -596,36 +546,29 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     userAssignedId: userAssignedId);
 
                 var result = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                    //.WithMtlsProofOfPossession() - excluding this will cause fallback to ImdsV1
+                    //.WithMtlsProofOfPossession() - excluding this will use ImdsV1
                     .ExecuteAsync().ConfigureAwait(false);
 
                 Assert.AreEqual(Bearer, result.TokenType);
                 Assert.IsNull(result.BindingCertificate, "Bearer token should not have binding certificate.");
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
 
-                // indicates ImdsV2 is still available
+                // Cached source is Imds (v1 probe succeeded)
                 var miSourceResult = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync(ManagedIdentityTests.ImdsProbesCancellationToken).ConfigureAwait(false);
-                Assert.AreEqual(ManagedIdentitySource.ImdsV2, miSourceResult.Source);
+                Assert.AreEqual(ManagedIdentitySource.Imds, miSourceResult.Source);
             }
         }
 
         [TestMethod]
-        public async Task BothImdsProbesFailMaxRetries_ReturnsNoneFound()
+        public async Task ImdsProbeFailsMaxRetries_ReturnsNoneFound()
         {
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
-                SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
 
-                // New discovery order: V1 probed first (fails), then V2 fails with max retries → NoneFound
+                // V1 probe fails → NoneFound
                 httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V1, retry: false));
-
-                const int Num500Errors = 1 + TestImdsProbeRetryPolicy.ExponentialStrategyNumRetries;
-                for (int i = 0; i < Num500Errors; i++)
-                {
-                    // `retry: true` indicates a retriable status code will be returned
-                    httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V2, retry: true));
-                }
 
                 var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, addProbeMock: false, addSourceCheck: false).ConfigureAwait(false);
 

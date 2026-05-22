@@ -49,8 +49,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow(AppServiceEndpoint, ManagedIdentitySource.AppService)]
         [DataRow(ImdsEndpoint, ManagedIdentitySource.Imds)]
         [DataRow(null, ManagedIdentitySource.Imds)]
-        [DataRow(ImdsEndpoint, ManagedIdentitySource.ImdsV2)]
-        [DataRow(null, ManagedIdentitySource.ImdsV2)]
         [DataRow(AzureArcEndpoint, ManagedIdentitySource.AzureArc)]
         [DataRow(CloudShellEndpoint, ManagedIdentitySource.CloudShell)]
         [DataRow(ServiceFabricEndpoint, ManagedIdentitySource.ServiceFabric)]
@@ -69,15 +67,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 ManagedIdentityApplication mi = miBuilder.Build() as ManagedIdentityApplication;
 
-                if (managedIdentitySource == ManagedIdentitySource.ImdsV2)
+                if (managedIdentitySource == ManagedIdentitySource.Imds)
                 {
-                    // New discovery order: V1 probed first (fails), then V2 (succeeds)
-                    httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V1));
-                    httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V2));
-                }
-                else if (managedIdentitySource == ManagedIdentitySource.Imds)
-                {
-                    // New discovery order: V1 probed first (succeeds)
+                    // Discovery probes V1 only
                     httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V1));
                 }
 
@@ -1128,9 +1120,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var mi = miBuilder.Build() as ManagedIdentityApplication;
                 Assert.IsNotNull(mi, "Build() should return a ManagedIdentityApplication instance.");
 
-                // Explicit discovery: V1 probe fails, then V2 probe also fails → NoneFound cached
+                // Explicit discovery: V1 probe fails → NoneFound cached
                 httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V1));
-                httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V2));
 
                 var sourceResult = await mi.GetManagedIdentitySourceAsync(ImdsProbesCancellationToken).ConfigureAwait(false);
                 Assert.AreEqual(ManagedIdentitySource.None, sourceResult.Source);
