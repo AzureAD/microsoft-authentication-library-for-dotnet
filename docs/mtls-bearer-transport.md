@@ -4,12 +4,12 @@
 
 By default, MSAL authenticates a confidential client app by signing a JWT (`client_assertion`) with its certificate and including that assertion in the POST body of every token request.
 
-**mTLS bearer transport** is an alternative: the certificate is presented at the **TLS layer** during the handshake, and no `client_assertion` is sent in the request body. The token returned is still a standard Bearer token.
+**mTLS bearer transport** is an alternative: the certificate is presented at the **TLS layer** during the handshake, and a `client_assertion` JWT is also included in the POST body. The token returned is still a standard Bearer token.
 
 This is enabled by the `SendCertificateOverMtls = true` option. When set:
 - Token requests are routed to `mtlsauth.microsoft.com` (or a regional mTLS endpoint when `WithAzureRegion` is also configured)
-- `client_assertion` is **not** included in the POST body
-- The TLS certificate authenticates the app
+- `client_assertion` **is** included in the POST body (ESTS requires it for this preview)
+- The TLS certificate also authenticates the app at the transport layer
 
 ## AAD Prerequisite: App Enablement (Preview)
 
@@ -101,7 +101,7 @@ Console.WriteLine(result.AuthenticationResultMetadata.TokenEndpoint);
 
 Use a recording `IMsalMtlsHttpClientFactory` (see `RecordingMtlsHttpClientFactory` in `MtlsTransportUserFlowTests.cs`) to capture the outgoing request. Assert:
 - URL contains `mtlsauth`
-- Body does **not** contain `client_assertion`
+- Body **contains** `client_assertion` (cert at TLS + assertion in body)
 
 ## Known Limitations
 

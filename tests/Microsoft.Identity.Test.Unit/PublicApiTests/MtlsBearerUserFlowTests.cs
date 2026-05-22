@@ -72,8 +72,14 @@ namespace Microsoft.Identity.Test.Unit
                             { OAuth2Parameter.GrantType, OAuth2GrantType.JwtBearer },
                             { OAuth2Parameter.RequestedTokenUse, OAuth2RequestedTokenUse.OnBehalfOf },
                             { OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtBearer },
-                            { OAuth2Parameter.ClientAssertion, "placeholder" }
                         },
+                        // client_assertion value is a signed JWT — assert presence only, not value
+                        AdditionalRequestValidation = req =>
+                        {
+                            string body = req.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                            StringAssert.Contains(body, "client_assertion=",
+                                "client_assertion must be present in the OBO POST body.");
+                        }
                     };
 
                     harness.HttpManager.AddMockHandler(tokenHttpCallHandler);
@@ -131,7 +137,13 @@ namespace Microsoft.Identity.Test.Unit
                         ExpectedPostData = new Dictionary<string, string>
                         {
                             { OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtBearer },
-                            { OAuth2Parameter.ClientAssertion, "placeholder" }
+                        },
+                        // client_assertion value is a signed JWT — assert presence only, not value
+                        AdditionalRequestValidation = req =>
+                        {
+                            string body = req.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                            StringAssert.Contains(body, "client_assertion=",
+                                "client_assertion must be present in the regional OBO POST body.");
                         }
                     };
 
@@ -190,8 +202,14 @@ namespace Microsoft.Identity.Test.Unit
                             { OAuth2Parameter.GrantType, OAuth2GrantType.RefreshToken },
                             { OAuth2Parameter.RefreshToken, fakeRefreshToken },
                             { OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtBearer },
-                            { OAuth2Parameter.ClientAssertion, "placeholder" }
                         },
+                        // client_assertion value is a signed JWT — assert presence only, not value
+                        AdditionalRequestValidation = req =>
+                        {
+                            string body = req.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                            StringAssert.Contains(body, "client_assertion=",
+                                "client_assertion must be present in the RT POST body.");
+                        }
                     };
 
                     harness.HttpManager.AddMockHandler(tokenHttpCallHandler);

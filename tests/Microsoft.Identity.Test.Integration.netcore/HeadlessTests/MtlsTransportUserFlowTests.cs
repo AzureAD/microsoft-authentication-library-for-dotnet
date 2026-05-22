@@ -94,7 +94,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNotNull(userResult?.AccessToken, "Failed to acquire user token via ROPC.");
 
             // Step 2: Build the OBO confidential client with SendCertificateOverMtls=true.
-            // The cert authenticates the app at the TLS layer; no client_assertion is sent in the body.
+            // The cert authenticates the app at the TLS layer AND client_assertion is sent in the body
+            // (preview behavior — ESTS requires the assertion for user flows).
             // NOTE: WithHttpClientFactory must come AFTER WithTestLogging to override the sniffer factory.
             var cca = ConfidentialClientApplicationBuilder
                 .Create(appApiConfig.AppId)
@@ -163,7 +164,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             string refreshToken = rtCacheItem.Secret;
 
             // Build CCA with SendCertificateOverMtls=true: the cert authenticates at the TLS layer
-            // and the factory provides the mTLS connection. No client_assertion is sent in the body.
+            // AND client_assertion is sent in the body (preview behavior).
             // NOTE: WithHttpClientFactory must come AFTER WithTestLogging to override the sniffer factory.
             var cca = ConfidentialClientApplicationBuilder
                 .Create(appConfig.AppId)
