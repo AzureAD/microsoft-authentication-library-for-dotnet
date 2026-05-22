@@ -21,9 +21,10 @@ namespace Microsoft.Identity.Test.Unit
     /// Unit tests for mTLS bearer transport applied to user flows (OBO and refresh_token).
     ///
     /// These tests verify that when <see cref="CertificateOptions.SendCertificateOverMtls"/> is
-    /// set to <c>true</c>, MSAL routes user-flow token requests to the mTLS endpoint
-    /// (<c>mtlsauth.microsoft.com</c>) and omits <c>client_assertion</c> from the POST body —
-    /// the same behaviour already implemented for <c>AcquireTokenForClient</c>.
+    /// set to <c>true</c>, MSAL routes token requests to the mTLS endpoint
+    /// (<c>mtlsauth.microsoft.com</c>) and includes <c>client_assertion</c> in the POST body
+    /// for all flows — the cert authenticates at the TLS layer AND the body carries the assertion.
+    /// This applies to all flows: S2S, OBO, refresh_token, and auth_code.
     /// </summary>
     [TestClass]
     public class MtlsBearerUserFlowTests : TestBase
@@ -44,10 +45,10 @@ namespace Microsoft.Identity.Test.Unit
         /// <summary>
         /// Verifies that an OBO token request with <c>SendCertificateOverMtls = true</c>:
         ///   1. Targets the global mTLS endpoint (mtlsauth.microsoft.com).
-        ///   2. Does NOT include <c>client_assertion</c> in the POST body.
+        ///   2. Includes <c>client_assertion</c> in the POST body (cert at TLS layer + assertion in body).
         /// </summary>
         [TestMethod]
-        public async Task OboFlow_WithSendCertificateOverMtls_UsesGlobalMtlsEndpointAndNoClientAssertionAsync()
+        public async Task OboFlow_WithSendCertificateOverMtls_UsesGlobalMtlsEndpointAsync()
         {
             string tenantId = "123456-1234-2345-1234561234";
             string authorityUrl = $"https://login.microsoftonline.com/{tenantId}";
@@ -71,12 +72,9 @@ namespace Microsoft.Identity.Test.Unit
                             { OAuth2Parameter.ClientId, TestConstants.ClientId },
                             { OAuth2Parameter.GrantType, OAuth2GrantType.JwtBearer },
                             { OAuth2Parameter.RequestedTokenUse, OAuth2RequestedTokenUse.OnBehalfOf },
-                        },
-                        UnExpectedPostData = new Dictionary<string, string>
-                        {
                             { OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtBearer },
                             { OAuth2Parameter.ClientAssertion, "placeholder" }
-                        }
+                        },
                     };
 
                     harness.HttpManager.AddMockHandler(tokenHttpCallHandler);
@@ -103,7 +101,8 @@ namespace Microsoft.Identity.Test.Unit
 
         /// <summary>
         /// Verifies that a user flow token request with <c>SendCertificateOverMtls = true</c> and a
-        /// region configured uses the regional mTLS endpoint (e.g. eastus.mtlsauth.microsoft.com).
+        /// region configured uses the regional mTLS endpoint (e.g. eastus.mtlsauth.microsoft.com)
+        /// and includes <c>client_assertion</c> in the POST body.
         ///
         /// OBO is used as the representative user flow here. The regional routing code
         /// (<c>RegionAndMtlsDiscoveryProvider</c>) is shared across all user flows (OBO, refresh_token,
@@ -130,7 +129,7 @@ namespace Microsoft.Identity.Test.Unit
                         ExpectedUrl = expectedTokenEndpoint,
                         ExpectedMethod = HttpMethod.Post,
                         ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
-                        UnExpectedPostData = new Dictionary<string, string>
+                        ExpectedPostData = new Dictionary<string, string>
                         {
                             { OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtBearer },
                             { OAuth2Parameter.ClientAssertion, "placeholder" }
@@ -164,10 +163,10 @@ namespace Microsoft.Identity.Test.Unit
         /// Verifies that a refresh-token redemption (<c>IByRefreshToken</c>) with
         /// <c>SendCertificateOverMtls = true</c>:
         ///   1. Targets the global mTLS endpoint.
-        ///   2. Does NOT include <c>client_assertion</c> in the POST body.
+        ///   2. Includes <c>client_assertion</c> in the POST body (cert at TLS layer + assertion in body).
         /// </summary>
         [TestMethod]
-        public async Task RefreshTokenFlow_WithSendCertificateOverMtls_UsesGlobalMtlsEndpointAndNoClientAssertionAsync()
+        public async Task RefreshTokenFlow_WithSendCertificateOverMtls_UsesGlobalMtlsEndpointAsync()
         {
             string tenantId = "123456-1234-2345-1234561234";
             string authorityUrl = $"https://login.microsoftonline.com/{tenantId}";
@@ -191,12 +190,9 @@ namespace Microsoft.Identity.Test.Unit
                             { OAuth2Parameter.ClientId, TestConstants.ClientId },
                             { OAuth2Parameter.GrantType, OAuth2GrantType.RefreshToken },
                             { OAuth2Parameter.RefreshToken, fakeRefreshToken },
-                        },
-                        UnExpectedPostData = new Dictionary<string, string>
-                        {
                             { OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtBearer },
                             { OAuth2Parameter.ClientAssertion, "placeholder" }
-                        }
+                        },
                     };
 
                     harness.HttpManager.AddMockHandler(tokenHttpCallHandler);

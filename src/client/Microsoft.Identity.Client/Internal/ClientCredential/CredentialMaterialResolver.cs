@@ -61,7 +61,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             {
                 ClientId = requestParams.AppConfig.ClientId,
                 TokenEndpoint = tokenEndpoint,
-                Mode = requestParams.MtlsCertificate != null || requestParams.IsMtlsPopRequested
+                Mode = requestParams.IsMtlsPopRequested
                     ? CredentialTransportProtocol.Mtls
                     : CredentialTransportProtocol.OAuth,
                 Claims = requestParams.Claims,

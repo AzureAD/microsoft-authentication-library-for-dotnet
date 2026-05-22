@@ -22,12 +22,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 {
     /// <summary>
     /// Integration tests for mTLS bearer transport (<c>SendCertificateOverMtls = true</c>)
-    /// applied to user flows: OBO and refresh_token.
+    /// applied to all flows: S2S, OBO, refresh_token, and auth_code.
     ///
-    /// Each test validates the two conditions required for true mTLS bearer transport:
+    /// Each test validates the two conditions required for mTLS bearer transport:
     ///   1. The token request goes to the mTLS endpoint (<c>mtlsauth.microsoft.com</c>).
-    ///   2. No <c>client_assertion</c> is in the POST body — the TLS certificate authenticates
-    ///      the app at the transport layer.
+    ///   2. <c>client_assertion</c> IS in the POST body — cert authenticates at the TLS layer
+    ///      AND the body carries the assertion (required by ESTS for this preview).
     ///
     /// This is distinct from mTLS PoP (<c>.WithMtlsProofOfPossession()</c>), which binds the
     /// token cryptographically to a certificate and is only available on AcquireTokenForClient.
@@ -259,9 +259,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         /// <summary>
-        /// Tests the two conditions required for true mTLS transport auth on OBO:
+        /// Tests the two conditions required for mTLS transport auth on OBO:
         ///   1. Token request goes to the mTLS endpoint (mtlsauth.microsoft.com), not the regular endpoint.
-        ///   2. No client_assertion in the POST body — the TLS cert alone authenticates the app.
+        ///   2. <c>client_assertion</c> IS in the POST body — cert at TLS layer + assertion in body.
         ///
         /// Uses <c>CertificateOptions.SendCertificateOverMtls = true</c> to opt in to mTLS bearer transport.
         /// AAD may reject the request if the cert is not registered for AppWebApi, but MSAL's request
@@ -321,15 +321,15 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             StringAssert.Contains(requestUrl, "mtlsauth",
                 $"Condition 1 FAILED: OBO token request went to '{requestUrl}' instead of mtlsauth.microsoft.com.");
 
-            // Condition 2: no client_assertion in body
-            Assert.DoesNotContain(lastBody, "client_assertion",
-                "Condition 2 FAILED: client_assertion IS present in the OBO POST body — should be absent for mTLS transport.");
+            // Condition 2: client_assertion must be in body (cert at TLS + assertion in body)
+            StringAssert.Contains(lastBody, "client_assertion",
+                "Condition 2 FAILED: client_assertion is NOT present in the OBO POST body — should be present for mTLS transport.");
         }
 
         /// <summary>
-        /// Tests the two conditions required for true mTLS transport auth on refresh_token redemption:
+        /// Tests the two conditions required for mTLS transport auth on refresh_token redemption:
         ///   1. Token request goes to the mTLS endpoint (mtlsauth.microsoft.com).
-        ///   2. No client_assertion in the POST body.
+        ///   2. <c>client_assertion</c> IS in the POST body.
         ///
         /// Uses <c>CertificateOptions.SendCertificateOverMtls = true</c> to opt in to mTLS bearer transport.
         /// </summary>
@@ -389,18 +389,17 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             StringAssert.Contains(requestUrl, "mtlsauth",
                 $"Condition 1 FAILED: RT token request went to '{requestUrl}' instead of mtlsauth.microsoft.com.");
 
-            // Condition 2: no client_assertion in body
-            Assert.DoesNotContain(lastBody, "client_assertion",
-                "Condition 2 FAILED: client_assertion IS present in the RT POST body — should be absent for mTLS transport.");
+            // Condition 2: client_assertion must be in body
+            StringAssert.Contains(lastBody, "client_assertion",
+                "Condition 2 FAILED: client_assertion is NOT present in the RT POST body — should be present for mTLS transport.");
         }
 
         /// <summary>
         /// Control test: verifies that for AcquireTokenForClient with SendCertificateOverMtls=true,
         /// BOTH mTLS transport conditions ARE met:
         ///   1. Request goes to mtlsauth.microsoft.com (mTLS endpoint).
-        ///   2. No client_assertion in the POST body.
+        ///   2. <c>client_assertion</c> IS in the POST body (cert at TLS + assertion in body).
         ///
-        /// This is the "correct" behavior that we want to extend to user flows.
         /// Uses the MSI-allowlisted app (163ffef9) which has the lab cert registered.
         /// </summary>
         [DoNotRunOnLinux]
@@ -437,15 +436,15 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             StringAssert.Contains(requestUrl, "mtlsauth",
                 $"Expected mTLS endpoint (mtlsauth) but got: {requestUrl}");
 
-            // Condition 2: no client_assertion in body
-            Assert.DoesNotContain(lastBody, "client_assertion",
-                "client_assertion should NOT be in the body when SendCertificateOverMtls=true.");
+            // Condition 2: client_assertion must be in body
+            StringAssert.Contains(lastBody, "client_assertion",
+                "client_assertion should be in the body when SendCertificateOverMtls=true (cert at TLS + assertion in body).");
         }
 
         /// <summary>
         /// Tests the two conditions required for mTLS transport on the auth_code flow:
         ///   1. Token request goes to the mTLS endpoint (mtlsauth.microsoft.com).
-        ///   2. No <c>client_assertion</c> in the POST body.
+        ///   2. <c>client_assertion</c> IS in the POST body (cert at TLS layer + assertion in body).
         ///
         /// Uses a fake/expired auth code to trigger the token request without a real browser session.
         /// AAD will reject the code, but the assertions verify MSAL's request format before the response.
@@ -490,9 +489,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             StringAssert.Contains(requestUrl, "mtlsauth",
                 $"Condition 1 FAILED: auth_code token request went to '{requestUrl}' instead of mtlsauth.microsoft.com.");
 
-            // Condition 2: no client_assertion in body
-            Assert.DoesNotContain(requestBody, "client_assertion",
-                "Condition 2 FAILED: client_assertion IS present in the auth_code POST body — should be absent for mTLS transport.");
+            // Condition 2: client_assertion must be in body
+            StringAssert.Contains(requestBody, "client_assertion",
+                "Condition 2 FAILED: client_assertion is NOT present in the auth_code POST body — should be present for mTLS transport.");
         }
 
         /// <summary>
