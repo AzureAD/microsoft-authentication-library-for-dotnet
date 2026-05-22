@@ -65,6 +65,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         /// </summary>
         [DoNotRunOnLinux]
         [TestMethod]
+        [Ignore("Blocked: AppWebApi (23c64cd8) not yet enabled for mTLS client auth in ID4SLAB1. " +
+                "Error: AADSTS700027 (cert not registered). " +
+                "Remove this attribute once Bogdan/Qi enable mTLS on AppWebApi.")]
         public async Task OboFlow_WithSendCertificateOverMtls_AcquiresTokenAsync()
         {
             // Arrange
@@ -132,6 +135,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         /// </summary>
         [DoNotRunOnLinux]
         [TestMethod]
+        [Ignore("Blocked: AppS2S mTLS endpoint does not yet support this auth scenario in ID4SLAB1. " +
+                "Error: AADSTS392189 (mTLS endpoint only supports SNI/federated identity). " +
+                "Remove this attribute once Bogdan/Qi enable mTLS on AppS2S.")]
         public async Task RefreshTokenFlow_WithSendCertificateOverMtls_AcquiresTokenAsync()
         {
             // Arrange
