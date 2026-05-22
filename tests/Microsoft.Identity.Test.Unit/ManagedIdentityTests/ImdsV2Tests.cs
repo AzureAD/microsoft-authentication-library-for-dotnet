@@ -366,13 +366,25 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
 
-                // Create app with V1 discovery (caches Imds), using KeyGuard keys required for mTLS PoP
-                var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, userAssignedIdentityId, userAssignedId, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard, imdsVersion: ImdsVersion.V2).ConfigureAwait(false);
+                // Create app WITHOUT running discovery yet
+                var managedIdentityApp = await CreateManagedIdentityAsync(
+                    httpManager, userAssignedIdentityId, userAssignedId,
+                    addProbeMock: false,
+                    addSourceCheck: false,
+                    managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard,
+                    imdsVersion: ImdsVersion.V2).ConfigureAwait(false);
 
-                // Add IMDSv2 mocks for mTLS PoP request (CSR + cert + token)
+                // Regression test for issue #6024:
+                // Azure SDK calls GetManagedIdentitySourceAsync first, which probes IMDSv1 and caches "Imds".
+                httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V1, userAssignedIdentityId, userAssignedId));
+                var sourceResult = await (managedIdentityApp as ManagedIdentityApplication)
+                    .GetManagedIdentitySourceAsync(ManagedIdentityTests.ImdsProbesCancellationToken)
+                    .ConfigureAwait(false);
+                Assert.AreEqual(ManagedIdentitySource.Imds, sourceResult.Source);
+
+                // Now an mTLS PoP request should route to IMDSv2 despite v1 being cached.
                 AddMocksToGetEntraToken(httpManager, userAssignedIdentityId, userAssignedId);
 
-                // mTLS PoP should route to IMDSv2 even though discovery cached Imds (v1)
                 var result = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .WithMtlsProofOfPossession()
                     .WithAttestationSupport()
