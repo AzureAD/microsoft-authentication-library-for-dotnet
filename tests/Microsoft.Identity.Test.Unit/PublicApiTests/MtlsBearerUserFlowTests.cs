@@ -136,6 +136,9 @@ namespace Microsoft.Identity.Test.Unit
                         ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
                         ExpectedPostData = new Dictionary<string, string>
                         {
+                            { OAuth2Parameter.ClientId, TestConstants.ClientId },
+                            { OAuth2Parameter.GrantType, OAuth2GrantType.JwtBearer },
+                            { OAuth2Parameter.RequestedTokenUse, OAuth2RequestedTokenUse.OnBehalfOf },
                             { OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtBearer },
                         },
                         // client_assertion value is a signed JWT — assert presence only, not value
