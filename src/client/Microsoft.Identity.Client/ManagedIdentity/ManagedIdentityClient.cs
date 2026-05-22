@@ -159,7 +159,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
                 var result = new ManagedIdentitySourceResult(ManagedIdentitySource.Imds);
 
-                // Fetch compute metadata to determine mTLS PoP support
+#if !NET462
+                // Fetch compute metadata to determine mTLS PoP support (not available on .NET Framework 4.6.2)
                 var computeMetadata = await ImdsComputeMetadataManager.GetComputeMetadataAsync(
                     requestContext.ServiceBundle.HttpManager,
                     requestContext.Logger,
@@ -167,6 +168,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
                 result.IsMtlsPopSupportedByHost = ImdsComputeMetadataManager.IsMtlsPopSupported(computeMetadata);
                 requestContext.Logger.Info($"[Managed Identity] mTLS PoP supported by host: {result.IsMtlsPopSupportedByHost}");
+#endif
 
                 return CacheDiscoveryResult(result);
             }
