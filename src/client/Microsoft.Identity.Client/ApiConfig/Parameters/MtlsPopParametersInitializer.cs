@@ -66,10 +66,11 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
             }
 
             // Case 2 – Only cert-capable credentials implement this capability interface.
-            // Guarded by SendCertificateOverMtls == true (same as Case 1) to avoid invoking
-            // the assertion callback on every request for apps that don't opt into mTLS.
-            if (serviceBundle.Config.CertificateOptions?.SendCertificateOverMtls == true &&
-                serviceBundle.Config.ClientCredential is IClientSignedAssertionProvider signedProvider)
+            // No SendCertificateOverMtls guard here: the TokenBindingCertificate pattern is a
+            // separate opt-in mechanism where the assertion delegate signals mTLS intent by
+            // returning a non-null cert. GetAssertionAsync is called once per request; the
+            // cert is only set if the delegate actually returns one.
+            if (serviceBundle.Config.ClientCredential is IClientSignedAssertionProvider signedProvider)
             {
                 var opts = CreateAssertionRequestOptions(tokenParameters, serviceBundle, ct);
 
