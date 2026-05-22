@@ -105,6 +105,15 @@ namespace Microsoft.Identity.Client.Internal
                         Cache.CacheLevel.None,
                         logger,
                         apiEvent.TokenType);
+
+                    serviceBundle.PlatformProxy.OtelInstrumentation.LogRemainingTokenLifetime(
+                        serviceBundle.PlatformProxy.GetProductName(),
+                        apiEvent.ApiId,
+                        TokenSource.IdentityProvider,
+                        Cache.CacheLevel.None,
+                        CacheRefreshReason.ProactivelyRefreshed,
+                        apiEvent.TokenType,
+                        authResult.ExpiresOn);
                 }
                 catch (MsalServiceException ex)
                 {

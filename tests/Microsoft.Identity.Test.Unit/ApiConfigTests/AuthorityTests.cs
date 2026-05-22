@@ -27,6 +27,11 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         private static readonly Authority s_b2cAuthority = Authority.CreateAuthority(TestConstants.B2CAuthority, true);
         private static readonly Authority s_commonNetAuthority = Authority.CreateAuthority(TestConstants.PrefCacheAuthorityCommonTenant, true);
 
+        private static readonly Authority s_consumersTenantAuthority =
+            Authority.CreateAuthority(TestConstants.AuthorityConsumersTenant, true);
+        private static readonly Authority s_consumerTidAuthority =
+            Authority.CreateAuthority(TestConstants.AuthorityConsumerTidTenant, true);
+
         private MockHttpAndServiceBundle _harness;
         private RequestContext _testRequestContext;
 
@@ -453,6 +458,41 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
             Assert.AreEqual(app.AuthorityInfo.AuthorityType.ToString(), authorityType);
         }
 
+        /// <summary>
+        /// Regression test for https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5951
+        /// When WithTenantId is called with a real tenant (MSA GUID or "consumers" alias) at request level,
+        /// it should be honored regardless of the app-level authority. Only "common" and "organizations"
+        /// are truly tenantless and are ignored at request level.
+        /// </summary>
+        [TestMethod]
+        [DataRow(TestConstants.AuthorityUtidTenant, TestConstants.AuthorityConsumerTidTenant, TestConstants.MsaTenantId,
+            DisplayName = "AppSpecificTenant_RequestMsaGuid_MsaGuidWins")]
+        [DataRow(TestConstants.AuthorityCommonTenant, TestConstants.AuthorityConsumerTidTenant, TestConstants.MsaTenantId,
+            DisplayName = "AppCommon_RequestMsaGuid_MsaGuidWins")]
+        [DataRow(TestConstants.AuthorityUtidTenant, TestConstants.AuthorityConsumersTenant, TestConstants.Consumers,
+            DisplayName = "AppSpecificTenant_RequestConsumersAlias_ConsumersWins")]
+        [DataRow(TestConstants.AuthorityCommonTenant, TestConstants.AuthorityConsumersTenant, TestConstants.Consumers,
+            DisplayName = "AppCommon_RequestConsumersAlias_ConsumersWins")]
+        [DataRow(TestConstants.AuthorityConsumerTidTenant, null, TestConstants.MsaTenantId,
+            DisplayName = "AppMsaGuid_NoRequestOverride_MsaGuidUsed")]
+        public void WithTenantId_ConsumerGuid_IsHonoredAtRequestLevel(
+            string configAuthorityUrl,
+            string requestAuthorityUrl,
+            string expectedTenantId)
+        {
+            var configAuthority = Authority.CreateAuthority(configAuthorityUrl, true);
+            Authority requestAuthority = requestAuthorityUrl == null
+                ? null
+                : Authority.CreateAuthority(requestAuthorityUrl, true);
+
+            VerifyAuthority(
+                configAuthority: configAuthority,
+                requestAuthority: requestAuthority,
+                account: null,
+                expectedTenantId: expectedTenantId,
+                _testRequestContext);
+        }
+
         private static void VerifyAuthority(
             Authority configAuthority,
             Authority requestAuthority,
@@ -465,6 +505,25 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
             requestContext.ServiceBundle.Config.MultiCloudSupportEnabled = multiCloudSupport;
             var resultAuthority = Authority.CreateAuthorityForRequestAsync(requestContext, requestAuthority?.AuthorityInfo, account).Result;
             Assert.AreEqual(expectedTenantId, resultAuthority.TenantId);
+        }
+
+        [TestMethod]
+        public void ValidatedEnvironmentsCache_IsCaseInsensitive()
+        {
+            // Act - add an uppercase hostname directly into the internal cache
+            AuthorityManager.s_validatedEnvironments.TryAdd("LOGIN.MICROSOFTONLINE.COM", 0);
+
+            // Assert - the lowercase variant must be found, proving OrdinalIgnoreCase is in effect.
+            // If the comparer were case-sensitive (the default), this would return false and the test
+            // would fail, catching any regression where StringComparer.OrdinalIgnoreCase is removed.
+            Assert.IsTrue(
+                AuthorityManager.s_validatedEnvironments.ContainsKey("login.microsoftonline.com"),
+                "s_validatedEnvironments must use OrdinalIgnoreCase — hostnames are case-insensitive.");
+
+            // Verify a completely different host is not found
+            Assert.IsFalse(
+                AuthorityManager.s_validatedEnvironments.ContainsKey("login.windows.net"),
+                "A different host should not be considered validated.");
         }
     }
 }

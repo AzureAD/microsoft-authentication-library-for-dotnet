@@ -1,10 +1,11 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System.Threading;
 using System.Threading.Tasks;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;
@@ -98,7 +99,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
                         MsalErrorMessage.MtlsCertificateNotProvidedMessage);
                 }
 
-                InitMtlsPopParameters(p, certCred.Certificate, serviceBundle);
+                await InitMtlsPopParametersAsync(p, certCred.Certificate, serviceBundle, ct).ConfigureAwait(false);
                 return;
             }
 
@@ -117,7 +118,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
                         MsalErrorMessage.MtlsCertificateNotProvidedMessage);
                 }
 
-                InitMtlsPopParameters(p, ar.TokenBindingCertificate, serviceBundle);
+                await InitMtlsPopParametersAsync(p, ar.TokenBindingCertificate, serviceBundle, ct).ConfigureAwait(false);
                 return;
             }
 
@@ -146,21 +147,32 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
             };
         }
 
-        private static void InitMtlsPopParameters(
+        private static async Task InitMtlsPopParametersAsync(
             AcquireTokenCommonParameters p,
             X509Certificate2 cert,
-            IServiceBundle serviceBundle)
+            IServiceBundle serviceBundle,
+            CancellationToken ct = default)
         {
             // AAD only validation
             if (serviceBundle.Config.Authority.AuthorityInfo.AuthorityType == AuthorityType.Aad)
             {
                 string tenant = AuthorityInfo.GetFirstPathSegment(serviceBundle.Config.Authority.AuthorityInfo.CanonicalAuthority);
-                if (AadAuthority.IsCommonOrganizationsOrConsumersTenant(tenant))
+                if (AadAuthority.IsCommonOrOrganizationsTenant(tenant))
                 {
                     throw new MsalClientException(
                         MsalError.MissingTenantedAuthority,
                         MsalErrorMessage.MtlsNonTenantedAuthorityNotAllowedMessage);
                 }
+            }
+
+            // If the current operation supports the AfterCredentialEvaluation lifecycle hook,
+            // invoke it with the cert instead of replacing the operation. This enables
+            // composition (e.g., CDT + mTLS POP) where the operation handles both concerns.
+            if (p.AuthenticationOperation is IAuthenticationOperation3 op3)
+            {
+                await op3.AfterCredentialEvaluationAsync(new CredentialEvaluationContext(cert), ct).ConfigureAwait(false);
+                p.MtlsCertificate = cert;
+                return;
             }
 
             p.AuthenticationOperation = new MtlsPopAuthenticationOperation(cert);
@@ -169,3 +181,5 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
 
     }
 }
+
+

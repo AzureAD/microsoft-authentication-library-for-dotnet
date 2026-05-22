@@ -1138,3 +1138,17 @@ Microsoft.Identity.Client.AcquireTokenByUserFederatedIdentityCredentialParameter
 Microsoft.Identity.Client.AcquireTokenByUserFederatedIdentityCredentialParameterBuilder.WithSendX5C(bool withSendX5C) -> Microsoft.Identity.Client.AcquireTokenByUserFederatedIdentityCredentialParameterBuilder
 Microsoft.Identity.Client.IByUserFederatedIdentityCredential
 Microsoft.Identity.Client.IByUserFederatedIdentityCredential.AcquireTokenByUserFederatedIdentityCredential(System.Collections.Generic.IEnumerable<string> scopes, string username, string assertion) -> Microsoft.Identity.Client.AcquireTokenByUserFederatedIdentityCredentialParameterBuilder
+static Microsoft.Identity.Client.Extensibility.AbstractConfidentialClientAcquireTokenParameterBuilderExtension.WithAttributeTokens<T>(this Microsoft.Identity.Client.AbstractConfidentialClientAcquireTokenParameterBuilder<T> builder, System.Collections.Generic.IEnumerable<string> attributeTokens) -> T
+static Microsoft.Identity.Client.Extensibility.AbstractConfidentialClientAcquireTokenParameterBuilderExtension.WithExtraBodyParameters<T>(this Microsoft.Identity.Client.AbstractConfidentialClientAcquireTokenParameterBuilder<T> builder, System.Collections.Generic.Dictionary<string, System.Func<System.Threading.CancellationToken, System.Threading.Tasks.Task<string>>> extraBodyParams) -> T
+Microsoft.Identity.Client.AssertionRequestOptions.CorrelationId.get -> System.Guid
+Microsoft.Identity.Client.AssertionRequestOptions.CorrelationId.set -> void
+const Microsoft.Identity.Client.MsalError.InvalidCredentialMaterial = "invalid_credential_material" -> string
+Microsoft.Identity.Client.AppConfig.CertificateOptions.SendCertificateOverMtls.get -> bool
+Microsoft.Identity.Client.AppConfig.CertificateOptions.SendCertificateOverMtls.init -> void
+Microsoft.Identity.Client.CacheOptions.IsInternalCacheDisabled.get -> bool
+Microsoft.Identity.Client.CacheOptions.IsInternalCacheDisabled.set -> void
+Microsoft.Identity.Client.CacheRefreshReason.CacheDisabled = 5 -> Microsoft.Identity.Client.CacheRefreshReason
+Microsoft.Identity.Client.Extensibility.AuthenticationResultExtensions
+const Microsoft.Identity.Client.MsalError.InternalCacheDisabled = "internal_cache_disabled" -> string
+static Microsoft.Identity.Client.CacheOptions.DisableInternalCacheOptions.get -> Microsoft.Identity.Client.CacheOptions
+static Microsoft.Identity.Client.Extensibility.AuthenticationResultExtensions.GetRefreshToken(this Microsoft.Identity.Client.AuthenticationResult result) -> string

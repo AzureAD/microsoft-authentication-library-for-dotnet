@@ -98,7 +98,7 @@ namespace Microsoft.Identity.Client.Extensibility
                     if (trimmed.Any(char.IsWhiteSpace))
                     {
                         throw new ArgumentException(
-                            $"Attribute tokens must not contain whitespace. Invalid token: '{trimmed}'",
+                            "Attribute tokens must not contain whitespace.",
                             nameof(attributeTokens));
                     }
 
