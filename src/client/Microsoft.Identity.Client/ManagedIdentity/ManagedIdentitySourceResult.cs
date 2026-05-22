@@ -32,6 +32,17 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         public string ImdsFailureReason { get; set; }
 
         /// <summary>
+        /// Gets a value indicating whether the host VM supports mTLS Proof-of-Possession (PoP) tokens.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if the VM runs Windows and has a security profile indicating a Trusted VM (TVM)
+        /// or Confidential VM (CVM); <c>false</c> if the compute metadata could not be retrieved,
+        /// the VM is not Windows, or the VM does not have a TVM/CVM security profile.
+        /// This property is only meaningful when <see cref="Source"/> is <see cref="ManagedIdentitySource.Imds"/>.
+        /// </value>
+        public bool IsMtlsPopSupportedByHost { get; internal set; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="ManagedIdentitySourceResult"/> class.
         /// </summary>
         /// <param name="source">The detected managed identity source.</param>

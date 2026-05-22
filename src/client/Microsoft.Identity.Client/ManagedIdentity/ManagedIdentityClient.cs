@@ -156,7 +156,19 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             if (imdsV1Success)
             {
                 requestContext.Logger.Info("[Managed Identity] IMDS detected via v1 probe.");
-                return CacheDiscoveryResult(new ManagedIdentitySourceResult(ManagedIdentitySource.Imds));
+
+                var result = new ManagedIdentitySourceResult(ManagedIdentitySource.Imds);
+
+                // Fetch compute metadata to determine mTLS PoP support
+                var computeMetadata = await ImdsComputeMetadataManager.GetComputeMetadataAsync(
+                    requestContext.ServiceBundle.HttpManager,
+                    requestContext.Logger,
+                    cancellationToken).ConfigureAwait(false);
+
+                result.IsMtlsPopSupportedByHost = ImdsComputeMetadataManager.IsMtlsPopSupported(computeMetadata);
+                requestContext.Logger.Info($"[Managed Identity] mTLS PoP supported by host: {result.IsMtlsPopSupportedByHost}");
+
+                return CacheDiscoveryResult(result);
             }
 
             requestContext.Logger.Info($"[Managed Identity] {MsalErrorMessage.ManagedIdentityAllSourcesUnavailable}");

@@ -11,3 +11,4 @@ Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySourceResult.ImdsFailur
 *REMOVED*Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySourceResult.ImdsV1FailureReason.set -> void
 *REMOVED*Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySourceResult.ImdsV2FailureReason.get -> string
 *REMOVED*Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySourceResult.ImdsV2FailureReason.set -> void
+Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySourceResult.IsMtlsPopSupportedByHost.get -> bool

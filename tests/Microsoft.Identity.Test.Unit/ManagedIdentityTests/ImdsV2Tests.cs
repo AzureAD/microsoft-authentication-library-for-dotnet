@@ -128,6 +128,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 // Discovery probes V1 (succeeds) → Imds cached
                 httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V1, userAssignedIdentityId, userAssignedId));
+                httpManager.AddMockHandler(MockHelpers.MockImdsComputeMetadata());
 
                 if (addSourceCheck)
                 {
@@ -142,6 +143,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 // Discovery probes V1 (succeeds) → Imds cached; mTLS PoP requests are routed to IMDSv2 automatically
                 httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V1, userAssignedIdentityId, userAssignedId));
+                httpManager.AddMockHandler(MockHelpers.MockImdsComputeMetadata());
             }
 
             if (addSourceCheck)
@@ -377,10 +379,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 // Regression test for issue #6024:
                 // Azure SDK calls GetManagedIdentitySourceAsync first, which probes IMDSv1 and caches "Imds".
                 httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V1, userAssignedIdentityId, userAssignedId));
+                httpManager.AddMockHandler(MockHelpers.MockImdsComputeMetadata());
                 var sourceResult = await (managedIdentityApp as ManagedIdentityApplication)
                     .GetManagedIdentitySourceAsync(ManagedIdentityTests.ImdsProbesCancellationToken)
                     .ConfigureAwait(false);
                 Assert.AreEqual(ManagedIdentitySource.Imds, sourceResult.Source);
+                Assert.IsTrue(sourceResult.IsMtlsPopSupportedByHost);
 
                 // Now an mTLS PoP request should route to IMDSv2 despite v1 being cached.
                 AddMocksToGetEntraToken(httpManager, userAssignedIdentityId, userAssignedId);
@@ -461,8 +465,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
 
-                // Discovery probes V1 (succeeds)
+                // Discovery probes V1 (succeeds), then fetches compute metadata
                 httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V1));
+                httpManager.AddMockHandler(MockHelpers.MockImdsComputeMetadata());
 
                 await CreateManagedIdentityAsync(httpManager, addProbeMock: false).ConfigureAwait(false);
             }
@@ -514,6 +519,113 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
         #endregion Probe Tests
+
+        #region IsMtlsPopSupportedByHost Tests
+        [TestMethod]
+        public async Task IsMtlsPopSupportedByHost_WindowsTvm_ReturnsTrue()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
+
+                httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V1));
+                httpManager.AddMockHandler(MockHelpers.MockImdsComputeMetadata(osType: "Windows", securityType: "TrustedLaunch"));
+
+                var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, addProbeMock: false, addSourceCheck: false).ConfigureAwait(false);
+
+                var result = await (managedIdentityApp as ManagedIdentityApplication)
+                    .GetManagedIdentitySourceAsync(ManagedIdentityTests.ImdsProbesCancellationToken).ConfigureAwait(false);
+
+                Assert.AreEqual(ManagedIdentitySource.Imds, result.Source);
+                Assert.IsTrue(result.IsMtlsPopSupportedByHost);
+            }
+        }
+
+        [TestMethod]
+        public async Task IsMtlsPopSupportedByHost_WindowsCvm_ReturnsTrue()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
+
+                httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V1));
+                httpManager.AddMockHandler(MockHelpers.MockImdsComputeMetadata(osType: "Windows", securityType: "ConfidentialVM"));
+
+                var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, addProbeMock: false, addSourceCheck: false).ConfigureAwait(false);
+
+                var result = await (managedIdentityApp as ManagedIdentityApplication)
+                    .GetManagedIdentitySourceAsync(ManagedIdentityTests.ImdsProbesCancellationToken).ConfigureAwait(false);
+
+                Assert.AreEqual(ManagedIdentitySource.Imds, result.Source);
+                Assert.IsTrue(result.IsMtlsPopSupportedByHost);
+            }
+        }
+
+        [TestMethod]
+        public async Task IsMtlsPopSupportedByHost_Linux_ReturnsFalse()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
+
+                httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V1));
+                httpManager.AddMockHandler(MockHelpers.MockImdsComputeMetadata(osType: "Linux", securityType: "TrustedLaunch"));
+
+                var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, addProbeMock: false, addSourceCheck: false).ConfigureAwait(false);
+
+                var result = await (managedIdentityApp as ManagedIdentityApplication)
+                    .GetManagedIdentitySourceAsync(ManagedIdentityTests.ImdsProbesCancellationToken).ConfigureAwait(false);
+
+                Assert.AreEqual(ManagedIdentitySource.Imds, result.Source);
+                Assert.IsFalse(result.IsMtlsPopSupportedByHost);
+            }
+        }
+
+        [TestMethod]
+        public async Task IsMtlsPopSupportedByHost_WindowsNoSecurityProfile_ReturnsFalse()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
+
+                httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V1));
+                httpManager.AddMockHandler(MockHelpers.MockImdsComputeMetadata(osType: "Windows", securityType: null));
+
+                var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, addProbeMock: false, addSourceCheck: false).ConfigureAwait(false);
+
+                var result = await (managedIdentityApp as ManagedIdentityApplication)
+                    .GetManagedIdentitySourceAsync(ManagedIdentityTests.ImdsProbesCancellationToken).ConfigureAwait(false);
+
+                Assert.AreEqual(ManagedIdentitySource.Imds, result.Source);
+                Assert.IsFalse(result.IsMtlsPopSupportedByHost);
+            }
+        }
+
+        [TestMethod]
+        public async Task IsMtlsPopSupportedByHost_ComputeMetadata404_ReturnsFalse()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
+
+                httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V1));
+                httpManager.AddMockHandler(MockHelpers.MockImdsComputeMetadataNotFound());
+
+                var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, addProbeMock: false, addSourceCheck: false).ConfigureAwait(false);
+
+                var result = await (managedIdentityApp as ManagedIdentityApplication)
+                    .GetManagedIdentitySourceAsync(ManagedIdentityTests.ImdsProbesCancellationToken).ConfigureAwait(false);
+
+                Assert.AreEqual(ManagedIdentitySource.Imds, result.Source);
+                Assert.IsFalse(result.IsMtlsPopSupportedByHost);
+            }
+        }
+        #endregion IsMtlsPopSupportedByHost Tests
 
         #region Fallback Behavior Tests
         // Verifies non-mTLS request after IMDS detection uses IMDSv1 (Bearer),

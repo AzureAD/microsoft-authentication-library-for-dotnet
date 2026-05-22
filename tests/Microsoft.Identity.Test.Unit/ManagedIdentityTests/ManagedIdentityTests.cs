@@ -69,8 +69,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 if (managedIdentitySource == ManagedIdentitySource.Imds)
                 {
-                    // Discovery probes V1 only
+                    // Discovery probes V1 only, then fetches compute metadata
                     httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V1));
+                    httpManager.AddMockHandler(MockHelpers.MockImdsComputeMetadata());
                 }
 
                 var miSourceResult = await mi.GetManagedIdentitySourceAsync(ImdsProbesCancellationToken).ConfigureAwait(false);
