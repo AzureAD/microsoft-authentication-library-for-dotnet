@@ -45,6 +45,21 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             long totalDurationInMs,
             string rawStsErrorCode = null);
 
+        internal void IncrementFailureCounter(
+            string platform,
+            string errorCode,
+            ApiEvent.ApiIds apiId,
+            string callerSdkId,
+            string callerSdkVersion,
+            CacheRefreshReason cacheRefreshReason,
+            int tokenType,
+            string rawStsErrorCode = null);
+
+        internal void LogFailureHttpDuration(
+            string platform,
+            ApiEvent apiEvent,
+            int httpStatusCode);
+
         internal void LogRemainingTokenLifetime(
             string platform,
             ApiEvent.ApiIds apiId,

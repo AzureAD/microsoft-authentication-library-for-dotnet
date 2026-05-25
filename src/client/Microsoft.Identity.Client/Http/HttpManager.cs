@@ -259,7 +259,6 @@ namespace Microsoft.Identity.Client.Http
                     using (HttpResponseMessage responseMessage =
                         await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false))
                     {
-                        LastRequestDurationInMs = sw.ElapsedMilliseconds;
                         logger.Verbose(() => $"[HttpManager] Received response. Status code: {responseMessage.StatusCode}. ");
 
                         HttpResponse returnValue = await CreateResponseAsync(responseMessage).ConfigureAwait(false);
@@ -267,10 +266,9 @@ namespace Microsoft.Identity.Client.Http
                         return returnValue;
                     }
                 }
-                catch
+                finally
                 {
                     LastRequestDurationInMs = sw.ElapsedMilliseconds;
-                    throw;
                 }
             }
         }

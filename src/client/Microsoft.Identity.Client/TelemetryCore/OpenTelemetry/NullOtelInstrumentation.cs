@@ -50,6 +50,25 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             // No op
         }
 
+        public void IncrementFailureCounter(string platform,
+            string errorCode,
+            ApiEvent.ApiIds apiId,
+            string callerSdkId,
+            string callerSdkVersion,
+            CacheRefreshReason cacheRefreshReason,
+            int tokenType,
+            string rawStsErrorCode = null)
+        {
+            // No op
+        }
+
+        public void LogFailureHttpDuration(string platform,
+            ApiEvent apiEvent,
+            int httpStatusCode)
+        {
+            // No op
+        }
+
         void IOtelInstrumentation.IncrementSuccessCounter(string platform, 
             ApiEvent.ApiIds apiId,
             string callerSdkId,

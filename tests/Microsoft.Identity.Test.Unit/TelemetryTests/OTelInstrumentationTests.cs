@@ -81,8 +81,8 @@ namespace Microsoft.Identity.Test.Unit
                 // V1 histograms emitted, V2 must not be
                 CollectionAssert.Contains(metricNames, "MsalTotalDuration.1A");
                 CollectionAssert.Contains(metricNames, "MsalDurationInHttp.1A");
-                CollectionAssert.DoesNotContain(metricNames, "MsalTotalDuration.2");
-                CollectionAssert.DoesNotContain(metricNames, "MsalDurationInHttp.2");
+                CollectionAssert.DoesNotContain(metricNames, "MsalTotalDurationV2.1A");
+                CollectionAssert.DoesNotContain(metricNames, "MsalDurationInHttpV2.1A");
 
                 VerifyMetrics(7, _exportedMetrics, 2, 2);
             }
@@ -104,15 +104,15 @@ namespace Microsoft.Identity.Test.Unit
                 // V1 histograms emitted, V2 must not be
                 CollectionAssert.Contains(metricNames, "MsalTotalDuration.1A");
                 CollectionAssert.Contains(metricNames, "MsalDurationInHttp.1A");
-                CollectionAssert.DoesNotContain(metricNames, "MsalTotalDuration.2");
-                CollectionAssert.DoesNotContain(metricNames, "MsalDurationInHttp.2");
+                CollectionAssert.DoesNotContain(metricNames, "MsalTotalDurationV2.1A");
+                CollectionAssert.DoesNotContain(metricNames, "MsalDurationInHttpV2.1A");
 
                 VerifyMetrics(7, _exportedMetrics, 2, 2);
             }
         }
 
         [TestMethod]
-        [Description("MSAL_ENABLE_EXTENDED_TOKEN_METRICS opt-in emits MsalTotalDuration.2 and MsalDurationInHttp.2 instead of V1 equivalents.")]
+        [Description("MSAL_ENABLE_EXTENDED_TOKEN_METRICS opt-in emits MsalTotalDurationV2.1A and MsalDurationInHttpV2.1A instead of V1 equivalents.")]
         public async Task AcquireToken_WithExtendedMetrics_EmitsV2HistogramsAsync()
         {
             using (new EnvVariableContext())
@@ -123,11 +123,7 @@ namespace Microsoft.Identity.Test.Unit
                 CreateApplication();
                 await AcquireTokenSuccessAsync().ConfigureAwait(false);
 
-                // Inline the service-exception path with a small mock delay so the request stopwatch
-                // measures >= 1 ms. LogFailureMetrics gates MsalTotalDuration.2 on totalDurationInMs > 0;
-                // sub-ms paths get truncated to 0 and skipped, causing flaky "no Succeeded=false point".
-                var failureHandler = _harness.HttpManager.AddTokenResponse(TokenResponseType.InvalidClient);
-                failureHandler.AdditionalRequestValidation = _ => Thread.Sleep(2);
+                _harness.HttpManager.AddTokenResponse(TokenResponseType.InvalidClient);
                 await AssertException.TaskThrowsAsync<MsalServiceException>(
                     () => _cca.AcquireTokenForClient(TestConstants.s_scopeForAnotherResource)
                         .WithExtraQueryParameters(extraQueryParams)
@@ -140,33 +136,40 @@ namespace Microsoft.Identity.Test.Unit
                 var metricNames = _exportedMetrics.Select(m => m.Name).ToList();
 
                 // V2 histograms emitted instead of V1
-                CollectionAssert.Contains(metricNames, "MsalTotalDuration.2");
-                CollectionAssert.Contains(metricNames, "MsalDurationInHttp.2");
+                CollectionAssert.Contains(metricNames, "MsalTotalDurationV2.1A");
+                CollectionAssert.Contains(metricNames, "MsalDurationInHttpV2.1A");
                 CollectionAssert.DoesNotContain(metricNames, "MsalTotalDuration.1A");
                 CollectionAssert.DoesNotContain(metricNames, "MsalDurationInHttp.1A");
 
-                // MsalTotalDuration.2 has Succeeded=true for the IDP success and Succeeded=false for the failure
-                var totalDurationV2 = _exportedMetrics.Single(m => m.Name == "MsalTotalDuration.2");
+                // MsalTotalDurationV2.1A has Succeeded=true for the IDP success and Succeeded=false for the failure
+                var totalDurationV2 = _exportedMetrics.Single(m => m.Name == "MsalTotalDurationV2.1A");
                 bool hasSuccessPoint = false, hasFailurePoint = false;
                 foreach (var point in totalDurationV2.GetMetricPoints())
                 {
                     if ((bool)GetTagValue(point.Tags, TelemetryConstants.Succeeded))
+                    {
                         hasSuccessPoint = true;
+                    }
                     else
+                    {
                         hasFailurePoint = true;
+                        // No token was acquired on failure, so TokenSource is empty.
+                        Assert.AreEqual(string.Empty, GetTagValue(point.Tags, TelemetryConstants.TokenSource),
+                            "MsalTotalDurationV2.1A failure point should have an empty TokenSource");
+                    }
                 }
-                Assert.IsTrue(hasSuccessPoint, "MsalTotalDuration.2 should have a point with Succeeded=true");
-                Assert.IsTrue(hasFailurePoint, "MsalTotalDuration.2 should have a point with Succeeded=false");
+                Assert.IsTrue(hasSuccessPoint, "MsalTotalDurationV2.1A should have a point with Succeeded=true");
+                Assert.IsTrue(hasFailurePoint, "MsalTotalDurationV2.1A should have a point with Succeeded=false");
 
-                // MsalDurationInHttp.2 has HttpStatusCode=200 from the IDP success
-                var httpDurationV2 = _exportedMetrics.Single(m => m.Name == "MsalDurationInHttp.2");
+                // MsalDurationInHttpV2.1A has HttpStatusCode=200 from the IDP success
+                var httpDurationV2 = _exportedMetrics.Single(m => m.Name == "MsalDurationInHttpV2.1A");
                 bool has200 = false;
                 foreach (var point in httpDurationV2.GetMetricPoints())
                 {
                     if ((int)GetTagValue(point.Tags, TelemetryConstants.HttpStatusCode) == 200)
                         has200 = true;
                 }
-                Assert.IsTrue(has200, "MsalDurationInHttp.2 should have a point with HttpStatusCode=200 for the IDP success");
+                Assert.IsTrue(has200, "MsalDurationInHttpV2.1A should have a point with HttpStatusCode=200 for the IDP success");
 
                 VerifyMetrics(7, _exportedMetrics, 2, 2);
             }
@@ -262,12 +265,12 @@ namespace Microsoft.Identity.Test.Unit
                 var metricNames = _exportedMetrics.Select(m => m.Name).ToList();
                 CollectionAssert.Contains(metricNames, "MsalDurationInHttp.1A",
                     "Background refresh HTTP duration must be recorded in MsalDurationInHttp.1A");
-                CollectionAssert.DoesNotContain(metricNames, "MsalDurationInHttp.2");
+                CollectionAssert.DoesNotContain(metricNames, "MsalDurationInHttpV2.1A");
             }
         }
 
         [TestMethod]
-        [Description("Background proactive refresh success with extended metrics records HTTP duration in MsalDurationInHttp.2 " +
+        [Description("Background proactive refresh success with extended metrics records HTTP duration in MsalDurationInHttpV2.1A " +
             "even when the foreground request was served from cache with no HTTP call.")]
         public async Task ProactiveTokenRefresh_Success_WithExtendedMetrics_RecordsV2HttpDurationAsync()
         {
@@ -295,13 +298,13 @@ namespace Microsoft.Identity.Test.Unit
                 TestCommon.YieldTillSatisfied(() =>
                 {
                     s_meterProvider.ForceFlush();
-                    return _exportedMetrics.Any(m => m.Name == "MsalDurationInHttp.2");
+                    return _exportedMetrics.Any(m => m.Name == "MsalDurationInHttpV2.1A");
                 });
 
-                // MsalDurationInHttp.2 must be present — it can only come from the background IDP call
+                // MsalDurationInHttpV2.1A must be present — it can only come from the background IDP call
                 // since the foreground request made no HTTP call. V1 must not be emitted.
-                var httpDurationV2 = _exportedMetrics.SingleOrDefault(m => m.Name == "MsalDurationInHttp.2");
-                Assert.IsNotNull(httpDurationV2, "Background refresh HTTP duration must be recorded in MsalDurationInHttp.2");
+                var httpDurationV2 = _exportedMetrics.SingleOrDefault(m => m.Name == "MsalDurationInHttpV2.1A");
+                Assert.IsNotNull(httpDurationV2, "Background refresh HTTP duration must be recorded in MsalDurationInHttpV2.1A");
                 CollectionAssert.DoesNotContain(
                     _exportedMetrics.Select(m => m.Name).ToList(),
                     "MsalDurationInHttp.1A");
@@ -312,7 +315,7 @@ namespace Microsoft.Identity.Test.Unit
                     if ((int)GetTagValue(point.Tags, TelemetryConstants.HttpStatusCode) == 200)
                         has200 = true;
                 }
-                Assert.IsTrue(has200, "MsalDurationInHttp.2 should have a point with HttpStatusCode=200 from the background success");
+                Assert.IsTrue(has200, "MsalDurationInHttpV2.1A should have a point with HttpStatusCode=200 from the background success");
             }
         }
 
@@ -496,8 +499,8 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        [Description("Background proactive refresh failure with extended metrics records MsalDurationInHttp.2 " +
-            "with the HTTP status code but does not emit MsalTotalDuration.2 for the background failure path.")]
+        [Description("Background proactive refresh failure with extended metrics records MsalDurationInHttpV2.1A " +
+            "with the HTTP status code but does not emit MsalTotalDurationV2.1A for the background failure path.")]
         public async Task ProactiveTokenRefresh_AadUnavailable_WithExtendedMetrics_RecordsHttpStatusCodeNotTotalDurationAsync()
         {
             using (new EnvVariableContext())
@@ -546,29 +549,30 @@ namespace Microsoft.Identity.Test.Unit
                 s_meterProvider.ForceFlush();
                 VerifyMetrics(6, _exportedMetrics, 3, 1);
 
-                // MsalTotalDuration.2 should have no Succeeded=false point from the background path —
-                // background failure passes totalDurationInMs=0 which is skipped by the guard in LogFailureMetrics
-                var totalDurationV2 = _exportedMetrics.FirstOrDefault(m => m.Name == "MsalTotalDuration.2");
+                // MsalTotalDurationV2.1A should have no Succeeded=false point from the background path —
+                // background failures call LogBackgroundFailureMetrics, which does not record total duration
+                // (the foreground user already received their token from cache).
+                var totalDurationV2 = _exportedMetrics.FirstOrDefault(m => m.Name == "MsalTotalDurationV2.1A");
                 if (totalDurationV2 != null)
                 {
                     foreach (var point in totalDurationV2.GetMetricPoints())
                     {
                         Assert.IsTrue(
                             (bool)GetTagValue(point.Tags, TelemetryConstants.Succeeded),
-                            "MsalTotalDuration.2 should not record Succeeded=false from the background path");
+                            "MsalTotalDurationV2.1A should not record Succeeded=false from the background path");
                     }
                 }
 
-                // MsalDurationInHttp.2 should have a point with HttpStatusCode=503 from the background failure
-                var httpDurationV2 = _exportedMetrics.FirstOrDefault(m => m.Name == "MsalDurationInHttp.2");
-                Assert.IsNotNull(httpDurationV2, "MsalDurationInHttp.2 should be recorded for background failure with an HTTP status code");
+                // MsalDurationInHttpV2.1A should have a point with HttpStatusCode=503 from the background failure
+                var httpDurationV2 = _exportedMetrics.FirstOrDefault(m => m.Name == "MsalDurationInHttpV2.1A");
+                Assert.IsNotNull(httpDurationV2, "MsalDurationInHttpV2.1A should be recorded for background failure with an HTTP status code");
                 bool has503 = false;
                 foreach (var point in httpDurationV2.GetMetricPoints())
                 {
                     if ((int)GetTagValue(point.Tags, TelemetryConstants.HttpStatusCode) == 503)
                         has503 = true;
                 }
-                Assert.IsTrue(has503, "MsalDurationInHttp.2 should have a point with HttpStatusCode=503 from the background failure");
+                Assert.IsTrue(has503, "MsalDurationInHttpV2.1A should have a point with HttpStatusCode=503 from the background failure");
             }
         }
 
@@ -950,8 +954,8 @@ namespace Microsoft.Identity.Test.Unit
 
                         break;
 
-                    case "MsalTotalDuration.2":
-                        Trace.WriteLine("Verify the metrics captured for MsalTotalDuration.2 histogram.");
+                    case "MsalTotalDurationV2.1A":
+                        Trace.WriteLine("Verify the metrics captured for MsalTotalDurationV2.1A histogram.");
                         Assert.AreEqual(MetricType.Histogram, exportedItem.MetricType);
 
                         expectedTags.Add(TelemetryConstants.MsalVersion);
@@ -971,8 +975,8 @@ namespace Microsoft.Identity.Test.Unit
 
                         break;
 
-                    case "MsalDurationInHttp.2":
-                        Trace.WriteLine("Verify the metrics captured for MsalDurationInHttp.2 histogram.");
+                    case "MsalDurationInHttpV2.1A":
+                        Trace.WriteLine("Verify the metrics captured for MsalDurationInHttpV2.1A histogram.");
                         Assert.AreEqual(MetricType.Histogram, exportedItem.MetricType);
 
                         expectedTags.Add(TelemetryConstants.MsalVersion);

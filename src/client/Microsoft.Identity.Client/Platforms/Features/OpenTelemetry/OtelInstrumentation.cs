@@ -9,7 +9,6 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.TelemetryCore.OpenTelemetry;
-using Microsoft.Identity.Client;
 
 namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
 {
@@ -45,8 +44,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
         private const string DurationInHttpHistogramName = "MsalDurationInHttp.1A";
         private const string DurationInExtensionInMsHistogram = "MsalDurationInExtensionInMs.1B";
         private const string RemainingTokenLifetimeHistogramName = "MsalRemainingTokenLifetime.1A";
-        private const string TotalDurationV2HistogramName = "MsalTotalDuration.2";
-        private const string DurationInHttpV2HistogramName = "MsalDurationInHttp.2";
+        private const string TotalDurationV2HistogramName = "MsalTotalDurationV2.1A";
+        private const string DurationInHttpV2HistogramName = "MsalDurationInHttpV2.1A";
 
         /// <summary>
         /// Meter to hold the MSAL metrics.
@@ -320,9 +319,11 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             }
         }
 
+        // Foreground failure path: increments the failure counter, records V2 total duration,
+        // and records V2 HTTP duration. Mirrors LogSuccessMetrics on the success side.
         public void LogFailureMetrics(
             string platform,
-            string errorCode,   
+            string errorCode,
             ApiEvent apiEvent,
             string callerSdkId,
             string callerSdkVersion,
@@ -332,51 +333,85 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             long totalDurationInMs,
             string rawStsErrorCode = null)
         {
-            if (s_failureCounter.Value.Enabled)
+            IncrementFailureCounter(
+                platform,
+                errorCode,
+                apiEvent.ApiId,
+                callerSdkId,
+                callerSdkVersion,
+                cacheRefreshReason,
+                tokenType,
+                rawStsErrorCode);
+
+            if (_isExtendedMetricsEnabled && s_durationTotalV2.Value.Enabled)
             {
-                var tags = new TagList
-                {
-                    { TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion() },
-                    { TelemetryConstants.Platform, platform },
-                    { TelemetryConstants.ErrorCode, errorCode },
-                    { TelemetryConstants.ApiId, apiEvent.ApiId },
-                    { TelemetryConstants.CallerSdkId, callerSdkId ?? string.Empty + "," + callerSdkVersion ?? string.Empty },
-                    { TelemetryConstants.CacheRefreshReason, cacheRefreshReason },
-                    { TelemetryConstants.TokenType, tokenType }
-                };
-
-                if (!string.IsNullOrEmpty(rawStsErrorCode))
-                    tags.Add(TelemetryConstants.RawStsErrorCode, rawStsErrorCode);
-
-                s_failureCounter.Value.Add(1, in tags);
+                // TokenSource is empty on failure: no token was acquired, so no source applies.
+                s_durationTotalV2.Value.Record(totalDurationInMs,
+                    new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
+                    new(TelemetryConstants.Platform, platform),
+                    new(TelemetryConstants.ApiId, apiEvent.ApiId),
+                    new(TelemetryConstants.TokenSource, string.Empty),
+                    new(TelemetryConstants.CacheLevel, string.Empty),
+                    new(TelemetryConstants.CacheRefreshReason, apiEvent.CacheInfo),
+                    new(TelemetryConstants.TokenType, apiEvent.TokenType),
+                    new(TelemetryConstants.ErrorCode, errorCode),
+                    new(TelemetryConstants.Succeeded, false));
             }
 
-            if (_isExtendedMetricsEnabled)
-            {
-                if (totalDurationInMs > 0 && s_durationTotalV2.Value.Enabled)
-                {
-                    s_durationTotalV2.Value.Record(totalDurationInMs,
-                        new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
-                        new(TelemetryConstants.Platform, platform),
-                        new(TelemetryConstants.ApiId, apiEvent.ApiId),
-                        new(TelemetryConstants.TokenSource, apiEvent.TokenSource),
-                        new(TelemetryConstants.CacheLevel, string.Empty),
-                        new(TelemetryConstants.CacheRefreshReason, apiEvent.CacheInfo),
-                        new(TelemetryConstants.TokenType, apiEvent.TokenType),
-                        new(TelemetryConstants.ErrorCode, errorCode),
-                        new(TelemetryConstants.Succeeded, false));
-                }
+            LogFailureHttpDuration(platform, apiEvent, httpStatusCode);
+        }
 
-                bool isTimeout = string.Equals(errorCode, MsalError.RequestTimeout, StringComparison.OrdinalIgnoreCase);
-                if ((httpStatusCode > 0 || (isTimeout && apiEvent.DurationInHttpInMs > 0)) && s_durationInHttpV2.Value.Enabled)
-                {
-                    s_durationInHttpV2.Value.Record(apiEvent.DurationInHttpInMs,
-                        new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
-                        new(TelemetryConstants.Platform, platform),
-                        new(TelemetryConstants.ApiId, apiEvent.ApiId),
-                        new(TelemetryConstants.TokenType, apiEvent.TokenType),
-                        new(TelemetryConstants.HttpStatusCode, httpStatusCode));
-                }
+        public void IncrementFailureCounter(
+            string platform,
+            string errorCode,
+            ApiEvent.ApiIds apiId,
+            string callerSdkId,
+            string callerSdkVersion,
+            CacheRefreshReason cacheRefreshReason,
+            int tokenType,
+            string rawStsErrorCode = null)
+        {
+            if (!s_failureCounter.Value.Enabled)
+                return;
+
+            var tags = new TagList
+            {
+                { TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion() },
+                { TelemetryConstants.Platform, platform },
+                { TelemetryConstants.ErrorCode, errorCode },
+                { TelemetryConstants.ApiId, apiId },
+                { TelemetryConstants.CallerSdkId, callerSdkId ?? string.Empty + "," + callerSdkVersion ?? string.Empty },
+                { TelemetryConstants.CacheRefreshReason, cacheRefreshReason },
+                { TelemetryConstants.TokenType, tokenType }
+            };
+
+            if (!string.IsNullOrEmpty(rawStsErrorCode))
+                tags.Add(TelemetryConstants.RawStsErrorCode, rawStsErrorCode);
+
+            s_failureCounter.Value.Add(1, in tags);
+        }
+
+        // Records V2 HTTP duration on the failure path. V1 has no failure HTTP histogram,
+        // so this is a no-op when extended metrics are disabled. Mirrors LogSuccessHttpDuration.
+        // Recorded whenever an HTTP exchange produced measurable duration — includes responses
+        // (HttpStatusCode > 0) and pre-response failures like cancellations and connection
+        // errors (HttpStatusCode = 0), which operators can separate via the HttpStatusCode tag.
+        public void LogFailureHttpDuration(
+            string platform,
+            ApiEvent apiEvent,
+            int httpStatusCode)
+        {
+            if (!_isExtendedMetricsEnabled || !s_durationInHttpV2.Value.Enabled)
+                return;
+
+            if (apiEvent.DurationInHttpInMs > 0)
+            {
+                s_durationInHttpV2.Value.Record(apiEvent.DurationInHttpInMs,
+                    new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
+                    new(TelemetryConstants.Platform, platform),
+                    new(TelemetryConstants.ApiId, apiEvent.ApiId),
+                    new(TelemetryConstants.TokenType, apiEvent.TokenType),
+                    new(TelemetryConstants.HttpStatusCode, httpStatusCode));
             }
         }
 
