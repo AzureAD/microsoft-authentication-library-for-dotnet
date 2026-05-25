@@ -38,6 +38,34 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         private int _entryCount = 0;
         private static int s_entryCount = 0;
 
+        // Bounded-mode coordination. Eviction is single-threaded via a CAS flag
+        // (0 = idle, 1 = running). Other threads observing the threshold while
+        // eviction is running skip the trigger and let the in-progress pass do the work.
+        private int _evictionRunning = 0;
+        private static int s_evictionRunning = 0;
+
+        // Cached settings — derived once in the constructor so the save-path hot check
+        // is a single read of a bool plus an int comparison.
+        //
+        // Invariant for shared-cache mode (UseSharedCache == true):
+        // all accessors that share the static dictionary must be built with the same
+        // CacheOptions values for EnableAppCacheBounding and AppCacheMaxEntries.
+        // Mixing values across accessors over the same static cache would cause
+        // different accessors to disagree on the eviction threshold for shared data.
+        private readonly bool _boundedEnabled;
+        private readonly int _maxEntries;
+        private readonly int _lowWatermark;
+
+        // Sampled-eviction tuning. Kept conservative to bound per-eviction CPU and
+        // to keep the sampling cost independent of partition size. Note that the
+        // ReservoirScanCap intentionally biases reservoir picks toward the first 64
+        // entries in enumeration order for pathologically large single partitions —
+        // accepted trade-off for a constant-time per-sample cost. MSAL partition keys
+        // are highly specific (clientId + tenant + keyId + extras) so real partitions
+        // are tiny and the cap is essentially never hit in normal use.
+        private const int EvictionSampleSize = 8;
+        private const int ReservoirScanCap = 64;
+
         public int EntryCount => GetEntryCountRef();
        
         public InMemoryPartitionedAppTokenCacheAccessor(
@@ -57,6 +85,13 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
                 AccessTokenCacheDictionary = new ConcurrentDictionary<string, ConcurrentDictionary<string, MsalAccessTokenCacheItem>>();
                 AppMetadataDictionary = new ConcurrentDictionary<string, MsalAppMetadataCacheItem>();
             }
+
+            _boundedEnabled = _tokenCacheAccessorOptions.EnableAppCacheBounding
+                              && _tokenCacheAccessorOptions.AppCacheMaxEntries > 0;
+            _maxEntries = _tokenCacheAccessorOptions.AppCacheMaxEntries;
+            _lowWatermark = _boundedEnabled
+                ? Math.Max(1, (int)(_maxEntries * 0.95))
+                : 0;
         }
 
         #region Add
@@ -72,6 +107,13 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             if (added)
             {
                 Interlocked.Increment(ref GetEntryCountRef());
+
+                // Bounded-mode hot path: one bool read + one int comparison when disabled.
+                // Updates (added == false) don't change the count, so no need to re-check.
+                if (_boundedEnabled && GetEntryCountRef() > _maxEntries)
+                {
+                    TryEvict();
+                }
             }
             else
             {
@@ -256,11 +298,217 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             return ref _tokenCacheAccessorOptions.UseSharedCache ? ref s_entryCount : ref _entryCount;
         }
 
+        private ref int GetEvictionRunningRef()
+        {
+            return ref _tokenCacheAccessorOptions.UseSharedCache ? ref s_evictionRunning : ref _evictionRunning;
+        }
+
+        /// <summary>
+        /// Attempts to start a single eviction pass. If another thread is already evicting,
+        /// returns immediately — the in-progress pass will trim the cache, and subsequent
+        /// writes will trigger again if it is not enough.
+        /// </summary>
+        private void TryEvict()
+        {
+            if (Interlocked.CompareExchange(ref GetEvictionRunningRef(), 1, 0) != 0)
+            {
+                return;
+            }
+
+            try
+            {
+                EvictDown();
+            }
+            finally
+            {
+                Volatile.Write(ref GetEvictionRunningRef(), 0);
+            }
+        }
+
+        /// <summary>
+        /// Approximate eviction (Redis-style sampled LRU + expired-first preference).
+        /// Each sample picks <see cref="EvictionSampleSize"/> entries pseudo-randomly across partitions:
+        /// any expired sample is evicted immediately; otherwise the oldest by <c>CachedAt</c> is evicted.
+        /// Loops until <see cref="_lowWatermark"/> is reached or a safety cap fires.
+        /// </summary>
+        private void EvictDown()
+        {
+            int target = _lowWatermark;
+            int countBefore = GetEntryCountRef();
+            if (countBefore <= target)
+            {
+                return;
+            }
+
+            // Snapshot only non-empty partitions so samples don't waste iterations on drained ones.
+            string[] partitionKeys = SnapshotNonEmptyPartitionKeys();
+            if (partitionKeys.Length == 0)
+            {
+                return;
+            }
+
+            // Eviction runs single-threaded under the CAS flag, so a local Random is safe.
+            var rng = new Random();
+
+            // Generous cap: empty partitions accumulate as we evict, so allow extra iterations
+            // for misses. Still bounded \u2014 if we don't converge the next save re-triggers.
+            int iterCap = Math.Max(64, (GetEntryCountRef() - target) * 16);
+            int refreshesLeft = 4;
+            int iters = 0;
+
+            while (GetEntryCountRef() > target && iters++ < iterCap)
+            {
+                if (!TrySampleVictim(partitionKeys, rng, out var partition, out var key, out var item))
+                {
+                    // Sample landed entirely on empty partitions. Refresh the snapshot.
+                    if (refreshesLeft-- <= 0)
+                    {
+                        break;
+                    }
+
+                    partitionKeys = SnapshotNonEmptyPartitionKeys();
+                    if (partitionKeys.Length == 0)
+                    {
+                        break;
+                    }
+
+                    continue;
+                }
+
+                TryRemoveExact(partition, key, item);
+            }
+
+            int countAfter = GetEntryCountRef();
+            int evicted = countBefore - countAfter;
+            int capturedIters = iters;
+            _logger.Info(() =>
+                $"[Internal cache] Bounded app cache eviction trimmed {evicted} entries " +
+                $"(count: {countBefore} -> {countAfter}, target: {target}, max: {_maxEntries}, iterations: {capturedIters}).");
+        }
+
+        private string[] SnapshotNonEmptyPartitionKeys()
+        {
+            var list = new List<string>();
+            foreach (var kvp in AccessTokenCacheDictionary)
+            {
+                if (!kvp.Value.IsEmpty)
+                {
+                    list.Add(kvp.Key);
+                }
+            }
+            return list.ToArray();
+        }
+
+        /// <summary>
+        /// Picks <see cref="EvictionSampleSize"/> entries pseudo-randomly across partitions.
+        /// Returns the first expired entry encountered (expired-first preference), or the
+        /// oldest sampled entry by <c>CachedAt</c>. Returns <c>false</c> if no entry was sampled.
+        /// </summary>
+        private bool TrySampleVictim(
+            string[] partitionKeys,
+            Random rng,
+            out ConcurrentDictionary<string, MsalAccessTokenCacheItem> bestPartition,
+            out string bestKey,
+            out MsalAccessTokenCacheItem bestItem)
+        {
+            bestPartition = null;
+            bestKey = null;
+            bestItem = null;
+            DateTimeOffset oldestCachedAt = DateTimeOffset.MaxValue;
+
+            for (int i = 0; i < EvictionSampleSize; i++)
+            {
+                string pKey = partitionKeys[rng.Next(partitionKeys.Length)];
+                if (!AccessTokenCacheDictionary.TryGetValue(pKey, out var partition))
+                {
+                    continue;
+                }
+
+                if (!TryReservoirPick(partition, rng, out string itemKey, out MsalAccessTokenCacheItem item))
+                {
+                    continue;
+                }
+
+                // Expired-first: as soon as we see an expired sample, evict it.
+                if (item.IsExpiredWithBuffer())
+                {
+                    bestPartition = partition;
+                    bestKey = itemKey;
+                    bestItem = item;
+                    return true;
+                }
+
+                if (item.CachedAt < oldestCachedAt)
+                {
+                    oldestCachedAt = item.CachedAt;
+                    bestPartition = partition;
+                    bestKey = itemKey;
+                    bestItem = item;
+                }
+            }
+
+            return bestItem is not null;
+        }
+
+        /// <summary>
+        /// Picks one random entry from a partition using reservoir sampling, capped at
+        /// <see cref="ReservoirScanCap"/> to keep cost independent of partition size.
+        /// </summary>
+        private static bool TryReservoirPick(
+            ConcurrentDictionary<string, MsalAccessTokenCacheItem> partition,
+            Random rng,
+            out string pickedKey,
+            out MsalAccessTokenCacheItem pickedItem)
+        {
+            pickedKey = null;
+            pickedItem = null;
+            int n = 0;
+
+            foreach (var kvp in partition)
+            {
+                n++;
+                // Reservoir: replace with probability 1/n.
+                if (rng.Next(n) == 0)
+                {
+                    pickedKey = kvp.Key;
+                    pickedItem = kvp.Value;
+                }
+
+                if (n >= ReservoirScanCap)
+                {
+                    break;
+                }
+            }
+
+            return n > 0;
+        }
+
+        /// <summary>
+        /// Removes an entry only if the current value still matches <paramref name="expected"/>
+        /// (reference equality, since <see cref="MsalAccessTokenCacheItem"/> has no Equals override).
+        /// Prevents evicting a fresher entry that was concurrently re-saved under the same key.
+        /// </summary>
+        private bool TryRemoveExact(
+            ConcurrentDictionary<string, MsalAccessTokenCacheItem> partition,
+            string key,
+            MsalAccessTokenCacheItem expected)
+        {
+            var asCollection = (ICollection<KeyValuePair<string, MsalAccessTokenCacheItem>>)partition;
+            if (asCollection.Remove(new KeyValuePair<string, MsalAccessTokenCacheItem>(key, expected)))
+            {
+                Interlocked.Decrement(ref GetEntryCountRef());
+                return true;
+            }
+
+            return false;
+        }
+
         public static void ClearStaticCacheForTest()
         {
             s_accessTokenCacheDictionary.Clear();
             s_appMetadataDictionary.Clear();
             Interlocked.Exchange(ref s_entryCount, 0);
+            Interlocked.Exchange(ref s_evictionRunning, 0);
         }
     }
 }
