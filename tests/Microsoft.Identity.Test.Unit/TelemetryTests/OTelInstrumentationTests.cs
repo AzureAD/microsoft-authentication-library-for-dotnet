@@ -176,6 +176,82 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
+        [Description("Foreground failure without an HTTP call (MsalClientException from validation) records V2 total " +
+            "with Succeeded=false and empty TokenSource, but does NOT record V2 HTTP duration (no HTTP exchange occurred).")]
+        public async Task ForegroundFailure_NoHttpCall_WithExtendedMetrics_RecordsV2TotalButNotV2HttpAsync()
+        {
+            using (new EnvVariableContext())
+            using (_harness = CreateTestHarness())
+            {
+                Environment.SetEnvironmentVariable(OtelInstrumentation.EnableExtendedTokenMetricsEnvVariable, "true");
+                CreateApplication();
+
+                // null scope triggers MsalClientException from parameter validation — no HTTP exchange happens.
+                await AssertException.TaskThrowsAsync<MsalClientException>(
+                    () => _cca.AcquireTokenForClient(null)
+                        .WithExtraQueryParameters(extraQueryParams)
+                        .ExecuteAsync(CancellationToken.None)).ConfigureAwait(false);
+
+                s_meterProvider.ForceFlush();
+
+                // V2 total must record the failure point with empty TokenSource.
+                var totalDurationV2 = _exportedMetrics.FirstOrDefault(m => m.Name == "MsalTotalDurationV2.1A");
+                Assert.IsNotNull(totalDurationV2,
+                    "MsalTotalDurationV2.1A should be recorded for foreground failure even without an HTTP call.");
+
+                bool hasFailurePoint = false;
+                foreach (var point in totalDurationV2.GetMetricPoints())
+                {
+                    if (!(bool)GetTagValue(point.Tags, TelemetryConstants.Succeeded))
+                    {
+                        hasFailurePoint = true;
+                        Assert.AreEqual(string.Empty, GetTagValue(point.Tags, TelemetryConstants.TokenSource),
+                            "Failure point should have empty TokenSource (no token was acquired).");
+                    }
+                }
+                Assert.IsTrue(hasFailurePoint, "MsalTotalDurationV2.1A should have a Succeeded=false point.");
+
+                // V2 HTTP must NOT be recorded — no HTTP exchange occurred, so DurationInHttpInMs is 0.
+                var httpDurationV2 = _exportedMetrics.FirstOrDefault(m => m.Name == "MsalDurationInHttpV2.1A");
+                Assert.IsNull(httpDurationV2,
+                    "MsalDurationInHttpV2.1A should not be recorded when no HTTP call was made.");
+            }
+        }
+
+        [TestMethod]
+        [Description("Foreground failure with sub-millisecond total duration is still recorded on V2 total.")]
+        public async Task ForegroundFailure_SubMillisecond_WithExtendedMetrics_RecordsV2TotalAsync()
+        {
+            using (new EnvVariableContext())
+            using (_harness = CreateTestHarness())
+            {
+                Environment.SetEnvironmentVariable(OtelInstrumentation.EnableExtendedTokenMetricsEnvVariable, "true");
+                CreateApplication();
+
+                // MsalClientException from null scope is essentially synchronous and typically sub-ms.
+                await AssertException.TaskThrowsAsync<MsalClientException>(
+                    () => _cca.AcquireTokenForClient(null)
+                        .WithExtraQueryParameters(extraQueryParams)
+                        .ExecuteAsync(CancellationToken.None)).ConfigureAwait(false);
+
+                s_meterProvider.ForceFlush();
+
+                var totalDurationV2 = _exportedMetrics.FirstOrDefault(m => m.Name == "MsalTotalDurationV2.1A");
+                Assert.IsNotNull(totalDurationV2,
+                    "MsalTotalDurationV2.1A must be recorded for sub-ms foreground failures (no totalDurationInMs > 0 gate).");
+
+                bool hasFailurePoint = false;
+                foreach (var point in totalDurationV2.GetMetricPoints())
+                {
+                    if (!(bool)GetTagValue(point.Tags, TelemetryConstants.Succeeded))
+                        hasFailurePoint = true;
+                }
+                Assert.IsTrue(hasFailurePoint,
+                    "MsalTotalDurationV2.1A should have a Succeeded=false point even when totalDurationInMs is 0.");
+            }
+        }
+
+        [TestMethod]
         [Description("AT in cache, needs refresh. AAD responds well to Refresh.")]
         public async Task ProactiveTokenRefresh_ValidResponse_ClientCredential_Async()
         {
@@ -576,6 +652,46 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
+        [TestMethod]
+        [Description("Background proactive refresh failure on V1 (default — extended metrics disabled) increments " +
+            "MsalFailure but does not emit either V2 histogram. Guards against V2 leakage in the default configuration.")]
+        public async Task ProactiveTokenRefresh_BackgroundFailure_V1Default_NoV2MetricsAsync()
+        {
+            using (_harness = base.CreateTestHarness())
+            {
+                CreateApplication();
+                TokenCacheHelper.PopulateCache(_cca.AppTokenCacheInternal.Accessor, addSecondAt: false);
+                TestCommon.UpdateATWithRefreshOn(_cca.AppTokenCacheInternal.Accessor);
+
+                // Background refresh will fail with 503.
+                _harness.HttpManager.AddAllMocks(TokenResponseType.Invalid_AADUnavailable503);
+                _harness.HttpManager.AddTokenResponse(TokenResponseType.Invalid_AADUnavailable503);
+
+                // Foreground served from cache succeeds; background refresh fails fire-and-forget.
+                AuthenticationResult result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithExtraQueryParameters(extraQueryParams)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+                Assert.IsNotNull(result, "Foreground request should succeed from cache even though background refresh fails.");
+
+                TestCommon.YieldTillSatisfied(() => _harness.HttpManager.QueueSize == 0);
+                Thread.Sleep(1000);
+
+                s_meterProvider.ForceFlush();
+
+                // MsalFailure must include the background failure.
+                var failureMetric = _exportedMetrics.FirstOrDefault(m => m.Name == "MsalFailure");
+                Assert.IsNotNull(failureMetric, "MsalFailure should be incremented by the background failure.");
+
+                // V2 histograms must NOT be emitted because extended metrics are disabled.
+                var metricNames = _exportedMetrics.Select(m => m.Name).ToList();
+                CollectionAssert.DoesNotContain(metricNames, "MsalTotalDurationV2.1A",
+                    "MsalTotalDurationV2.1A must not be emitted when MSAL_ENABLE_EXTENDED_TOKEN_METRICS is unset.");
+                CollectionAssert.DoesNotContain(metricNames, "MsalDurationInHttpV2.1A",
+                    "MsalDurationInHttpV2.1A must not be emitted when MSAL_ENABLE_EXTENDED_TOKEN_METRICS is unset.");
+            }
+        }
+
         private async Task AcquireTokenSuccessAsync(bool withExtension = false)
         {
             _harness.HttpManager.AddInstanceDiscoveryMockHandler();
@@ -958,8 +1074,7 @@ namespace Microsoft.Identity.Test.Unit
                         Trace.WriteLine("Verify the metrics captured for MsalTotalDurationV2.1A histogram.");
                         Assert.AreEqual(MetricType.Histogram, exportedItem.MetricType);
 
-                        expectedTags.Add(TelemetryConstants.MsalVersion);
-                        expectedTags.Add(TelemetryConstants.Platform);
+                        expectedTags.Add(TelemetryConstants.MsalVersionPlatform);
                         expectedTags.Add(TelemetryConstants.ApiId);
                         expectedTags.Add(TelemetryConstants.TokenSource);
                         expectedTags.Add(TelemetryConstants.CacheLevel);
@@ -979,8 +1094,7 @@ namespace Microsoft.Identity.Test.Unit
                         Trace.WriteLine("Verify the metrics captured for MsalDurationInHttpV2.1A histogram.");
                         Assert.AreEqual(MetricType.Histogram, exportedItem.MetricType);
 
-                        expectedTags.Add(TelemetryConstants.MsalVersion);
-                        expectedTags.Add(TelemetryConstants.Platform);
+                        expectedTags.Add(TelemetryConstants.MsalVersionPlatform);
                         expectedTags.Add(TelemetryConstants.ApiId);
                         expectedTags.Add(TelemetryConstants.TokenType);
                         expectedTags.Add(TelemetryConstants.HttpStatusCode);

@@ -140,6 +140,11 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             _isExtendedMetricsEnabled = ReadExtendedMetricsEnvVar();
         }
 
+        // Combined MsalVersion + Platform tag value for V2 histograms and MsalRemainingTokenLifetime.
+        // Reduces dimension count vs. emitting them separately; downstream consumers split on ",".
+        private static string MsalVersionPlatformTag(string platform) =>
+            $"{MsalIdHelper.GetMsalVersion()},{platform}";
+
         // Aggregates the successful requests based on token source and cache refresh reason.
         // Counter, L1, L2, and extension are always emitted.
         // When the MSAL_ENABLE_EXTENDED_TOKEN_METRICS env var is not set: V1 total duration and V1 HTTP duration are emitted.
@@ -228,8 +233,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                 if (s_durationTotalV2.Value.Enabled)
                 {
                     s_durationTotalV2.Value.Record(authResultMetadata.DurationTotalInMs,
-                        new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
-                        new(TelemetryConstants.Platform, platform),
+                        new(TelemetryConstants.MsalVersionPlatform, MsalVersionPlatformTag(platform)),
                         new(TelemetryConstants.ApiId, apiId),
                         new(TelemetryConstants.TokenSource, authResultMetadata.TokenSource),
                         new(TelemetryConstants.CacheLevel, cacheLevel),
@@ -243,8 +247,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                 if (s_durationInHttpV2.Value.Enabled && authResultMetadata.TokenSource == TokenSource.IdentityProvider)
                 {
                     s_durationInHttpV2.Value.Record(authResultMetadata.DurationInHttpInMs,
-                        new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
-                        new(TelemetryConstants.Platform, platform),
+                        new(TelemetryConstants.MsalVersionPlatform, MsalVersionPlatformTag(platform)),
                         new(TelemetryConstants.ApiId, apiId),
                         new(TelemetryConstants.TokenType, authResultMetadata.TelemetryTokenType),
                         new(TelemetryConstants.HttpStatusCode, 200));
@@ -310,8 +313,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                 if (s_durationInHttpV2.Value.Enabled)
                 {
                     s_durationInHttpV2.Value.Record(authResultMetadata.DurationInHttpInMs,
-                        new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
-                        new(TelemetryConstants.Platform, platform),
+                        new(TelemetryConstants.MsalVersionPlatform, MsalVersionPlatformTag(platform)),
                         new(TelemetryConstants.ApiId, apiId),
                         new(TelemetryConstants.TokenType, authResultMetadata.TelemetryTokenType),
                         new(TelemetryConstants.HttpStatusCode, 200));
@@ -347,8 +349,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             {
                 // TokenSource is empty on failure: no token was acquired, so no source applies.
                 s_durationTotalV2.Value.Record(totalDurationInMs,
-                    new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
-                    new(TelemetryConstants.Platform, platform),
+                    new(TelemetryConstants.MsalVersionPlatform, MsalVersionPlatformTag(platform)),
                     new(TelemetryConstants.ApiId, apiEvent.ApiId),
                     new(TelemetryConstants.TokenSource, string.Empty),
                     new(TelemetryConstants.CacheLevel, string.Empty),
@@ -407,8 +408,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             if (apiEvent.DurationInHttpInMs > 0)
             {
                 s_durationInHttpV2.Value.Record(apiEvent.DurationInHttpInMs,
-                    new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
-                    new(TelemetryConstants.Platform, platform),
+                    new(TelemetryConstants.MsalVersionPlatform, MsalVersionPlatformTag(platform)),
                     new(TelemetryConstants.ApiId, apiEvent.ApiId),
                     new(TelemetryConstants.TokenType, apiEvent.TokenType),
                     new(TelemetryConstants.HttpStatusCode, httpStatusCode));
@@ -429,7 +429,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                 long remainingSeconds = Math.Max(0, (long)(expiresOn - DateTimeOffset.UtcNow).TotalSeconds);
 
                 s_remainingTokenLifetime.Value.Record(remainingSeconds,
-                    new(TelemetryConstants.MsalVersionPlatform, $"{MsalIdHelper.GetMsalVersion()},{platform}"),
+                    new(TelemetryConstants.MsalVersionPlatform, MsalVersionPlatformTag(platform)),
                     new(TelemetryConstants.ApiId, apiId),
                     new(TelemetryConstants.TokenSource, tokenSource),
                     new(TelemetryConstants.CacheLevel, cacheLevel),
