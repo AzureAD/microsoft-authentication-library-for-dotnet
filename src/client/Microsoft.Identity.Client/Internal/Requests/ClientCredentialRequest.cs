@@ -347,6 +347,16 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             AppTokenProviderResult externalToken = await ServiceBundle.Config.AppTokenProvider(appTokenProviderParameters).ConfigureAwait(false);
 
+            if (!string.IsNullOrEmpty(externalToken?.CacheKey))
+            {
+                if (AuthenticationRequestParameters.CacheKeyComponents == null)
+                {
+                    AuthenticationRequestParameters.CacheKeyComponents = new SortedList<string, string>();
+                }
+
+                AuthenticationRequestParameters.CacheKeyComponents[Constants.AppTokenProviderCacheKey] = externalToken.CacheKey;
+            }
+
             var tokenResponse = MsalTokenResponse.CreateFromAppProviderResponse(externalToken);
             tokenResponse.Scope = appTokenProviderParameters.Scopes.AsSingleString();
             tokenResponse.CorrelationId = appTokenProviderParameters.CorrelationId;

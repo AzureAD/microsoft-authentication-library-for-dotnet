@@ -152,7 +152,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public IEnumerable<string> PersistedCacheParameters => _commonParameters.AdditionalCacheParameters;
 
-        public SortedList<string, string> CacheKeyComponents {get; private set; }
+        public SortedList<string, string> CacheKeyComponents {get; internal set; }
         public bool? SendOfflineAccessScope { get; private set; }
 
         #region TODO REMOVE FROM HERE AND USE FROM SPECIFIC REQUEST PARAMETERS

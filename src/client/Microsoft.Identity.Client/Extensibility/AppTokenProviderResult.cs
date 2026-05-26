@@ -28,5 +28,13 @@ namespace Microsoft.Identity.Client.Extensibility
         /// </summary>
         /// <remarks>If not set, MSAL will set it to half of the expiry time if that time is longer than 2 hours.</remarks>
         public long? RefreshInSeconds { get; set; }
+
+        /// <summary>
+        /// An optional cache key that is added to the access token cache key, allowing the app token provider
+        /// to partition the cache. When provided, this value is stored in the request's
+        /// <c>CacheKeyComponents</c> under the key <c>"appTokenProviderKey"</c> and contributes to the
+        /// computed access token cache key.
+        /// </summary>
+        public string CacheKey { get; set; }
     }
 }
