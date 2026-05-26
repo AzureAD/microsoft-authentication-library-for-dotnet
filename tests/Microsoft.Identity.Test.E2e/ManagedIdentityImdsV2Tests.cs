@@ -61,6 +61,7 @@ namespace Microsoft.Identity.Test.E2E
         [RunOnAzureDevOps]
         [TestCategory("MI_E2E_ImdsV2_Attested")]
         [TestMethod]
+        [Ignore("Failing in the build pipeline due to infrastructure issue: AADSTS1000901 (token_not_after on the attestation cert is in the past). Re-enable once the IMDSv2 test pool cert is refreshed. Tracking: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/6032")]
         [DataRow(null /*SAMI*/, null, DisplayName = "AcquireToken_OnImdsV2_MtlsPoP_WithAttestation_Succeeds-SAMI")]
         [DataRow(UamiClientId, "clientid", DisplayName = "AcquireToken_OnImdsV2_MtlsPoP_WithAttestation_Succeeds-UAMI-ClientId")]
         public async Task AcquireToken_OnImdsV2_MtlsPoP_WithAttestation_Succeeds(string id, string idType)
@@ -110,6 +111,7 @@ namespace Microsoft.Identity.Test.E2E
         [RunOnAzureDevOps]
         [TestCategory("MI_E2E_ImdsV2")]
         [TestMethod]
+        [Ignore("Failing in the build pipeline due to infrastructure issue: AADSTS1000901 (token_not_after on the attestation cert is in the past). Re-enable once the IMDSv2 test pool cert is refreshed. Tracking: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/6032")]
         public async Task AcquireToken_OnImdsV2_MtlsPoP_GracefulDegradation_WhenCredentialGuardUnavailable()
         {
             if (!OperatingSystem.IsWindows())
@@ -155,6 +157,7 @@ namespace Microsoft.Identity.Test.E2E
         [RunOnAzureDevOps]
         [TestCategory("MI_E2E_ImdsV2_Attested")]
         [TestMethod]
+        [Ignore("Failing in the build pipeline due to infrastructure issue: AADSTS1000901 (token_not_after on the attestation cert is in the past). Re-enable once the IMDSv2 test pool cert is refreshed. Tracking: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/6032")]
         public async Task AcquireTokenAndCallAKV_OnImdsV2_MtlsPoP_WithAttestation_Succeeds()
         {
             if (!OperatingSystem.IsWindows())
