@@ -100,8 +100,8 @@ namespace Microsoft.Identity.Client.Internal
                         apiEvent.ApiId,
                         callerSdkId,
                         callerSdkVersion,
-                        TokenSource.IdentityProvider, 
-                        CacheRefreshReason.ProactivelyRefreshed, 
+                        TokenSource.IdentityProvider,
+                        CacheRefreshReason.ProactivelyRefreshed,
                         Cache.CacheLevel.None,
                         logger,
                         apiEvent.TokenType);
@@ -114,6 +114,11 @@ namespace Microsoft.Identity.Client.Internal
                         CacheRefreshReason.ProactivelyRefreshed,
                         apiEvent.TokenType,
                         authResult.ExpiresOn);
+
+                    serviceBundle.PlatformProxy.OtelInstrumentation.LogSuccessHttpDuration(
+                        serviceBundle.PlatformProxy.GetProductName(),
+                        apiEvent.ApiId,
+                        authResult.AuthenticationResultMetadata);
                 }
                 catch (MsalServiceException ex)
                 {
@@ -127,41 +132,46 @@ namespace Microsoft.Identity.Client.Internal
                         logger.ErrorPiiWithPrefix(ex, logMsg);
                     }
 
-                    serviceBundle.PlatformProxy.OtelInstrumentation.LogFailureMetrics(
-                        serviceBundle.PlatformProxy.GetProductName(),
-                        ex.ErrorCode,
-                        apiEvent.ApiId,
-                        callerSdkId,
-                        callerSdkVersion,
-                        CacheRefreshReason.ProactivelyRefreshed,
-                        apiEvent.TokenType,
-                        ex.ErrorCodes?.FirstOrDefault());
+                    LogBackgroundFailureTelemetry(serviceBundle, apiEvent, callerSdkId, callerSdkVersion,
+                        ex.ErrorCode, ex.StatusCode, ex.ErrorCodes?.FirstOrDefault());
                 }
                 catch (OperationCanceledException ex)
                 {
                     logger.WarningPiiWithPrefix(ex, ProactiveRefreshCancellationError);
-                    serviceBundle.PlatformProxy.OtelInstrumentation.LogFailureMetrics(
-                        serviceBundle.PlatformProxy.GetProductName(),
-                        ex.GetType().Name,
-                        apiEvent.ApiId,
-                        callerSdkId, 
-                        callerSdkVersion, 
-                        CacheRefreshReason.ProactivelyRefreshed,
-                        apiEvent.TokenType);
+                    LogBackgroundFailureTelemetry(serviceBundle, apiEvent, callerSdkId, callerSdkVersion,
+                        ex.GetType().Name, httpStatusCode: 0);
                 }
                 catch (Exception ex)
                 {
                     logger.ErrorPiiWithPrefix(ex, ProactiveRefreshGeneralError);
-                    serviceBundle.PlatformProxy.OtelInstrumentation.LogFailureMetrics(
-                        serviceBundle.PlatformProxy.GetProductName(),
-                        ex.GetType().Name,
-                        apiEvent.ApiId,
-                        callerSdkId, 
-                        callerSdkVersion, 
-                        CacheRefreshReason.ProactivelyRefreshed,
-                        apiEvent.TokenType);
+                    LogBackgroundFailureTelemetry(serviceBundle, apiEvent, callerSdkId, callerSdkVersion,
+                        ex.GetType().Name, httpStatusCode: 0);
                 }
             });
+        }
+
+        // Records telemetry for a fire-and-forget background refresh failure: increments the
+        // failure counter and records V2 HTTP duration when an HTTP exchange happened.
+        // Total duration is deliberately not recorded — the foreground user already received
+        // their token from cache, so this latency is not user-facing.
+        private static void LogBackgroundFailureTelemetry(
+            IServiceBundle serviceBundle,
+            ApiEvent apiEvent,
+            string callerSdkId,
+            string callerSdkVersion,
+            string errorCode,
+            int httpStatusCode,
+            string rawStsErrorCode = null)
+        {
+            var otel = serviceBundle.PlatformProxy.OtelInstrumentation;
+            var platform = serviceBundle.PlatformProxy.GetProductName();
+
+            otel.IncrementFailureCounter(
+                platform, errorCode, apiEvent.ApiId, callerSdkId, callerSdkVersion,
+                CacheRefreshReason.ProactivelyRefreshed, apiEvent.TokenType, rawStsErrorCode);
+
+            otel.LogFailureHttpDuration(
+                platform, apiEvent, httpStatusCode);
         }
 
         private static Random s_random = new Random();
