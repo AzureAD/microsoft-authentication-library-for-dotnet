@@ -79,14 +79,6 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         /// </summary>
         public const string MsalAppAzureAdMultipleOrgsRegional = "MSAL-APP-AzureADMultipleOrgsRegional-JSON";
         /// <summary>
-        /// Multiple orgs app in public cloud (id4slab1 tenant). Used for client credentials and regional token acquisition tests.
-        /// </summary>
-        public const string MsalAppAzureAdMultipleOrgs = "MSAL-APP-AzureADMultipleOrgs-JSON";
-        /// <summary>
-        /// Regional app in id4slab1 tenant with SN+I claims (xms_idrel, xms_ds_cnf). Used for regional ESTS token acquisition tests.
-        /// </summary>
-        public const string MsalAppRegion = "MSAL-App-Region-JSON";
-        /// <summary>
         /// Represents the application identifier used for Arlington CCA test scenarios in the MSAL App Arlington CCA JSON configuration.
         /// </summary>
         public const string MsalAppArlingtonCCA = "MSAL-App-ArlingtonCCA-JSON";
