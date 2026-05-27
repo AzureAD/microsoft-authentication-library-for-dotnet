@@ -129,7 +129,7 @@ namespace Microsoft.Identity.Client
             // All extra query parameters are included in the cache key so that callers
             // cannot inadvertently bypass token caching by varying parameter values.
             // See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/6030
-            Config.CacheKeyComponents = Config.CacheKeyComponents ?? new SortedList<string, string>();
+            Config.CacheKeyComponents = Config.CacheKeyComponents ?? new SortedList<string, string>(StringComparer.OrdinalIgnoreCase);
 
             foreach (var kvp in extraQueryParameters)
             {
