@@ -5,3 +5,5 @@ Microsoft.Identity.Client.AuthScheme.IAuthenticationOperation3.AfterCredentialEv
 Microsoft.Identity.Client.AuthScheme.CredentialEvaluationContext
 Microsoft.Identity.Client.AuthScheme.CredentialEvaluationContext.CredentialEvaluationContext(System.Security.Cryptography.X509Certificates.X509Certificate2 mtlsCertificate) -> void
 Microsoft.Identity.Client.AuthScheme.CredentialEvaluationContext.MtlsCertificate.get -> System.Security.Cryptography.X509Certificates.X509Certificate2
+static Microsoft.Identity.Client.Extensibility.AcquireTokenParameterBuilderExtensions.WithCachePartitionKey<T>(this Microsoft.Identity.Client.BaseAbstractAcquireTokenParameterBuilder<T> builder, string key, string value) -> T
+static Microsoft.Identity.Client.Extensibility.AcquireTokenParameterBuilderExtensions.WithReservedScopes(this Microsoft.Identity.Client.AcquireTokenByAuthorizationCodeParameterBuilder builder, bool offlineAccessScope) -> Microsoft.Identity.Client.AcquireTokenByAuthorizationCodeParameterBuilder

@@ -22,6 +22,20 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
         /// </summary>
         public const string MeterName = "MicrosoftIdentityClient_Common_Meter";
 
+        internal const string EnableExtendedTokenMetricsEnvVariable = "MSAL_ENABLE_EXTENDED_TOKEN_METRICS";
+
+        // Captured at construction time (once per app build, mirroring MSAL_FORCE_REGION semantics).
+        // Changing the env var after the OtelInstrumentation instance is created has no effect on that instance.
+        private readonly bool _isExtendedMetricsEnabled;
+
+        private static bool ReadExtendedMetricsEnvVar()
+        {
+            string value = Environment.GetEnvironmentVariable(EnableExtendedTokenMetricsEnvVariable);
+            return !string.IsNullOrEmpty(value) &&
+                (value.Equals("1", StringComparison.OrdinalIgnoreCase) ||
+                 value.Equals("true", StringComparison.OrdinalIgnoreCase));
+        }
+
         private const string SuccessCounterName = "MsalSuccess";
         private const string FailedCounterName = "MsalFailure";
         private const string TotalDurationHistogramName = "MsalTotalDuration.1A";
@@ -30,6 +44,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
         private const string DurationInHttpHistogramName = "MsalDurationInHttp.1A";
         private const string DurationInExtensionInMsHistogram = "MsalDurationInExtensionInMs.1B";
         private const string RemainingTokenLifetimeHistogramName = "MsalRemainingTokenLifetime.1A";
+        private const string TotalDurationV2HistogramName = "MsalTotalDurationV2.1A";
+        private const string DurationInHttpV2HistogramName = "MsalDurationInHttpV2.1A";
 
         /// <summary>
         /// Meter to hold the MSAL metrics.
@@ -59,6 +75,15 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             description: "Performance of token acquisition calls total latency"));
 
         /// <summary>
+        /// Histogram to record total duration in milliseconds of token acquisition calls, covering both successes and failures.
+        /// Emitted only when extended metrics are enabled via the MSAL_ENABLE_EXTENDED_TOKEN_METRICS environment variable.
+        /// </summary>
+        internal static readonly Lazy<Histogram<long>> s_durationTotalV2 = new(() => Meter.CreateHistogram<long>(
+            TotalDurationV2HistogramName,
+            unit: "ms",
+            description: "Performance of token acquisition calls total latency including both successes and failures"));
+
+        /// <summary>
         /// Histogram to record total duration of token acquisition calls in microseconds(us) when token is fetched from L1 cache.
         /// </summary>
         internal static readonly Lazy<Histogram<long>> s_durationInL1CacheInUs = new(() => Meter.CreateHistogram<long>(
@@ -83,6 +108,15 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             description: "Performance of token acquisition calls network latency"));
 
         /// <summary>
+        /// Histogram to record duration in milliseconds in http when the token is fetched from identity provider, covering both successes and failures.
+        /// Emitted only when extended metrics are enabled via the MSAL_ENABLE_EXTENDED_TOKEN_METRICS environment variable.
+        /// </summary>
+        internal static readonly Lazy<Histogram<long>> s_durationInHttpV2 = new(() => Meter.CreateHistogram<long>(
+            DurationInHttpV2HistogramName,
+            unit: "ms",
+            description: "Performance of token acquisition calls network latency including both successes and failures"));
+
+        /// <summary>
         /// Histogram to record total duration of extension modifications in microseconds(us).
         /// </summary>
         internal static readonly Lazy<Histogram<long>> s_durationInExtensionInMs = new(() => Meter.CreateHistogram<long>(
@@ -100,11 +134,21 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
 
         public OtelInstrumentation()
         {
-            // Needed to fail fast if the runtime, like in-process Azure Functions, doesn't support OpenTelemetry 
+            // Needed to fail fast if the runtime, like in-process Azure Functions, doesn't support OpenTelemetry
             _ = Meter.Version;
+
+            _isExtendedMetricsEnabled = ReadExtendedMetricsEnvVar();
         }
 
+        // Combined MsalVersion + Platform tag value for V2 histograms and MsalRemainingTokenLifetime.
+        // Reduces dimension count vs. emitting them separately; downstream consumers split on ",".
+        private static string MsalVersionPlatformTag(string platform) =>
+            $"{MsalIdHelper.GetMsalVersion()},{platform}";
+
         // Aggregates the successful requests based on token source and cache refresh reason.
+        // Counter, L1, L2, and extension are always emitted.
+        // When the MSAL_ENABLE_EXTENDED_TOKEN_METRICS env var is not set: V1 total duration and V1 HTTP duration are emitted.
+        // When it is set: V2 total duration (Succeeded=true) and V2 HTTP duration (HttpStatusCode=200) are emitted instead.
         public void LogSuccessMetrics(
             string platform,
             ApiEvent.ApiIds apiId,
@@ -127,9 +171,44 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                 logger,
                 authResultMetadata.TelemetryTokenType);
 
-            if (s_durationTotal.Value.Enabled)
+            if (s_durationInL1CacheInUs.Value.Enabled && authResultMetadata.TokenSource == TokenSource.Cache
+                && authResultMetadata.CacheLevel.Equals(CacheLevel.L1Cache))
             {
-                s_durationTotal.Value.Record(authResultMetadata.DurationTotalInMs,
+                s_durationInL1CacheInUs.Value.Record(totalDurationInUs,
+                    new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
+                    new(TelemetryConstants.Platform, platform),
+                    new(TelemetryConstants.ApiId, apiId),
+                    new(TelemetryConstants.TokenSource, authResultMetadata.TokenSource),
+                    new(TelemetryConstants.CacheLevel, authResultMetadata.CacheLevel),
+                    new(TelemetryConstants.CacheRefreshReason, authResultMetadata.CacheRefreshReason));
+            }
+
+            // Only log cache duration if L2 cache was used.
+            if (s_durationInL2Cache.Value.Enabled && cacheLevel == CacheLevel.L2Cache)
+            {
+                s_durationInL2Cache.Value.Record(authResultMetadata.DurationInCacheInMs,
+                    new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
+                    new(TelemetryConstants.Platform, platform),
+                    new(TelemetryConstants.ApiId, apiId),
+                    new(TelemetryConstants.CacheRefreshReason, authResultMetadata.CacheRefreshReason));
+            }
+
+            if (s_durationInExtensionInMs.Value.Enabled)
+            {
+                s_durationInExtensionInMs.Value.Record(authResultMetadata.DurationCreatingExtendedTokenInUs,
+                    new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
+                    new(TelemetryConstants.Platform, platform),
+                    new(TelemetryConstants.ApiId, apiId),
+                    new(TelemetryConstants.TokenSource, authResultMetadata.TokenSource),
+                    new(TelemetryConstants.CacheLevel, authResultMetadata.CacheLevel),
+                    new(TelemetryConstants.TokenType, authResultMetadata.TelemetryTokenType));
+            }
+
+            if (!_isExtendedMetricsEnabled)
+            {
+                if (s_durationTotal.Value.Enabled)
+                {
+                    s_durationTotal.Value.Record(authResultMetadata.DurationTotalInMs,
                         new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                         new(TelemetryConstants.Platform, platform),
                         new(TelemetryConstants.ApiId, apiId),
@@ -137,50 +216,42 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                         new(TelemetryConstants.CacheLevel, cacheLevel),
                         new(TelemetryConstants.CacheRefreshReason, authResultMetadata.CacheRefreshReason),
                         new(TelemetryConstants.TokenType, authResultMetadata.TelemetryTokenType));
-            }
+                }
 
-            // Only log cache duration if L2 cache was used.
-            if (s_durationInL2Cache.Value.Enabled && cacheLevel == CacheLevel.L2Cache)
-            {
-                s_durationInL2Cache.Value.Record(authResultMetadata.DurationInCacheInMs,
-                new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
-                new(TelemetryConstants.Platform, platform),
-                new(TelemetryConstants.ApiId, apiId),
-                new(TelemetryConstants.CacheRefreshReason, authResultMetadata.CacheRefreshReason));
+                // Only log duration in HTTP when token is fetched from IDP.
+                if (s_durationInHttp.Value.Enabled && authResultMetadata.TokenSource == TokenSource.IdentityProvider)
+                {
+                    s_durationInHttp.Value.Record(authResultMetadata.DurationInHttpInMs,
+                        new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
+                        new(TelemetryConstants.Platform, platform),
+                        new(TelemetryConstants.ApiId, apiId),
+                        new(TelemetryConstants.TokenType, authResultMetadata.TelemetryTokenType));
+                }
             }
-
-            // Only log duration in HTTP when token is fetched from IDP.
-            if (s_durationInHttp.Value.Enabled && authResultMetadata.TokenSource == TokenSource.IdentityProvider)
+            else
             {
-                s_durationInHttp.Value.Record(authResultMetadata.DurationInHttpInMs,
-                new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
-                new(TelemetryConstants.Platform, platform),
-                new(TelemetryConstants.ApiId, apiId),
-                new(TelemetryConstants.TokenType, authResultMetadata.TelemetryTokenType));
-            }
+                if (s_durationTotalV2.Value.Enabled)
+                {
+                    s_durationTotalV2.Value.Record(authResultMetadata.DurationTotalInMs,
+                        new(TelemetryConstants.MsalVersionPlatform, MsalVersionPlatformTag(platform)),
+                        new(TelemetryConstants.ApiId, apiId),
+                        new(TelemetryConstants.TokenSource, authResultMetadata.TokenSource),
+                        new(TelemetryConstants.CacheLevel, cacheLevel),
+                        new(TelemetryConstants.CacheRefreshReason, authResultMetadata.CacheRefreshReason),
+                        new(TelemetryConstants.TokenType, authResultMetadata.TelemetryTokenType),
+                        new(TelemetryConstants.ErrorCode, string.Empty),
+                        new(TelemetryConstants.Succeeded, true));
+                }
 
-            // Only log duration in microseconds when the cache level is L1.
-            if (s_durationInL1CacheInUs.Value.Enabled && authResultMetadata.TokenSource == TokenSource.Cache
-                && authResultMetadata.CacheLevel.Equals(CacheLevel.L1Cache))
-            {
-                s_durationInL1CacheInUs.Value.Record(totalDurationInUs,
-                new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
-                new(TelemetryConstants.Platform, platform),
-                new(TelemetryConstants.ApiId, apiId),
-                new(TelemetryConstants.TokenSource, authResultMetadata.TokenSource),
-                new(TelemetryConstants.CacheLevel, authResultMetadata.CacheLevel),
-                new(TelemetryConstants.CacheRefreshReason, authResultMetadata.CacheRefreshReason));
-            }
-
-            if (s_durationInExtensionInMs.Value.Enabled)
-            {
-                s_durationInExtensionInMs.Value.Record(authResultMetadata.DurationCreatingExtendedTokenInUs,
-                new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
-                new(TelemetryConstants.Platform, platform),
-                new(TelemetryConstants.ApiId, apiId),
-                new(TelemetryConstants.TokenSource, authResultMetadata.TokenSource),
-                new(TelemetryConstants.CacheLevel, authResultMetadata.CacheLevel),
-                new(TelemetryConstants.TokenType, authResultMetadata.TelemetryTokenType));
+                // Only log duration in HTTP when token is fetched from IDP.
+                if (s_durationInHttpV2.Value.Enabled && authResultMetadata.TokenSource == TokenSource.IdentityProvider)
+                {
+                    s_durationInHttpV2.Value.Record(authResultMetadata.DurationInHttpInMs,
+                        new(TelemetryConstants.MsalVersionPlatform, MsalVersionPlatformTag(platform)),
+                        new(TelemetryConstants.ApiId, apiId),
+                        new(TelemetryConstants.TokenType, authResultMetadata.TelemetryTokenType),
+                        new(TelemetryConstants.HttpStatusCode, 200));
+                }
             }
 
             LogRemainingTokenLifetime(
@@ -218,7 +289,81 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             }
         }
 
-        public void LogFailureMetrics(string platform,
+        public void LogSuccessHttpDuration(
+            string platform,
+            ApiEvent.ApiIds apiId,
+            AuthenticationResultMetadata authResultMetadata)
+        {
+            if (authResultMetadata.TokenSource != TokenSource.IdentityProvider)
+                return;
+
+            if (!_isExtendedMetricsEnabled)
+            {
+                if (s_durationInHttp.Value.Enabled)
+                {
+                    s_durationInHttp.Value.Record(authResultMetadata.DurationInHttpInMs,
+                        new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
+                        new(TelemetryConstants.Platform, platform),
+                        new(TelemetryConstants.ApiId, apiId),
+                        new(TelemetryConstants.TokenType, authResultMetadata.TelemetryTokenType));
+                }
+            }
+            else
+            {
+                if (s_durationInHttpV2.Value.Enabled)
+                {
+                    s_durationInHttpV2.Value.Record(authResultMetadata.DurationInHttpInMs,
+                        new(TelemetryConstants.MsalVersionPlatform, MsalVersionPlatformTag(platform)),
+                        new(TelemetryConstants.ApiId, apiId),
+                        new(TelemetryConstants.TokenType, authResultMetadata.TelemetryTokenType),
+                        new(TelemetryConstants.HttpStatusCode, 200));
+                }
+            }
+        }
+
+        // Foreground failure path: increments the failure counter, records V2 total duration,
+        // and records V2 HTTP duration. Mirrors LogSuccessMetrics on the success side.
+        public void LogFailureMetrics(
+            string platform,
+            string errorCode,
+            ApiEvent apiEvent,
+            string callerSdkId,
+            string callerSdkVersion,
+            CacheRefreshReason cacheRefreshReason,
+            int tokenType,
+            int httpStatusCode,
+            long totalDurationInMs,
+            string rawStsErrorCode = null)
+        {
+            IncrementFailureCounter(
+                platform,
+                errorCode,
+                apiEvent.ApiId,
+                callerSdkId,
+                callerSdkVersion,
+                cacheRefreshReason,
+                tokenType,
+                rawStsErrorCode);
+
+            if (_isExtendedMetricsEnabled && s_durationTotalV2.Value.Enabled)
+            {
+                // TokenSource is empty on failure: no token was acquired, so no source applies.
+                s_durationTotalV2.Value.Record(totalDurationInMs,
+                    new(TelemetryConstants.MsalVersionPlatform, MsalVersionPlatformTag(platform)),
+                    new(TelemetryConstants.ApiId, apiEvent.ApiId),
+                    new(TelemetryConstants.TokenSource, string.Empty),
+                    new(TelemetryConstants.CacheLevel, string.Empty),
+                    new(TelemetryConstants.CacheRefreshReason, apiEvent.CacheInfo),
+                    new(TelemetryConstants.TokenType, apiEvent.TokenType),
+                    new(TelemetryConstants.ErrorCode, errorCode),
+                    new(TelemetryConstants.Succeeded, false));
+            }
+
+            LogFailureHttpDuration(platform, apiEvent, httpStatusCode);
+        }
+
+        public void IncrementFailureCounter(
+            string platform,
             string errorCode,
             ApiEvent.ApiIds apiId,
             string callerSdkId,
@@ -247,6 +392,29 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             s_failureCounter.Value.Add(1, in tags);
         }
 
+        // Records V2 HTTP duration on the failure path. V1 has no failure HTTP histogram,
+        // so this is a no-op when extended metrics are disabled. Mirrors LogSuccessHttpDuration.
+        // Recorded whenever an HTTP exchange produced measurable duration — includes responses
+        // (HttpStatusCode > 0) and pre-response failures like cancellations and connection
+        // errors (HttpStatusCode = 0), which operators can separate via the HttpStatusCode tag.
+        public void LogFailureHttpDuration(
+            string platform,
+            ApiEvent apiEvent,
+            int httpStatusCode)
+        {
+            if (!_isExtendedMetricsEnabled || !s_durationInHttpV2.Value.Enabled)
+                return;
+
+            if (apiEvent.DurationInHttpInMs > 0)
+            {
+                s_durationInHttpV2.Value.Record(apiEvent.DurationInHttpInMs,
+                    new(TelemetryConstants.MsalVersionPlatform, MsalVersionPlatformTag(platform)),
+                    new(TelemetryConstants.ApiId, apiEvent.ApiId),
+                    new(TelemetryConstants.TokenType, apiEvent.TokenType),
+                    new(TelemetryConstants.HttpStatusCode, httpStatusCode));
+            }
+        }
+
         public void LogRemainingTokenLifetime(
             string platform,
             ApiEvent.ApiIds apiId,
@@ -261,7 +429,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                 long remainingSeconds = Math.Max(0, (long)(expiresOn - DateTimeOffset.UtcNow).TotalSeconds);
 
                 s_remainingTokenLifetime.Value.Record(remainingSeconds,
-                    new(TelemetryConstants.MsalVersionPlatform, $"{MsalIdHelper.GetMsalVersion()},{platform}"),
+                    new(TelemetryConstants.MsalVersionPlatform, MsalVersionPlatformTag(platform)),
                     new(TelemetryConstants.ApiId, apiId),
                     new(TelemetryConstants.TokenSource, tokenSource),
                     new(TelemetryConstants.CacheLevel, cacheLevel),
@@ -269,6 +437,5 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                     new(TelemetryConstants.TokenType, tokenType));
             }
         }
-
     }
 }
