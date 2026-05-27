@@ -69,7 +69,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 {
                     throw new MsalClientException(
                         MsalError.InvalidRequest,
-                        $"WithClientClaims is only supported for IMDS-based managed identity sources. " +
+                        $"WithClaimsFromClient is only supported for IMDS-based managed identity sources. " +
                         $"The detected source is {_sourceType}. " +
                         "Only ManagedIdentitySource.Imds and ManagedIdentitySource.ImdsV2 support the 'claims' parameter.");
                 }
@@ -380,7 +380,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                         MsalError.InvalidRequest,
                         $"MSIv1 (IMDS v1) only supports the `{XmsAzNwperimid}` custom claim. " +
                         $"The claims JSON contained the unsupported key `{kvp.Key}`. " +
-                        $"Remove all keys other than `{XmsAzNwperimid}` when using WithClientClaims with MSIv1.");
+                        $"Remove all keys other than `{XmsAzNwperimid}` when using WithClaimsFromClient with MSIv1.");
                 }
             }
         }

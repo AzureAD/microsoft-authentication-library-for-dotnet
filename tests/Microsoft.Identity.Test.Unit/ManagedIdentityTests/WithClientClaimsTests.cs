@@ -17,20 +17,16 @@ using static Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil
 namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 {
     /// <summary>
-    /// Unit tests for <c>WithClientClaims()</c> across all three auth flows:
+    /// Unit tests for <c>WithClaimsFromClient()</c> across all three auth flows:
     ///   1. MSIv1 (IMDS GET — claims as query parameter)
     ///   2. Confidential Client / AcquireTokenForClient (claims merged into ESTS POST body)
     ///   3. Cache-key isolation — different claims values produce separate cache entries
     /// </summary>
     [TestClass]
-    public class WithClientClaimsTests : TestBase
+    public class WithClaimsFromClientTests : TestBase
     {
         // A simple NSP-style claims payload used across tests.
         private const string NspClaims = @"{""nsp"":{""essential"":true}}";
-
-        // Same logical claims as NspClaims but with extra whitespace/different key ordering.
-        // After normalization these must equal NspClaims.
-        private const string NspClaimsWithWhitespace = @"{ ""nsp"" : { ""essential"" : true } }";
 
         // A second, distinct claims value used to exercise separate-cache-entry behaviour.
         private const string OtherClaims = @"{""region"":{""value"":""eastus""}}";
@@ -43,7 +39,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow(null)]
         [DataRow("")]
         [DataRow("   ")]
-        public void WithClientClaims_NullOrWhitespace_IsNoOp(string emptyClaims)
+        public void WithClaimsFromClient_NullOrWhitespace_IsNoOp(string emptyClaims)
         {
             // Arrange
             using (new EnvVariableContext())
@@ -55,7 +51,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 // Act — should not throw
                 var builder = mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                    .WithClientClaims(emptyClaims);
+                    .WithClaimsFromClient(emptyClaims);
 
                 // Assert — ClientClaims must remain unset (no cache component added)
                 Assert.IsNull(builder.CommonParameters.ClientClaims,
@@ -66,7 +62,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        public void WithClientClaims_SetsClientClaimsOnCommonParameters()
+        public void WithClaimsFromClient_SetsClientClaimsOnCommonParameters()
         {
             // Arrange
             using (new EnvVariableContext())
@@ -79,7 +75,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 // Act
                 var builder = mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                    .WithClientClaims(NspClaims);
+                    .WithClaimsFromClient(NspClaims);
 
                 // Assert — normalized claims are stored
                 Assert.IsNotNull(builder.CommonParameters.ClientClaims,
@@ -92,9 +88,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        public void WithClientClaims_DoesNotSetCommonParametersClaims()
+        public void WithClaimsFromClient_DoesNotSetCommonParametersClaims()
         {
-            // WithClientClaims must NOT touch CommonParameters.Claims — doing so would
+            // WithClaimsFromClient must NOT touch CommonParameters.Claims — doing so would
             // incorrectly bypass the token cache (Claims is the server-issued bypass signal).
             using (new EnvVariableContext())
             {
@@ -106,38 +102,11 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 // Act
                 var builder = mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                    .WithClientClaims(NspClaims);
+                    .WithClaimsFromClient(NspClaims);
 
                 // Assert — CommonParameters.Claims (the cache-bypass property) must be null
                 Assert.IsNull(builder.CommonParameters.Claims,
-                    "WithClientClaims must NOT set CommonParameters.Claims — that would bypass the cache.");
-            }
-        }
-
-        [TestMethod]
-        public void WithClientClaims_NormalizesJsonBeforeStoring()
-        {
-            // The same logical JSON passed with different whitespace must produce an identical
-            // stored value (preventing cache key fragmentation).
-            using (new EnvVariableContext())
-            {
-                SetEnvironmentVariables(ManagedIdentitySource.Imds, ManagedIdentityTests.ImdsEndpoint);
-                var mi = ManagedIdentityApplicationBuilder
-                    .Create(ManagedIdentityId.SystemAssigned)
-                    .WithExperimentalFeatures(true)
-                    .Build();
-
-                // Act
-                var builder1 = mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                    .WithClientClaims(NspClaims);
-                var builder2 = mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                    .WithClientClaims(NspClaimsWithWhitespace);
-
-                // Assert
-                Assert.AreEqual(
-                    builder1.CommonParameters.ClientClaims,
-                    builder2.CommonParameters.ClientClaims,
-                    "Logically identical claims with different whitespace must normalize to the same string.");
+                    "WithClaimsFromClient must NOT set CommonParameters.Claims — that would bypass the cache.");
             }
         }
 
@@ -146,7 +115,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         // ---------------------------------------------------------------------------------
 
         [TestMethod]
-        public async Task WithClientClaims_Imds_ForwardsClaimsAsQueryParameterAsync()
+        public async Task WithClaimsFromClient_Imds_ForwardsClaimsAsQueryParameterAsync()
         {
             // Arrange
             using (new EnvVariableContext())
@@ -164,7 +133,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 // The mock handler is set up to expect claims=<normalizedNspClaims> in the query string.
                 // If the MSAL code does NOT send the parameter, the handler will not match and the
                 // test will throw InvalidOperationException (no handler matched).
-                string normalizedClaims = Client.Internal.ClaimsHelper.NormalizeClaimsJson(NspClaims);
+                string normalizedClaims = NspClaims;
                 httpManager.AddManagedIdentityMockHandler(
                     ManagedIdentityTests.ImdsEndpoint,
                     ManagedIdentityTests.Resource,
@@ -174,7 +143,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 // Act
                 var result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                    .WithClientClaims(NspClaims)
+                    .WithClaimsFromClient(NspClaims)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -184,7 +153,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        public async Task WithClientClaims_Imds_TokenIsCached_SecondCallDoesNotHitNetworkAsync()
+        public async Task WithClaimsFromClient_Imds_TokenIsCached_SecondCallDoesNotHitNetworkAsync()
         {
             // Arrange
             using (new EnvVariableContext())
@@ -200,7 +169,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .Build();
 
                 // Only one network mock — second call must come from cache.
-                string normalizedClaims = Client.Internal.ClaimsHelper.NormalizeClaimsJson(NspClaims);
+                string normalizedClaims = NspClaims;
                 httpManager.AddManagedIdentityMockHandler(
                     ManagedIdentityTests.ImdsEndpoint,
                     ManagedIdentityTests.Resource,
@@ -210,13 +179,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 // Act — first call
                 var result1 = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                    .WithClientClaims(NspClaims)
+                    .WithClaimsFromClient(NspClaims)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
                 // Act — second call (no new mock handler added)
                 var result2 = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                    .WithClientClaims(NspClaims)
+                    .WithClaimsFromClient(NspClaims)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -229,52 +198,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        public async Task WithClientClaims_Imds_SameClaimsNormalized_SameCacheEntryAsync()
-        {
-            // Logically identical claims passed with different whitespace must map to the same
-            // cache entry — only one network call should occur.
-            using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager())
-            {
-                SetEnvironmentVariables(ManagedIdentitySource.Imds, ManagedIdentityTests.ImdsEndpoint);
-
-                var mi = ManagedIdentityApplicationBuilder
-                    .Create(ManagedIdentityId.SystemAssigned)
-                    .WithHttpManager(httpManager)
-                    .WithExperimentalFeatures(true)
-
-                    .Build();
-
-                string normalizedClaims = Client.Internal.ClaimsHelper.NormalizeClaimsJson(NspClaims);
-
-                // Only one network mock
-                httpManager.AddManagedIdentityMockHandler(
-                    ManagedIdentityTests.ImdsEndpoint,
-                    ManagedIdentityTests.Resource,
-                    MockHelpers.GetMsiSuccessfulResponse(),
-                    ManagedIdentitySource.Imds,
-                    extraQueryParameters: new Dictionary<string, string> { { "claims", Uri.EscapeDataString(normalizedClaims) } });
-
-                // Act
-                var result1 = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                    .WithClientClaims(NspClaims)
-                    .ExecuteAsync()
-                    .ConfigureAwait(false);
-
-                var result2 = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                    .WithClientClaims(NspClaimsWithWhitespace)  // same logic, different whitespace
-                    .ExecuteAsync()
-                    .ConfigureAwait(false);
-
-                // Assert
-                Assert.AreEqual(TokenSource.IdentityProvider, result1.AuthenticationResultMetadata.TokenSource);
-                Assert.AreEqual(TokenSource.Cache, result2.AuthenticationResultMetadata.TokenSource,
-                    "Whitespace-variant of the same claims must hit the same cache entry.");
-            }
-        }
-
-        [TestMethod]
-        public async Task WithClientClaims_Imds_DifferentClaims_ProduceSeparateCacheEntriesAsync()
+        public async Task WithClaimsFromClient_Imds_DifferentClaims_ProduceSeparateCacheEntriesAsync()
         {
             // Two calls with distinct claims values must each produce a separate network call.
             using (new EnvVariableContext())
@@ -289,8 +213,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                     .Build();
 
-                string normalizedNsp = Client.Internal.ClaimsHelper.NormalizeClaimsJson(NspClaims);
-                string normalizedOther = Client.Internal.ClaimsHelper.NormalizeClaimsJson(OtherClaims);
+                string normalizedNsp = NspClaims;
+                string normalizedOther = OtherClaims;
 
                 // Two distinct network mocks — each must be consumed
                 httpManager.AddManagedIdentityMockHandler(
@@ -309,12 +233,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 // Act
                 var result1 = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                    .WithClientClaims(NspClaims)
+                    .WithClaimsFromClient(NspClaims)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
                 var result2 = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                    .WithClientClaims(OtherClaims)
+                    .WithClaimsFromClient(OtherClaims)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -327,10 +251,10 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        public async Task WithClientClaims_Imds_DoesNotBypassCache_UnlikeWithClaimsAsync()
+        public async Task WithClaimsFromClient_Imds_DoesNotBypassCache_UnlikeWithClaimsAsync()
         {
             // WithClaims() bypasses the cache on every call.
-            // WithClientClaims() must NOT bypass the cache — second call should be a cache hit.
+            // WithClaimsFromClient() must NOT bypass the cache — second call should be a cache hit.
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
@@ -343,7 +267,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                     .Build();
 
-                string normalizedClaims = Client.Internal.ClaimsHelper.NormalizeClaimsJson(NspClaims);
+                string normalizedClaims = NspClaims;
 
                 // Only one mock handler — if the second call also hits the network it will throw
                 httpManager.AddManagedIdentityMockHandler(
@@ -355,23 +279,23 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 // Act
                 await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                    .WithClientClaims(NspClaims)
+                    .WithClaimsFromClient(NspClaims)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
                 var result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                    .WithClientClaims(NspClaims)
+                    .WithClaimsFromClient(NspClaims)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
                 // Assert — second call must be a cache hit, not a network call
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource,
-                    "WithClientClaims must use the cache (unlike WithClaims which always bypasses).");
+                    "WithClaimsFromClient must use the cache (unlike WithClaims which always bypasses).");
             }
         }
 
         [TestMethod]
-        public async Task WithClientClaims_Imds_NoClaims_ClaimsParamAbsentFromRequestAsync()
+        public async Task WithClaimsFromClient_Imds_NoClaims_ClaimsParamAbsentFromRequestAsync()
         {
             // When no client claims are specified, the `claims` query parameter must be absent.
             using (new EnvVariableContext())
@@ -393,7 +317,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     MockHelpers.GetMsiSuccessfulResponse(),
                     ManagedIdentitySource.Imds);
 
-                // Act — no WithClientClaims call
+                // Act — no WithClaimsFromClient call
                 var result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
@@ -408,7 +332,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         // ---------------------------------------------------------------------------------
 
         [TestMethod]
-        public async Task WithClientClaims_ConfidentialClient_SendsClaimsInEstsBodyAsync()
+        public async Task WithClaimsFromClient_ConfidentialClient_SendsClaimsInEstsBodyAsync()
         {
             // Arrange
             using (var harness = CreateTestHarness())
@@ -423,7 +347,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithExperimentalFeatures(true)
                     .BuildConcrete();
 
-                string normalizedClaims = Client.Internal.ClaimsHelper.NormalizeClaimsJson(NspClaims);
+                string normalizedClaims = NspClaims;
 
                 // The POST body must contain claims=<normalizedClaims>
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(
@@ -436,7 +360,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 // Act
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope)
-                    .WithClientClaims(normalizedClaims)
+                    .WithClaimsFromClient(normalizedClaims)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -447,7 +371,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        public async Task WithClientClaims_ConfidentialClient_TokenIsCached_SecondCallFromCacheAsync()
+        public async Task WithClaimsFromClient_ConfidentialClient_TokenIsCached_SecondCallFromCacheAsync()
         {
             // Arrange
             using (var harness = CreateTestHarness())
@@ -462,7 +386,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithExperimentalFeatures(true)
                     .BuildConcrete();
 
-                string normalizedClaims = Client.Internal.ClaimsHelper.NormalizeClaimsJson(NspClaims);
+                string normalizedClaims = NspClaims;
 
                 // Only one mock — second call must come from cache
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(
@@ -471,12 +395,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 // Act
                 var result1 = await app.AcquireTokenForClient(TestConstants.s_scope)
-                    .WithClientClaims(normalizedClaims)
+                    .WithClaimsFromClient(normalizedClaims)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
                 var result2 = await app.AcquireTokenForClient(TestConstants.s_scope)
-                    .WithClientClaims(normalizedClaims)
+                    .WithClaimsFromClient(normalizedClaims)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -489,7 +413,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        public async Task WithClientClaims_ConfidentialClient_DifferentClaims_SeparateCacheEntriesAsync()
+        public async Task WithClaimsFromClient_ConfidentialClient_DifferentClaims_SeparateCacheEntriesAsync()
         {
             // Arrange
             using (var harness = CreateTestHarness())
@@ -504,8 +428,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithExperimentalFeatures(true)
                     .BuildConcrete();
 
-                string normalizedNsp = Client.Internal.ClaimsHelper.NormalizeClaimsJson(NspClaims);
-                string normalizedOther = Client.Internal.ClaimsHelper.NormalizeClaimsJson(OtherClaims);
+                string normalizedNsp = NspClaims;
+                string normalizedOther = OtherClaims;
 
                 // Two distinct network mocks
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(
@@ -518,12 +442,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 // Act
                 var result1 = await app.AcquireTokenForClient(TestConstants.s_scope)
-                    .WithClientClaims(normalizedNsp)
+                    .WithClaimsFromClient(normalizedNsp)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
                 var result2 = await app.AcquireTokenForClient(TestConstants.s_scope)
-                    .WithClientClaims(normalizedOther)
+                    .WithClaimsFromClient(normalizedOther)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -536,7 +460,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        public async Task WithClientClaims_ConfidentialClient_DoesNotBypassCacheAsync()
+        public async Task WithClaimsFromClient_ConfidentialClient_DoesNotBypassCacheAsync()
         {
             // Arrange
             using (var harness = CreateTestHarness())
@@ -551,7 +475,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithExperimentalFeatures(true)
                     .BuildConcrete();
 
-                string normalizedClaims = Client.Internal.ClaimsHelper.NormalizeClaimsJson(NspClaims);
+                string normalizedClaims = NspClaims;
 
                 // Only one mock — if second call also hits the network it will throw
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(
@@ -560,26 +484,26 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 // Act
                 await app.AcquireTokenForClient(TestConstants.s_scope)
-                    .WithClientClaims(normalizedClaims)
+                    .WithClaimsFromClient(normalizedClaims)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope)
-                    .WithClientClaims(normalizedClaims)
+                    .WithClaimsFromClient(normalizedClaims)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
                 // Assert
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource,
-                    "WithClientClaims must not bypass the cache on repeated calls.");
+                    "WithClaimsFromClient must not bypass the cache on repeated calls.");
             }
         }
 
         [TestMethod]
-        public async Task WithClientClaims_ConfidentialClient_WithServerClaims_ServerClaimsBypassesCacheAsync()
+        public async Task WithClaimsFromClient_ConfidentialClient_WithServerClaims_ServerClaimsBypassesCacheAsync()
         {
             // WithClaims (server-issued) always bypasses the cache.
-            // WithClientClaims (client-originated) does not.
+            // WithClaimsFromClient (client-originated) does not.
             // When both are used together, the server claim should still bypass the cache.
             using (var harness = CreateTestHarness())
             {
@@ -593,7 +517,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithExperimentalFeatures(true)
                     .BuildConcrete();
 
-                string normalizedClientClaims = Client.Internal.ClaimsHelper.NormalizeClaimsJson(NspClaims);
+                string normalizedClientClaims = NspClaims;
 
                 // First call — populate cache with client claims
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(
@@ -601,17 +525,17 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     responseMessage: MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage());
 
                 await app.AcquireTokenForClient(TestConstants.s_scope)
-                    .WithClientClaims(normalizedClientClaims)
+                    .WithClaimsFromClient(normalizedClientClaims)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
-                // Second call — with WithClaims (server bypass) in addition to WithClientClaims
+                // Second call — with WithClaims (server bypass) in addition to WithClaimsFromClient
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(
                     TestConstants.AuthorityUtidTenant,
                     responseMessage: MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage());
 
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope)
-                    .WithClientClaims(normalizedClientClaims)
+                    .WithClaimsFromClient(normalizedClientClaims)
                     .WithClaims(TestConstants.Claims)   // server-issued → bypasses cache
                     .ExecuteAsync()
                     .ConfigureAwait(false);
@@ -623,7 +547,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        public async Task WithClientClaims_ConfidentialClient_NoClaims_ClaimsParamAbsentFromBodyAsync()
+        public async Task WithClaimsFromClient_ConfidentialClient_NoClaims_ClaimsParamAbsentFromBodyAsync()
         {
             // When no client claims are specified, the `claims` body parameter must not appear.
             using (var harness = CreateTestHarness())
@@ -643,7 +567,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     TestConstants.AuthorityUtidTenant,
                     responseMessage: MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage());
 
-                // Act — no WithClientClaims
+                // Act — no WithClaimsFromClient
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
@@ -658,7 +582,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         // ---------------------------------------------------------------------------------
 
         [TestMethod]
-        public void WithClientClaims_InvalidJson_ThrowsMsalClientException()
+        public void WithClaimsFromClient_InvalidJson_ThrowsMsalClientException()
         {
             // Arrange
             using (new EnvVariableContext())
@@ -672,14 +596,14 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 // Act & Assert
                 MsalClientException ex = Assert.ThrowsExactly<MsalClientException>(
                     () => mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                            .WithClientClaims("not-valid-json"));
+                            .WithClaimsFromClient("not-valid-json"));
 
                 Assert.AreEqual(MsalError.InvalidJsonClaimsFormat, ex.ErrorCode);
             }
         }
 
         [TestMethod]
-        public void WithClientClaims_JsonNullLiteral_ThrowsMsalClientException()
+        public void WithClaimsFromClient_JsonNullLiteral_ThrowsMsalClientException()
         {
             // "null" is valid JSON but not a JSON object — must produce MsalClientException,
             // not a raw NullReferenceException from JsonNode.AsObject().
@@ -694,7 +618,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 // Act & Assert
                 MsalClientException ex = Assert.ThrowsExactly<MsalClientException>(
                     () => mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                            .WithClientClaims("null"));
+                            .WithClaimsFromClient("null"));
 
                 Assert.AreEqual(MsalError.InvalidJsonClaimsFormat, ex.ErrorCode);
             }
@@ -705,9 +629,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         // ---------------------------------------------------------------------------------
 
         [TestMethod]
-        public void WithClientClaims_NonImdsSource_SetsBuilderParameterButThrowsOnExecution()
+        public void WithClaimsFromClient_NonImdsSource_SetsBuilderParameterButThrowsOnExecution()
         {
-            // WithClientClaims() sets the builder parameter for any MI source — the guard that
+            // WithClaimsFromClient() sets the builder parameter for any MI source — the guard that
             // rejects non-IMDS sources fires at request-execution time (in AbstractManagedIdentity),
             // not at builder construction time. This test verifies the builder state; a full
             // execution-level test requires mocking the App Service endpoint and is deferred.
@@ -721,7 +645,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 // Act
                 var builder = mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                    .WithClientClaims(NspClaims);
+                    .WithClaimsFromClient(NspClaims);
 
                 // Assert — parameter is stored on the builder regardless of source;
                 // MsalClientException is thrown later when the request is executed.
@@ -741,7 +665,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         private const string MixedClaims = @"{""xms_az_nwperimid"":{""values"":[""perimid-1234""]},""other_claim"":{""essential"":true}}";
 
         [TestMethod]
-        public async Task WithClientClaims_Imds_ValidXmsAzNwperimid_SucceedsAsync()
+        public async Task WithClaimsFromClient_Imds_ValidXmsAzNwperimid_SucceedsAsync()
         {
             // xms_az_nwperimid is the only allowed claim for MSIv1; a request carrying it must succeed.
             using (new EnvVariableContext())
@@ -755,7 +679,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithExperimentalFeatures(true)
                     .Build();
 
-                string normalizedClaims = Client.Internal.ClaimsHelper.NormalizeClaimsJson(ValidNspClaim);
+                string normalizedClaims = ValidNspClaim;
                 httpManager.AddManagedIdentityMockHandler(
                     ManagedIdentityTests.ImdsEndpoint,
                     ManagedIdentityTests.Resource,
@@ -765,7 +689,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 // Act
                 var result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                    .WithClientClaims(ValidNspClaim)
+                    .WithClaimsFromClient(ValidNspClaim)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -775,7 +699,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        public async Task WithClientClaims_Imds_UnsupportedClaim_ThrowsMsalClientExceptionAsync()
+        public async Task WithClaimsFromClient_Imds_UnsupportedClaim_ThrowsMsalClientExceptionAsync()
         {
             // Any claim key other than xms_az_nwperimid must be rejected before the network call,
             // so the caller gets a clear error instead of an opaque HTTP 400 from IMDS.
@@ -793,7 +717,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 // Act & Assert — MsalClientException must be thrown before any HTTP request is made
                 MsalClientException ex = await Assert.ThrowsExactlyAsync<MsalClientException>(
                     () => mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                            .WithClientClaims(UnsupportedClaim)
+                            .WithClaimsFromClient(UnsupportedClaim)
                             .ExecuteAsync())
                     .ConfigureAwait(false);
 
@@ -803,7 +727,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        public async Task WithClientClaims_Imds_MixedClaims_ThrowsMsalClientExceptionAsync()
+        public async Task WithClaimsFromClient_Imds_MixedClaims_ThrowsMsalClientExceptionAsync()
         {
             // Even if xms_az_nwperimid is present, any additional claims must be rejected.
             using (new EnvVariableContext())
@@ -820,7 +744,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 // Act & Assert
                 MsalClientException ex = await Assert.ThrowsExactlyAsync<MsalClientException>(
                     () => mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                            .WithClientClaims(MixedClaims)
+                            .WithClaimsFromClient(MixedClaims)
                             .ExecuteAsync())
                     .ConfigureAwait(false);
 

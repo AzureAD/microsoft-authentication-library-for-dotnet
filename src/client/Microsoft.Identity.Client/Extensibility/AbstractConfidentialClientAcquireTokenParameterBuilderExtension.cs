@@ -8,7 +8,6 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 
 namespace Microsoft.Identity.Client.Extensibility
@@ -23,18 +22,14 @@ namespace Microsoft.Identity.Client.Extensibility
         /// Specifies client-originated claims to include in the token request.
         /// Unlike <see cref="AbstractAcquireTokenParameterBuilder{T}.WithClaims"/> (for server-issued
         /// claims challenges), tokens acquired with client claims <b>are cached</b> and the cache entry
-        /// is keyed on the normalized claims value. Different claims values produce separate cache entries.
+        /// is keyed on the claims value. Different claims values produce separate cache entries.
         /// Use stable, non-dynamic values to avoid unbounded cache growth.
         /// </summary>
-        /// <remarks>
-        /// This API is intended for MSI and cert/FIC flows (e.g., NSP claims for Azure Redis Cache).
-        /// Behavior for B2C, ADFS, and dSTS is undefined and unsupported.
-        /// </remarks>
         /// <typeparam name="T">The concrete confidential client builder type.</typeparam>
         /// <param name="builder">The builder to chain options to.</param>
         /// <param name="claimsJson">A JSON string containing the client-originated claims. Must be valid JSON.</param>
         /// <returns>The builder to chain the .With methods.</returns>
-        public static T WithClientClaims<T>(
+        public static T WithClaimsFromClient<T>(
             this AbstractConfidentialClientAcquireTokenParameterBuilder<T> builder,
             string claimsJson)
             where T : AbstractConfidentialClientAcquireTokenParameterBuilder<T>
@@ -44,41 +39,13 @@ namespace Microsoft.Identity.Client.Extensibility
                 return (T)builder;
             }
 
-            // Client claims must not appear in front-channel authorization URLs because they can
-            // contain sensitive data and because the resulting cache key cannot be reproduced by
-            // silent token calls. Only token-acquisition flows (AcquireTokenForClient, OBO, etc.)
-            // are supported.
-            if (builder is GetAuthorizationRequestUrlParameterBuilder)
-            {
-                throw new MsalClientException(
-                    MsalError.InvalidRequest,
-                    "WithClientClaims is not supported for GetAuthorizationRequestUrl. " +
-                    "Client claims are intended for token-acquisition flows (AcquireTokenForClient, AcquireTokenOnBehalfOf).");
-            }
-
-            // User-token flows (auth code, username/password, federated identity) cache tokens
-            // that AcquireTokenSilent would later retrieve — but AcquireTokenSilent has no
-            // WithClientClaims equivalent, so those tokens can never be found silently. Block
-            // these flows to avoid permanent cache pollution.
-            if (builder is AcquireTokenByAuthorizationCodeParameterBuilder ||
-                builder is AcquireTokenByUsernameAndPasswordConfidentialParameterBuilder ||
-                builder is AcquireTokenByUserFederatedIdentityCredentialParameterBuilder)
-            {
-                throw new MsalClientException(
-                    MsalError.InvalidRequest,
-                    "WithClientClaims is not supported for user-token flows (AcquireTokenByAuthorizationCode, " +
-                    "AcquireTokenByUsernameAndPassword, AcquireTokenByUserFederatedIdentityCredential). " +
-                    "Use WithClientClaims with AcquireTokenForClient or AcquireTokenOnBehalfOf.");
-            }
-
             builder.ValidateUseOfExperimentalFeature();
 
-            string normalized = ClaimsHelper.NormalizeClaimsJson(claimsJson);
-            builder.CommonParameters.ClientClaims = normalized;
+            builder.CommonParameters.ClientClaims = claimsJson;
 
             // Use indexer (not SortedList.Add) so repeated calls are last-write-wins rather than throwing.
             builder.CommonParameters.CacheKeyComponents ??= new SortedList<string, Func<CancellationToken, Task<string>>>();
-            builder.CommonParameters.CacheKeyComponents["client_claims"] = _ => Task.FromResult(normalized);
+            builder.CommonParameters.CacheKeyComponents["client_claims"] = _ => Task.FromResult(claimsJson);
 
             return (T)builder;
         }

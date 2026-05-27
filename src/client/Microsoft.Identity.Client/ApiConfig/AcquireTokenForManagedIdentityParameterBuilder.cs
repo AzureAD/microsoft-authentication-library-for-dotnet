@@ -8,7 +8,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
@@ -91,7 +90,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="claimsJson">A JSON string containing the client claims. Must be valid JSON.</param>
         /// <returns>The builder to chain .With methods.</returns>
-        public AcquireTokenForManagedIdentityParameterBuilder WithClientClaims(string claimsJson)
+        public AcquireTokenForManagedIdentityParameterBuilder WithClaimsFromClient(string claimsJson)
         {
             if (string.IsNullOrWhiteSpace(claimsJson))
             {
@@ -100,11 +99,10 @@ namespace Microsoft.Identity.Client
 
             ValidateUseOfExperimentalFeature();
 
-            string normalized = ClaimsHelper.NormalizeClaimsJson(claimsJson);
-            CommonParameters.ClientClaims = normalized;
+            CommonParameters.ClientClaims = claimsJson;
 
             CommonParameters.CacheKeyComponents ??= new SortedList<string, Func<CancellationToken, Task<string>>>();
-            CommonParameters.CacheKeyComponents["client_claims"] = _ => Task.FromResult(normalized);
+            CommonParameters.CacheKeyComponents["client_claims"] = _ => Task.FromResult(claimsJson);
 
             return this;
         }
