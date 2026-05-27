@@ -458,6 +458,13 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
 
                     foreach (X509Certificate2 candidate in snapshot)
                     {
+                        if (candidate is null)
+                        {
+                            // Defensive: snapshot slot may be null if the store enumeration
+                            // yielded fewer items than Certificates.Count reported (TOCTOU).
+                            continue;
+                        }
+
                         try
                         {
                             inspected++;

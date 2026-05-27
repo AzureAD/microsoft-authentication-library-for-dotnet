@@ -46,6 +46,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         {
             value = default;
 
+            if (isOrphaned is null)
+            {
+                throw new ArgumentNullException(nameof(isOrphaned));
+            }
+
             try
             {
                 using var store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
@@ -152,6 +157,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 
         private static void RemoveByThumbprints(string alias, List<string> thumbprints, ILoggerAdapter logger)
         {
+            var thumbprintSet = new HashSet<string>(thumbprints, StringComparer.OrdinalIgnoreCase);
+
             InterprocessLock.TryWithAliasLock(
                 alias,
                 timeout: TimeSpan.FromMilliseconds(300),
@@ -169,7 +176,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                         {
                             try
                             {
-                                if (thumbprints.Contains(cert.Thumbprint))
+                                if (thumbprintSet.Contains(cert.Thumbprint))
                                 {
                                     store.Remove(cert);
                                     removed++;
