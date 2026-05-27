@@ -1,10 +1,10 @@
-# WithClientClaims API Design
+# WithClaimsFromClient API Design
 
 ## Background
 
 Azure Redis Cache operates in a Backing resource VM/VMSS and uses MSAL with Managed Identity credentials to acquire tokens from ESTS. The Redis team has requested that MSAL support sending NSP (Network Security Perimeter) claims to IMDS, so that the resulting tokens contain the NSP claim required to access NSP-protected resources.
 
-This document proposes a new `WithClientClaims()` API to support this scenario in a consistent, safe, and harmonized way across all MSAL auth flows.
+This document proposes a new `WithClaimsFromClient()` API to support this scenario in a consistent, safe, and harmonized way across all MSAL auth flows.
 
 ## Scope and Initial Rollout
 
@@ -45,22 +45,22 @@ For the NSP scenario, claims need to be sent to IMDS as a query parameter **and*
 
 ### MSIv2 (IMDS v2)
 
-MSIv2 uses a different protocol from MSIv1. It acquires an mTLS binding certificate from IMDS, then makes a POST directly to an ESTS token endpoint (`/oauth2/v2.0/token`). The MSIv2 design for `WithClientClaims` is not finalized — the IMDS team is still working on it. See the **ETAs** section.
+MSIv2 uses a different protocol from MSIv1. It acquires an mTLS binding certificate from IMDS, then makes a POST directly to an ESTS token endpoint (`/oauth2/v2.0/token`). The MSIv2 design for `WithClaimsFromClient` is not finalized — the IMDS team is still working on it. See the **ETAs** section.
 
-## Proposed API: `WithClientClaims(string claimsJson)`
+## Proposed API: `WithClaimsFromClient(string claimsJson)`
 
-Add `WithClientClaims(string claimsJson)` across the MSI, client credentials, and FIC request builders.
+Add `WithClaimsFromClient(string claimsJson)` across the MSI, client credentials, and FIC request builders.
 
 ### Naming note: coexistence with the existing obsolete `WithClientClaims`
 
-`ConfidentialClientApplicationBuilder` already has an **obsolete, app-level** `WithClientClaims(X509Certificate2, IDictionary<string,string>, ...)` that signs extra claims into the client assertion JWT. The new API described here is a **request-level** method on `AcquireTokenForManagedIdentityParameterBuilder` and `AcquireTokenForClientParameterBuilder` that takes a JSON string. The two APIs are on different classes with different signatures and coexist without ambiguity. The obsolete app-level overload remains for backward compatibility and is unaffected by this change.
+`ConfidentialClientApplicationBuilder` already has an **obsolete, app-level** `WithClientClaims(X509Certificate2, IDictionary<string,string>, ...)` that signs extra claims into the client assertion JWT. To avoid any confusion with that existing certificate-based overload, the new API is named **`WithClaimsFromClient`** (Bogdan's suggestion, agreed across teams). It is a **request-level** method on `AcquireTokenForManagedIdentityParameterBuilder` and `AcquireTokenForClientParameterBuilder` that takes a JSON string. The two APIs are on different classes with different names and signatures and coexist without ambiguity. The obsolete app-level overload remains for backward compatibility and is unaffected by this change.
 
 ### Distinction from `WithClaims()`
 
 | API | Who originates | Cache behavior | Use case |
 |---|---|---|---|
 | `WithClaims()` | Server (ESTS / web API challenge) | Bypasses cache | CAE, MFA step-up |
-| `WithClientClaims()` | Client application | Cached, keyed on claims value | NSP, Step-Up |
+| `WithClaimsFromClient()` | Client application | Cached, keyed on claims value | NSP, Step-Up |
 
 ### Key Behaviors
 
@@ -71,11 +71,11 @@ Add `WithClientClaims(string claimsJson)` across the MSI, client credentials, an
    - MSIv2: body parameter in the ESTS POST request *(design pending IMDS team confirmation)*
    - Cert-based / FIC: `claims` body parameter sent to ESTS — **not** embedded in the client assertion JWT
 
-3. **CCA: claims go in the request body, not the JWT.** For confidential client flows, `WithClientClaims` sends the NSP claim as a standard ESTS `claims` body parameter. It is **not** placed inside the signed client assertion JWT. The existing `WithExtraClientAssertionClaims` API (separate, unrelated) handles the JWT-embedding path. These two APIs are distinct and serve different purposes.
+3. **CCA: claims go in the request body, not the JWT.** For confidential client flows, `WithClaimsFromClient` sends the NSP claim as a standard ESTS `claims` body parameter. It is **not** placed inside the signed client assertion JWT. The existing `WithExtraClientAssertionClaims` API (separate, unrelated) handles the JWT-embedding path. These two APIs are distinct and serve different purposes.
 
-4. **MSAL owns the JSON merge.** If a server-issued claims challenge (e.g., CAE) arrives while `WithClientClaims` is set, MSAL merges the two claims objects using the existing `ClaimsHelper` infrastructure. This infrastructure already performs JSON merging for cert-based flows today.
+4. **MSAL owns the JSON merge.** If a server-issued claims challenge (e.g., CAE) arrives while `WithClaimsFromClient` is set, MSAL merges the two claims objects using the existing `ClaimsHelper` infrastructure. This infrastructure already performs JSON merging for cert-based flows today.
 
-5. **Stable claims only.** Callers should avoid dynamic values (timestamps, nonces) in the claims string — each unique claims value creates a distinct cache entry, and frequently changing values will create an unbounded cache.
+5. **Stable claims only — caller passes the exact same string each call.** MSAL does **not** parse, sort, or normalize the claims JSON. The raw string the caller provides is used verbatim as part of the cache key. If a caller passes `{"a":1}` on one call and `{ "a" : 1 }` on the next, those will be treated as two different cache entries. This keeps the hot path allocation-free and avoids penalizing the 99% of callers who pass a single canonical string for the cost of normalizing for the 1% who would not. Callers should also avoid dynamic values (timestamps, nonces) in the claims string — each unique value creates a distinct cache entry, and frequently changing values will create an unbounded cache.
 
 ### MSIv1 claim restriction
 
@@ -92,13 +92,13 @@ If dynamic claims truly cannot be avoided, the following options are available (
 | `IncludeInCacheKey: false` via `WithExtraQueryParameters` | Claims sent with the request but excluded from the cache key | Cached token may not satisfy the current claims requirement — incorrect for security-sensitive claims |
 | `WithClaims()` (existing) | Always bypass the cache | Hits IMDS on every call; will cause throttling for high-throughput workloads like Redis |
 | Disable internal cache (`CacheOptions.DisableInternalCacheOptions`) | Caller manages their own cache externally | Maximum flexibility, maximum complexity |
-| Caller normalizes claims | Strip dynamic fields before passing to `WithClientClaims`; send dynamic parts separately via `WithExtraQueryParameters` with `IncludeInCacheKey: false` | Requires caller to understand the claims structure |
+| Caller normalizes claims | Strip dynamic fields before passing to `WithClaimsFromClient`; send dynamic parts separately via `WithExtraQueryParameters` with `IncludeInCacheKey: false` | Requires caller to understand the claims structure |
 
 For the NSP use case specifically, the claims represent a network security perimeter identifier, which is stable per workload deployment. Dynamic values are not expected to be an issue here.
 
 ### Why the API is request-level, not app-level
 
-`WithClientClaims` is intentionally placed on the request builder, not the application builder, to support scenarios where claims change at runtime — for example, when an admin toggles NSP enforcement mode, the NSP SDK vends updated claims and the workload needs MSAL to acquire a new token scoped to those claims. If claims were baked into the application object, the caller would have to destroy and recreate the `ManagedIdentityApplication` on every enforcement change.
+`WithClaimsFromClient` is intentionally placed on the request builder, not the application builder, to support scenarios where claims change at runtime — for example, when an admin toggles NSP enforcement mode, the NSP SDK vends updated claims and the workload needs MSAL to acquire a new token scoped to those claims. If claims were baked into the application object, the caller would have to destroy and recreate the `ManagedIdentityApplication` on every enforcement change.
 
 Typical NSP usage:
 
@@ -109,7 +109,7 @@ string currentNspClaims = nspContext.GetCurrentClaimsJson();
 
 AuthenticationResult result = await miApp
     .AcquireTokenForManagedIdentity("https://management.azure.com/")
-    .WithClientClaims(currentNspClaims)
+    .WithClaimsFromClient(currentNspClaims)
     .ExecuteAsync(cancellationToken)
     .ConfigureAwait(false);
 ```
@@ -136,10 +136,11 @@ E2E testing requires the Redis Cache team's help because this feature is gated i
 
 | # | Question | Resolution |
 |---|----------|------------|
-| 1 | Is `WithClientClaims` the right name? | Yes — agreed across teams |
+| 1 | Is `WithClaimsFromClient` the right name? | Yes — agreed across teams (renamed from earlier `WithClientClaims` proposal to avoid clash with the obsolete certificate-based overload) |
 | 2 | CCA: request body or client assertion JWT? | **Request body only.** Claims are sent as the ESTS `claims` body parameter. They are not embedded in the signed client assertion JWT. |
 | 3 | MSIv1 claims param name | `claims` query parameter (OIDC standard), percent-encoded |
 | 4 | Rollout scope | MSIv1 first; MSIv2 and CCA follow once MSIv2 design is ready from IMDS team |
+| 5 | Does MSAL normalize/canonicalize the claims JSON? | **No.** MSAL stores the raw string verbatim and uses it as part of the cache key. It is the application's responsibility to pass a consistent string on each call. We will not penalize the 99% who already do that for the cost of normalizing for the 1% who would not. |
 
 ## Open Questions
 
