@@ -116,16 +116,25 @@ namespace Microsoft.Identity.Client
         {
             ValidateUseOfExperimentalFeature();
 
+            if (extraQueryParameters == null)
+            {
+                return this;
+            }
+
             if (Config.ExtraQueryParameters == null)
             {
-                Config.ExtraQueryParameters = extraQueryParameters;
+                Config.ExtraQueryParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             }
-            else
+
+            // All extra query parameters are included in the cache key so that callers
+            // cannot inadvertently bypass token caching by varying parameter values.
+            // See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/6030
+            Config.CacheKeyComponents = Config.CacheKeyComponents ?? new SortedList<string, string>();
+
+            foreach (var kvp in extraQueryParameters)
             {
-                foreach (var kvp in extraQueryParameters)
-                {
-                    Config.ExtraQueryParameters[kvp.Key] = kvp.Value; // This will overwrite if key exists, or add if new
-                }
+                Config.ExtraQueryParameters[kvp.Key] = kvp.Value;
+                Config.CacheKeyComponents[kvp.Key] = kvp.Value;
             }
 
             return this;

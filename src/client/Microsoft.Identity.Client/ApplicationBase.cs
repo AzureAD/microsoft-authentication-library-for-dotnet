@@ -64,6 +64,19 @@ namespace Microsoft.Identity.Client
 
             var cacheKeyComponents = await InitializeCacheKeyComponentsAsync(commonParameters.CacheKeyComponents, cancellationToken).ConfigureAwait(false);
 
+            // Merge any app-level cache key components (e.g. set via application-builder
+            // WithExtraQueryParameters when IncludeInCacheKey is true) so they participate
+            // in token cache key computation alongside the per-request components.
+            // See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/6030
+            if (ServiceBundle.Config.CacheKeyComponents != null && ServiceBundle.Config.CacheKeyComponents.Count > 0)
+            {
+                cacheKeyComponents = cacheKeyComponents ?? new SortedList<string, string>();
+                foreach (var kvp in ServiceBundle.Config.CacheKeyComponents)
+                {
+                    cacheKeyComponents[kvp.Key] = kvp.Value;
+                }
+            }
+
             return new AuthenticationRequestParameters(
                 ServiceBundle,
                 cache,
