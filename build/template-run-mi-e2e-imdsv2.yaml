@@ -45,9 +45,6 @@ steps:
     rerunFailedTests: true
     rerunMaxAttempts: '3'
     runInParallel: false
-    # Temporarily relaxed: all tests in (MI_E2E_ImdsV2|MI_E2E_ImdsV2_Attested) are currently
-    # [Ignore]d due to a test-infrastructure issue (AADSTS1000901). Restore failOnMinTestsNotRun: true
-    # when the tests are re-enabled. Tracking: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/6032
-    failOnMinTestsNotRun: false
-    minimumExpectedTests: '0'
+    failOnMinTestsNotRun: true
+    minimumExpectedTests: '1'
     testFiltercriteria: '(TestCategory=MI_E2E_ImdsV2|TestCategory=MI_E2E_ImdsV2_Attested)'
