@@ -278,7 +278,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         internal DateTimeOffset? RefreshOn { get; private set; }
 
-        internal DateTimeOffset CachedAt { get; private set; }
+        internal DateTimeOffset CachedAt { get; set; }
 
         public bool IsExtendedLifeTimeToken { get; set; }
 

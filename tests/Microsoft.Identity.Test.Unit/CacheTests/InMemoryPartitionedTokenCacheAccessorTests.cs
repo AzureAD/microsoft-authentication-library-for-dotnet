@@ -596,10 +596,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         public void BoundedCache_DefaultsToEnabled_Test()
         {
             // Locks in the default-on behavior: new CacheOptions() must yield bounding ON
-            // so callers who never set EnableAppCacheBounding get the bounded accessor.
+            // so callers who never set AppCacheMaxEntries get the bounded accessor.
             // Use a tiny override max so eviction is observable in the test.
             var opts = new CacheOptions { AppCacheMaxEntries = 10 };
-            Assert.IsTrue(opts.EnableAppCacheBounding, "EnableAppCacheBounding must default to true.");
 
             var accessor = new InMemoryPartitionedAppTokenCacheAccessor(new NullLogger(), opts);
 
@@ -618,8 +617,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void BoundedCache_Disabled_BehavesAsLegacy_Test()
         {
-            // Flag off: no bounding even past what would be a tiny threshold.
-            var opts = new CacheOptions { EnableAppCacheBounding = false, AppCacheMaxEntries = 5 };
+            // MaxEntries <= 0 triggers legacy off/disabled behavior: no bounding.
+            var opts = new CacheOptions { AppCacheMaxEntries = 0 };
             var accessor = new InMemoryPartitionedAppTokenCacheAccessor(new NullLogger(), opts);
 
             for (int i = 0; i < 50; i++)
@@ -635,7 +634,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void BoundedCache_NoEvictionUnderThreshold_Test()
         {
-            var opts = new CacheOptions { EnableAppCacheBounding = true, AppCacheMaxEntries = 100 };
+            var opts = new CacheOptions { AppCacheMaxEntries = 100 };
             var accessor = new InMemoryPartitionedAppTokenCacheAccessor(new NullLogger(), opts);
 
             for (int i = 0; i < 100; i++)
@@ -651,7 +650,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void BoundedCache_UpdateExistingDoesNotIncrement_Test()
         {
-            var opts = new CacheOptions { EnableAppCacheBounding = true, AppCacheMaxEntries = 5 };
+            var opts = new CacheOptions { AppCacheMaxEntries = 5 };
             var accessor = new InMemoryPartitionedAppTokenCacheAccessor(new NullLogger(), opts);
 
             var item = TokenCacheHelper.CreateAccessTokenItem();
@@ -668,8 +667,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         public void BoundedCache_EvictsWhenOverThreshold_Test()
         {
             // Small max so we cross the threshold quickly and deterministically.
-            // lowWatermark = max(1, (int)(10 * 0.95)) = 9
-            var opts = new CacheOptions { EnableAppCacheBounding = true, AppCacheMaxEntries = 10 };
+            // lowWatermark = max(1, (int)(10 * 0.75)) = 7
+            var opts = new CacheOptions { AppCacheMaxEntries = 10 };
             var accessor = new InMemoryPartitionedAppTokenCacheAccessor(new NullLogger(), opts);
 
             // Insert 30 distinct entries. Each save runs synchronously; when count > 10
@@ -692,8 +691,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             // Smallest practical cache: max = 3 so eviction kicks in almost immediately
             // and we can observe specific entries being deleted.
-            // lowWatermark = max(1, (int)(3 * 0.95)) = 2.
-            var opts = new CacheOptions { EnableAppCacheBounding = true, AppCacheMaxEntries = 3 };
+            // lowWatermark = max(1, (int)(3 * 0.75)) = 2.
+            var opts = new CacheOptions { AppCacheMaxEntries = 3 };
             var accessor = new InMemoryPartitionedAppTokenCacheAccessor(new NullLogger(), opts);
 
             // Insert 8 distinct entries with a small delay so CachedAt is strictly ordered
@@ -736,7 +735,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void BoundedCache_EvictsExpiredPreferentially_Test()
         {
-            var opts = new CacheOptions { EnableAppCacheBounding = true, AppCacheMaxEntries = 10 };
+            var opts = new CacheOptions { AppCacheMaxEntries = 10 };
             var accessor = new InMemoryPartitionedAppTokenCacheAccessor(new NullLogger(), opts);
 
             // Seed 8 expired entries (under threshold, no eviction yet).
@@ -776,7 +775,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void BoundedCache_DeleteStillDecrementsCount_Test()
         {
-            var opts = new CacheOptions { EnableAppCacheBounding = true, AppCacheMaxEntries = 100 };
+            var opts = new CacheOptions { AppCacheMaxEntries = 100 };
             var accessor = new InMemoryPartitionedAppTokenCacheAccessor(new NullLogger(), opts);
 
             var item = TokenCacheHelper.CreateAccessTokenItem();
@@ -790,7 +789,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void BoundedCache_ClearResetsCount_Test()
         {
-            var opts = new CacheOptions { EnableAppCacheBounding = true, AppCacheMaxEntries = 100 };
+            var opts = new CacheOptions { AppCacheMaxEntries = 100 };
             var accessor = new InMemoryPartitionedAppTokenCacheAccessor(new NullLogger(), opts);
 
             for (int i = 0; i < 20; i++)
@@ -810,7 +809,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             // Each save runs eviction synchronously when it observes count > max, so the
             // final state after all parallel saves return must respect the bound.
-            var opts = new CacheOptions { EnableAppCacheBounding = true, AppCacheMaxEntries = 50 };
+            var opts = new CacheOptions { AppCacheMaxEntries = 50 };
             var accessor = new InMemoryPartitionedAppTokenCacheAccessor(new NullLogger(), opts);
 
             Parallel.For(0, 500, i =>
@@ -843,7 +842,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             // Edge case: max=0 with flag on must behave as disabled (constructor check
             // requires AppCacheMaxEntries > 0). Inserting past 0 must not crash, must not
             // evict, and the count must keep growing.
-            var opts = new CacheOptions { EnableAppCacheBounding = true, AppCacheMaxEntries = 0 };
+            var opts = new CacheOptions { AppCacheMaxEntries = 0 };
             var accessor = new InMemoryPartitionedAppTokenCacheAccessor(new NullLogger(), opts);
 
             for (int i = 0; i < 25; i++)
@@ -856,6 +855,125 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [TestMethod]
+        public void BoundedCache_500k_SerialInserts_NeverExceedMax_Test()
+        {
+            // Stress: 500k serial inserts against a cache capped at 500k.
+            // Verifies eviction keeps the count at or below the ceiling throughout.
+            const int max = 500_000;
+            var opts = new CacheOptions { AppCacheMaxEntries = max };
+            var accessor = new InMemoryPartitionedAppTokenCacheAccessor(new NullLogger(), opts);
+
+            // Arrange
+            for (int i = 0; i < max; i++)
+            {
+                accessor.SaveAccessToken(TokenCacheHelper.CreateAccessTokenItem(
+                    scopes: "scope" + i, tenant: "tenant" + i));
+            }
+
+            // Act: insert 10k more on a full cache — should keep triggering eviction.
+            for (int i = max; i < max + 10_000; i++)
+            {
+                accessor.SaveAccessToken(TokenCacheHelper.CreateAccessTokenItem(
+                    scopes: "scope" + i, tenant: "tenant" + i));
+            }
+
+            // Assert: bound must hold and counter must match actual dictionary contents.
+            int actualCount = accessor.AccessTokenCacheDictionary.Sum(p => p.Value.Count);
+            Assert.IsLessThanOrEqualTo(
+                max,
+                accessor.EntryCount,
+                $"EntryCount {accessor.EntryCount} exceeded max {max} after 510k serial inserts.");
+            Assert.AreEqual(accessor.EntryCount, actualCount, "EntryCount drifted from actual dictionary count.");
+        }
+
+        [TestMethod]
+        public void BoundedCache_50k_ConcurrentInserts_CountNeverDrifts_Test()
+        {
+            // Stress: 50k parallel inserts against a 50k-bounded cache.
+            // Verifies that the lock-free eviction CAS and Interlocked counter stay coherent
+            // under heavy thread contention.
+            const int max = 50_000;
+            var opts = new CacheOptions { AppCacheMaxEntries = max };
+            var accessor = new InMemoryPartitionedAppTokenCacheAccessor(new NullLogger(), opts);
+
+            // Arrange + Act
+            Parallel.For(0, max + 5_000, i =>
+            {
+                accessor.SaveAccessToken(TokenCacheHelper.CreateAccessTokenItem(
+                    scopes: "scope" + i, tenant: "tenant" + i));
+            });
+
+            // Settle: one final serial save ensures any in-flight eviction has completed.
+            accessor.SaveAccessToken(TokenCacheHelper.CreateAccessTokenItem(
+                scopes: "settle-scope", tenant: "settle-tenant"));
+
+            // Assert: bound must hold.
+            Assert.IsLessThanOrEqualTo(
+                max,
+                accessor.EntryCount,
+                $"EntryCount {accessor.EntryCount} exceeded max {max} after concurrent 55k inserts.");
+
+            // Assert: counter must match dictionary reality.
+            int actualCount = accessor.AccessTokenCacheDictionary.Sum(p => p.Value.Count);
+            Assert.AreEqual(accessor.EntryCount, actualCount,
+                "EntryCount drifted from actual dictionary contents under concurrent load.");
+        }
+
+        [TestMethod]
+        public void BoundedCache_ContinuousEviction_ReadsAlwaysSucceed_Test()
+        {
+            // Stress: verify that GetAllAccessTokens never throws or returns null
+            // while the eviction path is running concurrently with saves.
+            const int max = 1_000;
+            var opts = new CacheOptions { AppCacheMaxEntries = max };
+            var accessor = new InMemoryPartitionedAppTokenCacheAccessor(new NullLogger(), opts);
+
+            // Pre-fill to capacity.
+            for (int i = 0; i < max; i++)
+            {
+                accessor.SaveAccessToken(TokenCacheHelper.CreateAccessTokenItem(
+                    scopes: "scope" + i, tenant: "tenant" + i));
+            }
+
+            var writeErrors = new System.Collections.Concurrent.ConcurrentBag<System.Exception>();
+            var readErrors  = new System.Collections.Concurrent.ConcurrentBag<System.Exception>();
+
+            // Writer thread: hammer inserts above the limit to trigger evictions continuously.
+            var writer = System.Threading.Tasks.Task.Run(() =>
+            {
+                for (int i = max; i < max + 5_000; i++)
+                {
+                    try
+                    {
+                        accessor.SaveAccessToken(TokenCacheHelper.CreateAccessTokenItem(
+                            scopes: "scope" + i, tenant: "tenant" + i));
+                    }
+                    catch (System.Exception ex) { writeErrors.Add(ex); }
+                }
+            });
+
+            // Reader thread: reads must never crash, even if eviction is concurrently removing items.
+            var reader = System.Threading.Tasks.Task.Run(() =>
+            {
+                for (int r = 0; r < 500; r++)
+                {
+                    try
+                    {
+                        var tokens = accessor.GetAllAccessTokens();
+                        Assert.IsNotNull(tokens, "GetAllAccessTokens must never return null.");
+                    }
+                    catch (System.Exception ex) { readErrors.Add(ex); }
+                }
+            });
+
+            System.Threading.Tasks.Task.WaitAll(writer, reader);
+
+            Assert.IsEmpty(writeErrors, $"Write errors during eviction stress: {string.Join("; ", writeErrors)}");
+            Assert.IsEmpty(readErrors,  $"Read errors during eviction stress: {string.Join("; ", readErrors)}");
+            Assert.IsLessThanOrEqualTo(max, accessor.EntryCount, "Bound violated after concurrent read/write stress.");
+        }
+
+        [TestMethod]
         public void BoundedCache_MaxEntriesIntMaxValue_DoesNotOverflow_Test()
         {
             // Edge case: int.MaxValue is the largest legal setting. lowWatermark is
@@ -863,7 +981,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             // bounded by (count - target) * 16 which can never overflow because
             // (count - target) <= 0.05 * int.MaxValue. This test just exercises the
             // constructor and a few inserts to make sure no exception is thrown.
-            var opts = new CacheOptions { EnableAppCacheBounding = true, AppCacheMaxEntries = int.MaxValue };
+            var opts = new CacheOptions { AppCacheMaxEntries = int.MaxValue };
             var accessor = new InMemoryPartitionedAppTokenCacheAccessor(new NullLogger(), opts);
 
             for (int i = 0; i < 10; i++)
@@ -879,7 +997,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         public void BoundedCache_SharedCache_EvictsWhenOverThreshold_Test()
         {            // Shared-cache mode uses the static dictionary and the static eviction flag.
             // This test locks in that bounding works through that path and that
-            // ClearStaticCacheForTest properly resets both s_entryCount and s_evictionRunning
+            // ClearStaticCacheForTest properly resets both runtime counters and shared config invariant state
             // between tests.
             InMemoryPartitionedAppTokenCacheAccessor.ClearStaticCacheForTest();
             try
@@ -887,7 +1005,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 var opts = new CacheOptions
                 {
                     UseSharedCache = true,
-                    EnableAppCacheBounding = true,
                     AppCacheMaxEntries = 10
                 };
                 var accessor = new InMemoryPartitionedAppTokenCacheAccessor(new NullLogger(), opts);
@@ -910,6 +1027,105 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             {
                 InMemoryPartitionedAppTokenCacheAccessor.ClearStaticCacheForTest();
             }
+        }
+
+        [TestMethod]
+        public void BoundedCache_SharedCache_MismatchedSettings_Throws_Test()
+        {
+            InMemoryPartitionedAppTokenCacheAccessor.ClearStaticCacheForTest();
+            try
+            {
+                var baseline = new CacheOptions
+                {
+                    UseSharedCache = true,
+                    AppCacheMaxEntries = 10
+                };
+
+                _ = new InMemoryPartitionedAppTokenCacheAccessor(new NullLogger(), baseline);
+
+                var mismatch = new CacheOptions
+                {
+                    UseSharedCache = true,
+                    AppCacheMaxEntries = 0
+                };
+
+                Assert.Throws<System.InvalidOperationException>(
+                    () => new InMemoryPartitionedAppTokenCacheAccessor(new NullLogger(), mismatch));
+            }
+            finally
+            {
+                InMemoryPartitionedAppTokenCacheAccessor.ClearStaticCacheForTest();
+            }
+        }
+
+        [TestMethod]
+        public void BoundedCache_EvictsOlderAndPreservesNewest_Test()
+        {
+            // Set max entries to 50,000 as requested.
+            const int max = 50_000;
+            var opts = new CacheOptions { AppCacheMaxEntries = max };
+            var accessor = new InMemoryPartitionedAppTokenCacheAccessor(new NullLogger(), opts);
+
+            // Populate the cache sequentially with 50,000 entries.
+            // We simulate a strict timeline by spreading CachedAt timestamps or letting natural order flow.
+            // To make sure CachedAt timestamps strictly advance, we can set them manually 
+            // or let them reflect a tight sequence (MsalAccessTokenCacheItem has a CachedAt property).
+            var items = new MsalAccessTokenCacheItem[max + 1];
+            for (int i = 0; i <= max; i++)
+            {
+                var item = TokenCacheHelper.CreateAccessTokenItem(
+                    scopes: "scope" + i, tenant: "tenant" + i);
+                // Assign an advancing creation timestamp so that LRU has clear order.
+                item.CachedAt = System.DateTimeOffset.UtcNow.AddSeconds(i - max);
+                items[i] = item;
+            }
+
+            // Save the first 50,000. No eviction should be triggered.
+            for (int i = 0; i < max; i++)
+            {
+                accessor.SaveAccessToken(items[i]);
+            }
+            Assert.AreEqual(max, accessor.EntryCount, "No eviction should have run yet.");
+
+            // Save the 50,001st entry. This must trigger eviction down to the 75% low watermark (37,500 entries).
+            accessor.SaveAccessToken(items[max]);
+
+            // Bound must hold (<= 50,000 entries, target is ~37,500 entries).
+            Assert.IsLessThanOrEqualTo(max, accessor.EntryCount, "Cache failed to bound under the maximum cap.");
+
+            var remaining = accessor.GetAllAccessTokens();
+            var remainingScopes = new System.Collections.Generic.HashSet<string>(remaining.Select(t => t.ScopeString));
+
+            // Verify that the extremely fresh/newly-inserted ones are preserved.
+            // Let's check the last 1,000 items (indices 49,001 to 50,000). None of them should be evicted.
+            int newestPreservedCount = 0;
+            for (int i = max - 1000; i <= max; i++)
+            {
+                if (remainingScopes.Contains("scope" + i))
+                {
+                    newestPreservedCount++;
+                }
+            }
+
+            // Output the verification results for the user.
+            System.Console.WriteLine($"--- Eviction Summary for 50,000 cache capacity ---");
+            System.Console.WriteLine($"Total remaining entries in cache: {remaining.Count}");
+            System.Console.WriteLine($"Out of the most recent 1,000 entries (indices {max - 1000} to {max}), {newestPreservedCount} are still preserved in the cache.");
+
+            // Assert that 100% of the last 1,000 entries are preserved (since they are the newest by CachedAt).
+            Assert.AreEqual(1001, newestPreservedCount, "Not all of the latest 1,000 entries were preserved! Bounded eviction must respect LRU.");
+
+            // Let's also assert that evictions targeted the older half of the cache.
+            int olderEvectedCount = 0;
+            for (int i = 0; i < 5000; i++)
+            {
+                if (!remainingScopes.Contains("scope" + i))
+                {
+                    olderEvectedCount++;
+                }
+            }
+            System.Console.WriteLine($"Out of the oldest 5,000 entries, {olderEvectedCount} were successfully evicted to free up space.");
+            Assert.IsGreaterThan(0, olderEvectedCount, "No older entries were evicted. Expired-first / LRU policy failed to target older entries.");
         }
 
         #endregion

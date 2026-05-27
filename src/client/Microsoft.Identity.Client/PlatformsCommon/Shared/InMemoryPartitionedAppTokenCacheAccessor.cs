@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using Microsoft.Identity.Client.Cache;
@@ -38,6 +39,12 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         private int _entryCount = 0;
         private static int s_entryCount = 0;
 
+        // Shared-cache configuration invariant: all accessors that use shared mode must agree
+        // on bounded-cache settings so they do not disagree on thresholds for the same static store.
+        private static readonly object s_sharedCacheConfigLock = new object();
+        private static bool s_sharedCacheConfigInitialized = false;
+        private static int s_sharedMaxEntries = 0;
+
         // Bounded-mode coordination. Eviction is single-threaded via a CAS flag
         // (0 = idle, 1 = running). Other threads observing the threshold while
         // eviction is running skip the trigger and let the in-progress pass do the work.
@@ -65,6 +72,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         // are tiny and the cap is essentially never hit in normal use.
         private const int EvictionSampleSize = 8;
         private const int ReservoirScanCap = 64;
+        private const int MaxEvictionPassesPerTrigger = 3;
 
         public int EntryCount => GetEntryCountRef();
        
@@ -86,12 +94,13 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
                 AppMetadataDictionary = new ConcurrentDictionary<string, MsalAppMetadataCacheItem>();
             }
 
-            _boundedEnabled = _tokenCacheAccessorOptions.EnableAppCacheBounding
-                              && _tokenCacheAccessorOptions.AppCacheMaxEntries > 0;
+            _boundedEnabled = _tokenCacheAccessorOptions.AppCacheMaxEntries > 0;
             _maxEntries = _tokenCacheAccessorOptions.AppCacheMaxEntries;
             _lowWatermark = _boundedEnabled
-                ? Math.Max(1, (int)(_maxEntries * 0.95))
+                ? Math.Max(1, (int)(_maxEntries * 0.75))
                 : 0;
+
+            EnsureSharedCacheInvariant();
         }
 
         #region Add
@@ -303,11 +312,37 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             return ref _tokenCacheAccessorOptions.UseSharedCache ? ref s_evictionRunning : ref _evictionRunning;
         }
 
+        private void EnsureSharedCacheInvariant()
+        {
+            if (!_tokenCacheAccessorOptions.UseSharedCache)
+            {
+                return;
+            }
+
+            lock (s_sharedCacheConfigLock)
+            {
+                if (!s_sharedCacheConfigInitialized)
+                {
+                    s_sharedMaxEntries = _maxEntries;
+                    s_sharedCacheConfigInitialized = true;
+                    return;
+                }
+
+                if (s_sharedMaxEntries != _maxEntries)
+                {
+                    throw new InvalidOperationException(
+                        "All shared-cache accessors must use identical bounded-cache settings. " +
+                        $"Expected AppCacheMaxEntries={s_sharedMaxEntries}; " +
+                        $"received AppCacheMaxEntries={_maxEntries}.");
+                }
+            }
+        }
+
         /// <summary>
         /// Attempts to start a single eviction pass. If another thread is already evicting,
         /// returns immediately — the in-progress pass will trim the cache, and subsequent
-        /// writes will trigger again if it is not enough.
-        /// </summary>
+        /// writes will trigger again if it is not enough. null
+        /// </summary> 
         private void TryEvict()
         {
             if (Interlocked.CompareExchange(ref GetEvictionRunningRef(), 1, 0) != 0)
@@ -317,7 +352,36 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
             try
             {
-                EvictDown();
+                var stopwatch = Stopwatch.StartNew();
+                int passes = 0;
+                int countBefore = GetEntryCountRef();
+
+                while (GetEntryCountRef() > _maxEntries && passes < MaxEvictionPassesPerTrigger)
+                {
+                    passes++;
+                    bool hitIterationCap = EvictDown();
+    
+                    if (hitIterationCap)
+                    {
+                        _logger.Warning(
+                            $"[Internal cache] Bounded app cache eviction pass {passes}/{MaxEvictionPassesPerTrigger} hit iteration cap. " +
+                            $"Current count={GetEntryCountRef()}, max={_maxEntries}, target={_lowWatermark}.");
+                    }
+                }
+
+                stopwatch.Stop();
+                int countAfter = GetEntryCountRef();
+
+                _logger.Info(() =>
+                    $"[Internal cache] Bounded app cache eviction trigger completed in {stopwatch.ElapsedMilliseconds} ms " +
+                    $"(passes: {passes}, count: {countBefore} -> {countAfter}, max: {_maxEntries}, target: {_lowWatermark}).");
+
+                if (countAfter > _maxEntries)
+                {
+                    _logger.Warning(
+                        $"[Internal cache] Bounded app cache remains above max after {passes} passes. " +
+                        $"Current count={countAfter}, max={_maxEntries}, target={_lowWatermark}. Subsequent writes will re-trigger eviction.");
+                }
             }
             finally
             {
@@ -331,20 +395,20 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         /// any expired sample is evicted immediately; otherwise the oldest by <c>CachedAt</c> is evicted.
         /// Loops until <see cref="_lowWatermark"/> is reached or a safety cap fires.
         /// </summary>
-        private void EvictDown()
+        private bool EvictDown()
         {
             int target = _lowWatermark;
             int countBefore = GetEntryCountRef();
             if (countBefore <= target)
             {
-                return;
+                return false;
             }
 
             // Snapshot only non-empty partitions so samples don't waste iterations on drained ones.
             string[] partitionKeys = SnapshotNonEmptyPartitionKeys();
             if (partitionKeys.Length == 0)
             {
-                return;
+                return false;
             }
 
             // Eviction runs single-threaded under the CAS flag, so a local Random is safe.
@@ -352,7 +416,8 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
             // Generous cap: empty partitions accumulate as we evict, so allow extra iterations
             // for misses. Still bounded \u2014 if we don't converge the next save re-triggers.
-            int iterCap = Math.Max(64, (GetEntryCountRef() - target) * 16);
+            // Capped at 20,000 to prevent CPU spikes or latency regressions on extreme bulk evictions.
+            int iterCap = Math.Min(20000, Math.Max(64, (GetEntryCountRef() - target) * 16));
             int refreshesLeft = 4;
             int iters = 0;
 
@@ -384,6 +449,8 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             _logger.Info(() =>
                 $"[Internal cache] Bounded app cache eviction trimmed {evicted} entries " +
                 $"(count: {countBefore} -> {countAfter}, target: {target}, max: {_maxEntries}, iterations: {capturedIters}).");
+
+            return capturedIters >= iterCap && countAfter > target;
         }
 
         private string[] SnapshotNonEmptyPartitionKeys()
@@ -509,6 +576,11 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             s_appMetadataDictionary.Clear();
             Interlocked.Exchange(ref s_entryCount, 0);
             Interlocked.Exchange(ref s_evictionRunning, 0);
+            lock (s_sharedCacheConfigLock)
+            {
+                s_sharedCacheConfigInitialized = false;
+                s_sharedMaxEntries = 0;
+            }
         }
     }
 }

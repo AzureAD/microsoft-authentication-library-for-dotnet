@@ -22,6 +22,7 @@ namespace Microsoft.Identity.Test.Performance
             try
             {
                 var results = BenchmarkSwitcher.FromTypes(new[] {
+                    typeof(BoundedAppCacheTests),
                     typeof(AcquireTokenForClientCacheTests),
                     typeof(AcquireTokenForOboCacheTests),
                     typeof(TokenCacheTests),

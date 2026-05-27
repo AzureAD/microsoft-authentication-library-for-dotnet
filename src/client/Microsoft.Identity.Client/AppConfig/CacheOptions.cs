@@ -89,29 +89,15 @@ namespace Microsoft.Identity.Client
         internal static bool IsDisabledFor(CacheOptions options) => options?.IsInternalCacheDisabled == true;
 
         /// <summary>
-        /// When <c>true</c>, the in-memory app token cache (client-credentials flow) is bounded
-        /// to <see cref="AppCacheMaxEntries"/> and uses approximate, sampled eviction
-        /// (expired entries are preferred; otherwise the oldest sampled entry by <c>CachedAt</c>).
-        /// Defaults to <c>true</c> with a cap of 2,000,000 entries; set to <c>false</c> to disable
-        /// and keep the legacy unbounded behavior.
-        /// </summary>
-        /// <remarks>
-        /// This value is snapshotted by the token cache accessor at construction time.
-        /// Mutating it after the accessor is built has no effect on that accessor; build a new
-        /// <see cref="CacheOptions"/> and a new accessor to change the setting.
-        /// </remarks>
-        internal bool EnableAppCacheBounding { get; set; } = true;
-
-        /// <summary>
-        /// Maximum number of access-token entries kept in the in-memory app token cache when
-        /// <see cref="EnableAppCacheBounding"/> is <c>true</c>. Defaults to 2,000,000.
-        /// When the count exceeds this value, eviction trims the cache down to ~95% of this value.
+        /// Maximum number of access-token entries kept in the in-memory app token cache. Defaults to 500,000.
+        /// Set to <c>0</c> or less to disable bounding and keep the legacy unbounded behavior.
+        /// When the count exceeds this value, eviction trims the cache down to ~75% of this value.
         /// </summary>
         /// <remarks>
         /// This value is snapshotted by the token cache accessor at construction time.
         /// Mutating it after the accessor is built has no effect on that accessor; build a new
         /// <see cref="CacheOptions"/> and a new accessor to change the limit.
         /// </remarks>
-        internal int AppCacheMaxEntries { get; set; } = 2_000_000;
+        public int AppCacheMaxEntries { get; set; } = 500_000;
     }
 }
