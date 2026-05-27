@@ -25,11 +25,11 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
     [TestClass]
     public class WithClaimsFromClientTests : TestBase
     {
-        // A simple NSP-style claims payload used across tests.
-        private const string NspClaims = @"{""nsp"":{""essential"":true}}";
+        // A simple NSP-style claims payload used across tests. MSIv1 only allows the `xms_az_nwperimid` key.
+        private const string NspClaims = @"{""xms_az_nwperimid"":{""essential"":true}}";
 
         // A second, distinct claims value used to exercise separate-cache-entry behaviour.
-        private const string OtherClaims = @"{""region"":{""value"":""eastus""}}";
+        private const string OtherClaims = @"{""xms_az_nwperimid"":{""values"":[""eastus""]}}";
 
         // ---------------------------------------------------------------------------------
         // Builder-level unit tests (no HTTP)
@@ -580,49 +580,15 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         // ---------------------------------------------------------------------------------
         // Invalid JSON
         // ---------------------------------------------------------------------------------
-
-        [TestMethod]
-        public void WithClaimsFromClient_InvalidJson_ThrowsMsalClientException()
-        {
-            // Arrange
-            using (new EnvVariableContext())
-            {
-                SetEnvironmentVariables(ManagedIdentitySource.Imds, ManagedIdentityTests.ImdsEndpoint);
-                var mi = ManagedIdentityApplicationBuilder
-                    .Create(ManagedIdentityId.SystemAssigned)
-                    .WithExperimentalFeatures(true)
-                    .Build();
-
-                // Act & Assert
-                MsalClientException ex = Assert.ThrowsExactly<MsalClientException>(
-                    () => mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                            .WithClaimsFromClient("not-valid-json"));
-
-                Assert.AreEqual(MsalError.InvalidJsonClaimsFormat, ex.ErrorCode);
-            }
-        }
-
-        [TestMethod]
-        public void WithClaimsFromClient_JsonNullLiteral_ThrowsMsalClientException()
-        {
-            // "null" is valid JSON but not a JSON object — must produce MsalClientException,
-            // not a raw NullReferenceException from JsonNode.AsObject().
-            using (new EnvVariableContext())
-            {
-                SetEnvironmentVariables(ManagedIdentitySource.Imds, ManagedIdentityTests.ImdsEndpoint);
-                var mi = ManagedIdentityApplicationBuilder
-                    .Create(ManagedIdentityId.SystemAssigned)
-                    .WithExperimentalFeatures(true)
-                    .Build();
-
-                // Act & Assert
-                MsalClientException ex = Assert.ThrowsExactly<MsalClientException>(
-                    () => mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                            .WithClaimsFromClient("null"));
-
-                Assert.AreEqual(MsalError.InvalidJsonClaimsFormat, ex.ErrorCode);
-            }
-        }
+        //
+        // Note: WithClaimsFromClient intentionally does NOT validate the JSON at builder time.
+        // Per reviewer feedback (Bogdan), MSAL stores the raw caller string verbatim and does no
+        // parsing on the hot path. Invalid JSON (e.g. "not-valid-json", "null") is forwarded as-is
+        // and will surface as an MsalServiceException from the wire when IMDS/ESTS rejects it, or
+        // as an MsalClientException from MergeClaimsObjects on cache miss when a server-issued
+        // claims challenge is also present. Builder-time fail-fast tests were removed when the
+        // NormalizeClaimsJson code path was deleted.
+        // ---------------------------------------------------------------------------------
 
         // ---------------------------------------------------------------------------------
         // Non-IMDS sources — builder behavior
