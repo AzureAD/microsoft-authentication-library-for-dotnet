@@ -69,9 +69,12 @@ namespace Microsoft.Identity.Client.Internal
             {
                 // InvalidOperationException is thrown by JsonNode.AsObject() when a value is
                 // valid JSON but not an object (e.g. an array or a scalar).
+                // Do not include the raw claims payload in the message — it may contain
+                // sensitive data; details remain available on the inner exception.
                 throw new MsalClientException(
                     MsalError.InvalidJsonClaimsFormat,
-                    MsalErrorMessage.InvalidJsonClaimsFormat(claims1),
+                    "The client_claims value is not valid JSON. Inspect the inner exception for parsing details. " +
+                    "See https://openid.net/specs/openid-connect-core-1_0.html#ClaimsParameter.",
                     ex);
             }
         }

@@ -714,6 +714,59 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
+        // ---------------------------------------------------------------------------------
+        // Override precedence — WithClientClaims must win over app-level
+        // WithExtraQueryParameters({"claims", ...}). Otherwise the cache key
+        // (partitioned on client_claims) and the wire request silently desync.
+        // ---------------------------------------------------------------------------------
+
+        [TestMethod]
+        public async Task WithClientClaims_Imds_TakesPrecedenceOverExtraQueryParametersClaimsAsync()
+        {
+                // Arrange — app is built with WithExtraQueryParameters({"claims": "EXTRA"}),
+                // then the request uses WithClientClaims(NspClaims). The mock handler only
+                // accepts the request-level value; if the app-level extra param wins instead
+                // (the bug), the mock will not match and the call throws.
+                using (new EnvVariableContext())
+                using (var httpManager = new MockHttpManager())
+                {
+                    SetEnvironmentVariables(ManagedIdentitySource.Imds, ManagedIdentityTests.ImdsEndpoint);
+
+                    var mi = ManagedIdentityApplicationBuilder
+                        .Create(ManagedIdentityId.SystemAssigned)
+                        .WithHttpManager(httpManager)
+                        .WithExperimentalFeatures(true)
+                        .WithExtraQueryParameters(new Dictionary<string, string>
+                        {
+                            ["claims"] = "EXTRA_QUERY_CLAIMS_THAT_MUST_NOT_WIN"
+                        })
+                        .Build();
+
+                    string normalizedClaims = Client.Internal.ClaimsHelper.NormalizeClaimsJson(NspClaims);
+                    httpManager.AddManagedIdentityMockHandler(
+                        ManagedIdentityTests.ImdsEndpoint,
+                        ManagedIdentityTests.Resource,
+                        MockHelpers.GetMsiSuccessfulResponse(),
+                        ManagedIdentitySource.Imds,
+                        extraQueryParameters: new Dictionary<string, string>
+                        {
+                            ["claims"] = Uri.EscapeDataString(normalizedClaims)
+                        });
+
+                    // Act
+                    var result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                        .WithClientClaims(NspClaims)
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
+
+                    // Assert — request was served by IdP, meaning the wire request matched
+                    // the mock's expected `claims=<normalizedClaims>` value (not the app-level
+                    // EXTRA value). This proves the request-level claim won and the cache key
+                    // (partitioned on client_claims) matches what went on the wire.
+                    Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+                }
+        }
+
     }
 }
 
