@@ -352,10 +352,11 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
             string once = ClaimsHelper.NormalizeClaimsJson(input);
             string twice = ClaimsHelper.NormalizeClaimsJson(once);
 
-            // Assert — order preserved
-            Assert.IsLessThan(once.IndexOf("3", StringComparison.Ordinal), once.IndexOf("1", StringComparison.Ordinal),
+            // Assert — order preserved. Assert.IsLessThan(upperBound, value) asserts value < upperBound,
+            // so to assert IndexOf("3") < IndexOf("1") we pass IndexOf("1") as upperBound.
+            Assert.IsLessThan(once.IndexOf("1", StringComparison.Ordinal), once.IndexOf("3", StringComparison.Ordinal),
                 "Numeric array element order must be preserved (3,1,2 → '3' appears before '1').");
-            Assert.IsLessThan(once.IndexOf("\"b\"", StringComparison.Ordinal), once.IndexOf("\"a\"", StringComparison.Ordinal),
+            Assert.IsLessThan(once.IndexOf("\"a\"", StringComparison.Ordinal), once.IndexOf("\"b\"", StringComparison.Ordinal),
                 "String array element order must be preserved (\"b\",\"a\" → '\"b\"' appears before '\"a\"').");
             Assert.AreEqual(once, twice, "Normalization must be idempotent.");
         }
