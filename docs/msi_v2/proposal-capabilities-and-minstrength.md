@@ -22,6 +22,7 @@ Separately, we may need a way to **assert** the minimum binding strength their a
 ### 1. New discovery API (capability-shaped name)
 
 ```csharp
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.ManagedIdentity;
 
 namespace Microsoft.Identity.Client
@@ -51,7 +52,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         // for callers that want to assert a floor via WithMinStrength(...).
         public MtlsBindingStrength MaxSupportedBindingStrength { get; }
     }
+}
 
+namespace Microsoft.Identity.Client.AppConfig
+{
+    // Shared by MI and confidential client, so it lives in AppConfig (not .ManagedIdentity).
     public enum MtlsBindingStrength
     {
         Bearer   = 0,  // .NET 4.6.2 (no PoP)
@@ -177,7 +182,8 @@ Open to swapping to the overload shape if the team prefers it — they're all va
 ## Open questions for the thread
 
 1. Dragos — does `WithMinStrength` as a floor-only assertion meet the no-downgrade goal? Or do you want the discovery API alone (no enforcement helper)?
-2. Should `MtlsBindingStrength` live in `Microsoft.Identity.Client.ManagedIdentity` or `Microsoft.Identity.Client.AppConfig`? It's shared by both MI and ConfClient.
-3. `WithMinStrength` shape — chained (current), overload, or options object? See *Alternatives considered* above.
+2. `WithMinStrength` shape — chained (current), overload, or options object? See *Alternatives considered* above.
 
-Note: `IsMtlsPopSupportedByHost` stays on `ManagedIdentityCapabilities` alongside `MaxSupportedBindingStrength`. The boolean is the single, callable check the Azure SDK chain already wants ("can this host do PoP at all?"); `MaxSupportedBindingStrength` is the finer-grained signal for callers that care about the strength tier.
+Notes:
+- `IsMtlsPopSupportedByHost` stays on `ManagedIdentityCapabilities` alongside `MaxSupportedBindingStrength`. The boolean is the single, callable check the Azure SDK chain already wants ("can this host do PoP at all?"); `MaxSupportedBindingStrength` is the finer-grained signal for callers that care about the strength tier.
+- `MtlsBindingStrength` lives in `Microsoft.Identity.Client.AppConfig` (it's shared by MI and confidential client).
