@@ -15,7 +15,7 @@
 
 The method name `GetManagedIdentitySource…` no longer describes what callers get back. Callers using it for capability decisions (Azure SDK, AKV SDK) read it as "tell me what this host can do," which is what we want — and the name should match.
 
-Separately, service teams (Dragos's ask) need a way to **assert** the minimum binding strength their app requires, so a CVM/TVM app accidentally deployed on a software-only host fails at build/request time instead of silently downgrading.
+Separately, we may need a way to **assert** the minimum binding strength their app requires, so a CVM/TVM app accidentally deployed on a software-only host fails at build/request time instead of silently downgrading.
 
 ## What
 
