@@ -19,7 +19,7 @@ This is enabled by the `SendCertificateOverMtls = true` option. When set:
 
 ## How to Opt In
 
-Two steps are required.
+The minimum configuration is a single call: pass `SendCertificateOverMtls = true` on `CertificateOptions`. MSAL's default HTTP factory handles the mTLS transport automatically. Step 2 below is only needed if you want to control the HTTP pipeline.
 
 ### Step 1 — Configure the credential
 
@@ -28,15 +28,17 @@ var cca = ConfidentialClientApplicationBuilder
     .Create(clientId)
     .WithAuthority($"https://login.microsoftonline.com/{tenantId}")
     .WithCertificate(cert, new CertificateOptions { SendCertificateOverMtls = true })
-    .WithHttpClientFactory(new MyMtlsHttpClientFactory(cert))  // see Step 2
+    // .WithHttpClientFactory(new MyMtlsHttpClientFactory(cert))  // optional — see Step 2
     .Build();
 ```
 
 `SendCertificateOverMtls` requires a certificate-based credential. Passing it with a client secret throws at `Build()` time.
 
-### Step 2 — Implement `IMsalMtlsHttpClientFactory`
+### Step 2 — (Optional) Implement `IMsalMtlsHttpClientFactory`
 
-MSAL calls `GetHttpClient(X509Certificate2)` to obtain an `HttpClient` that presents the client certificate during the TLS handshake. You must provide an implementation via `WithHttpClientFactory`.
+MSAL ships a default factory (`SimpleHttpClientFactory`) that implements `IMsalMtlsHttpClientFactory` and automatically creates an mTLS-capable `HttpClient` when required. **You do not need to call `WithHttpClientFactory` for mTLS to work.**
+
+Provide a custom factory only when you need control over the HTTP pipeline (e.g., proxies, custom handler chain, per-process `HttpClient` pooling). When you do, MSAL calls `GetHttpClient(X509Certificate2)` for every request and passes the cert for mTLS calls or `null` for non-mTLS calls (e.g., instance discovery). Your cert overload **must** handle the null case — otherwise the client certificate will be presented on every request, including discovery endpoints that don't expect it.
 
 ```csharp
 public class MyMtlsHttpClientFactory : IMsalMtlsHttpClientFactory
@@ -53,10 +55,13 @@ public class MyMtlsHttpClientFactory : IMsalMtlsHttpClientFactory
         _plainClient = new HttpClient();
     }
 
-    // Called for mTLS token requests (cert at TLS layer)
-    public HttpClient GetHttpClient(X509Certificate2 cert) => _mtlsClient;
+    // MSAL routes ALL requests through this overload when the factory is IMsalMtlsHttpClientFactory.
+    // Return the mTLS client only when a cert is supplied; otherwise return the plain client.
+    public HttpClient GetHttpClient(X509Certificate2 cert)
+        => cert == null ? _plainClient : _mtlsClient;
 
-    // Called for non-mTLS requests (e.g., instance discovery)
+    // Required by IMsalHttpClientFactory but not invoked by MSAL when the factory implements
+    // IMsalMtlsHttpClientFactory — the cert overload above is used for every request.
     public HttpClient GetHttpClient() => _plainClient;
 }
 ```
