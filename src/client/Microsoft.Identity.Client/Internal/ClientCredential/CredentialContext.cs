@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
@@ -63,14 +62,47 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         public ILoggerAdapter Logger { get; init; }
 
         /// <summary>
-        /// Certificate already resolved during preflight (by
-        /// <see cref="Microsoft.Identity.Client.ApiConfig.Parameters.MtlsPopParametersInitializer"/>)
-        /// and stashed on the active request. When set and <see cref="Mode"/> is
-        /// <see cref="CredentialTransportProtocol.Mtls"/>, credential implementations MUST
-        /// reuse this certificate instead of invoking their provider delegate again.
-        /// Honors the single-invocation principle stated on issue #5943.
+        /// Single factory used by both the runtime path
+        /// (<see cref="CredentialMaterialResolver"/>) and the preflight path
+        /// (<see cref="Microsoft.Identity.Client.ApiConfig.Parameters.MtlsPopParametersInitializer"/>)
+        /// to materialize a <see cref="CredentialContext"/>. Centralizing the construction
+        /// here ensures any new field on <see cref="CredentialContext"/> is wired through a
+        /// single choke-point instead of being duplicated across object initializers.
         /// </summary>
-        public X509Certificate2 PreResolvedCertificate { get; init; }
+        internal static CredentialContext Create(
+            string clientId,
+            string tokenEndpoint,
+            CredentialTransportProtocol mode,
+            string claims,
+            IEnumerable<string> clientCapabilities,
+            ICryptographyManager cryptographyManager,
+            bool sendX5C,
+            bool useSha2,
+            string extraClientAssertionClaims,
+            string clientAssertionFmiPath,
+            string authority,
+            string tenantId,
+            Guid correlationId,
+            ILoggerAdapter logger)
+        {
+            return new CredentialContext
+            {
+                ClientId = clientId,
+                TokenEndpoint = tokenEndpoint,
+                Mode = mode,
+                Claims = claims,
+                ClientCapabilities = clientCapabilities,
+                CryptographyManager = cryptographyManager,
+                SendX5C = sendX5C,
+                UseSha2 = useSha2,
+                ExtraClientAssertionClaims = extraClientAssertionClaims,
+                ClientAssertionFmiPath = clientAssertionFmiPath,
+                Authority = authority,
+                TenantId = tenantId,
+                CorrelationId = correlationId,
+                Logger = logger,
+            };
+        }
 
         /// <summary>
         /// Creates an <see cref="AssertionRequestOptions"/> from this context.

@@ -129,7 +129,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
 
             // Every supported credential returns a non-null cert in mTLS mode or throws. A null here
             // would indicate a credential that violated the Mode contract.
-            if (material.ResolvedCertificate == null)
+            if (material.ResolvedCertificate is null)
             {
                 throw new MsalClientException(
                     MsalError.MtlsCertificateNotProvided,
@@ -172,27 +172,26 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
             AuthorityInfo authorityInfo = serviceBundle.Config.Authority?.AuthorityInfo;
             string canonicalAuthority = authorityInfo?.CanonicalAuthority?.AbsoluteUri;
 
-            return new CredentialContext
-            {
-                ClientId = serviceBundle.Config.ClientId,
-                TokenEndpoint = canonicalAuthority,
-                Mode = mode,
-                Claims = p.Claims,
-                ClientCapabilities = serviceBundle.Config.ClientCapabilities,
-                CryptographyManager = serviceBundle.PlatformProxy.CryptographyManager,
-                SendX5C = serviceBundle.Config.SendX5C,
-                UseSha2 = authorityInfo?.IsSha2CredentialSupported ?? false,
-                ExtraClientAssertionClaims = null,
-                ClientAssertionFmiPath = p.ClientAssertionFmiPath,
-                Authority = canonicalAuthority,
-                // GetFirstPathSegment throws for non-AAD shapes; only set TenantId for AAD here.
-                TenantId = authorityInfo?.AuthorityType == AuthorityType.Aad
-                    ? AuthorityInfo.GetFirstPathSegment(authorityInfo.CanonicalAuthority)
-                    : null,
-                CorrelationId = p.CorrelationId,
-                Logger = serviceBundle.ApplicationLogger,
-                PreResolvedCertificate = null
-            };
+            // GetFirstPathSegment throws for non-AAD shapes; only set TenantId for AAD here.
+            string tenantId = authorityInfo?.AuthorityType == AuthorityType.Aad
+                ? AuthorityInfo.GetFirstPathSegment(authorityInfo.CanonicalAuthority)
+                : null;
+
+            return CredentialContext.Create(
+                clientId: serviceBundle.Config.ClientId,
+                tokenEndpoint: canonicalAuthority,
+                mode: mode,
+                claims: p.Claims,
+                clientCapabilities: serviceBundle.Config.ClientCapabilities,
+                cryptographyManager: serviceBundle.PlatformProxy.CryptographyManager,
+                sendX5C: serviceBundle.Config.SendX5C,
+                useSha2: authorityInfo?.IsSha2CredentialSupported ?? false,
+                extraClientAssertionClaims: null,
+                clientAssertionFmiPath: p.ClientAssertionFmiPath,
+                authority: canonicalAuthority,
+                tenantId: tenantId,
+                correlationId: p.CorrelationId,
+                logger: serviceBundle.ApplicationLogger);
         }
 
         private static AssertionRequestOptions CreateAssertionRequestOptions(
@@ -214,23 +213,38 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
             };
         }
 
+        /// <summary>
+        /// Enforces the mTLS PoP authority contract: when the configured authority is AAD,
+        /// it must be tenanted (i.e., not /common or /organizations). Runs AFTER the credential
+        /// provider so that credentials that cannot produce a certificate in mTLS mode
+        /// (e.g., client-secret, client-assertion) preserve the public
+        /// <see cref="MsalError.MtlsCertificateNotProvided"/> error-code contract before
+        /// authority-shape errors surface. See <see cref="InitExplicitMtlsPopAsync"/>.
+        /// </summary>
+        private static void ValidateAadAuthorityForPop(IServiceBundle serviceBundle)
+        {
+            AuthorityInfo authorityInfo = serviceBundle.Config.Authority?.AuthorityInfo;
+            if (authorityInfo?.AuthorityType != AuthorityType.Aad)
+            {
+                return;
+            }
+
+            string tenant = AuthorityInfo.GetFirstPathSegment(authorityInfo.CanonicalAuthority);
+            if (AadAuthority.IsCommonOrOrganizationsTenant(tenant))
+            {
+                throw new MsalClientException(
+                    MsalError.MissingTenantedAuthority,
+                    MsalErrorMessage.MtlsNonTenantedAuthorityNotAllowedMessage);
+            }
+        }
+
         private static async Task InitMtlsPopParametersAsync(
             AcquireTokenCommonParameters p,
             X509Certificate2 cert,
             IServiceBundle serviceBundle,
             CancellationToken ct = default)
         {
-            // AAD only validation
-            if (serviceBundle.Config.Authority.AuthorityInfo.AuthorityType == AuthorityType.Aad)
-            {
-                string tenant = AuthorityInfo.GetFirstPathSegment(serviceBundle.Config.Authority.AuthorityInfo.CanonicalAuthority);
-                if (AadAuthority.IsCommonOrOrganizationsTenant(tenant))
-                {
-                    throw new MsalClientException(
-                        MsalError.MissingTenantedAuthority,
-                        MsalErrorMessage.MtlsNonTenantedAuthorityNotAllowedMessage);
-                }
-            }
+            ValidateAadAuthorityForPop(serviceBundle);
 
             // If the current operation supports the AfterCredentialEvaluation lifecycle hook,
             // invoke it with the cert instead of replacing the operation. This enables

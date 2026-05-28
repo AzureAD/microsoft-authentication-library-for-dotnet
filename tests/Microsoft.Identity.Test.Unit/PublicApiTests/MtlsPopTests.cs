@@ -195,10 +195,12 @@ namespace Microsoft.Identity.Test.Unit
                     Assert.AreEqual(s_testCertificate.Thumbprint, result.BindingCertificate.Thumbprint);
 
                     // Provider must be invoked exactly once per mTLS PoP request.
-                    // Preflight resolves the cert and stashes it on the request; credential
-                    // material resolution reuses it via CredentialContext.PreResolvedCertificate.
-                    // This locks in the single-invocation principle from issue #5943.
-                    Assert.AreEqual(1, providerCallCount, "The certificate provider must be invoked exactly once per mTLS PoP token request (#5943 principle). If this assertion fails with count=2, the preflight-resolved cert is no longer being plumbed through CredentialContext.PreResolvedCertificate.");
+                    // Preflight (MtlsPopParametersInitializer) resolves the cert and stashes it
+                    // on the request; runtime (CredentialMaterialResolver.ResolveAsync) detects
+                    // the preflight-resolved cert on a certificate credential and short-circuits
+                    // the credential roundtrip. This locks in the single-invocation principle
+                    // from issue #5943.
+                    Assert.AreEqual(1, providerCallCount, "The certificate provider must be invoked exactly once per mTLS PoP token request (#5943 principle). If this assertion fails with count=2, the resolver short-circuit in CredentialMaterialResolver.ResolveAsync is no longer reusing the preflight-resolved certificate on requestParams.MtlsCertificate.");
                 }
             }
         }

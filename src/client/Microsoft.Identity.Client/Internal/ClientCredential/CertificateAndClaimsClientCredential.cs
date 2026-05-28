@@ -54,25 +54,13 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         {
             context.Logger.Verbose(() => $"[CertificateAndClaimsClientCredential] Mode={context.Mode}");
 
-            X509Certificate2 certificate;
-
-            if (context.Mode == CredentialTransportProtocol.Mtls && context.PreResolvedCertificate is not null)
-            {
-                // Honor the single-invocation principle (#5943): the certificate was already
-                // resolved at preflight by MtlsPopParametersInitializer and stashed on the
-                // request. Reuse it here instead of invoking the provider delegate again.
-                context.Logger.Verbose(() =>
-                    $"[CertificateAndClaimsClientCredential] Reusing preflight-resolved certificate " +
-                    $"(Thumbprint={context.PreResolvedCertificate.Thumbprint}); skipping provider invocation.");
-                certificate = context.PreResolvedCertificate;
-            }
-            else
-            {
-                // Regular (JWT-bearer) path or mTLS without a preflight-resolved cert:
-                // invoke the provider to resolve the certificate now.
-                certificate = await ResolveCertificateAsync(context, cancellationToken)
-                    .ConfigureAwait(false);
-            }
+            // Cert reuse (single-invocation per request, issue #5943) is handled in
+            // CredentialMaterialResolver.ResolveAsync, which short-circuits before invoking
+            // this method when a preflight-resolved cert is already on the request. This
+            // keeps the credential implementation focused on producing material and avoids
+            // bleeding per-request-cache state through the shared CredentialContext.
+            X509Certificate2 certificate = await ResolveCertificateAsync(context, cancellationToken)
+                .ConfigureAwait(false);
 
             if (context.Mode == CredentialTransportProtocol.Mtls)
             {
@@ -81,7 +69,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                 // Reject the misconfiguration here rather than silently re-purposing the cert.
                 // Subclasses (CertificateClientCredential, DynamicCertificateClientCredential)
                 // construct the base with claimsToSign: null and are unaffected by this guard.
-                if (_claimsToSign != null)
+                if (_claimsToSign is not null)
                 {
                     throw new MsalClientException(
                         MsalError.MtlsCertificateNotProvided,
