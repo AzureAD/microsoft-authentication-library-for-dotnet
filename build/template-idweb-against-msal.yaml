@@ -232,7 +232,10 @@ stages:
           $ErrorActionPreference = 'Stop'
 
           # Check 1: global packages cache holds our version.
-          $globalPackages = (& dotnet nuget locals global-packages --list) -replace '.*: *',''
+          # Parse the path with a non-greedy, anchored regex. The naive
+          # '.*: *' is greedy and on Windows eats up to the drive-letter
+          # colon (e.g. "C:\Users\...\.nuget\packages\" -> "\Users\...\").
+          $globalPackages = (& dotnet nuget locals global-packages --list) -replace '^.*?global-packages:\s*',''
           $msalCachePath = Join-Path $globalPackages "microsoft.identity.client/$(MsalLocalVersion)"
           if (-not (Test-Path $msalCachePath)) {
             Write-Error "Restore did not pull Microsoft.Identity.Client $(MsalLocalVersion) from the local feed. Expected cache path: $msalCachePath"
