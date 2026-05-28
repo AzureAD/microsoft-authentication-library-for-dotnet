@@ -485,7 +485,7 @@ namespace Microsoft.Identity.Client
             /// <summary>
             /// Figures out the authority based on the authority from the config and the authority from the request,
             /// and optionally the homeAccountTenantId, which has an impact on AcquireTokenSilent
-            /// If the request authority is consumers, organizations, or common, it should just be set an the app level.
+            /// If the request authority is "common" or "organizations", it should be set at the app level.
             /// The algorithm is:
             ///
             /// 1. If there is no request authority (i.e. no authority override), use the config authority.
