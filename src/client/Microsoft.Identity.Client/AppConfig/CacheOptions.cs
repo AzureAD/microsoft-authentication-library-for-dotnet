@@ -88,5 +88,16 @@ namespace Microsoft.Identity.Client
         /// </summary>
         internal static bool IsDisabledFor(CacheOptions options) => options?.IsInternalCacheDisabled == true;
 
+        /// <summary>
+        /// Maximum number of access-token entries kept in the in-memory app token cache. Defaults to 500,000.
+        /// Set to <c>0</c> or less to disable bounding and keep the legacy unbounded behavior.
+        /// When the count exceeds this value, eviction trims the cache down to ~75% of this value.
+        /// </summary>
+        /// <remarks>
+        /// This value is snapshotted by the token cache accessor at construction time.
+        /// Mutating it after the accessor is built has no effect on that accessor; build a new
+        /// <see cref="CacheOptions"/> and a new accessor to change the limit.
+        /// </remarks>
+        public int AppCacheMaxEntries { get; set; } = 500_000;
     }
 }

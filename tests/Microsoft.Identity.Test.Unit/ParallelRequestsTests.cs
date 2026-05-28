@@ -124,6 +124,74 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
+        public async Task BoundedCache_ParallelAcquisition_NoDeadlock_Test()
+        {
+            // Scenario: Cache limit is 10. Start with 9 tokens already pre-populated.
+            // Run 10 parallel AcquireTokenForClient requests.
+            // This force-triggers concurrent writes and synchronous EvictDown() trimming
+            // to make sure no deadlocks or exceptions occur under heavy thread concurrency.
+            const int Limit = 10;
+            const int ParallelTasks = 10;
+
+            ParallelRequestMockHandler httpManager = new();
+
+            // Set up a CCA with a custom bounded cache of size 10
+            var cca = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithAuthority("https://login.microsoftonline.com/common")
+                .WithClientSecret(TestConstants.ClientSecret)
+                .WithHttpManager(httpManager)
+                .WithCacheOptions(new CacheOptions
+                {
+                    AppCacheMaxEntries = Limit
+                })
+                .BuildConcrete();
+
+            // 1. Pre-populate the internal app cache with 9 entries (Limit - 1)
+            var internalAccessor = cca.AppTokenCacheInternal.Accessor;
+            for (int i = 0; i < Limit - 1; i++)
+            {
+                var item = TokenCacheHelper.CreateAccessTokenItem(
+                    scopes: "scope" + i,
+                    tenant: $"tenant_{i}");
+                internalAccessor.SaveAccessToken(item);
+            }
+
+            Assert.AreEqual(Limit - 1, internalAccessor.EntryCount, "Cache should have exactly Limit - 1 entries initially.");
+
+            // 2. Fire 10 parallel requests. Each request uses a unique tenant which translates
+            //    to a unique cache partition/entry, forcing concurrent writes and eviction passes.
+            var tasks = new List<Task<AuthenticationResult>>();
+            for (int i = 0; i < ParallelTasks; i++)
+            {
+                int tempI = i;
+                tasks.Add(Task.Run(async () =>
+                {
+                    // Each request targets a distinct tenant ID, creating a new cache item.
+                    string tid = $"tid_{tempI}";
+                    return await cca.AcquireTokenForClient(TestConstants.s_scope)
+                        .WithTenantId(tid)
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
+                }));
+            }
+
+            // Wait for completion. If there is a deadlock, this will hang or timeout.
+            AuthenticationResult[] results = await Task.WhenAll(tasks).ConfigureAwait(false);
+
+            // 3. Assertions
+            Assert.HasCount(ParallelTasks, results);
+
+            // Verify that the entry count did not exceed the limit, AND the dictionary 
+            // has successfully evicted down.
+            Assert.IsLessThanOrEqualTo(Limit, internalAccessor.EntryCount, $"Entry count should never exceed Limit ({Limit}).");
+            
+            // Check that we can read back from the cache safely
+            var currentTokens = internalAccessor.GetAllAccessTokens();
+            Assert.IsNotNull(currentTokens, "Cache should be readable post-stress.");
+        }
+
+        [TestMethod]
         public async Task AcquireTokenForClient_PerTenantCaching_Test()
         {
             const int NumberOfRequests = 5000;

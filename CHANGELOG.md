@@ -16,6 +16,7 @@
 - Added in-process MAA token caching to PopKeyAttestor. [#5887](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5887)
 - Added raw STS error code to MsalFailure metric. [#5961](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5961)
 - Support forwarding MSAL client metadata headers through IMDS to ESTS. [#5912](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5912)
+- [Internal] Enabled bounded mode for the in-memory app token cache by default at a 2,000,000-entry cap with approximate sampled-LRU eviction (expired-first). Lower-volume callers see no observable change. Set `CacheOptions.EnableAppCacheBounding = false` (internal property) to keep the legacy unbounded behavior. [#6027](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6027)
 
 ### Bug Fixes
 - Fixed eager evaluation in `ConcurrentDictionary.GetOrAdd` calls. [#5950](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5950)

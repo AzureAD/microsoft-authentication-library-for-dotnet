@@ -89,6 +89,48 @@ namespace Microsoft.Identity.Test.Performance
               .ConfigureAwait(false);
         }
 
+        [Benchmark(Description = "AcquireTokenForClient + Write (Below Threshold)")]
+        public async Task AcquireTokenForClient_WriteBelowThreshold_TestAsync()
+        {
+            // Acquire a brand new token using a unique scope to trigger a cache write.
+            // Under CacheOptions, EnableAppCacheBounding is true with default MaxEntries.
+            // Since we use a unique scope/tenant configuration, this simulates the overhead of constant writes
+            // when the cache limit is not reached.
+            string uniqueTenant = $"{_tenantPrefix}_new_" + System.Guid.NewGuid().ToString("N");
+            string uniqueScope = $"{_scopePrefix}_new";
+
+            await _cca.AcquireTokenForClient(new[] { uniqueScope })
+              .WithTenantId(uniqueTenant)
+              .ExecuteAsync()
+              .ConfigureAwait(false);
+        }
+
+        [Benchmark(Description = "AcquireTokenForClient + Write (Over Threshold)")]
+        public async Task AcquireTokenForClient_WriteOverThreshold_TestAsync()
+        {
+            // Set up a custom CCA with a very low bounds limit to ensure every single concurrent write pushes
+            // the count over the limit and triggers eviction. Measuring un-amortized eviction writes.
+            string uniqueTenant = $"{_tenantPrefix}_new_" + System.Guid.NewGuid().ToString("N");
+            string uniqueScope = $"{_scopePrefix}_new";
+
+            // Dispatches to a small bounded client to force eviction to run on every loop iteration
+            var boundedCca = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithRedirectUri(TestConstants.RedirectUri)
+                .WithClientSecret(TestConstants.ClientSecret)
+                .WithLegacyCacheCompatibility(false)
+                .WithCacheOptions(new CacheOptions
+                {
+                    AppCacheMaxEntries = 5 // tiny cap
+                })
+                .BuildConcrete();
+
+            await boundedCca.AcquireTokenForClient(new[] { uniqueScope })
+              .WithTenantId(uniqueTenant)
+              .ExecuteAsync()
+              .ConfigureAwait(false);
+        }
+
         /// <summary>
         /// Create a fake token and save into the internal cache.
         /// If cache serialization is enabled, call an event handler to serialize current cache state into external cache,
