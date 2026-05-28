@@ -1503,6 +1503,61 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
+        public void WithExtraQueryParameters_PopulatesCacheKeyComponents_Issue6030()
+        {
+            // Arrange
+            var extraQueryParameters = new Dictionary<string, string>
+                {
+                    { "param1", "value1" },
+                    { "param2", "value2" }
+                };
+
+            // Act
+            var miBuilder = ManagedIdentityApplicationBuilder
+                .Create(ManagedIdentityId.SystemAssigned)
+                .WithExperimentalFeatures(true)
+                .WithExtraQueryParameters(extraQueryParameters);
+
+            // Assert: every EQP must participate in the cache key so callers cannot bypass caching.
+            Assert.IsNotNull(miBuilder.Config.CacheKeyComponents);
+            Assert.HasCount(2, miBuilder.Config.CacheKeyComponents);
+            Assert.AreEqual("value1", miBuilder.Config.CacheKeyComponents["param1"]);
+            Assert.AreEqual("value2", miBuilder.Config.CacheKeyComponents["param2"]);
+        }
+
+        [TestMethod]
+        public void WithExtraQueryParameters_DifferentValuesProduceDifferentCacheKeys_Issue6030()
+        {
+            // Two MI apps that differ only by an EQP value must produce distinct app-token cache keys
+            // so that the second app cannot read the first app's cached token.
+            var miA = ManagedIdentityApplicationBuilder
+                .Create(ManagedIdentityId.SystemAssigned)
+                .WithExperimentalFeatures(true)
+                .WithExtraQueryParameters(new Dictionary<string, string> { { "tenantHint", "tenantA" } })
+                .BuildConcrete();
+
+            var miB = ManagedIdentityApplicationBuilder
+                .Create(ManagedIdentityId.SystemAssigned)
+                .WithExperimentalFeatures(true)
+                .WithExtraQueryParameters(new Dictionary<string, string> { { "tenantHint", "tenantB" } })
+                .BuildConcrete();
+
+            string keyA = Client.Cache.CacheKeyFactory.GetAppTokenCacheItemKey(
+                miA.ServiceBundle.Config.ClientId,
+                tenantId: string.Empty,
+                popKid: null,
+                miA.ServiceBundle.Config.CacheKeyComponents);
+
+            string keyB = Client.Cache.CacheKeyFactory.GetAppTokenCacheItemKey(
+                miB.ServiceBundle.Config.ClientId,
+                tenantId: string.Empty,
+                popKid: null,
+                miB.ServiceBundle.Config.CacheKeyComponents);
+
+            Assert.AreNotEqual(keyA, keyB, "EQP-differentiated MI requests must not share a cache entry.");
+        }
+
+        [TestMethod]
         public async Task ManagedIdentityWithExtraQueryParametersTestAsync()
         {
             using (new EnvVariableContext())
