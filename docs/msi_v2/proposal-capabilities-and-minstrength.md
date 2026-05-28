@@ -11,61 +11,63 @@
 
 - **today:** `Source` + `ImdsV1FailureReason` + `ImdsV2FailureReason`
 - **after PR #6026:** + `IsMtlsPopSupportedByHost`
-- **next:** + `SupportedBindingStrengths` (for the MinStrength feature)
+- **next:** + `MaxSupportedBindingStrength` (for the MinStrength feature)
 
 The method name `GetManagedIdentitySource…` no longer describes what callers get back. Callers using it for capability decisions (Azure SDK, AKV SDK) read it as "tell me what this host can do," which is what we want — and the name should match.
 
-Separately, we may need a way to **assert** the minimum binding strength their app requires, so a CVM/TVM app accidentally deployed on a software-only host fails at build/request time instead of silently downgrading.
+Separately, we may need a way to **assert** the minimum binding strength their app requires, so a CVM/TVM app accidentally deployed on a software-only host fails at request time instead of silently downgrading.
 
 ## What
 
 ### 1. New discovery API (capability-shaped name)
 
 ```csharp
-namespace Microsoft.Identity.Client.ManagedIdentity
+using Microsoft.Identity.Client.ManagedIdentity;
+
+namespace Microsoft.Identity.Client
 {
     public class ManagedIdentityApplication : IManagedIdentityApplication
     {
         public Task<ManagedIdentityCapabilities> GetManagedIdentityCapabilitiesAsync(
             CancellationToken cancellationToken);
     }
+}
 
+namespace Microsoft.Identity.Client.ManagedIdentity
+{
     public class ManagedIdentityCapabilities
     {
         public ManagedIdentitySource Source { get; }
 
-        // Existing probe-failure detail (carried over)
-        public string ImdsV1FailureReason { get; set; }
-        public string ImdsV2FailureReason { get; set; }
+        // Single concatenated reason if detection failed; null on success.
+        // Not coupled to v1/v2 — internal probe diagnostics are folded in here.
+        public string ErrorReason { get; }
 
         // Host capability surface
         public bool IsMtlsPopSupportedByHost { get; }
-        public IReadOnlyList<MtlsBindingStrength> SupportedBindingStrengths { get; }
+
+        // Highest binding strength this host can produce.
+        // MSAL always uses this max; the value is exposed for diagnostics and
+        // for callers that want to assert a floor via WithMinStrength(...).
+        public MtlsBindingStrength MaxSupportedBindingStrength { get; }
     }
 
     public enum MtlsBindingStrength
     {
-        Bearer            = 0,  // .NET 4.6.2 (no PoP)
-        EphemeralSoftware = 1,  // in-memory RSA, process lifetime
+        Bearer   = 0,  // .NET 4.6.2 (no PoP)
+        Software = 1,  // software-backed RSA — persisted CNG on Windows, RSA.Create() elsewhere
         // 2 reserved for future (TPM-backed, etc.)
-        KeyGuard          = 3,  // VBS-isolated (CVM/TVM with VBS enabled)
+        KeyGuard = 3,  // VBS-isolated (CVM/TVM with VBS enabled)
     }
 }
 ```
 
-### 2. Old API stays, marked Obsolete
+### 2. Old API removed (clean rename)
 
-```csharp
-[Obsolete(
-    "Use GetManagedIdentityCapabilitiesAsync instead. " +
-    "The returned ManagedIdentityCapabilities exposes the same Source plus host capability.",
-    error: false)]
-public Task<ManagedIdentitySourceResult> GetManagedIdentitySourceAsync(
-    CancellationToken cancellationToken);
-```
-
-- `ManagedIdentitySourceResult` continues to exist for back-compat; no new members added to it.
-- Implementation of the obsolete method delegates to the new one and projects the result.
+- Delete `GetManagedIdentitySourceAsync(CancellationToken)` from `ManagedIdentityApplication`.
+- Delete `ManagedIdentitySourceResult`.
+- Remove both from `PublicAPI.Shipped.txt`; add the new types to `PublicAPI.Unshipped.txt`.
+- Feature is internal-only today (Azure SDK private chain is the sole consumer). No external customers to migrate, no obsolete shim needed.
 
 ### 3. `WithMinStrength` — floor assertion on the request
 
@@ -95,9 +97,9 @@ public class AcquireTokenForClientParameterBuilder
 | Host actual | `WithMinStrength(...)` | Behavior |
 |---|---|---|
 | KeyGuard available | `KeyGuard` | Uses KeyGuard. ✅ |
-| KeyGuard available | `EphemeralSoftware` | Uses KeyGuard (host max, never downgrades). |
+| KeyGuard available | `Software` | Uses KeyGuard (host max, never downgrades). |
 | Software only | `KeyGuard` | **Throws `MsalClientException` at AcquireToken.** |
-| Software only | `EphemeralSoftware` | Uses ephemeral software. ✅ |
+| Software only | `Software` | Uses software. ✅ |
 | .NET 4.6.2 | any non-Bearer | **Throws.** |
 | Not chained with `WithMtlsProofOfPossession()` | any | **Throws** — `WithMinStrength` only meaningful with PoP. |
 
@@ -123,7 +125,7 @@ var mi = ManagedIdentityApplicationBuilder
 var caps = await ((ManagedIdentityApplication)mi)
     .GetManagedIdentityCapabilitiesAsync(ct);
 
-if (!caps.SupportedBindingStrengths.Contains(MtlsBindingStrength.KeyGuard))
+if (caps.MaxSupportedBindingStrength < MtlsBindingStrength.KeyGuard)
 {
     logger.LogWarning("This host cannot meet KeyGuard requirement; service will refuse to start.");
 }
@@ -145,17 +147,28 @@ var result = await mi.AcquireTokenForManagedIdentity("https://vault.azure.net/.d
 - `AcquireTokenForClientParameterBuilder.WithMinStrength(...)`
 - `MsalError.MinStrengthNotMet`
 
-`PublicAPI.Shipped.txt` change:
-- `GetManagedIdentitySourceAsync` gets `[Obsolete]` (does not remove from shipped surface).
+`PublicAPI.Shipped.txt` removals:
+- `ManagedIdentityApplication.GetManagedIdentitySourceAsync(CancellationToken)`
+- `ManagedIdentitySourceResult` (class + members)
 
-No binary-breaking changes. No semver bump.
+Feature is internal-only (Azure SDK private chain). No external migration story required.
+
+## Alternatives considered for `WithMinStrength`
+
+| Shape | Pro | Con |
+|---|---|---|
+| **Chained: `WithMtlsProofOfPossession().WithMinStrength(KeyGuard)`** (current proposal) | Discoverable, composes with existing API, easy to add later without touching `WithMtlsProofOfPossession` signature | Two calls to express one intent |
+| `WithMtlsProofOfPossession(MtlsBindingStrength minStrength)` overload | One call, single intent | Adds an overload to an already-shipped method; semantics overloaded (PoP-on + floor) |
+| `WithMtlsProofOfPossession(new PoPOptions { MinStrength = KeyGuard })` | Extensible — future PoP options slot in cleanly | New options type to maintain; verbose for the common case |
+
+Open to swapping to the overload shape if the team prefers it — they're all valid; the chained form is just the least-invasive.
 
 ## Acceptance
 
-- [ ] `MtlsBindingStrength` enum added.
-- [ ] `ManagedIdentityCapabilities` class added.
-- [ ] `GetManagedIdentityCapabilitiesAsync` added; populates `SupportedBindingStrengths` by combining IMDS hint + KeyGuard probe + .NET TFM.
-- [ ] Old `GetManagedIdentitySourceAsync` marked `[Obsolete]` (non-error), delegates to new method.
+- [ ] `MtlsBindingStrength` enum added (`Bearer=0`, `Software=1`, `KeyGuard=3`).
+- [ ] `ManagedIdentityCapabilities` class added with `Source`, `ErrorReason`, `IsMtlsPopSupportedByHost`, `MaxSupportedBindingStrength`.
+- [ ] `GetManagedIdentityCapabilitiesAsync` added; populates `MaxSupportedBindingStrength` by combining IMDS hint + KeyGuard probe + .NET TFM.
+- [ ] Old `GetManagedIdentitySourceAsync` + `ManagedIdentitySourceResult` deleted; removed from `PublicAPI.Shipped.txt`.
 - [ ] `WithMinStrength` added on `AcquireTokenForManagedIdentityParameterBuilder` and `AcquireTokenForClientParameterBuilder`.
 - [ ] `MsalError.MinStrengthNotMet` thrown when host can't meet floor; error message names host actual strength + required floor.
 - [ ] `WithMinStrength` without `WithMtlsProofOfPossession` throws at request time.
@@ -163,6 +176,7 @@ No binary-breaking changes. No semver bump.
 
 ## Open questions for the thread
 
-1. Bogdan — keep `IsMtlsPopSupportedByHost` (boolean) on the new `ManagedIdentityCapabilities`, or drop it in favor of `SupportedBindingStrengths.Count > 0`?
+1. Bogdan — keep `IsMtlsPopSupportedByHost` (boolean) on `ManagedIdentityCapabilities`, or drop it in favor of `MaxSupportedBindingStrength > Bearer`?
 2. Dragos — does `WithMinStrength` as a floor-only assertion meet the no-downgrade goal? Or do you want the discovery API alone (no enforcement helper)?
 3. Should `MtlsBindingStrength` live in `Microsoft.Identity.Client.ManagedIdentity` or `Microsoft.Identity.Client.AppConfig`? It's shared by both MI and ConfClient.
+4. `WithMinStrength` shape — chained (current), overload, or options object? See *Alternatives considered* above.
