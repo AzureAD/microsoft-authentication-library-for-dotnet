@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -10,7 +11,6 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using Microsoft.Identity.Client.Utils;
 using JObject = System.Text.Json.Nodes.JsonObject;
-using System;
 
 namespace Microsoft.Identity.Client.Internal
 {
@@ -81,18 +81,41 @@ namespace Microsoft.Identity.Client.Internal
             var sorted = new JObject();
             foreach (var key in obj.Select(kvp => kvp.Key).OrderBy(k => k, StringComparer.Ordinal))
             {
-                var value = obj[key];
-                if (value is JObject nestedObj)
-                {
-                    sorted[key] = SortJsonObjectKeys(nestedObj);
-                }
-                else
-                {
-                    // JsonNode.DeepClone is .NET 6+; use Parse(ToJsonString()) for portability.
-                    sorted[key] = value is null ? null : JsonNode.Parse(value.ToJsonString());
-                }
+                sorted[key] = CloneSorted(obj[key]);
             }
             return sorted;
+        }
+
+        // Recursively clones a JsonNode, sorting keys inside any nested JsonObject (including
+        // those contained inside JsonArrays). Array element order is preserved — only object
+        // key order is normalized. This is required so semantically identical claims such as
+        // {"x":[{"a":1,"b":2}]} and {"x":[{"b":2,"a":1}]} produce the same normalized string,
+        // and therefore the same cache key.
+        private static JsonNode CloneSorted(JsonNode value)
+        {
+            if (value is null)
+            {
+                return null;
+            }
+
+            if (value is JObject nestedObj)
+            {
+                return SortJsonObjectKeys(nestedObj);
+            }
+
+            if (value is JsonArray array)
+            {
+                var newArray = new JsonArray();
+                foreach (var element in array)
+                {
+                    newArray.Add(CloneSorted(element));
+                }
+                return newArray;
+            }
+
+            // Scalar (JsonValue) — re-parse to detach from the original tree.
+            // JsonNode.DeepClone is .NET 6+; use Parse(ToJsonString()) for portability.
+            return JsonNode.Parse(value.ToJsonString());
         }
 
         internal static string GetMergedClaimsAndClientCapabilities(

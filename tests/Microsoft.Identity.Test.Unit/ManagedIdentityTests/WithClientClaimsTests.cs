@@ -158,7 +158,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager)
                     .WithExperimentalFeatures(true)
-
                     .Build();
 
                 // The mock handler is set up to expect claims=<normalizedNspClaims> in the query string.
@@ -196,7 +195,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager)
                     .WithExperimentalFeatures(true)
-
                     .Build();
 
                 // Only one network mock — second call must come from cache.
@@ -242,7 +240,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager)
                     .WithExperimentalFeatures(true)
-
                     .Build();
 
                 string normalizedClaims = Client.Internal.ClaimsHelper.NormalizeClaimsJson(NspClaims);
@@ -286,7 +283,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager)
                     .WithExperimentalFeatures(true)
-
                     .Build();
 
                 string normalizedNsp = Client.Internal.ClaimsHelper.NormalizeClaimsJson(NspClaims);
@@ -340,7 +336,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager)
                     .WithExperimentalFeatures(true)
-
                     .Build();
 
                 string normalizedClaims = Client.Internal.ClaimsHelper.NormalizeClaimsJson(NspClaims);
@@ -383,7 +378,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager)
                     .WithExperimentalFeatures(true)
-
                     .Build();
 
                 // Standard mock handler with no claims expectation
@@ -676,7 +670,50 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Assert.AreEqual(MsalError.InvalidJsonClaimsFormat, ex.ErrorCode);
             }
+        }
+
+        [TestMethod]
+        public void WithClientClaims_ExperimentalFeaturesNotEnabled_ThrowsMsalClientException()
+        {
+            // Arrange — note: NO .WithExperimentalFeatures(true) on the app builder
+            using (new EnvVariableContext())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, ManagedIdentityTests.ImdsEndpoint);
+                var mi = ManagedIdentityApplicationBuilder
+                    .Create(ManagedIdentityId.SystemAssigned)
+                    .Build();
+
+                // Act & Assert — valid claims must still throw because the experimental gate is closed
+                MsalClientException ex = Assert.ThrowsExactly<MsalClientException>(
+                    () => mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                            .WithClientClaims(NspClaims));
+
+                Assert.AreEqual(MsalError.ExperimentalFeature, ex.ErrorCode);
+            }
         }
+
+        [TestMethod]
+        public void WithClientClaims_ExperimentalFeaturesNotEnabled_ConfidentialClient_ThrowsMsalClientException()
+        {
+            // Arrange — no .WithExperimentalFeatures(true)
+            using (var harness = CreateTestHarness())
+            {
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithAuthority(AzureCloudInstance.AzurePublic, TestConstants.Utid)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithHttpManager(harness.HttpManager)
+                    .BuildConcrete();
+
+                // Act & Assert
+                MsalClientException ex = Assert.ThrowsExactly<MsalClientException>(
+                    () => app.AcquireTokenForClient(TestConstants.s_scope)
+                            .WithClientClaims(NspClaims));
+
+                Assert.AreEqual(MsalError.ExperimentalFeature, ex.ErrorCode);
+            }
+        }
+
     }
 }
 

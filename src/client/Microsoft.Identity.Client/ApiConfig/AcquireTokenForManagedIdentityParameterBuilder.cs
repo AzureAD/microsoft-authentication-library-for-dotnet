@@ -88,9 +88,22 @@ namespace Microsoft.Identity.Client
         /// Unlike <see cref="WithClaims(string)"/> (for server-issued claims challenges), tokens acquired
         /// with client claims are cached and keyed on the claims value. Different claim values produce
         /// separate cache entries. Use stable, non-dynamic claim values to avoid cache fragmentation.
+        /// <para>
+        /// This is an experimental API. The application must opt in via
+        /// <c>ManagedIdentityApplicationBuilder.WithExperimentalFeatures(true)</c> or this method
+        /// will throw <see cref="MsalClientException"/>.
+        /// </para>
         /// </summary>
-        /// <param name="claimsJson">A JSON string containing the client claims. Must be valid JSON.</param>
+        /// <param name="claimsJson">
+        /// A JSON string containing the client claims. Must be a valid JSON <b>object</b>
+        /// (per OIDC §5.5 <c>claims</c> parameter); JSON arrays or scalars are rejected with
+        /// <see cref="MsalClientException"/> (<see cref="MsalError.InvalidJsonClaimsFormat"/>).
+        /// </param>
         /// <returns>The builder to chain .With methods.</returns>
+        /// <exception cref="MsalClientException">
+        /// Thrown when experimental features are not enabled on the application, or when
+        /// <paramref name="claimsJson"/> is not a valid JSON object.
+        /// </exception>
         public AcquireTokenForManagedIdentityParameterBuilder WithClientClaims(string claimsJson)
         {
             if (string.IsNullOrWhiteSpace(claimsJson))

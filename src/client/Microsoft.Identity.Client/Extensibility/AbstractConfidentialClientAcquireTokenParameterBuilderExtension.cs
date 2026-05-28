@@ -25,11 +25,24 @@ namespace Microsoft.Identity.Client.Extensibility
         /// claims challenges), tokens acquired with client claims <b>are cached</b> and the cache entry
         /// is keyed on the normalized claims value. Different claims values produce separate cache entries.
         /// Use stable, non-dynamic values to avoid unbounded cache growth.
+        /// <para>
+        /// This is an experimental API. The application must opt in via
+        /// <c>ConfidentialClientApplicationBuilder.WithExperimentalFeatures(true)</c> or this method
+        /// will throw <see cref="MsalClientException"/>.
+        /// </para>
         /// </summary>
         /// <typeparam name="T">The concrete confidential client builder type.</typeparam>
         /// <param name="builder">The builder to chain options to.</param>
-        /// <param name="claimsJson">A JSON string containing the client-originated claims. Must be valid JSON.</param>
+        /// <param name="claimsJson">
+        /// A JSON string containing the client-originated claims. Must be a valid JSON <b>object</b>
+        /// (per OIDC §5.5 <c>claims</c> parameter); JSON arrays or scalars are rejected with
+        /// <see cref="MsalClientException"/> (<see cref="MsalError.InvalidJsonClaimsFormat"/>).
+        /// </param>
         /// <returns>The builder to chain the .With methods.</returns>
+        /// <exception cref="MsalClientException">
+        /// Thrown when experimental features are not enabled on the application, or when
+        /// <paramref name="claimsJson"/> is not a valid JSON object.
+        /// </exception>
         public static T WithClientClaims<T>(
             this AbstractConfidentialClientAcquireTokenParameterBuilder<T> builder,
             string claimsJson)

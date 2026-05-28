@@ -309,6 +309,57 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
                 "id_token must appear before userinfo after ordinal key sort.");
         }
 
+        [TestMethod]
+        public void NormalizeClaimsJson_SortsObjectKeysNestedInsideArrays()
+        {
+            // Arrange — objects inside arrays must also have their keys sorted so that
+            // semantically identical claims always produce the same cache key.
+            string variant1 = @"{""x"":[{""a"":1,""b"":2}]}";
+            string variant2 = @"{""x"":[{""b"":2,""a"":1}]}";
+
+            // Act
+            string result1 = ClaimsHelper.NormalizeClaimsJson(variant1);
+            string result2 = ClaimsHelper.NormalizeClaimsJson(variant2);
+
+            // Assert
+            Assert.AreEqual(result1, result2,
+                "Objects nested inside arrays must be sorted so cache keys do not fragment.");
+        }
+
+        [TestMethod]
+        public void NormalizeClaimsJson_DeeplyNestedObjectInArrayInObjectInArray_IsSorted()
+        {
+            // Arrange — exercise the recursive CloneSorted path through multiple array/object layers.
+            string variant1 = @"{""outer"":[{""inner"":[{""z"":1,""a"":2}]}]}";
+            string variant2 = @"{""outer"":[{""inner"":[{""a"":2,""z"":1}]}]}";
+
+            // Act
+            string result1 = ClaimsHelper.NormalizeClaimsJson(variant1);
+            string result2 = ClaimsHelper.NormalizeClaimsJson(variant2);
+
+            // Assert
+            Assert.AreEqual(result1, result2,
+                "Deeply nested objects (object→array→object→array→object) must be sorted at every depth.");
+        }
+
+        [TestMethod]
+        public void NormalizeClaimsJson_ArrayOfScalars_OrderPreservedAndIdempotent()
+        {
+            // Arrange — arrays of scalars must keep element order.
+            string input = @"{""values"":[3,1,2,""b"",""a""]}";
+
+            // Act
+            string once = ClaimsHelper.NormalizeClaimsJson(input);
+            string twice = ClaimsHelper.NormalizeClaimsJson(once);
+
+            // Assert — order preserved
+            Assert.IsLessThan(once.IndexOf("3", StringComparison.Ordinal), once.IndexOf("1", StringComparison.Ordinal),
+                "Numeric array element order must be preserved (3,1,2 → '3' appears before '1').");
+            Assert.IsLessThan(once.IndexOf("\"b\"", StringComparison.Ordinal), once.IndexOf("\"a\"", StringComparison.Ordinal),
+                "String array element order must be preserved (\"b\",\"a\" → '\"b\"' appears before '\"a\"').");
+            Assert.AreEqual(once, twice, "Normalization must be idempotent.");
+        }
+
         #endregion
     }
 }

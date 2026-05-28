@@ -214,5 +214,37 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
             Assert.AreEqual("common", authority.TenantId);
         }
+
+        [TestMethod]
+        public void CreateAuthorityFromTenantlessDsts_NonForced_RewritesToSpecifiedTenant()
+        {
+            // Regression test for the case where a DSTS authority is configured with a tenantless
+            // path segment ("common" or "organizations") and Authority.CreateAuthorityWithTenant
+            // is invoked with forceSpecifiedTenant:false (the silent-flow / legacy-cache path).
+            // The authority must be rewritten to use the supplied tenant id, otherwise downstream
+            // cache keys and token requests would use the literal "common" tenant.
+            Authority commonAuthority = Authority.CreateAuthority(TestConstants.DstsAuthorityCommon);
+            Assert.AreEqual("common", commonAuthority.TenantId);
+
+            string rewritten = commonAuthority.GetTenantedAuthority(TestConstants.TenantId, forceSpecifiedTenant: false);
+
+            Assert.AreEqual(
+                $"https://some.url.dsts.core.azure-test.net/dstsv2/{TestConstants.TenantId}/",
+                rewritten,
+                "Tenantless DSTS authorities must be rewritten when GetTenantedAuthority is called with a real tenant id, even when forceSpecifiedTenant=false.");
+        }
+
+        [TestMethod]
+        public void CreateAuthorityFromOrganizationsDsts_NonForced_RewritesToSpecifiedTenant()
+        {
+            Authority orgsAuthority = Authority.CreateAuthority(TestConstants.DstsAuthorityOrganizations);
+            Assert.AreEqual("organizations", orgsAuthority.TenantId);
+
+            string rewritten = orgsAuthority.GetTenantedAuthority(TestConstants.TenantId, forceSpecifiedTenant: false);
+
+            Assert.AreEqual(
+                $"https://some.url.dsts.core.azure-test.net/dstsv2/{TestConstants.TenantId}/",
+                rewritten);
+        }
     }
 }

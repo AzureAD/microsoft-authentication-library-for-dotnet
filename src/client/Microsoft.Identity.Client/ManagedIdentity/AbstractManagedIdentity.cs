@@ -60,9 +60,16 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             // Forward client-originated claims to the correct location:
             // - GET requests (IMDS/MSIv1): append as "claims" query parameter
             // - POST requests (ImdsV2 / ESTS): append as "claims" body parameter
+            //
+            // Encoding asymmetry (intentional — do NOT "fix" by encoding both or neither):
+            // - QueryParameters values are appended verbatim by UriBuilderExtensions.AppendQueryParameters,
+            //   so the caller must pre-encode (Uri.EscapeDataString).
+            // - BodyParameters are wrapped in FormUrlEncodedContent (see below) which encodes
+            //   both keys and values, so the raw normalized JSON is correct here. Pre-encoding
+            //   would double-encode the body.
             if (!string.IsNullOrEmpty(parameters.ClientClaims))
             {
-                if (request.Method == System.Net.Http.HttpMethod.Get)
+                if (request.Method == HttpMethod.Get)
                 {
                     request.QueryParameters["claims"] = Uri.EscapeDataString(parameters.ClientClaims);
                     _requestContext.Logger.Info("[Managed Identity] Adding client claims to IMDS request as query parameter.");
