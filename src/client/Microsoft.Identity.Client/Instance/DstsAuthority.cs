@@ -22,6 +22,12 @@ namespace Microsoft.Identity.Client.Instance
             TenantId = AuthorityInfo.GetSecondPathSegment(AuthorityInfo.CanonicalAuthority);
         }
 
+        // DSTS authorities use their own URL template (dstsv2/{tenantId}/), not the AAD template.
+        // Rewrite the authority when either:
+        //  - the caller forces it via .WithTenantId() (forceSpecifiedTenant=true), or
+        //  - the configured authority is tenantless (e.g. ".../dstsv2/common/" or ".../dstsv2/organizations/"),
+        //    which is the silent-flow path used by Authority.CreateAuthorityWithTenant when deriving a
+        //    tenanted authority from a home account / id token.
         internal override string GetTenantedAuthority(string tenantId, bool forceSpecifiedTenant = false)
         {
             if (!string.IsNullOrEmpty(tenantId) &&

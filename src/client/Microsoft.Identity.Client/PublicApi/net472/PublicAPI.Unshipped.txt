@@ -1,3 +1,5 @@
+Microsoft.Identity.Client.AcquireTokenForManagedIdentityParameterBuilder.WithClaimsFromClient(string claimsJson) -> Microsoft.Identity.Client.AcquireTokenForManagedIdentityParameterBuilder
+static Microsoft.Identity.Client.Extensibility.AbstractConfidentialClientAcquireTokenParameterBuilderExtension.WithClaimsFromClient<T>(this Microsoft.Identity.Client.AbstractConfidentialClientAcquireTokenParameterBuilder<T> builder, string claimsJson) -> T
 Microsoft.Identity.Client.AuthScheme.IAuthenticationOperation3
 Microsoft.Identity.Client.AuthScheme.IAuthenticationOperation3.AfterCredentialEvaluationAsync(Microsoft.Identity.Client.AuthScheme.CredentialEvaluationContext context, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task
 Microsoft.Identity.Client.AuthScheme.CredentialEvaluationContext
@@ -5,10 +7,4 @@ Microsoft.Identity.Client.AuthScheme.CredentialEvaluationContext.CredentialEvalu
 Microsoft.Identity.Client.AuthScheme.CredentialEvaluationContext.MtlsCertificate.get -> System.Security.Cryptography.X509Certificates.X509Certificate2
 static Microsoft.Identity.Client.Extensibility.AcquireTokenParameterBuilderExtensions.WithCachePartitionKey<T>(this Microsoft.Identity.Client.BaseAbstractAcquireTokenParameterBuilder<T> builder, string key, string value) -> T
 static Microsoft.Identity.Client.Extensibility.AcquireTokenParameterBuilderExtensions.WithReservedScopes(this Microsoft.Identity.Client.AcquireTokenByAuthorizationCodeParameterBuilder builder, bool offlineAccessScope) -> Microsoft.Identity.Client.AcquireTokenByAuthorizationCodeParameterBuilder
-Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySourceResult.ImdsFailureReason.get -> string
-Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySourceResult.ImdsFailureReason.set -> void
-*REMOVED*Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySourceResult.ImdsV1FailureReason.get -> string
-*REMOVED*Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySourceResult.ImdsV1FailureReason.set -> void
-*REMOVED*Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySourceResult.ImdsV2FailureReason.get -> string
-*REMOVED*Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySourceResult.ImdsV2FailureReason.set -> void
 Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySourceResult.IsMtlsPopSupportedByHost.get -> bool

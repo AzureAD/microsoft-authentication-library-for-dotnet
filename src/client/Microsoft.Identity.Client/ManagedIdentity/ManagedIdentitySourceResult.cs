@@ -4,11 +4,11 @@
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
     /// <summary>
-    /// Result of managed identity source detection, including the detected source and any failure information from the IMDS probe.
+    /// Result of managed identity source detection, including the detected source and any failure information from IMDS probes.
     /// </summary>
     /// <remarks>
     /// This class is returned by <see cref="ManagedIdentityApplication.GetManagedIdentitySourceAsync"/> to provide
-    /// detailed information about managed identity source detection, including failure reasons when the IMDS probe fails.
+    /// detailed information about managed identity source detection, including failure reasons when IMDS probes fail.
     /// This information is useful for credential chains like DefaultAzureCredential to determine whether to skip
     /// managed identity authentication entirely.
     /// </remarks>
@@ -24,12 +24,20 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         public ManagedIdentitySource Source { get; }
 
         /// <summary>
-        /// Gets or sets the failure reason from the IMDS probe, if it failed.
+        /// Gets or sets the failure reason from the IMDSv1 probe, if it failed.
         /// </summary>
         /// <value>
-        /// A string describing why the IMDS probe failed, or <c>null</c> if the probe succeeded or was not attempted.
+        /// A string describing why the IMDSv1 probe failed, or <c>null</c> if the probe succeeded or was not attempted.
         /// </value>
-        public string ImdsFailureReason { get; set; }
+        public string ImdsV1FailureReason { get; set; }
+
+        /// <summary>
+        /// Gets or sets the failure reason from the IMDSv2 probe, if it failed.
+        /// </summary>
+        /// <value>
+        /// A string describing why the IMDSv2 probe failed, or <c>null</c> if the probe succeeded or was not attempted.
+        /// </value>
+        public string ImdsV2FailureReason { get; set; }
 
         /// <summary>
         /// Gets a value indicating whether the host VM supports mTLS Proof-of-Possession (PoP) tokens.

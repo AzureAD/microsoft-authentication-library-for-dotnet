@@ -101,12 +101,24 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     throw CreateManagedIdentityUnavailableException(s_cachedSourceResult);
                 }
 
-                // When IMDS is detected (via probe or cache) and mTLS PoP is requested,
-                // route to IMDSv2 which supports token binding.
+                // Per-request fallback: if ImdsV2 is cached but mTLS PoP not requested, use ImdsV1 for this request only.
+                // We do NOT latch this state; future PoP requests can still leverage the cached ImdsV2 discovery.
+                if (source == ManagedIdentitySource.ImdsV2 && !isMtlsPopRequested)
+                {
+                    requestContext.Logger.Info("[Managed Identity] ImdsV2 detected, but mTLS PoP was not requested. Using ImdsV1 for this request only. Please use the \"WithMtlsProofOfPossession\" API to request a token via ImdsV2.");
+
+                    // Do NOT modify s_cachedSourceResult; keep cached ImdsV2 so future PoP
+                    // requests can leverage it.
+                    source = ManagedIdentitySource.Imds;
+                }
+
+                // If the source is determined to be ImdsV1 and mTLS PoP was requested,
+                // throw an exception since ImdsV1 does not support mTLS PoP
                 if (source == ManagedIdentitySource.Imds && isMtlsPopRequested)
                 {
-                    requestContext.Logger.Info("[Managed Identity] IMDS detected, mTLS PoP requested. Routing to IMDSv2.");
-                    return Task.FromResult<AbstractManagedIdentity>(ImdsV2ManagedIdentitySource.Create(requestContext));
+                    throw new MsalClientException(
+                        MsalError.MtlsPopTokenNotSupportedinImdsV1,
+                        MsalErrorMessage.MtlsPopTokenNotSupportedinImdsV1);
                 }
 
                 return Task.FromResult<AbstractManagedIdentity>(source switch
@@ -129,10 +141,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             return result;
         }
 
-        // Detect managed identity source by probing IMDS v1 endpoint.
+        // Detect managed identity source by probing IMDS endpoints.
         // This method is called only by the explicit discovery path (GetManagedIdentitySourceAsync in ManagedIdentityApplication.cs).
-        // It probes IMDS v1 only and caches the result. If v1 is reachable, IMDS infrastructure
-        // is present and IMDSv2 is assumed to be available for mTLS PoP requests.
+        // It probes IMDS v2 first, then v1 if v2 fails, and caches the result.
         internal async Task<ManagedIdentitySourceResult> GetManagedIdentitySourceAsync(
             RequestContext requestContext,
             CancellationToken cancellationToken)
@@ -151,11 +162,25 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 return CacheDiscoveryResult(new ManagedIdentitySourceResult(source));
             }
 
-            // Probe IMDS v1 to determine if IMDS infrastructure is available
+            string imdsV1FailureReason = null;
+            string imdsV2FailureReason = null;
+
+            // Probe IMDS v2 first. The v2 path (CSR metadata endpoint) only exists on hosts that
+            // actually support IMDSv2; on v1-only hosts it returns 404. Probing v2 first avoids
+            // the v1 success-on-400 contract masking a v2-capable host (see issue #6024).
+            var (imdsV2Success, imdsV2Failure) = await ImdsManagedIdentitySource.ProbeImdsEndpointAsync(requestContext, ImdsVersion.V2, cancellationToken).ConfigureAwait(false);
+            if (imdsV2Success)
+            {
+                requestContext.Logger.Info("[Managed Identity] ImdsV2 detected.");
+                return CacheDiscoveryResult(new ManagedIdentitySourceResult(ManagedIdentitySource.ImdsV2));
+            }
+            imdsV2FailureReason = imdsV2Failure;
+
+            // If v2 fails, fall back to probing IMDS v1.
             var (imdsV1Success, imdsV1Failure) = await ImdsManagedIdentitySource.ProbeImdsEndpointAsync(requestContext, ImdsVersion.V1, cancellationToken).ConfigureAwait(false);
             if (imdsV1Success)
             {
-                requestContext.Logger.Info("[Managed Identity] IMDS detected via v1 probe.");
+                requestContext.Logger.Info("[Managed Identity] ImdsV1 detected.");
 
                 var result = new ManagedIdentitySourceResult(ManagedIdentitySource.Imds);
 
@@ -172,11 +197,13 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
                 return CacheDiscoveryResult(result);
             }
+            imdsV1FailureReason = imdsV1Failure;
 
             requestContext.Logger.Info($"[Managed Identity] {MsalErrorMessage.ManagedIdentityAllSourcesUnavailable}");
             return CacheDiscoveryResult(new ManagedIdentitySourceResult(ManagedIdentitySource.None)
             {
-                ImdsFailureReason = imdsV1Failure
+                ImdsV1FailureReason = imdsV1FailureReason,
+                ImdsV2FailureReason = imdsV2FailureReason
             });
         }
 
@@ -266,15 +293,26 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         /// <summary>
         /// Creates an MsalClientException for when no managed identity source is available,
-        /// including detailed failure information from the IMDS probe if available.
+        /// including detailed failure information from IMDS probes if available.
         /// </summary>
         private static MsalClientException CreateManagedIdentityUnavailableException(ManagedIdentitySourceResult sourceResult)
         {
             string errorMessage = MsalErrorMessage.ManagedIdentityAllSourcesUnavailable;
 
-            if (sourceResult != null && !string.IsNullOrEmpty(sourceResult.ImdsFailureReason))
+            if (sourceResult != null)
             {
-                errorMessage += $" MSAL was not able to detect the Azure Instance Metadata Service (IMDS) that runs on VMs: {sourceResult.ImdsFailureReason}.";
+                if (!string.IsNullOrEmpty(sourceResult.ImdsV1FailureReason) || !string.IsNullOrEmpty(sourceResult.ImdsV2FailureReason))
+                {
+                    errorMessage += " MSAL was not able to detect the Azure Instance Metadata Service (IMDS) that runs on VMs:";
+                    if (!string.IsNullOrEmpty(sourceResult.ImdsV2FailureReason))
+                    {
+                        errorMessage += $" IMDSv2: {sourceResult.ImdsV2FailureReason}.";
+                    }
+                    if (!string.IsNullOrEmpty(sourceResult.ImdsV1FailureReason))
+                    {
+                        errorMessage += $" IMDSv1: {sourceResult.ImdsV1FailureReason}.";
+                    }
+                }
             }
 
             return new MsalClientException(MsalError.ManagedIdentityAllSourcesUnavailable, errorMessage);

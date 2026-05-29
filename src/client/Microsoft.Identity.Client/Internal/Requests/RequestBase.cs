@@ -85,6 +85,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 AuthenticationRequestParameters.RequestContext.ApiEvent = apiEvent;
             });
 
+            var requestStopwatch = Stopwatch.StartNew();
             try
             {
                 AuthenticationResult authenticationResult = null;
@@ -112,8 +113,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
                 AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
 
+                int httpStatusCode = ex is MsalServiceException serviceEx ? serviceEx.StatusCode : 0;
+
                 LogFailureTelemetryToOtel(
-                    ex.ErrorCode, apiEvent, apiEvent.CacheInfo,
+                    ex.ErrorCode,
+                    apiEvent,
+                    apiEvent.CacheInfo,
+                    httpStatusCode,
+                    requestStopwatch.ElapsedMilliseconds + measureTelemetryDurationResult.Milliseconds,
                     (ex as MsalServiceException)?.ErrorCodes?.FirstOrDefault());
                 throw;
             }
@@ -122,7 +129,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 apiEvent.ApiErrorCode = ex.GetType().Name;
                 AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
 
-                LogFailureTelemetryToOtel(ex.GetType().Name, apiEvent, apiEvent.CacheInfo);
+                LogFailureTelemetryToOtel(ex.GetType().Name, apiEvent, apiEvent.CacheInfo, httpStatusCode: 0, totalDurationInMs: requestStopwatch.ElapsedMilliseconds + measureTelemetryDurationResult.Milliseconds);
                 throw;
             }
         }
@@ -144,17 +151,18 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         authenticationResult.ExpiresOn);
         }
 
-        private void LogFailureTelemetryToOtel(string errorCodeToLog, ApiEvent apiEvent, CacheRefreshReason cacheRefreshReason, string rawStsErrorCode = null)
+        private void LogFailureTelemetryToOtel(string errorCodeToLog, ApiEvent apiEvent, CacheRefreshReason cacheRefreshReason, int httpStatusCode, long totalDurationInMs, string rawStsErrorCode = null)
         {
-            // Log metrics
             ServiceBundle.PlatformProxy.OtelInstrumentation.LogFailureMetrics(
                         ServiceBundle.PlatformProxy.GetProductName(),
                         errorCodeToLog,
-                        apiEvent.ApiId,
+                        apiEvent,
                         apiEvent.CallerSdkApiId,
                         apiEvent.CallerSdkVersion,
                         cacheRefreshReason,
                         apiEvent.TokenType,
+                        httpStatusCode,
+                        totalDurationInMs,
                         rawStsErrorCode);
         }
 
