@@ -71,13 +71,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 if (managedIdentitySource == ManagedIdentitySource.ImdsV2)
                 {
-                    // New discovery order: V1 probed first (fails), then V2 (succeeds)
-                    httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V1));
+                    // Discovery order: V2 probed first (succeeds)
                     httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V2));
                 }
                 else if (managedIdentitySource == ManagedIdentitySource.Imds)
                 {
-                    // New discovery order: V1 probed first (succeeds)
+                    // Discovery order: V2 probed first (fails), then V1 (succeeds)
+                    httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V2));
                     httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V1));
                 }
 
@@ -1128,9 +1128,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var mi = miBuilder.Build() as ManagedIdentityApplication;
                 Assert.IsNotNull(mi, "Build() should return a ManagedIdentityApplication instance.");
 
-                // Explicit discovery: V1 probe fails, then V2 probe also fails → NoneFound cached
-                httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V1));
+                // Explicit discovery: V2 probe fails, then V1 probe also fails → NoneFound cached
                 httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V2));
+                httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V1));
 
                 var sourceResult = await mi.GetManagedIdentitySourceAsync(ImdsProbesCancellationToken).ConfigureAwait(false);
                 Assert.AreEqual(ManagedIdentitySource.None, sourceResult.Source);
