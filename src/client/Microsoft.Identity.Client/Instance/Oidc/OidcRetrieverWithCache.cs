@@ -173,5 +173,20 @@ namespace Microsoft.Identity.Client.Instance.Oidc
         {
             s_cache.Clear();
         }
+
+        /// <summary>
+        /// Pre-populates the OIDC metadata cache without performing network discovery.
+        /// Used by sources (e.g. IMDS v2) that already know the token endpoint and want to skip the
+        /// /.well-known/openid-configuration round-trip when driving an inner CCA via WithGenericAuthority.
+        /// </summary>
+        internal static void TrySetPreseeded(string authority, OidcMetadata metadata)
+        {
+            if (string.IsNullOrEmpty(authority) || metadata is null)
+            {
+                return;
+            }
+
+            s_cache[authority] = metadata;
+        }
     }
 }

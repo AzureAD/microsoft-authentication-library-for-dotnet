@@ -184,7 +184,14 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         {
             var expiresOnKey = imdsV2 ? "expires_in" : "expires_on";
             string expiresOnValue;
-            if (useIsoFormat)
+            if (imdsV2)
+            {
+                // IMDS v2 returns expires_in as a duration (OAuth2-standard seconds-from-now),
+                // not an absolute Unix timestamp.
+                const int SecondsPerHour = 60 * 60;
+                expiresOnValue = (expiresInHours * SecondsPerHour).ToString(CultureInfo.InvariantCulture);
+            }
+            else if (useIsoFormat)
             {
                 // Return ISO 8601 format
                 expiresOnValue = DateTime.UtcNow.AddHours(expiresInHours).ToString("o", CultureInfo.InvariantCulture);

@@ -242,6 +242,45 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             return false;
         }
 
+        /// <summary>
+        /// Spike (gladjohn/rewire): replace the direct HTTP POST to the IMDS mTLS token endpoint
+        /// with an inner <see cref="ConfidentialClientApplication"/> driven via <c>AcquireTokenForClient</c>.
+        /// All cert mint plumbing (CSR metadata + issue-credential) happens up the stack in
+        /// <see cref="CreateRequestAsync"/>; here we just pluck the inputs out of the prepared
+        /// <paramref name="request"/> and delegate.
+        /// </summary>
+        protected override Task<ManagedIdentityResponse> SendRequestAndHandleResponseAsync(
+            ManagedIdentityRequest request,
+            ApiConfig.Parameters.AcquireTokenForManagedIdentityParameters parameters,
+            CancellationToken cancellationToken)
+        {
+            // request.ComputeUri() => https://{mtlsAuth-host}/{tenantId}/oauth2/v2.0/token
+            Uri tokenUri = request.ComputeUri();
+            string mtlsEndpoint = tokenUri.GetLeftPart(UriPartial.Authority); // https://{host}
+            string trimmedPath = tokenUri.AbsolutePath.TrimStart('/');
+            int firstSlash = trimmedPath.IndexOf('/');
+            string tenantId = firstSlash > 0 ? trimmedPath.Substring(0, firstSlash) : trimmedPath;
+
+            string clientId = request.BodyParameters.TryGetValue("client_id", out string cid) ? cid : null;
+            string scope = request.BodyParameters.TryGetValue("scope", out string sc) ? sc : null;
+            string resource = string.IsNullOrEmpty(scope)
+                ? parameters.Resource
+                : scope.EndsWith("/.default", StringComparison.OrdinalIgnoreCase)
+                    ? scope.Substring(0, scope.Length - "/.default".Length)
+                    : scope;
+
+            return ImdsV2InnerCcaTokenAcquirer.AcquireTokenAsync(
+                _requestContext,
+                parameters,
+                mtlsEndpoint,
+                tenantId,
+                clientId,
+                resource,
+                request.MtlsCertificate,
+                _isMtlsPopRequested,
+                cancellationToken);
+        }
+
         private async Task<CertificateRequestResponse> ExecuteCertificateRequestAsync(
             string clientId,
             string attestationEndpoint,

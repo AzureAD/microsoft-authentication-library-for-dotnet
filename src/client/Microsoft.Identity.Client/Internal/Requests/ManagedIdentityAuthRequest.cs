@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System.Collections.Generic;
@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             AuthenticationResult authResult = null;
             ILoggerAdapter logger = AuthenticationRequestParameters.RequestContext.Logger;
-            
+
             // Prime the scheme before any cache lookup if we already have a binding cert from a prior mint
             if (AuthenticationRequestParameters.IsMtlsPopRequested)
             {

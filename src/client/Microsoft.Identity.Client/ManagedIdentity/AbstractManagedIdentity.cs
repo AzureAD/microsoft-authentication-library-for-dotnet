@@ -48,8 +48,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 cancellationToken.ThrowIfCancellationRequested();
             }
 
-            HttpResponse response;
-
             // Convert the scopes to a resource string.
             string resource = parameters.Resource;
 
@@ -80,50 +78,64 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             _requestContext.Logger.Info("[Managed Identity] Sending request to managed identity endpoints.");
 
-            IRetryPolicy retryPolicy = _requestContext.ServiceBundle.Config.RetryPolicyFactory.GetRetryPolicy(request.RequestType);
-
             try
             {
-                if (request.Method == HttpMethod.Get)
-                {
-                    response = await _requestContext.ServiceBundle.HttpManager
-                        .SendRequestAsync(
-                            request.ComputeUri(),
-                            request.Headers,
-                            body: null,
-                            method: HttpMethod.Get,
-                            logger: _requestContext.Logger,
-                            doNotThrow: true,
-                            mtlsCertificate: request.MtlsCertificate,
-                            validateServerCertificate: GetValidationCallback(),
-                            cancellationToken: cancellationToken,
-                            retryPolicy: retryPolicy).ConfigureAwait(false);
-                }
-                else
-                {
-                    response = await _requestContext.ServiceBundle.HttpManager
-                        .SendRequestAsync(
-                            request.ComputeUri(),
-                            request.Headers,
-                            body: new FormUrlEncodedContent(request.BodyParameters),
-                            method: HttpMethod.Post,
-                            logger: _requestContext.Logger,
-                            doNotThrow: true,
-                            mtlsCertificate: request.MtlsCertificate,
-                            validateServerCertificate: GetValidationCallback(),
-                            cancellationToken: cancellationToken,
-                            retryPolicy: retryPolicy)
-                        .ConfigureAwait(false);
-
-                }
-
-                return await HandleResponseAsync(parameters, response, cancellationToken).ConfigureAwait(false);
+                return await SendRequestAndHandleResponseAsync(request, parameters, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
                 HandleException(ex);
                 throw;
             }
+        }
+
+        /// <summary>
+        /// Sends the prepared request and converts the HTTP response into a <see cref="ManagedIdentityResponse"/>.
+        /// Overridable so a managed-identity source can replace the direct HTTP send (e.g., delegate to an
+        /// internal ConfidentialClientApplication.AcquireTokenForClient call instead of calling HttpManager directly).
+        /// </summary>
+        protected virtual async Task<ManagedIdentityResponse> SendRequestAndHandleResponseAsync(
+            ManagedIdentityRequest request,
+            AcquireTokenForManagedIdentityParameters parameters,
+            CancellationToken cancellationToken)
+        {
+            HttpResponse response;
+
+            IRetryPolicy retryPolicy = _requestContext.ServiceBundle.Config.RetryPolicyFactory.GetRetryPolicy(request.RequestType);
+
+            if (request.Method == HttpMethod.Get)
+            {
+                response = await _requestContext.ServiceBundle.HttpManager
+                    .SendRequestAsync(
+                        request.ComputeUri(),
+                        request.Headers,
+                        body: null,
+                        method: HttpMethod.Get,
+                        logger: _requestContext.Logger,
+                        doNotThrow: true,
+                        mtlsCertificate: request.MtlsCertificate,
+                        validateServerCertificate: GetValidationCallback(),
+                        cancellationToken: cancellationToken,
+                        retryPolicy: retryPolicy).ConfigureAwait(false);
+            }
+            else
+            {
+                response = await _requestContext.ServiceBundle.HttpManager
+                    .SendRequestAsync(
+                        request.ComputeUri(),
+                        request.Headers,
+                        body: new FormUrlEncodedContent(request.BodyParameters),
+                        method: HttpMethod.Post,
+                        logger: _requestContext.Logger,
+                        doNotThrow: true,
+                        mtlsCertificate: request.MtlsCertificate,
+                        validateServerCertificate: GetValidationCallback(),
+                        cancellationToken: cancellationToken,
+                        retryPolicy: retryPolicy)
+                    .ConfigureAwait(false);
+            }
+
+            return await HandleResponseAsync(parameters, response, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>

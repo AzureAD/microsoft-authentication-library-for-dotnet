@@ -648,7 +648,7 @@ namespace Microsoft.Identity.Test.Unit
         /// <summary>
         /// Fake mTLS authentication endpoint used in tests.
         /// </summary>
-        public const string MtlsAuthenticationEndpoint = "http://fake_mtls_authentication_endpoint";
+        public const string MtlsAuthenticationEndpoint = "https://fake_mtls_authentication_endpoint";
 
         /// <summary>
         /// Sample claims JSON payload.
