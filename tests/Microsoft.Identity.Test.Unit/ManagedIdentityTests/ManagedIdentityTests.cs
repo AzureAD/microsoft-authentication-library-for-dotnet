@@ -49,6 +49,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow(AppServiceEndpoint, ManagedIdentitySource.AppService)]
         [DataRow(ImdsEndpoint, ManagedIdentitySource.Imds)]
         [DataRow(null, ManagedIdentitySource.Imds)]
+        [DataRow(ImdsEndpoint, ManagedIdentitySource.ImdsV2)]
+        [DataRow(null, ManagedIdentitySource.ImdsV2)]
         [DataRow(AzureArcEndpoint, ManagedIdentitySource.AzureArc)]
         [DataRow(CloudShellEndpoint, ManagedIdentitySource.CloudShell)]
         [DataRow(ServiceFabricEndpoint, ManagedIdentitySource.ServiceFabric)]
@@ -67,9 +69,15 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 ManagedIdentityApplication mi = miBuilder.Build() as ManagedIdentityApplication;
 
-                if (managedIdentitySource == ManagedIdentitySource.Imds)
+                if (managedIdentitySource == ManagedIdentitySource.ImdsV2)
                 {
-                    // Discovery probes V1 only
+                    // Discovery order: V2 probed first (succeeds)
+                    httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V2));
+                }
+                else if (managedIdentitySource == ManagedIdentitySource.Imds)
+                {
+                    // Discovery order: V2 probed first (fails), then V1 (succeeds)
+                    httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V2));
                     httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V1));
                 }
 
@@ -1120,7 +1128,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var mi = miBuilder.Build() as ManagedIdentityApplication;
                 Assert.IsNotNull(mi, "Build() should return a ManagedIdentityApplication instance.");
 
-                // Explicit discovery: V1 probe fails → NoneFound cached
+                // Explicit discovery: V2 probe fails, then V1 probe also fails → NoneFound cached
+                httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V2));
                 httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V1));
 
                 var sourceResult = await mi.GetManagedIdentitySourceAsync(ImdsProbesCancellationToken).ConfigureAwait(false);
@@ -1491,6 +1500,61 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     StringAssert.StartsWith(secondUri.ToString(), secondEndpoint);
                 }
             }
+        }
+
+        [TestMethod]
+        public void WithExtraQueryParameters_PopulatesCacheKeyComponents_Issue6030()
+        {
+            // Arrange
+            var extraQueryParameters = new Dictionary<string, string>
+                {
+                    { "param1", "value1" },
+                    { "param2", "value2" }
+                };
+
+            // Act
+            var miBuilder = ManagedIdentityApplicationBuilder
+                .Create(ManagedIdentityId.SystemAssigned)
+                .WithExperimentalFeatures(true)
+                .WithExtraQueryParameters(extraQueryParameters);
+
+            // Assert: every EQP must participate in the cache key so callers cannot bypass caching.
+            Assert.IsNotNull(miBuilder.Config.CacheKeyComponents);
+            Assert.HasCount(2, miBuilder.Config.CacheKeyComponents);
+            Assert.AreEqual("value1", miBuilder.Config.CacheKeyComponents["param1"]);
+            Assert.AreEqual("value2", miBuilder.Config.CacheKeyComponents["param2"]);
+        }
+
+        [TestMethod]
+        public void WithExtraQueryParameters_DifferentValuesProduceDifferentCacheKeys_Issue6030()
+        {
+            // Two MI apps that differ only by an EQP value must produce distinct app-token cache keys
+            // so that the second app cannot read the first app's cached token.
+            var miA = ManagedIdentityApplicationBuilder
+                .Create(ManagedIdentityId.SystemAssigned)
+                .WithExperimentalFeatures(true)
+                .WithExtraQueryParameters(new Dictionary<string, string> { { "tenantHint", "tenantA" } })
+                .BuildConcrete();
+
+            var miB = ManagedIdentityApplicationBuilder
+                .Create(ManagedIdentityId.SystemAssigned)
+                .WithExperimentalFeatures(true)
+                .WithExtraQueryParameters(new Dictionary<string, string> { { "tenantHint", "tenantB" } })
+                .BuildConcrete();
+
+            string keyA = Client.Cache.CacheKeyFactory.GetAppTokenCacheItemKey(
+                miA.ServiceBundle.Config.ClientId,
+                tenantId: string.Empty,
+                popKid: null,
+                miA.ServiceBundle.Config.CacheKeyComponents);
+
+            string keyB = Client.Cache.CacheKeyFactory.GetAppTokenCacheItemKey(
+                miB.ServiceBundle.Config.ClientId,
+                tenantId: string.Empty,
+                popKid: null,
+                miB.ServiceBundle.Config.CacheKeyComponents);
+
+            Assert.AreNotEqual(keyA, keyB, "EQP-differentiated MI requests must not share a cache entry.");
         }
 
         [TestMethod]

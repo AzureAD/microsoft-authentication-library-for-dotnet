@@ -28,7 +28,29 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             // No op
         }
 
+        public void LogSuccessHttpDuration(
+            string platform,
+            ApiEvent.ApiIds apiId,
+            AuthenticationResultMetadata authResultMetadata)
+        {
+            // No op
+        }
+
         public void LogFailureMetrics(string platform,
+            string errorCode,
+            ApiEvent apiEvent,
+            string callerSdkId,
+            string callerSdkVersion,
+            CacheRefreshReason cacheRefreshReason,
+            int tokenType,
+            int httpStatusCode,
+            long totalDurationInMs,
+            string rawStsErrorCode = null)
+        {
+            // No op
+        }
+
+        public void IncrementFailureCounter(string platform,
             string errorCode,
             ApiEvent.ApiIds apiId,
             string callerSdkId,
@@ -36,6 +58,13 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             CacheRefreshReason cacheRefreshReason,
             int tokenType,
             string rawStsErrorCode = null)
+        {
+            // No op
+        }
+
+        public void LogFailureHttpDuration(string platform,
+            ApiEvent apiEvent,
+            int httpStatusCode)
         {
             // No op
         }

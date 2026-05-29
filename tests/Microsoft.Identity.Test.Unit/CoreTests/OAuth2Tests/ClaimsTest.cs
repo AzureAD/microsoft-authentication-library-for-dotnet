@@ -228,8 +228,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
         [TestMethod]
         public async Task Claims_Fail_WhenClaimsIsNotJson_Async()
         {
+            // Use a loopback redirect URI so that the AcquireTokenInteractive path on .NET 8
+            // passes its loopback validation and reaches the claims merge -- otherwise the
+            // loopback check would throw MsalError.LoopbackRedirectUri before any claims
+            // parsing runs (since ClaimsAndClientCapabilities is computed lazily).
             var app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                             .WithClientCapabilities(TestConstants.s_clientCapabilities)
+                            .WithRedirectUri("http://localhost")
                             .BuildConcrete();
 
             var ex = await AssertException.TaskThrowsAsync<MsalClientException>(

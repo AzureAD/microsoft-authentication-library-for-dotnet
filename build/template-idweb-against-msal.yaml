@@ -1,0 +1,320 @@
+# template-idweb-against-msal.yaml
+#
+# Conditional stage that builds Microsoft.Identity.Web (IdWeb) against the
+# current MSAL.NET source by packing MSAL locally and consuming it as a NuGet
+# package via IdWeb's existing $(MicrosoftIdentityClientVersion) override hook
+# in IdWeb's Directory.Build.props.
+#
+# This mirrors the DevEx unified-build pattern (definitionId=2749) that
+# already daisy-chains Abstractions -> Wilson -> IdWeb -> SAL -> MISE through
+# local NuGet feeds. We add MSAL as one more link upstream.
+#
+# Purpose: catch MSAL changes on 'main' that would break IdWeb consumers
+# before MSAL ships a release.
+#
+# Activation: this stage is gated by
+#   eq(variables['RunIdWebIntegration'], 'true')
+# The parent PR pipeline (build/pipeline-pullrequest.yaml) does NOT declare
+# RunIdWebIntegration at root -- root-level YAML variables override
+# pipeline-definition UI variables in ADO, which would defeat per-definition
+# override. So on PR runs the variable is undefined, the condition is false,
+# and the stage is Skipped (zero agent time). The separate ADO pipeline
+# definition (.NET MSAL Nightly IdWeb Integration) sets
+# RunIdWebIntegration='true' and IdWebRef in its Variables UI, and attaches
+# a scheduled trigger in its Triggers UI.
+#
+# IdWeb's default branch is 'master' (not 'main') -- this template's
+# PowerShell fallback defaults to 'master' if IdWebRef is unset.
+#
+# Scope: by design we restore/build/test ONLY the
+#   tests/Microsoft.Identity.Web.Test/Microsoft.Identity.Web.Test.csproj
+# csproj. Project references pull in the IdWeb libraries we care about
+# (Microsoft.Identity.Web, .TokenCache, .Certificateless) transitively.
+# Avoiding the full sln dodges unrelated projects (E2E, perf, DevApps,
+# Aspire, AOT TestApp, tooling) that produce false nightly failures from
+# workload/SDK drift.
+#
+# IMPORTANT: this template does NOT publish any NuGet package externally.
+# The .nupkg produced lives in $(LocalNugetFeed) on the agent only, with
+# version 99.0.0-nightly-* which is structurally impossible to confuse for
+# a real MSAL release and dominates any plausible transitive '>=' constraint.
+
+parameters:
+- name: buildConfiguration
+  displayName: 'Build configuration'
+  type: string
+  default: 'Release'
+- name: dependsOnStage
+  displayName: 'Stage to depend on (typically MSAL Build)'
+  type: string
+  default: 'Build'
+
+stages:
+- stage: IdWebAgainstMsal
+  displayName: 'IdWeb against MSAL src (nightly integration)'
+  dependsOn: ${{ parameters.dependsOnStage }}
+  condition: and(succeeded(), eq(variables['RunIdWebIntegration'], 'true'))
+  jobs:
+  - job: BuildAndTestIdWeb
+    displayName: 'Pack MSAL + build IdWeb against local feed + run unit tests'
+    pool:
+      vmImage: 'windows-2022'
+    timeoutInMinutes: 60
+    workspace:
+      clean: outputs
+    variables:
+      # Local-only MSAL version. 99.x dominates any plausible transitive '>='
+      # constraint that could otherwise silently fall back to a real release
+      # from nuget.org. Build.BuildId makes each run's version unique within
+      # the agent cache.
+      MsalLocalVersion: '99.0.0-nightly-$(Build.BuildId)'
+
+      # On-agent throwaway NuGet feed. Never published.
+      LocalNugetFeed:   '$(Build.ArtifactStagingDirectory)/nuget-local-3P'
+      IdWebRoot:        '$(Agent.BuildDirectory)/idweb'
+      BinlogDir:        '$(Build.ArtifactStagingDirectory)/binlogs'
+      TestResultsDir:   '$(Build.ArtifactStagingDirectory)/testresults'
+      IdWebTestCsproj:  '$(Agent.BuildDirectory)/idweb/tests/Microsoft.Identity.Web.Test/Microsoft.Identity.Web.Test.csproj'
+
+    steps:
+    - checkout: self
+      displayName: 'Checkout MSAL.NET (self)'
+      clean: false
+      fetchDepth: 1
+
+    - task: UseDotNet@2
+      displayName: 'Use .NET 8 SDK'
+      inputs:
+        packageType: 'sdk'
+        version: '8.0.x'
+
+    - task: UseDotNet@2
+      displayName: 'Use .NET 9 SDK'
+      inputs:
+        packageType: 'sdk'
+        version: '9.0.x'
+
+    - task: UseDotNet@2
+      displayName: 'Use .NET 10 SDK (required by IdWeb global.json)'
+      inputs:
+        packageType: 'sdk'
+        version: '10.0.x'
+        includePreviewVersions: true
+
+    - task: PowerShell@2
+      displayName: 'Initialize local NuGet feed directory'
+      inputs:
+        targetType: 'inline'
+        script: |
+          $ErrorActionPreference = 'Stop'
+          New-Item -ItemType Directory -Force -Path '$(LocalNugetFeed)' | Out-Null
+          New-Item -ItemType Directory -Force -Path '$(BinlogDir)'      | Out-Null
+          New-Item -ItemType Directory -Force -Path '$(TestResultsDir)' | Out-Null
+          Write-Host "Local feed root: $(LocalNugetFeed)"
+          Write-Host "MSAL local version: $(MsalLocalVersion)"
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Pack MSAL with local-only version'
+      inputs:
+        command: 'pack'
+        packagesToPack: '$(Build.SourcesDirectory)/src/client/Microsoft.Identity.Client/Microsoft.Identity.Client.csproj'
+        packDirectory: '$(LocalNugetFeed)'
+        configuration: '${{ parameters.buildConfiguration }}'
+        buildProperties: 'Version=$(MsalLocalVersion);PackageVersion=$(MsalLocalVersion)'
+        verbosityPack: 'minimal'
+
+    - task: PowerShell@2
+      displayName: 'Verify MSAL pack produced expected nupkg'
+      inputs:
+        targetType: 'inline'
+        script: |
+          $ErrorActionPreference = 'Stop'
+          $expected = "Microsoft.Identity.Client.$(MsalLocalVersion).nupkg"
+          $found = Get-ChildItem '$(LocalNugetFeed)' -Filter 'Microsoft.Identity.Client.*.nupkg' -ErrorAction SilentlyContinue
+          if (-not $found) { throw "No Microsoft.Identity.Client*.nupkg found in $(LocalNugetFeed)" }
+          $found | ForEach-Object { Write-Host ("  packed: {0} ({1:N1} KB)" -f $_.Name, ($_.Length / 1KB)) }
+          if (-not ($found.Name -contains $expected)) {
+            throw "Expected '$expected' not present in feed. Got: $($found.Name -join ', ')"
+          }
+          Write-Host "OK"
+
+    - task: PowerShell@2
+      displayName: 'Clone Microsoft.Identity.Web'
+      retryCountOnTaskFailure: 2
+      inputs:
+        targetType: 'inline'
+        script: |
+          $ErrorActionPreference = 'Stop'
+
+          # Resolve the ref. We deliberately do NOT declare $(IdWebRef) at
+          # YAML root (UI-precedence issue), so it can be unset on this
+          # pipeline. Default to 'master' when undefined or unresolved
+          # (Microsoft.Identity.Web's default branch is 'master', not 'main').
+          $ref = '$(IdWebRef)'
+          if ([string]::IsNullOrWhiteSpace($ref) -or $ref -eq '$(IdWebRef)') {
+            $ref = 'master'
+          }
+
+          # Allowlist: refs must look like branch/tag/sha names. Blocks
+          # argument-injection (refs starting with '-') and shell
+          # metacharacters. Allowed chars: alphanumerics, dot, underscore,
+          # forward slash, hyphen.
+          if ($ref -notmatch '^[A-Za-z0-9._/-]+$' -or $ref.StartsWith('-')) {
+            throw "IdWebRef '$ref' contains disallowed characters or starts with '-'"
+          }
+
+          $idwebDir = '$(IdWebRoot)'
+          if (Test-Path $idwebDir) {
+            Write-Host "Removing stale IdWeb clone at $idwebDir"
+            Remove-Item -Recurse -Force $idwebDir
+          }
+          $parent = Split-Path $idwebDir
+          if (-not (Test-Path $parent)) { New-Item -ItemType Directory -Force -Path $parent | Out-Null }
+
+          Write-Host "Cloning IdWeb @ '$ref'"
+          # Try a shallow clone first (works for branches + tags). If that
+          # fails, fall back to a full clone + checkout (handles arbitrary
+          # SHAs).
+          git clone --depth 1 --branch $ref https://github.com/AzureAD/microsoft-identity-web.git $idwebDir
+          if ($LASTEXITCODE -ne 0) {
+            Write-Host "Shallow branch clone failed; trying full clone + checkout (supports SHAs)"
+            if (Test-Path $idwebDir) { Remove-Item -Recurse -Force $idwebDir }
+            git clone https://github.com/AzureAD/microsoft-identity-web.git $idwebDir
+            if ($LASTEXITCODE -ne 0) { throw "git clone of IdWeb failed (exit $LASTEXITCODE)" }
+            git -C $idwebDir checkout $ref
+            if ($LASTEXITCODE -ne 0) { throw "git checkout '$ref' failed (exit $LASTEXITCODE)" }
+          }
+
+          Write-Host ""
+          Write-Host "IdWeb HEAD:"
+          git -C $idwebDir log -1 --oneline
+          Write-Host ""
+          Write-Host "MSAL HEAD (self) at $(Build.SourcesDirectory):"
+          git -C '$(Build.SourcesDirectory)' log -1 --oneline
+
+    - task: PowerShell@2
+      displayName: 'Wire local MSAL feed into IdWeb NuGet.Config'
+      inputs:
+        targetType: 'inline'
+        script: |
+          $ErrorActionPreference = 'Stop'
+          $cfg = Join-Path '$(IdWebRoot)' 'NuGet.Config'
+          if (-not (Test-Path $cfg)) { throw "IdWeb NuGet.Config not found at $cfg" }
+          Write-Host "Adding source 'msal-nightly-3P' = $(LocalNugetFeed)"
+          dotnet nuget add source '$(LocalNugetFeed)' --name 'msal-nightly-3P' --configfile $cfg
+          if ($LASTEXITCODE -ne 0) { throw "dotnet nuget add source failed" }
+          Write-Host ""
+          Write-Host "Resulting NuGet.Config sources:"
+          dotnet nuget list source --configfile $cfg
+
+    - task: PowerShell@2
+      displayName: 'Restore IdWeb test project against local MSAL feed'
+      retryCountOnTaskFailure: 2
+      inputs:
+        targetType: 'inline'
+        workingDirectory: '$(IdWebRoot)'
+        script: |
+          $ErrorActionPreference = 'Stop'
+          # Project-scoped restore (not solution-wide -- see header comment).
+          # --configfile pins us to IdWeb's NuGet.Config (where we just added
+          # the local feed), bypassing any ADO task auto-feed-mgmt behavior.
+          dotnet restore '$(IdWebTestCsproj)' `
+            --configfile '$(IdWebRoot)/NuGet.Config' `
+            /p:MicrosoftIdentityClientVersion=$(MsalLocalVersion) `
+            /bl:'$(BinlogDir)/idweb-restore.binlog'
+          if ($LASTEXITCODE -ne 0) { throw "dotnet restore failed (exit $LASTEXITCODE)" }
+
+    - task: PowerShell@2
+      displayName: 'Sanity check: test csproj resolved MSAL from local feed'
+      inputs:
+        targetType: 'inline'
+        script: |
+          $ErrorActionPreference = 'Stop'
+
+          # Check 1: global packages cache holds our version.
+          # Parse the path with a non-greedy, anchored regex. The naive
+          # '.*: *' is greedy and on Windows eats up to the drive-letter
+          # colon (e.g. "C:\Users\...\.nuget\packages\" -> "\Users\...\").
+          $globalPackages = (& dotnet nuget locals global-packages --list) -replace '^.*?global-packages:\s*',''
+          $msalCachePath = Join-Path $globalPackages "microsoft.identity.client/$(MsalLocalVersion)"
+          if (-not (Test-Path $msalCachePath)) {
+            Write-Error "Restore did not pull Microsoft.Identity.Client $(MsalLocalVersion) from the local feed. Expected cache path: $msalCachePath"
+            exit 1
+          }
+          Write-Host "OK: MSAL $(MsalLocalVersion) is in the global packages cache."
+
+          # Check 2: the test csproj's project.assets.json names our version.
+          # Catches the case where some other project pulled in our version
+          # (so check 1 passes) but the project under test resolved a real
+          # MSAL version transitively from nuget.org.
+          $assets = Join-Path (Split-Path '$(IdWebTestCsproj)') 'obj/project.assets.json'
+          if (-not (Test-Path $assets)) { throw "project.assets.json missing at $assets" }
+          $content = Get-Content $assets -Raw
+          if ($content -notmatch [regex]::Escape("Microsoft.Identity.Client/$(MsalLocalVersion)")) {
+            Write-Error "project.assets.json for the IdWeb test csproj does NOT name Microsoft.Identity.Client/$(MsalLocalVersion). A transitive '>=' constraint likely pulled a real MSAL. Inspect $assets."
+            exit 1
+          }
+          Write-Host "OK: test csproj resolves Microsoft.Identity.Client/$(MsalLocalVersion)."
+
+    - task: PowerShell@2
+      displayName: 'Build IdWeb test project against local MSAL'
+      inputs:
+        targetType: 'inline'
+        workingDirectory: '$(IdWebRoot)'
+        script: |
+          $ErrorActionPreference = 'Stop'
+          dotnet build '$(IdWebTestCsproj)' `
+            --no-restore `
+            --configuration ${{ parameters.buildConfiguration }} `
+            /p:MicrosoftIdentityClientVersion=$(MsalLocalVersion) `
+            /bl:'$(BinlogDir)/idweb-build.binlog'
+          if ($LASTEXITCODE -ne 0) { throw "dotnet build failed (exit $LASTEXITCODE)" }
+
+    - task: PowerShell@2
+      displayName: 'Run IdWeb unit tests'
+      inputs:
+        targetType: 'inline'
+        workingDirectory: '$(IdWebRoot)'
+        script: |
+          $ErrorActionPreference = 'Stop'
+          dotnet test '$(IdWebTestCsproj)' `
+            --no-build `
+            --configuration ${{ parameters.buildConfiguration }} `
+            --logger 'trx' `
+            --results-directory '$(TestResultsDir)' `
+            /p:MicrosoftIdentityClientVersion=$(MsalLocalVersion) `
+            /bl:'$(BinlogDir)/idweb-test.binlog'
+          # Don't throw on non-zero exit -- test failures are surfaced
+          # downstream by the PublishTestResults step with
+          # failTaskOnFailedTests=true. This keeps the failure attributed to
+          # tests in the ADO Tests tab rather than to a generic step failure.
+          if ($LASTEXITCODE -ne 0) {
+            Write-Host "##[warning]dotnet test exit code $LASTEXITCODE; test failures will be reported by PublishTestResults"
+          }
+
+    - task: PublishTestResults@2
+      displayName: 'Publish test results (.trx)'
+      condition: always()
+      inputs:
+        testResultsFormat: 'VSTest'
+        testResultsFiles: '**/*.trx'
+        searchFolder: '$(TestResultsDir)'
+        testRunTitle: 'IdWeb unit tests against MSAL $(MsalLocalVersion)'
+        failTaskOnFailedTests: true
+        mergeTestResults: true
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish MSBuild binlogs'
+      condition: always()
+      inputs:
+        PathtoPublish: '$(BinlogDir)'
+        ArtifactName: 'idweb-against-msal-binlogs'
+        publishLocation: 'Container'
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish .trx test results as build artifact'
+      condition: always()
+      inputs:
+        PathtoPublish: '$(TestResultsDir)'
+        ArtifactName: 'idweb-against-msal-testresults'
+        publishLocation: 'Container'

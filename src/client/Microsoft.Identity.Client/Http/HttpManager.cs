@@ -254,15 +254,21 @@ namespace Microsoft.Identity.Client.Http
 
                 HttpClient client = GetHttpClient(bindingCertificate, validateServerCert);
 
-                using (HttpResponseMessage responseMessage =
-                    await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false))
+                try
+                {
+                    using (HttpResponseMessage responseMessage =
+                        await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false))
+                    {
+                        logger.Verbose(() => $"[HttpManager] Received response. Status code: {responseMessage.StatusCode}. ");
+
+                        HttpResponse returnValue = await CreateResponseAsync(responseMessage).ConfigureAwait(false);
+                        returnValue.UserAgent = requestMessage.Headers.UserAgent.ToString();
+                        return returnValue;
+                    }
+                }
+                finally
                 {
                     LastRequestDurationInMs = sw.ElapsedMilliseconds;
-                    logger.Verbose(() => $"[HttpManager] Received response. Status code: {responseMessage.StatusCode}. ");
-
-                    HttpResponse returnValue = await CreateResponseAsync(responseMessage).ConfigureAwait(false);
-                    returnValue.UserAgent = requestMessage.Headers.UserAgent.ToString();
-                    return returnValue;
                 }
             }
         }
