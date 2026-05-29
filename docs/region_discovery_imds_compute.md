@@ -90,11 +90,12 @@ Sample response (abbreviated):
 }
 ```
 
-MSAL deserializes the response, reads `location`, normalizes it (lowercase,
-strip spaces — same as today), and validates it via the existing
-`ValidateRegion` helper. On success, the region is cached as
-`RegionAutodetectionSource.Imds`. On failure, the failure is cached and
-MSAL falls back to the global endpoint.
+MSAL deserializes the response, reads `location`, and validates it via the
+existing `ValidateRegion` helper. The IMDS-sourced value is consumed
+verbatim (no normalization is applied — only the `REGION_NAME` env-var
+path lowercases and strips spaces, as it does today). On success, the
+region is cached as `RegionAutodetectionSource.Imds`. On failure, the
+failure is cached and MSAL falls back to the global endpoint.
 
 The api-version drift handler is preserved unchanged (see *API-Version
 Fallback* below), but it now probes the new endpoint URL.
@@ -209,9 +210,14 @@ Unchanged.
 - `ApiEvent.RegionUsed`, `ApiEvent.AutoDetectedRegion`,
   `ApiEvent.RegionOutcome`, and `ApiEvent.RegionDiscoveryFailureReason`
   retain their current semantics.
-- The failure-reason string is built from `imdsUri.AbsoluteUri`, so the
-  new endpoint is automatically reflected in observability data without
-  any telemetry-pipeline changes.
+- `RegionDiscoveryFailureReason` continues to use the existing fixed-
+  format strings (e.g., `"Call to local IMDS failed with status code
+  {StatusCode} or an empty response."`). The endpoint URL is **not**
+  included in the failure reason today, and this spec does not change
+  that. Surfacing the endpoint in failure telemetry, if desired, is a
+  separate (telemetry-content) change out of scope here. Note that the
+  public `TestConstants.RegionAutoDetectOkFailureMessage` /
+  `RegionAutoDetectNotFoundFailureMessage` strings are unaffected.
 
 ---
 
@@ -290,9 +296,15 @@ well-formed-URI check used today.
 
 ### 7. No telemetry schema change
 
-The endpoint URL is already included in failure-reason strings via
-`imdsUri.AbsoluteUri`, so observability of the new endpoint is automatic.
-Adding a dedicated "endpoint" telemetry field is unnecessary.
+`RegionAutodetectionSource`, `RegionOutcome`, `RegionUsed`,
+`AutoDetectedRegion`, and `RegionDiscoveryFailureReason` retain their
+current shapes and string formats. The IMDS endpoint URL is not part of
+the failure-reason string today and is intentionally not added by this
+spec — keeping the change surface minimal and protecting the public test
+constants (`TestConstants.RegionAutoDetectOkFailureMessage`,
+`TestConstants.RegionAutoDetectNotFoundFailureMessage`). Enriching the
+failure reason with the endpoint URL, if ever desired, is a separate
+spec/change.
 
 ---
 
@@ -313,13 +325,14 @@ and any related mocks. Required scenarios:
 | 8 | IMDS times out | `FailedAutoDiscovery`, timeout reflected in failure reason |
 | 9 | Second call after success | Returned from cache; source `Cache`; no IMDS call |
 | 10 | Second call after failure | `FailedAutoDiscovery` from cache; no IMDS call |
-| 11 | `location` value with mixed case / spaces | Normalized (lowercase, no spaces) before validation |
-| 12 | `location` value that fails `ValidateRegion` | `FailedAutoDiscovery` |
+| 11 | `location` value that fails `ValidateRegion` (e.g., empty / contains URI-illegal characters) | `FailedAutoDiscovery` |
 
 Existing telemetry tests
 (`tests/Microsoft.Identity.Test.Unit/TelemetryTests/RegionalTelemetryTests.cs`
-and `ClientCredentialWithRegionTests.cs`) must continue to pass without
-modification, given the no-schema-change decision.
+and
+`tests/Microsoft.Identity.Test.Unit/PublicApiTests/ClientCredentialWithRegionTests.cs`)
+must continue to pass without modification, given the no-schema-change
+decision.
 
 The integration test
 `tests/Microsoft.Identity.Test.Integration.netcore/HeadlessTests/ClientCredentialsTests.WithRegion.cs`
