@@ -295,6 +295,66 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
+        public async Task WithClaimsFromClient_Imds_CombinedWithWithClaims_ForwardsClientClaimsAndBypassesCacheAsync()
+        {
+            // When both .WithClaims (server-issued challenge) and .WithClaimsFromClient (client claims)
+            // are supplied on the same MSI request:
+            //   - Only the client claims are forwarded to IMDS as the `claims` query parameter
+            //     (server-issued challenges are not a recognised IMDS contract).
+            //   - .WithClaims causes the request to bypass the cache on every call, so two back-to-back
+            //     calls with identical inputs must each hit the network.
+            const string ServerClaims = @"{""access_token"":{""nbf"":{""essential"":true}}}";
+
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, ManagedIdentityTests.ImdsEndpoint);
+
+                var mi = ManagedIdentityApplicationBuilder
+                    .Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpManager(httpManager)
+                    .WithExperimentalFeatures(true)
+                    .Build();
+
+                // Two mocks — both expect ONLY the client claims in the `claims` parameter, never
+                // a merged value that includes ServerClaims. If MSAL accidentally merges them or
+                // forwards the server-issued claims, neither handler will match and the test fails.
+                for (int i = 0; i < 2; i++)
+                {
+                    httpManager.AddManagedIdentityMockHandler(
+                        ManagedIdentityTests.ImdsEndpoint,
+                        ManagedIdentityTests.Resource,
+                        MockHelpers.GetMsiSuccessfulResponse(),
+                        ManagedIdentitySource.Imds,
+                        extraQueryParameters: new Dictionary<string, string>
+                        {
+                            { "claims", Uri.EscapeDataString(NspClaims) }
+                        });
+                }
+
+                // Act — first call
+                var result1 = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithClaims(ServerClaims)
+                    .WithClaimsFromClient(NspClaims)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Act — second call with identical inputs; .WithClaims must force a network round-trip
+                var result2 = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithClaims(ServerClaims)
+                    .WithClaimsFromClient(NspClaims)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual(TokenSource.IdentityProvider, result1.AuthenticationResultMetadata.TokenSource,
+                    "First call should hit the network.");
+                Assert.AreEqual(TokenSource.IdentityProvider, result2.AuthenticationResultMetadata.TokenSource,
+                    "WithClaims must bypass the cache even when WithClaimsFromClient is also set.");
+            }
+        }
+
+        [TestMethod]
         public async Task WithClaimsFromClient_Imds_NoClaims_ClaimsParamAbsentFromRequestAsync()
         {
             // When no client claims are specified, the `claims` query parameter must be absent.
@@ -619,6 +679,42 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     "ClientClaims must be set on the builder even for non-IMDS sources.");
                 Assert.IsTrue(builder.CommonParameters.CacheKeyComponents.ContainsKey("client_claims"),
                     "Cache key component must be registered.");
+            }
+        }
+
+        [TestMethod]
+        [DataRow(ManagedIdentitySource.AppService, "http://127.0.0.1:41564/msi/token")]
+        [DataRow(ManagedIdentitySource.AzureArc, "http://127.0.0.1:40342/metadata/identity/oauth2/token")]
+        [DataRow(ManagedIdentitySource.CloudShell, "http://localhost:50342/oauth2/token")]
+        [DataRow(ManagedIdentitySource.ServiceFabric, "https://127.0.0.1:2377/metadata/identity/oauth2/token")]
+        [DataRow(ManagedIdentitySource.MachineLearning, "http://localhost:7071/msi/token")]
+        public async Task WithClaimsFromClient_NonImdsSource_ExecuteThrowsMsalClientExceptionAsync(
+            ManagedIdentitySource source,
+            string endpoint)
+        {
+            // Only IMDS / IMDSv2 are wired to forward client claims today. Any other source must
+            // fail fast with MsalClientException at execute time so callers don't silently lose
+            // their claims (and so the cache doesn't pollute with keys the endpoint never saw).
+            using (new EnvVariableContext())
+            {
+                SetEnvironmentVariables(source, endpoint);
+
+                var mi = ManagedIdentityApplicationBuilder
+                    .Create(ManagedIdentityId.SystemAssigned)
+                    .WithExperimentalFeatures(true)
+                    .Build();
+
+                MsalClientException ex = await Assert.ThrowsExactlyAsync<MsalClientException>(
+                    () => mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                            .WithClaimsFromClient(NspClaims)
+                            .ExecuteAsync())
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual(MsalError.InvalidRequest, ex.ErrorCode);
+                Assert.Contains(source.ToString(), ex.Message,
+                    "Error message should name the detected source.");
+                Assert.Contains("IMDS", ex.Message,
+                    "Error message should explain only IMDS sources are supported.");
             }
         }
 

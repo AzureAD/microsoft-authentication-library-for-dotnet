@@ -371,7 +371,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         /// </summary>
         private static void ValidateMsiv1Claims(string claimsJson)
         {
-            var parsed = JsonHelper.ParseIntoJsonObject(claimsJson);
+            var parsed = ClaimsHelper.ParseClaimsOrThrow(claimsJson);
             foreach (var kvp in parsed)
             {
                 if (!string.Equals(kvp.Key, XmsAzNwperimid, StringComparison.Ordinal))
