@@ -356,9 +356,31 @@ runs against a real Azure VM and is the end-to-end gate.
 
 ---
 
+## Future Work (non-normative)
+
+The `/compute` document is a superset of what region discovery needs — it
+also exposes `azEnvironment`, `zone`, `extendedLocation`, `vmId`, and
+other fields that future MSAL features may want. Today, every VM-only
+IMDS consumer in MSAL.NET stands up its own call, cache, retry policy,
+and telemetry; this migration is a natural prerequisite to consolidating
+those onto a single process-wide, lazy, single-flight `ImdsComputeSnapshot`
+shared by all VM-only consumers (with `RegionManager` as the first
+consumer). Managed Identity source detection is deliberately out of scope
+for that follow-up, since non-VM hosts (App Service, Functions, Azure
+Arc, Service Fabric, Cloud Shell, Container Apps) don't host `/compute`
+at all and use their own detection ladders.
+
+Tracked separately as
+[#6046](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/6046).
+This spec deliberately keeps that consolidation out of scope so the URL
+swap can land cleanly first.
+
+---
+
 ## References
 
 - Issue: [#6039 — Consolidate MSAL Region Discovery onto the IMDS `/compute` Endpoint](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/6039)
+- Follow-up: [#6046 — Unified IMDS `/compute` snapshot cache for VM-only consumers](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/6046)
 - IMDS docs: https://learn.microsoft.com/azure/virtual-machines/instance-metadata-service
 - Related specs:
   - `docs/imds_retry_based_on_errors.md`
