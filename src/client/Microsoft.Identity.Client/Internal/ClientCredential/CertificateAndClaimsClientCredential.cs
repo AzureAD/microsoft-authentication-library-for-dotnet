@@ -55,10 +55,13 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             context.Logger.Verbose(() => $"[CertificateAndClaimsClientCredential] Mode={context.Mode}");
 
             // Cert reuse (single-invocation per request, issue #5943) is handled in
-            // CredentialMaterialResolver.ResolveAsync, which short-circuits before invoking
-            // this method when a preflight-resolved cert is already on the request. This
-            // keeps the credential implementation focused on producing material and avoids
-            // bleeding per-request-cache state through the shared CredentialContext.
+            // CredentialMaterialResolver.ResolveAsync, which short-circuits this method when
+            // requestParams.MtlsCertificate is set (i.e., the mTLS PoP preflight already
+            // resolved a binding cert). Subclasses must not rely on this method being invoked
+            // in mTLS mode and must keep mTLS-mode output equal to (empty params, cert) —
+            // any future subclass that needs different mTLS-mode behaviour (e.g. additional
+            // token-request headers) must update the resolver short-circuit, not just override
+            // here, or those additions will be silently dropped at runtime.
             X509Certificate2 certificate = await ResolveCertificateAsync(context, cancellationToken)
                 .ConfigureAwait(false);
 
@@ -73,7 +76,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                 {
                     throw new MsalClientException(
                         MsalError.MtlsCertificateNotProvided,
-                        MsalErrorMessage.MtlsCertificateNotProvidedMessage);
+                        MsalErrorMessage.MtlsPopNotSupportedWithClientClaimsMessage);
                 }
 
                 // mTLS path: the certificate authenticates the client at the TLS layer.

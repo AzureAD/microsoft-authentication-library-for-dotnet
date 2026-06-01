@@ -47,6 +47,12 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             // certificate provider delegate at runtime. Non-certificate credentials
             // (assertion-based, etc.) require runtime invocation to produce per-request
             // material (e.g., a fresh JWT-PoP assertion), so they fall through.
+            //
+            // Invariant guarded by CertificateAndClaimsClientCredential.GetCredentialMaterialAsync:
+            // every subclass of CertificateAndClaimsClientCredential must keep mTLS-mode output
+            // equal to (empty, cert). Subclasses that need to override mTLS-mode behaviour
+            // (e.g. add custom token-request headers) must change this short-circuit too —
+            // not just override the method — or their additions will be silently dropped here.
             if (requestParams.MtlsCertificate != null
                 && credential is CertificateAndClaimsClientCredential)
             {

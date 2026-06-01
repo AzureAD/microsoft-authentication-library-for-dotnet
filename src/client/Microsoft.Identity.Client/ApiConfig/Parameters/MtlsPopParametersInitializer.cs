@@ -56,9 +56,10 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
                 return;
             }
 
-            // Case 1 – App opted into mTLS Bearer via SendCertificateOverMtls.
-            //          Resolve the cert polymorphically; non-certificate credentials throw and we leave
-            //          MtlsCertificate unset (the caller will go down the regular Bearer path).
+            // Case 1 – App opted into mTLS Bearer via SendCertificateOverMtls. The builder validates
+            //          at construction time that this option is only paired with a certificate-based
+            //          credential (ConfidentialClientApplicationBuilder.Validate), so the polymorphic
+            //          resolve below is guaranteed to succeed against a CertificateAndClaimsClientCredential.
             if (serviceBundle.Config.CertificateOptions?.SendCertificateOverMtls == true)
             {
                 CredentialMaterial material = await ResolveMtlsMaterialAsync(
