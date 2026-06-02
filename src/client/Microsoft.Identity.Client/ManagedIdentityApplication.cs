@@ -61,6 +61,11 @@ namespace Microsoft.Identity.Client
         /// <c>DefaultAzureCredential</c>) to decide whether managed identity is available and
         /// what binding strength to expect.
         /// </summary>
+        /// <remarks>
+        /// On hosts capable of key binding, detecting the strongest available strength may provision
+        /// (and persist) a binding key as a side effect, pre-warming the cache reused by a subsequent
+        /// token request. The key provider is created once per process and its key is cached.
+        /// </remarks>
         /// <param name="cancellationToken">A cancellation token to observe while waiting for the detection to complete.</param>
         /// <returns>A <see cref="ManagedIdentityCapabilities"/> describing the detected source and host capabilities.</returns>
         public async Task<ManagedIdentityCapabilities> GetManagedIdentityCapabilitiesAsync(CancellationToken cancellationToken)
