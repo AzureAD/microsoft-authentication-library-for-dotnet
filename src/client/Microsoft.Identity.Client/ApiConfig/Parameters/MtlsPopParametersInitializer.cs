@@ -99,6 +99,12 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         ///   <item><description>Signed-assertion credentials invoke their delegate and return
         ///         <c>(jwt-pop, cert)</c>, or throw <see cref="MsalError.MtlsCertificateNotProvided"/>
         ///         if no <see cref="ClientSignedAssertion.TokenBindingCertificate"/> is supplied.</description></item>
+        ///   <item><description>Custom client-claims credentials (WithClientClaims) throw
+        ///         <see cref="MsalError.MtlsCertificateNotProvided"/> directly from
+        ///         <see cref="CertificateAndClaimsClientCredential.GetCredentialMaterialAsync"/>
+        ///         because their cert is intended to sign a JWT-bearer assertion, not bind the TLS
+        ///         transport. The error is surfaced as-is (not re-wrapped) so the message can
+        ///         specifically call out the WithClientClaims incompatibility.</description></item>
         ///   <item><description>Client-secret / static-assertion / string-callback credentials throw
         ///         <see cref="MsalError.InvalidCredentialMaterial"/> via
         ///         <see cref="ClientCredentialGuards.ThrowIfMtlsNotSupported"/>; we translate that

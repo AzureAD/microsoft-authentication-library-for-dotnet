@@ -228,6 +228,11 @@ namespace Microsoft.Identity.Test.Unit
                 .ConfigureAwait(false);
 
             Assert.AreEqual(MsalError.MtlsCertificateNotProvided, ex.ErrorCode);
+
+            // Lock in the message wording so a future "centralise error messages" refactor cannot
+            // silently re-broaden it back to MtlsCertificateNotProvidedMessage and lose the
+            // WithClientClaims-specific diagnostic.
+            StringAssert.Contains(ex.Message, "WithClientClaims");
         }
 
         [TestMethod]
@@ -1346,6 +1351,52 @@ namespace Microsoft.Identity.Test.Unit
                         "BindingCertificate should be present for mTLS PoP.");
                 }
             }
+        }
+
+        [TestMethod]
+        public async Task SendCertificateOverMtls_WithClientClaims_ThrowsClearMessageAsync()
+        {
+            // Regression test for the misconfiguration where an app combines:
+            //   .WithCertificate(cert, new CertificateOptions { SendCertificateOverMtls = true })
+            //   .WithClientClaims(cert, claims)   // overwrites credential, keeps options
+            // and does NOT call .WithMtlsProofOfPossession().
+            //
+            // ConfidentialClientApplicationBuilder.Validate() allows this combo (the credential is
+            // still a CertificateAndClaimsClientCredential, so the cert-only guard passes). At token
+            // request time, TryInitImplicitBearerOverMtlsAsync.Case 1 fires on SendCertificateOverMtls
+            // and asks the credential for material in mTLS mode, which trips the
+            // _claimsToSign != null guard in CertificateAndClaimsClientCredential.
+            //
+            // The message must NOT falsely blame Proof-of-Possession — the user never requested PoP.
+            // It must name both transports (PoP and SendCertificateOverMtls) and the WithClientClaims
+            // incompatibility so the diagnostic is actionable.
+            var ipAddress = new Dictionary<string, string>
+            {
+                { "client_ip", "192.168.1.2" }
+            };
+
+            var options = new CertificateOptions { SendCertificateOverMtls = true };
+
+#pragma warning disable CS0618 // WithClientClaims is obsolete
+            IConfidentialClientApplication app = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithCertificate(s_testCertificate, options)
+                .WithClientClaims(s_testCertificate, ipAddress)
+                .WithAuthority("https://login.microsoftonline.com/123456-1234-2345-1234561234")
+                .Build();
+#pragma warning restore CS0618
+
+            // No .WithMtlsProofOfPossession() — Bearer-over-mTLS path only.
+            MsalClientException ex = await Assert.ThrowsAsync<MsalClientException>(() =>
+                app.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync())
+                .ConfigureAwait(false);
+
+            Assert.AreEqual(MsalError.MtlsCertificateNotProvided, ex.ErrorCode);
+
+            // The diagnostic must name both transports and the offending API.
+            StringAssert.Contains(ex.Message, "WithClientClaims");
+            StringAssert.Contains(ex.Message, "SendCertificateOverMtls");
+            StringAssert.Contains(ex.Message, "Proof-of-Possession");
         }
 
         #endregion

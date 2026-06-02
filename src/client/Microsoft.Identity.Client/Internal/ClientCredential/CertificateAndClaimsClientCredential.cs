@@ -69,14 +69,17 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             {
                 // Custom client-claims credentials (WithClientClaims) are JWT-bearer only:
                 // their cert is intended to sign the assertion, not to bind the TLS transport.
-                // Reject the misconfiguration here rather than silently re-purposing the cert.
+                // This guard fires for every mTLS-mode resolution path — explicit PoP
+                // (.WithMtlsProofOfPossession()) AND implicit Bearer-over-mTLS
+                // (CertificateOptions.SendCertificateOverMtls = true) — so the message must
+                // cover both transports rather than naming Proof-of-Possession alone.
                 // Subclasses (CertificateClientCredential, DynamicCertificateClientCredential)
                 // construct the base with claimsToSign: null and are unaffected by this guard.
                 if (_claimsToSign is not null)
                 {
                     throw new MsalClientException(
                         MsalError.MtlsCertificateNotProvided,
-                        MsalErrorMessage.MtlsPopNotSupportedWithClientClaimsMessage);
+                        MsalErrorMessage.MtlsNotSupportedWithClientClaimsMessage);
                 }
 
                 // mTLS path: the certificate authenticates the client at the TLS layer.
