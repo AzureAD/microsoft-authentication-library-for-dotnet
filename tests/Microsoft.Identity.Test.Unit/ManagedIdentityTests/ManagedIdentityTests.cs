@@ -49,8 +49,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow(AppServiceEndpoint, ManagedIdentitySource.AppService)]
         [DataRow(ImdsEndpoint, ManagedIdentitySource.Imds)]
         [DataRow(null, ManagedIdentitySource.Imds)]
-        [DataRow(ImdsEndpoint, ManagedIdentitySource.ImdsV2)]
-        [DataRow(null, ManagedIdentitySource.ImdsV2)]
         [DataRow(AzureArcEndpoint, ManagedIdentitySource.AzureArc)]
         [DataRow(CloudShellEndpoint, ManagedIdentitySource.CloudShell)]
         [DataRow(ServiceFabricEndpoint, ManagedIdentitySource.ServiceFabric)]
@@ -69,20 +67,64 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 ManagedIdentityApplication mi = miBuilder.Build() as ManagedIdentityApplication;
 
-                if (managedIdentitySource == ManagedIdentitySource.ImdsV2)
+                if (managedIdentitySource == ManagedIdentitySource.Imds)
                 {
-                    // Discovery order: V2 probed first (succeeds)
-                    httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V2));
-                }
-                else if (managedIdentitySource == ManagedIdentitySource.Imds)
-                {
-                    // Discovery order: V2 probed first (fails), then V1 (succeeds)
+                    // Discovery order: V2 probed first (fails), then V1 (succeeds), then compute metadata for capability.
                     httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V2));
                     httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V1));
+                    httpManager.AddMockHandler(MockHelpers.MockImdsComputeMetadata());
                 }
 
-                var miSourceResult = await mi.GetManagedIdentitySourceAsync(ImdsProbesCancellationToken).ConfigureAwait(false);
-                Assert.AreEqual(managedIdentitySource, miSourceResult.Source);
+                var caps = await mi.GetManagedIdentityCapabilitiesAsync(ImdsProbesCancellationToken).ConfigureAwait(false);
+                Assert.AreEqual(managedIdentitySource, caps.Source);
+            }
+        }
+
+        [TestMethod]
+        public async Task GetManagedIdentityCapabilities_ImdsV2Detected_ReportsSoftwarePoPAsync()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, ImdsEndpoint);
+
+                var mi = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpManager(httpManager)
+                    .Build() as ManagedIdentityApplication;
+
+                // Discovery order: V2 probed first and succeeds, signalling host PoP capability.
+                httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V2));
+
+                var caps = await mi.GetManagedIdentityCapabilitiesAsync(ImdsProbesCancellationToken).ConfigureAwait(false);
+
+                Assert.AreEqual(ManagedIdentitySource.Imds, caps.Source);
+                Assert.AreEqual(MtlsBindingStrength.Software, caps.MaxSupportedBindingStrength);
+                Assert.IsTrue(caps.IsMtlsPopSupportedByHost);
+            }
+        }
+
+        [TestMethod]
+        public async Task GetManagedIdentityCapabilities_ImdsV1NonTvm_ReportsBearerAsync()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, ImdsEndpoint);
+
+                var mi = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpManager(httpManager)
+                    .Build() as ManagedIdentityApplication;
+
+                // V2 fails, V1 succeeds, compute metadata reports a non-TVM/CVM host (no security profile).
+                httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V2));
+                httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V1));
+                httpManager.AddMockHandler(MockHelpers.MockImdsComputeMetadata(osType: "Linux", securityType: null));
+
+                var caps = await mi.GetManagedIdentityCapabilitiesAsync(ImdsProbesCancellationToken).ConfigureAwait(false);
+
+                Assert.AreEqual(ManagedIdentitySource.Imds, caps.Source);
+                Assert.AreEqual(MtlsBindingStrength.Bearer, caps.MaxSupportedBindingStrength);
+                Assert.IsFalse(caps.IsMtlsPopSupportedByHost);
             }
         }
 
@@ -1132,7 +1174,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V2));
                 httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V1));
 
-                var sourceResult = await mi.GetManagedIdentitySourceAsync(ImdsProbesCancellationToken).ConfigureAwait(false);
+                var sourceResult = await mi.GetManagedIdentityCapabilitiesAsync(ImdsProbesCancellationToken).ConfigureAwait(false);
                 Assert.AreEqual(ManagedIdentitySource.None, sourceResult.Source);
 
                 // Token acquisition uses cached NoneFound and throws AllSourcesUnavailable
@@ -1370,7 +1412,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow(ManagedIdentitySource.AzureArc)]
         [DataRow(ManagedIdentitySource.CloudShell)]
         [DataRow(ManagedIdentitySource.Imds)]
-        [DataRow(ManagedIdentitySource.ImdsV2)]
         [DataRow(ManagedIdentitySource.ServiceFabric)]
         [DataRow(ManagedIdentitySource.MachineLearning)]
         public void ValidateServerCertificate_OnlySetForServiceFabric(ManagedIdentitySource managedIdentitySource)
@@ -1407,6 +1448,26 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
+        [TestMethod]
+        public void ValidateServerCertificate_NotSetForImdsV2()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, "https://identity.endpoint.com");
+
+                var managedIdentityApp = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpManager(httpManager)
+                    .BuildConcrete();
+                RequestContext requestContext = new RequestContext(managedIdentityApp.ServiceBundle, Guid.NewGuid(), null);
+
+                AbstractManagedIdentity managedIdentity = new ImdsV2ManagedIdentitySource(requestContext);
+
+                Assert.IsNull(managedIdentity.GetValidationCallback(),
+                    "IMDSv2 source should not have ValidateServerCertificate set");
+            }
+        }
+
         private AbstractManagedIdentity CreateManagedIdentitySource(ManagedIdentitySource sourceType, MockHttpManager httpManager)
         {
             string endpoint = "https://identity.endpoint.com";
@@ -1436,9 +1497,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     break;
                 case ManagedIdentitySource.Imds:
                     managedIdentity = new ImdsManagedIdentitySource(requestContext);
-                    break;
-                case ManagedIdentitySource.ImdsV2:
-                    managedIdentity = new ImdsV2ManagedIdentitySource(requestContext);
                     break;
                 case ManagedIdentitySource.MachineLearning:
                     managedIdentity = MachineLearningManagedIdentitySource.Create(requestContext);

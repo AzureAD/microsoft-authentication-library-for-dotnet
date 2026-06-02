@@ -38,6 +38,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             _sourceType = sourceType;
         }
 
+        // True only for the IMDSv1 source. IMDSv1 and IMDSv2 both report
+        // <see cref="ManagedIdentitySource.Imds"/> publicly, so this flag preserves the
+        // v1-specific MSIv1 claims validation without relying on the (folded) source label.
+        protected virtual bool RequiresMsiV1ClaimsValidation => false;
+
         private const string XmsAzNwperimid = "xms_az_nwperimid";
 
         public virtual async Task<ManagedIdentityResponse> AuthenticateAsync(
@@ -65,16 +70,16 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             // ignoring the value and polluting the cache with keys the endpoint never saw.
             if (!string.IsNullOrEmpty(parameters.ClientClaims))
             {
-                if (_sourceType != ManagedIdentitySource.Imds && _sourceType != ManagedIdentitySource.ImdsV2)
+                if (_sourceType != ManagedIdentitySource.Imds)
                 {
                     throw new MsalClientException(
                         MsalError.InvalidRequest,
                         $"WithClaimsFromClient is only supported for IMDS-based managed identity sources. " +
                         $"The detected source is {_sourceType}. " +
-                        "Only ManagedIdentitySource.Imds and ManagedIdentitySource.ImdsV2 support the 'claims' parameter.");
+                        "Only ManagedIdentitySource.Imds supports the 'claims' parameter.");
                 }
 
-                if (_sourceType == ManagedIdentitySource.Imds)
+                if (RequiresMsiV1ClaimsValidation)
                 {
                     ValidateMsiv1Claims(parameters.ClientClaims);
                 }
