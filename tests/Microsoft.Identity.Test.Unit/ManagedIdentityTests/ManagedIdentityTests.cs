@@ -13,13 +13,16 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.ManagedIdentity;
+using Microsoft.Identity.Client.ManagedIdentity.KeyProviders;
 using Microsoft.Identity.Client.ManagedIdentity.V2;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Unit.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NSubstitute;
 using static Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil;
 
 namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
@@ -43,6 +46,16 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         internal static CancellationToken ImdsProbesCancellationToken = new CancellationTokenSource(TimeSpan.FromMinutes(5)).Token; // never timeout for the unit tests
 
         private readonly TestRetryPolicyFactory _testRetryPolicyFactory = new TestRetryPolicyFactory();
+
+        // Injects a test platform proxy that returns the supplied key provider, so that IMDSv2
+        // capability discovery deterministically resolves the host's binding strength (KeyGuard vs
+        // software) instead of probing the real platform key provider.
+        private static void InjectKeyProvider(ManagedIdentityApplication mi, IManagedIdentityKeyProvider keyProvider)
+        {
+            var platformProxy = Substitute.For<IPlatformProxy>();
+            platformProxy.ManagedIdentityKeyProvider.Returns(keyProvider);
+            mi.ServiceBundle.SetPlatformProxyForTest(platformProxy);
+        }
 
         [TestMethod]
         [DataRow("http://127.0.0.1:41564/msi/token/", ManagedIdentitySource.AppService)]
@@ -92,6 +105,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithHttpManager(httpManager)
                     .Build() as ManagedIdentityApplication;
 
+                // A software-backed key provider (no VBS/KeyGuard) caps the host at the Software tier.
+                InjectKeyProvider(mi, new InMemoryManagedIdentityKeyProvider());
+
                 // Discovery order: V2 probed first and succeeds, signalling host PoP capability.
                 httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V2));
 
@@ -99,6 +115,33 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Assert.AreEqual(ManagedIdentitySource.Imds, caps.Source);
                 Assert.AreEqual(MtlsBindingStrength.Software, caps.MaxSupportedBindingStrength);
+                Assert.IsTrue(caps.IsMtlsPopSupportedByHost);
+            }
+        }
+
+        [TestMethod]
+        public async Task GetManagedIdentityCapabilities_ImdsV2KeyGuard_ReportsKeyGuardAsync()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, ImdsEndpoint);
+
+                var mi = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpManager(httpManager)
+                    .Build() as ManagedIdentityApplication;
+
+                // A KeyGuard-capable key provider (VBS-isolated key) upgrades the host to the
+                // attested KeyGuard tier.
+                InjectKeyProvider(mi, new TestKeyGuardManagedIdentityKeyProvider());
+
+                // Discovery order: V2 probed first and succeeds, signalling host PoP capability.
+                httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V2));
+
+                var caps = await mi.GetManagedIdentityCapabilitiesAsync(ImdsProbesCancellationToken).ConfigureAwait(false);
+
+                Assert.AreEqual(ManagedIdentitySource.Imds, caps.Source);
+                Assert.AreEqual(MtlsBindingStrength.KeyGuard, caps.MaxSupportedBindingStrength);
                 Assert.IsTrue(caps.IsMtlsPopSupportedByHost);
             }
         }

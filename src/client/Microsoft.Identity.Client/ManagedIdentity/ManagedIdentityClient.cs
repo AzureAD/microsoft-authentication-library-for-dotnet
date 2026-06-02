@@ -177,12 +177,18 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             {
                 requestContext.Logger.Info("[Managed Identity] ImdsV2 detected.");
 
-                // A successful IMDSv2 probe means the host can bind a token to a key (the v2 CSR
-                // flow is the key-bound PoP protocol). Report at least Software binding strength.
+                // A successful IMDSv2 probe proves the host speaks the key-bound CSR (PoP) protocol,
+                // so it can bind at least at Software strength. Probe the platform key provider to see
+                // whether it can produce a VBS-isolated KeyGuard key and thus advertise the stronger,
+                // attested KeyGuard tier. The v2 PoP token flow itself requires a KeyGuard key, so this
+                // mirrors what an actual PoP request would obtain.
+                MtlsBindingStrength v2Strength = await DetermineImdsV2BindingStrengthAsync(requestContext, cancellationToken).ConfigureAwait(false);
+                requestContext.Logger.Info($"[Managed Identity] Host max supported binding strength: {v2Strength}.");
+
                 return CacheDiscoveryResult(new ManagedIdentityDiscoveryResult(
                     ManagedIdentitySource.Imds,
                     ImdsVersion.V2,
-                    MtlsBindingStrength.Software));
+                    v2Strength));
             }
             imdsV2FailureReason = imdsV2Failure;
 
@@ -192,7 +198,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             {
                 requestContext.Logger.Info("[Managed Identity] ImdsV1 detected.");
 
-                MtlsBindingStrength strength = await DetermineImdsBindingStrengthAsync(requestContext, cancellationToken).ConfigureAwait(false);
+                MtlsBindingStrength strength = await DetermineImdsV1BindingStrengthAsync(requestContext, cancellationToken).ConfigureAwait(false);
                 requestContext.Logger.Info($"[Managed Identity] Host max supported binding strength: {strength}.");
 
                 return CacheDiscoveryResult(new ManagedIdentityDiscoveryResult(
@@ -209,22 +215,22 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 imdsV2FailureReason: imdsV2FailureReason));
         }
 
-        // Determines the host's maximum mTLS binding strength for IMDS hosts using the
+        // Determines the host's maximum mTLS binding strength for IMDSv1-only hosts using the
         // /metadata/instance/compute security profile. mTLS PoP is not supported on .NET
         // Framework 4.6.2, so the host is reported as Bearer-only there.
-        private static Task<MtlsBindingStrength> DetermineImdsBindingStrengthAsync(
+        private static Task<MtlsBindingStrength> DetermineImdsV1BindingStrengthAsync(
             RequestContext requestContext,
             CancellationToken cancellationToken)
         {
 #if NET462
             return Task.FromResult(MtlsBindingStrength.Bearer);
 #else
-            return DetermineImdsBindingStrengthCoreAsync(requestContext, cancellationToken);
+            return DetermineImdsV1BindingStrengthCoreAsync(requestContext, cancellationToken);
 #endif
         }
 
 #if !NET462
-        private static async Task<MtlsBindingStrength> DetermineImdsBindingStrengthCoreAsync(
+        private static async Task<MtlsBindingStrength> DetermineImdsV1BindingStrengthCoreAsync(
             RequestContext requestContext,
             CancellationToken cancellationToken)
         {
@@ -235,10 +241,60 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             // A Windows TVM/CVM security profile indicates key-binding capability. We report
             // Software (binding available) rather than KeyGuard: the security profile alone does
-            // not prove a successful VBS/KeyGuard attestation, so we must not overclaim attestation.
+            // not prove a successful VBS/KeyGuard attestation, and an IMDSv1-only host cannot use
+            // the v2 CSR (PoP) flow regardless, so we must not overclaim attestation.
             return ImdsComputeMetadataManager.IsMtlsPopSupported(computeMetadata)
                 ? MtlsBindingStrength.Software
                 : MtlsBindingStrength.Bearer;
+        }
+#endif
+
+        // Determines the IMDSv2 host's maximum mTLS binding strength. The host supports at least
+        // Software binding (the v2 CSR flow binds a token to a key); if the platform can produce a
+        // VBS-isolated KeyGuard key it supports the stronger, attested KeyGuard tier. mTLS PoP is
+        // unavailable on .NET Framework 4.6.2, so the host is reported as Bearer-only there.
+        private static Task<MtlsBindingStrength> DetermineImdsV2BindingStrengthAsync(
+            RequestContext requestContext,
+            CancellationToken cancellationToken)
+        {
+#if NET462
+            return Task.FromResult(MtlsBindingStrength.Bearer);
+#else
+            return DetermineImdsV2BindingStrengthCoreAsync(requestContext, cancellationToken);
+#endif
+        }
+
+#if !NET462
+        private static async Task<MtlsBindingStrength> DetermineImdsV2BindingStrengthCoreAsync(
+            RequestContext requestContext,
+            CancellationToken cancellationToken)
+        {
+            ManagedIdentityKeyType keyType;
+            try
+            {
+                IManagedIdentityKeyProvider keyProvider = requestContext.ServiceBundle.PlatformProxy.ManagedIdentityKeyProvider;
+                ManagedIdentityKeyInfo keyInfo = await keyProvider
+                    .GetOrCreateKeyAsync(requestContext.Logger, cancellationToken)
+                    .ConfigureAwait(false);
+                keyType = keyInfo.Type;
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                // Failing to obtain a key does not invalidate the host's v2/Software capability;
+                // keep the Software floor rather than failing capability discovery.
+                requestContext.Logger.Info($"[Managed Identity] KeyGuard probe failed; reporting Software binding strength. {ex.Message}");
+                return MtlsBindingStrength.Software;
+            }
+
+            // Only a VBS-isolated KeyGuard key justifies the attested KeyGuard tier. Any other key
+            // type stays at the Software floor; we never downgrade a confirmed v2 host below Software.
+            return keyType == ManagedIdentityKeyType.KeyGuard
+                ? MtlsBindingStrength.KeyGuard
+                : MtlsBindingStrength.Software;
         }
 #endif
 

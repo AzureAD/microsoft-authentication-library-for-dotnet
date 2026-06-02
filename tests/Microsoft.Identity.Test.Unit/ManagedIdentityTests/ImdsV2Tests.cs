@@ -147,13 +147,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V2, userAssignedIdentityId, userAssignedId));
             }
 
-            if (addSourceCheck)
-            {
-                var miSourceResult = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentityCapabilitiesAsync(ManagedIdentityTests.ImdsProbesCancellationToken).ConfigureAwait(false);
-                Assert.AreEqual(ManagedIdentitySource.Imds, miSourceResult.Source);
-            }
-
-            // Choose deterministic key source for tests.
+            // Choose deterministic key source for tests. This must be injected BEFORE discovery runs,
+            // because IMDSv2 capability discovery probes the key provider to determine whether the host
+            // can produce a KeyGuard key (and therefore advertise the KeyGuard binding-strength tier).
             IManagedIdentityKeyProvider managedIdentityKeyProvider = keyProvider;
             if (managedIdentityKeyProvider == null)
             {
@@ -177,6 +173,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 (managedIdentityApp as ManagedIdentityApplication)
                     .ServiceBundle.SetPlatformProxyForTest(platformProxy);
+            }
+
+            if (addSourceCheck)
+            {
+                var miSourceResult = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentityCapabilitiesAsync(ManagedIdentityTests.ImdsProbesCancellationToken).ConfigureAwait(false);
+                Assert.AreEqual(ManagedIdentitySource.Imds, miSourceResult.Source);
             }
 
             return managedIdentityApp;
