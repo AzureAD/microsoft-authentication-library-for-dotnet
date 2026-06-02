@@ -130,18 +130,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             const string validDiscoveryUri = @"https://login.microsoftonline.com/common/discovery/instance?api-version=1.1&authorization_endpoint=https%3A%2F%2Flogin.microsoftonline.com%2Fcommon%2Foauth2%2Fv2.0%2Fauthorize";
             const string validPpeDiscoveryUri = @"https://login.windows-ppe.net/common/discovery/instance?api-version=1.1&authorization_endpoint=https%3A%2F%2Flogin.microsoftonline.com%2Fcommon%2Foauth2%2Fv2.0%2Fauthorize";
-            HttpClient httpClient = new HttpClient();
-            HttpResponseMessage discoveryResponse = await httpClient.SendAsync(
-                new HttpRequestMessage(
-                    HttpMethod.Get,
-                    validDiscoveryUri)).ConfigureAwait(false);
-            string discoveryJson = await discoveryResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
+            using HttpClient httpClient = new HttpClient();
 
-            HttpResponseMessage ppeDiscoveryResponse = await httpClient.SendAsync(
-                new HttpRequestMessage(
-                    HttpMethod.Get,
-                    validPpeDiscoveryUri)).ConfigureAwait(false);
-            string ppeDiscoveryJson = await ppeDiscoveryResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
+            string discoveryJson = await GetDiscoveryResponseWithRetryAsync(httpClient, validDiscoveryUri).ConfigureAwait(false);
+            string ppeDiscoveryJson = await GetDiscoveryResponseWithRetryAsync(httpClient, validPpeDiscoveryUri).ConfigureAwait(false);
 
             InstanceDiscoveryMetadataEntry[] actualMetadata = JsonHelper.DeserializeFromJson<InstanceDiscoveryResponse>(discoveryJson).Metadata;
             InstanceDiscoveryMetadataEntry[] actualPpeMetadata = JsonHelper.DeserializeFromJson<InstanceDiscoveryResponse>(ppeDiscoveryJson).Metadata;
@@ -175,6 +167,42 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 expectedMetadata,
                 processedMetadata,
                 new InstanceDiscoveryMetadataEntryComparer());
+        }
+
+        private static async Task<string> GetDiscoveryResponseWithRetryAsync(HttpClient httpClient, string uri, int maxRetries = 3)
+        {
+            HttpResponseMessage response = null;
+            string body = null;
+
+            for (int attempt = 0; attempt < maxRetries; attempt++)
+            {
+                try
+                {
+                    using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, uri);
+                    response = await httpClient.SendAsync(request).ConfigureAwait(false);
+                    body = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        return body;
+                    }
+                }
+                catch (HttpRequestException ex)
+                {
+                    body = ex.Message;
+                }
+
+                if (attempt < maxRetries - 1)
+                {
+                    await Task.Delay(1000 * (attempt + 1)).ConfigureAwait(false);
+                }
+            }
+
+            Assert.Inconclusive(
+                $"Instance discovery endpoint returned non-success status after {maxRetries} retries. " +
+                $"URI: {uri}, Status: {(int)(response?.StatusCode ?? 0)} {response?.StatusCode}, Body: {body}");
+
+            return null; // unreachable, but required by compiler
         }
 
         private class InstanceDiscoveryMetadataEntryComparer : IEqualityComparer<InstanceDiscoveryMetadataEntry>
