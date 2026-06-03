@@ -27,6 +27,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         // Allows caching "NoneFound" (Source=None) without confusing it with "not discovered yet".
         private static ManagedIdentityDiscoveryResult s_cachedSourceResult = null;
 
+        // Serializes explicit capability discovery so concurrent callers at process startup do not
+        // issue redundant IMDS probes or provision the binding key more than once.
+        private static readonly SemaphoreSlim s_discoveryLock = new SemaphoreSlim(1, 1);
+
         // Holds the most recently minted mTLS binding certificate for this application instance.
         private X509Certificate2 _runtimeMtlsBindingCertificate;
         internal X509Certificate2 RuntimeMtlsBindingCertificate => Volatile.Read(ref _runtimeMtlsBindingCertificate);
@@ -152,67 +156,95 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             RequestContext requestContext,
             CancellationToken cancellationToken)
         {
-            // Return cached result if explicit discovery already ran
+            // Fast path: explicit discovery already completed.
             if (s_cachedSourceResult != null)
             {
                 return s_cachedSourceResult;
             }
 
-            // First check env vars to avoid the probe if possible
-            ManagedIdentitySource source = GetManagedIdentitySourceNoImds(requestContext.Logger);
-            
-            if (source != ManagedIdentitySource.None)
+            // Single-flight: ensure only one caller probes IMDS / provisions a binding key at a
+            // time. Concurrent callers at process startup wait here and then observe the cached
+            // result instead of issuing redundant probes. Try a non-blocking acquire first so an
+            // uncontended caller keeps the existing cancellation point (the HTTP probe); only a
+            // contended caller waits, and that wait is cancelable.
+            bool lockTaken = s_discoveryLock.Wait(0);
+            if (!lockTaken)
             {
-                return CacheDiscoveryResult(new ManagedIdentityDiscoveryResult(source));
+                await s_discoveryLock.WaitAsync(cancellationToken).ConfigureAwait(false);
+                lockTaken = true;
             }
 
-            string imdsV1FailureReason = null;
-            string imdsV2FailureReason = null;
-
-            // Probe IMDS v2 first. The v2 path (CSR metadata endpoint) only exists on hosts that
-            // actually support IMDSv2; on v1-only hosts it returns 404. Probing v2 first avoids
-            // the v1 success-on-400 contract masking a v2-capable host (see issue #6024).
-            var (imdsV2Success, imdsV2Failure) = await ImdsManagedIdentitySource.ProbeImdsEndpointAsync(requestContext, ImdsVersion.V2, cancellationToken).ConfigureAwait(false);
-            if (imdsV2Success)
+            try
             {
-                requestContext.Logger.Info("[Managed Identity] ImdsV2 detected.");
+                // Re-check under the lock in case another caller completed discovery while we waited.
+                if (s_cachedSourceResult != null)
+                {
+                    return s_cachedSourceResult;
+                }
 
-                // A successful IMDSv2 probe proves the host speaks the key-bound CSR (PoP) protocol,
-                // so it can bind at least at Software strength. Probe the platform key provider to see
-                // whether it can produce a VBS-isolated KeyGuard key and thus advertise the stronger,
-                // attested KeyGuard tier. The v2 PoP token flow itself requires a KeyGuard key, so this
-                // mirrors what an actual PoP request would obtain.
-                MtlsBindingStrength v2Strength = await DetermineImdsV2BindingStrengthAsync(requestContext, cancellationToken).ConfigureAwait(false);
-                requestContext.Logger.Info($"[Managed Identity] Host max supported binding strength: {v2Strength}.");
+                // First check env vars to avoid the probe if possible
+                ManagedIdentitySource source = GetManagedIdentitySourceNoImds(requestContext.Logger);
 
+                if (source != ManagedIdentitySource.None)
+                {
+                    return CacheDiscoveryResult(new ManagedIdentityDiscoveryResult(source));
+                }
+
+                string imdsV1FailureReason = null;
+                string imdsV2FailureReason = null;
+
+                // Probe IMDS v2 first. The v2 path (CSR metadata endpoint) only exists on hosts that
+                // actually support IMDSv2; on v1-only hosts it returns 404. Probing v2 first avoids
+                // the v1 success-on-400 contract masking a v2-capable host (see issue #6024).
+                var (imdsV2Success, imdsV2Failure) = await ImdsManagedIdentitySource.ProbeImdsEndpointAsync(requestContext, ImdsVersion.V2, cancellationToken).ConfigureAwait(false);
+                if (imdsV2Success)
+                {
+                    requestContext.Logger.Info("[Managed Identity] ImdsV2 detected.");
+
+                    // A successful IMDSv2 probe proves the host speaks the key-bound CSR (PoP) protocol,
+                    // so it can bind at least at Software strength. Probe the platform key provider to see
+                    // whether it can produce a VBS-isolated KeyGuard key and thus advertise the stronger,
+                    // attested KeyGuard tier. The v2 PoP token flow itself requires a KeyGuard key, so this
+                    // mirrors what an actual PoP request would obtain.
+                    MtlsBindingStrength v2Strength = await DetermineImdsV2BindingStrengthAsync(requestContext, cancellationToken).ConfigureAwait(false);
+                    requestContext.Logger.Info($"[Managed Identity] Host max supported binding strength: {v2Strength}.");
+
+                    return CacheDiscoveryResult(new ManagedIdentityDiscoveryResult(
+                        ManagedIdentitySource.Imds,
+                        ImdsVersion.V2,
+                        v2Strength));
+                }
+                imdsV2FailureReason = imdsV2Failure;
+
+                // If v2 fails, fall back to probing IMDS v1.
+                var (imdsV1Success, imdsV1Failure) = await ImdsManagedIdentitySource.ProbeImdsEndpointAsync(requestContext, ImdsVersion.V1, cancellationToken).ConfigureAwait(false);
+                if (imdsV1Success)
+                {
+                    requestContext.Logger.Info("[Managed Identity] ImdsV1 detected.");
+
+                    MtlsBindingStrength strength = await DetermineImdsV1BindingStrengthAsync(requestContext, cancellationToken).ConfigureAwait(false);
+                    requestContext.Logger.Info($"[Managed Identity] Host max supported binding strength: {strength}.");
+
+                    return CacheDiscoveryResult(new ManagedIdentityDiscoveryResult(
+                        ManagedIdentitySource.Imds,
+                        ImdsVersion.V1,
+                        strength));
+                }
+                imdsV1FailureReason = imdsV1Failure;
+
+                requestContext.Logger.Info($"[Managed Identity] {MsalErrorMessage.ManagedIdentityAllSourcesUnavailable}");
                 return CacheDiscoveryResult(new ManagedIdentityDiscoveryResult(
-                    ManagedIdentitySource.Imds,
-                    ImdsVersion.V2,
-                    v2Strength));
+                    ManagedIdentitySource.None,
+                    imdsV1FailureReason: imdsV1FailureReason,
+                    imdsV2FailureReason: imdsV2FailureReason));
             }
-            imdsV2FailureReason = imdsV2Failure;
-
-            // If v2 fails, fall back to probing IMDS v1.
-            var (imdsV1Success, imdsV1Failure) = await ImdsManagedIdentitySource.ProbeImdsEndpointAsync(requestContext, ImdsVersion.V1, cancellationToken).ConfigureAwait(false);
-            if (imdsV1Success)
+            finally
             {
-                requestContext.Logger.Info("[Managed Identity] ImdsV1 detected.");
-
-                MtlsBindingStrength strength = await DetermineImdsV1BindingStrengthAsync(requestContext, cancellationToken).ConfigureAwait(false);
-                requestContext.Logger.Info($"[Managed Identity] Host max supported binding strength: {strength}.");
-
-                return CacheDiscoveryResult(new ManagedIdentityDiscoveryResult(
-                    ManagedIdentitySource.Imds,
-                    ImdsVersion.V1,
-                    strength));
+                if (lockTaken)
+                {
+                    s_discoveryLock.Release();
+                }
             }
-            imdsV1FailureReason = imdsV1Failure;
-
-            requestContext.Logger.Info($"[Managed Identity] {MsalErrorMessage.ManagedIdentityAllSourcesUnavailable}");
-            return CacheDiscoveryResult(new ManagedIdentityDiscoveryResult(
-                ManagedIdentitySource.None,
-                imdsV1FailureReason: imdsV1FailureReason,
-                imdsV2FailureReason: imdsV2FailureReason));
         }
 
         // Determines the host's maximum mTLS binding strength for IMDSv1-only hosts using the
@@ -393,7 +425,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             string combinedReason = discoveryResult?.GetCombinedErrorReason();
             if (!string.IsNullOrEmpty(combinedReason))
             {
-                errorMessage += " MSAL was not able to detect the Azure Instance Metadata Service (IMDS) that runs on VMs: " + combinedReason;
+                errorMessage += " The Azure Instance Metadata Service (IMDS) that runs on VMs was not detected: " + combinedReason;
             }
 
             return new MsalClientException(MsalError.ManagedIdentityAllSourcesUnavailable, errorMessage);

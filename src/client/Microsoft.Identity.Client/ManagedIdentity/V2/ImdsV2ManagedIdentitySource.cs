@@ -351,7 +351,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 {
                     throw new MsalClientException(
                         "mtls_pop_requires_keyguard",
-                        $"[ImdsV2] mTLS Proof-of-Possession requires KeyGuard keys. Current key type: {keyInfo.Type}");
+                        $"[ImdsV2] mTLS Proof-of-Possession currently requires a KeyGuard key, but this host produced a '{keyInfo.Type}' key. " +
+                        "The host may report Software-strength binding capability (which means it can bind a token to a key), " +
+                        "but the IMDSv2 PoP token flow only accepts VBS-isolated KeyGuard keys today. " +
+                        "Ensure Virtualization-based Security (VBS)/KeyGuard is enabled on the host, or request a bearer token instead.");
                 }
             }
 
