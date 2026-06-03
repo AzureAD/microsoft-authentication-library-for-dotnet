@@ -48,13 +48,19 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             // (assertion-based, etc.) require runtime invocation to produce per-request
             // material (e.g., a fresh JWT-PoP assertion), so they fall through.
             //
+            // Exception: when SendCertificateOverMtls=true the bearer flow requires a
+            // client_assertion JWT in the POST body in addition to the cert at the TLS
+            // layer. That JWT must come from the credential at runtime (Mode=OAuth path),
+            // so we do NOT short-circuit in that case.
+            //
             // Invariant guarded by CertificateAndClaimsClientCredential.GetCredentialMaterialAsync:
             // every subclass of CertificateAndClaimsClientCredential must keep mTLS-mode output
             // equal to (empty, cert). Subclasses that need to override mTLS-mode behaviour
             // (e.g. add custom token-request headers) must change this short-circuit too —
             // not just override the method — or their additions will be silently dropped here.
             if (requestParams.MtlsCertificate != null
-                && credential is CertificateAndClaimsClientCredential)
+                && credential is CertificateAndClaimsClientCredential
+                && requestParams.AppConfig.CertificateOptions?.SendCertificateOverMtls != true)
             {
                 requestParams.RequestContext.Logger.Verbose(() =>
                     $"[CredentialMaterialResolver] Reusing preflight-resolved certificate " +
@@ -87,7 +93,10 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             return CredentialContext.Create(
                 clientId: requestParams.AppConfig.ClientId,
                 tokenEndpoint: tokenEndpoint,
-                mode: requestParams.MtlsCertificate != null || requestParams.IsMtlsPopRequested
+                // Mode=Mtls only for explicit mTLS PoP. All other paths (including SendCertificateOverMtls
+                // bearer where MtlsCertificate is set by preflight) use Mode=OAuth so the credential
+                // produces a client_assertion JWT in the POST body.
+                mode: requestParams.IsMtlsPopRequested
                     ? CredentialTransportProtocol.Mtls
                     : CredentialTransportProtocol.OAuth,
                 claims: requestParams.Claims,
