@@ -28,6 +28,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private readonly IServiceBundle _serviceBundle;
         private readonly AcquireTokenCommonParameters _commonParameters;
         private string _loginHint;
+        private Lazy<string> _claimsAndClientCapabilities;
 
         public AuthenticationRequestParameters(
             IServiceBundle serviceBundle,
@@ -69,12 +70,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
             }
 
-            ClaimsAndClientCapabilities = ClaimsHelper.GetMergedClaimsAndClientCapabilities(
-                _commonParameters.Claims,
-                _serviceBundle.Config.ClientCapabilities);
-
             HomeAccountId = homeAccountId;
             CacheKeyComponents = cacheKeyComponents;
+
+            // Defer JSON merge to first access — cache hits never read ClaimsAndClientCapabilities,
+            // so we avoid parsing on the hot path.
+            _claimsAndClientCapabilities = new Lazy<string>(() =>
+                ClaimsHelper.GetMergedClaimsAndClientCapabilities(
+                    ClaimsHelper.MergeClaimsObjects(_commonParameters.Claims, _commonParameters.ClientClaims),
+                    _serviceBundle.Config.ClientCapabilities));
         }
 
         public ApplicationConfiguration AppConfig => _serviceBundle.Config;
@@ -107,7 +111,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public IDictionary<string, string> ExtraQueryParameters { get; }
 
-        public string ClaimsAndClientCapabilities { get; private set; }
+        public string ClaimsAndClientCapabilities => _claimsAndClientCapabilities.Value;
 
         public Guid CorrelationId => _commonParameters.CorrelationId;
 
@@ -137,6 +141,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 return _commonParameters.Claims;
             }
         }
+
+        /// <summary>
+        /// Client-originated claims set via .WithClaimsFromClient(). These are cached (no bypass) and
+        /// keyed on the raw claims string as passed by the caller.
+        /// </summary>
+        public string ClientClaims => _commonParameters.ClientClaims;
 
         private IAuthenticationOperation _requestOverrideScheme;
 

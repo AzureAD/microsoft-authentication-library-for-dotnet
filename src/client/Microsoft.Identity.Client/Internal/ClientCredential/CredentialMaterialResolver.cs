@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Internal.ClientCredential
 {
@@ -38,6 +39,32 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             string tokenEndpoint,
             CancellationToken cancellationToken)
         {
+            // Single-invocation principle (issue #5943): when the preflight in
+            // MtlsPopParametersInitializer has already resolved an mTLS binding certificate
+            // (stashed on requestParams.MtlsCertificate) and the credential is a certificate
+            // credential — whose runtime material in mTLS mode is always (empty, cert) —
+            // skip the credential roundtrip entirely. This avoids re-invoking the user's
+            // certificate provider delegate at runtime. Non-certificate credentials
+            // (assertion-based, etc.) require runtime invocation to produce per-request
+            // material (e.g., a fresh JWT-PoP assertion), so they fall through.
+            //
+            // Invariant guarded by CertificateAndClaimsClientCredential.GetCredentialMaterialAsync:
+            // every subclass of CertificateAndClaimsClientCredential must keep mTLS-mode output
+            // equal to (empty, cert). Subclasses that need to override mTLS-mode behaviour
+            // (e.g. add custom token-request headers) must change this short-circuit too —
+            // not just override the method — or their additions will be silently dropped here.
+            if (requestParams.MtlsCertificate != null
+                && credential is CertificateAndClaimsClientCredential)
+            {
+                requestParams.RequestContext.Logger.Verbose(() =>
+                    $"[CredentialMaterialResolver] Reusing preflight-resolved certificate " +
+                    $"(Thumbprint={requestParams.MtlsCertificate.Thumbprint}); skipping credential roundtrip.");
+
+                return new CredentialMaterial(
+                    CollectionHelpers.GetEmptyDictionary<string, string>(),
+                    requestParams.MtlsCertificate);
+            }
+
             var context = BuildContext(requestParams, tokenEndpoint);
 
             CredentialMaterial material = await credential
@@ -57,28 +84,26 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             AuthenticationRequestParameters requestParams,
             string tokenEndpoint)
         {
-            return new CredentialContext
-            {
-                ClientId = requestParams.AppConfig.ClientId,
-                TokenEndpoint = tokenEndpoint,
-                Mode = requestParams.IsMtlsPopRequested
+            return CredentialContext.Create(
+                clientId: requestParams.AppConfig.ClientId,
+                tokenEndpoint: tokenEndpoint,
+                mode: requestParams.MtlsCertificate != null || requestParams.IsMtlsPopRequested
                     ? CredentialTransportProtocol.Mtls
                     : CredentialTransportProtocol.OAuth,
-                Claims = requestParams.Claims,
-                ClientCapabilities = requestParams.AppConfig.ClientCapabilities,
-                CryptographyManager = requestParams.RequestContext.ServiceBundle.PlatformProxy.CryptographyManager,
+                claims: requestParams.Claims,
+                clientCapabilities: requestParams.AppConfig.ClientCapabilities,
+                cryptographyManager: requestParams.RequestContext.ServiceBundle.PlatformProxy.CryptographyManager,
                 // When SendCertificateOverMtls=true, the client_assertion JWT must include the x5c chain
                 // so that AAD can validate the assertion against the SNI-registered certificate.
-                SendX5C = requestParams.SendX5C
+                sendX5C: requestParams.SendX5C
                     || (requestParams.AppConfig.CertificateOptions?.SendCertificateOverMtls == true),
-                UseSha2 = requestParams.AuthorityManager.Authority.AuthorityInfo.IsSha2CredentialSupported,
-                ExtraClientAssertionClaims = requestParams.ExtraClientAssertionClaims,
-                ClientAssertionFmiPath = requestParams.ClientAssertionFmiPath,
-                Authority = requestParams.AuthorityManager.Authority.AuthorityInfo.CanonicalAuthority?.ToString(),
-                TenantId = requestParams.AuthorityManager.Authority.TenantId,
-                CorrelationId = requestParams.RequestContext.CorrelationId,
-                Logger = requestParams.RequestContext.Logger
-            };
+                useSha2: requestParams.AuthorityManager.Authority.AuthorityInfo.IsSha2CredentialSupported,
+                extraClientAssertionClaims: requestParams.ExtraClientAssertionClaims,
+                clientAssertionFmiPath: requestParams.ClientAssertionFmiPath,
+                authority: requestParams.AuthorityManager.Authority.AuthorityInfo.CanonicalAuthority?.ToString(),
+                tenantId: requestParams.AuthorityManager.Authority.TenantId,
+                correlationId: requestParams.RequestContext.CorrelationId,
+                logger: requestParams.RequestContext.Logger);
         }
     }
 }
