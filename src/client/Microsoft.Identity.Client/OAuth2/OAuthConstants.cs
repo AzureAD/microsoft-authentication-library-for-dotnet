@@ -48,6 +48,7 @@ namespace Microsoft.Identity.Client.OAuth2
         public const string Attributes = "attributes"; // not a standard OAuth2 param
         public const string AttributeTokens = "attribute_tokens"; // not a standard OAuth2 param
         public const string UserFederatedIdentityCredential = "user_federated_identity_credential"; // user_fic grant type parameter
+        public const string UserId = "user_id"; // user_fic grant type parameter (OID-based user identification)
     }
 
     internal static class OAuth2GrantType

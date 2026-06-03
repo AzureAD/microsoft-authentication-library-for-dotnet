@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
@@ -175,5 +176,296 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         username: FakeUsername,
                         assertion: string.Empty));
         }
+
+        #region OID-Based UserFIC Tests
+
+        private static readonly Guid FakeUserOid = new Guid("11111111-2222-3333-4444-555555555555");
+
+        /// <summary>
+        /// Verifies that when the Guid overload of AcquireTokenByUserFederatedIdentityCredential is used,
+        /// the token request sends "user_id" (OID) instead of "username" (UPN) in the POST body.
+        /// </summary>
+        [TestMethod]
+        public async Task AcquireTokenByUserFic_WithOid_SendsUserIdParameter_Async()
+        {
+            // Arrange
+            using var httpManager = new MockHttpManager();
+            httpManager.AddInstanceDiscoveryMockHandler();
+
+            httpManager.AddMockHandler(new MockHttpMessageHandler
+            {
+                ExpectedUrl = TestConstants.AuthorityCommonTenant + "oauth2/v2.0/token",
+                ExpectedMethod = HttpMethod.Post,
+                ExpectedPostData = new Dictionary<string, string>
+                {
+                    { OAuth2Parameter.GrantType, OAuth2GrantType.UserFic },
+                    { OAuth2Parameter.UserId, FakeUserOid.ToString("D") },
+                    { OAuth2Parameter.UserFederatedIdentityCredential, FakeAssertion }
+                },
+                UnExpectedPostData = new Dictionary<string, string>
+                {
+                    { OAuth2Parameter.Username, "" }
+                },
+                ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
+            });
+
+            var app = BuildCCA(httpManager);
+
+            // Act
+            var result = await (app as IByUserFederatedIdentityCredential)
+                .AcquireTokenByUserFederatedIdentityCredential(
+                    TestConstants.s_scope,
+                    FakeUserOid,
+                    FakeAssertion)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+        }
+
+        /// <summary>
+        /// Verifies that the UPN overload sends "username" and NOT "user_id" in the POST body.
+        /// This is the inverse of the OID test and ensures the two paths are mutually exclusive.
+        /// </summary>
+        [TestMethod]
+        public async Task AcquireTokenByUserFic_WithUpn_SendsUsernameParameter_Async()
+        {
+            // Arrange
+            using var httpManager = new MockHttpManager();
+            httpManager.AddInstanceDiscoveryMockHandler();
+
+            httpManager.AddMockHandler(new MockHttpMessageHandler
+            {
+                ExpectedUrl = TestConstants.AuthorityCommonTenant + "oauth2/v2.0/token",
+                ExpectedMethod = HttpMethod.Post,
+                ExpectedPostData = new Dictionary<string, string>
+                {
+                    { OAuth2Parameter.GrantType, OAuth2GrantType.UserFic },
+                    { OAuth2Parameter.Username, FakeUsername },
+                    { OAuth2Parameter.UserFederatedIdentityCredential, FakeAssertion }
+                },
+                UnExpectedPostData = new Dictionary<string, string>
+                {
+                    { OAuth2Parameter.UserId, "" }
+                },
+                ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
+            });
+
+            var app = BuildCCA(httpManager);
+
+            // Act
+            var result = await (app as IByUserFederatedIdentityCredential)
+                .AcquireTokenByUserFederatedIdentityCredential(
+                    TestConstants.s_scope,
+                    FakeUsername,
+                    FakeAssertion)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+        }
+
+        /// <summary>
+        /// Verifies that Guid.Empty is rejected at builder creation time.
+        /// </summary>
+        [TestMethod]
+        public void AcquireTokenByUserFic_EmptyGuid_ThrowsArgumentException()
+        {
+            using var httpManager = new MockHttpManager();
+            var app = BuildCCA(httpManager);
+
+            AssertException.Throws<ArgumentException>(() =>
+                (app as IByUserFederatedIdentityCredential)
+                    .AcquireTokenByUserFederatedIdentityCredential(
+                        TestConstants.s_scope,
+                        userObjectId: Guid.Empty,
+                        assertion: FakeAssertion));
+        }
+
+        /// <summary>
+        /// Verifies that null assertion is rejected for the OID overload.
+        /// </summary>
+        [TestMethod]
+        public void AcquireTokenByUserFic_NullOidAssertion_ThrowsArgumentNullException()
+        {
+            using var httpManager = new MockHttpManager();
+            var app = BuildCCA(httpManager);
+
+            AssertException.Throws<ArgumentNullException>(() =>
+                (app as IByUserFederatedIdentityCredential)
+                    .AcquireTokenByUserFederatedIdentityCredential(
+                        TestConstants.s_scope,
+                        userObjectId: FakeUserOid,
+                        assertion: null));
+        }
+
+        /// <summary>
+        /// Verifies that empty assertion is rejected for the OID overload.
+        /// </summary>
+        [TestMethod]
+        public void AcquireTokenByUserFic_EmptyOidAssertion_ThrowsArgumentNullException()
+        {
+            using var httpManager = new MockHttpManager();
+            var app = BuildCCA(httpManager);
+
+            AssertException.Throws<ArgumentNullException>(() =>
+                (app as IByUserFederatedIdentityCredential)
+                    .AcquireTokenByUserFederatedIdentityCredential(
+                        TestConstants.s_scope,
+                        userObjectId: FakeUserOid,
+                        assertion: string.Empty));
+        }
+
+        #endregion
+
+        #region Multi-User Cache Tests
+
+        /// <summary>
+        /// Adds a mock handler for a UserFIC call with a specific username and a token response
+        /// that returns a distinct user identity (OID and preferred_username).
+        /// </summary>
+        private static void AddMockHandlerForUserFicWithIdentity(
+            MockHttpManager httpManager,
+            string username,
+            string userOid,
+            string accessToken,
+            string authority = TestConstants.AuthorityCommonTenant)
+        {
+            httpManager.AddMockHandler(new MockHttpMessageHandler
+            {
+                ExpectedUrl = authority + "oauth2/v2.0/token",
+                ExpectedMethod = HttpMethod.Post,
+                ExpectedPostData = new Dictionary<string, string>
+                {
+                    { OAuth2Parameter.GrantType, OAuth2GrantType.UserFic },
+                    { OAuth2Parameter.Username, username },
+                    { OAuth2Parameter.UserFederatedIdentityCredential, FakeAssertion }
+                },
+                ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
+                    userOid,
+                    username,
+                    TestConstants.s_scope.ToArray(),
+                    accessToken: accessToken)
+            });
+        }
+
+        /// <summary>
+        /// Verifies that when two different users (by UPN) acquire tokens via UserFIC on the same CCA,
+        /// AcquireTokenSilent returns the correct cached token for each user and does not cross-contaminate.
+        /// </summary>
+        [TestMethod]
+        public async Task AcquireTokenByUserFic_TwoUpns_SilentReturnsCorrectToken_Async()
+        {
+            // Arrange
+            const string User1Upn = "alice@contoso.com";
+            const string User1Oid = "oid-alice-1111";
+            const string User1Token = "access-token-alice";
+
+            const string User2Upn = "bob@contoso.com";
+            const string User2Oid = "oid-bob-2222";
+            const string User2Token = "access-token-bob";
+
+            using var httpManager = new MockHttpManager();
+            httpManager.AddInstanceDiscoveryMockHandler();
+
+            var app = BuildCCA(httpManager);
+
+            // Act — Acquire token for User 1 (Alice)
+            AddMockHandlerForUserFicWithIdentity(httpManager, User1Upn, User1Oid, User1Token);
+
+            var result1 = await (app as IByUserFederatedIdentityCredential)
+                .AcquireTokenByUserFederatedIdentityCredential(TestConstants.s_scope, User1Upn, FakeAssertion)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            Assert.AreEqual(TokenSource.IdentityProvider, result1.AuthenticationResultMetadata.TokenSource);
+            Assert.AreEqual(User1Token, result1.AccessToken);
+            Assert.AreEqual(User1Upn, result1.Account.Username);
+
+            // Act — Acquire token for User 2 (Bob)
+            AddMockHandlerForUserFicWithIdentity(httpManager, User2Upn, User2Oid, User2Token);
+
+            var result2 = await (app as IByUserFederatedIdentityCredential)
+                .AcquireTokenByUserFederatedIdentityCredential(TestConstants.s_scope, User2Upn, FakeAssertion)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            Assert.AreEqual(TokenSource.IdentityProvider, result2.AuthenticationResultMetadata.TokenSource);
+            Assert.AreEqual(User2Token, result2.AccessToken);
+            Assert.AreEqual(User2Upn, result2.Account.Username);
+
+            // Assert — Both accounts cached, silent returns correct token per user
+            var accounts = await app.GetAccountsAsync().ConfigureAwait(false);
+            Assert.AreEqual(2, accounts.Count(), "Two accounts should be cached");
+
+            var account1 = accounts.First(a => string.Equals(a.Username, User1Upn, StringComparison.OrdinalIgnoreCase));
+            var silent1 = await app.AcquireTokenSilent(TestConstants.s_scope, account1).ExecuteAsync().ConfigureAwait(false);
+            Assert.AreEqual(TokenSource.Cache, silent1.AuthenticationResultMetadata.TokenSource);
+            Assert.AreEqual(User1Token, silent1.AccessToken, "Silent call for Alice should return Alice's token");
+
+            var account2 = accounts.First(a => string.Equals(a.Username, User2Upn, StringComparison.OrdinalIgnoreCase));
+            var silent2 = await app.AcquireTokenSilent(TestConstants.s_scope, account2).ExecuteAsync().ConfigureAwait(false);
+            Assert.AreEqual(TokenSource.Cache, silent2.AuthenticationResultMetadata.TokenSource);
+            Assert.AreEqual(User2Token, silent2.AccessToken, "Silent call for Bob should return Bob's token");
+        }
+
+        /// <summary>
+        /// Verifies that when two different users (by OID) acquire tokens via UserFIC on the same CCA,
+        /// AcquireTokenSilent resolves the correct account by OID and returns the correct cached token.
+        /// </summary>
+        [TestMethod]
+        public async Task AcquireTokenByUserFic_TwoOids_SilentReturnsCorrectToken_Async()
+        {
+            // Arrange
+            const string User1Upn = "carol@contoso.com";
+            const string User1Oid = "oid-carol-3333";
+            const string User1Token = "access-token-carol";
+
+            const string User2Upn = "dave@contoso.com";
+            const string User2Oid = "oid-dave-4444";
+            const string User2Token = "access-token-dave";
+
+            using var httpManager = new MockHttpManager();
+            httpManager.AddInstanceDiscoveryMockHandler();
+
+            var app = BuildCCA(httpManager);
+
+            // Act — Acquire tokens via UPN (populates user cache)
+            AddMockHandlerForUserFicWithIdentity(httpManager, User1Upn, User1Oid, User1Token);
+            var result1 = await (app as IByUserFederatedIdentityCredential)
+                .AcquireTokenByUserFederatedIdentityCredential(TestConstants.s_scope, User1Upn, FakeAssertion)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+            Assert.AreEqual(User1Token, result1.AccessToken);
+
+            AddMockHandlerForUserFicWithIdentity(httpManager, User2Upn, User2Oid, User2Token);
+            var result2 = await (app as IByUserFederatedIdentityCredential)
+                .AcquireTokenByUserFederatedIdentityCredential(TestConstants.s_scope, User2Upn, FakeAssertion)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+            Assert.AreEqual(User2Token, result2.AccessToken);
+
+            // Assert — Retrieve by OID via HomeAccountId.ObjectId
+            var accounts = await app.GetAccountsAsync().ConfigureAwait(false);
+            Assert.AreEqual(2, accounts.Count(), "Two accounts should be cached");
+
+            var carolAccount = accounts.First(a =>
+                string.Equals(a.HomeAccountId.ObjectId, User1Oid, StringComparison.OrdinalIgnoreCase));
+            var silentCarol = await app.AcquireTokenSilent(TestConstants.s_scope, carolAccount).ExecuteAsync().ConfigureAwait(false);
+            Assert.AreEqual(TokenSource.Cache, silentCarol.AuthenticationResultMetadata.TokenSource);
+            Assert.AreEqual(User1Token, silentCarol.AccessToken, "OID-based lookup for Carol should return Carol's token");
+
+            var daveAccount = accounts.First(a =>
+                string.Equals(a.HomeAccountId.ObjectId, User2Oid, StringComparison.OrdinalIgnoreCase));
+            var silentDave = await app.AcquireTokenSilent(TestConstants.s_scope, daveAccount).ExecuteAsync().ConfigureAwait(false);
+            Assert.AreEqual(TokenSource.Cache, silentDave.AuthenticationResultMetadata.TokenSource);
+            Assert.AreEqual(User2Token, silentDave.AccessToken, "OID-based lookup for Dave should return Dave's token");
+        }
+
+        #endregion
     }
 }
