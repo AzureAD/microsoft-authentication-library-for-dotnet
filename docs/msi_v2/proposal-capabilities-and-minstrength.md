@@ -7,22 +7,11 @@
 
 ## Why
 
-`ManagedIdentityApplication.GetManagedIdentitySourceAsync` is already a shipped public API. Its return type was meant to be a thin wrapper over `ManagedIdentitySource` — but it's grown:
+Managed Identity callers (Azure SDK, AKV SDK) need to know what attestation the host can produce so they can pick the right token flow — bearer for stock VMs and AKS, mTLS PoP for CVM/TVM hosts with KeyGuard. Today's `GetManagedIdentitySourceAsync` only returns a source enum; it can't answer "what binding strength can this host give me?"
 
-- **today:** `Source` + `ImdsV1FailureReason` + `ImdsV2FailureReason`
-- **after PR #6026:** + `IsMtlsPopSupportedByHost`
-- **next:** + `MaxSupportedBindingStrength` (the range of attestation strengths the host supports)
+This proposal replaces it with a capability-shaped API that surfaces the host's max binding strength (`Bearer` / `Software` / `KeyGuard`) so callers branch on capability instead of inferring it from the source enum.
 
-The method name `GetManagedIdentitySource…` no longer describes what callers get back. Callers using it for capability decisions (Azure SDK, AKV SDK) read it as "tell me what this host can do," which is what we want — and the name should match.
-
-Separately, we may later want a way to **assert** the minimum binding strength an app requires, so a CVM/TVM app accidentally deployed on a software-only host fails at request time instead of silently downgrading.
-
-### Plan / phasing
-
-This builds on Bogdan's PR #6026 rather than starting fresh. That PR already does the load-bearing work — the `/metadata/instance/compute` call, parsing the security profile, and deciding whether the host is a TVM/CVM to set the capability flag — and it's already been validated on a real VM across app restart with the cert, app restart without it, and a full VM restart.
-
-- **Phase 1 (this cut — unblocks the AKV SDK):** the renamed discovery API (`GetManagedIdentityCapabilitiesAsync` returning `ManagedIdentityCapabilities`) carrying the range of attestation strengths, plus folding the `ImdsV2` source value back into `Imds`.
-- **Phase 2 (follow-up):** the `WithMtlsProofOfPossession(PoPOptions)` minimum-strength enforcement. It isn't needed for AKV, so it doesn't gate the unblock.
+Separately, an app may want to **assert** a minimum binding strength so a CVM/TVM-bound service accidentally deployed on a software-only host fails at request time instead of silently downgrading.
 
 ## What
 
@@ -90,9 +79,7 @@ The public source enum drops the separate `ImdsV2 = 8` value; detection reports 
 - **Safe for AKS-on-IMDS:** those nodes are Linux with no TVM/CVM profile, so `IsMtlsPopSupportedByHost` comes back `false`. Azure SDK also checks for AKS via `FEDERATED_TOKEN_FILE` before it ever calls MSAL's MI path — a second safety net.
 - **Future bearer-over-IMDSv2:** today bearer is served by v1 and v2 is only used for PoP, so there's no current bearer-over-v2 path. The shape doesn't block it later — `Bearer` is the floor of the strength range and v1/v2 routing is internal, so it can be wired up without an API change.
 
-### 3. `WithMtlsProofOfPossession(PoPOptions)` — floor assertion (Phase 2, follow-up)
-
-> **Deferred to a follow-up.** Phase 1 ships the discovery API only. The enforcement knob below is the agreed shape but is **not** part of the first cut — AKV doesn't need it, so it won't gate the unblock.
+### 3. `WithMtlsProofOfPossession(PoPOptions)` — floor assertion
 
 ```csharp
 namespace Microsoft.Identity.Client.AppConfig
@@ -167,7 +154,7 @@ if (caps.MaxSupportedBindingStrength < MtlsBindingStrength.KeyGuard)
     logger.LogWarning("This host cannot meet KeyGuard requirement; service will refuse to start.");
 }
 
-// 2. Assert the floor when acquiring (Phase 2 — follow-up; not in the first cut)
+// 2. Assert the floor when acquiring
 var result = await mi.AcquireTokenForManagedIdentity("https://vault.azure.net/.default")
     .WithMtlsProofOfPossession(new PoPOptions { MinStrength = MtlsBindingStrength.KeyGuard })  // throws if host can't deliver
     .ExecuteAsync(ct);
@@ -177,21 +164,19 @@ var result = await mi.AcquireTokenForManagedIdentity("https://vault.azure.net/.d
 
 These files are split per target framework under `src/client/Microsoft.Identity.Client/PublicApi/<tfm>/`, so every change below applies across all TFMs.
 
-**Phase 1 — `PublicAPI.Unshipped.txt` additions:**
+**`PublicAPI.Unshipped.txt` additions:**
 - `ManagedIdentityApplication.GetManagedIdentityCapabilitiesAsync(CancellationToken)`
 - `ManagedIdentityCapabilities` (class + members)
 - `MtlsBindingStrength` (enum + members)
-
-**Phase 1 — `PublicAPI.Shipped.txt` removals:**
-- `ManagedIdentityApplication.GetManagedIdentitySourceAsync(CancellationToken)`
-- `ManagedIdentitySourceResult` (class + members)
-- `ManagedIdentitySource.ImdsV2` (enum member — folded into `Imds`)
-
-**Phase 2 (follow-up) — `PublicAPI.Unshipped.txt` additions:**
 - `PoPOptions` (class + `MinStrength` member)
 - `ManagedIdentityPopExtensions.WithMtlsProofOfPossession(PoPOptions)`
 - `AcquireTokenForClientParameterBuilder.WithMtlsProofOfPossession(PoPOptions)`
 - `MsalError.MinStrengthNotMet`
+
+**`PublicAPI.Shipped.txt` removals:**
+- `ManagedIdentityApplication.GetManagedIdentitySourceAsync(CancellationToken)`
+- `ManagedIdentitySourceResult` (class + members)
+- `ManagedIdentitySource.ImdsV2` (enum member — folded into `Imds`)
 
 Feature is internal-only (Azure SDK private chain). No external migration story required.
 
@@ -207,27 +192,29 @@ Feature is internal-only (Azure SDK private chain). No external migration story 
 
 ## Acceptance
 
-**Phase 1 (discovery — this cut):**
-
 - [ ] `MtlsBindingStrength` enum added in `Microsoft.Identity.Client.AppConfig` (`Bearer=0`, `Software=1`, `KeyGuard=3`).
 - [ ] `ManagedIdentityCapabilities` class added with `Source`, `ErrorReason`, `MaxSupportedBindingStrength`, and a derived `IsMtlsPopSupportedByHost` (`> Bearer`).
-- [ ] `GetManagedIdentityCapabilitiesAsync` added; populates `MaxSupportedBindingStrength` by combining the `/compute` security-profile signal (from #6026) + KeyGuard probe + .NET TFM.
+- [ ] `GetManagedIdentityCapabilitiesAsync` added; populates `MaxSupportedBindingStrength` by combining the `/compute` security-profile signal + KeyGuard probe + .NET TFM.
 - [ ] `ManagedIdentitySource.ImdsV2` folded into `Imds`; public enum member removed and the `PublicAPI` files updated for all TFMs.
 - [ ] Old `GetManagedIdentitySourceAsync` + `ManagedIdentitySourceResult` deleted; removed from `PublicAPI.Shipped.txt`.
-- [ ] Tests cover: AKS/Linux host → `IsMtlsPopSupportedByHost = false`; Windows TVM/CVM → KeyGuard tier; existing token flows unchanged.
-
-**Phase 2 (enforcement — follow-up):**
-
 - [ ] `PoPOptions` class added in `Microsoft.Identity.Client.AppConfig` with `MinStrength` property (default `Bearer`).
 - [ ] `WithMtlsProofOfPossession(PoPOptions)` overload added on `AcquireTokenForManagedIdentityParameterBuilder` and `AcquireTokenForClientParameterBuilder`.
 - [ ] `MsalError.MinStrengthNotMet` thrown when host can't meet floor; error message names host actual strength + required floor.
-- [ ] Tests cover: KeyGuard host passes floor, software host fails floor, .NET 4.6.2 fails floor, default `Bearer` floor behaves identically to parameterless overload, ConfClient parity.
+- [ ] Tests cover: AKS/Linux host → `IsMtlsPopSupportedByHost = false`; Windows TVM/CVM → KeyGuard tier; KeyGuard host passes floor; software host fails floor; .NET 4.6.2 fails floor; default `Bearer` floor behaves identically to parameterless overload; ConfClient parity.
 
 ## Resolved
 
-- **Phasing.** Discovery API ships first (Phase 1) to unblock the AKV SDK; the `PoPOptions` floor-enforcement helper is a Phase 2 follow-up and does not gate the unblock.
-- **Build on #6026.** Reuse Bogdan's `/compute` + capability detection rather than starting fresh; it's already validated on a real VM.
 - **`IsMtlsPopSupportedByHost` is derived**, not a standalone capability: it's `MaxSupportedBindingStrength > Bearer`. The strength tier is the source of truth. `true` means "host can bind a token to a key," NOT "attested" — software-key binding on high-density platforms (AKS/SF/ACI, where the host is the node) can report `true` without VBS, so attestation must be read from the KeyGuard tier, never the bool.
 - **`ManagedIdentitySource.ImdsV2` folds into `Imds`.** The v1/v2 distinction becomes an internal routing detail; callers branch on the capability signal. Safe for AKS (reports `false`; Azure SDK also gates on `FEDERATED_TOKEN_FILE`).
 - `MtlsBindingStrength` and `PoPOptions` live in `Microsoft.Identity.Client.AppConfig` (shared by MI and confidential client).
-- Enforcement shape: `WithMtlsProofOfPossession(PoPOptions options)` overload (per Bogdan's suggestion) — keeps the builder surface stable and lets future PoP knobs land on `PoPOptions`.
+- Enforcement shape: `WithMtlsProofOfPossession(PoPOptions options)` overload — keeps the builder surface stable and lets future PoP knobs land on `PoPOptions`.
+
+## Appendix — superseded names
+
+For searchability of older threads and PRs:
+
+- `GetManagedIdentitySourceAsync` → superseded by `GetManagedIdentityCapabilitiesAsync`.
+- `ManagedIdentitySourceResult` → superseded by `ManagedIdentityCapabilities`.
+- `ImdsV1FailureReason` / `ImdsV2FailureReason` → collapsed into a single `ErrorReason`.
+- `SupportedBindingStrengths` (list) → collapsed into a single `MaxSupportedBindingStrength`.
+- `ManagedIdentitySource.ImdsV2` → folded into `Imds`.
