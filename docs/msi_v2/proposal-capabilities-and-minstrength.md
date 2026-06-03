@@ -68,10 +68,10 @@ namespace Microsoft.Identity.Client.AppConfig
     // Shared by MI and confidential client, so it lives in AppConfig (not .ManagedIdentity).
     public enum MtlsBindingStrength
     {
-        Bearer   = 0,  // .NET 4.6.2 (no PoP)
-        Software = 1,  // software-backed RSA — persisted CNG on Windows, RSA.Create() elsewhere
+        Bearer   = 0,  // no key binding (regular Bearer token)
+        Software = 1,  // software-backed key (e.g., persisted CNG on Windows, software key elsewhere)
         // 2 reserved for future (TPM-backed, etc.)
-        KeyGuard = 3,  // VBS-isolated (CVM/TVM with VBS enabled)
+        KeyGuard = 3,  // VBS-isolated key (CVM/TVM with VBS enabled)
     }
 }
 ```
