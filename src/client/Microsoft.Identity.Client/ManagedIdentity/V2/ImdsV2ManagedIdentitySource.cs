@@ -113,7 +113,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 MsalError.ManagedIdentityRequestFailed,
                 $"[ImdsV2] {errorMessage}",
                 ex,
-                ManagedIdentitySource.ImdsV2,
+                ManagedIdentitySource.Imds,
                 statusCode);
         }
 
@@ -177,7 +177,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         internal ImdsV2ManagedIdentitySource(
             RequestContext requestContext,
             IMtlsCertificateCache mtlsCache)
-            : base(requestContext, ManagedIdentitySource.ImdsV2)
+            : base(requestContext, ManagedIdentitySource.Imds)
         {
             _mtlsCache = mtlsCache ?? throw new ArgumentNullException(nameof(mtlsCache));
         }
@@ -312,7 +312,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                     MsalError.ManagedIdentityRequestFailed,
                     "[ImdsV2] ImdsV2ManagedIdentitySource.ExecuteCertificateRequestAsync failed.",
                     ex,
-                    ManagedIdentitySource.ImdsV2,
+                    ManagedIdentitySource.Imds,
                     statusCode);
             }
 
@@ -322,7 +322,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                     MsalError.ManagedIdentityRequestFailed,
                     $"[ImdsV2] ImdsV2ManagedIdentitySource.ExecuteCertificateRequestAsync failed due to HTTP error. Status code: {response.StatusCode} Body: {response.Body}",
                     null,
-                    ManagedIdentitySource.ImdsV2,
+                    ManagedIdentitySource.Imds,
                     (int)response.StatusCode);
             }
 
@@ -351,7 +351,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 {
                     throw new MsalClientException(
                         "mtls_pop_requires_keyguard",
-                        $"[ImdsV2] mTLS Proof-of-Possession requires KeyGuard keys. Current key type: {keyInfo.Type}");
+                        $"[ImdsV2] mTLS Proof-of-Possession currently requires a KeyGuard key, but this host produced a '{keyInfo.Type}' key. " +
+                        "The host may report Software-strength binding capability (which means it can bind a token to a key), " +
+                        "but the IMDSv2 PoP token flow only accepts VBS-isolated KeyGuard keys today. " +
+                        "Ensure Virtualization-based Security (VBS)/KeyGuard is enabled on the host, or request a bearer token instead.");
                 }
             }
 
