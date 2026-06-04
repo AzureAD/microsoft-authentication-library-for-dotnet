@@ -126,7 +126,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
             if (imdsVersion == ImdsVersion.V1)
             {
-                // New discovery order: V1 probed first (succeeds) → ImdsV1 cached
+                // Discovery order: V2 probed first (fails), then V1 (succeeds) → ImdsV1 cached
+                httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V2, userAssignedIdentityId, userAssignedId));
                 httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V1, userAssignedIdentityId, userAssignedId));
 
                 if (addSourceCheck)
@@ -140,8 +141,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
             if (addProbeMock)
             {
-                // New discovery order: V1 probed first (fails), then V2 (succeeds)
-                httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V1, userAssignedIdentityId, userAssignedId));
+                // Discovery order: V2 probed first (succeeds) → ImdsV2 cached
                 httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V2, userAssignedIdentityId, userAssignedId));
             }
 
@@ -433,12 +433,15 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
+        // Verifies that after a non-mTLS request uses IMDSv1 (per-request fallback), a subsequent
+        // mTLS PoP request still succeeds against the cached IMDSv2 source. Previously this combination
+        // threw CannotSwitchBetweenImdsVersionsForPreview; the preview latch has been removed (issue #6024).
         [TestMethod]
         [DataRow(UserAssignedIdentityId.None, null)]                             // SAMI
         [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId)]       // UAMI
         [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId)] // UAMI
         [DataRow(UserAssignedIdentityId.ObjectId, TestConstants.ObjectId)]       // UAMI
-        public async Task ApplicationsCannotSwitchBetweenImdsVersionsForPreview(
+        public async Task ApplicationsCanSwitchBetweenImdsVersions(
             UserAssignedIdentityId userAssignedIdentityId,
             string userAssignedId)
         {
@@ -449,7 +452,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, userAssignedIdentityId, userAssignedId, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
 
-                // IMDSv1 request mock
+                // Arrange: non-mTLS request will route to IMDSv1 per-request fallback
                 httpManager.AddManagedIdentityMockHandler(
                     ManagedIdentityTests.ImdsEndpoint,
                     ManagedIdentityTests.Resource,
@@ -458,28 +461,32 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     userAssignedId: userAssignedId,
                     userAssignedIdentityId: userAssignedIdentityId);
 
-                var result = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                    //.WithMtlsProofOfPossession() - excluding this will cause fallback to ImdsV1
-                    //.WithAttestationSupport()
+                // Act: first call without WithMtlsProofOfPossession → IMDSv1 fallback
+                var bearerResult = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .ExecuteAsync().ConfigureAwait(false);
 
-                Assert.IsNotNull(result);
-                Assert.AreEqual(Bearer, result.TokenType);
-                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+                // Assert: Bearer token returned, but cached source remains ImdsV2 (no latching)
+                Assert.IsNotNull(bearerResult);
+                Assert.AreEqual(Bearer, bearerResult.TokenType);
+                Assert.AreEqual(TokenSource.IdentityProvider, bearerResult.AuthenticationResultMetadata.TokenSource);
 
-                // even though the app fell back to ImdsV1, the source should still be ImdsV2
                 var miSourceResult = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync(ManagedIdentityTests.ImdsProbesCancellationToken).ConfigureAwait(false);
                 Assert.AreEqual(ManagedIdentitySource.ImdsV2, miSourceResult.Source);
 
-                // none of the mocks from AddMocksToGetEntraToken are needed since checking the cache occurs before the network requests
-                var ex = await Assert.ThrowsAsync<MsalClientException>(async () =>
-                    await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                    .WithMtlsProofOfPossession() // this will cause an error to be thrown since the app already fell back to ImdsV1
-                    .WithAttestationSupport()
-                    .ExecuteAsync().ConfigureAwait(false)
-                ).ConfigureAwait(false);
+                // Arrange: mocks for the IMDSv2 mTLS PoP token request
+                AddMocksToGetEntraToken(httpManager, userAssignedIdentityId, userAssignedId);
 
-                Assert.AreEqual(MsalError.CannotSwitchBetweenImdsVersionsForPreview, ex.ErrorCode);
+                // Act: second call WITH mTLS PoP → must succeed (no CannotSwitchBetweenImdsVersionsForPreview throw)
+                var popResult = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession()
+                    .WithAttestationSupport()
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                // Assert: mTLS PoP token returned successfully
+                Assert.IsNotNull(popResult);
+                Assert.AreEqual(MTLSPoP, popResult.TokenType);
+                Assert.IsNotNull(popResult.BindingCertificate);
+                Assert.AreEqual(TokenSource.IdentityProvider, popResult.AuthenticationResultMetadata.TokenSource);
             }
         }
         #endregion Failure Tests
@@ -493,8 +500,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
 
-                // New discovery order: V1 probed first (fails), then V2 (succeeds)
-                httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V1));
+                // Discovery order: V2 probed first (succeeds)
                 httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V2));
 
                 await CreateManagedIdentityAsync(httpManager, addProbeMock: false).ConfigureAwait(false);
@@ -509,8 +515,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
 
-                // New discovery order: V1 probed first (fails), then V2 (first attempt fails with retry, second succeeds)
-                httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V1));
+                // Discovery order: V2 probed first (first attempt fails with retry, second succeeds)
                 // `retry: true` indicates a retriable status code will be returned
                 httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V2, retry: true));
                 // Second V2 attempt succeeds
@@ -528,15 +533,15 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
 
-                // New discovery order: V1 probed first (fails with non-retriable 404), then V2 (succeeds)
-                // `retry: false` indicates a non-retriable status code (404) will be returned for V1
-                httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V1, retry: false));
-                httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V2));
+                // Discovery order: V2 probed first (fails with non-retriable 404), then V1 (succeeds)
+                // `retry: false` indicates a non-retriable status code (404) will be returned for V2
+                httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V2, retry: false));
+                httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V1));
 
                 var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, addProbeMock: false, addSourceCheck: false).ConfigureAwait(false);
 
                 var miSourceResult = await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentitySourceAsync(ManagedIdentityTests.ImdsProbesCancellationToken).ConfigureAwait(false);
-                Assert.AreEqual(ManagedIdentitySource.ImdsV2, miSourceResult.Source);
+                Assert.AreEqual(ManagedIdentitySource.Imds, miSourceResult.Source);
             }
         }
 
@@ -554,8 +559,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var managedIdentityApp = miBuilder.Build();
 
-                // New discovery order: V1 is probed first
-                httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V1));
+                // Discovery order: V2 is probed first
+                httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V2));
 
                 var cts = new CancellationTokenSource();
                 cts.Cancel();
@@ -617,15 +622,15 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(ManagedIdentitySource.ImdsV2, TestConstants.ImdsEndpoint);
 
-                // New discovery order: V1 probed first (fails), then V2 fails with max retries → NoneFound
-                httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V1, retry: false));
-
+                // Discovery order: V2 probed first (fails with max retries), then V1 (fails) → NoneFound
                 const int Num500Errors = 1 + TestImdsProbeRetryPolicy.ExponentialStrategyNumRetries;
                 for (int i = 0; i < Num500Errors; i++)
                 {
                     // `retry: true` indicates a retriable status code will be returned
                     httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V2, retry: true));
                 }
+
+                httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V1, retry: false));
 
                 var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, addProbeMock: false, addSourceCheck: false).ConfigureAwait(false);
 

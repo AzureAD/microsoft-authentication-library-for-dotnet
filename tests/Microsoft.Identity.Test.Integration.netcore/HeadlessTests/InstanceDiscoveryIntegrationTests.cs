@@ -136,12 +136,26 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     HttpMethod.Get,
                     validDiscoveryUri)).ConfigureAwait(false);
             string discoveryJson = await discoveryResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
+            if (!discoveryResponse.IsSuccessStatusCode)
+            {
+                Assert.Fail(
+                    $"Public discovery endpoint returned {(int)discoveryResponse.StatusCode} " +
+                    $"{discoveryResponse.ReasonPhrase}. Body: {Truncate(discoveryJson)}");
+            }
 
             HttpResponseMessage ppeDiscoveryResponse = await httpClient.SendAsync(
                 new HttpRequestMessage(
                     HttpMethod.Get,
                     validPpeDiscoveryUri)).ConfigureAwait(false);
             string ppeDiscoveryJson = await ppeDiscoveryResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
+            if (!ppeDiscoveryResponse.IsSuccessStatusCode)
+            {
+                Assert.Inconclusive(
+                    $"PPE discovery endpoint {validPpeDiscoveryUri} returned " +
+                    $"{(int)ppeDiscoveryResponse.StatusCode} {ppeDiscoveryResponse.ReasonPhrase}. " +
+                    $"This is typically an environmental issue (login.windows-ppe.net is restricted). " +
+                    $"Body: {Truncate(ppeDiscoveryJson)}");
+            }
 
             InstanceDiscoveryMetadataEntry[] actualMetadata = JsonHelper.DeserializeFromJson<InstanceDiscoveryResponse>(discoveryJson).Metadata;
             InstanceDiscoveryMetadataEntry[] actualPpeMetadata = JsonHelper.DeserializeFromJson<InstanceDiscoveryResponse>(ppeDiscoveryJson).Metadata;
@@ -175,6 +189,16 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 expectedMetadata,
                 processedMetadata,
                 new InstanceDiscoveryMetadataEntryComparer());
+        }
+
+        private static string Truncate(string s, int maxLength = 500)
+        {
+            if (string.IsNullOrEmpty(s))
+            {
+                return string.Empty;
+            }
+
+            return s.Length <= maxLength ? s : s.Substring(0, maxLength);
         }
 
         private class InstanceDiscoveryMetadataEntryComparer : IEqualityComparer<InstanceDiscoveryMetadataEntry>

@@ -283,7 +283,7 @@ When attestation is configured:
 | **Framework** | .NET Core / .NET 5+ only. Not supported on .NET Framework 4.6.2. |
 | **IMDS version** | Requires IMDSv2. If the VM only has IMDSv1, throws `MtlsPopTokenNotSupportedinImdsV1`. |
 | **Key type** | KeyGuard RSA key required. Throws error code `mtls_pop_requires_keyguard` if not available (hardcoded string — not yet a constant in `MsalError`). |
-| **Mixed usage** | Once IMDSv1 is used in a process while IMDSv2 is cached, switching to IMDSv2 PoP in the same process is blocked (preview behavior). Throws `CannotSwitchBetweenImdsVersionsForPreview`. |
+| **Mixed usage** | Non-mTLS PoP calls in a process where IMDSv2 is cached transparently use IMDSv1 for that request; subsequent PoP calls still route to IMDSv2. |
 | **Experimental** | This feature is in preview. Not all regions and environments may be supported. |
 
 ---
@@ -297,7 +297,6 @@ When attestation is configured:
 | `mtls_pop_requires_keyguard` | The managed identity key is not a KeyGuard key (hardcoded string — not yet a constant in `MsalError`) | Use a VM/VMSS with KeyGuard support enabled |
 | `MtlsCertificateNotProvided` | (CCA path) No certificate was found for binding | Pass a certificate via `.WithCertificate(cert, sendX5C: true)` |
 | `MtlsPopWithoutRegion` | (CCA path) Azure region not set | Add `.WithAzureRegion("region")` to the app builder |
-| `CannotSwitchBetweenImdsVersionsForPreview` | Mixed IMDSv1/v2 usage in same process | Use a single IMDS version per process; restart the app |
 
 ---
 

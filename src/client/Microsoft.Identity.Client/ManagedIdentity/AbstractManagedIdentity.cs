@@ -38,6 +38,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             _sourceType = sourceType;
         }
 
+        private const string XmsAzNwperimid = "xms_az_nwperimid";
+
         public virtual async Task<ManagedIdentityResponse> AuthenticateAsync(
             AcquireTokenForManagedIdentityParameters parameters,
             CancellationToken cancellationToken)
@@ -56,6 +58,38 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             _isMtlsPopRequested = parameters.IsMtlsPopRequested;
 
             ManagedIdentityRequest request = await CreateRequestAsync(resource).ConfigureAwait(false);
+
+            // Forward client-originated claims to the correct location for IMDS/MSIv2 only.
+            // Other MI sources (App Service, Azure Arc, Service Fabric, etc.) do not have a
+            // confirmed contract for the "claims" parameter; fail fast rather than silently
+            // ignoring the value and polluting the cache with keys the endpoint never saw.
+            if (!string.IsNullOrEmpty(parameters.ClientClaims))
+            {
+                if (_sourceType != ManagedIdentitySource.Imds && _sourceType != ManagedIdentitySource.ImdsV2)
+                {
+                    throw new MsalClientException(
+                        MsalError.InvalidRequest,
+                        $"WithClaimsFromClient is only supported for IMDS-based managed identity sources. " +
+                        $"The detected source is {_sourceType}. " +
+                        "Only ManagedIdentitySource.Imds and ManagedIdentitySource.ImdsV2 support the 'claims' parameter.");
+                }
+
+                if (_sourceType == ManagedIdentitySource.Imds)
+                {
+                    ValidateMsiv1Claims(parameters.ClientClaims);
+                }
+
+                if (request.Method == System.Net.Http.HttpMethod.Get)
+                {
+                    request.QueryParameters["claims"] = Uri.EscapeDataString(parameters.ClientClaims);
+                    _requestContext.Logger.Info("[Managed Identity] Adding client claims to IMDS request as query parameter.");
+                }
+                else
+                {
+                    request.BodyParameters["claims"] = parameters.ClientClaims;
+                    _requestContext.Logger.Info("[Managed Identity] Adding client claims to ESTS POST body.");
+                }
+            }
 
             // When IMDSv2 mints a binding certificate during this request (via CSR),
             // it's exposed via request.MtlsCertificate. Bubble it up so the request
@@ -328,6 +362,27 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 null);
 
             throw exception;
+        }
+
+        /// <summary>
+        /// MSIv1 (IMDS v1) only supports a single custom claim: <c>xms_az_nwperimid</c>.
+        /// Any other top-level key in the claims JSON will cause IMDS to return HTTP 400 Bad Request
+        /// with no useful diagnostic. Validate early so the caller gets a clear MSAL error.
+        /// </summary>
+        private static void ValidateMsiv1Claims(string claimsJson)
+        {
+            var parsed = ClaimsHelper.ParseClaimsOrThrow(claimsJson);
+            foreach (var kvp in parsed)
+            {
+                if (!string.Equals(kvp.Key, XmsAzNwperimid, StringComparison.Ordinal))
+                {
+                    throw new MsalClientException(
+                        MsalError.InvalidRequest,
+                        $"MSIv1 (IMDS v1) only supports the `{XmsAzNwperimid}` custom claim. " +
+                        $"The claims JSON contained the unsupported key `{kvp.Key}`. " +
+                        $"Remove all keys other than `{XmsAzNwperimid}` when using WithClaimsFromClient with MSIv1.");
+                }
+            }
         }
     }
 }

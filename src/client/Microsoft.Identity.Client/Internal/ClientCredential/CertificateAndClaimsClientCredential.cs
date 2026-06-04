@@ -54,12 +54,34 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         {
             context.Logger.Verbose(() => $"[CertificateAndClaimsClientCredential] Mode={context.Mode}");
 
-            // Resolve the certificate via the provider (used both for Regular and MtlsMode paths).
+            // Cert reuse (single-invocation per request, issue #5943) is handled in
+            // CredentialMaterialResolver.ResolveAsync, which short-circuits this method when
+            // requestParams.MtlsCertificate is set (i.e., the mTLS PoP preflight already
+            // resolved a binding cert). Subclasses must not rely on this method being invoked
+            // in mTLS mode and must keep mTLS-mode output equal to (empty params, cert) —
+            // any future subclass that needs different mTLS-mode behaviour (e.g. additional
+            // token-request headers) must update the resolver short-circuit, not just override
+            // here, or those additions will be silently dropped at runtime.
             X509Certificate2 certificate = await ResolveCertificateAsync(context, cancellationToken)
                 .ConfigureAwait(false);
 
             if (context.Mode == CredentialTransportProtocol.Mtls)
             {
+                // Custom client-claims credentials (WithClientClaims) are JWT-bearer only:
+                // their cert is intended to sign the assertion, not to bind the TLS transport.
+                // This guard fires for every mTLS-mode resolution path — explicit PoP
+                // (.WithMtlsProofOfPossession()) AND implicit Bearer-over-mTLS
+                // (CertificateOptions.SendCertificateOverMtls = true) — so the message must
+                // cover both transports rather than naming Proof-of-Possession alone.
+                // Subclasses (CertificateClientCredential, DynamicCertificateClientCredential)
+                // construct the base with claimsToSign: null and are unaffected by this guard.
+                if (_claimsToSign is not null)
+                {
+                    throw new MsalClientException(
+                        MsalError.MtlsCertificateNotProvided,
+                        MsalErrorMessage.MtlsNotSupportedWithClientClaimsMessage);
+                }
+
                 // mTLS path: the certificate authenticates the client at the TLS layer.
                 // No client_assertion is needed; return an empty parameter set.
                 return new CredentialMaterial(
@@ -100,32 +122,17 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         }
 
         /// <summary>
-        /// Resolves the certificate for use as an mTLS transport credential, without building a full
-        /// JWT client assertion. Invokes the provider delegate (which may be a static lambda or a
-        /// true async callback) and validates the result.
-        /// Called by <see cref="Microsoft.Identity.Client.ApiConfig.Parameters.MtlsPopParametersInitializer"/>
-        /// for the implicit Bearer-over-mTLS path when
-        /// <see cref="AppConfig.CertificateOptions.SendCertificateOverMtls"/> is <see langword="true"/>.
-        /// </summary>
-        internal async Task<X509Certificate2> ResolveCertificateForMtlsAsync(
-            AssertionRequestOptions options)
-        {
-            X509Certificate2 certificate = await _certificateProvider(options).ConfigureAwait(false);
-
-            ValidateCertificate(certificate);
-
-            return certificate;
-        }
-
-        /// <summary>
-        /// Resolves the certificate to use for signing the client assertion.
-        /// Invokes the certificate provider delegate to get the certificate.
+        /// Resolves the certificate to use for signing the client assertion or binding the TLS
+        /// transport. Invokes the certificate provider delegate and validates the result.
         /// </summary>
         /// <param name="context">Immutable context describing the current request.</param>
         /// <param name="cancellationToken">Cancellation token for the async operation.</param>
-        /// <returns>The X509Certificate2 to use for signing.</returns>
+        /// <returns>The X509Certificate2 to use for signing or transport binding.</returns>
         /// <exception cref="MsalClientException">
         /// Thrown if the certificate provider returns null or a certificate without a private key.
+        /// In <see cref="CredentialTransportProtocol.Mtls"/> mode, a null certificate is reported as
+        /// <see cref="MsalError.MtlsCertificateNotProvided"/>; otherwise as
+        /// <see cref="MsalError.InvalidClientAssertion"/>.
         /// </exception>
         private async Task<X509Certificate2> ResolveCertificateAsync(
             CredentialContext context,
@@ -140,7 +147,19 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             // Invoke the provider to get the certificate
             X509Certificate2 certificate = await _certificateProvider(options).ConfigureAwait(false);
 
-            ValidateCertificate(certificate);
+            // In mTLS mode, surface a null cert as MtlsCertificateNotProvided to match the public
+            // mTLS PoP API contract. In Regular (JWT-bearer) mode, keep InvalidClientAssertion.
+            if (context.Mode == CredentialTransportProtocol.Mtls)
+            {
+                ValidateCertificate(
+                    certificate,
+                    MsalError.MtlsCertificateNotProvided,
+                    MsalErrorMessage.MtlsCertificateNotProvidedMessage);
+            }
+            else
+            {
+                ValidateCertificate(certificate);
+            }
 
             context.Logger.Verbose(
                 () => $"[CertificateAndClaimsClientCredential] Certificate resolved. " +
@@ -150,15 +169,28 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         }
 
         /// <summary>
-        /// Validates that the certificate is non-null and has a private key.
+        /// Validates that the certificate is non-null and has an accessible private key.
         /// </summary>
-        private static void ValidateCertificate(X509Certificate2 certificate)
+        /// <param name="certificate">The certificate returned by the provider.</param>
+        /// <param name="nullErrorCode">
+        /// The <see cref="MsalError"/> code to throw when the certificate is null. Defaults to
+        /// <see cref="MsalError.InvalidClientAssertion"/> for the credential-material path. The
+        /// preflight path passes <see cref="MsalError.MtlsCertificateNotProvided"/> instead.
+        /// </param>
+        /// <param name="nullErrorMessage">
+        /// Optional message to use when the certificate is null. If omitted, a generic
+        /// provider-returned-null message is used.
+        /// </param>
+        private static void ValidateCertificate(
+            X509Certificate2 certificate,
+            string nullErrorCode = MsalError.InvalidClientAssertion,
+            string nullErrorMessage = null)
         {
             if (certificate == null)
             {
                 throw new MsalClientException(
-                    MsalError.InvalidClientAssertion,
-                    "The certificate provider callback returned null. Ensure the callback returns a valid X509Certificate2 instance.");
+                    nullErrorCode,
+                    nullErrorMessage ?? "The certificate provider callback returned null. Ensure the callback returns a valid X509Certificate2 instance.");
             }
 
             try

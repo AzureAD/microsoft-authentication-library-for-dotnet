@@ -1,11 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System.Buffers;
+using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Microsoft.Identity.Client.Utils;
@@ -17,6 +15,44 @@ namespace Microsoft.Identity.Client.Internal
     {
         private const string AccessTokenClaim = "access_token";
         private const string XmsClientCapability = "xms_cc";
+
+        /// <summary>
+        /// Parses a claims JSON string into a <see cref="JObject"/>, throwing a friendly
+        /// <see cref="MsalClientException"/> (error code <see cref="MsalError.InvalidJsonClaimsFormat"/>)
+        /// if the value is not a valid JSON object. The raw claims value is never included in the
+        /// exception message — it may contain sensitive data.
+        /// </summary>
+        internal static JObject ParseClaimsOrThrow(string claims)
+        {
+            try
+            {
+                return JsonHelper.ParseIntoJsonObject(claims);
+            }
+            catch (Exception ex) when (ex is JsonException || ex is InvalidOperationException)
+            {
+                // InvalidOperationException is thrown by JsonNode.AsObject() when the root token is
+                // valid JSON but not an object (e.g. an array, a scalar, or the literal 'null').
+                throw new MsalClientException(
+                    MsalError.InvalidJsonClaimsFormat,
+                    "The claims value is not a valid JSON object. Inspect the inner exception for parsing details. " +
+                    "See https://openid.net/specs/openid-connect-core-1_0.html#ClaimsParameter.",
+                    ex);
+            }
+        }
+
+        /// <summary>
+        /// Merges two JSON claims objects. If either is null/empty the other is returned as-is.
+        /// </summary>
+        internal static string MergeClaimsObjects(string claims1, string claims2)
+        {
+            if (string.IsNullOrEmpty(claims1)) return claims2;
+            if (string.IsNullOrEmpty(claims2)) return claims1;
+
+            JObject obj1 = ParseClaimsOrThrow(claims1);
+            JObject obj2 = ParseClaimsOrThrow(claims2);
+            JObject merged = JsonHelper.Merge(obj1, obj2);
+            return JsonHelper.JsonObjectToString(merged);
+        }
 
         internal static string GetMergedClaimsAndClientCapabilities(
             string claims,
@@ -37,18 +73,7 @@ namespace Microsoft.Identity.Client.Internal
         {
             if (!string.IsNullOrEmpty(claims))
             {
-                JObject claimsJson;
-                try
-                {
-                    claimsJson = JsonHelper.ParseIntoJsonObject(claims);
-                }
-                catch (JsonException ex)
-                {
-                    throw new MsalClientException(
-                        MsalError.InvalidJsonClaimsFormat,
-                        MsalErrorMessage.InvalidJsonClaimsFormat(claims),
-                        ex);
-                }
+                JObject claimsJson = ParseClaimsOrThrow(claims);
                 capabilitiesJson = JsonHelper.Merge(capabilitiesJson, claimsJson);
             }
 
