@@ -63,7 +63,6 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
                     break;
 
                 case ManagedIdentitySource.Imds:
-                case ManagedIdentitySource.ImdsV2:
                     Environment.SetEnvironmentVariable("AZURE_POD_IDENTITY_AUTHORITY_HOST", endpoint);
                     break;
 

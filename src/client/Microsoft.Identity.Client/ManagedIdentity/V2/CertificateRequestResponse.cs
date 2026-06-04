@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                     MsalError.ManagedIdentityRequestFailed,
                     $"[ImdsV2] ImdsV2ManagedIdentitySource.ExecuteCertificateRequestAsync failed because the certificate request response is malformed. Status code: 200",
                     null,
-                    ManagedIdentitySource.ImdsV2,
+                    ManagedIdentitySource.Imds,
                     (int)HttpStatusCode.OK);
             }
         }

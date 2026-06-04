@@ -55,20 +55,39 @@ namespace Microsoft.Identity.Client
                 resource);
         }
 
-        /// <inheritdoc/>
-        public async Task<ManagedIdentitySourceResult> GetManagedIdentitySourceAsync(CancellationToken cancellationToken)
+        /// <summary>
+        /// Detects the managed identity source available on the host and the strongest mTLS
+        /// binding the host can produce. Useful for credential chains (such as
+        /// <c>DefaultAzureCredential</c>) to decide whether managed identity is available and
+        /// what binding strength to expect.
+        /// </summary>
+        /// <remarks>
+        /// On hosts capable of key binding, detecting the strongest available strength may provision
+        /// (and persist) a binding key as a side effect, pre-warming the cache reused by a subsequent
+        /// token request. The key provider is created once per process and its key is cached.
+        /// </remarks>
+        /// <param name="cancellationToken">A cancellation token to observe while waiting for the detection to complete.</param>
+        /// <returns>A <see cref="ManagedIdentityCapabilities"/> describing the detected source and host capabilities.</returns>
+        public async Task<ManagedIdentityCapabilities> GetManagedIdentityCapabilitiesAsync(CancellationToken cancellationToken)
         {
             // Create a temporary RequestContext for the logger and the IMDS probe request.
             var requestContext = new RequestContext(this.ServiceBundle, Guid.NewGuid(), null, cancellationToken);
 
-            return await ManagedIdentityClient.GetManagedIdentitySourceAsync(requestContext, cancellationToken).ConfigureAwait(false);
+            ManagedIdentityDiscoveryResult discoveryResult = await ManagedIdentityClient
+                .GetManagedIdentityCapabilitiesAsync(requestContext, cancellationToken)
+                .ConfigureAwait(false);
+
+            return new ManagedIdentityCapabilities(
+                discoveryResult.Source,
+                discoveryResult.MaxSupportedBindingStrength,
+                discoveryResult.GetCombinedErrorReason());
         }
 
         /// <summary>
         /// Detects and returns the managed identity source available on the environment.
         /// </summary>
         /// <returns>Managed identity source detected on the environment if any.</returns>
-        [Obsolete("Use GetManagedIdentitySourceAsync() instead. \"ManagedIdentityApplication mi = miBuilder.Build() as ManagedIdentityApplication;\"")]
+        [Obsolete("Use GetManagedIdentityCapabilitiesAsync() instead. \"ManagedIdentityApplication mi = miBuilder.Build() as ManagedIdentityApplication;\"")]
         public static ManagedIdentitySource GetManagedIdentitySource()
         {
             var source = ManagedIdentityClient.GetManagedIdentitySourceNoImds();
