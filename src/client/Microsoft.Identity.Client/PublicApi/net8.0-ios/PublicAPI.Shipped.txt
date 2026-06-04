@@ -270,6 +270,7 @@ Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder.WithPreferredAzu
 Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder.WithSendX5C(bool withSendX5C) -> Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder
 Microsoft.Identity.Client.AcquireTokenForManagedIdentityParameterBuilder
 Microsoft.Identity.Client.AcquireTokenForManagedIdentityParameterBuilder.WithClaims(string claims) -> Microsoft.Identity.Client.AcquireTokenForManagedIdentityParameterBuilder
+Microsoft.Identity.Client.AcquireTokenForManagedIdentityParameterBuilder.WithClaimsFromClient(string claimsJson) -> Microsoft.Identity.Client.AcquireTokenForManagedIdentityParameterBuilder
 Microsoft.Identity.Client.AcquireTokenForManagedIdentityParameterBuilder.WithForceRefresh(bool forceRefresh) -> Microsoft.Identity.Client.AcquireTokenForManagedIdentityParameterBuilder
 Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder
 Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder.WithAccount(Microsoft.Identity.Client.IAccount account) -> Microsoft.Identity.Client.AcquireTokenInteractiveParameterBuilder
@@ -303,6 +304,10 @@ Microsoft.Identity.Client.AppConfig.CertificateOptions.SendCertificateOverMtls.i
 Microsoft.Identity.Client.AppConfig.CertificateOptions.SendX5C.get -> bool
 Microsoft.Identity.Client.AppConfig.CertificateOptions.SendX5C.init -> void
 Microsoft.Identity.Client.AppConfig.ManagedIdentityId
+Microsoft.Identity.Client.AppConfig.MtlsBindingStrength
+Microsoft.Identity.Client.AppConfig.MtlsBindingStrength.KeyGuard = 3 -> Microsoft.Identity.Client.AppConfig.MtlsBindingStrength
+Microsoft.Identity.Client.AppConfig.MtlsBindingStrength.None = 0 -> Microsoft.Identity.Client.AppConfig.MtlsBindingStrength
+Microsoft.Identity.Client.AppConfig.MtlsBindingStrength.Software = 1 -> Microsoft.Identity.Client.AppConfig.MtlsBindingStrength
 Microsoft.Identity.Client.AppConfig.PoPAuthenticationConfiguration
 Microsoft.Identity.Client.AppConfig.PoPAuthenticationConfiguration.HttpHost.get -> string
 Microsoft.Identity.Client.AppConfig.PoPAuthenticationConfiguration.HttpHost.set -> void
@@ -682,6 +687,7 @@ Microsoft.Identity.Client.IByRefreshToken
 Microsoft.Identity.Client.IByRefreshToken.AcquireTokenByRefreshToken(System.Collections.Generic.IEnumerable<string> scopes, string refreshToken) -> Microsoft.Identity.Client.AcquireTokenByRefreshTokenParameterBuilder
 Microsoft.Identity.Client.IByUserFederatedIdentityCredential
 Microsoft.Identity.Client.IByUserFederatedIdentityCredential.AcquireTokenByUserFederatedIdentityCredential(System.Collections.Generic.IEnumerable<string> scopes, string username, string assertion) -> Microsoft.Identity.Client.AcquireTokenByUserFederatedIdentityCredentialParameterBuilder
+Microsoft.Identity.Client.IByUserFederatedIdentityCredential.AcquireTokenByUserFederatedIdentityCredential(System.Collections.Generic.IEnumerable<string> scopes, System.Guid userObjectId, string assertion) -> Microsoft.Identity.Client.AcquireTokenByUserFederatedIdentityCredentialParameterBuilder
 Microsoft.Identity.Client.IByUsernameAndPassword
 Microsoft.Identity.Client.IByUsernameAndPassword.AcquireTokenByUsernamePassword(System.Collections.Generic.IEnumerable<string> scopes, string username, string password) -> Microsoft.Identity.Client.AcquireTokenByUsernameAndPasswordConfidentialParameterBuilder
 Microsoft.Identity.Client.IClientApplicationBase
@@ -789,6 +795,11 @@ Microsoft.Identity.Client.LogLevel.Error = 0 -> Microsoft.Identity.Client.LogLev
 Microsoft.Identity.Client.LogLevel.Info = 2 -> Microsoft.Identity.Client.LogLevel
 Microsoft.Identity.Client.LogLevel.Verbose = 3 -> Microsoft.Identity.Client.LogLevel
 Microsoft.Identity.Client.LogLevel.Warning = 1 -> Microsoft.Identity.Client.LogLevel
+Microsoft.Identity.Client.ManagedIdentity.ManagedIdentityCapabilities
+Microsoft.Identity.Client.ManagedIdentity.ManagedIdentityCapabilities.ErrorReason.get -> string
+Microsoft.Identity.Client.ManagedIdentity.ManagedIdentityCapabilities.IsMtlsPopSupportedByHost.get -> bool
+Microsoft.Identity.Client.ManagedIdentity.ManagedIdentityCapabilities.MaxSupportedBindingStrength.get -> Microsoft.Identity.Client.AppConfig.MtlsBindingStrength
+Microsoft.Identity.Client.ManagedIdentity.ManagedIdentityCapabilities.Source.get -> Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource
 Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource
 Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource.AppService = 2 -> Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource
 Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource.AzureArc = 3 -> Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource
@@ -800,6 +811,7 @@ Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource.None = 0 -> Micr
 Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource.ServiceFabric = 5 -> Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource
 Microsoft.Identity.Client.ManagedIdentityApplication
 Microsoft.Identity.Client.ManagedIdentityApplication.AcquireTokenForManagedIdentity(string resource) -> Microsoft.Identity.Client.AcquireTokenForManagedIdentityParameterBuilder
+Microsoft.Identity.Client.ManagedIdentityApplication.GetManagedIdentityCapabilitiesAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.Identity.Client.ManagedIdentity.ManagedIdentityCapabilities>
 Microsoft.Identity.Client.ManagedIdentityApplicationBuilder
 Microsoft.Identity.Client.ManagedIdentityApplicationBuilder.Build() -> Microsoft.Identity.Client.IManagedIdentityApplication
 Microsoft.Identity.Client.ManagedIdentityApplicationBuilder.WithClientCapabilities(System.Collections.Generic.IEnumerable<string> clientCapabilities) -> Microsoft.Identity.Client.ManagedIdentityApplicationBuilder
@@ -1049,6 +1061,7 @@ static Microsoft.Identity.Client.Extensibility.AbstractConfidentialClientAcquire
 static Microsoft.Identity.Client.Extensibility.AbstractConfidentialClientAcquireTokenParameterBuilderExtension.WithAdditionalCacheParameters<T>(this Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T> builder, System.Collections.Generic.IEnumerable<string> cacheParameters) -> Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T>
 static Microsoft.Identity.Client.Extensibility.AbstractConfidentialClientAcquireTokenParameterBuilderExtension.WithAttributeTokens<T>(this Microsoft.Identity.Client.AbstractConfidentialClientAcquireTokenParameterBuilder<T> builder, System.Collections.Generic.IEnumerable<string> attributeTokens) -> T
 static Microsoft.Identity.Client.Extensibility.AbstractConfidentialClientAcquireTokenParameterBuilderExtension.WithAuthenticationExtension<T>(this Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T> builder, Microsoft.Identity.Client.Extensibility.MsalAuthenticationExtension authenticationExtension) -> Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T>
+static Microsoft.Identity.Client.Extensibility.AbstractConfidentialClientAcquireTokenParameterBuilderExtension.WithClaimsFromClient<T>(this Microsoft.Identity.Client.AbstractConfidentialClientAcquireTokenParameterBuilder<T> builder, string claimsJson) -> T
 static Microsoft.Identity.Client.Extensibility.AbstractConfidentialClientAcquireTokenParameterBuilderExtension.WithExtraBodyParameters<T>(this Microsoft.Identity.Client.AbstractConfidentialClientAcquireTokenParameterBuilder<T> builder, System.Collections.Generic.Dictionary<string, System.Func<System.Threading.CancellationToken, System.Threading.Tasks.Task<string>>> extraBodyParams) -> T
 static Microsoft.Identity.Client.Extensibility.AbstractConfidentialClientAcquireTokenParameterBuilderExtension.WithExtraClientAssertionClaims<T>(this Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T> builder, string clientAssertionClaims) -> Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T>
 static Microsoft.Identity.Client.Extensibility.AbstractConfidentialClientAcquireTokenParameterBuilderExtension.WithFmiPathForClientAssertion<T>(this Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T> builder, string fmiPath) -> Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T>
