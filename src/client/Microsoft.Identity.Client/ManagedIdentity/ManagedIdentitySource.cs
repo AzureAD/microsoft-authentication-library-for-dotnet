@@ -48,17 +48,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         /// Indicates that the source is defaulted to IMDS since no environment variables are set.
         /// This is used to detect the managed identity source.
         /// </summary>
-        [Obsolete("In use only to support the now obsolete GetManagedIdentitySource API. Will be removed in a future version. Use GetManagedIdentitySourceAsync instead.")]
+        [Obsolete("In use only to support the now obsolete GetManagedIdentitySource API. Will be removed in a future version. Use GetManagedIdentityCapabilitiesAsync instead.")]
         DefaultToImds,
 
         /// <summary>
         /// The source to acquire token for managed identity is Machine Learning Service.
         /// </summary>
         MachineLearning,
-
-        /// <summary>
-        /// The source to acquire token for managed identity is IMDSV2.
-        /// </summary>
-        ImdsV2,
     }
 }

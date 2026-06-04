@@ -949,6 +949,50 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         }
 
         /// <summary>
+        /// Creates a mock IMDS compute metadata (/metadata/instance/compute) response handler.
+        /// </summary>
+        /// <param name="osType">The OS type to return (e.g., "Windows", "Linux").</param>
+        /// <param name="securityType">The security profile type (e.g., "TrustedLaunch", "ConfidentialVM"), or null for no profile.</param>
+        /// <returns>A configured <see cref="MockHttpMessageHandler"/>.</returns>
+        internal static MockHttpMessageHandler MockImdsComputeMetadata(
+            string osType = "Windows",
+            string securityType = "TrustedLaunch")
+        {
+            string securityProfileJson = securityType != null
+                ? $", \"securityProfile\": {{ \"securityType\": \"{securityType}\" }}"
+                : "";
+
+            string body = $"{{ \"osType\": \"{osType}\"{securityProfileJson} }}";
+
+            return new MockHttpMessageHandler()
+            {
+                ExpectedUrl = $"{ImdsManagedIdentitySource.DefaultImdsBaseEndpoint}{ImdsComputeMetadataManager.ImdsComputePath}",
+                ExpectedMethod = HttpMethod.Get,
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(body),
+                }
+            };
+        }
+
+        /// <summary>
+        /// Creates a mock IMDS compute metadata 404 (not found) response handler.
+        /// </summary>
+        /// <returns>A configured <see cref="MockHttpMessageHandler"/>.</returns>
+        internal static MockHttpMessageHandler MockImdsComputeMetadataNotFound()
+        {
+            return new MockHttpMessageHandler()
+            {
+                ExpectedUrl = $"{ImdsManagedIdentitySource.DefaultImdsBaseEndpoint}{ImdsComputeMetadataManager.ImdsComputePath}",
+                ExpectedMethod = HttpMethod.Get,
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.NotFound)
+                {
+                    Content = new StringContent(""),
+                }
+            };
+        }
+
+        /// <summary>
         /// Creates a mock CSR metadata response handler for IMDS v2 flows.
         /// </summary>
         /// <param name="statusCode">The HTTP status code to return.</param>
