@@ -26,7 +26,15 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
                 builder.AppendLine("ForceRefresh: " + ForceRefresh);
                 builder.AppendLine("UserIdentifiedByOid: " + UserObjectId.HasValue);
                 builder.AppendLine("Assertion set: " + !string.IsNullOrEmpty(Assertion));
-                logger.Info(builder.ToString());
+
+                var piiBuilder = new StringBuilder(builder.ToString());
+                piiBuilder.AppendLine("Username: " + Username);
+                piiBuilder.AppendLine("UserObjectId: " + UserObjectId);
+
+                builder.AppendLine("Username set: " + !string.IsNullOrEmpty(Username));
+                builder.AppendLine("UserObjectId set: " + UserObjectId.HasValue);
+
+                logger.InfoPii(piiBuilder.ToString(), builder.ToString());
             }
         }
     }
