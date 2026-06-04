@@ -20,21 +20,27 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         {
             if (logger.IsLoggingEnabled(LogLevel.Info))
             {
+                // PII-enabled message: includes actual Username and UserObjectId values
                 var builder = new StringBuilder();
                 builder.AppendLine("=== AcquireTokenByUserFederatedIdentityCredentialParameters ===");
                 builder.AppendLine("SendX5C: " + SendX5C);
                 builder.AppendLine("ForceRefresh: " + ForceRefresh);
-                builder.AppendLine("UserIdentifiedByOid: " + UserObjectId.HasValue);
+                builder.AppendLine("Username: " + Username);
+                builder.AppendLine("UserObjectId: " + UserObjectId);
                 builder.AppendLine("Assertion set: " + !string.IsNullOrEmpty(Assertion));
 
-                var piiBuilder = new StringBuilder(builder.ToString());
-                piiBuilder.AppendLine("Username: " + Username);
-                piiBuilder.AppendLine("UserObjectId: " + UserObjectId);
+                string messageWithPii = builder.ToString();
 
+                // Non-PII message: redacts Username and UserObjectId to booleans
+                builder = new StringBuilder();
+                builder.AppendLine("=== AcquireTokenByUserFederatedIdentityCredentialParameters ===");
+                builder.AppendLine("SendX5C: " + SendX5C);
+                builder.AppendLine("ForceRefresh: " + ForceRefresh);
                 builder.AppendLine("Username set: " + !string.IsNullOrEmpty(Username));
                 builder.AppendLine("UserObjectId set: " + UserObjectId.HasValue);
+                builder.AppendLine("Assertion set: " + !string.IsNullOrEmpty(Assertion));
 
-                logger.InfoPii(piiBuilder.ToString(), builder.ToString());
+                logger.InfoPii(messageWithPii, builder.ToString());
             }
         }
     }
