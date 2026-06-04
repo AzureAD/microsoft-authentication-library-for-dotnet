@@ -59,7 +59,15 @@ namespace Microsoft.Identity.Client.Region
             string region = null;
             bool isMtlsEnabled = requestContext.IsMtlsRequested;
 
-            if (requestContext.ApiEvent?.ApiId == TelemetryCore.Internal.Events.ApiEvent.ApiIds.AcquireTokenForClient)
+            // Always attempt region discovery for AcquireTokenForClient.
+            // Also attempt it for mTLS-enabled user flows when the app has opted in to
+            // regional endpoints (AzureRegion != null), so that OBO/RT can use a regional
+            // mTLS endpoint (e.g. eastus.mtlsauth.microsoft.com) when configured.
+            bool shouldAttemptRegionDiscovery =
+                requestContext.ApiEvent?.ApiId == TelemetryCore.Internal.Events.ApiEvent.ApiIds.AcquireTokenForClient ||
+                (isMtlsEnabled && requestContext.ServiceBundle.Config.AzureRegion != null);
+
+            if (shouldAttemptRegionDiscovery)
             {
                 region = await _regionManager.GetAzureRegionAsync(requestContext).ConfigureAwait(false);
             }

@@ -1,0 +1,120 @@
+# mTLS Bearer Transport for Confidential Client Applications
+
+## What is mTLS Bearer Transport?
+
+By default, MSAL authenticates a confidential client app by signing a JWT (`client_assertion`) with its certificate and including that assertion in the POST body of every token request.
+
+**mTLS bearer transport** is an alternative: the certificate is presented at the **TLS layer** during the handshake, and a `client_assertion` JWT is also included in the POST body. The token returned is still a standard Bearer token.
+
+This is enabled by the `SendCertificateOverMtls = true` option. When set:
+- Token requests are routed to `mtlsauth.microsoft.com` (or a regional mTLS endpoint when `WithAzureRegion` is also configured)
+- `client_assertion` **is** included in the POST body (ESTS requires it for this preview)
+- The TLS certificate also authenticates the app at the transport layer
+
+## AAD Prerequisite: App Enablement (Preview)
+
+> ⚠️ **This feature is in preview. Your app must be enabled for mTLS client auth by Microsoft Entra before token requests will succeed.**
+>
+> There is no self-serve portal today. Without enablement, AAD returns `AADSTS51000: MtlsClientAuth is/are disabled`.
+
+## How to Opt In
+
+The minimum configuration is a single call: pass `SendCertificateOverMtls = true` on `CertificateOptions`. MSAL's default HTTP factory handles the mTLS transport automatically. Step 2 below is only needed if you want to control the HTTP pipeline.
+
+### Step 1 — Configure the credential
+
+```csharp
+var cca = ConfidentialClientApplicationBuilder
+    .Create(clientId)
+    .WithAuthority($"https://login.microsoftonline.com/{tenantId}")
+    .WithCertificate(cert, new CertificateOptions { SendCertificateOverMtls = true })
+    // .WithHttpClientFactory(new MyMtlsHttpClientFactory(cert))  // optional — see Step 2
+    .Build();
+```
+
+`SendCertificateOverMtls` requires a certificate-based credential. Passing it with a client secret throws at `Build()` time.
+
+### Step 2 — (Optional) Implement `IMsalMtlsHttpClientFactory`
+
+MSAL ships a default factory (`SimpleHttpClientFactory`) that implements `IMsalMtlsHttpClientFactory` and automatically creates an mTLS-capable `HttpClient` when required. **You do not need to call `WithHttpClientFactory` for mTLS to work.**
+
+Provide a custom factory only when you need control over the HTTP pipeline (e.g., proxies, custom handler chain, per-process `HttpClient` pooling). When you do, MSAL calls `GetHttpClient(X509Certificate2)` for every request and passes the cert for mTLS calls or `null` for non-mTLS calls (e.g., instance discovery). Your cert overload **must** handle the null case — otherwise the client certificate will be presented on every request, including discovery endpoints that don't expect it.
+
+```csharp
+public class MyMtlsHttpClientFactory : IMsalMtlsHttpClientFactory
+{
+    // Reuse HttpClient instances — do NOT create a new one per call (socket exhaustion).
+    private readonly HttpClient _mtlsClient;
+    private readonly HttpClient _plainClient;
+
+    public MyMtlsHttpClientFactory(X509Certificate2 cert)
+    {
+        var handler = new HttpClientHandler();
+        handler.ClientCertificates.Add(cert);
+        _mtlsClient = new HttpClient(handler);
+        _plainClient = new HttpClient();
+    }
+
+    // MSAL routes ALL requests through this overload when the factory is IMsalMtlsHttpClientFactory.
+    // Return the mTLS client only when a cert is supplied; otherwise return the plain client.
+    public HttpClient GetHttpClient(X509Certificate2 cert)
+        => cert == null ? _plainClient : _mtlsClient;
+
+    // Required by IMsalHttpClientFactory but not invoked by MSAL when the factory implements
+    // IMsalMtlsHttpClientFactory — the cert overload above is used for every request.
+    public HttpClient GetHttpClient() => _plainClient;
+}
+```
+
+### Acquire a token
+
+```csharp
+// S2S (app-to-app)
+AuthenticationResult result = await cca
+    .AcquireTokenForClient(scopes)
+    .ExecuteAsync();
+
+// On-behalf-of
+AuthenticationResult result = await cca
+    .AcquireTokenOnBehalfOf(scopes, new UserAssertion(userToken))
+    .ExecuteAsync();
+```
+
+The same `WithCertificate(cert, new CertificateOptions { SendCertificateOverMtls = true })` configuration applies to all supported flows — no per-call change is needed.
+
+## Supported Flows
+
+| Flow | MSAL API |
+|------|----------|
+| App-to-app (S2S / client credentials) | `AcquireTokenForClient` |
+| On-behalf-of (OBO) | `AcquireTokenOnBehalfOf` |
+| Silent / refresh-token redemption | `AcquireTokenSilent`, `AcquireTokenByRefreshToken` |
+| Authorization code | `AcquireTokenByAuthorizationCode` |
+
+## How to Verify It's Working
+
+### Option 1 — Check the token endpoint
+
+```csharp
+AuthenticationResult result = await cca.AcquireTokenForClient(scopes).ExecuteAsync();
+
+// Should contain "mtlsauth.microsoft.com", not "login.microsoftonline.com"
+Console.WriteLine(result.AuthenticationResultMetadata.TokenEndpoint);
+```
+
+### Option 2 — Intercept the request (unit/integration tests)
+
+Use a recording `IMsalMtlsHttpClientFactory` (see `RecordingMtlsHttpClientFactory` in `MtlsTransportUserFlowTests.cs`) to capture the outgoing request. Assert:
+- URL contains `mtlsauth`
+- Body **contains** `client_assertion` (cert at TLS + assertion in body)
+
+## Known Limitations
+
+- **Integration test setup is Windows-only** — the provided integration tests use `[DoNotRunOnLinux]` due to test infrastructure constraints. The mTLS bearer transport feature itself works cross-platform wherever `HttpClientHandler` client certificate authentication is supported.
+- **AAD-side enablement required (preview)** — there is no self-serve portal today; app enablement requires Microsoft Entra configuration.
+- **Certificate credential required** — `SendCertificateOverMtls = true` is incompatible with client secrets and throws at `Build()` time.
+
+## Related Docs
+
+- [sni_mtls_bearer_token_design.md](sni_mtls_bearer_token_design.md) — internal design spec
+- [mtlspop_architecture.md](mtlspop_architecture.md) — mTLS PoP architecture (distinct from Bearer transport)
