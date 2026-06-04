@@ -62,6 +62,49 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         public ILoggerAdapter Logger { get; init; }
 
         /// <summary>
+        /// Single factory used by both the runtime path
+        /// (<see cref="CredentialMaterialResolver"/>) and the preflight path
+        /// (<see cref="Microsoft.Identity.Client.ApiConfig.Parameters.MtlsPopParametersInitializer"/>)
+        /// to materialize a <see cref="CredentialContext"/>. Centralizing the construction
+        /// here ensures any new field on <see cref="CredentialContext"/> is wired through a
+        /// single choke-point instead of being duplicated across object initializers.
+        /// </summary>
+        internal static CredentialContext Create(
+            string clientId,
+            string tokenEndpoint,
+            CredentialTransportProtocol mode,
+            string claims,
+            IEnumerable<string> clientCapabilities,
+            ICryptographyManager cryptographyManager,
+            bool sendX5C,
+            bool useSha2,
+            string extraClientAssertionClaims,
+            string clientAssertionFmiPath,
+            string authority,
+            string tenantId,
+            Guid correlationId,
+            ILoggerAdapter logger)
+        {
+            return new CredentialContext
+            {
+                ClientId = clientId,
+                TokenEndpoint = tokenEndpoint,
+                Mode = mode,
+                Claims = claims,
+                ClientCapabilities = clientCapabilities,
+                CryptographyManager = cryptographyManager,
+                SendX5C = sendX5C,
+                UseSha2 = useSha2,
+                ExtraClientAssertionClaims = extraClientAssertionClaims,
+                ClientAssertionFmiPath = clientAssertionFmiPath,
+                Authority = authority,
+                TenantId = tenantId,
+                CorrelationId = correlationId,
+                Logger = logger,
+            };
+        }
+
+        /// <summary>
         /// Creates an <see cref="AssertionRequestOptions"/> from this context.
         /// Centralizes the mapping so credential implementations don't duplicate it.
         /// </summary>

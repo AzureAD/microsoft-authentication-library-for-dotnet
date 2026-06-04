@@ -7,3 +7,13 @@ Microsoft.Identity.Client.AuthScheme.CredentialEvaluationContext.CredentialEvalu
 Microsoft.Identity.Client.AuthScheme.CredentialEvaluationContext.MtlsCertificate.get -> System.Security.Cryptography.X509Certificates.X509Certificate2
 static Microsoft.Identity.Client.Extensibility.AcquireTokenParameterBuilderExtensions.WithCachePartitionKey<T>(this Microsoft.Identity.Client.BaseAbstractAcquireTokenParameterBuilder<T> builder, string key, string value) -> T
 static Microsoft.Identity.Client.Extensibility.AcquireTokenParameterBuilderExtensions.WithReservedScopes(this Microsoft.Identity.Client.AcquireTokenByAuthorizationCodeParameterBuilder builder, bool offlineAccessScope) -> Microsoft.Identity.Client.AcquireTokenByAuthorizationCodeParameterBuilder
+Microsoft.Identity.Client.AppConfig.MtlsBindingStrength
+Microsoft.Identity.Client.AppConfig.MtlsBindingStrength.None = 0 -> Microsoft.Identity.Client.AppConfig.MtlsBindingStrength
+Microsoft.Identity.Client.AppConfig.MtlsBindingStrength.Software = 1 -> Microsoft.Identity.Client.AppConfig.MtlsBindingStrength
+Microsoft.Identity.Client.AppConfig.MtlsBindingStrength.KeyGuard = 3 -> Microsoft.Identity.Client.AppConfig.MtlsBindingStrength
+Microsoft.Identity.Client.ManagedIdentity.ManagedIdentityCapabilities
+Microsoft.Identity.Client.ManagedIdentity.ManagedIdentityCapabilities.ErrorReason.get -> string
+Microsoft.Identity.Client.ManagedIdentity.ManagedIdentityCapabilities.IsMtlsPopSupportedByHost.get -> bool
+Microsoft.Identity.Client.ManagedIdentity.ManagedIdentityCapabilities.MaxSupportedBindingStrength.get -> Microsoft.Identity.Client.AppConfig.MtlsBindingStrength
+Microsoft.Identity.Client.ManagedIdentity.ManagedIdentityCapabilities.Source.get -> Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource
+Microsoft.Identity.Client.ManagedIdentityApplication.GetManagedIdentityCapabilitiesAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.Identity.Client.ManagedIdentity.ManagedIdentityCapabilities>
