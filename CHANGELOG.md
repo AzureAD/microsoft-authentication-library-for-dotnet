@@ -1,3 +1,19 @@
+4.84.1
+======
+
+### New Features
+- Added `WithReservedScopes` and `WithCachePartitionKey` public API extensions on `AcquireTokenByAuthorizationCodeParameterBuilder` and `BaseAbstractAcquireTokenParameterBuilder`. [#6014](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6014)
+- Added `IAuthenticationOperation3` interface for CDT + mTLS PoP composition, with `CredentialEvaluationContext` for post-credential evaluation hooks. [#5996](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5996)
+- Added `MsalRemainingTokenLifetime` histogram metric for token expiry tracking. [#5920](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5920)
+
+### Changes
+- Removed `[Obsolete]` attribute from `WithExtraBodyParameters` extension method. [#6006](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6006)
+- Replaced `ConcurrentHashSet<T>` with `ConcurrentDictionary<T, byte>` to eliminate custom collection. [#5975](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5975)
+
+### Bug Fixes
+- Fixed `WithTenantId` not honoring MSA tenant GUID when specified at request level. [#5958](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5958)
+- Fixed OBO cache returning `multiple_matching_tokens_detected` when attributed tokens share a partition. [#5993](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5993)
+
 4.84.0
 ======
 
