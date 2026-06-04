@@ -197,6 +197,19 @@ namespace Microsoft.Identity.Client
                 assertion);
         }
 
+        /// <inheritdoc/>
+        AcquireTokenByUserFederatedIdentityCredentialParameterBuilder IByUserFederatedIdentityCredential.AcquireTokenByUserFederatedIdentityCredential(
+            IEnumerable<string> scopes,
+            Guid userObjectId,
+            string assertion)
+        {
+            return AcquireTokenByUserFederatedIdentityCredentialParameterBuilder.Create(
+                ClientExecutorFactory.CreateConfidentialClientExecutor(this),
+                scopes,
+                userObjectId,
+                assertion);
+        }
+
         AcquireTokenByRefreshTokenParameterBuilder IByRefreshToken.AcquireTokenByRefreshToken(
             IEnumerable<string> scopes,
             string refreshToken)
