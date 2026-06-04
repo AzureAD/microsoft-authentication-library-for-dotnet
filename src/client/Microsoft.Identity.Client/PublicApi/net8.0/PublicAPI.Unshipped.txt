@@ -17,3 +17,4 @@ Microsoft.Identity.Client.ManagedIdentity.ManagedIdentityCapabilities.IsMtlsPopS
 Microsoft.Identity.Client.ManagedIdentity.ManagedIdentityCapabilities.MaxSupportedBindingStrength.get -> Microsoft.Identity.Client.AppConfig.MtlsBindingStrength
 Microsoft.Identity.Client.ManagedIdentity.ManagedIdentityCapabilities.Source.get -> Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource
 Microsoft.Identity.Client.ManagedIdentityApplication.GetManagedIdentityCapabilitiesAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.Identity.Client.ManagedIdentity.ManagedIdentityCapabilities>
+Microsoft.Identity.Client.IByUserFederatedIdentityCredential.AcquireTokenByUserFederatedIdentityCredential(System.Collections.Generic.IEnumerable<string> scopes, System.Guid userObjectId, string assertion) -> Microsoft.Identity.Client.AcquireTokenByUserFederatedIdentityCredentialParameterBuilder
