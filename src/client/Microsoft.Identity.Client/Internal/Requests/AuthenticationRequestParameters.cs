@@ -72,7 +72,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             HomeAccountId = homeAccountId;
             CacheKeyComponents = cacheKeyComponents;
-            SendOfflineAccessScope = commonParameters.SendOfflineAccessScope;
 
             // Defer JSON merge to first access — cache hits never read ClaimsAndClientCapabilities,
             // so we avoid parsing on the hot path.
@@ -123,6 +122,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         }
 
         public bool IsMtlsPopRequested => _commonParameters.IsMtlsPopRequested;
+        public bool? SendOfflineAccessScope => _commonParameters.SendOfflineAccessScope;
 
         /// <summary>
         /// The certificate resolved and used for client authentication (if certificate-based authentication was used).
@@ -163,7 +163,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public IEnumerable<string> PersistedCacheParameters => _commonParameters.AdditionalCacheParameters;
 
         public SortedList<string, string> CacheKeyComponents {get; private set; }
-        public bool? SendOfflineAccessScope { get; private set; }
 
         #region TODO REMOVE FROM HERE AND USE FROM SPECIFIC REQUEST PARAMETERS
         // TODO: ideally, these can come from the particular request instance and not be in RequestBase since it's not valid for all requests.
