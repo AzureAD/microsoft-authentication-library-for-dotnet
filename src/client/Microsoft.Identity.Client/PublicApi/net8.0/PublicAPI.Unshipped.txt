@@ -8,7 +8,7 @@ Microsoft.Identity.Client.AuthScheme.CredentialEvaluationContext.MtlsCertificate
 static Microsoft.Identity.Client.Extensibility.AcquireTokenParameterBuilderExtensions.WithCachePartitionKey<T>(this Microsoft.Identity.Client.BaseAbstractAcquireTokenParameterBuilder<T> builder, string key, string value) -> T
 static Microsoft.Identity.Client.Extensibility.AcquireTokenParameterBuilderExtensions.WithReservedScopes(this Microsoft.Identity.Client.AcquireTokenByAuthorizationCodeParameterBuilder builder, bool offlineAccessScope) -> Microsoft.Identity.Client.AcquireTokenByAuthorizationCodeParameterBuilder
 Microsoft.Identity.Client.AppConfig.MtlsBindingStrength
-Microsoft.Identity.Client.AppConfig.MtlsBindingStrength.Bearer = 0 -> Microsoft.Identity.Client.AppConfig.MtlsBindingStrength
+Microsoft.Identity.Client.AppConfig.MtlsBindingStrength.None = 0 -> Microsoft.Identity.Client.AppConfig.MtlsBindingStrength
 Microsoft.Identity.Client.AppConfig.MtlsBindingStrength.Software = 1 -> Microsoft.Identity.Client.AppConfig.MtlsBindingStrength
 Microsoft.Identity.Client.AppConfig.MtlsBindingStrength.KeyGuard = 3 -> Microsoft.Identity.Client.AppConfig.MtlsBindingStrength
 Microsoft.Identity.Client.ManagedIdentity.ManagedIdentityCapabilities

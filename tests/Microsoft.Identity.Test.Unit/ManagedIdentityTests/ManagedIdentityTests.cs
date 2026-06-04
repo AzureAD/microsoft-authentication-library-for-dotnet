@@ -166,7 +166,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var caps = await mi.GetManagedIdentityCapabilitiesAsync(ImdsProbesCancellationToken).ConfigureAwait(false);
 
                 Assert.AreEqual(ManagedIdentitySource.Imds, caps.Source);
-                Assert.AreEqual(MtlsBindingStrength.Bearer, caps.MaxSupportedBindingStrength);
+                Assert.AreEqual(MtlsBindingStrength.None, caps.MaxSupportedBindingStrength);
                 Assert.IsFalse(caps.IsMtlsPopSupportedByHost);
             }
         }

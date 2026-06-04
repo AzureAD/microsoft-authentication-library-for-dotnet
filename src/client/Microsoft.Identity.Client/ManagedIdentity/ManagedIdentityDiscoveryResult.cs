@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         public ManagedIdentityDiscoveryResult(
             ManagedIdentitySource source,
             ImdsVersion? detectedImdsVersion = null,
-            MtlsBindingStrength maxSupportedBindingStrength = MtlsBindingStrength.Bearer,
+            MtlsBindingStrength maxSupportedBindingStrength = MtlsBindingStrength.None,
             string imdsV1FailureReason = null,
             string imdsV2FailureReason = null)
         {

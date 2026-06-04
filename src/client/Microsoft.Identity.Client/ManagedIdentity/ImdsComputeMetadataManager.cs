@@ -65,11 +65,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
                 return JsonHelper.TryToDeserializeFromJson<ComputeMetadataResponse>(response.Body);
             }
-            catch (OperationCanceledException)
-            {
-                throw;
-            }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 logger.Info($"[Managed Identity] IMDS compute metadata request failed with exception: {ex.Message}");
                 return null;

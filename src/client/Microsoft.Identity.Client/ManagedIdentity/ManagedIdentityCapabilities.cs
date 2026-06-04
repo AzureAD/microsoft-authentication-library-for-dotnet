@@ -51,11 +51,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         /// </summary>
         /// <value>
         /// <c>true</c> when <see cref="MaxSupportedBindingStrength"/> is greater than
-        /// <see cref="MtlsBindingStrength.Bearer"/>. This means the host can bind a token to a key;
+        /// <see cref="MtlsBindingStrength.None"/>. This means the host can bind a token to a key;
         /// it does <b>not</b> imply hardware attestation. Callers that require attestation must
         /// check for the <see cref="MtlsBindingStrength.KeyGuard"/> tier.
         /// </value>
-        public bool IsMtlsPopSupportedByHost => MaxSupportedBindingStrength > MtlsBindingStrength.Bearer;
+        public bool IsMtlsPopSupportedByHost => MaxSupportedBindingStrength > MtlsBindingStrength.None;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ManagedIdentityCapabilities"/> class.

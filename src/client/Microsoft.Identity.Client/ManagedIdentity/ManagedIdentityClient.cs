@@ -249,13 +249,13 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         // Determines the host's maximum mTLS binding strength for IMDSv1-only hosts using the
         // /metadata/instance/compute security profile. mTLS PoP is not supported on .NET
-        // Framework 4.6.2, so the host is reported as Bearer-only there.
+        // Framework 4.6.2, so the host is reported as None there.
         private static Task<MtlsBindingStrength> DetermineImdsV1BindingStrengthAsync(
             RequestContext requestContext,
             CancellationToken cancellationToken)
         {
 #if NET462
-            return Task.FromResult(MtlsBindingStrength.Bearer);
+            return Task.FromResult(MtlsBindingStrength.None);
 #else
             return DetermineImdsV1BindingStrengthCoreAsync(requestContext, cancellationToken);
 #endif
@@ -277,20 +277,20 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             // the v2 CSR (PoP) flow regardless, so we must not overclaim attestation.
             return ImdsComputeMetadataManager.IsMtlsPopSupported(computeMetadata)
                 ? MtlsBindingStrength.Software
-                : MtlsBindingStrength.Bearer;
+                : MtlsBindingStrength.None;
         }
 #endif
 
         // Determines the IMDSv2 host's maximum mTLS binding strength. The host supports at least
         // Software binding (the v2 CSR flow binds a token to a key); if the platform can produce a
         // VBS-isolated KeyGuard key it supports the stronger, attested KeyGuard tier. mTLS PoP is
-        // unavailable on .NET Framework 4.6.2, so the host is reported as Bearer-only there.
+        // unavailable on .NET Framework 4.6.2, so the host is reported as None there.
         private static Task<MtlsBindingStrength> DetermineImdsV2BindingStrengthAsync(
             RequestContext requestContext,
             CancellationToken cancellationToken)
         {
 #if NET462
-            return Task.FromResult(MtlsBindingStrength.Bearer);
+            return Task.FromResult(MtlsBindingStrength.None);
 #else
             return DetermineImdsV2BindingStrengthCoreAsync(requestContext, cancellationToken);
 #endif

@@ -10,17 +10,18 @@ namespace Microsoft.Identity.Client.AppConfig
     /// </summary>
     /// <remarks>
     /// This type is shared by managed identity and confidential client mTLS Proof-of-Possession
-    /// scenarios. A value greater than <see cref="Bearer"/> means the host can bind a token to a
+    /// scenarios. A value greater than <see cref="None"/> means the host can bind a token to a
     /// key; it does <b>not</b> by itself imply hardware attestation. Attestation corresponds to
     /// the <see cref="KeyGuard"/> tier specifically.
     /// </remarks>
     public enum MtlsBindingStrength
     {
         /// <summary>
-        /// No key binding is available; only bearer tokens can be issued. This is the floor of
-        /// the range (for example, on .NET Framework 4.6.2, which does not support PoP).
+        /// No key binding is available, so the host cannot perform mTLS Proof-of-Possession. This
+        /// is the floor of the range (for example, on .NET Framework 4.6.2, which does not support
+        /// PoP).
         /// </summary>
-        Bearer = 0,
+        None = 0,
 
         /// <summary>
         /// The token can be bound to a software-backed key (for example, a persisted CNG key on
