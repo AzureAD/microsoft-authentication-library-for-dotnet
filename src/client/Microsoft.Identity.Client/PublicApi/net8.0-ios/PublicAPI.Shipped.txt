@@ -795,20 +795,11 @@ Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource.AzureArc = 3 -> 
 Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource.CloudShell = 4 -> Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource
 Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource.DefaultToImds = 6 -> Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource
 Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource.Imds = 1 -> Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource
-Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource.ImdsV2 = 8 -> Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource
 Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource.MachineLearning = 7 -> Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource
 Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource.None = 0 -> Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource
 Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource.ServiceFabric = 5 -> Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource
-Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySourceResult
-Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySourceResult.ImdsV1FailureReason.get -> string
-Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySourceResult.ImdsV1FailureReason.set -> void
-Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySourceResult.ImdsV2FailureReason.get -> string
-Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySourceResult.ImdsV2FailureReason.set -> void
-Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySourceResult.ManagedIdentitySourceResult(Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource source) -> void
-Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySourceResult.Source.get -> Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource
 Microsoft.Identity.Client.ManagedIdentityApplication
 Microsoft.Identity.Client.ManagedIdentityApplication.AcquireTokenForManagedIdentity(string resource) -> Microsoft.Identity.Client.AcquireTokenForManagedIdentityParameterBuilder
-Microsoft.Identity.Client.ManagedIdentityApplication.GetManagedIdentitySourceAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySourceResult>
 Microsoft.Identity.Client.ManagedIdentityApplicationBuilder
 Microsoft.Identity.Client.ManagedIdentityApplicationBuilder.Build() -> Microsoft.Identity.Client.IManagedIdentityApplication
 Microsoft.Identity.Client.ManagedIdentityApplicationBuilder.WithClientCapabilities(System.Collections.Generic.IEnumerable<string> clientCapabilities) -> Microsoft.Identity.Client.ManagedIdentityApplicationBuilder

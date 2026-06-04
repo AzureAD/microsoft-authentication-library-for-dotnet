@@ -18,6 +18,7 @@
 ======
 
 ### New Features
+- Added `ManagedIdentityApplication.GetManagedIdentityCapabilitiesAsync(CancellationToken)` returning a `ManagedIdentityCapabilities` object that reports the detected managed identity `Source`, the host's `MaxSupportedBindingStrength` (new `MtlsBindingStrength` enum: `None`, `Software`, `KeyGuard`), and a derived `IsMtlsPopSupportedByHost`. Replaces `GetManagedIdentitySourceAsync()`/`ManagedIdentitySourceResult`. The public `ManagedIdentitySource.ImdsV2` value is folded into `Imds` (v1/v2 routing remains internal). [#6049](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6049)
 - Added `CacheOptions.DisableInternalCacheOptions` static property and `CacheOptions.IsInternalCacheDisabled` to allow disabling MSAL's internal token cache. Added `CacheRefreshReason.CacheDisabled` and `MsalError.InternalCacheDisabled` to support this scenario. [#5947](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5947)
 - Added `AuthenticationResultExtensions.GetRefreshToken()` extension method for accessing refresh tokens from `AuthenticationResult`. [#5947](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5947)
 - Added `WithAttributeTokens` and `WithExtraBodyParameters` extension methods on `AbstractConfidentialClientAcquireTokenParameterBuilder` for enhanced extensibility. [#5888](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5888)
