@@ -13,13 +13,16 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.ManagedIdentity;
+using Microsoft.Identity.Client.ManagedIdentity.KeyProviders;
 using Microsoft.Identity.Client.ManagedIdentity.V2;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Unit.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NSubstitute;
 using static Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil;
 
 namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
@@ -44,13 +47,21 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
         private readonly TestRetryPolicyFactory _testRetryPolicyFactory = new TestRetryPolicyFactory();
 
+        // Injects a test platform proxy that returns the supplied key provider, so that IMDSv2
+        // capability discovery deterministically resolves the host's binding strength (KeyGuard vs
+        // software) instead of probing the real platform key provider.
+        private static void InjectKeyProvider(ManagedIdentityApplication mi, IManagedIdentityKeyProvider keyProvider)
+        {
+            var platformProxy = Substitute.For<IPlatformProxy>();
+            platformProxy.ManagedIdentityKeyProvider.Returns(keyProvider);
+            mi.ServiceBundle.SetPlatformProxyForTest(platformProxy);
+        }
+
         [TestMethod]
         [DataRow("http://127.0.0.1:41564/msi/token/", ManagedIdentitySource.AppService)]
         [DataRow(AppServiceEndpoint, ManagedIdentitySource.AppService)]
         [DataRow(ImdsEndpoint, ManagedIdentitySource.Imds)]
         [DataRow(null, ManagedIdentitySource.Imds)]
-        [DataRow(ImdsEndpoint, ManagedIdentitySource.ImdsV2)]
-        [DataRow(null, ManagedIdentitySource.ImdsV2)]
         [DataRow(AzureArcEndpoint, ManagedIdentitySource.AzureArc)]
         [DataRow(CloudShellEndpoint, ManagedIdentitySource.CloudShell)]
         [DataRow(ServiceFabricEndpoint, ManagedIdentitySource.ServiceFabric)]
@@ -69,20 +80,94 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 ManagedIdentityApplication mi = miBuilder.Build() as ManagedIdentityApplication;
 
-                if (managedIdentitySource == ManagedIdentitySource.ImdsV2)
+                if (managedIdentitySource == ManagedIdentitySource.Imds)
                 {
-                    // New discovery order: V1 probed first (fails), then V2 (succeeds)
-                    httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V1));
-                    httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V2));
-                }
-                else if (managedIdentitySource == ManagedIdentitySource.Imds)
-                {
-                    // New discovery order: V1 probed first (succeeds)
+                    // Discovery order: V2 probed first (fails), then V1 (succeeds), then compute metadata for capability.
+                    httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V2));
                     httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V1));
+                    httpManager.AddMockHandler(MockHelpers.MockImdsComputeMetadata());
                 }
 
-                var miSourceResult = await mi.GetManagedIdentitySourceAsync(ImdsProbesCancellationToken).ConfigureAwait(false);
-                Assert.AreEqual(managedIdentitySource, miSourceResult.Source);
+                var caps = await mi.GetManagedIdentityCapabilitiesAsync(ImdsProbesCancellationToken).ConfigureAwait(false);
+                Assert.AreEqual(managedIdentitySource, caps.Source);
+            }
+        }
+
+        [TestMethod]
+        public async Task GetManagedIdentityCapabilities_ImdsV2Detected_ReportsSoftwarePoPAsync()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, ImdsEndpoint);
+
+                var mi = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpManager(httpManager)
+                    .Build() as ManagedIdentityApplication;
+
+                // A software-backed key provider (no VBS/KeyGuard) caps the host at the Software tier.
+                InjectKeyProvider(mi, new InMemoryManagedIdentityKeyProvider());
+
+                // Discovery order: V2 probed first and succeeds, signalling host PoP capability.
+                httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V2));
+
+                var caps = await mi.GetManagedIdentityCapabilitiesAsync(ImdsProbesCancellationToken).ConfigureAwait(false);
+
+                Assert.AreEqual(ManagedIdentitySource.Imds, caps.Source);
+                Assert.AreEqual(MtlsBindingStrength.Software, caps.MaxSupportedBindingStrength);
+                Assert.IsTrue(caps.IsMtlsPopSupportedByHost);
+            }
+        }
+
+        [TestMethod]
+        public async Task GetManagedIdentityCapabilities_ImdsV2KeyGuard_ReportsKeyGuardAsync()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, ImdsEndpoint);
+
+                var mi = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpManager(httpManager)
+                    .Build() as ManagedIdentityApplication;
+
+                // A KeyGuard-capable key provider (VBS-isolated key) upgrades the host to the
+                // attested KeyGuard tier.
+                InjectKeyProvider(mi, new TestKeyGuardManagedIdentityKeyProvider());
+
+                // Discovery order: V2 probed first and succeeds, signalling host PoP capability.
+                httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V2));
+
+                var caps = await mi.GetManagedIdentityCapabilitiesAsync(ImdsProbesCancellationToken).ConfigureAwait(false);
+
+                Assert.AreEqual(ManagedIdentitySource.Imds, caps.Source);
+                Assert.AreEqual(MtlsBindingStrength.KeyGuard, caps.MaxSupportedBindingStrength);
+                Assert.IsTrue(caps.IsMtlsPopSupportedByHost);
+            }
+        }
+
+        [TestMethod]
+        public async Task GetManagedIdentityCapabilities_ImdsV1NonTvm_ReportsBearerAsync()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, ImdsEndpoint);
+
+                var mi = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpManager(httpManager)
+                    .Build() as ManagedIdentityApplication;
+
+                // V2 fails, V1 succeeds, compute metadata reports a non-TVM/CVM host (no security profile).
+                httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V2));
+                httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V1));
+                httpManager.AddMockHandler(MockHelpers.MockImdsComputeMetadata(osType: "Linux", securityType: null));
+
+                var caps = await mi.GetManagedIdentityCapabilitiesAsync(ImdsProbesCancellationToken).ConfigureAwait(false);
+
+                Assert.AreEqual(ManagedIdentitySource.Imds, caps.Source);
+                Assert.AreEqual(MtlsBindingStrength.None, caps.MaxSupportedBindingStrength);
+                Assert.IsFalse(caps.IsMtlsPopSupportedByHost);
             }
         }
 
@@ -1128,11 +1213,11 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var mi = miBuilder.Build() as ManagedIdentityApplication;
                 Assert.IsNotNull(mi, "Build() should return a ManagedIdentityApplication instance.");
 
-                // Explicit discovery: V1 probe fails, then V2 probe also fails → NoneFound cached
-                httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V1));
+                // Explicit discovery: V2 probe fails, then V1 probe also fails → NoneFound cached
                 httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V2));
+                httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V1));
 
-                var sourceResult = await mi.GetManagedIdentitySourceAsync(ImdsProbesCancellationToken).ConfigureAwait(false);
+                var sourceResult = await mi.GetManagedIdentityCapabilitiesAsync(ImdsProbesCancellationToken).ConfigureAwait(false);
                 Assert.AreEqual(ManagedIdentitySource.None, sourceResult.Source);
 
                 // Token acquisition uses cached NoneFound and throws AllSourcesUnavailable
@@ -1370,7 +1455,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow(ManagedIdentitySource.AzureArc)]
         [DataRow(ManagedIdentitySource.CloudShell)]
         [DataRow(ManagedIdentitySource.Imds)]
-        [DataRow(ManagedIdentitySource.ImdsV2)]
         [DataRow(ManagedIdentitySource.ServiceFabric)]
         [DataRow(ManagedIdentitySource.MachineLearning)]
         public void ValidateServerCertificate_OnlySetForServiceFabric(ManagedIdentitySource managedIdentitySource)
@@ -1407,6 +1491,26 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
+        [TestMethod]
+        public void ValidateServerCertificate_NotSetForImdsV2()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, "https://identity.endpoint.com");
+
+                var managedIdentityApp = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpManager(httpManager)
+                    .BuildConcrete();
+                RequestContext requestContext = new RequestContext(managedIdentityApp.ServiceBundle, Guid.NewGuid(), null);
+
+                AbstractManagedIdentity managedIdentity = new ImdsV2ManagedIdentitySource(requestContext);
+
+                Assert.IsNull(managedIdentity.GetValidationCallback(),
+                    "IMDSv2 source should not have ValidateServerCertificate set");
+            }
+        }
+
         private AbstractManagedIdentity CreateManagedIdentitySource(ManagedIdentitySource sourceType, MockHttpManager httpManager)
         {
             string endpoint = "https://identity.endpoint.com";
@@ -1436,9 +1540,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     break;
                 case ManagedIdentitySource.Imds:
                     managedIdentity = new ImdsManagedIdentitySource(requestContext);
-                    break;
-                case ManagedIdentitySource.ImdsV2:
-                    managedIdentity = new ImdsV2ManagedIdentitySource(requestContext);
                     break;
                 case ManagedIdentitySource.MachineLearning:
                     managedIdentity = MachineLearningManagedIdentitySource.Create(requestContext);
@@ -1500,6 +1601,61 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     StringAssert.StartsWith(secondUri.ToString(), secondEndpoint);
                 }
             }
+        }
+
+        [TestMethod]
+        public void WithExtraQueryParameters_PopulatesCacheKeyComponents_Issue6030()
+        {
+            // Arrange
+            var extraQueryParameters = new Dictionary<string, string>
+                {
+                    { "param1", "value1" },
+                    { "param2", "value2" }
+                };
+
+            // Act
+            var miBuilder = ManagedIdentityApplicationBuilder
+                .Create(ManagedIdentityId.SystemAssigned)
+                .WithExperimentalFeatures(true)
+                .WithExtraQueryParameters(extraQueryParameters);
+
+            // Assert: every EQP must participate in the cache key so callers cannot bypass caching.
+            Assert.IsNotNull(miBuilder.Config.CacheKeyComponents);
+            Assert.HasCount(2, miBuilder.Config.CacheKeyComponents);
+            Assert.AreEqual("value1", miBuilder.Config.CacheKeyComponents["param1"]);
+            Assert.AreEqual("value2", miBuilder.Config.CacheKeyComponents["param2"]);
+        }
+
+        [TestMethod]
+        public void WithExtraQueryParameters_DifferentValuesProduceDifferentCacheKeys_Issue6030()
+        {
+            // Two MI apps that differ only by an EQP value must produce distinct app-token cache keys
+            // so that the second app cannot read the first app's cached token.
+            var miA = ManagedIdentityApplicationBuilder
+                .Create(ManagedIdentityId.SystemAssigned)
+                .WithExperimentalFeatures(true)
+                .WithExtraQueryParameters(new Dictionary<string, string> { { "tenantHint", "tenantA" } })
+                .BuildConcrete();
+
+            var miB = ManagedIdentityApplicationBuilder
+                .Create(ManagedIdentityId.SystemAssigned)
+                .WithExperimentalFeatures(true)
+                .WithExtraQueryParameters(new Dictionary<string, string> { { "tenantHint", "tenantB" } })
+                .BuildConcrete();
+
+            string keyA = Client.Cache.CacheKeyFactory.GetAppTokenCacheItemKey(
+                miA.ServiceBundle.Config.ClientId,
+                tenantId: string.Empty,
+                popKid: null,
+                miA.ServiceBundle.Config.CacheKeyComponents);
+
+            string keyB = Client.Cache.CacheKeyFactory.GetAppTokenCacheItemKey(
+                miB.ServiceBundle.Config.ClientId,
+                tenantId: string.Empty,
+                popKid: null,
+                miB.ServiceBundle.Config.CacheKeyComponents);
+
+            Assert.AreNotEqual(keyA, keyB, "EQP-differentiated MI requests must not share a cache entry.");
         }
 
         [TestMethod]

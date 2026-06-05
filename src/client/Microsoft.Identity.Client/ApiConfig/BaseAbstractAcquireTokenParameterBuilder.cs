@@ -135,7 +135,6 @@ namespace Microsoft.Identity.Client
             return this as T;
         }
 
-
         /// <summary>
         /// Validates the parameters of the AcquireToken operation.
         /// </summary>

@@ -17,7 +17,7 @@
     <!--This should be passed from the VSTS build-->
     <MicrosoftIdentityClientVersion Condition="'$(MicrosoftIdentityClientVersion)' == ''">$(MsalInternalVersion)</MicrosoftIdentityClientVersion>
     <!--This will generate AssemblyVersion, AssemblyFileVersion and AssemblyInformationVersion-->
-    <Version>$(MicrosoftIdentityClientVersion)-preview</Version>
+    <Version>$(MicrosoftIdentityClientVersion)</Version>
     <!-- Copyright needs to be in the form of © not (c) to be compliant -->
     <Title>MSAL.NET extension for Credential Guard attestation support</Title>
     <Description>

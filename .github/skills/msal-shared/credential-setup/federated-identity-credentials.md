@@ -41,7 +41,7 @@ Navigate to **App Registration** → **Certificates & secrets** → **Federated 
 | **Issuer** | `https://login.microsoftonline.com/{tenantID}/v2.0` (use MI tenant ID) |
 | **Subject identifier** | Principal ID/Object ID of managed identity (GUID format) |
 | **Name** | Descriptive name (e.g., "MI-FIC-Production") |
-| **Audience** | `api://AzureADTokenExchange` |
+| **Audience** | Cloud-specific token exchange URI (e.g., `api://AzureADTokenExchange` for Public cloud). See [Cloud-specific token exchange audiences](#cloud-specific-token-exchange-audiences) below. |
 
 ### 3. Grant Permissions to Managed Identity
 Assign the managed identity permissions on target resources:
@@ -94,6 +94,20 @@ Use when: Working with Azure Resource Manager or infrastructure-as-code
 
 See [ManagedIdentityId API documentation](https://learn.microsoft.com/en-us/dotnet/api/microsoft.identity.client.appconfig.managedidentityid?view=msal-dotnet-latest) for details.
 
+## Cloud-specific token exchange audiences
+
+The FIC `audience` value is **cloud-specific**. ESTS validates the audience of the incoming managed-identity assertion against the AAD Token Exchange app URI for the cloud where the token exchange is performed. Using the wrong value results in error `7002206 UserFederatedIdentityTokenAudienceMustBeTokenExchange` — *"Forbidden token audience. Token audience must match the cloud-specific AAD Token Exchange App Uri."*
+
+| Cloud                | Audience (Resource URI)              |
+|----------------------|--------------------------------------|
+| Public (commercial)  | `api://AzureADTokenExchange`         |
+| US Gov (Fairfax)     | `api://AzureADTokenExchangeUSGov`    |
+| China (Mooncake)     | `api://AzureADTokenExchangeChina`    |
+| France (Bleu)        | `api://AzureADTokenExchangeFrance`   |
+| Germany (Delos)      | `api://AzureADTokenExchangeGermany`  |
+
+> MSAL .NET has authority/instance discovery support for Bleu and Delos (see `KnownMetadataProvider`, added in v4.82.0). Use the audience that matches the cloud where the **token exchange** is performed, not necessarily the cloud of the target resource.
+
 ## Common Issues
 
 ### "Issuer does not match"
@@ -104,9 +118,11 @@ See [ManagedIdentityId API documentation](https://learn.microsoft.com/en-us/dotn
 - Ensure subject is the **principal ID** (Object ID) of the managed identity
 - Must be in GUID format: `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`
 
-### "Audience not recognized"
-- Always use `api://AzureADTokenExchange` as the audience
-- This is the standard for FIC with managed identity
+### "Audience not recognized" / `UserFederatedIdentityTokenAudienceMustBeTokenExchange` (error 7002206)
+- The audience must match the **cloud-specific** AAD Token Exchange URI — see the [Cloud-specific token exchange audiences](#cloud-specific-token-exchange-audiences) table.
+- `api://AzureADTokenExchange` is correct **only** for the Public (commercial) cloud.
+- For US Gov use `api://AzureADTokenExchangeUSGov`; for China (Mooncake) use `api://AzureADTokenExchangeChina`; for France (Bleu) use `api://AzureADTokenExchangeFrance`; for Germany (Delos) use `api://AzureADTokenExchangeGermany`.
+- Verify the assertion's `aud` claim before token exchange — ESTS will reject mismatches even if the issuer and subject are valid.
 
 ## Migration from Certificates to FIC
 

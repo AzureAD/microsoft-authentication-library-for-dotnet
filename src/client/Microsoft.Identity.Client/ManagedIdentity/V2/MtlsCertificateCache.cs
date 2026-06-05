@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
@@ -183,6 +184,88 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             catch (Exception ex)
             {
                 logger?.Verbose(() => $"[PersistentCert] Error removing from persistent cache: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Returns <see langword="true"/> if the cert's embedded public key does not match the
+        /// public key currently in the associated CNG container, indicating the container was
+        /// regenerated (e.g. by KeyGuard on reboot) while the cert on disk still references the
+        /// old key material.
+        /// </summary>
+        internal static bool IsCertKeyOrphaned(X509Certificate2 cert, ILoggerAdapter logger)
+        {
+            if (cert is null)
+                return true;
+
+            try
+            {
+                using var rsaKey = cert.GetRSAPrivateKey();
+                if (rsaKey is null)
+                {
+                    // GetRSAPrivateKey() returns null for non-RSA certs (e.g. ECDSA) AND for RSA
+                    // certs where the private key is inaccessible. Distinguish the two cases:
+                    // if the cert has an RSA public key, the private key should be present but isn't
+                    // → the cert is unusable. If there is no RSA public key, it's a non-RSA cert
+                    // that we can't check → accept on faith.
+                    using var pubKey = cert.GetRSAPublicKey();
+                    return pubKey is not null; // RSA cert + inaccessible private key = orphaned
+                }
+
+                if (rsaKey is not RSACng rsaCng)
+                {
+                    // Non-CNG RSA key (e.g. software CSP) — cannot perform KG container check; accept.
+                    return false;
+                }
+
+                return !PublicKeyMatchesCert(rsaCng, cert, logger);
+            }
+            catch (CryptographicException ex)
+            {
+                logger?.Verbose(() =>
+                    $"[PersistentCert] Cannot load private key for orphan check: {ex.Message}. Treating cert as unusable.");
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// Returns <see langword="true"/> if the public key exported from <paramref name="containerKey"/>
+        /// matches the public key embedded in <paramref name="cert"/>.
+        /// A mismatch means the container holds different key material than when the cert was issued.
+        /// </summary>
+        /// <remarks>
+        /// Check 3 from the original proposal — comparing the CNG container's
+        /// <c>NCRYPT_LAST_MODIFIED_PROPERTY</c> against the cert's <c>NotBefore</c> — is
+        /// intentionally omitted. Both Check 3 and this modulus comparison detect the same event:
+        /// KeyGuard regenerating the key in the container post-reboot. This check is definitive:
+        /// two independently generated RSA keys sharing a modulus is computationally infeasible,
+        /// so a mismatch conclusively means the container was regenerated. Check 3 is a heuristic
+        /// with a known false-negative window (a reboot occurring within one minute of cert
+        /// issuance), and adds no coverage that this check does not already provide.
+        /// </remarks>
+        internal static bool PublicKeyMatchesCert(RSACng containerKey, X509Certificate2 cert, ILoggerAdapter logger)
+        {
+            try
+            {
+                var containerParams = containerKey.ExportParameters(includePrivateParameters: false);
+                using var certPubKey = cert.GetRSAPublicKey();
+                if (certPubKey is null)
+                    return false;
+
+                var certParams = certPubKey.ExportParameters(includePrivateParameters: false);
+
+                return containerParams.Modulus is not null
+                    && certParams.Modulus is not null
+                    && containerParams.Modulus.AsSpan().SequenceEqual(certParams.Modulus)
+                    && containerParams.Exponent is not null
+                    && certParams.Exponent is not null
+                    && containerParams.Exponent.AsSpan().SequenceEqual(certParams.Exponent);
+            }
+            catch (CryptographicException ex)
+            {
+                logger?.Verbose(() =>
+                    $"[PersistentCert] Public key export failed during orphan check: {ex.Message}. Treating cert as orphaned.");
+                return false;
             }
         }
     }
