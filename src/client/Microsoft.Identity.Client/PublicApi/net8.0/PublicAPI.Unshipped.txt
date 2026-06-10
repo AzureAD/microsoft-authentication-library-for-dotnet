@@ -1,0 +1,3 @@
+Microsoft.Identity.Client.AzureCloudInstance.GovFr = 5 -> Microsoft.Identity.Client.AzureCloudInstance
+Microsoft.Identity.Client.AzureCloudInstance.GovDe = 6 -> Microsoft.Identity.Client.AzureCloudInstance
+Microsoft.Identity.Client.AzureCloudInstance.GovSg = 7 -> Microsoft.Identity.Client.AzureCloudInstance
