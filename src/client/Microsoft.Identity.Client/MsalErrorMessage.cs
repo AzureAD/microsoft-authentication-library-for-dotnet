@@ -455,6 +455,9 @@ namespace Microsoft.Identity.Client
         public const string InvalidCertificate = "The certificate received from the Imds server is invalid.";
         public const string CannotSwitchBetweenImdsVersionsForPreview = "ImdsV2 is currently experimental - A Bearer token has already been received; Please restart the application to receive a mTLS PoP token.";
         public const string MtlsPopTokenNotSupportedinImdsV1 = "mTLS Proof of Possession with managed identity is currently in private preview and is not supported on this VM. Ensure you're running on a supported VM image.";
+
+        public static string MinStrengthNotMet(object actualStrength, object requiredStrength) =>
+            $"The host's maximum mTLS binding strength '{actualStrength}' does not meet the required minimum binding strength '{requiredStrength}' specified via PoPOptions.MinStrength.";
         public const string ManagedIdentityAllSourcesUnavailable = "All Managed Identity sources are unavailable.";
         public const string SendCertificateOverMtlsRequiresCertificate =
             "CertificateOptions.SendCertificateOverMtls is only valid with a certificate-based credential " +

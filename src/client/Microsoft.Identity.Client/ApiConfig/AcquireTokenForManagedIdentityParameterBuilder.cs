@@ -130,6 +130,7 @@ namespace Microsoft.Identity.Client
             AcquireTokenForManagedIdentityParameters acquireTokenForManagedIdentityParameters)
         {
             acquireTokenForManagedIdentityParameters.IsMtlsPopRequested = acquireTokenCommonParameters.IsMtlsPopRequested;
+            acquireTokenForManagedIdentityParameters.MtlsPopMinStrength = acquireTokenCommonParameters.MtlsPopMinStrength;
             acquireTokenForManagedIdentityParameters.AttestationTokenProvider = acquireTokenCommonParameters.AttestationTokenProvider;
 
             // PoP requests should be partitioned by attestation-support mode.

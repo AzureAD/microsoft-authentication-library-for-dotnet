@@ -51,6 +51,23 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             AcquireTokenForManagedIdentityParameters parameters,
             CancellationToken cancellationToken)
         {
+            // Enforce a minimum binding strength floor when requested via PoPOptions.MinStrength.
+            // The token-request path normally routes mTLS PoP straight to IMDSv2 without probing,
+            // so explicitly run discovery to learn the host's maximum binding strength and fail
+            // fast if the host cannot meet the required floor.
+            if (parameters.MtlsPopMinStrength > MtlsBindingStrength.None)
+            {
+                ManagedIdentityDiscoveryResult discovery =
+                    await GetManagedIdentityCapabilitiesAsync(requestContext, cancellationToken).ConfigureAwait(false);
+
+                if (discovery.MaxSupportedBindingStrength < parameters.MtlsPopMinStrength)
+                {
+                    throw new MsalClientException(
+                        MsalError.MinStrengthNotMet,
+                        MsalErrorMessage.MinStrengthNotMet(discovery.MaxSupportedBindingStrength, parameters.MtlsPopMinStrength));
+                }
+            }
+
             AbstractManagedIdentity msi = await GetOrSelectManagedIdentitySourceAsync(requestContext, parameters.IsMtlsPopRequested, cancellationToken).ConfigureAwait(false);
             return await msi.AuthenticateAsync(parameters, cancellationToken).ConfigureAwait(false);
         }
