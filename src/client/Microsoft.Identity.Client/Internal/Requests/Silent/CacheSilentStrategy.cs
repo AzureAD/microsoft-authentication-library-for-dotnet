@@ -106,11 +106,14 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
 
                         SilentRequestHelper.ProcessFetchInBackground(
                         cachedAccessTokenItem,
-                        () =>
+                        async () =>
                         {
                             // Use a linked token source, in case the original cancellation token source is disposed before this background task completes.
+                            // IMPORTANT: The lambda must be async and await the inner call. Without async/await, `using var` disposes the linked CTS
+                            // before the async operation completes, breaking cancellation propagation and causing unbounded SemaphoreSlim convoy.
+                            // See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/6053
                             using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-                            return RefreshRtOrFailAsync(tokenSource.Token);
+                            return await RefreshRtOrFailAsync(tokenSource.Token).ConfigureAwait(false);
                         }, logger, ServiceBundle, AuthenticationRequestParameters.RequestContext.ApiEvent,
                         AuthenticationRequestParameters.RequestContext.ApiEvent.CallerSdkApiId,
                         AuthenticationRequestParameters.RequestContext.ApiEvent.CallerSdkVersion);
