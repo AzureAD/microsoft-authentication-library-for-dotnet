@@ -25,6 +25,7 @@ namespace Microsoft.Identity.Client
         AbstractManagedIdentityAcquireTokenParameterBuilder<AcquireTokenForManagedIdentityParameterBuilder>
     {
         private const string MiAttCacheKeyComponent = "mi_att";
+        private const string MiMinStrengthCacheKeyComponent = "mi_minstrength";
         private static readonly Task<string> s_att0 = Task.FromResult("0");
         private static readonly Task<string> s_att1 = Task.FromResult("1");
 
@@ -141,6 +142,11 @@ namespace Microsoft.Identity.Client
 
                 acquireTokenCommonParameters.CacheKeyComponents[MiAttCacheKeyComponent] =
                     _ => acquireTokenCommonParameters.AttestationTokenProvider != null ? s_att1 : s_att0;
+
+                // Partition by the requested minimum binding strength so a higher-floor request
+                // cannot be satisfied from a cache entry created by a lower/no-floor request.
+                acquireTokenCommonParameters.CacheKeyComponents[MiMinStrengthCacheKeyComponent] =
+                    _ => Task.FromResult(acquireTokenCommonParameters.MtlsPopMinStrength.ToString());
             }
         }
     }

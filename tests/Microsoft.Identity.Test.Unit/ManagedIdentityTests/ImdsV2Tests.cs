@@ -459,6 +459,49 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
+        public async Task MinStrength_FloorIsPartOfCacheKey_HigherFloorDoesNotReuseLowerFloorTokenAsync()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                // Arrange
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
+
+                var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
+
+                // Act 1: no floor → mints and caches a token.
+                AddMocksToGetEntraToken(httpManager);
+                var noFloor = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession(new PoPOptions())
+                    .WithAttestationSupport()
+                    .ExecuteAsync().ConfigureAwait(false);
+                Assert.AreEqual(TokenSource.IdentityProvider, noFloor.AuthenticationResultMetadata.TokenSource);
+
+                // Act 2: KeyGuard floor → distinct cache key → token cache miss → fresh token
+                // acquisition (the issued binding certificate is reused from cache, so only the
+                // CSR-metadata and token endpoints are hit), proving the higher-floor request does
+                // not silently reuse the no-floor token entry.
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
+                httpManager.AddMockHandler(MockHelpers.MockImdsV2EntraTokenRequestResponse(_identityLoggerAdapter));
+                var keyGuardFloor = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession(new PoPOptions { MinStrength = MtlsBindingStrength.KeyGuard })
+                    .WithAttestationSupport()
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual(MTLSPoP, keyGuardFloor.TokenType);
+                Assert.AreEqual(TokenSource.IdentityProvider, keyGuardFloor.AuthenticationResultMetadata.TokenSource);
+
+                // Act 3: repeat the KeyGuard-floor request → now served from cache under its own key.
+                var keyGuardCached = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession(new PoPOptions { MinStrength = MtlsBindingStrength.KeyGuard })
+                    .WithAttestationSupport()
+                    .ExecuteAsync().ConfigureAwait(false);
+                Assert.AreEqual(TokenSource.Cache, keyGuardCached.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+
+        [TestMethod]
         public async Task MinStrength_NullPoPOptions_ThrowsArgumentNullExceptionAsync()
         {
             using (new EnvVariableContext())
