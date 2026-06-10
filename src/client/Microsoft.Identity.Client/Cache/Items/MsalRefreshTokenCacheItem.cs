@@ -2,6 +2,8 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
@@ -20,14 +22,16 @@ namespace Microsoft.Identity.Client.Cache.Items
             string preferredCacheEnv,
             string clientId,
             MsalTokenResponse response,
-            string homeAccountId)
+            string homeAccountId,
+            SortedList<string, string> cacheKeyComponents = null)
             : this(
                   preferredCacheEnv,
                   clientId,
                   response.RefreshToken,
                   response.ClientInfo,
                   response.FamilyId,
-                  homeAccountId)
+                  homeAccountId,
+                  cacheKeyComponents: cacheKeyComponents)
         {
         }
 
@@ -37,7 +41,8 @@ namespace Microsoft.Identity.Client.Cache.Items
             string secret,
             string rawClientInfo,
             string familyId,
-            string homeAccountId)
+            string homeAccountId,
+            SortedList<string, string> cacheKeyComponents = null)
             : this()
         {
             ClientId = clientId;
@@ -47,6 +52,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             FamilyId = familyId;
             HomeAccountId = homeAccountId;
 
+            InitializeAdditionalCacheKeyComponents(cacheKeyComponents);
             InitCacheKey();
         }
 
@@ -63,18 +69,37 @@ namespace Microsoft.Identity.Client.Cache.Items
             }
             else
             {
+                string credentialDescriptor = StorageJsonValues.CredentialTypeRefreshToken;
+                string[] extraKeyParts = null;
+
+                if (AdditionalCacheKeyComponents != null && AdditionalCacheKeyComponents.Any())
+                {
+                    credentialDescriptor = StorageJsonValues.CredentialTypeRefreshTokenExtended;
+                    extraKeyParts = new[] { CoreHelpers.ComputeAccessTokenExtCacheKey(AdditionalCacheKeyComponents) };
+                }
+
                 key = MsalCacheKeys.GetCredentialKey(
                        HomeAccountId,
                        Environment,
-                       StorageJsonValues.CredentialTypeRefreshToken,
+                       credentialDescriptor,
                        ClientId,
                        tenantId: null,
-                       scopes: null);
+                       scopes: null,
+                       extraKeyParts);
             }
 
             CacheKey = key;
 
             iOSCacheKeyLazy = new Lazy<IiOSKey>(() => InitiOSKey());
+        }
+
+        private void InitializeAdditionalCacheKeyComponents(SortedList<string, string> cacheKeyComponents)
+        {
+            if (cacheKeyComponents != null && cacheKeyComponents.Any())
+            {
+                AdditionalCacheKeyComponents = cacheKeyComponents;
+                CredentialType = StorageJsonValues.CredentialTypeRefreshTokenExtended;
+            }
         }
 
         internal string ToLogString(bool piiEnabled = false)
@@ -146,6 +171,8 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         public string CacheKey { get; private set; }
 
+        internal SortedList<string, string> AdditionalCacheKeyComponents { get; private set; }
+
         private Lazy<IiOSKey> iOSCacheKeyLazy;
         public IiOSKey iOSCacheKey => iOSCacheKeyLazy.Value;
 
@@ -165,6 +192,13 @@ namespace Microsoft.Identity.Client.Cache.Items
             item.FamilyId = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.FamilyId);
             item.OboCacheKey = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.UserAssertionHash);
 
+            var additionalCacheKeyComponents = JsonHelper.ExtractInnerJsonAsDictionary(j, StorageJsonKeys.CacheExtensions);
+            if (additionalCacheKeyComponents != null)
+            {
+                item.AdditionalCacheKeyComponents = new SortedList<string, string>(additionalCacheKeyComponents);
+                item.CredentialType = StorageJsonValues.CredentialTypeRefreshTokenExtended;
+            }
+
             item.PopulateFieldsFromJObject(j);
             item.InitCacheKey();
 
@@ -176,6 +210,17 @@ namespace Microsoft.Identity.Client.Cache.Items
             var json = base.ToJObject();
             SetItemIfValueNotNull(json, StorageJsonKeys.FamilyId, FamilyId);
             SetItemIfValueNotNull(json, StorageJsonKeys.UserAssertionHash, OboCacheKey);
+
+            if (AdditionalCacheKeyComponents != null)
+            {
+                var obj = new System.Text.Json.Nodes.JsonObject();
+                foreach (KeyValuePair<string, string> value in AdditionalCacheKeyComponents)
+                {
+                    obj[value.Key] = value.Value;
+                }
+                json[StorageJsonKeys.CacheExtensions] = obj;
+            }
+
             return json;
         }
 
