@@ -875,7 +875,7 @@ namespace Microsoft.Identity.Test.Unit
         /// <summary>
         /// IMDS region discovery URL.
         /// </summary>
-        public const string ImdsUrl = $"http://{ImdsHost}/metadata/instance/compute/location";
+        public const string ImdsUrl = $"http://{ImdsHost}/metadata/instance/compute";
 
         /// <summary>
         /// App Service MSI endpoint used in tests.

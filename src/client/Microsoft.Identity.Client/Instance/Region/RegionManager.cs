@@ -34,8 +34,8 @@ namespace Microsoft.Identity.Client.Region
         }
 
         // For information of the current api-version refer: https://learn.microsoft.com/azure/virtual-machines/instance-metadata-service?tabs=windows#versioning
-        private const string ImdsEndpoint = "http://169.254.169.254/metadata/instance/compute/location";
-        private const string DefaultApiVersion = "2020-06-01";
+        private const string ImdsEndpoint = "http://169.254.169.254/metadata/instance/compute";
+        private const string DefaultApiVersion = "2021-02-01";
 
         private readonly IHttpManager _httpManager;
         private readonly int _imdsCallTimeoutMs;
@@ -237,7 +237,8 @@ namespace Microsoft.Identity.Client.Region
 
                             if (response.StatusCode == HttpStatusCode.OK && !response.Body.IsNullOrEmpty())
                             {
-                                region = response.Body;
+                                LocalImdsComputeResponse computeResponse = JsonHelper.DeserializeFromJson<LocalImdsComputeResponse>(response.Body);
+                                region = computeResponse?.Location;
 
                                 if (ValidateRegion(region, $"IMDS call to {imdsUri.AbsoluteUri}", logger))
                                 {
@@ -363,7 +364,6 @@ namespace Microsoft.Identity.Client.Region
         {
             UriBuilder uriBuilder = new UriBuilder(ImdsEndpoint);
             uriBuilder.AppendQueryParameters($"api-version={apiVersion}");
-            uriBuilder.AppendQueryParameters("format=text");
             return uriBuilder.Uri;
         }
 
