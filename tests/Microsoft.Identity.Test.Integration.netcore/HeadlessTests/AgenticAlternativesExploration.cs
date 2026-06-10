@@ -29,9 +29,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     ///
     /// 1. client_id on the wire:
     ///    TokenClient.cs:139 sets client_id from AppConfig.ClientId as a body parameter.
-    ///    additionalBodyParameters are added AFTER (line 170-173) and OnBeforeTokenRequest
-    ///    handlers fire even later (OAuth2Client.cs:128-133). Both use dict indexer
-    ///    (_bodyParameters[key] = value), so client_id CAN be overwritten on the wire.
+    ///    WithExtraBodyParameters and OnBeforeTokenRequest handlers fire later and can
+    ///    overwrite body params. After the internal fix (Add() → indexer), both can
+    ///    overwrite existing keys like client_id without throwing.
     ///
     /// 2. client_id in cache keys:
     ///    TokenCache.ITokenCacheInternal.cs:78 creates MsalAccessTokenCacheItem with
@@ -39,25 +39,21 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     ///    tokens (line 101). So the cache key always uses the CCA's configured ClientId,
     ///    regardless of what was sent on the wire.
     ///
-    /// 3. WithExtraBodyParameters and cache isolation:
-    ///    WithExtraBodyParameters always calls WithAdditionalCacheKeyComponents, which
-    ///    adds a hash of the extra params to the ACCESS TOKEN cache key. This means:
-    ///    - Access tokens for different agents would have different extended cache key hashes ✅
-    ///    - DeleteAccessTokensWithIntersectingScopes checks AdditionalCacheKeyComponents
-    ///      for equality (fixed in PR #5963), so cross-agent eviction won't happen ✅
-    ///    - BUT refresh tokens have NO AdditionalCacheKeyComponents support ❌
-    ///      → Same user + different agents = refresh token collision in a single CCA
+    /// 3. Cache isolation via AdditionalCacheKeyComponents:
+    ///    WithExtraBodyParameters is ideal for stable values like client_id because it
+    ///    handles both wire override and cache key inclusion in one call. OnBeforeTokenRequest
+    ///    is needed for volatile values like client_assertion (T1 token) that must NOT be
+    ///    in cache keys (they would cause cache misses on every T1 renewal).
     ///
-    /// 4. WithExtraQueryParameters(value, includeInCacheKey: true):
-    ///    Similar to WithExtraBodyParameters — adds to CacheKeyComponents for access tokens
-    ///    but does NOT help with refresh token isolation.
+    /// 4. Refresh token gap (fixed in this PR):
+    ///    Before this PR, only access tokens supported AdditionalCacheKeyComponents.
+    ///    Refresh tokens had no such mechanism, causing RT collisions when two agents
+    ///    serve the same user through a single CCA. This PR adds RT support.
     ///
     /// Conclusion:
-    /// - Access token isolation IS achievable via WithExtraBodyParameters in a single CCA
-    /// - Refresh token isolation is NOT achievable without MSAL-internal changes
-    /// - The multi-CCA pattern remains the only fully correct approach
-    /// - However, for app-only flows (Legs 1 and 2), there are no refresh tokens,
-    ///   so single-CCA approaches may work for app-only scenarios
+    /// - WithExtraBodyParameters for client_id: wire override + cache key in one call
+    /// - OnBeforeTokenRequest for client_assertion: wire override without cache key pollution
+    /// - With the RT fix in this PR, the single-CCA pattern is viable for all legs
     ///
     /// This test class explores these alternatives with live token requests.
     /// </summary>
@@ -165,27 +161,27 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         #region Approach 2: Single Blueprint CCA with T1 as Assertion + client_id Override
 
         /// <summary>
-        /// APPROACH 2 — Single Blueprint CCA with Assertion Override
+        /// APPROACH 2 — Single Blueprint CCA with WithExtraBodyParameters + OnBeforeTokenRequest
         ///
-        /// Hypothesis: Use the blueprint CCA for Leg 1, then for Leg 2, override BOTH
-        /// client_id and client_assertion in the request body. The client_assertion would
-        /// be T1 (the FMI token), and client_id would be agentAppId.
+        /// Hypothesis: Use the blueprint CCA for Leg 1, then for Legs 2/3, use:
+        /// - WithExtraBodyParameters for client_id: overwrites it on the wire AND
+        ///   automatically includes it in CacheKeyComponents for per-agent cache isolation.
+        ///   (Previously this threw ArgumentException because Add() was used internally;
+        ///   we changed it to use the dictionary indexer so it can overwrite existing keys.)
+        /// - OnBeforeTokenRequest for client_assertion + client_assertion_type only:
+        ///   these are volatile values (T1 token rotates on expiry) and must NOT be
+        ///   included in cache keys. OnBeforeTokenRequest modifies the wire request
+        ///   without affecting CacheKeyComponents.
         ///
-        /// This is essentially what the separate Agent CCA does — but done manually via
-        /// OnBeforeTokenRequest on the blueprint CCA instead.
-        ///
-        /// Concern: Cache isolation. Even though we override on the wire, the cache key
-        /// for access tokens uses AppConfig.ClientId (blueprintClientId). However,
-        /// WithExtraBodyParameters adds AdditionalCacheKeyComponents which differentiate
-        /// the cache entries.
-        ///
-        /// BUT: This approach means the cache key's clientId field is "wrong" (blueprint
-        /// instead of agent) — which affects AcquireTokenSilent lookups.
+        /// Cache isolation: The cache key's clientId field still shows blueprintClientId,
+        /// but AdditionalCacheKeyComponents (from WithExtraBodyParameters) differentiates
+        /// per-agent entries. This works for both ATs (already supported) and RTs
+        /// (after the internal fix in this PR).
         /// </summary>
         [TestMethod]
         public async Task Approach2_SingleBlueprintCca_OverrideAssertionAndClientId()
         {
-            // Single blueprint CCA
+            // Single blueprint CCA — WithExperimentalFeatures needed for WithExtraBodyParameters
             var blueprintCca = ConfidentialClientApplicationBuilder
                 .Create(BlueprintClientId)
                 .WithCertificate(_cert, sendX5C: true)
@@ -204,18 +200,25 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNotNull(t1, "Leg 1 should succeed");
             Console.WriteLine($"Leg 1 succeeded — T1 from: {leg1Result.AuthenticationResultMetadata.TokenSource}");
 
-            // Leg 2: Override client_id AND client_assertion on the blueprint CCA
-            // We use OnBeforeTokenRequest to modify both body parameters
+            // WithExtraBodyParameters: overwrites client_id on the wire AND adds it
+            // to CacheKeyComponents for per-agent cache isolation (stable value, safe for cache key)
+            var agentClientId = new Dictionary<string, Func<CancellationToken, Task<string>>>
+            {
+                { "client_id", _ => Task.FromResult(AgentAppId) }
+            };
+
+            // Leg 2: Override client_id (WithExtraBodyParameters) and client_assertion (OnBeforeTokenRequest)
             try
             {
                 var leg2Result = await blueprintCca
                     .AcquireTokenForClient(ExchangeScopes)
+                    .WithExtraBodyParameters(agentClientId)
                     .OnBeforeTokenRequest(data =>
                     {
-                        // Override to agent's identity on the wire
-                        data.BodyParameters["client_id"] = AgentAppId;
-                        // Replace the certificate-based assertion with T1
+                        // Override volatile assertion params (NOT in cache key)
                         data.BodyParameters["client_assertion"] = t1;
+                        data.BodyParameters["client_assertion_type"] =
+                            "urn:ietf:params:oauth:client-assertion-type:jwt-bearer";
                         return Task.CompletedTask;
                     })
                     .ExecuteAsync()
@@ -225,15 +228,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 Console.WriteLine($"  Token source: {leg2Result.AuthenticationResultMetadata.TokenSource}");
                 Console.WriteLine($"  Access token (first 40 chars): {leg2Result.AccessToken[..40]}...");
 
-                // NOTE: The cache key for this token uses blueprintClientId, NOT agentAppId
-                // This means AcquireTokenSilent on this CCA would find it, but it's
-                // keyed "incorrectly" — any other flow using the blueprint's own
-                // api://AzureADTokenExchange scope (e.g., another Leg 1 without fmi_path)
-                // could collide... EXCEPT that OnBeforeTokenRequest is NOT captured in
-                // cache key components, so there's no cache isolation for this approach.
-                //
-                // VERDICT: This approach is fragile. The manual body overrides affect the
-                // wire protocol but the cache has no knowledge of them.
+                // NOTE: The cache key's clientId field still shows blueprintClientId,
+                // but AdditionalCacheKeyComponents from WithExtraBodyParameters ensures
+                // per-agent cache isolation for both ATs and RTs (after the RT fix).
             }
             catch (MsalServiceException ex)
             {
@@ -674,29 +671,32 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         /// | # | Approach                          | Wire Works? | AT Cache? | RT Cache? | Verdict         |
         /// |---|-----------------------------------|-------------|-----------|-----------|-----------------|
         /// | 1 | Single CCA, override client_id    | ❌ ESTS rejects — assertion mismatch | N/A | N/A | Not viable |
-        /// | 2 | Single CCA, override assertion+id | ⚠️ Maybe    | ❌ No isolation | ❌ No isolation | Not viable |
+        /// | 2 | Single CCA, override assertion+id | ✅ OnBeforeTokenRequest | ✅ via WithExtraQueryParameters | ✅ after RT fix | ✅ Viable alternative |
         /// | 3 | 1+N CCAs (current recommended)    | ✅          | ✅ Natural   | ✅ Natural   | ✅ Best option  |
         /// | 4 | N CCAs, override client_id Leg 1  | ❌ JWT mismatch | N/A | N/A | Not viable |
         /// |4b | N CCAs, shared blueprint for Leg1 | ✅          | ✅ Natural   | ✅ Natural   | = Approach 3    |
-        /// | 5 | Per-agent CCA + extra body params | ✅          | ⚠️ Extended | ❌ Collision  | Partial only   |
-        /// | 6 | Per-agent CCA + extra query params| ✅          | ⚠️ Extended | ❌ Collision  | Partial only   |
+        /// | 5 | Per-agent CCA + extra body params | ✅          | ⚠️ Extended | ✅ after RT fix | Viable (multi-CCA) |
+        /// | 6 | Per-agent CCA + extra query params| ✅          | ⚠️ Extended | ✅ after RT fix | Viable (multi-CCA) |
+        ///
+        /// KEY API INSIGHTS:
+        ///
+        /// WithExtraBodyParameters:
+        /// - After the Add() → indexer fix, can now overwrite existing body params like client_id.
+        /// - Handles BOTH wire override and cache key inclusion in one call.
+        /// - Ideal for stable values like client_id.
+        /// - NOT suitable for volatile values like client_assertion (T1 token) because it
+        ///   includes ALL params in cache keys, causing cache misses on T1 renewal.
+        ///
+        /// OnBeforeTokenRequest:
+        /// - Needed ONLY for volatile values (client_assertion, client_assertion_type) that
+        ///   must override wire params without affecting cache keys.
+        /// - Should be minimized — only use for params that WithExtraBodyParameters can't handle
+        ///   due to cache key pollution concerns.
         ///
         /// CONCLUSION:
-        /// The 1+N CCA pattern (Approach 3 / 4b) remains the only fully correct approach.
-        ///
-        /// The core issue is that MSAL's certificate-based assertion JWT includes the CCA's
-        /// ClientId as the subject, which ESTS validates against the app registration's
-        /// certificate. You can't reuse a certificate assertion across different client_ids
-        /// without the JWT matching.
-        ///
-        /// For cache isolation, while WithExtraBodyParameters can differentiate ACCESS token
-        /// cache keys via AdditionalCacheKeyComponents, REFRESH tokens have no such mechanism.
-        /// Since the user_fic flow returns refresh tokens, a single-CCA approach for user
-        /// flows will always have refresh token collisions between agents.
-        ///
-        /// The good news: the "1+N" pattern is actually "1 shared singleton + N lightweight
-        /// instances", which is a well-understood factory pattern. The AgentTokenService
-        /// class in the guide encapsulates this nicely.
+        /// Approach 2 (single CCA) is viable with WithExtraBodyParameters (client_id) +
+        /// OnBeforeTokenRequest (client_assertion) + the RT AdditionalCacheKeyComponents fix.
+        /// Approach 3 (1+N CCAs) remains the simplest and most robust pattern for most scenarios.
         /// </summary>
         [TestMethod]
         public void Summary_PrintAnalysis()
@@ -704,30 +704,22 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Console.WriteLine("=== Agentic CCA Alternatives Analysis ===");
             Console.WriteLine();
             Console.WriteLine("FINDING 1: client_id on the wire CAN be overridden via");
-            Console.WriteLine("  OnBeforeTokenRequest / WithExtraBodyParameters (dict indexer).");
-            Console.WriteLine("  But the certificate assertion JWT contains the CCA's ClientId,");
-            Console.WriteLine("  and ESTS validates this — so overriding just client_id fails.");
+            Console.WriteLine("  WithExtraBodyParameters (after the Add() → indexer fix).");
+            Console.WriteLine("  This also adds client_id to CacheKeyComponents automatically.");
             Console.WriteLine();
-            Console.WriteLine("FINDING 2: Access token cache keys CAN be differentiated via");
-            Console.WriteLine("  AdditionalCacheKeyComponents (from WithExtraBodyParameters or");
-            Console.WriteLine("  WithExtraQueryParameters with includeInCacheKey=true).");
-            Console.WriteLine("  DeleteAccessTokensWithIntersectingScopes respects these.");
+            Console.WriteLine("FINDING 2: client_assertion must be overridden via OnBeforeTokenRequest");
+            Console.WriteLine("  because it's volatile (T1 token rotates on expiry) and must NOT be");
+            Console.WriteLine("  included in cache keys. OnBeforeTokenRequest modifies the wire request");
+            Console.WriteLine("  without affecting CacheKeyComponents.");
             Console.WriteLine();
-            Console.WriteLine("FINDING 3: Refresh token cache keys CANNOT be differentiated —");
-            Console.WriteLine("  MsalRefreshTokenCacheItem has no AdditionalCacheKeyComponents.");
-            Console.WriteLine("  Key = homeAccountId-env-refreshtoken-clientId--, where clientId");
-            Console.WriteLine("  is always AppConfig.ClientId. Same user + different agents = collision.");
+            Console.WriteLine("FINDING 3: Refresh token cache keys NOW support AdditionalCacheKeyComponents");
+            Console.WriteLine("  (after the RT fix in this PR). Both AT and RT isolation are achievable.");
             Console.WriteLine();
-            Console.WriteLine("FINDING 4: The Blueprint CCA is unavoidable because MSAL's");
-            Console.WriteLine("  certificate JWT builder uses AppConfig.ClientId as the JWT subject.");
-            Console.WriteLine("  Leg 1 MUST use a CCA with ClientId = blueprintClientId.");
-            Console.WriteLine();
-            Console.WriteLine("CONCLUSION: The 1+N CCA pattern is the correct approach.");
-            Console.WriteLine("  - 1 = shared Blueprint CCA (singleton, handles Leg 1 for all agents)");
-            Console.WriteLine("  - N = Agent CCAs (one per agent, lightweight, assertion-callback-based)");
-            Console.WriteLine("  - Natural cache isolation via separate AppConfig.ClientId per CCA");
-            Console.WriteLine("  - No refresh token collision risk");
-            Console.WriteLine("  - AgentTokenService wrapper makes this a clean factory pattern");
+            Console.WriteLine("APPROACHES:");
+            Console.WriteLine("  Approach 2 (Single CCA): WithExtraBodyParameters(client_id) +");
+            Console.WriteLine("    OnBeforeTokenRequest(client_assertion) — 1 CCA total, shared cache");
+            Console.WriteLine("  Approach 3 (1+N CCAs): Natural cache isolation via separate ClientIds");
+            Console.WriteLine("    — simpler per-request code, more CCA instances to manage");
         }
 
         #endregion
