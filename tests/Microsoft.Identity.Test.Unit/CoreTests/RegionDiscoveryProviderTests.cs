@@ -74,6 +74,11 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         [DataRow("east us", false, DisplayName = "Embedded space rejected")]
         [DataRow("east.us", false, DisplayName = "Dot rejected")]
         [DataRow("east@us", false, DisplayName = "At sign rejected")]
+        [DataRow("eastus\n", false, DisplayName = "Trailing newline rejected")]
+        [DataRow("eastus\r\n", false, DisplayName = "Trailing CRLF rejected")]
+        [DataRow("east\nus", false, DisplayName = "Embedded newline rejected")]
+        [DataRow("eastus\u00B2", false, DisplayName = "Unicode superscript digit rejected")]
+        [DataRow("eastus\uFF10", false, DisplayName = "Unicode fullwidth digit rejected")]
         [DataRow("", false, DisplayName = "Empty rejected")]
         public void IsValidRegionName_EnforcesAlphanumericOnly(string region, bool expected)
         {

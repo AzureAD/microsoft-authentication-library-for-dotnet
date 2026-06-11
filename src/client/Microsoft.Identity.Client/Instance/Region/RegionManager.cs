@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
@@ -46,6 +47,13 @@ namespace Microsoft.Identity.Client.Region
         private static string s_autoDiscoveredRegion;
         private static bool s_failedAutoDiscovery = false;
         private static string s_regionDiscoveryDetails;
+
+        // Matches a region short name consisting solely of ASCII letters and digits.
+        // \A...\z (not ^...$) anchors the whole string so a trailing newline cannot slip through,
+        // and the explicit [a-zA-Z0-9] class (not \w / \d) keeps the match ASCII-only, rejecting
+        // Unicode letters/digits and homoglyphs that could otherwise alter the token endpoint host.
+        private static readonly Regex s_validRegionRegex =
+            new Regex(@"\A[a-zA-Z0-9]+\z", RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
         public RegionManager(
             IHttpManager httpManager,
@@ -341,25 +349,7 @@ namespace Microsoft.Identity.Client.Region
         /// </summary>
         internal static bool IsValidRegionName(string region)
         {
-            if (string.IsNullOrEmpty(region))
-            {
-                return false;
-            }
-
-            foreach (char c in region)
-            {
-                bool isAsciiLetterOrDigit =
-                    (c >= 'a' && c <= 'z') ||
-                    (c >= 'A' && c <= 'Z') ||
-                    (c >= '0' && c <= '9');
-
-                if (!isAsciiLetterOrDigit)
-                {
-                    return false;
-                }
-            }
-
-            return true;
+            return !string.IsNullOrEmpty(region) && s_validRegionRegex.IsMatch(region);
         }
 
         private async Task<string> GetImdsUriApiVersionAsync(ILoggerAdapter logger, Dictionary<string, string> headers, CancellationToken userCancellationToken, IRetryPolicy retryPolicy)
