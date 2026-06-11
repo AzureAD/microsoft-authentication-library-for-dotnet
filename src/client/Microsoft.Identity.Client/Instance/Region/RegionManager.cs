@@ -96,6 +96,18 @@ namespace Microsoft.Identity.Client.Region
                 }
             }
 
+            // For a user-provided region (WithAzureRegion or the MSAL_FORCE_REGION env variable),
+            // validate the format before using it. An invalid region (e.g. one containing a host,
+            // path, or other special characters) must never be prefixed onto the trusted
+            // "{region}.login.microsoft.com" suffix, as that would redirect the request to a
+            // tampered host. Consistent with region handling elsewhere, an invalid value falls
+            // back to the global (non-regional) endpoint rather than failing the request.
+            if (!IsValidRegionName(azureRegionConfig))
+            {
+                logger.Error($"[Region discovery] User provided region '{azureRegionConfig}' is invalid. Falling back to the global endpoint. {DateTime.UtcNow}");
+                return null;
+            }
+
             logger.Info(() => $"[Region discovery] Returning user provided region: {azureRegionConfig}.");
             return azureRegionConfig;
         }

@@ -499,120 +499,98 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        [DataRow("attacker.com/x", DisplayName = "Path separator")]
-        [DataRow("attacker.com?x", DisplayName = "Query separator")]
-        [DataRow("attacker.com#x", DisplayName = "Fragment separator")]
+        [DataRow("fake.com/x", DisplayName = "Path separator")]
+        [DataRow("fake.com?x", DisplayName = "Query separator")]
+        [DataRow("fake.com#x", DisplayName = "Fragment separator")]
         [DataRow("east@us", DisplayName = "At sign")]
         [DataRow("east.us", DisplayName = "Dot")]
-        public void WithAzureRegionThrowsOnInvalidFormat(string invalidRegion)
+        [DataRow("east us", DisplayName = "Embedded space")]
+        public async Task WithAzureRegionWithInvalidFormatFallsBackToGlobalAsync(string invalidRegion)
         {
-            // Act
-            MsalClientException ex = AssertException.Throws<MsalClientException>(
-                () => ConfidentialClientApplicationBuilder
-                             .Create(TestConstants.ClientId)
-                             .WithAzureRegion(invalidRegion)
-                             .WithClientSecret(TestConstants.ClientSecret)
-                             .Build());
-
-            // Assert
-            Assert.AreEqual(MsalError.InvalidRegion, ex.ErrorCode);
-        }
-
-        [TestMethod]
-        [DataRow("east us", "eastus", DisplayName = "Embedded space is stripped")]
-        [DataRow("EastUs", "eastus", DisplayName = "Mixed case is lower-cased")]
-        [DataRow(" eastus ", "eastus", DisplayName = "Surrounding spaces are stripped")]
-        public void WithAzureRegionNormalizesValidRegion(string region, string expectedRegion)
-        {
-            // Act - WithAzureRegion should normalize the same way the REGION_NAME env path does
-            var cca = ConfidentialClientApplicationBuilder
-                .Create(TestConstants.ClientId)
-                .WithAzureRegion(region)
-                .WithClientSecret(TestConstants.ClientSecret)
-                .BuildConcrete();
-
-            // Assert
-            Assert.AreEqual(expectedRegion, cca.ServiceBundle.Config.AzureRegion);
-        }
-
-        [TestMethod]
-        public void ForceRegionEnvVariableIsNormalized()
-        {
-            // Arrange - the MSAL_FORCE_REGION env variable should be normalized consistently
-            using (new EnvVariableContext())
+            // Arrange - a region containing characters other than letters and digits must never be
+            // prefixed onto "{region}.login.microsoft.com". Instead of failing the request, MSAL
+            // falls back to the global (non-regional) endpoint, so the request never reaches the
+            // tampered host. The global token handler below would reject any regionalized URL.
+            using (var harness = base.CreateTestHarness())
             {
-                Environment.SetEnvironmentVariable(ConfidentialClientApplicationBuilder.ForceRegionEnvVariable, "East Us");
+                var httpManager = harness.HttpManager;
+                httpManager.AddRegionDiscoveryMockHandler(TestConstants.Region);
+                httpManager.AddInstanceDiscoveryMockHandler();
+                httpManager.AddMockHandler(CreateTokenResponseHttpHandler(expectRegional: false));
+
+                IConfidentialClientApplication cca = CreateCca(httpManager, invalidRegion);
 
                 // Act
+                AuthenticationResult result = await cca
+                    .AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert - request succeeded against the global endpoint
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(
+                    "https://login.microsoftonline.com/common/oauth2/v2.0/token",
+                    result.AuthenticationResultMetadata.TokenEndpoint);
+            }
+        }
+
+        [TestMethod]
+        public async Task ForceRegionEnvVariableWithInvalidFormatFallsBackToGlobalAsync()
+        {
+            // Arrange - the MSAL_FORCE_REGION env variable must not bypass region validation either
+            using (new EnvVariableContext())
+            using (var harness = base.CreateTestHarness())
+            {
+                Environment.SetEnvironmentVariable(ConfidentialClientApplicationBuilder.ForceRegionEnvVariable, "fake.com/x");
+
+                var httpManager = harness.HttpManager;
+                httpManager.AddRegionDiscoveryMockHandler(TestConstants.Region);
+                httpManager.AddInstanceDiscoveryMockHandler();
+                httpManager.AddMockHandler(CreateTokenResponseHttpHandler(expectRegional: false));
+
                 var cca = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
-                    .WithClientSecret(TestConstants.ClientSecret)
-                    .BuildConcrete();
-
-                // Assert
-                Assert.AreEqual("eastus", cca.ServiceBundle.Config.AzureRegion);
-            }
-        }
-
-        [TestMethod]
-        [DataRow("eastus", DisplayName = "Lowercase region")]
-        [DataRow("eastus2", DisplayName = "Region with digit")]
-        [DataRow("EastUs", DisplayName = "Mixed case region")]
-        public void WithAzureRegionAcceptsValidRegionAndSentinels(string validRegion)
-        {
-            // Act + Assert - none of these should throw at build time
-            ConfidentialClientApplicationBuilder
-                .Create(TestConstants.ClientId)
-                .WithAzureRegion(validRegion)
-                .WithClientSecret(TestConstants.ClientSecret)
-                .Build();
-
-            ConfidentialClientApplicationBuilder
-                .Create(TestConstants.ClientId)
-                .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
-                .WithClientSecret(TestConstants.ClientSecret)
-                .Build();
-
-            ConfidentialClientApplicationBuilder
-                .Create(TestConstants.ClientId)
-                .WithAzureRegion(ConfidentialClientApplicationBuilder.DisableForceRegion)
-                .WithClientSecret(TestConstants.ClientSecret)
-                .Build();
-        }
-
-        [TestMethod]
-        public void ForceRegionEnvVariableWithInvalidFormatThrows()
-        {
-            // Arrange - the MSAL_FORCE_REGION env variable must not bypass region validation
-            using (new EnvVariableContext())
-            {
-                Environment.SetEnvironmentVariable(ConfidentialClientApplicationBuilder.ForceRegionEnvVariable, "attacker.com/x");
-
-                // Act
-                MsalClientException ex = AssertException.Throws<MsalClientException>(
-                    () => ConfidentialClientApplicationBuilder
-                                 .Create(TestConstants.ClientId)
-                                 .WithClientSecret(TestConstants.ClientSecret)
-                                 .Build());
-
-                // Assert
-                Assert.AreEqual(MsalError.InvalidRegion, ex.ErrorCode);
-            }
-        }
-
-        [TestMethod]
-        public void ForceRegionEnvVariableWithValidFormatIsAccepted()
-        {
-            // Arrange
-            using (new EnvVariableContext())
-            {
-                Environment.SetEnvironmentVariable(ConfidentialClientApplicationBuilder.ForceRegionEnvVariable, EastUsRegion);
-
-                // Act + Assert - a valid forced region must not throw at build time
-                ConfidentialClientApplicationBuilder
-                    .Create(TestConstants.ClientId)
+                    .WithHttpManager(httpManager)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .Build();
+
+                // Act
+                AuthenticationResult result = await cca
+                    .AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert - request succeeded against the global endpoint
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(
+                    "https://login.microsoftonline.com/common/oauth2/v2.0/token",
+                    result.AuthenticationResultMetadata.TokenEndpoint);
+            }
+        }
+
+        [TestMethod]
+        public async Task WithAzureRegionWithValidFormatRoutesRegionallyAsync()
+        {
+            // Arrange - a valid (alphanumeric) region must continue to route to the regional endpoint
+            using (var harness = base.CreateTestHarness())
+            {
+                var httpManager = harness.HttpManager;
+                httpManager.AddRegionDiscoveryMockHandler(TestConstants.Region);
+                httpManager.AddMockHandler(CreateTokenResponseHttpHandler(expectRegional: true));
+
+                IConfidentialClientApplication cca = CreateCca(httpManager, TestConstants.Region);
+
+                // Act
+                AuthenticationResult result = await cca
+                    .AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual(TestConstants.Region, result.ApiEvent.RegionUsed);
+                Assert.AreEqual(
+                    $"https://{TestConstants.Region}.login.microsoft.com/common/oauth2/v2.0/token",
+                    result.AuthenticationResultMetadata.TokenEndpoint);
             }
         }
 

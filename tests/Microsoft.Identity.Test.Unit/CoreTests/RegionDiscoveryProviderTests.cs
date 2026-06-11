@@ -68,9 +68,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         [DataRow("eastus2", true, DisplayName = "Letters and digits")]
         [DataRow("EastUs", true, DisplayName = "Mixed case")]
         [DataRow("TryAutoDetect", true, DisplayName = "Auto-detect sentinel is alphanumeric")]
-        [DataRow("attacker.com/x", false, DisplayName = "Path separator rejected")]
-        [DataRow("attacker.com?x", false, DisplayName = "Query separator rejected")]
-        [DataRow("attacker.com#x", false, DisplayName = "Fragment separator rejected")]
+        [DataRow("fake.com/x", false, DisplayName = "Path separator rejected")]
+        [DataRow("fake.com?x", false, DisplayName = "Query separator rejected")]
+        [DataRow("fake.com#x", false, DisplayName = "Fragment separator rejected")]
         [DataRow("east us", false, DisplayName = "Embedded space rejected")]
         [DataRow("east.us", false, DisplayName = "Dot rejected")]
         [DataRow("east@us", false, DisplayName = "At sign rejected")]
@@ -88,7 +88,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         public async Task RegionWithSpecialCharactersFromEnvironmentVariableIsRejectedAsync()
         {
             // Arrange - a poisoned REGION_NAME must not be used as the region
-            Environment.SetEnvironmentVariable(TestConstants.RegionName, "attacker.com/x");
+            Environment.SetEnvironmentVariable(TestConstants.RegionName, "fake.com/x");
             _testRequestContext.ServiceBundle.Config.AzureRegion = ConfidentialClientApplication.AttemptRegionDiscovery;
             _httpManager.AddRegionDiscoveryMockHandlerWithError(HttpStatusCode.NotFound);
 
@@ -99,7 +99,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
 
             // Assert - the invalid env region is ignored, discovery falls through and fails over to global
             Assert.IsNull(regionalMetadata);
-            Assert.AreNotEqual("attacker.com/x", _testRequestContext.ApiEvent.RegionUsed);
+            Assert.AreNotEqual("fake.com/x", _testRequestContext.ApiEvent.RegionUsed);
         }
 
         [TestMethod]
