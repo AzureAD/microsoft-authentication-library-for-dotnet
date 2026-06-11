@@ -502,7 +502,6 @@ namespace Microsoft.Identity.Test.Unit
         [DataRow("attacker.com/x", DisplayName = "Path separator")]
         [DataRow("attacker.com?x", DisplayName = "Query separator")]
         [DataRow("attacker.com#x", DisplayName = "Fragment separator")]
-        [DataRow("east us", DisplayName = "Embedded space")]
         [DataRow("east@us", DisplayName = "At sign")]
         [DataRow("east.us", DisplayName = "Dot")]
         public void WithAzureRegionThrowsOnInvalidFormat(string invalidRegion)
@@ -517,6 +516,42 @@ namespace Microsoft.Identity.Test.Unit
 
             // Assert
             Assert.AreEqual(MsalError.InvalidRegion, ex.ErrorCode);
+        }
+
+        [TestMethod]
+        [DataRow("east us", "eastus", DisplayName = "Embedded space is stripped")]
+        [DataRow("EastUs", "eastus", DisplayName = "Mixed case is lower-cased")]
+        [DataRow(" eastus ", "eastus", DisplayName = "Surrounding spaces are stripped")]
+        public void WithAzureRegionNormalizesValidRegion(string region, string expectedRegion)
+        {
+            // Act - WithAzureRegion should normalize the same way the REGION_NAME env path does
+            var cca = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithAzureRegion(region)
+                .WithClientSecret(TestConstants.ClientSecret)
+                .BuildConcrete();
+
+            // Assert
+            Assert.AreEqual(expectedRegion, cca.ServiceBundle.Config.AzureRegion);
+        }
+
+        [TestMethod]
+        public void ForceRegionEnvVariableIsNormalized()
+        {
+            // Arrange - the MSAL_FORCE_REGION env variable should be normalized consistently
+            using (new EnvVariableContext())
+            {
+                Environment.SetEnvironmentVariable(ConfidentialClientApplicationBuilder.ForceRegionEnvVariable, "East Us");
+
+                // Act
+                var cca = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .BuildConcrete();
+
+                // Assert
+                Assert.AreEqual("eastus", cca.ServiceBundle.Config.AzureRegion);
+            }
         }
 
         [TestMethod]

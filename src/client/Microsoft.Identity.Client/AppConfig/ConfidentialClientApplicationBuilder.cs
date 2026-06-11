@@ -394,14 +394,7 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(azureRegion));
             }
 
-            if (!RegionManager.IsValidRegionName(azureRegion))
-            {
-                throw new MsalClientException(
-                    MsalError.InvalidRegion,
-                    string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.InvalidRegionFormat, azureRegion));
-            }
-
-            Config.AzureRegion = azureRegion;
+            Config.AzureRegion = NormalizeAndValidateRegion(azureRegion);
 
             return this;
         }
@@ -523,16 +516,37 @@ namespace Microsoft.Identity.Client
                 string forcedRegion = Environment.GetEnvironmentVariable(ForceRegionEnvVariable);
                 if (!string.IsNullOrEmpty(forcedRegion))
                 {
-                    if (!RegionManager.IsValidRegionName(forcedRegion))
-                    {
-                        throw new MsalClientException(
-                            MsalError.InvalidRegion,
-                            string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.InvalidRegionFormat, forcedRegion));
-                    }
-
-                    Config.AzureRegion = forcedRegion;
+                    Config.AzureRegion = NormalizeAndValidateRegion(forcedRegion);
                 }
             }
+        }
+
+        /// <summary>
+        /// Normalizes a region value the same way the REGION_NAME auto-detection path does
+        /// (removing spaces and lower-casing) and validates that the result is a single
+        /// alphanumeric word. Sentinel values (<see cref="ConfidentialClientApplication.AttemptRegionDiscovery"/>
+        /// and <see cref="DisableForceRegion"/>) are returned unchanged so that case-sensitive
+        /// comparisons performed later (e.g. auto-detection) continue to match.
+        /// </summary>
+        /// <exception cref="MsalClientException">Thrown when the region is not a single alphanumeric word.</exception>
+        private static string NormalizeAndValidateRegion(string region)
+        {
+            if (string.Equals(region, ConfidentialClientApplication.AttemptRegionDiscovery, StringComparison.Ordinal) ||
+                string.Equals(region, DisableForceRegion, StringComparison.Ordinal))
+            {
+                return region;
+            }
+
+            string normalizedRegion = region.Replace(" ", string.Empty).ToLowerInvariant();
+
+            if (!RegionManager.IsValidRegionName(normalizedRegion))
+            {
+                throw new MsalClientException(
+                    MsalError.InvalidRegion,
+                    string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.InvalidRegionFormat, region));
+            }
+
+            return normalizedRegion;
         }
 
         /// <summary>
