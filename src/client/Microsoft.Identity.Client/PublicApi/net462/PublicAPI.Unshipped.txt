@@ -1,0 +1,2 @@
+Microsoft.Identity.Client.MsalServiceException.SubError.get -> string
+Microsoft.Identity.Client.MsalServiceException.SubError.set -> void
