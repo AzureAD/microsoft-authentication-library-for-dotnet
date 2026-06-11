@@ -237,13 +237,30 @@ namespace Microsoft.Identity.Client.Region
 
                             if (response.StatusCode == HttpStatusCode.OK && !response.Body.IsNullOrEmpty())
                             {
-                                LocalImdsComputeResponse computeResponse = JsonHelper.DeserializeFromJson<LocalImdsComputeResponse>(response.Body);
-                                region = computeResponse?.Location;
+                                try
+                                {
+                                    LocalImdsComputeResponse computeResponse = JsonHelper.DeserializeFromJson<LocalImdsComputeResponse>(response.Body);
+                                    region = computeResponse?.Location;
+                                }
+                                catch (Exception ex)
+                                {
+                                    // Malformed JSON: treat as an unusable response (region stays null) so the
+                                    // failure reason below is consistent with the empty/missing-location cases
+                                    // instead of leaking an exception string into telemetry.
+                                    region = null;
+                                    logger.Info(() => $"[Region discovery] Failed to parse IMDS compute response: {ex.Message}. {DateTime.UtcNow}");
+                                }
 
                                 if (ValidateRegion(region, $"IMDS call to {imdsUri.AbsoluteUri}", logger))
                                 {
                                     logger.Info(() => $"[Region discovery] Call to local IMDS succeeded. Region: {region}. {DateTime.UtcNow}");
                                     result = new RegionInfo(region, RegionAutodetectionSource.Imds, null);
+                                }
+                                else
+                                {
+                                    // Non-empty but unusable body (missing/null location or malformed JSON).
+                                    s_regionDiscoveryDetails = $"Call to local IMDS failed with status code {response.StatusCode} or an empty response. {DateTime.UtcNow}";
+                                    logger.Error($"[Region discovery] {s_regionDiscoveryDetails}");
                                 }
                             }
                             else
