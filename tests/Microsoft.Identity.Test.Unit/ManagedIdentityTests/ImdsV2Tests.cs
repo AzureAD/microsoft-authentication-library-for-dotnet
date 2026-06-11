@@ -3,7 +3,9 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
+using System.Net.Http;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
@@ -225,6 +227,83 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.IsNotNull(result.BindingCertificate);
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
             }
+        }
+
+        // Spike #6042 (throwaway PoC): proves the IMDSv2 post-mint token leg can be delegated to
+        // MSAL's internal TokenClient exchange path. The cert-mint flow (/getplatformmetadata +
+        // /issuecredential) is unchanged; only the token request is delegated. Validates that the
+        // delegated request hits the ESTS-R mtls endpoint, posts the canonical client_id +
+        // token_type=mtls_pop, returns a cert-bound token, and is cached (second call = Cache).
+        [TestMethod]
+        public async Task mTLSPop_DelegatedTokenLeg_HappyPath_Spike6042()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                // Arrange
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
+                ImdsV2ManagedIdentitySource.s_delegateTokenLegToInternalExchange = true;
+
+                try
+                {
+                    var managedIdentityApp = await CreateManagedIdentityAsync(
+                        httpManager,
+                        managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
+
+                    // Cert-mint mocks (unchanged path) + delegated ESTS-R token mock.
+                    httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
+                    httpManager.AddMockHandler(MockHelpers.MockCertificateRequestResponse());
+                    httpManager.AddMockHandler(CreateDelegatedEntraTokenMock());
+
+                    // Act
+                    var result = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                        .WithMtlsProofOfPossession()
+                        .WithAttestationSupport()
+                        .ExecuteAsync().ConfigureAwait(false);
+
+                    // Assert - token acquired from the delegated exchange path and cert-bound.
+                    Assert.IsNotNull(result);
+                    Assert.IsNotNull(result.AccessToken);
+                    Assert.AreEqual(MTLSPoP, result.TokenType);
+                    Assert.IsNotNull(result.BindingCertificate);
+                    Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+
+                    // Act - second acquire should hit the MSAL cache (no further HTTP needed).
+                    result = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                        .WithMtlsProofOfPossession()
+                        .WithAttestationSupport()
+                        .ExecuteAsync().ConfigureAwait(false);
+
+                    // Assert
+                    Assert.IsNotNull(result.AccessToken);
+                    Assert.AreEqual(MTLSPoP, result.TokenType);
+                    Assert.IsNotNull(result.BindingCertificate);
+                    Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+                }
+                finally
+                {
+                    ImdsV2ManagedIdentitySource.s_delegateTokenLegToInternalExchange = false;
+                }
+            }
+        }
+
+        // ESTS-R mtls token mock for the delegated path. Unlike the bespoke MI token mock, the
+        // delegated path goes through TokenClient, which parses a standard ESTS token response
+        // (expires_in). Asserts the canonical client_id, client_credentials grant, and mtls_pop.
+        private static MockHttpMessageHandler CreateDelegatedEntraTokenMock()
+        {
+            return new MockHttpMessageHandler()
+            {
+                ExpectedUrl = $"{TestConstants.MtlsAuthenticationEndpoint}/{TestConstants.TenantId}{ImdsV2ManagedIdentitySource.AcquireEntraTokenPath}",
+                ExpectedMethod = HttpMethod.Post,
+                ExpectedPostData = new Dictionary<string, string>
+                {
+                    { "token_type", "mtls_pop" },
+                    { "client_id", TestConstants.ClientId },
+                    { "grant_type", "client_credentials" }
+                },
+                ResponseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage(tokenType: MTLSPoP)
+            };
         }
 
         [TestMethod]

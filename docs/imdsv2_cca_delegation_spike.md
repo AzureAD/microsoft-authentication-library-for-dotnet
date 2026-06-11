@@ -188,3 +188,72 @@ keep MI caching, and add the `invalid_client` remint wrapper. This is the minima
 that lets the future MSIv2 NSP claims (#5982) ride MSAL's existing
 claims→body / CP1-merge / claims-cache-key machinery instead of being re-ported into the
 managed-identity path. Reassess option B once the IMDS NSP wire contract lands.
+
+## 9. PoC results (Phase 2 — completed)
+
+A throwaway PoC was implemented on branch `rginsburg/imdsv2-cca-delegation-spike`,
+gated behind `ImdsV2ManagedIdentitySource.s_delegateTokenLegToInternalExchange`
+(default **off**, so all existing behavior/tests are unaffected).
+
+Changes:
+- `ImdsV2ManagedIdentitySource`: extracted the cert-mint flow into
+  `AcquireMtlsBindingAsync()` (behavior-neutral refactor) and added a mint-only
+  delegation entrypoint `AcquireMtlsBindingForDelegationAsync(...)` (sets the
+  attestation provider / PoP flag and supports `invalid_client` re-mint eviction).
+- `ManagedIdentityClient`: added `AcquireImdsV2MtlsBindingAsync(...)` (mints without
+  sending the bespoke token POST).
+- `ManagedIdentityAuthRequest`: added a flag-gated delegation branch plus
+  `SendDelegatedImdsV2TokenRequestAsync` / `DelegateImdsV2TokenLegAsync`, which inject
+  the minted cert, apply `MtlsPopAuthenticationOperation`, and call
+  `new TokenClient(reqParams).SendTokenRequestAsync(body, scopeOverride, tokenEndpointOverride)`,
+  wrapped in an `invalid_client` re-mint-and-retry-once.
+
+**Feasibility: confirmed.** Option A works with **no change to `TokenClient`**:
+- `tokenEndpointOverride` targets the IMDS-provided ESTS-R endpoint with zero instance
+  discovery.
+- The canonical mint client_id is supplied via `additionalBodyParameters` and overrides
+  `AppConfig.ClientId` (`OAuth2Client.AddBodyParameter` overwrites by key).
+- The minted cert flows as the mTLS transport cert via `requestParams.MtlsCertificate`.
+- MI token caching is preserved: the cache lookup runs upstream in
+  `ManagedIdentityAuthRequest.ExecuteAsync`, so the delegated branch only executes on a
+  cache miss; the cert is re-primed for the scheme via `SetRuntimeMtlsBindingCertificate`.
+
+**Validation:** new test `mTLSPop_DelegatedTokenLeg_HappyPath_Spike6042` (SAMI, KeyGuard +
+attestation) passes — the delegated request hits
+`{mtls_endpoint}/{tenant}/oauth2/v2.0/token`, posts `client_credentials` +
+canonical `client_id` + `token_type=mtls_pop`, returns a cert-bound token
+(`TokenSource.IdentityProvider`), and the second acquire is served from cache
+(`TokenSource.Cache`). All **83** `ImdsV2Tests` pass with the flag default-off.
+
+### Measurement (issue ask: lines removed vs. lines added)
+
+`git diff --numstat origin/main` (production token-leg files only):
+
+| File | +added | −removed |
+|------|-------:|---------:|
+| `ManagedIdentityAuthRequest.cs` | 80 | 0 |
+| `ManagedIdentityClient.cs` | 17 | 0 |
+| `ImdsV2ManagedIdentitySource.cs` | 66 | 24 |
+| **Total** | **163** | **24** |
+
+Decomposition (the raw numbers overstate "new" code because the spike kept the bespoke
+path intact behind a flag and only *extracted* the mint block):
+
+- **Behavior-neutral refactor (moved, not new):** ~50 lines — the mint block relocated
+  from `CreateRequestAsync` into `AcquireMtlsBindingAsync`.
+- **Net-new delegation glue:** ~95 lines — delegation branch + 2 helpers (~70 in
+  `ManagedIdentityAuthRequest`), the mint accessor (17 in `ManagedIdentityClient`), and the
+  flag + delegation entrypoint (~25 in `ImdsV2ManagedIdentitySource`).
+- **Bespoke token-path code the delegation bypasses (would be removed in a non-flagged
+  migration):** ~26 lines in `CreateRequestAsync` (lines 417–442: `ManagedIdentityRequest`
+  construction, headers, body params, `RequestType`/`MtlsCertificate`) **plus** reliance on
+  the MI-specific HTTP send and `ManagedIdentityResponse` parsing that `TokenClient` and
+  `MsalTokenResponse` replace.
+
+**Key finding (the real driver):** for the *happy path* the line count is roughly
+net-neutral. The decisive benefit is qualitative: delegation means claims→body, CP1
+capability merge, claims-in-cache-key, and ESTS error handling are inherited from
+`TokenClient`/`ClientCredentialRequest` instead of being **re-ported and maintained** in
+the MSI v2 path. The bespoke path would have to *grow* to add NSP (#5982); the delegated
+path gets it for free. Recommendation: adopt option A as the basis for MSIv2 NSP once the
+IMDS `/issuecredential` wire contract is finalized.

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
@@ -10,6 +11,7 @@ using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.ManagedIdentity;
+using Microsoft.Identity.Client.ManagedIdentity.V2;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
@@ -227,6 +229,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 _managedIdentityParameters.ClientClaims = AuthenticationRequestParameters.ClientClaims;
             }
 
+            // Spike #6042 (throwaway PoC): delegate the post-mint token leg to MSAL's internal
+            // TokenClient exchange path instead of the bespoke MI token POST. Default off.
+            if (ImdsV2ManagedIdentitySource.s_delegateTokenLegToInternalExchange &&
+                AuthenticationRequestParameters.IsMtlsPopRequested)
+            {
+                return await SendDelegatedImdsV2TokenRequestAsync(logger, cancellationToken).ConfigureAwait(false);
+            }
+
             ManagedIdentityResponse managedIdentityResponse =
                 await _managedIdentityClient
                 .SendTokenRequestForManagedIdentityAsync(AuthenticationRequestParameters.RequestContext, _managedIdentityParameters, cancellationToken)
@@ -250,6 +260,76 @@ namespace Microsoft.Identity.Client.Internal.Requests
             msalTokenResponse.Scope = AuthenticationRequestParameters.Scope.AsSingleString();
 
             return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse, cancellationToken).ConfigureAwait(false);
+        }
+
+        // Spike #6042 (throwaway PoC): mint the IMDSv2 binding cert, then delegate the token
+        // request to MSAL's internal TokenClient (the same exchange path CCA uses). Wraps an
+        // invalid_client re-mint-and-retry-once. The minted cert is injected as the mTLS
+        // transport cert and the mtls_pop scheme is applied so the result is cert-bound.
+        private async Task<AuthenticationResult> SendDelegatedImdsV2TokenRequestAsync(
+            ILoggerAdapter logger,
+            CancellationToken cancellationToken)
+        {
+            logger.Info("[ManagedIdentityRequest][Spike6042] Delegating IMDSv2 token leg to internal TokenClient exchange path.");
+
+            string resource = _managedIdentityParameters.Resource;
+            MsalTokenResponse msalTokenResponse;
+
+            try
+            {
+                msalTokenResponse = await DelegateImdsV2TokenLegAsync(resource, forceRemint: false, cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            catch (MsalServiceException ex) when (
+                string.Equals(ex.ErrorCode, "invalid_client", StringComparison.OrdinalIgnoreCase))
+            {
+                logger.Info("[ManagedIdentityRequest][Spike6042] ESTS-R returned invalid_client; re-minting binding certificate and retrying once.");
+                msalTokenResponse = await DelegateImdsV2TokenLegAsync(resource, forceRemint: true, cancellationToken)
+                    .ConfigureAwait(false);
+            }
+
+            return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse, cancellationToken).ConfigureAwait(false);
+        }
+
+        private async Task<MsalTokenResponse> DelegateImdsV2TokenLegAsync(
+            string resource,
+            bool forceRemint,
+            CancellationToken cancellationToken)
+        {
+            MtlsBindingInfo binding = await _managedIdentityClient
+                .AcquireImdsV2MtlsBindingAsync(
+                    AuthenticationRequestParameters.RequestContext,
+                    _managedIdentityParameters,
+                    forceRemint,
+                    cancellationToken)
+                .ConfigureAwait(false);
+
+            // Inject the IMDS-minted cert as the request mTLS transport cert and apply the
+            // mtls_pop scheme so TokenClient emits token_type=mtls_pop and the result is bound.
+            AuthenticationRequestParameters.MtlsCertificate = binding.Certificate;
+            AuthenticationRequestParameters.AuthenticationScheme =
+                new MtlsPopAuthenticationOperation(binding.Certificate);
+
+            // Parity with the bespoke path: remember the cert for subsequent cache lookups.
+            _managedIdentityClient.SetRuntimeMtlsBindingCertificate(binding.Certificate);
+
+            var bodyParameters = new Dictionary<string, string>
+            {
+                [OAuth2Parameter.GrantType] = OAuth2GrantType.ClientCredentials,
+                [OAuth2Parameter.ClientId] = binding.ClientId
+            };
+
+            string tokenEndpoint = binding.Endpoint.TrimEnd('/') + ImdsV2ManagedIdentitySource.AcquireEntraTokenPath;
+            string scopeOverride = resource.TrimEnd('/') + "/.default";
+
+            var tokenClient = new TokenClient(AuthenticationRequestParameters);
+
+            return await tokenClient.SendTokenRequestAsync(
+                bodyParameters,
+                scopeOverride: scopeOverride,
+                tokenEndpointOverride: tokenEndpoint,
+                cancellationToken: cancellationToken)
+                .ConfigureAwait(false);
         }
 
         private async Task<MsalAccessTokenCacheItem> GetCachedAccessTokenAsync()

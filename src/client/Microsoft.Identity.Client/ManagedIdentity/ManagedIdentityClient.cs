@@ -55,6 +55,23 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             return await msi.AuthenticateAsync(parameters, cancellationToken).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Spike #6042 (throwaway PoC): mints (or reuses) the IMDSv2 mTLS binding without sending
+        /// the bespoke token request, so the caller can delegate the token leg to MSAL's internal
+        /// exchange path. mTLS PoP always routes to the IMDSv2 source.
+        /// </summary>
+        internal async Task<MtlsBindingInfo> AcquireImdsV2MtlsBindingAsync(
+            RequestContext requestContext,
+            AcquireTokenForManagedIdentityParameters parameters,
+            bool forceRemint,
+            CancellationToken cancellationToken)
+        {
+            var source = (ImdsV2ManagedIdentitySource)ImdsV2ManagedIdentitySource.Create(requestContext);
+            return await source
+                .AcquireMtlsBindingForDelegationAsync(parameters, forceRemint, cancellationToken)
+                .ConfigureAwait(false);
+        }
+
         // This method selects the managed identity source for token acquisition.
         // It does NOT probe IMDS. It uses the cached explicit discovery result if available,
         // otherwise checks environment variables, and defaults to IMDS without probing.
