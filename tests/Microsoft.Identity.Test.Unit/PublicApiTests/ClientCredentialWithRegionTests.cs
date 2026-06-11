@@ -499,6 +499,89 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
+        [DataRow("attacker.com/x", DisplayName = "Path separator")]
+        [DataRow("attacker.com?x", DisplayName = "Query separator")]
+        [DataRow("attacker.com#x", DisplayName = "Fragment separator")]
+        [DataRow("east us", DisplayName = "Embedded space")]
+        [DataRow("east@us", DisplayName = "At sign")]
+        [DataRow("east.us", DisplayName = "Dot")]
+        public void WithAzureRegionThrowsOnInvalidFormat(string invalidRegion)
+        {
+            // Act
+            MsalClientException ex = AssertException.Throws<MsalClientException>(
+                () => ConfidentialClientApplicationBuilder
+                             .Create(TestConstants.ClientId)
+                             .WithAzureRegion(invalidRegion)
+                             .WithClientSecret(TestConstants.ClientSecret)
+                             .Build());
+
+            // Assert
+            Assert.AreEqual(MsalError.InvalidRegion, ex.ErrorCode);
+        }
+
+        [TestMethod]
+        [DataRow("eastus", DisplayName = "Lowercase region")]
+        [DataRow("eastus2", DisplayName = "Region with digit")]
+        [DataRow("EastUs", DisplayName = "Mixed case region")]
+        public void WithAzureRegionAcceptsValidRegionAndSentinels(string validRegion)
+        {
+            // Act + Assert - none of these should throw at build time
+            ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithAzureRegion(validRegion)
+                .WithClientSecret(TestConstants.ClientSecret)
+                .Build();
+
+            ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
+                .WithClientSecret(TestConstants.ClientSecret)
+                .Build();
+
+            ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithAzureRegion(ConfidentialClientApplicationBuilder.DisableForceRegion)
+                .WithClientSecret(TestConstants.ClientSecret)
+                .Build();
+        }
+
+        [TestMethod]
+        public void ForceRegionEnvVariableWithInvalidFormatThrows()
+        {
+            // Arrange - the MSAL_FORCE_REGION env variable must not bypass region validation
+            using (new EnvVariableContext())
+            {
+                Environment.SetEnvironmentVariable(ConfidentialClientApplicationBuilder.ForceRegionEnvVariable, "attacker.com/x");
+
+                // Act
+                MsalClientException ex = AssertException.Throws<MsalClientException>(
+                    () => ConfidentialClientApplicationBuilder
+                                 .Create(TestConstants.ClientId)
+                                 .WithClientSecret(TestConstants.ClientSecret)
+                                 .Build());
+
+                // Assert
+                Assert.AreEqual(MsalError.InvalidRegion, ex.ErrorCode);
+            }
+        }
+
+        [TestMethod]
+        public void ForceRegionEnvVariableWithValidFormatIsAccepted()
+        {
+            // Arrange
+            using (new EnvVariableContext())
+            {
+                Environment.SetEnvironmentVariable(ConfidentialClientApplicationBuilder.ForceRegionEnvVariable, EastUsRegion);
+
+                // Act + Assert - a valid forced region must not throw at build time
+                ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .Build();
+            }
+        }
+
+        [TestMethod]
         // regression: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2686
         public async Task OtherCloudWithAuthorityValidationAsync()
         {

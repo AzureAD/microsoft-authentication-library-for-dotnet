@@ -321,6 +321,7 @@ namespace Microsoft.Identity.Client
         public const string RegionDiscoveryFailedWithTimeout = "Region discovery failed due to app cancellation or timeout. ";
         public const string RegionDiscoveryNotAvailable = "Region discovery cannot be performed for ADFS authority. Do not set `WithAzureRegion` to true. ";
         public const string RegionDiscoveryWithCustomInstanceMetadata = "Configure either region discovery or custom instance metadata. Custom instance discovery metadata overrides region discovery. ";
+        public const string InvalidRegionFormat = "The region '{0}' is invalid. An Azure region must be a single alphanumeric word (letters and digits only), for example 'centralus'. ";
 
         public static string AuthorityTypeMismatch(
             AuthorityType appAuthorityType,

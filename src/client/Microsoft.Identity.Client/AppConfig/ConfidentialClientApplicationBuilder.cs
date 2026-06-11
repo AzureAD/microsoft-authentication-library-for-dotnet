@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
@@ -13,6 +14,7 @@ using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.ClientCredential;
+using Microsoft.Identity.Client.Region;
 using Microsoft.IdentityModel.Abstractions;
 
 namespace Microsoft.Identity.Client
@@ -392,6 +394,13 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(azureRegion));
             }
 
+            if (!RegionManager.IsValidRegionName(azureRegion))
+            {
+                throw new MsalClientException(
+                    MsalError.InvalidRegion,
+                    string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.InvalidRegionFormat, azureRegion));
+            }
+
             Config.AzureRegion = azureRegion;
 
             return this;
@@ -514,6 +523,13 @@ namespace Microsoft.Identity.Client
                 string forcedRegion = Environment.GetEnvironmentVariable(ForceRegionEnvVariable);
                 if (!string.IsNullOrEmpty(forcedRegion))
                 {
+                    if (!RegionManager.IsValidRegionName(forcedRegion))
+                    {
+                        throw new MsalClientException(
+                            MsalError.InvalidRegion,
+                            string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.InvalidRegionFormat, forcedRegion));
+                    }
+
                     Config.AzureRegion = forcedRegion;
                 }
             }

@@ -906,6 +906,13 @@ namespace Microsoft.Identity.Client
         public const string RegionDiscoveryNotEnabled = "region_discovery_unavailable";
 
         /// <summary>
+        /// <para>What happens?</para>The Azure region configured via <c>WithAzureRegion</c> or the
+        /// <c>MSAL_FORCE_REGION</c> environment variable contains characters other than letters and digits.
+        /// <para>Mitigation</para>Use a valid Azure region short name (alphanumeric, e.g. "centralus", "eastus2").
+        /// </summary>
+        public const string InvalidRegion = "invalid_region";
+
+        /// <summary>
         /// <para>What happens?</para>The request has broker enabled and Proof-of-Possession configured but the broker does not support Proof-of-Possession
         /// <para>Mitigation</para>only configure Proof-of-Possession for public clients on windows.
         /// </summary>

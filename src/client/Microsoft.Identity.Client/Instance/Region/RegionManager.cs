@@ -311,10 +311,40 @@ namespace Microsoft.Identity.Client.Region
                 return false;
             }
 
-            if (!Uri.IsWellFormedUriString($"https://{region}.login.microsoft.com", UriKind.Absolute))
+            if (!IsValidRegionName(region))
             {
                 logger.Error($"[Region discovery] Region from {source} was found but it's invalid: {region}. {DateTime.UtcNow}");
                 return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Validates that a region short name contains only letters and digits (a single
+        /// alphanumeric word). Azure region short names (e.g. "centralus", "eastus2") are
+        /// always alphanumeric. Rejecting any other character prevents a malformed or
+        /// malicious region (e.g. "attacker.com/x") from being prefixed onto the trusted
+        /// "{region}.login.microsoft.com" suffix and altering the resulting token endpoint host.
+        /// </summary>
+        internal static bool IsValidRegionName(string region)
+        {
+            if (string.IsNullOrEmpty(region))
+            {
+                return false;
+            }
+
+            foreach (char c in region)
+            {
+                bool isAsciiLetterOrDigit =
+                    (c >= 'a' && c <= 'z') ||
+                    (c >= 'A' && c <= 'Z') ||
+                    (c >= '0' && c <= '9');
+
+                if (!isAsciiLetterOrDigit)
+                {
+                    return false;
+                }
             }
 
             return true;
