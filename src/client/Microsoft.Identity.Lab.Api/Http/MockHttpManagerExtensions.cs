@@ -454,9 +454,11 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             }
             else if (userAssignedIdentityId == UserAssignedIdentityId.ObjectId)
             {
-                httpMessageHandler.ExpectedQueryParams.Add(
-                    Constants.ManagedIdentityObjectId,
-                    userAssignedId);
+                // Service Fabric uses 'principalId'; all other sources use 'object_id'
+                string objectIdParamName = managedIdentitySourceType == ManagedIdentitySource.ServiceFabric
+                    ? Constants.ServiceFabricManagedIdentityPrincipalId
+                    : Constants.ManagedIdentityObjectId;
+                httpMessageHandler.ExpectedQueryParams.Add(objectIdParamName, userAssignedId);
             }
 
             httpMessageHandler.ResponseMessage = responseMessage;

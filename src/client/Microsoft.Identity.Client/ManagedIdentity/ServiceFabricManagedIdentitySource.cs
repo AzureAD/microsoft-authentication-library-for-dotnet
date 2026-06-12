@@ -71,7 +71,23 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             if (requestContext.ServiceBundle.Config.ManagedIdentityId.IsUserAssigned)
             {
-                requestContext.Logger.Warning(MsalErrorMessage.ManagedIdentityUserAssignedNotConfigurableAtRuntime);
+                var idType = requestContext.ServiceBundle.Config.ManagedIdentityId.IdType;
+
+                // Service Fabric only supports object ID (principalId) for user-assigned managed identity.
+                // ClientId and ResourceId are not supported today. When SF adds support for them,
+                // remove or update this check.
+                if (idType == AppConfig.ManagedIdentityIdType.ClientId || idType == AppConfig.ManagedIdentityIdType.ResourceId)
+                {
+                    requestContext.Logger.Warning(MsalErrorMessage.ManagedIdentityUserAssignedNotConfigurableAtRuntime);
+
+                    var exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
+                        MsalError.UserAssignedManagedIdentityNotConfigurableAtRuntime,
+                        MsalErrorMessage.ManagedIdentityUserAssignedNotConfigurableAtRuntime,
+                        null,
+                        ManagedIdentitySource.ServiceFabric,
+                        null);
+                    throw exception;
+                }
             }
         }
 
@@ -97,8 +113,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     break;
 
                 case AppConfig.ManagedIdentityIdType.ObjectId:
-                    _requestContext.Logger.Info("[Managed Identity] Adding user assigned object id to the request.");
-                    request.QueryParameters[Constants.ManagedIdentityObjectId] = _requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId;
+                    _requestContext.Logger.Info("[Managed Identity] Adding user assigned object id as principalId to the request.");
+                    request.QueryParameters[Constants.ServiceFabricManagedIdentityPrincipalId] = _requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId;
                     break;
             }
 
