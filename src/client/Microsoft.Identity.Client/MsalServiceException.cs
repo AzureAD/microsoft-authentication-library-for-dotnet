@@ -208,9 +208,9 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Sub-error returned by the token service refining <see cref="MsalException.ErrorCode"/>
         /// (for example <c>consent_required</c>, <c>bad_token</c>, <c>protection_policy_required</c>).
-        /// Diagnostic only — values are emitted by the service and may change without notice.
+        /// Values are emitted by the service and may change without notice.
         /// </summary>
-        public string SubError { get; set; }
+        public string SubError { get; internal set; }
 
         /// <summary>
         /// A list of STS-specific error codes that can help in diagnostics.
