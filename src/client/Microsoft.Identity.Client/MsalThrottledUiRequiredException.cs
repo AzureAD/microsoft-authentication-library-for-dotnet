@@ -27,7 +27,7 @@ namespace Microsoft.Identity.Client
                 originalException.InnerException, 
                 originalException.Classification)
         {
-            SubError = originalException.SubError;
+            SubErrorForLogging = originalException.SubErrorForLogging;
             StatusCode = originalException.StatusCode;
             Claims = originalException.Claims;
             CorrelationId = originalException.CorrelationId;

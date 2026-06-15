@@ -208,9 +208,10 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Sub-error returned by the token service refining <see cref="MsalException.ErrorCode"/>
         /// (for example <c>consent_required</c>, <c>bad_token</c>, <c>protection_policy_required</c>).
-        /// Values are emitted by the service and may change without notice.
+        /// Values are emitted by the service and may change without notice; intended for diagnostics
+        /// and logging — do not branch production behavior on this value.
         /// </summary>
-        public string SubError { get; internal set; }
+        public string SubErrorForLogging { get; internal set; }
 
         /// <summary>
         /// A list of STS-specific error codes that can help in diagnostics.
@@ -251,7 +252,7 @@ namespace Microsoft.Identity.Client
             jObject[ClaimsKey] = Claims;
             jObject[ResponseBodyKey] = ResponseBody;
             jObject[CorrelationIdKey] = CorrelationId;
-            jObject[SubErrorKey] = SubError;
+            jObject[SubErrorKey] = SubErrorForLogging;
         }
 
         internal override void PopulateObjectFromJson(JObject jObject)
@@ -261,7 +262,7 @@ namespace Microsoft.Identity.Client
             Claims = JsonHelper.GetExistingOrEmptyString(jObject, ClaimsKey);
             ResponseBody = JsonHelper.GetExistingOrEmptyString(jObject, ResponseBodyKey);
             CorrelationId = JsonHelper.GetExistingOrEmptyString(jObject, CorrelationIdKey);
-            SubError = JsonHelper.GetExistingOrEmptyString(jObject, SubErrorKey);
+            SubErrorForLogging = JsonHelper.GetExistingOrEmptyString(jObject, SubErrorKey);
         }
         #endregion
     }
