@@ -75,18 +75,15 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
                 // Service Fabric only supports object ID (principalId) for user-assigned managed identity.
                 // ClientId and ResourceId are not supported today. When SF adds support for them,
-                // remove or update this check.
-                if (idType == AppConfig.ManagedIdentityIdType.ClientId || idType == AppConfig.ManagedIdentityIdType.ResourceId)
+                // remove or update this check and add the corresponding cases in CreateRequestAsync.
+                if (idType != AppConfig.ManagedIdentityIdType.ObjectId)
                 {
-                    requestContext.Logger.Warning(MsalErrorMessage.ManagedIdentityUserAssignedNotConfigurableAtRuntime);
-
-                    var exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
+                    throw MsalServiceExceptionFactory.CreateManagedIdentityException(
                         MsalError.UserAssignedManagedIdentityNotConfigurableAtRuntime,
                         MsalErrorMessage.ManagedIdentityUserAssignedNotConfigurableAtRuntime,
                         null,
                         ManagedIdentitySource.ServiceFabric,
                         null);
-                    throw exception;
                 }
             }
         }
@@ -100,22 +97,13 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             request.QueryParameters["api-version"] = ServiceFabricMsiApiVersion;
             request.QueryParameters["resource"] = resource;
 
-            switch (_requestContext.ServiceBundle.Config.ManagedIdentityId.IdType)
+            // Service Fabric only supports object ID (sent as 'principalId'). The constructor
+            // rejects ClientId/ResourceId for user-assigned identities, so only ObjectId can
+            // reach this point.
+            if (_requestContext.ServiceBundle.Config.ManagedIdentityId.IdType == AppConfig.ManagedIdentityIdType.ObjectId)
             {
-                case AppConfig.ManagedIdentityIdType.ClientId:
-                    _requestContext.Logger.Info("[Managed Identity] Adding user assigned client id to the request.");
-                    request.QueryParameters[Constants.ManagedIdentityClientId] = _requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId;
-                    break;
-
-                case AppConfig.ManagedIdentityIdType.ResourceId:
-                    _requestContext.Logger.Info("[Managed Identity] Adding user assigned resource id to the request.");
-                    request.QueryParameters[Constants.ManagedIdentityResourceId] = _requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId;
-                    break;
-
-                case AppConfig.ManagedIdentityIdType.ObjectId:
-                    _requestContext.Logger.Info("[Managed Identity] Adding user assigned object id as principalId to the request.");
-                    request.QueryParameters[Constants.ServiceFabricManagedIdentityPrincipalId] = _requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId;
-                    break;
+                _requestContext.Logger.Info("[Managed Identity] Adding user assigned object id as principalId to the request.");
+                request.QueryParameters[Constants.ServiceFabricManagedIdentityPrincipalId] = _requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId;
             }
 
             return Task.FromResult(request);

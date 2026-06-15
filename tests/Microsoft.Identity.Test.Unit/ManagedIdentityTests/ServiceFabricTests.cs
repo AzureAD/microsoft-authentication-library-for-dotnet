@@ -25,6 +25,65 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         private const string Resource = "https://management.azure.com";
 
         [TestMethod]
+        [DataRow(TestConstants.ClientId, UserAssignedIdentityId.ClientId)]
+        [DataRow(TestConstants.MiResourceId, UserAssignedIdentityId.ResourceId)]
+        public async Task ServiceFabricRejectsClientIdAndResourceIdForUserAssignedAsync(
+            string userAssignedId,
+            UserAssignedIdentityId userAssignedIdentityId)
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.ServiceFabric, ManagedIdentityTests.ServiceFabricEndpoint);
+
+                ManagedIdentityApplicationBuilder miBuilder = CreateMIABuilder(userAssignedId, userAssignedIdentityId);
+                miBuilder.WithHttpManager(httpManager);
+
+                IManagedIdentityApplication mi = miBuilder.Build();
+
+                MsalServiceException ex = await Assert.ThrowsAsync<MsalServiceException>(async () =>
+                    await mi.AcquireTokenForManagedIdentity(Resource)
+                    .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
+
+                Assert.IsNotNull(ex);
+                Assert.AreEqual(ManagedIdentitySource.ServiceFabric.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
+                Assert.AreEqual(MsalError.UserAssignedManagedIdentityNotConfigurableAtRuntime, ex.ErrorCode);
+                Assert.AreEqual(MsalErrorMessage.ManagedIdentityUserAssignedNotConfigurableAtRuntime, ex.Message);
+            }
+        }
+
+        [TestMethod]
+        public async Task ServiceFabricSendsPrincipalIdForObjectIdAsync()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.ServiceFabric, ManagedIdentityTests.ServiceFabricEndpoint);
+
+                ManagedIdentityApplicationBuilder miBuilder = CreateMIABuilder(TestConstants.ObjectId, UserAssignedIdentityId.ObjectId)
+                    .WithHttpManager(httpManager);
+
+                IManagedIdentityApplication mi = miBuilder.Build();
+
+                // AddManagedIdentityMockHandler asserts 'principalId' (not 'object_id') for SF + ObjectId;
+                // a mismatch fails the test, so a successful call here proves the parameter name.
+                httpManager.AddManagedIdentityMockHandler(
+                    ManagedIdentityTests.ServiceFabricEndpoint,
+                    Resource,
+                    MockHelpers.GetMsiSuccessfulResponse(),
+                    ManagedIdentitySource.ServiceFabric,
+                    userAssignedId: TestConstants.ObjectId,
+                    userAssignedIdentityId: UserAssignedIdentityId.ObjectId);
+
+                AuthenticationResult result = await mi.AcquireTokenForManagedIdentity(Resource)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+            }
+        }
+
+        [TestMethod]
         public async Task ServiceFabricInvalidEndpointAsync()
         {
             using(new EnvVariableContext())
