@@ -25,6 +25,7 @@ namespace Microsoft.Identity.Client.Platforms.net
     /// </summary>
     [JsonSerializable(typeof(InstanceDiscoveryResponse))]
     [JsonSerializable(typeof(LocalImdsErrorResponse))]
+    [JsonSerializable(typeof(LocalImdsComputeResponse))]
     [JsonSerializable(typeof(AdalResultWrapper))]
     [JsonSerializable(typeof(List<KeyValuePair<string, IEnumerable<string>>>))]
     [JsonSerializable(typeof(ClientInfo))]
