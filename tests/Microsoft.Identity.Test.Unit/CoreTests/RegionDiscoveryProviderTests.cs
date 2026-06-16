@@ -64,6 +64,50 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         }
 
         [TestMethod]
+        [DataRow("eastus", true, DisplayName = "Lowercase letters")]
+        [DataRow("eastus2", true, DisplayName = "Letters and digits")]
+        [DataRow("EastUs", true, DisplayName = "Mixed case")]
+        [DataRow("TryAutoDetect", true, DisplayName = "Auto-detect sentinel is alphanumeric")]
+        [DataRow("fake.com/x", false, DisplayName = "Path separator rejected")]
+        [DataRow("fake.com?x", false, DisplayName = "Query separator rejected")]
+        [DataRow("fake.com#x", false, DisplayName = "Fragment separator rejected")]
+        [DataRow("east us", false, DisplayName = "Embedded space rejected")]
+        [DataRow("east.us", false, DisplayName = "Dot rejected")]
+        [DataRow("east@us", false, DisplayName = "At sign rejected")]
+        [DataRow("eastus\n", false, DisplayName = "Trailing newline rejected")]
+        [DataRow("eastus\r\n", false, DisplayName = "Trailing CRLF rejected")]
+        [DataRow("east\nus", false, DisplayName = "Embedded newline rejected")]
+        [DataRow("eastus\u00B2", false, DisplayName = "Unicode superscript digit rejected")]
+        [DataRow("eastus\uFF10", false, DisplayName = "Unicode fullwidth digit rejected")]
+        [DataRow("", false, DisplayName = "Empty rejected")]
+        public void IsValidRegionName_EnforcesAlphanumericOnly(string region, bool expected)
+        {
+            // Act
+            bool actual = RegionManager.IsValidRegionName(region);
+
+            // Assert
+            Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public async Task RegionWithSpecialCharactersFromEnvironmentVariableIsRejectedAsync()
+        {
+            // Arrange - a poisoned REGION_NAME must not be used as the region
+            Environment.SetEnvironmentVariable(TestConstants.RegionName, "fake.com/x");
+            _testRequestContext.ServiceBundle.Config.AzureRegion = ConfidentialClientApplication.AttemptRegionDiscovery;
+            _httpManager.AddRegionDiscoveryMockHandlerWithError(HttpStatusCode.NotFound);
+
+            // Act
+            InstanceDiscoveryMetadataEntry regionalMetadata = await _regionDiscoveryProvider.GetMetadataAsync(
+                new Uri("https://login.microsoftonline.com/common/"), _testRequestContext)
+                .ConfigureAwait(false);
+
+            // Assert - the invalid env region is ignored, discovery falls through and fails over to global
+            Assert.IsNull(regionalMetadata);
+            Assert.AreNotEqual("fake.com/x", _testRequestContext.ApiEvent.RegionUsed);
+        }
+
+        [TestMethod]
         public async Task SuccessfulResponseFromEnvironmentVariableAsync()
         {
             Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
@@ -203,8 +247,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         [TestMethod]
         public async Task ResponseFromUserProvidedRegionDifferentFromRegionDetectedAsync()
         {
-            Environment.SetEnvironmentVariable(TestConstants.RegionName, "detected_region");
-            _testRequestContext.ServiceBundle.Config.AzureRegion = "user_region";
+            Environment.SetEnvironmentVariable(TestConstants.RegionName, "detectedregion");
+            _testRequestContext.ServiceBundle.Config.AzureRegion = "userregion";
 
             //IRegionDiscoveryProvider regionDiscoveryProvider = new RegionDiscoveryProvider(_httpManager, new NetworkCacheMetadataProvider());
             InstanceDiscoveryMetadataEntry regionalMetadata = await _regionDiscoveryProvider.GetMetadataAsync(
@@ -212,8 +256,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                 _testRequestContext).ConfigureAwait(false);
 
             Assert.IsNotNull(regionalMetadata);
-            Assert.AreEqual($"user_region.{RegionAndMtlsDiscoveryProvider.PublicEnvForRegional}", regionalMetadata.PreferredNetwork);
-            Assert.AreEqual("user_region", _testRequestContext.ApiEvent.RegionUsed);
+            Assert.AreEqual($"userregion.{RegionAndMtlsDiscoveryProvider.PublicEnvForRegional}", regionalMetadata.PreferredNetwork);
+            Assert.AreEqual("userregion", _testRequestContext.ApiEvent.RegionUsed);
             Assert.AreEqual(RegionAutodetectionSource.EnvVariable, _testRequestContext.ApiEvent.RegionAutodetectionSource);
             Assert.AreEqual(RegionOutcome.UserProvidedInvalid, _testRequestContext.ApiEvent.RegionOutcome);
             Assert.IsNull(_testRequestContext.ApiEvent.RegionDiscoveryFailureReason);
