@@ -237,7 +237,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                     return null;
 #else
                     if (MsalError.InvalidGrantError.Equals(ex?.ErrorCode, StringComparison.OrdinalIgnoreCase) &&
-                        MsalError.ClientMismatch.Equals(ex?.SubError, StringComparison.OrdinalIgnoreCase))
+                        MsalError.ClientMismatch.Equals(ex?.SubErrorForLogging, StringComparison.OrdinalIgnoreCase))
                     {
                         logger.Error("[FOCI] FRT refresh failed - client mismatch. ");
                         return null;
