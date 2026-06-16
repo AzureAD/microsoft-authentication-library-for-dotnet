@@ -35,8 +35,8 @@ namespace Microsoft.Identity.Client.Region
         }
 
         // For information of the current api-version refer: https://learn.microsoft.com/azure/virtual-machines/instance-metadata-service?tabs=windows#versioning
-        private const string ImdsEndpoint = "http://169.254.169.254/metadata/instance/compute/location";
-        private const string DefaultApiVersion = "2020-06-01";
+        private const string ImdsEndpoint = "http://169.254.169.254/metadata/instance/compute";
+        private const string DefaultApiVersion = "2021-02-01";
 
         private readonly IHttpManager _httpManager;
         private readonly int _imdsCallTimeoutMs;
@@ -257,12 +257,30 @@ namespace Microsoft.Identity.Client.Region
 
                             if (response.StatusCode == HttpStatusCode.OK && !response.Body.IsNullOrEmpty())
                             {
-                                region = response.Body;
+                                try
+                                {
+                                    LocalImdsComputeResponse computeResponse = JsonHelper.DeserializeFromJson<LocalImdsComputeResponse>(response.Body);
+                                    region = computeResponse?.Location;
+                                }
+                                catch (Exception ex)
+                                {
+                                    // Malformed JSON: treat as an unusable response (region stays null) so the
+                                    // failure reason below is consistent with the empty/missing-location cases
+                                    // instead of leaking an exception string into telemetry.
+                                    region = null;
+                                    logger.Info(() => $"[Region discovery] Failed to parse IMDS compute response: {ex.Message}. {DateTime.UtcNow}");
+                                }
 
                                 if (ValidateRegion(region, $"IMDS call to {imdsUri.AbsoluteUri}", logger))
                                 {
                                     logger.Info(() => $"[Region discovery] Call to local IMDS succeeded. Region: {region}. {DateTime.UtcNow}");
                                     result = new RegionInfo(region, RegionAutodetectionSource.Imds, null);
+                                }
+                                else
+                                {
+                                    // Non-empty but unusable body (missing/null location or malformed JSON).
+                                    s_regionDiscoveryDetails = $"Call to local IMDS failed with status code {response.StatusCode} or an empty response. {DateTime.UtcNow}";
+                                    logger.Error($"[Region discovery] {s_regionDiscoveryDetails}");
                                 }
                             }
                             else
@@ -395,7 +413,6 @@ namespace Microsoft.Identity.Client.Region
         {
             UriBuilder uriBuilder = new UriBuilder(ImdsEndpoint);
             uriBuilder.AppendQueryParameters($"api-version={apiVersion}");
-            uriBuilder.AppendQueryParameters("format=text");
             return uriBuilder.Uri;
         }
 
