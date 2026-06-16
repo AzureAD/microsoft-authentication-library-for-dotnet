@@ -72,6 +72,16 @@ namespace Microsoft.Identity.Client.Region
                 region = await _regionManager.GetAzureRegionAsync(requestContext).ConfigureAwait(false);
             }
 
+            // Defense-in-depth: never prefix an invalid region onto a trusted host. The region
+            // is validated at configuration time and during auto-detection, but re-validate here
+            // (the single point where the regional host is constructed) so a malformed value can
+            // never alter the authority host. An invalid region is ignored and falls back to global.
+            if (!string.IsNullOrEmpty(region) && !RegionManager.IsValidRegionName(region))
+            {
+                requestContext.Logger.Error($"[Region discovery] Region '{region}' has an invalid format and will be ignored.");
+                region = null;
+            }
+
             if (string.IsNullOrEmpty(region))
             {
                 if (isMtlsEnabled)
