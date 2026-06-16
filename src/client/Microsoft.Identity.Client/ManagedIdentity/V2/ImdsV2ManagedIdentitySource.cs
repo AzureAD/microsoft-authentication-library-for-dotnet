@@ -301,6 +301,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         // ManagedIdentityAuthRequest.SendDelegatedImdsV2TokenRequestAsync). The cert-mint flow is exposed
         // via AcquireMtlsBindingForDelegationAsync, so the base AuthenticateAsync/CreateRequestAsync path
         // is not used for IMDSv2. This override only satisfies the abstract base contract.
+        // DO NOT restore a bespoke token request here: the IMDSv2 token leg must go through TokenClient so
+        // client-originated claims, client-capability (CP1) merge, and claims-based cache keying are preserved.
         protected override Task<ManagedIdentityRequest> CreateRequestAsync(string resource)
         {
             throw new InvalidOperationException(

@@ -79,8 +79,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             {
                 throw new MsalClientException(
                     MsalError.MtlsPopNotSupportedForEnvironment,
-                    "mTLS Proof-of-Possession with managed identity is only supported on IMDSv2. " +
-                    "The detected managed identity source does not support mTLS PoP.");
+                    MsalErrorMessage.MtlsPopNotSupportedForManagedIdentityEnvironmentMessage);
             }
 
             return await imdsV2Source
