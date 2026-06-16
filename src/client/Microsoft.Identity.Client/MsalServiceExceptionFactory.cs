@@ -78,7 +78,7 @@ namespace Microsoft.Identity.Client
 
             ex.Claims = oAuth2Response?.Claims;
             ex.CorrelationId = oAuth2Response?.CorrelationId;
-            ex.SubError = oAuth2Response?.SubError;
+            ex.SubErrorForLogging = oAuth2Response?.SubError;
             ex.ErrorCodes = oAuth2Response?.ErrorCodes;
 
             return ex;
@@ -168,7 +168,7 @@ namespace Microsoft.Identity.Client
             SetHttpExceptionData(ex, brokerHttpResponse);
 
             ex.CorrelationId = correlationId;
-            ex.SubError = subErrorCode;
+            ex.SubErrorForLogging = subErrorCode;
 
             return ex;
         }

@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
                 Claims = SomeClaims,
                 CorrelationId = SomeCorrelationId,
                 ResponseBody = SomeResponseBody,
-                SubError = SomeSubError
+                SubErrorForLogging = SomeSubError
             };
 
             SerializeDeserializeAndValidate(ex, typeof(MsalServiceException), true);
@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
                 Claims = SomeClaims,
                 CorrelationId = SomeCorrelationId,
                 ResponseBody = SomeResponseBody,
-                SubError = SomeSubError
+                SubErrorForLogging = SomeSubError
             };
 
             SerializeDeserializeAndValidate(ex, typeof(MsalUiRequiredException), true);
@@ -108,7 +108,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
                 Assert.AreEqual(SomeClaims, serviceEx.Claims);
                 Assert.AreEqual(SomeResponseBody, serviceEx.ResponseBody);
                 Assert.AreEqual(SomeCorrelationId, serviceEx.CorrelationId);
-                Assert.AreEqual(SomeSubError, serviceEx.SubError);
+                Assert.AreEqual(SomeSubError, serviceEx.SubErrorForLogging);
             }
         }
     }
