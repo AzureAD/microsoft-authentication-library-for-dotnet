@@ -72,8 +72,18 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             AbstractManagedIdentity selected = await GetOrSelectManagedIdentitySourceAsync(
                 requestContext, isMtlsPopRequested: true, cancellationToken).ConfigureAwait(false);
 
-            var source = (ImdsV2ManagedIdentitySource)selected;
-            return await source
+            // An environment-detected source (App Service, Service Fabric, Cloud Shell, Azure Arc,
+            // Machine Learning) does not support mTLS PoP. Fail fast with a clear MSAL error rather
+            // than an opaque InvalidCastException from an unchecked cast.
+            if (selected is not ImdsV2ManagedIdentitySource imdsV2Source)
+            {
+                throw new MsalClientException(
+                    MsalError.MtlsPopNotSupportedForEnvironment,
+                    "mTLS Proof-of-Possession with managed identity is only supported on IMDSv2. " +
+                    "The detected managed identity source does not support mTLS PoP.");
+            }
+
+            return await imdsV2Source
                 .AcquireMtlsBindingForDelegationAsync(parameters, forceRemint, cancellationToken)
                 .ConfigureAwait(false);
         }

@@ -182,41 +182,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             _mtlsCache = mtlsCache ?? throw new ArgumentNullException(nameof(mtlsCache));
         }
 
-        public override async Task<ManagedIdentityResponse> AuthenticateAsync(
-            ApiConfig.Parameters.AcquireTokenForManagedIdentityParameters parameters,
-            CancellationToken cancellationToken)
-        {
-            // Capture the attestation token provider delegate before calling base
-            _attestationTokenProvider = parameters.AttestationTokenProvider;
-
-            try
-            {
-                return await base.AuthenticateAsync(parameters, cancellationToken).ConfigureAwait(false);
-            }
-            catch (MsalServiceException ex) when (ex.ErrorCode == MsalError.ManagedIdentityUnreachableNetwork && IsSchanelFailure(ex))
-            {
-                _requestContext.Logger.Verbose(() =>
-                    "[ImdsV2] SCHANNEL mTLS failure detected. Removing bad persisted cert and retrying with fresh mint.");
-
-                // Remove the bad cert from both caches
-                string certCacheKey = GetMtlsCertCacheKey();
-                try
-                {
-                    if (_mtlsCache is MtlsBindingCache mtlsCache)
-                    {
-                        mtlsCache.RemoveBadCert(certCacheKey, _requestContext.Logger);
-                    }
-                }
-                catch (Exception removalEx)
-                {
-                    _requestContext.Logger.Verbose(() => $"[ImdsV2] Error removing bad cert: {removalEx.Message}");
-                }
-
-                // Retry - will mint fresh cert since we just deleted the bad one
-                return await base.AuthenticateAsync(parameters, cancellationToken).ConfigureAwait(false);
-            }
-        }
-
         /// <summary>
         /// Detects if the exception was caused by a SCHANNEL failure during mTLS authentication, 
         /// which can occur if the client certificate becomes invalid.
@@ -332,43 +297,15 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             return certificateRequestResponse;
         }
 
-        protected override async Task<ManagedIdentityRequest> CreateRequestAsync(string resource)
+        // IMDSv2 delegates its token leg to MSAL's internal TokenClient exchange (see
+        // ManagedIdentityAuthRequest.SendDelegatedImdsV2TokenRequestAsync). The cert-mint flow is exposed
+        // via AcquireMtlsBindingForDelegationAsync, so the base AuthenticateAsync/CreateRequestAsync path
+        // is not used for IMDSv2. This override only satisfies the abstract base contract.
+        protected override Task<ManagedIdentityRequest> CreateRequestAsync(string resource)
         {
-            // Mint (or reuse) the mTLS binding. NOTE: for mTLS PoP the token leg is delegated to
-            // MSAL's internal TokenClient exchange (see ManagedIdentityAuthRequest); IMDSv2 is selected
-            // solely for PoP today, so this bespoke token request is retained only for completeness.
-            MtlsBindingInfo mtlsBinding = await AcquireMtlsBindingAsync().ConfigureAwait(false);
-
-            X509Certificate2 bindingCertificate = mtlsBinding.Certificate;
-            string endpointBaseForToken = mtlsBinding.Endpoint;
-            string clientIdForToken = mtlsBinding.ClientId;
-
-            ManagedIdentityRequest request = new ManagedIdentityRequest(
-                HttpMethod.Post,
-                new Uri(endpointBaseForToken + AcquireEntraTokenPath));
-
-            Dictionary<string, string> idParams = MsalIdHelper.GetMsalIdParameters(_requestContext.Logger);
-
-            foreach (KeyValuePair<string, string> idParam in idParams)
-            {
-                request.Headers[idParam.Key] = idParam.Value;
-            }
-
-            request.Headers.Add(OAuth2Header.XMsCorrelationId, _requestContext.CorrelationId.ToString());
-            request.Headers.Add(ThrottleCommon.ThrottleRetryAfterHeaderName, ThrottleCommon.ThrottleRetryAfterHeaderValue);
-            request.Headers.Add(OAuth2Header.RequestCorrelationIdInResponse, "true");
-
-            var tokenType = _isMtlsPopRequested ? Constants.MtlsPoPTokenType : Constants.BearerTokenType;
-
-            request.BodyParameters.Add("client_id", clientIdForToken);
-            request.BodyParameters.Add("grant_type", OAuth2GrantType.ClientCredentials);
-            request.BodyParameters.Add("scope", resource.TrimEnd('/') + "/.default");
-            request.BodyParameters.Add("token_type", tokenType);
-
-            request.RequestType = RequestType.STS;
-            request.MtlsCertificate = bindingCertificate;
-
-            return request;
+            throw new InvalidOperationException(
+                "IMDSv2 delegates its token leg to the internal exchange path; CreateRequestAsync is not used. " +
+                "Mint the mTLS binding via AcquireMtlsBindingForDelegationAsync instead.");
         }
 
         /// <summary>

@@ -243,20 +243,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 .SendTokenRequestForManagedIdentityAsync(AuthenticationRequestParameters.RequestContext, _managedIdentityParameters, cancellationToken)
                 .ConfigureAwait(false);
 
-            if (AuthenticationRequestParameters.IsMtlsPopRequested && _managedIdentityParameters.MtlsCertificate != null)
-            {
-                // Remember the cert...
-                _managedIdentityClient.SetRuntimeMtlsBindingCertificate(_managedIdentityParameters.MtlsCertificate);
-
-                // Apply mTLS scheme BEFORE caching...
-                AuthenticationRequestParameters.AuthenticationScheme =
-                    new MtlsPopAuthenticationOperation(_managedIdentityParameters.MtlsCertificate);
-
-                _managedIdentityParameters.MtlsCertificate = null;
-                AuthenticationRequestParameters.RequestContext.Logger.Info(
-                    "[ManagedIdentity] Applied mtls_pop scheme prior to caching.");
-            }
-
             var msalTokenResponse = MsalTokenResponse.CreateFromManagedIdentityResponse(managedIdentityResponse);
             msalTokenResponse.Scope = AuthenticationRequestParameters.Scope.AsSingleString();
 
@@ -282,7 +268,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     .ConfigureAwait(false);
             }
             catch (MsalServiceException ex) when (
-                string.Equals(ex.ErrorCode, "invalid_client", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(ex.ErrorCode, MsalError.InvalidClient, StringComparison.OrdinalIgnoreCase) ||
                 ImdsV2ManagedIdentitySource.IsSchanelFailure(ex))
             {
                 logger.Info("[ManagedIdentityRequest] mTLS binding rejected (invalid_client/SCHANNEL); re-minting binding certificate and retrying once.");
