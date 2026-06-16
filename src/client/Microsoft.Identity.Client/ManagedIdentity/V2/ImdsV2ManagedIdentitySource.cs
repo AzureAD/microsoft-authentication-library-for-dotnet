@@ -223,7 +223,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         /// </summary>
         /// <param name="ex"></param>
         /// <returns></returns>
-        private static bool IsSchanelFailure(MsalServiceException ex)
+        internal static bool IsSchanelFailure(MsalServiceException ex)
         {
             for (Exception e = ex; e != null; e = e.InnerException)
             {
@@ -334,6 +334,51 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 
         protected override async Task<ManagedIdentityRequest> CreateRequestAsync(string resource)
         {
+            // Mint (or reuse) the mTLS binding. NOTE: for mTLS PoP the token leg is delegated to
+            // MSAL's internal TokenClient exchange (see ManagedIdentityAuthRequest); IMDSv2 is selected
+            // solely for PoP today, so this bespoke token request is retained only for completeness.
+            MtlsBindingInfo mtlsBinding = await AcquireMtlsBindingAsync().ConfigureAwait(false);
+
+            X509Certificate2 bindingCertificate = mtlsBinding.Certificate;
+            string endpointBaseForToken = mtlsBinding.Endpoint;
+            string clientIdForToken = mtlsBinding.ClientId;
+
+            ManagedIdentityRequest request = new ManagedIdentityRequest(
+                HttpMethod.Post,
+                new Uri(endpointBaseForToken + AcquireEntraTokenPath));
+
+            Dictionary<string, string> idParams = MsalIdHelper.GetMsalIdParameters(_requestContext.Logger);
+
+            foreach (KeyValuePair<string, string> idParam in idParams)
+            {
+                request.Headers[idParam.Key] = idParam.Value;
+            }
+
+            request.Headers.Add(OAuth2Header.XMsCorrelationId, _requestContext.CorrelationId.ToString());
+            request.Headers.Add(ThrottleCommon.ThrottleRetryAfterHeaderName, ThrottleCommon.ThrottleRetryAfterHeaderValue);
+            request.Headers.Add(OAuth2Header.RequestCorrelationIdInResponse, "true");
+
+            var tokenType = _isMtlsPopRequested ? Constants.MtlsPoPTokenType : Constants.BearerTokenType;
+
+            request.BodyParameters.Add("client_id", clientIdForToken);
+            request.BodyParameters.Add("grant_type", OAuth2GrantType.ClientCredentials);
+            request.BodyParameters.Add("scope", resource.TrimEnd('/') + "/.default");
+            request.BodyParameters.Add("token_type", tokenType);
+
+            request.RequestType = RequestType.STS;
+            request.MtlsCertificate = bindingCertificate;
+
+            return request;
+        }
+
+        /// <summary>
+        /// Performs the cert-mint flow (/getplatformmetadata + /issuecredential) and returns the
+        /// resulting mTLS binding (cert + ESTS-R endpoint + canonical client_id). Extracted so the
+        /// binding can be reused by the internal-exchange delegation path without building the
+        /// bespoke token request.
+        /// </summary>
+        private async Task<MtlsBindingInfo> AcquireMtlsBindingAsync()
+        {
             CsrMetadata csrMetadata = await GetCsrMetadataAsync(_requestContext).ConfigureAwait(false);
 
             // Early validation: Fail-fast if mTLS PoP was requested but KeyGuard is unavailable.
@@ -410,36 +455,30 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 _requestContext.Logger)
                 .ConfigureAwait(false);
 
-            X509Certificate2 bindingCertificate = mtlsBinding.Certificate;
-            string endpointBaseForToken = mtlsBinding.Endpoint;
-            string clientIdForToken = mtlsBinding.ClientId;
+            return mtlsBinding;
+        }
 
-            ManagedIdentityRequest request = new ManagedIdentityRequest(
-                HttpMethod.Post,
-                new Uri(endpointBaseForToken + AcquireEntraTokenPath));
+        /// <summary>
+        /// Mint-only entrypoint used by the internal-exchange delegation path. Sets the attestation
+        /// provider and mTLS-PoP flag from the request parameters, optionally evicts a rejected cert
+        /// (invalid_client / SCHANNEL re-mint), and returns the mTLS binding. Does NOT send the token request.
+        /// </summary>
+        internal async Task<MtlsBindingInfo> AcquireMtlsBindingForDelegationAsync(
+            ApiConfig.Parameters.AcquireTokenForManagedIdentityParameters parameters,
+            bool forceRemint,
+            CancellationToken cancellationToken)
+        {
+            _attestationTokenProvider = parameters.AttestationTokenProvider;
+            _isMtlsPopRequested = true;
 
-            Dictionary<string, string> idParams = MsalIdHelper.GetMsalIdParameters(_requestContext.Logger);
-
-            foreach (KeyValuePair<string, string> idParam in idParams)
+            if (forceRemint && _mtlsCache is MtlsBindingCache bindingCache)
             {
-                request.Headers[idParam.Key] = idParam.Value;
+                bindingCache.RemoveBadCert(GetMtlsCertCacheKey(), _requestContext.Logger);
             }
 
-            request.Headers.Add(OAuth2Header.XMsCorrelationId, _requestContext.CorrelationId.ToString());
-            request.Headers.Add(ThrottleCommon.ThrottleRetryAfterHeaderName, ThrottleCommon.ThrottleRetryAfterHeaderValue);
-            request.Headers.Add(OAuth2Header.RequestCorrelationIdInResponse, "true");
+            cancellationToken.ThrowIfCancellationRequested();
 
-            var tokenType = _isMtlsPopRequested ? Constants.MtlsPoPTokenType : Constants.BearerTokenType;
-
-            request.BodyParameters.Add("client_id", clientIdForToken);
-            request.BodyParameters.Add("grant_type", OAuth2GrantType.ClientCredentials);
-            request.BodyParameters.Add("scope", resource.TrimEnd('/') + "/.default");
-            request.BodyParameters.Add("token_type", tokenType);
-
-            request.RequestType = RequestType.STS;
-            request.MtlsCertificate = bindingCertificate;
-
-            return request;
+            return await AcquireMtlsBindingAsync().ConfigureAwait(false);
         }
 
         /// <summary>
