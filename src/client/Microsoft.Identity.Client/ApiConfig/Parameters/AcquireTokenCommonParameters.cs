@@ -47,6 +47,14 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public string ExtraClientAssertionClaims { get; internal set; }
 
         /// <summary>
+        /// Optional caller-supplied delegate that adds extra tags to the OpenTelemetry metrics MSAL records
+        /// for this request. It receives the <see cref="ExecutionResult"/> of the acquisition (success or failure)
+        /// and a mutable list of tags to which additional dimensions can be appended.
+        /// Set via <c>WithOtelTagsEnricher</c>.
+        /// </summary>
+        public Action<ExecutionResult, IList<KeyValuePair<string, object>>> OtelTagsEnricher { get; set; }
+
+        /// <summary>
         /// Optional delegate for obtaining attestation JWT for Credential Guard keys.
         /// Set by the KeyAttestation package via .WithAttestationSupport().
         /// Returns null for non-attested flows.

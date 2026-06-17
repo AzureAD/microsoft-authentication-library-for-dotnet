@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 
 namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
@@ -23,7 +24,9 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             long totalDurationInUs,
             AuthenticationResultMetadata authResultMetadata,
             ILoggerAdapter logger,
-            DateTimeOffset expiresOn)
+            DateTimeOffset expiresOn,
+            ExecutionResult executionResult = null,
+            Action<ExecutionResult, IList<KeyValuePair<string, object>>> tagsEnricher = null)
         {
             // No op
         }
@@ -31,7 +34,10 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
         public void LogSuccessHttpDuration(
             string platform,
             ApiEvent.ApiIds apiId,
-            AuthenticationResultMetadata authResultMetadata)
+            AuthenticationResultMetadata authResultMetadata,
+            ILoggerAdapter logger = null,
+            ExecutionResult executionResult = null,
+            Action<ExecutionResult, IList<KeyValuePair<string, object>>> tagsEnricher = null)
         {
             // No op
         }
@@ -45,7 +51,10 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             int tokenType,
             int httpStatusCode,
             long totalDurationInMs,
-            string rawStsErrorCode = null)
+            string rawStsErrorCode = null,
+            ILoggerAdapter logger = null,
+            ExecutionResult executionResult = null,
+            Action<ExecutionResult, IList<KeyValuePair<string, object>>> tagsEnricher = null)
         {
             // No op
         }
@@ -57,27 +66,35 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             string callerSdkVersion,
             CacheRefreshReason cacheRefreshReason,
             int tokenType,
-            string rawStsErrorCode = null)
+            string rawStsErrorCode = null,
+            ILoggerAdapter logger = null,
+            ExecutionResult executionResult = null,
+            Action<ExecutionResult, IList<KeyValuePair<string, object>>> tagsEnricher = null)
         {
             // No op
         }
 
         public void LogFailureHttpDuration(string platform,
             ApiEvent apiEvent,
-            int httpStatusCode)
+            int httpStatusCode,
+            ILoggerAdapter logger = null,
+            ExecutionResult executionResult = null,
+            Action<ExecutionResult, IList<KeyValuePair<string, object>>> tagsEnricher = null)
         {
             // No op
         }
 
-        void IOtelInstrumentation.IncrementSuccessCounter(string platform, 
+        void IOtelInstrumentation.IncrementSuccessCounter(string platform,
             ApiEvent.ApiIds apiId,
             string callerSdkId,
             string callerSdkVersion,
-            TokenSource tokenSource, 
-            CacheRefreshReason cacheRefreshReason, 
-            CacheLevel cacheLevel, 
+            TokenSource tokenSource,
+            CacheRefreshReason cacheRefreshReason,
+            CacheLevel cacheLevel,
             ILoggerAdapter logger,
-            int tokenType)
+            int tokenType,
+            ExecutionResult executionResult,
+            Action<ExecutionResult, IList<KeyValuePair<string, object>>> tagsEnricher)
         {
             // No op
         }
@@ -89,7 +106,10 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             CacheLevel cacheLevel,
             CacheRefreshReason cacheRefreshReason,
             int tokenType,
-            DateTimeOffset expiresOn)
+            DateTimeOffset expiresOn,
+            ILoggerAdapter logger = null,
+            ExecutionResult executionResult = null,
+            Action<ExecutionResult, IList<KeyValuePair<string, object>>> tagsEnricher = null)
         {
             // No op
         }

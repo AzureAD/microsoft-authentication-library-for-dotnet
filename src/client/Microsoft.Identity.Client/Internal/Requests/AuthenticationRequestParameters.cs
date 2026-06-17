@@ -218,6 +218,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public string ExtraClientAssertionClaims => _commonParameters.ExtraClientAssertionClaims;
 
+        /// <summary>
+        /// Optional caller-supplied delegate that adds extra tags to the OpenTelemetry metrics MSAL records
+        /// for this request. Configured via <c>WithOtelTagsEnricher</c>.
+        /// </summary>
+        public Action<ExecutionResult, IList<KeyValuePair<string, object>>> OtelTagsEnricher => _commonParameters.OtelTagsEnricher;
+
         public void LogParameters()
         {
             var logger = RequestContext.Logger;

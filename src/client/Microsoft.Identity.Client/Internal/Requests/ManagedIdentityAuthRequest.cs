@@ -133,7 +133,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                                 return await GetAccessTokenAsync(tokenSource.Token, logger).ConfigureAwait(false);
                             }, logger, ServiceBundle, AuthenticationRequestParameters.RequestContext.ApiEvent,
                         AuthenticationRequestParameters.RequestContext.ApiEvent.CallerSdkApiId,
-                        AuthenticationRequestParameters.RequestContext.ApiEvent.CallerSdkVersion);
+                        AuthenticationRequestParameters.RequestContext.ApiEvent.CallerSdkVersion,
+                        AuthenticationRequestParameters.OtelTagsEnricher);
                     }
                 }
                 catch (MsalServiceException e)

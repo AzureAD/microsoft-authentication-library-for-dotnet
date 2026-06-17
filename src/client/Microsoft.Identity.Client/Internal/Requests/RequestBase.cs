@@ -24,6 +24,7 @@ using Microsoft.Identity.Client.TelemetryCore.OpenTelemetry;
 using Microsoft.Identity.Client.Internal.Broker;
 using System.Runtime.ConstrainedExecution;
 using Microsoft.Identity.Client.AuthScheme;
+using Microsoft.Identity.Client.Extensibility;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -121,7 +122,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     apiEvent.CacheInfo,
                     httpStatusCode,
                     requestStopwatch.ElapsedMilliseconds + measureTelemetryDurationResult.Milliseconds,
-                    (ex as MsalServiceException)?.ErrorCodes?.FirstOrDefault());
+                    exception: ex,
+                    rawStsErrorCode: (ex as MsalServiceException)?.ErrorCodes?.FirstOrDefault());
                 throw;
             }
             catch (Exception ex)
@@ -138,6 +140,18 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             CacheLevel cacheLevel = GetCacheLevel(authenticationResult);
 
+            Action<ExecutionResult, IList<KeyValuePair<string, object>>> tagsEnricher = AuthenticationRequestParameters.OtelTagsEnricher;
+
+            // Only materialize an ExecutionResult when an enricher is configured to consume it.
+            ExecutionResult executionResult = tagsEnricher == null
+                ? null
+                : new ExecutionResult
+                {
+                    Successful = true,
+                    Result = authenticationResult,
+                    ClientCertificate = AuthenticationRequestParameters.ResolvedCertificate
+                };
+
             // Log metrics
             ServiceBundle.PlatformProxy.OtelInstrumentation.LogSuccessMetrics(
                         ServiceBundle.PlatformProxy.GetProductName(),
@@ -148,11 +162,25 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         durationInUs,
                         authenticationResult.AuthenticationResultMetadata,
                         AuthenticationRequestParameters.RequestContext.Logger,
-                        authenticationResult.ExpiresOn);
+                        authenticationResult.ExpiresOn,
+                        executionResult,
+                        tagsEnricher);
         }
 
-        private void LogFailureTelemetryToOtel(string errorCodeToLog, ApiEvent apiEvent, CacheRefreshReason cacheRefreshReason, int httpStatusCode, long totalDurationInMs, string rawStsErrorCode = null)
+        private void LogFailureTelemetryToOtel(string errorCodeToLog, ApiEvent apiEvent, CacheRefreshReason cacheRefreshReason, int httpStatusCode, long totalDurationInMs, MsalException exception = null, string rawStsErrorCode = null)
         {
+            Action<ExecutionResult, IList<KeyValuePair<string, object>>> tagsEnricher = AuthenticationRequestParameters.OtelTagsEnricher;
+
+            // Only materialize an ExecutionResult when an enricher is configured to consume it.
+            ExecutionResult executionResult = tagsEnricher == null
+                ? null
+                : new ExecutionResult
+                {
+                    Successful = false,
+                    Exception = exception,
+                    ClientCertificate = AuthenticationRequestParameters.ResolvedCertificate
+                };
+
             ServiceBundle.PlatformProxy.OtelInstrumentation.LogFailureMetrics(
                         ServiceBundle.PlatformProxy.GetProductName(),
                         errorCodeToLog,
@@ -163,7 +191,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         apiEvent.TokenType,
                         httpStatusCode,
                         totalDurationInMs,
-                        rawStsErrorCode);
+                        rawStsErrorCode,
+                        AuthenticationRequestParameters.RequestContext.Logger,
+                        executionResult,
+                        tagsEnricher);
         }
 
         private Tuple<string, string> ParseScopesForTelemetry()
