@@ -2,3 +2,4 @@ Microsoft.Identity.Client.MsalServiceException.SubErrorForLogging.get -> string
 Microsoft.Identity.Client.AzureCloudInstance.GovFr = 5 -> Microsoft.Identity.Client.AzureCloudInstance
 Microsoft.Identity.Client.AzureCloudInstance.GovDe = 6 -> Microsoft.Identity.Client.AzureCloudInstance
 Microsoft.Identity.Client.AzureCloudInstance.GovSg = 7 -> Microsoft.Identity.Client.AzureCloudInstance
+static Microsoft.Identity.Client.Extensibility.AbstractConfidentialClientAcquireTokenParameterBuilderExtension.WithOtelTagsEnricher<T>(this Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T> builder, System.Action<Microsoft.Identity.Client.Extensibility.ExecutionResult, System.Collections.Generic.IList<System.Collections.Generic.KeyValuePair<string, object>>> tagsEnricher) -> Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T>

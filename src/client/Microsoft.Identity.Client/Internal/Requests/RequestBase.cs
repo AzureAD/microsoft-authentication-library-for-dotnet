@@ -24,6 +24,7 @@ using Microsoft.Identity.Client.TelemetryCore.OpenTelemetry;
 using Microsoft.Identity.Client.Internal.Broker;
 using System.Runtime.ConstrainedExecution;
 using Microsoft.Identity.Client.AuthScheme;
+using Microsoft.Identity.Client.Extensibility;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -121,7 +122,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     apiEvent.CacheInfo,
                     httpStatusCode,
                     requestStopwatch.ElapsedMilliseconds + measureTelemetryDurationResult.Milliseconds,
-                    (ex as MsalServiceException)?.ErrorCodes?.FirstOrDefault());
+                    exception: ex,
+                    rawStsErrorCode: (ex as MsalServiceException)?.ErrorCodes?.FirstOrDefault());
                 throw;
             }
             catch (Exception ex)
@@ -138,6 +140,18 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             CacheLevel cacheLevel = GetCacheLevel(authenticationResult);
 
+            // Invoke the caller-supplied enricher once per acquisition and merge the resulting fixed set of
+            // extra tags into every instrument below, so the delegate is not re-run per metric.
+            IReadOnlyList<KeyValuePair<string, object>> extraTags = OtelEnrichmentHelper.MaterializeExtraTags(
+                AuthenticationRequestParameters.OtelTagsEnricher,
+                () => new ExecutionResult
+                {
+                    Successful = true,
+                    Result = authenticationResult,
+                    ClientCertificate = AuthenticationRequestParameters.ResolvedCertificate
+                },
+                AuthenticationRequestParameters.RequestContext.Logger);
+
             // Log metrics
             ServiceBundle.PlatformProxy.OtelInstrumentation.LogSuccessMetrics(
                         ServiceBundle.PlatformProxy.GetProductName(),
@@ -148,11 +162,24 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         durationInUs,
                         authenticationResult.AuthenticationResultMetadata,
                         AuthenticationRequestParameters.RequestContext.Logger,
-                        authenticationResult.ExpiresOn);
+                        authenticationResult.ExpiresOn,
+                        extraTags);
         }
 
-        private void LogFailureTelemetryToOtel(string errorCodeToLog, ApiEvent apiEvent, CacheRefreshReason cacheRefreshReason, int httpStatusCode, long totalDurationInMs, string rawStsErrorCode = null)
+        private void LogFailureTelemetryToOtel(string errorCodeToLog, ApiEvent apiEvent, CacheRefreshReason cacheRefreshReason, int httpStatusCode, long totalDurationInMs, MsalException exception = null, string rawStsErrorCode = null)
         {
+            // Invoke the caller-supplied enricher once per acquisition and merge the resulting fixed set of
+            // extra tags into every instrument below, so the delegate is not re-run per metric.
+            IReadOnlyList<KeyValuePair<string, object>> extraTags = OtelEnrichmentHelper.MaterializeExtraTags(
+                AuthenticationRequestParameters.OtelTagsEnricher,
+                () => new ExecutionResult
+                {
+                    Successful = false,
+                    Exception = exception,
+                    ClientCertificate = AuthenticationRequestParameters.ResolvedCertificate
+                },
+                AuthenticationRequestParameters.RequestContext.Logger);
+
             ServiceBundle.PlatformProxy.OtelInstrumentation.LogFailureMetrics(
                         ServiceBundle.PlatformProxy.GetProductName(),
                         errorCodeToLog,
@@ -163,7 +190,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         apiEvent.TokenType,
                         httpStatusCode,
                         totalDurationInMs,
-                        rawStsErrorCode);
+                        rawStsErrorCode,
+                        AuthenticationRequestParameters.RequestContext.Logger,
+                        extraTags);
         }
 
         private Tuple<string, string> ParseScopesForTelemetry()
