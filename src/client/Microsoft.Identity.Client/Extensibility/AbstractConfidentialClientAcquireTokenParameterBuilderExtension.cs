@@ -408,6 +408,7 @@ namespace Microsoft.Identity.Client.Extensibility
         /// <param name="tagsEnricher">
         /// A delegate that receives the <see cref="ExecutionResult"/> and a mutable list of tags to enrich.
         /// The delegate runs on MSAL's metric-recording path, so it should be fast, non-blocking and must not throw.
+        /// The supplied tag list must be populated synchronously; do not retain or mutate it after the delegate returns.
         /// </param>
         /// <returns>The builder to chain the .With methods.</returns>
         /// <exception cref="ArgumentNullException">Thrown when <paramref name="tagsEnricher"/> is null.</exception>

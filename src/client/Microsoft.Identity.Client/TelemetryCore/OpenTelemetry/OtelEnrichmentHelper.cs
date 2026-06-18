@@ -51,7 +51,11 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
                 return null;
             }
 
-            return extraTags;
+            // Return a snapshot, not the list handed to the enricher. A misbehaving enricher that retained the
+            // reference (e.g. via a captured field or a fire-and-forget task) cannot then mutate the set we
+            // enumerate while recording metrics, which would otherwise risk a "Collection was modified" throw
+            // on the auth path. Empty -> null so the no-tags case allocates nothing (BuildTagList treats both alike).
+            return extraTags.Count == 0 ? null : extraTags.ToArray();
         }
     }
 }
