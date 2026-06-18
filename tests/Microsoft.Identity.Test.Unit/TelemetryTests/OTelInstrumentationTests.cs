@@ -1137,6 +1137,56 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
+        [TestMethod]
+        [Description("An enricher tag whose key collides with a canonical tag key is dropped (the canonical value wins), " +
+            "and tags with null/empty keys are skipped, so the enricher cannot override or corrupt the canonical metric set.")]
+        public async Task WithOtelTagsEnricher_CollidingAndInvalidKeys_AreDroppedAsync()
+        {
+            using (_harness = CreateTestHarness())
+            {
+                CreateApplication();
+                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                _harness.HttpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                AuthenticationResult result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithExtraQueryParameters(extraQueryParams)
+                    .WithOtelTagsEnricher((executionResult, tags) =>
+                    {
+                        // Collides with a canonical key — must NOT override MSAL's value.
+                        tags.Add(new KeyValuePair<string, object>(TelemetryConstants.ApiId, "BOGUS_OVERRIDE"));
+                        // Invalid keys — must be skipped without breaking recording.
+                        tags.Add(new KeyValuePair<string, object>(null, "nullKey"));
+                        tags.Add(new KeyValuePair<string, object>(string.Empty, "emptyKey"));
+                        // A normal tag still gets through.
+                        tags.Add(new KeyValuePair<string, object>("CustomTag", "CustomValue"));
+                    })
+                    .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+
+                Assert.IsNotNull(result, "Acquisition should succeed even when the enricher adds colliding/invalid tags.");
+
+                s_meterProvider.ForceFlush();
+
+                var msalSuccess = _exportedMetrics.FirstOrDefault(m => m.Name == "MsalSuccess");
+                Assert.IsNotNull(msalSuccess, "MsalSuccess metric should be emitted.");
+
+                foreach (var metricPoint in msalSuccess.GetMetricPoints())
+                {
+                    var tags = GetTagDictionary(metricPoint.Tags);
+
+                    // Canonical ApiId is preserved — the colliding enricher value is dropped.
+                    Assert.AreNotEqual("BOGUS_OVERRIDE", tags[TelemetryConstants.ApiId],
+                        "The enricher must not override the canonical ApiId tag.");
+
+                    // The empty-key tag is skipped (a null-key tag is likewise skipped before recording).
+                    Assert.IsFalse(tags.ContainsKey(string.Empty), "Empty-key tag should be skipped.");
+
+                    // The valid custom tag still made it through.
+                    Assert.IsTrue(tags.TryGetValue("CustomTag", out var value) && (string)value == "CustomValue",
+                        "A valid custom tag should still be recorded.");
+                }
+            }
+        }
+
         private static IDictionary<string, object> GetTagDictionary(ReadOnlyTagCollection tags)
         {
             var dict = new Dictionary<string, object>();

@@ -149,8 +149,11 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
         // Builds the final TagList for a metric by appending the caller-supplied extra tags (if any) after
         // MSAL's canonical base tags. The extra tags are materialized once per acquisition by the caller
         // (see OtelEnrichmentHelper.MaterializeExtraTags) and the same fixed set is merged into every
-        // instrument, so this method never invokes the enricher and never throws on its behalf. Base tags
-        // are emitted first and are append-only, so the canonical metric set cannot be removed or altered.
+        // instrument, so this method never invokes the enricher and never throws on its behalf. The
+        // canonical base tags are emitted first and are protected: an extra tag with a null/empty key is
+        // skipped, and an extra tag whose key collides with a canonical base tag key is dropped (a duplicate
+        // key would otherwise shadow MSAL's canonical value in last-wins backends). So the canonical metric
+        // set cannot be removed, overridden, or altered by the enricher.
         private static TagList BuildTagList(
             IReadOnlyList<KeyValuePair<string, object>> extraTags,
             params KeyValuePair<string, object>[] baseTags)
@@ -161,13 +164,22 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             }
 
             var tagList = new TagList();
+            var baseKeys = new HashSet<string>(StringComparer.Ordinal);
             foreach (KeyValuePair<string, object> tag in baseTags)
             {
                 tagList.Add(tag);
+                baseKeys.Add(tag.Key);
             }
 
             foreach (KeyValuePair<string, object> tag in extraTags)
             {
+                // Never let a caller-supplied tag remove, override, or corrupt a canonical tag:
+                // drop tags with a null/empty key and tags whose key collides with a base tag key.
+                if (string.IsNullOrEmpty(tag.Key) || baseKeys.Contains(tag.Key))
+                {
+                    continue;
+                }
+
                 tagList.Add(tag);
             }
 
