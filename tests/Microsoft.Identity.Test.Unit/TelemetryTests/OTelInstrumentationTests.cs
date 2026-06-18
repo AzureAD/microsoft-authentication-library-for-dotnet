@@ -1041,8 +1041,9 @@ namespace Microsoft.Identity.Test.Unit
 
                 lock (warnings)
                 {
-                    Assert.IsTrue(warnings.Any(m => m.Contains("OTel tags enricher threw an exception")),
-                        "A warning should be logged when the enricher throws.");
+                    int enricherWarnings = warnings.Count(m => m.Contains("OTel tags enricher threw an exception"));
+                    Assert.AreEqual(1, enricherWarnings,
+                        "A throwing enricher runs once per acquisition and must log exactly one warning, not one per metric instrument.");
                 }
             }
         }
@@ -1088,6 +1089,51 @@ namespace Microsoft.Identity.Test.Unit
                     Assert.IsTrue(tags.TryGetValue("CustomTag", out var value) && (string)value == "CustomValue",
                         "The enricher's added tag should still be present.");
                 }
+            }
+        }
+
+        [TestMethod]
+        [Description("The OTel tags enricher is invoked exactly once per acquisition, not once per metric instrument, " +
+            "even though several instruments are recorded for a single successful acquisition.")]
+        public async Task WithOtelTagsEnricher_InvokedOncePerAcquisitionAsync()
+        {
+            using (_harness = CreateTestHarness())
+            {
+                CreateApplication();
+                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                _harness.HttpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                int invocationCount = 0;
+
+                AuthenticationResult result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithExtraQueryParameters(extraQueryParams)
+                    .WithOtelTagsEnricher((executionResult, tags) =>
+                    {
+                        Interlocked.Increment(ref invocationCount);
+                        tags.Add(new KeyValuePair<string, object>("CustomTag", "CustomValue"));
+                    })
+                    .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+
+                s_meterProvider.ForceFlush();
+
+                // A single IDP success records several instruments (success counter, total duration, HTTP duration,
+                // extension duration, remaining token lifetime). The enricher must still run only once.
+                Assert.AreEqual(1, invocationCount,
+                    "Enricher must be invoked exactly once per acquisition, regardless of how many instruments are recorded.");
+
+                // The single materialized tag set is still merged into every recorded instrument.
+                var msalSuccess = _exportedMetrics.FirstOrDefault(m => m.Name == "MsalSuccess");
+                Assert.IsNotNull(msalSuccess, "MsalSuccess metric should be emitted.");
+                bool foundCustomTag = false;
+                foreach (var metricPoint in msalSuccess.GetMetricPoints())
+                {
+                    var tags = GetTagDictionary(metricPoint.Tags);
+                    if (tags.TryGetValue("CustomTag", out var value) && (string)value == "CustomValue")
+                        foundCustomTag = true;
+                }
+                Assert.IsTrue(foundCustomTag, "The single materialized tag set should be merged into the recorded metrics.");
             }
         }
 

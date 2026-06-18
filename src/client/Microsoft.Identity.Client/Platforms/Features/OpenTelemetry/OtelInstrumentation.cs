@@ -6,7 +6,6 @@ using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
@@ -147,53 +146,32 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
         private static string MsalVersionPlatformTag(string platform) =>
             $"{MsalIdHelper.GetMsalVersion()},{platform}";
 
-        // Builds the final TagList for a metric, applying the optional caller-supplied enricher on top
-        // of the base tags. When no enricher is configured this is a thin wrapper over the base tags and
-        // allocates nothing extra. When an enricher is configured, it receives a separate, initially empty
-        // additions list so it can only append tags — MSAL's canonical base tags are append-only and cannot
-        // be removed or altered by the enricher. The base tags followed by the additions are then
-        // materialized into a TagList for recording.
+        // Builds the final TagList for a metric by appending the caller-supplied extra tags (if any) after
+        // MSAL's canonical base tags. The extra tags are materialized once per acquisition by the caller
+        // (see OtelEnrichmentHelper.MaterializeExtraTags) and the same fixed set is merged into every
+        // instrument, so this method never invokes the enricher and never throws on its behalf. Base tags
+        // are emitted first and are append-only, so the canonical metric set cannot be removed or altered.
         private static TagList BuildTagList(
-            ILoggerAdapter logger,
-            ExecutionResult executionResult,
-            Action<ExecutionResult, IList<KeyValuePair<string, object>>> tagsEnricher,
+            IReadOnlyList<KeyValuePair<string, object>> extraTags,
             params KeyValuePair<string, object>[] baseTags)
         {
-            if (tagsEnricher == null)
+            if (extraTags == null || extraTags.Count == 0)
             {
                 return new TagList(baseTags);
             }
 
-            var additions = new List<KeyValuePair<string, object>>();
             var tagList = new TagList();
-            try
+            foreach (KeyValuePair<string, object> tag in baseTags)
             {
-                // The enricher only ever sees the additions list, so it cannot remove or mutate the
-                // canonical base tags. Materialization is inside the try as well, so a malformed tag
-                // (e.g. one that throws on Add) also falls back to the base-tags-only path below.
-                tagsEnricher(executionResult, additions);
-
-                foreach (KeyValuePair<string, object> tag in baseTags)
-                {
-                    tagList.Add(tag);
-                }
-
-                foreach (KeyValuePair<string, object> tag in additions)
-                {
-                    tagList.Add(tag);
-                }
-
-                return tagList;
+                tagList.Add(tag);
             }
-            catch (Exception ex)
+
+            foreach (KeyValuePair<string, object> tag in extraTags)
             {
-                // A caller-supplied enricher must never break telemetry recording or the auth flow.
-                // On failure, log a warning, discard any partial mutations and fall back to the base tags.
-                logger?.WarningPii(
-                    $"[OpenTelemetry] The OTel tags enricher threw an exception and was ignored. {ex}",
-                    "[OpenTelemetry] The OTel tags enricher threw an exception and was ignored.");
-                return new TagList(baseTags);
+                tagList.Add(tag);
             }
+
+            return tagList;
         }
 
         // Aggregates the successful requests based on token source and cache refresh reason.
@@ -210,8 +188,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             AuthenticationResultMetadata authResultMetadata,
             ILoggerAdapter logger,
             DateTimeOffset expiresOn,
-            ExecutionResult executionResult = null,
-            Action<ExecutionResult, IList<KeyValuePair<string, object>>> tagsEnricher = null)
+            IReadOnlyList<KeyValuePair<string, object>> extraTags = null)
         {
             IncrementSuccessCounter(
                 platform,
@@ -223,13 +200,12 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                 cacheLevel,
                 logger,
                 authResultMetadata.TelemetryTokenType,
-                executionResult,
-                tagsEnricher);
+                extraTags);
 
             if (s_durationInL1CacheInUs.Value.Enabled && authResultMetadata.TokenSource == TokenSource.Cache
                 && authResultMetadata.CacheLevel.Equals(CacheLevel.L1Cache))
             {
-                var tags = BuildTagList(logger, executionResult, tagsEnricher,
+                var tags = BuildTagList(extraTags,
                     new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                     new(TelemetryConstants.Platform, platform),
                     new(TelemetryConstants.ApiId, apiId),
@@ -242,7 +218,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             // Only log cache duration if L2 cache was used.
             if (s_durationInL2Cache.Value.Enabled && cacheLevel == CacheLevel.L2Cache)
             {
-                var tags = BuildTagList(logger, executionResult, tagsEnricher,
+                var tags = BuildTagList(extraTags,
                     new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                     new(TelemetryConstants.Platform, platform),
                     new(TelemetryConstants.ApiId, apiId),
@@ -252,7 +228,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
 
             if (s_durationInExtensionInMs.Value.Enabled)
             {
-                var tags = BuildTagList(logger, executionResult, tagsEnricher,
+                var tags = BuildTagList(extraTags,
                     new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                     new(TelemetryConstants.Platform, platform),
                     new(TelemetryConstants.ApiId, apiId),
@@ -266,7 +242,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             {
                 if (s_durationTotal.Value.Enabled)
                 {
-                    var tags = BuildTagList(logger, executionResult, tagsEnricher,
+                    var tags = BuildTagList(extraTags,
                         new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                         new(TelemetryConstants.Platform, platform),
                         new(TelemetryConstants.ApiId, apiId),
@@ -280,7 +256,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                 // Only log duration in HTTP when token is fetched from IDP.
                 if (s_durationInHttp.Value.Enabled && authResultMetadata.TokenSource == TokenSource.IdentityProvider)
                 {
-                    var tags = BuildTagList(logger, executionResult, tagsEnricher,
+                    var tags = BuildTagList(extraTags,
                         new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                         new(TelemetryConstants.Platform, platform),
                         new(TelemetryConstants.ApiId, apiId),
@@ -292,7 +268,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             {
                 if (s_durationTotalV2.Value.Enabled)
                 {
-                    var tags = BuildTagList(logger, executionResult, tagsEnricher,
+                    var tags = BuildTagList(extraTags,
                         new(TelemetryConstants.MsalVersionPlatform, MsalVersionPlatformTag(platform)),
                         new(TelemetryConstants.ApiId, apiId),
                         new(TelemetryConstants.TokenSource, authResultMetadata.TokenSource),
@@ -307,7 +283,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                 // Only log duration in HTTP when token is fetched from IDP.
                 if (s_durationInHttpV2.Value.Enabled && authResultMetadata.TokenSource == TokenSource.IdentityProvider)
                 {
-                    var tags = BuildTagList(logger, executionResult, tagsEnricher,
+                    var tags = BuildTagList(extraTags,
                         new(TelemetryConstants.MsalVersionPlatform, MsalVersionPlatformTag(platform)),
                         new(TelemetryConstants.ApiId, apiId),
                         new(TelemetryConstants.TokenType, authResultMetadata.TelemetryTokenType),
@@ -325,8 +301,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                 authResultMetadata.TelemetryTokenType,
                 expiresOn,
                 logger,
-                executionResult,
-                tagsEnricher);
+                extraTags);
         }
 
         public void IncrementSuccessCounter(string platform,
@@ -338,12 +313,11 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             CacheLevel cacheLevel,
             ILoggerAdapter logger,
             int tokenType,
-            ExecutionResult executionResult = null,
-            Action<ExecutionResult, IList<KeyValuePair<string, object>>> tagsEnricher = null)
+            IReadOnlyList<KeyValuePair<string, object>> extraTags = null)
         {
             if (s_successCounter.Value.Enabled)
             {
-                var tags = BuildTagList(logger, executionResult, tagsEnricher,
+                var tags = BuildTagList(extraTags,
                         new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                         new(TelemetryConstants.Platform, platform),
                         new(TelemetryConstants.ApiId, apiId),
@@ -362,8 +336,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             ApiEvent.ApiIds apiId,
             AuthenticationResultMetadata authResultMetadata,
             ILoggerAdapter logger = null,
-            ExecutionResult executionResult = null,
-            Action<ExecutionResult, IList<KeyValuePair<string, object>>> tagsEnricher = null)
+            IReadOnlyList<KeyValuePair<string, object>> extraTags = null)
         {
             if (authResultMetadata.TokenSource != TokenSource.IdentityProvider)
                 return;
@@ -372,7 +345,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             {
                 if (s_durationInHttp.Value.Enabled)
                 {
-                    var tags = BuildTagList(logger, executionResult, tagsEnricher,
+                    var tags = BuildTagList(extraTags,
                         new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                         new(TelemetryConstants.Platform, platform),
                         new(TelemetryConstants.ApiId, apiId),
@@ -384,7 +357,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             {
                 if (s_durationInHttpV2.Value.Enabled)
                 {
-                    var tags = BuildTagList(logger, executionResult, tagsEnricher,
+                    var tags = BuildTagList(extraTags,
                         new(TelemetryConstants.MsalVersionPlatform, MsalVersionPlatformTag(platform)),
                         new(TelemetryConstants.ApiId, apiId),
                         new(TelemetryConstants.TokenType, authResultMetadata.TelemetryTokenType),
@@ -408,8 +381,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             long totalDurationInMs,
             string rawStsErrorCode = null,
             ILoggerAdapter logger = null,
-            ExecutionResult executionResult = null,
-            Action<ExecutionResult, IList<KeyValuePair<string, object>>> tagsEnricher = null)
+            IReadOnlyList<KeyValuePair<string, object>> extraTags = null)
         {
             IncrementFailureCounter(
                 platform,
@@ -421,13 +393,12 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                 tokenType,
                 rawStsErrorCode,
                 logger,
-                executionResult,
-                tagsEnricher);
+                extraTags);
 
             if (_isExtendedMetricsEnabled && s_durationTotalV2.Value.Enabled)
             {
                 // TokenSource is empty on failure: no token was acquired, so no source applies.
-                var tags = BuildTagList(logger, executionResult, tagsEnricher,
+                var tags = BuildTagList(extraTags,
                     new(TelemetryConstants.MsalVersionPlatform, MsalVersionPlatformTag(platform)),
                     new(TelemetryConstants.ApiId, apiEvent.ApiId),
                     new(TelemetryConstants.TokenSource, string.Empty),
@@ -439,7 +410,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                 s_durationTotalV2.Value.Record(totalDurationInMs, in tags);
             }
 
-            LogFailureHttpDuration(platform, apiEvent, httpStatusCode, logger, executionResult, tagsEnricher);
+            LogFailureHttpDuration(platform, apiEvent, httpStatusCode, logger, extraTags);
         }
 
         public void IncrementFailureCounter(
@@ -452,8 +423,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             int tokenType,
             string rawStsErrorCode = null,
             ILoggerAdapter logger = null,
-            ExecutionResult executionResult = null,
-            Action<ExecutionResult, IList<KeyValuePair<string, object>>> tagsEnricher = null)
+            IReadOnlyList<KeyValuePair<string, object>> extraTags = null)
         {
             if (!s_failureCounter.Value.Enabled)
                 return;
@@ -472,7 +442,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             if (!string.IsNullOrEmpty(rawStsErrorCode))
                 baseTags.Add(new(TelemetryConstants.RawStsErrorCode, rawStsErrorCode));
 
-            var tags = BuildTagList(logger, executionResult, tagsEnricher, baseTags.ToArray());
+            var tags = BuildTagList(extraTags, baseTags.ToArray());
 
             s_failureCounter.Value.Add(1, in tags);
         }
@@ -487,15 +457,14 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             ApiEvent apiEvent,
             int httpStatusCode,
             ILoggerAdapter logger = null,
-            ExecutionResult executionResult = null,
-            Action<ExecutionResult, IList<KeyValuePair<string, object>>> tagsEnricher = null)
+            IReadOnlyList<KeyValuePair<string, object>> extraTags = null)
         {
             if (!_isExtendedMetricsEnabled || !s_durationInHttpV2.Value.Enabled)
                 return;
 
             if (apiEvent.DurationInHttpInMs > 0)
             {
-                var tags = BuildTagList(logger, executionResult, tagsEnricher,
+                var tags = BuildTagList(extraTags,
                     new(TelemetryConstants.MsalVersionPlatform, MsalVersionPlatformTag(platform)),
                     new(TelemetryConstants.ApiId, apiEvent.ApiId),
                     new(TelemetryConstants.TokenType, apiEvent.TokenType),
@@ -513,14 +482,13 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             int tokenType,
             DateTimeOffset expiresOn,
             ILoggerAdapter logger = null,
-            ExecutionResult executionResult = null,
-            Action<ExecutionResult, IList<KeyValuePair<string, object>>> tagsEnricher = null)
+            IReadOnlyList<KeyValuePair<string, object>> extraTags = null)
         {
             if (s_remainingTokenLifetime.Value.Enabled)
             {
                 long remainingSeconds = Math.Max(0, (long)(expiresOn - DateTimeOffset.UtcNow).TotalSeconds);
 
-                var tags = BuildTagList(logger, executionResult, tagsEnricher,
+                var tags = BuildTagList(extraTags,
                     new(TelemetryConstants.MsalVersionPlatform, MsalVersionPlatformTag(platform)),
                     new(TelemetryConstants.ApiId, apiId),
                     new(TelemetryConstants.TokenSource, tokenSource),

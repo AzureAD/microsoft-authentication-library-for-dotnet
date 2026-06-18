@@ -12,6 +12,7 @@ using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
+using Microsoft.Identity.Client.TelemetryCore.OpenTelemetry;
 #if iOS
 using Microsoft.Identity.Client.Platforms.iOS;
 #endif
@@ -98,10 +99,12 @@ namespace Microsoft.Identity.Client.Internal
                 {
                     var authResult = await fetchAction().ConfigureAwait(false);
 
-                    // Only materialize an ExecutionResult when an enricher is configured to consume it.
-                    ExecutionResult executionResult = tagsEnricher == null
-                        ? null
-                        : new ExecutionResult { Successful = true, Result = authResult };
+                    // Invoke the enricher once for this background refresh and reuse the materialized
+                    // tags across every instrument below.
+                    IReadOnlyList<KeyValuePair<string, object>> extraTags = OtelEnrichmentHelper.MaterializeExtraTags(
+                        tagsEnricher,
+                        () => new ExecutionResult { Successful = true, Result = authResult },
+                        logger);
 
                     serviceBundle.PlatformProxy.OtelInstrumentation.IncrementSuccessCounter(
                         serviceBundle.PlatformProxy.GetProductName(),
@@ -113,8 +116,7 @@ namespace Microsoft.Identity.Client.Internal
                         Cache.CacheLevel.None,
                         logger,
                         apiEvent.TokenType,
-                        executionResult,
-                        tagsEnricher);
+                        extraTags);
 
                     serviceBundle.PlatformProxy.OtelInstrumentation.LogRemainingTokenLifetime(
                         serviceBundle.PlatformProxy.GetProductName(),
@@ -125,16 +127,14 @@ namespace Microsoft.Identity.Client.Internal
                         apiEvent.TokenType,
                         authResult.ExpiresOn,
                         logger,
-                        executionResult,
-                        tagsEnricher);
+                        extraTags);
 
                     serviceBundle.PlatformProxy.OtelInstrumentation.LogSuccessHttpDuration(
                         serviceBundle.PlatformProxy.GetProductName(),
                         apiEvent.ApiId,
                         authResult.AuthenticationResultMetadata,
                         logger,
-                        executionResult,
-                        tagsEnricher);
+                        extraTags);
                 }
                 catch (MsalServiceException ex)
                 {
@@ -185,18 +185,20 @@ namespace Microsoft.Identity.Client.Internal
             var otel = serviceBundle.PlatformProxy.OtelInstrumentation;
             var platform = serviceBundle.PlatformProxy.GetProductName();
 
-            // Only materialize an ExecutionResult when an enricher is configured to consume it.
-            ExecutionResult executionResult = tagsEnricher == null
-                ? null
-                : new ExecutionResult { Successful = false, Exception = exception };
+            // Invoke the enricher once for this background failure and reuse the materialized tags
+            // across both instruments below.
+            IReadOnlyList<KeyValuePair<string, object>> extraTags = OtelEnrichmentHelper.MaterializeExtraTags(
+                tagsEnricher,
+                () => new ExecutionResult { Successful = false, Exception = exception },
+                logger);
 
             otel.IncrementFailureCounter(
                 platform, errorCode, apiEvent.ApiId, callerSdkId, callerSdkVersion,
                 CacheRefreshReason.ProactivelyRefreshed, apiEvent.TokenType, rawStsErrorCode,
-                logger, executionResult, tagsEnricher);
+                logger, extraTags);
 
             otel.LogFailureHttpDuration(
-                platform, apiEvent, httpStatusCode, logger, executionResult, tagsEnricher);
+                platform, apiEvent, httpStatusCode, logger, extraTags);
         }
 
         private static Random s_random = new Random();

@@ -140,17 +140,17 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             CacheLevel cacheLevel = GetCacheLevel(authenticationResult);
 
-            Action<ExecutionResult, IList<KeyValuePair<string, object>>> tagsEnricher = AuthenticationRequestParameters.OtelTagsEnricher;
-
-            // Only materialize an ExecutionResult when an enricher is configured to consume it.
-            ExecutionResult executionResult = tagsEnricher == null
-                ? null
-                : new ExecutionResult
+            // Invoke the caller-supplied enricher once per acquisition and merge the resulting fixed set of
+            // extra tags into every instrument below, so the delegate is not re-run per metric.
+            IReadOnlyList<KeyValuePair<string, object>> extraTags = OtelEnrichmentHelper.MaterializeExtraTags(
+                AuthenticationRequestParameters.OtelTagsEnricher,
+                () => new ExecutionResult
                 {
                     Successful = true,
                     Result = authenticationResult,
                     ClientCertificate = AuthenticationRequestParameters.ResolvedCertificate
-                };
+                },
+                AuthenticationRequestParameters.RequestContext.Logger);
 
             // Log metrics
             ServiceBundle.PlatformProxy.OtelInstrumentation.LogSuccessMetrics(
@@ -163,23 +163,22 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         authenticationResult.AuthenticationResultMetadata,
                         AuthenticationRequestParameters.RequestContext.Logger,
                         authenticationResult.ExpiresOn,
-                        executionResult,
-                        tagsEnricher);
+                        extraTags);
         }
 
         private void LogFailureTelemetryToOtel(string errorCodeToLog, ApiEvent apiEvent, CacheRefreshReason cacheRefreshReason, int httpStatusCode, long totalDurationInMs, MsalException exception = null, string rawStsErrorCode = null)
         {
-            Action<ExecutionResult, IList<KeyValuePair<string, object>>> tagsEnricher = AuthenticationRequestParameters.OtelTagsEnricher;
-
-            // Only materialize an ExecutionResult when an enricher is configured to consume it.
-            ExecutionResult executionResult = tagsEnricher == null
-                ? null
-                : new ExecutionResult
+            // Invoke the caller-supplied enricher once per acquisition and merge the resulting fixed set of
+            // extra tags into every instrument below, so the delegate is not re-run per metric.
+            IReadOnlyList<KeyValuePair<string, object>> extraTags = OtelEnrichmentHelper.MaterializeExtraTags(
+                AuthenticationRequestParameters.OtelTagsEnricher,
+                () => new ExecutionResult
                 {
                     Successful = false,
                     Exception = exception,
                     ClientCertificate = AuthenticationRequestParameters.ResolvedCertificate
-                };
+                },
+                AuthenticationRequestParameters.RequestContext.Logger);
 
             ServiceBundle.PlatformProxy.OtelInstrumentation.LogFailureMetrics(
                         ServiceBundle.PlatformProxy.GetProductName(),
@@ -193,8 +192,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         totalDurationInMs,
                         rawStsErrorCode,
                         AuthenticationRequestParameters.RequestContext.Logger,
-                        executionResult,
-                        tagsEnricher);
+                        extraTags);
         }
 
         private Tuple<string, string> ParseScopesForTelemetry()

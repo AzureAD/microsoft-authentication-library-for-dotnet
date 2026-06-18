@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 
 namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
@@ -22,8 +21,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             AuthenticationResultMetadata authResultMetadata,
             ILoggerAdapter logger,
             DateTimeOffset expiresOn,
-            ExecutionResult executionResult = null,
-            Action<ExecutionResult, IList<KeyValuePair<string, object>>> tagsEnricher = null);
+            IReadOnlyList<KeyValuePair<string, object>> extraTags = null);
 
         internal void IncrementSuccessCounter(
             string platform,
@@ -35,8 +33,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             CacheLevel cacheLevel,
             ILoggerAdapter logger,
             int TokenType,
-            ExecutionResult executionResult = null,
-            Action<ExecutionResult, IList<KeyValuePair<string, object>>> tagsEnricher = null);
+            IReadOnlyList<KeyValuePair<string, object>> extraTags = null);
 
         internal void LogFailureMetrics(
             string platform,
@@ -50,8 +47,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             long totalDurationInMs,
             string rawStsErrorCode = null,
             ILoggerAdapter logger = null,
-            ExecutionResult executionResult = null,
-            Action<ExecutionResult, IList<KeyValuePair<string, object>>> tagsEnricher = null);
+            IReadOnlyList<KeyValuePair<string, object>> extraTags = null);
 
         internal void IncrementFailureCounter(
             string platform,
@@ -63,16 +59,14 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             int tokenType,
             string rawStsErrorCode = null,
             ILoggerAdapter logger = null,
-            ExecutionResult executionResult = null,
-            Action<ExecutionResult, IList<KeyValuePair<string, object>>> tagsEnricher = null);
+            IReadOnlyList<KeyValuePair<string, object>> extraTags = null);
 
         internal void LogFailureHttpDuration(
             string platform,
             ApiEvent apiEvent,
             int httpStatusCode,
             ILoggerAdapter logger = null,
-            ExecutionResult executionResult = null,
-            Action<ExecutionResult, IList<KeyValuePair<string, object>>> tagsEnricher = null);
+            IReadOnlyList<KeyValuePair<string, object>> extraTags = null);
 
         internal void LogRemainingTokenLifetime(
             string platform,
@@ -83,15 +77,13 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             int tokenType,
             DateTimeOffset expiresOn,
             ILoggerAdapter logger = null,
-            ExecutionResult executionResult = null,
-            Action<ExecutionResult, IList<KeyValuePair<string, object>>> tagsEnricher = null);
+            IReadOnlyList<KeyValuePair<string, object>> extraTags = null);
 
         internal void LogSuccessHttpDuration(
             string platform,
             ApiEvent.ApiIds apiId,
             AuthenticationResultMetadata authResultMetadata,
             ILoggerAdapter logger = null,
-            ExecutionResult executionResult = null,
-            Action<ExecutionResult, IList<KeyValuePair<string, object>>> tagsEnricher = null);
+            IReadOnlyList<KeyValuePair<string, object>> extraTags = null);
     }
 }

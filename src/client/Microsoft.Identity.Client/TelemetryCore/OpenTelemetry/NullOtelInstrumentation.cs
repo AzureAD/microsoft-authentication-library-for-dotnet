@@ -8,7 +8,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 
 namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
@@ -25,8 +24,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             AuthenticationResultMetadata authResultMetadata,
             ILoggerAdapter logger,
             DateTimeOffset expiresOn,
-            ExecutionResult executionResult = null,
-            Action<ExecutionResult, IList<KeyValuePair<string, object>>> tagsEnricher = null)
+            IReadOnlyList<KeyValuePair<string, object>> extraTags = null)
         {
             // No op
         }
@@ -36,8 +34,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             ApiEvent.ApiIds apiId,
             AuthenticationResultMetadata authResultMetadata,
             ILoggerAdapter logger = null,
-            ExecutionResult executionResult = null,
-            Action<ExecutionResult, IList<KeyValuePair<string, object>>> tagsEnricher = null)
+            IReadOnlyList<KeyValuePair<string, object>> extraTags = null)
         {
             // No op
         }
@@ -53,8 +50,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             long totalDurationInMs,
             string rawStsErrorCode = null,
             ILoggerAdapter logger = null,
-            ExecutionResult executionResult = null,
-            Action<ExecutionResult, IList<KeyValuePair<string, object>>> tagsEnricher = null)
+            IReadOnlyList<KeyValuePair<string, object>> extraTags = null)
         {
             // No op
         }
@@ -68,8 +64,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             int tokenType,
             string rawStsErrorCode = null,
             ILoggerAdapter logger = null,
-            ExecutionResult executionResult = null,
-            Action<ExecutionResult, IList<KeyValuePair<string, object>>> tagsEnricher = null)
+            IReadOnlyList<KeyValuePair<string, object>> extraTags = null)
         {
             // No op
         }
@@ -78,8 +73,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             ApiEvent apiEvent,
             int httpStatusCode,
             ILoggerAdapter logger = null,
-            ExecutionResult executionResult = null,
-            Action<ExecutionResult, IList<KeyValuePair<string, object>>> tagsEnricher = null)
+            IReadOnlyList<KeyValuePair<string, object>> extraTags = null)
         {
             // No op
         }
@@ -93,8 +87,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             CacheLevel cacheLevel,
             ILoggerAdapter logger,
             int tokenType,
-            ExecutionResult executionResult,
-            Action<ExecutionResult, IList<KeyValuePair<string, object>>> tagsEnricher)
+            IReadOnlyList<KeyValuePair<string, object>> extraTags)
         {
             // No op
         }
@@ -108,8 +101,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             int tokenType,
             DateTimeOffset expiresOn,
             ILoggerAdapter logger = null,
-            ExecutionResult executionResult = null,
-            Action<ExecutionResult, IList<KeyValuePair<string, object>>> tagsEnricher = null)
+            IReadOnlyList<KeyValuePair<string, object>> extraTags = null)
         {
             // No op
         }
