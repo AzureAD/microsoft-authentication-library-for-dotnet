@@ -412,8 +412,10 @@ namespace Microsoft.Identity.Client.Extensibility
         /// <returns>The builder to chain the .With methods.</returns>
         /// <exception cref="ArgumentNullException">Thrown when <paramref name="tagsEnricher"/> is null.</exception>
         /// <remarks>
-        /// Keep the cardinality of added tag values low. High-cardinality values (such as correlation ids or
-        /// user identifiers) can cause an unbounded number of metric time series in the downstream telemetry backend.
+        /// Keep both the number of added tags and — more importantly — their value cardinality low. High-cardinality
+        /// tag values (such as correlation ids, timestamps, or user identifiers) can cause an unbounded number of
+        /// metric time series in the downstream telemetry backend. The tags are applied to every metric MSAL records
+        /// for the request, so a large number of tags also adds overhead on the metric-recording path.
         /// </remarks>
         public static AbstractAcquireTokenParameterBuilder<T> WithOtelTagsEnricher<T>(
             this AbstractAcquireTokenParameterBuilder<T> builder,

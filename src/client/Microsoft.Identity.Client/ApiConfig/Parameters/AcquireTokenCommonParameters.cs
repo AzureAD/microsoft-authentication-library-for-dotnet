@@ -52,6 +52,14 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         /// and a mutable list of tags to which additional dimensions can be appended.
         /// Set via <c>WithOtelTagsEnricher</c>.
         /// </summary>
+        /// <remarks>
+        /// The tags returned by the enricher are applied to every metric MSAL records for the request, so keep
+        /// both their value cardinality and their number low. High-cardinality tag values (for example correlation
+        /// ids, timestamps, or user identifiers) are the dominant cost: each distinct value multiplies the number
+        /// of metric time series the downstream backend must store and aggregate. A large number of tags is a
+        /// secondary cost that adds per-record overhead on MSAL's metric-recording path. Prefer a small set of
+        /// low-cardinality dimensions; avoid using request-unique values as tags.
+        /// </remarks> 
         public Action<ExecutionResult, IList<KeyValuePair<string, object>>> OtelTagsEnricher { get; set; }
 
         /// <summary>
