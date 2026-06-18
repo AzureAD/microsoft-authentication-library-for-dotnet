@@ -434,12 +434,27 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                     { "custom-cache-key-component", ("custom-value", true) }
                 };
 
+                void AssertCallerSdkDetailsAreNotInCacheKeyComponents()
+                {
+                    var cachedAccessToken = cca.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single();
+
+                    CollectionAssert.AreEquivalent(
+                        new[] { "custom-cache-key-component" },
+                        cachedAccessToken.AdditionalCacheKeyComponents.Keys.ToArray());
+
+                    Assert.AreEqual("custom-value", cachedAccessToken.AdditionalCacheKeyComponents["custom-cache-key-component"]);
+                }
+
                 // Act
                 await cca.AcquireTokenForClient(TestConstants.s_scope)
                     .WithExtraQueryParameters(extraQueryParameters)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
+                // Assert
+                AssertCallerSdkDetailsAreNotInCacheKeyComponents();
+
+                // Act
                 await cca.AcquireTokenForClient(TestConstants.s_scope)
                     .WithExtraQueryParameters(new Dictionary<string, (string, bool)>
                     {
@@ -451,11 +466,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                     .ConfigureAwait(false);
 
                 // Assert
-                var cachedAccessToken = cca.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single();
-
-                CollectionAssert.AreEquivalent(
-                    new[] { "custom-cache-key-component" },
-                    cachedAccessToken.AdditionalCacheKeyComponents.Keys.ToArray());
+                AssertCallerSdkDetailsAreNotInCacheKeyComponents();
             }
         }
 
