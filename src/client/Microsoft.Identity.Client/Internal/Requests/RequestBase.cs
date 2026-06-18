@@ -290,6 +290,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
             string callerSdkId;
             string callerSdkVer;
 
+            RemoveCallerSdkCacheKeyComponents();
+
             // Check if ExtraQueryParameters contains caller-sdk-id and caller-sdk-ver
             if (AuthenticationRequestParameters.ExtraQueryParameters.TryGetValue(Constants.CallerSdkIdKey, out callerSdkId))
             {
@@ -311,6 +313,29 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             apiEvent.CallerSdkApiId = callerSdkId == null ? null : callerSdkId.Substring(0, Math.Min(callerSdkId.Length, Constants.CallerSdkIdMaxLength));
             apiEvent.CallerSdkVersion = callerSdkVer == null ? null : callerSdkVer.Substring(0, Math.Min(callerSdkVer.Length, Constants.CallerSdkVersionMaxLength));
+        }
+
+        private void RemoveCallerSdkCacheKeyComponents()
+        {
+            RemoveCacheKeyComponent(Constants.CallerSdkIdKey);
+            RemoveCacheKeyComponent(Constants.CallerSdkVersionKey);
+        }
+
+        private void RemoveCacheKeyComponent(string key)
+        {
+            var cacheKeyComponents = AuthenticationRequestParameters.CacheKeyComponents;
+
+            if (cacheKeyComponents == null)
+            {
+                return;
+            }
+
+            foreach (string cacheKeyComponent in cacheKeyComponents.Keys
+                .Where(cacheKeyComponent => string.Equals(cacheKeyComponent, key, StringComparison.OrdinalIgnoreCase))
+                .ToArray())
+            {
+                cacheKeyComponents.Remove(cacheKeyComponent);
+            }
         }
 
         private AssertionType GetAssertionType()

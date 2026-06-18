@@ -418,6 +418,48 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         }
 
         [TestMethod]
+        public async Task CallerSdkDetails_AreNeverIncludedInCacheKeyComponentsAsync()
+        {
+            using (_harness = CreateTestHarness())
+            {
+                // Arrange
+                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                _harness.HttpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                var cca = CreateConfidentialClientApp();
+                var extraQueryParameters = new Dictionary<string, (string, bool)>
+                {
+                    { Constants.CallerSdkIdKey, ("testApiId", true) },
+                    { Constants.CallerSdkVersionKey, ("testSdkVersion", true) },
+                    { "custom-cache-key-component", ("custom-value", true) }
+                };
+
+                // Act
+                await cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithExtraQueryParameters(extraQueryParameters)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                await cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithExtraQueryParameters(new Dictionary<string, (string, bool)>
+                    {
+                        { Constants.CallerSdkIdKey, ("otherApiId", true) },
+                        { Constants.CallerSdkVersionKey, ("otherSdkVersion", true) },
+                        { "custom-cache-key-component", ("custom-value", true) }
+                    })
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert
+                var cachedAccessToken = cca.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single();
+
+                CollectionAssert.AreEquivalent(
+                    new[] { "custom-cache-key-component" },
+                    cachedAccessToken.AdditionalCacheKeyComponents.Keys.ToArray());
+            }
+        }
+
+        [TestMethod]
         public async Task CallerSdkDetailsWithClientNameTestAsync()
         {
             using (_harness = CreateTestHarness())
