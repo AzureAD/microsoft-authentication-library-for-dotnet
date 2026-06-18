@@ -1047,6 +1047,50 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
+        [TestMethod]
+        [Description("An enricher that tries to clear or mutate the tag list it receives cannot remove MSAL's canonical tags — " +
+            "the enricher only ever sees its own additions list, so the canonical metric set is append-only.")]
+        public async Task WithOtelTagsEnricher_AttemptsToRemoveCanonicalTags_CanonicalTagsArePreservedAsync()
+        {
+            using (_harness = CreateTestHarness())
+            {
+                CreateApplication();
+                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                _harness.HttpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                AuthenticationResult result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithExtraQueryParameters(extraQueryParams)
+                    .WithOtelTagsEnricher((executionResult, tags) =>
+                    {
+                        // A hostile/buggy enricher tries to wipe and overwrite the canonical tags.
+                        tags.Clear();
+                        tags.Add(new KeyValuePair<string, object>("CustomTag", "CustomValue"));
+                    })
+                    .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+
+                s_meterProvider.ForceFlush();
+
+                var msalSuccess = _exportedMetrics.FirstOrDefault(m => m.Name == "MsalSuccess");
+                Assert.IsNotNull(msalSuccess, "MsalSuccess metric should be emitted.");
+
+                foreach (var metricPoint in msalSuccess.GetMetricPoints())
+                {
+                    var tags = GetTagDictionary(metricPoint.Tags);
+
+                    // Canonical tags survive despite the enricher's Clear().
+                    Assert.IsTrue(tags.ContainsKey(TelemetryConstants.MsalVersion), "Canonical MsalVersion tag must be preserved.");
+                    Assert.IsTrue(tags.ContainsKey(TelemetryConstants.Platform), "Canonical Platform tag must be preserved.");
+                    Assert.IsTrue(tags.ContainsKey(TelemetryConstants.ApiId), "Canonical ApiId tag must be preserved.");
+
+                    // The enricher's own addition is still applied on top.
+                    Assert.IsTrue(tags.TryGetValue("CustomTag", out var value) && (string)value == "CustomValue",
+                        "The enricher's added tag should still be present.");
+                }
+            }
+        }
+
         private static IDictionary<string, object> GetTagDictionary(ReadOnlyTagCollection tags)
         {
             var dict = new Dictionary<string, object>();

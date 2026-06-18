@@ -149,8 +149,10 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
 
         // Builds the final TagList for a metric, applying the optional caller-supplied enricher on top
         // of the base tags. When no enricher is configured this is a thin wrapper over the base tags and
-        // allocates nothing extra. When an enricher is configured, the base tags are copied into a mutable
-        // list the enricher can append to, then materialized into a TagList for recording.
+        // allocates nothing extra. When an enricher is configured, it receives a separate, initially empty
+        // additions list so it can only append tags — MSAL's canonical base tags are append-only and cannot
+        // be removed or altered by the enricher. The base tags followed by the additions are then
+        // materialized into a TagList for recording.
         private static TagList BuildTagList(
             ILoggerAdapter logger,
             ExecutionResult executionResult,
@@ -162,10 +164,26 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                 return new TagList(baseTags);
             }
 
-            var tags = new List<KeyValuePair<string, object>>(baseTags);
+            var additions = new List<KeyValuePair<string, object>>();
+            var tagList = new TagList();
             try
             {
-                tagsEnricher(executionResult, tags);
+                // The enricher only ever sees the additions list, so it cannot remove or mutate the
+                // canonical base tags. Materialization is inside the try as well, so a malformed tag
+                // (e.g. one that throws on Add) also falls back to the base-tags-only path below.
+                tagsEnricher(executionResult, additions);
+
+                foreach (KeyValuePair<string, object> tag in baseTags)
+                {
+                    tagList.Add(tag);
+                }
+
+                foreach (KeyValuePair<string, object> tag in additions)
+                {
+                    tagList.Add(tag);
+                }
+
+                return tagList;
             }
             catch (Exception ex)
             {
@@ -174,16 +192,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                 logger?.WarningPii(
                     $"[OpenTelemetry] The OTel tags enricher threw an exception and was ignored. {ex}",
                     "[OpenTelemetry] The OTel tags enricher threw an exception and was ignored.");
-                tags = new List<KeyValuePair<string, object>>(baseTags);
+                return new TagList(baseTags);
             }
-
-            var tagList = new TagList();
-            foreach (KeyValuePair<string, object> tag in tags)
-            {
-                tagList.Add(tag);
-            }
-
-            return tagList;
         }
 
         // Aggregates the successful requests based on token source and cache refresh reason.
