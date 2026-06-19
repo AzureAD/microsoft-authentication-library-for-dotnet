@@ -2,6 +2,8 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
@@ -20,14 +22,16 @@ namespace Microsoft.Identity.Client.Cache.Items
             string preferredCacheEnv,
             string clientId,
             MsalTokenResponse response,
-            string homeAccountId)
+            string homeAccountId,
+            SortedList<string, string> cacheKeyComponents = null)
             : this(
                   preferredCacheEnv,
                   clientId,
                   response.RefreshToken,
                   response.ClientInfo,
                   response.FamilyId,
-                  homeAccountId)
+                  homeAccountId,
+                  cacheKeyComponents)
         {
         }
 
@@ -37,7 +41,8 @@ namespace Microsoft.Identity.Client.Cache.Items
             string secret,
             string rawClientInfo,
             string familyId,
-            string homeAccountId)
+            string homeAccountId,
+            SortedList<string, string> cacheKeyComponents = null)
             : this()
         {
             ClientId = clientId;
@@ -46,6 +51,12 @@ namespace Microsoft.Identity.Client.Cache.Items
             RawClientInfo = rawClientInfo;
             FamilyId = familyId;
             HomeAccountId = homeAccountId;
+
+            // Do not partition FRTs — they are shared across apps by design
+            if (string.IsNullOrWhiteSpace(FamilyId) && cacheKeyComponents != null && cacheKeyComponents.Any())
+            {
+                AdditionalCacheKeyComponents = cacheKeyComponents;
+            }
 
             InitCacheKey();
         }
@@ -70,6 +81,12 @@ namespace Microsoft.Identity.Client.Cache.Items
                        ClientId,
                        tenantId: null,
                        scopes: null);
+
+                // Append partition hash so partitioned and non-partitioned RTs coexist
+                if (AdditionalCacheKeyComponents != null && AdditionalCacheKeyComponents.Count > 0)
+                {
+                    key = $"{key}{MsalCacheKeys.CacheKeyDelimiter}{CoreHelpers.ComputeAccessTokenExtCacheKey(AdditionalCacheKeyComponents)}";
+                }
             }
 
             CacheKey = key;
@@ -144,6 +161,12 @@ namespace Microsoft.Identity.Client.Cache.Items
         /// </summary>
         public bool IsFRT => !string.IsNullOrEmpty(FamilyId);
 
+        /// <summary>
+        /// Additional key-value components used to partition this RT in the cache.
+        /// Never set on FRTs (family refresh tokens are shared across apps).
+        /// </summary>
+        internal SortedList<string, string> AdditionalCacheKeyComponents { get; private set; }
+
         public string CacheKey { get; private set; }
 
         private Lazy<IiOSKey> iOSCacheKeyLazy;
@@ -165,6 +188,12 @@ namespace Microsoft.Identity.Client.Cache.Items
             item.FamilyId = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.FamilyId);
             item.OboCacheKey = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.UserAssertionHash);
 
+            var additionalCacheKeyComponents = JsonHelper.ExtractInnerJsonAsDictionary(j, StorageJsonKeys.CacheExtensions);
+            if (additionalCacheKeyComponents != null && string.IsNullOrWhiteSpace(item.FamilyId))
+            {
+                item.AdditionalCacheKeyComponents = new SortedList<string, string>(additionalCacheKeyComponents);
+            }
+
             item.PopulateFieldsFromJObject(j);
             item.InitCacheKey();
 
@@ -176,7 +205,26 @@ namespace Microsoft.Identity.Client.Cache.Items
             var json = base.ToJObject();
             SetItemIfValueNotNull(json, StorageJsonKeys.FamilyId, FamilyId);
             SetItemIfValueNotNull(json, StorageJsonKeys.UserAssertionHash, OboCacheKey);
+
+            if (AdditionalCacheKeyComponents != null && AdditionalCacheKeyComponents.Count > 0)
+            {
+                StoreDictionaryInJson(json, StorageJsonKeys.CacheExtensions, AdditionalCacheKeyComponents);
+            }
+
             return json;
+        }
+
+        private static void StoreDictionaryInJson(JObject json, string key, IDictionary<string, string> values)
+        {
+            if (values != null)
+            {
+                var innerJson = new JObject();
+                foreach (var kvp in values)
+                {
+                    innerJson[kvp.Key] = kvp.Value;
+                }
+                json[key] = innerJson;
+            }
         }
 
         internal string ToJsonString()
