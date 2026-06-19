@@ -7,14 +7,14 @@
 - Added `GovFr`, `GovDe`, and `GovSg` values to the `AzureCloudInstance` enum for sovereign cloud support. [#6023](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6023)
 
 ### Changes
-- Migrated region discovery to the IMDS `/compute` JSON endpoint. [#6057](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6057)
+- Migrated region discovery to the IMDS `/compute` JSON endpoint. [#6039](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/6039)
 
 ### Bug Fixes
-- Excluded caller SDK telemetry headers (`caller-sdk-id`, `caller-sdk-ver`) from access token cache keys to prevent cache fragmentation. [#6074](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6074)
-- Service Fabric Managed Identity now sends `principalId` for `ObjectId` and rejects `ClientId`/`ResourceId` identifiers. [#6069](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6069)
-- Validated Azure region format to prevent region poisoning. [#6061](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6061)
-- Fixed proactive token refresh bypassing cancellation, which could lead to unbounded semaphore waits. [#6054](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6054)
-- Fall back to the home account from the request when not available elsewhere. [#5657](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5657)
+- Excluded caller SDK telemetry headers (`caller-sdk-id`, `caller-sdk-ver`) from access token cache keys to prevent cache fragmentation. [#6073](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/6073)
+- Service Fabric Managed Identity now sends `principalId` for `ObjectId` and rejects `ClientId`/`ResourceId` identifiers. [#6065](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/6065)
+- Validated Azure region format to prevent region poisoning. [#6060](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/6060)
+- Fixed proactive token refresh bypassing cancellation, which could lead to unbounded semaphore waits. [#6053](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/6053)
+- Fall back to the home account from the request when not available elsewhere. [#5618](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5618)
 
 4.84.2
 ======
