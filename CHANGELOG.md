@@ -1,3 +1,21 @@
+4.85.0
+======
+
+### New Features
+- Added `WithOtelTagsEnricher` extension on `AbstractAcquireTokenParameterBuilder<T>` to enrich OpenTelemetry tags from token acquisition results. [#6071](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6071)
+- Promoted `MsalServiceException.SubErrorForLogging` to public for diagnostic logging of service sub-errors. [#6063](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6063)
+- Added `GovFr`, `GovDe`, and `GovSg` values to the `AzureCloudInstance` enum for sovereign cloud support. [#6023](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6023)
+
+### Changes
+- Migrated region discovery to the IMDS `/compute` JSON endpoint. [#6057](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6057)
+
+### Bug Fixes
+- Excluded caller SDK telemetry headers (`caller-sdk-id`, `caller-sdk-ver`) from access token cache keys to prevent cache fragmentation. [#6074](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6074)
+- Service Fabric Managed Identity now sends `principalId` for `ObjectId` and rejects `ClientId`/`ResourceId` identifiers. [#6069](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6069)
+- Validated Azure region format to prevent region poisoning. [#6061](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6061)
+- Fixed proactive token refresh bypassing cancellation, which could lead to unbounded semaphore waits. [#6054](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6054)
+- Fall back to the home account from the request when not available elsewhere. [#5657](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5657)
+
 4.84.2
 ======
 
