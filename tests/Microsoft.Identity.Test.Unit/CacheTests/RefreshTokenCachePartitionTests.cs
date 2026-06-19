@@ -40,16 +40,24 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.HasCount(1, item.AdditionalCacheKeyComponents);
             Assert.AreEqual("pv", item.AdditionalCacheKeyComponents["pk"]);
 
-            string hash = CoreHelpers.ComputeAccessTokenExtCacheKey(components);
+            // The hash is passed through GetCredentialKey which lower-cases the entire key
+            string hash = CoreHelpers.ComputeAccessTokenExtCacheKey(components).ToLowerInvariant();
             StringAssert.EndsWith(item.CacheKey, "-" + hash,
-                "Cache key should end with partition hash");
+                "Cache key should end with lower-cased partition hash");
+
+            // The entire cache key must be lower-case (consistent with MSAL convention)
+            Assert.AreEqual(item.CacheKey, item.CacheKey.ToLowerInvariant(),
+                "Cache key must be fully lower-cased");
         }
 
         [TestMethod]
         public void RTWithoutPartition_CacheKeyHasNoHash()
         {
+            // Arrange
+            var components = new SortedList<string, string> { { "pk", "pv" } };
+
             // Act
-            var item = new MsalRefreshTokenCacheItem(
+            var nonPartitioned = new MsalRefreshTokenCacheItem(
                 "login.microsoftonline.com",
                 TestConstants.ClientId,
                 "secret-rt",
@@ -57,13 +65,26 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 familyId: null,
                 TestConstants.HomeAccountId);
 
-            // Assert
-            Assert.IsNull(item.AdditionalCacheKeyComponents);
+            var partitioned = new MsalRefreshTokenCacheItem(
+                "login.microsoftonline.com",
+                TestConstants.ClientId,
+                "secret-rt",
+                TestConstants.RawClientId,
+                familyId: null,
+                TestConstants.HomeAccountId,
+                components);
 
-            // Non-partitioned RT cache key should not contain any partition hash
-            // Verify the key ends with the standard delimiter pattern (no appended hash)
-            string keyWithPartition = item.CacheKey + "-extra";
-            Assert.AreNotEqual(keyWithPartition, item.CacheKey);
+            // Assert
+            Assert.IsNull(nonPartitioned.AdditionalCacheKeyComponents);
+
+            // Non-partitioned key must be shorter (no hash suffix)
+            Assert.IsGreaterThan(nonPartitioned.CacheKey.Length, partitioned.CacheKey.Length,
+                "Partitioned key should be longer than non-partitioned key");
+
+            // The partition hash must not appear in the non-partitioned key
+            string hash = CoreHelpers.ComputeAccessTokenExtCacheKey(components).ToLowerInvariant();
+            Assert.DoesNotContain(hash, nonPartitioned.CacheKey,
+                "Non-partitioned key must not contain the partition hash");
         }
 
         [TestMethod]
@@ -88,9 +109,11 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             // Assert — partition should be ignored for FRTs
             Assert.IsNull(item.AdditionalCacheKeyComponents);
             Assert.IsTrue(item.IsFRT);
-            // FRT key should not contain any partition hash
-            string hash = CoreHelpers.ComputeAccessTokenExtCacheKey(components);
-            Assert.AreEqual(-1, item.CacheKey.IndexOf(hash),
+
+            // FRT key should not contain any partition hash (case-insensitive check
+            // since both the hash and the key are lower-cased by convention)
+            string hash = CoreHelpers.ComputeAccessTokenExtCacheKey(components).ToLowerInvariant();
+            Assert.DoesNotContain(hash, item.CacheKey,
                 "FRT cache key must not contain partition hash");
         }
 
@@ -172,14 +195,13 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [TestMethod]
-        public void OldMsalReadsNewJson_PartitionFieldPreservedAsAdditionalFields()
+        public void OldMsalReadsNewJson_PartitionFieldPreservedViaAdditionalFieldsJson()
         {
-            // Scenario: new MSAL writes a partitioned RT; old MSAL (which doesn't
-            // know about cache_extensions on RTs) reads it. The unknown field should
-            // land in AdditionalFieldsJson and survive a re-serialization round-trip,
-            // so it is NOT lost when old MSAL writes the cache back.
+            // Scenario: new MSAL writes a partitioned RT. Old MSAL (which doesn't
+            // know about the "ext" field on RTs) reads it. The unknown field lands
+            // in AdditionalFieldsJson and must survive re-serialization.
 
-            // Arrange — create partitioned RT and serialize
+            // Arrange — build JSON as new MSAL would write it
             var components = new SortedList<string, string> { { "pk", "pv" } };
             var partitioned = new MsalRefreshTokenCacheItem(
                 "login.microsoftonline.com",
@@ -192,16 +214,30 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             var json = partitioned.ToJObject();
 
-            // Act — simulate old MSAL: strip partition awareness by
-            // deserializing into a plain item that ignores the field.
-            // The base class AdditionalFieldsJson mechanism captures unknowns.
+            // Verify the ext field is present in the serialized JSON
+            Assert.IsNotNull(json["ext"], "New MSAL must serialize the ext field");
+
+            // Act — simulate old MSAL (which doesn't know about the 'ext' field on RTs) by
+            // renaming it so the current parser treats it as unknown and moves it into AdditionalFieldsJson.
+            var extValue = json["ext"];
+            json.Remove("ext");
+            json["unknown_ext"] = extValue;
+
             var oldStyleItem = MsalRefreshTokenCacheItem.FromJObject(json);
 
-            // Assert — the partition data round-trips through AdditionalFieldsJson
-            // or through the explicit property; either way it must survive.
+            // Assert — the renamed field should be captured in AdditionalFieldsJson
+            // because the parser doesn't know about it (simulating old MSAL not knowing "ext")
+            Assert.IsNotNull(oldStyleItem.AdditionalFieldsJson,
+                "Unknown fields must be captured in AdditionalFieldsJson");
+            Assert.Contains("unknown_ext", oldStyleItem.AdditionalFieldsJson,
+                "Renamed ext field must survive as an additional field");
+            Assert.IsNull(oldStyleItem.AdditionalCacheKeyComponents,
+                "Old MSAL must not populate partition components from renamed field");
+
+            // Re-serialize and verify the unknown field is preserved
             var reserializedJson = oldStyleItem.ToJObject();
-            Assert.IsNotNull(reserializedJson["ext"],
-                "ext (cache_extensions) field must survive the round-trip even if treated as unknown");
+            Assert.IsNotNull(reserializedJson["unknown_ext"],
+                "Unknown field must survive old MSAL round-trip via AdditionalFieldsJson");
         }
 
         [TestMethod]

@@ -72,6 +72,20 @@ namespace Microsoft.Identity.Client.Cache.Items
                 key = $"{HomeAccountId}{d}{Environment}{d}{StorageJsonValues.CredentialTypeRefreshToken}{d}{FamilyId}{d}{d}".ToLowerInvariant();
 
             }
+            else if (AdditionalCacheKeyComponents != null && AdditionalCacheKeyComponents.Count > 0)
+            {
+                // Pass the partition hash through additionalKeys so it is included
+                // in the ToLowerInvariant() call inside GetCredentialKey, keeping
+                // cache key casing consistent with the AT partition pattern.
+                key = MsalCacheKeys.GetCredentialKey(
+                       HomeAccountId,
+                       Environment,
+                       StorageJsonValues.CredentialTypeRefreshToken,
+                       ClientId,
+                       tenantId: null,
+                       scopes: null,
+                       CoreHelpers.ComputeAccessTokenExtCacheKey(AdditionalCacheKeyComponents));
+            }
             else
             {
                 key = MsalCacheKeys.GetCredentialKey(
@@ -81,12 +95,6 @@ namespace Microsoft.Identity.Client.Cache.Items
                        ClientId,
                        tenantId: null,
                        scopes: null);
-
-                // Append partition hash so partitioned and non-partitioned RTs coexist
-                if (AdditionalCacheKeyComponents != null && AdditionalCacheKeyComponents.Count > 0)
-                {
-                    key = $"{key}{MsalCacheKeys.CacheKeyDelimiter}{CoreHelpers.ComputeAccessTokenExtCacheKey(AdditionalCacheKeyComponents)}";
-                }
             }
 
             CacheKey = key;
@@ -138,6 +146,16 @@ namespace Microsoft.Identity.Client.Cache.Items
             if (!string.IsNullOrWhiteSpace(FamilyId))
             {
                 return $"{StorageJsonValues.CredentialTypeRefreshToken}{MsalCacheKeys.CacheKeyDelimiter}{FamilyId}{MsalCacheKeys.CacheKeyDelimiter}{MsalCacheKeys.CacheKeyDelimiter}".ToLowerInvariant();
+            }
+
+            if (AdditionalCacheKeyComponents != null && AdditionalCacheKeyComponents.Count > 0)
+            {
+                return MsalCacheKeys.GetiOSServiceKey(
+                    StorageJsonValues.CredentialTypeRefreshToken,
+                    ClientId,
+                    tenantId: null,
+                    scopes: null,
+                    CoreHelpers.ComputeAccessTokenExtCacheKey(AdditionalCacheKeyComponents));
             }
 
             return MsalCacheKeys.GetiOSServiceKey(StorageJsonValues.CredentialTypeRefreshToken, ClientId, tenantId: null, scopes: null);
