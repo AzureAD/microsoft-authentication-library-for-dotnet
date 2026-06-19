@@ -4,6 +4,7 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.KeyAttestation.Attestation;
 
 namespace Microsoft.Identity.Client.KeyAttestation
 {
@@ -12,6 +13,11 @@ namespace Microsoft.Identity.Client.KeyAttestation
     /// </summary>
     public static class ManagedIdentityAttestationExtensions
     {
+        // Error code surfaced when Credential Guard / KeyGuard attestation is requested but fails.
+        // The failure originates from the attestation (MAA) service, so it is surfaced as a service error.
+        // Matches the error code used by the IMDSv2 consumer so callers see a single, consistent code.
+        private const string AttestationFailedErrorCode = "attestation_failed";
+
         /// <summary>
         /// Enables Credential Guard attestation support for managed identity mTLS Proof-of-Possession flows.
         /// This method should be called after <see cref="ManagedIdentityPopExtensions.WithMtlsProofOfPossession"/>.
@@ -28,7 +34,7 @@ namespace Microsoft.Identity.Client.KeyAttestation
 
             builder.CommonParameters.AttestationTokenProvider = async (endpoint, keyHandle, clientId, keyId, logger, ct) =>
             {
-                var result = await PopKeyAttestor.AttestCredentialGuardAsync(
+                AttestationResult result = await PopKeyAttestor.AttestCredentialGuardAsync(
                     endpoint,
                     keyHandle,
                     clientId,
@@ -36,8 +42,23 @@ namespace Microsoft.Identity.Client.KeyAttestation
                     logger,
                     ct).ConfigureAwait(false);
 
-                // Return JWT on success, null for non-attested flow on failure
-                return result.Status == Attestation.AttestationStatus.Success ? result.Jwt : null;
+                if (result.Status == AttestationStatus.Success && !string.IsNullOrEmpty(result.Jwt))
+                {
+                    return result.Jwt;
+                }
+
+                // Attestation failed. Surface the reason to the caller instead of returning null —
+                // returning null would cause an empty/non-attested certificate request to be sent to
+                // IMDS, silently dropping the real failure (e.g. an MAA policy-evaluation deny). The
+                // failure originates from the attestation (MAA) service, so it is a service exception.
+                string reason = string.IsNullOrEmpty(result.ErrorMessage)
+                    ? "(no additional detail available)"
+                    : result.ErrorMessage;
+
+                throw new MsalServiceException(
+                    AttestationFailedErrorCode,
+                    $"Key Guard attestation failed; no attestation token was produced. " +
+                    $"Status: {result.Status}, NativeErrorCode: {result.NativeErrorCode}, Reason: {reason}");
             };
 
             return builder;

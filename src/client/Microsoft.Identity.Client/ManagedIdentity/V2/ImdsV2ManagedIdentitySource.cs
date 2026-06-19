@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -490,18 +490,35 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 
                 if (string.IsNullOrWhiteSpace(attestationJwt))
                 {
-                    _requestContext.Logger.Info("[ImdsV2] Attestation provider returned null/empty JWT. Proceeding with non-attested flow.");
-                    return null;
+                    // A provider was configured (we passed the _attestationTokenProvider null-check above)
+                    // and this is a KeyGuard key, for which attestation is mandatory. A null/empty token
+                    // means attestation did not succeed — refuse to fall back to a non-attested request,
+                    // which would silently send an empty attestation token to IMDS.
+                    throw MsalServiceExceptionFactory.CreateManagedIdentityException(
+                        "attestation_failed",
+                        "[ImdsV2] Attestation was required for this KeyGuard key but the attestation provider " +
+                        "returned no token. Refusing to send a non-attested certificate request to IMDS.",
+                        null,
+                        ManagedIdentitySource.Imds,
+                        null);
                 }
 
                 return attestationJwt;
             }
+            catch (MsalServiceException)
+            {
+                // Already a well-formed attestation service failure (from the provider or the check above) —
+                // propagate as-is rather than double-wrapping.
+                throw;
+            }
             catch (Exception ex)
             {
-                throw new MsalClientException(
+                throw MsalServiceExceptionFactory.CreateManagedIdentityException(
                     "attestation_failed",
                     $"[ImdsV2] Attestation token provider failed: {ex.Message}",
-                    ex);
+                    ex,
+                    ManagedIdentitySource.Imds,
+                    null);
             }
         }
 

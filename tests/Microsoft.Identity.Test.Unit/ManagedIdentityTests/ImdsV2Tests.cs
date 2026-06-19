@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Xml;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Logger;
 using Microsoft.Identity.Client.KeyAttestation;
@@ -792,53 +793,401 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        public async Task MtlsPop_AttestationProviderReturnsNull_UsesNonAttestedFlow()
+        public async Task MtlsPop_AttestationProviderReturnsNull_ThrowsAttestationFailed()
         {
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
+                // Arrange
                 SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
 
                 var mi = await CreateManagedIdentityAsync(httpManager, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
 
-                // Add mocks for successful non-attested flow
-                AddMocksToGetEntraToken(httpManager);
+                // Only the CSR-metadata request is consumed before attestation fails; no cert/token mocks.
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
 
-                // Test with null-returning attestation provider - should gracefully use non-attested flow
-                var result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                    .WithMtlsProofOfPossession()
-                    .WithAttestationProviderForTests(TestAttestationProviders.CreateNullProvider())
-                    .ExecuteAsync().ConfigureAwait(false);
+                // Act: a configured provider that yields no token must hard-fail for a KeyGuard key rather
+                // than silently sending a non-attested certificate request to IMDS.
+                var ex = await Assert.ThrowsAsync<MsalServiceException>(async () =>
+                    await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                        .WithMtlsProofOfPossession()
+                        .WithAttestationProviderForTests(TestAttestationProviders.CreateNullProvider())
+                        .ExecuteAsync().ConfigureAwait(false)
+                ).ConfigureAwait(false);
 
-                Assert.IsNotNull(result);
-                Assert.AreEqual(MTLSPoP, result.TokenType, "Should get mTLS PoP token even with null attestation provider");
-                Assert.IsNotNull(result.BindingCertificate);
+                // Assert
+                Assert.AreEqual("attestation_failed", ex.ErrorCode);
             }
         }
 
         [TestMethod]
-        public async Task MtlsPop_AttestationProviderReturnsEmptyToken_UsesNonAttestedFlow()
+        public async Task MtlsPop_AttestationProviderReturnsEmptyToken_ThrowsAttestationFailed()
         {
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
+                // Arrange
                 SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
 
                 var mi = await CreateManagedIdentityAsync(httpManager, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
 
-                // Add mocks for successful non-attested flow
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
+
+                // Act: whitespace/empty token is treated as a failed attestation, not a non-attested fallback.
+                var ex = await Assert.ThrowsAsync<MsalServiceException>(async () =>
+                    await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                        .WithMtlsProofOfPossession()
+                        .WithAttestationProviderForTests(TestAttestationProviders.CreateEmptyProvider())
+                        .ExecuteAsync().ConfigureAwait(false)
+                ).ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual("attestation_failed", ex.ErrorCode);
+            }
+        }
+
+        [TestMethod]
+        public async Task MtlsPop_AttestationProviderThrows_ThrowsAttestationFailedWithInner()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                // Arrange
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
+
+                var mi = await CreateManagedIdentityAsync(httpManager, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
+
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
+
+                // Act: an exception from the provider must surface as attestation_failed with the cause preserved.
+                var ex = await Assert.ThrowsAsync<MsalServiceException>(async () =>
+                    await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                        .WithMtlsProofOfPossession()
+                        .WithAttestationProviderForTests(TestAttestationProviders.CreateFailingProvider("native boom"))
+                        .ExecuteAsync().ConfigureAwait(false)
+                ).ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual("attestation_failed", ex.ErrorCode);
+                StringAssert.Contains(ex.Message, "native boom");
+                Assert.IsNotNull(ex.InnerException);
+                Assert.IsInstanceOfType(ex.InnerException, typeof(InvalidOperationException));
+            }
+        }
+
+        [TestMethod]
+        public async Task MtlsPop_WithAttestationSupport_NativeError_ThrowsAttestationFailedWithReason()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                // Arrange
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
+
+                var mi = await CreateManagedIdentityAsync(httpManager, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
+
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
+
+                // Simulate the production failure: MAA policy/dbx deny surfaces as a native error code + reason.
+                const string reason = "The enclave rejected the evidence (key type / PCR policy).";
+                PopKeyAttestor.s_testAttestationProvider = (endpoint, keyHandle, clientId, keyId, ct) =>
+                    Task.FromResult(new AttestationResult(AttestationStatus.NativeError, null, null, -6, reason));
+
+                // Act
+                var ex = await Assert.ThrowsAsync<MsalServiceException>(async () =>
+                    await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                        .WithMtlsProofOfPossession()
+                        .WithAttestationSupport()
+                        .ExecuteAsync().ConfigureAwait(false)
+                ).ConfigureAwait(false);
+
+                // Assert: the real reason is propagated to the caller (not swallowed into an empty token).
+                Assert.AreEqual("attestation_failed", ex.ErrorCode);
+                StringAssert.Contains(ex.Message, reason);
+                StringAssert.Contains(ex.Message, "Status: NativeError");
+                StringAssert.Contains(ex.Message, "NativeErrorCode: -6");
+            }
+        }
+
+        [TestMethod]
+        public async Task MtlsPop_WithAttestationSupport_NativeException_ThrowsAttestationFailedWithReason()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                // Arrange
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
+
+                var mi = await CreateManagedIdentityAsync(httpManager, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
+
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
+
+                const string reason = "Native library raised SEHException: 0x80090011";
+                PopKeyAttestor.s_testAttestationProvider = (endpoint, keyHandle, clientId, keyId, ct) =>
+                    Task.FromResult(new AttestationResult(AttestationStatus.Exception, null, string.Empty, -1, reason));
+
+                // Act
+                var ex = await Assert.ThrowsAsync<MsalServiceException>(async () =>
+                    await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                        .WithMtlsProofOfPossession()
+                        .WithAttestationSupport()
+                        .ExecuteAsync().ConfigureAwait(false)
+                ).ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual("attestation_failed", ex.ErrorCode);
+                StringAssert.Contains(ex.Message, reason);
+                StringAssert.Contains(ex.Message, "Status: Exception");
+            }
+        }
+
+        [TestMethod]
+        public async Task MtlsPop_WithAttestationSupport_TokenEmpty_ThrowsAttestationFailed()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                // Arrange
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
+
+                var mi = await CreateManagedIdentityAsync(httpManager, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
+
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
+
+                PopKeyAttestor.s_testAttestationProvider = (endpoint, keyHandle, clientId, keyId, ct) =>
+                    Task.FromResult(new AttestationResult(AttestationStatus.TokenEmpty, null, null, 0, "rc==0 but token buffer was null."));
+
+                // Act
+                var ex = await Assert.ThrowsAsync<MsalServiceException>(async () =>
+                    await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                        .WithMtlsProofOfPossession()
+                        .WithAttestationSupport()
+                        .ExecuteAsync().ConfigureAwait(false)
+                ).ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual("attestation_failed", ex.ErrorCode);
+                StringAssert.Contains(ex.Message, "Status: TokenEmpty");
+            }
+        }
+
+        [TestMethod]
+        public async Task MtlsPop_WithAttestationSupport_NotInitialized_ThrowsAttestationFailed()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                // Arrange
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
+
+                var mi = await CreateManagedIdentityAsync(httpManager, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
+
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
+
+                PopKeyAttestor.s_testAttestationProvider = (endpoint, keyHandle, clientId, keyId, ct) =>
+                    Task.FromResult(new AttestationResult(AttestationStatus.NotInitialized, null, null, -1, "Native library not initialized."));
+
+                // Act
+                var ex = await Assert.ThrowsAsync<MsalServiceException>(async () =>
+                    await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                        .WithMtlsProofOfPossession()
+                        .WithAttestationSupport()
+                        .ExecuteAsync().ConfigureAwait(false)
+                ).ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual("attestation_failed", ex.ErrorCode);
+                StringAssert.Contains(ex.Message, "Status: NotInitialized");
+            }
+        }
+
+        [TestMethod]
+        public async Task MtlsPop_WithAttestationSupport_SuccessButEmptyJwt_ThrowsAttestationFailed()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                // Arrange
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
+
+                var mi = await CreateManagedIdentityAsync(httpManager, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
+
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
+
+                // Defensive: a "Success" status with no JWT must still be treated as a failure.
+                PopKeyAttestor.s_testAttestationProvider = (endpoint, keyHandle, clientId, keyId, ct) =>
+                    Task.FromResult(new AttestationResult(AttestationStatus.Success, null, string.Empty, 0, null));
+
+                // Act
+                var ex = await Assert.ThrowsAsync<MsalServiceException>(async () =>
+                    await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                        .WithMtlsProofOfPossession()
+                        .WithAttestationSupport()
+                        .ExecuteAsync().ConfigureAwait(false)
+                ).ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual("attestation_failed", ex.ErrorCode);
+            }
+        }
+
+        [TestMethod]
+        public async Task MtlsPop_WithAttestationSupport_Success_IncludesAttestationToken()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                // Arrange
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
+
+                var mi = await CreateManagedIdentityAsync(httpManager, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
+
+                // Init already injects a fake successful attestation provider; full attested flow runs end-to-end.
                 AddMocksToGetEntraToken(httpManager);
 
-                // Test with empty-string-returning attestation provider - should gracefully use non-attested flow
+                // Act
                 var result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .WithMtlsProofOfPossession()
-                    .WithAttestationProviderForTests(TestAttestationProviders.CreateEmptyProvider())
+                    .WithAttestationSupport()
                     .ExecuteAsync().ConfigureAwait(false);
 
+                // Assert
                 Assert.IsNotNull(result);
-                Assert.AreEqual(MTLSPoP, result.TokenType, "Should get mTLS PoP token even with empty attestation provider");
+                Assert.AreEqual(MTLSPoP, result.TokenType);
                 Assert.IsNotNull(result.BindingCertificate);
             }
+        }
+
+        // ---- Fix 2: native MAA logs are bridged into the MSAL ILoggerAdapter ----
+
+        [TestMethod]
+        public void AttestationLogger_MapLevel_MapsNativeLevelsToMsalLevels()
+        {
+            // Assert
+            Assert.AreEqual(LogLevel.Error, AttestationLogger.MapLevel(AttestationClientLib.LogLevel.Error));
+            Assert.AreEqual(LogLevel.Warning, AttestationLogger.MapLevel(AttestationClientLib.LogLevel.Warn));
+            Assert.AreEqual(LogLevel.Info, AttestationLogger.MapLevel(AttestationClientLib.LogLevel.Info));
+            Assert.AreEqual(LogLevel.Verbose, AttestationLogger.MapLevel(AttestationClientLib.LogLevel.Debug));
+            Assert.AreEqual(LogLevel.Verbose, AttestationLogger.MapLevel((AttestationClientLib.LogLevel)999));
+        }
+
+        [TestMethod]
+        public void AttestationLogger_FormatNativeLog_ContainsTagFuncLineAndMessage()
+        {
+            // Act
+            string formatted = AttestationLogger.FormatNativeLog(
+                "AttestationClientLib", AttestationClientLib.LogLevel.Error, "AttestKeyGuardImportKey", 614, "PolicyEvaluationError");
+
+            // Assert
+            StringAssert.Contains(formatted, "AttestationClientLib");
+            StringAssert.Contains(formatted, "AttestKeyGuardImportKey");
+            StringAssert.Contains(formatted, "614");
+            StringAssert.Contains(formatted, "PolicyEvaluationError");
+        }
+
+        [TestMethod]
+        public void AttestationLogger_FormatNativeLog_NullInputs_DoesNotThrow()
+        {
+            // Act
+            string formatted = AttestationLogger.FormatNativeLog(null, AttestationClientLib.LogLevel.Info, null, 0, null);
+
+            // Assert
+            Assert.IsNotNull(formatted);
+        }
+
+        [TestMethod]
+        public void AttestationLogger_CreateLoggerBridge_RoutesEachNativeLevelToMappedMsalLevel()
+        {
+            // Arrange
+            var logger = Substitute.For<ILoggerAdapter>();
+            logger.IsLoggingEnabled(Arg.Any<LogLevel>()).Returns(true);
+            var bridge = AttestationLogger.CreateLoggerBridge(logger);
+
+            // Act
+            bridge(IntPtr.Zero, "Tag", AttestationClientLib.LogLevel.Error, "Fn", 1, "e-msg");
+            bridge(IntPtr.Zero, "Tag", AttestationClientLib.LogLevel.Warn, "Fn", 2, "w-msg");
+            bridge(IntPtr.Zero, "Tag", AttestationClientLib.LogLevel.Info, "Fn", 3, "i-msg");
+            bridge(IntPtr.Zero, "Tag", AttestationClientLib.LogLevel.Debug, "Fn", 4, "d-msg");
+
+            // Assert
+            logger.Received(1).Log(LogLevel.Error, Arg.Any<string>(), Arg.Is<string>(s => s.Contains("e-msg")));
+            logger.Received(1).Log(LogLevel.Warning, Arg.Any<string>(), Arg.Is<string>(s => s.Contains("w-msg")));
+            logger.Received(1).Log(LogLevel.Info, Arg.Any<string>(), Arg.Is<string>(s => s.Contains("i-msg")));
+            logger.Received(1).Log(LogLevel.Verbose, Arg.Any<string>(), Arg.Is<string>(s => s.Contains("d-msg")));
+        }
+
+        [TestMethod]
+        public void AttestationLogger_CreateLoggerBridge_LogsMessageAsScrubbedNotPii()
+        {
+            // Arrange
+            var logger = Substitute.For<ILoggerAdapter>();
+            logger.IsLoggingEnabled(Arg.Any<LogLevel>()).Returns(true);
+            var bridge = AttestationLogger.CreateLoggerBridge(logger);
+
+            // Act
+            bridge(IntPtr.Zero, "AttestationClientLib", AttestationClientLib.LogLevel.Error, "Attest", 614, "PolicyEvaluationError");
+
+            // Assert: diagnostic text goes to the scrubbed slot; the PII slot is empty.
+            logger.Received(1).Log(LogLevel.Error, string.Empty, Arg.Is<string>(s => s.Contains("PolicyEvaluationError")));
+        }
+
+        [TestMethod]
+        public void AttestationLogger_CreateLoggerBridge_WhenLevelDisabled_DoesNotLog()
+        {
+            // Arrange
+            var logger = Substitute.For<ILoggerAdapter>();
+            logger.IsLoggingEnabled(Arg.Any<LogLevel>()).Returns(false);
+            var bridge = AttestationLogger.CreateLoggerBridge(logger);
+
+            // Act
+            bridge(IntPtr.Zero, "Tag", AttestationClientLib.LogLevel.Error, "Fn", 1, "msg");
+
+            // Assert
+            logger.DidNotReceive().Log(Arg.Any<LogLevel>(), Arg.Any<string>(), Arg.Any<string>());
+        }
+
+        [TestMethod]
+        public void AttestationLogger_CreateLoggerBridge_WhenLoggerThrows_SwallowsException()
+        {
+            // Arrange
+            var logger = Substitute.For<ILoggerAdapter>();
+            logger.IsLoggingEnabled(Arg.Any<LogLevel>()).Returns(true);
+            logger.When(l => l.Log(Arg.Any<LogLevel>(), Arg.Any<string>(), Arg.Any<string>()))
+                  .Do(_ => throw new InvalidOperationException("logger blew up"));
+            var bridge = AttestationLogger.CreateLoggerBridge(logger);
+
+            // Act + Assert: a logging callback must never throw back into native code.
+            bridge(IntPtr.Zero, "Tag", AttestationClientLib.LogLevel.Error, "Fn", 1, "msg");
+        }
+
+        [TestMethod]
+        public void AttestationLogger_CreateLoggerBridge_NullLogger_FallsBackWithoutThrowing()
+        {
+            // Act
+            var bridge = AttestationLogger.CreateLoggerBridge(null);
+
+            // Assert: returns a usable Trace fallback that does not throw.
+            Assert.IsNotNull(bridge);
+            bridge(IntPtr.Zero, "Tag", AttestationClientLib.LogLevel.Info, "Fn", 1, "msg");
+        }
+
+        [TestMethod]
+        public void AttestationErrors_Describe_KnownCodes_ReturnReadableReason()
+        {
+            // Assert
+            StringAssert.Contains(AttestationErrors.Describe(AttestationResultErrorCode.ERRORATTESTATIONFAILED), "rejected the evidence");
+            StringAssert.Contains(AttestationErrors.Describe(AttestationResultErrorCode.ERRORHTTPREQUESTFAILED), "Could not reach the attestation service");
+            StringAssert.Contains(AttestationErrors.Describe(AttestationResultErrorCode.ERRORCURLINITIALIZATION), "libcurl failed to initialize");
+            StringAssert.Contains(AttestationErrors.Describe(AttestationResultErrorCode.ERRORJWTDECRYPTIONFAILED), "could not be decrypted");
+        }
+
+        [TestMethod]
+        public void AttestationErrors_Describe_UnknownCode_ReturnsEnumName()
+        {
+            // Assert: codes without a curated message fall back to the enum name.
+            Assert.AreEqual(
+                AttestationResultErrorCode.ERRORTPMINTERNALFAILURE.ToString(),
+                AttestationErrors.Describe(AttestationResultErrorCode.ERRORTPMINTERNALFAILURE));
         }
 
         [TestMethod]
