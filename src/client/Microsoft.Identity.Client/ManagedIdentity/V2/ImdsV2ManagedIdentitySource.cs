@@ -511,6 +511,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 // propagate as-is rather than double-wrapping.
                 throw;
             }
+            catch (OperationCanceledException)
+            {
+                // Cancellation (including TaskCanceledException) must propagate unchanged rather than
+                // being masked as an attestation_failed service error.
+                throw;
+            }
             catch (Exception ex)
             {
                 throw MsalServiceExceptionFactory.CreateManagedIdentityException(

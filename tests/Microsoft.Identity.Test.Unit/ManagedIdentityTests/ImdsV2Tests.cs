@@ -876,6 +876,41 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
+        public async Task MtlsPop_AttestationProviderCancelled_PropagatesCancellation()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                // Arrange
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
+
+                var mi = await CreateManagedIdentityAsync(httpManager, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
+
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
+
+                // Act: a cancellation surfaced by the attestation provider must propagate unchanged,
+                // not be masked as an attestation_failed service error.
+                Exception caught = null;
+                try
+                {
+                    await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                        .WithMtlsProofOfPossession()
+                        .WithAttestationProviderForTests((endpoint, keyHandle, clientId, keyId, logger, ct) =>
+                            throw new OperationCanceledException("attestation canceled"))
+                        .ExecuteAsync().ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    caught = ex;
+                }
+
+                // Assert
+                Assert.IsInstanceOfType(caught, typeof(OperationCanceledException), "Cancellation must propagate unchanged.");
+                Assert.IsNotInstanceOfType(caught, typeof(MsalServiceException), "Cancellation must not be wrapped as attestation_failed.");
+            }
+        }
+
+        [TestMethod]
         public async Task MtlsPop_WithAttestationSupport_NativeError_ThrowsAttestationFailedWithReason()
         {
             using (new EnvVariableContext())
