@@ -1,2 +1,2 @@
-Microsoft.Identity.Client.MsalMetricsCatalog
-static Microsoft.Identity.Client.MsalMetricsCatalog.CanonicalTagsByMetric.get -> System.Collections.Generic.IReadOnlyDictionary<string, System.Collections.Generic.IReadOnlyList<string>>
+Microsoft.Identity.Client.Extensibility.MsalMetricsCatalog
+static Microsoft.Identity.Client.Extensibility.MsalMetricsCatalog.CanonicalTagsByMetric.get -> System.Collections.Generic.IReadOnlyDictionary<string, System.Collections.Generic.IReadOnlyList<string>>

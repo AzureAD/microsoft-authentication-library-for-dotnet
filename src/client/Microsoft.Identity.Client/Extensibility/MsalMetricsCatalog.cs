@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Microsoft.Identity.Client.TelemetryCore;
 
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Client.Extensibility
 {
     /// <summary>
     /// Describes the OpenTelemetry metrics that MSAL emits and, for each metric, the canonical
@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client
     /// <para>
     /// The tag names listed for a metric are the canonical base tags MSAL always emits for it. They do not
     /// include any extra tags supplied through
-    /// <see cref="Extensibility.AbstractConfidentialClientAcquireTokenParameterBuilderExtension.WithOtelTagsEnricher{T}"/>,
+    /// <see cref="AbstractConfidentialClientAcquireTokenParameterBuilderExtension.WithOtelTagsEnricher{T}"/>,
     /// which are caller-defined and therefore not part of this catalog. Some canonical tags are emitted only
     /// under certain conditions (for example the raw STS error-code tag is present on the failure counter only
     /// when the STS returns a sub-error); they are listed here because they are part of the metric's canonical
