@@ -890,7 +890,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 {
                     // Assert
                     Assert.AreEqual(BrokerResponseConst.AndroidUnauthorizedClient, ex.ErrorCode);
-                    Assert.AreEqual(BrokerResponseConst.AndroidProtectionPolicyRequired, ex.SubError);
+                    Assert.AreEqual(BrokerResponseConst.AndroidProtectionPolicyRequired, ex.SubErrorForLogging);
 
                     return;
                 }

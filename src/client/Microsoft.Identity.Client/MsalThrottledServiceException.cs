@@ -23,7 +23,7 @@ namespace Microsoft.Identity.Client
                 originalException.Message, 
                 originalException.InnerException)
         {
-            SubError = originalException.SubError;
+            SubErrorForLogging = originalException.SubErrorForLogging;
             StatusCode = originalException.StatusCode;
             Claims = originalException.Claims;
             CorrelationId = originalException.CorrelationId;

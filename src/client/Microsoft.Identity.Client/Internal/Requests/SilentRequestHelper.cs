@@ -8,9 +8,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
+using Microsoft.Identity.Client.TelemetryCore.OpenTelemetry;
 #if iOS
 using Microsoft.Identity.Client.Platforms.iOS;
 #endif
@@ -84,17 +86,26 @@ namespace Microsoft.Identity.Client.Internal
         internal static void ProcessFetchInBackground(
             MsalAccessTokenCacheItem oldAccessToken,
             Func<Task<AuthenticationResult>> fetchAction,
-            ILoggerAdapter logger, 
-            IServiceBundle serviceBundle, 
-            ApiEvent apiEvent, 
-            string callerSdkId, 
-            string callerSdkVersion)
+            ILoggerAdapter logger,
+            IServiceBundle serviceBundle,
+            ApiEvent apiEvent,
+            string callerSdkId,
+            string callerSdkVersion,
+            Action<ExecutionResult, IList<KeyValuePair<string, object>>> tagsEnricher = null)
         {
             _ = Task.Run(async () =>
             {
                 try
                 {
                     var authResult = await fetchAction().ConfigureAwait(false);
+
+                    // Invoke the enricher once for this background refresh and reuse the materialized
+                    // tags across every instrument below.
+                    IReadOnlyList<KeyValuePair<string, object>> extraTags = OtelEnrichmentHelper.MaterializeExtraTags(
+                        tagsEnricher,
+                        () => new ExecutionResult { Successful = true, Result = authResult },
+                        logger);
+
                     serviceBundle.PlatformProxy.OtelInstrumentation.IncrementSuccessCounter(
                         serviceBundle.PlatformProxy.GetProductName(),
                         apiEvent.ApiId,
@@ -104,7 +115,8 @@ namespace Microsoft.Identity.Client.Internal
                         CacheRefreshReason.ProactivelyRefreshed,
                         Cache.CacheLevel.None,
                         logger,
-                        apiEvent.TokenType);
+                        apiEvent.TokenType,
+                        extraTags);
 
                     serviceBundle.PlatformProxy.OtelInstrumentation.LogRemainingTokenLifetime(
                         serviceBundle.PlatformProxy.GetProductName(),
@@ -113,12 +125,16 @@ namespace Microsoft.Identity.Client.Internal
                         Cache.CacheLevel.None,
                         CacheRefreshReason.ProactivelyRefreshed,
                         apiEvent.TokenType,
-                        authResult.ExpiresOn);
+                        authResult.ExpiresOn,
+                        logger,
+                        extraTags);
 
                     serviceBundle.PlatformProxy.OtelInstrumentation.LogSuccessHttpDuration(
                         serviceBundle.PlatformProxy.GetProductName(),
                         apiEvent.ApiId,
-                        authResult.AuthenticationResultMetadata);
+                        authResult.AuthenticationResultMetadata,
+                        logger,
+                        extraTags);
                 }
                 catch (MsalServiceException ex)
                 {
@@ -133,19 +149,19 @@ namespace Microsoft.Identity.Client.Internal
                     }
 
                     LogBackgroundFailureTelemetry(serviceBundle, apiEvent, callerSdkId, callerSdkVersion,
-                        ex.ErrorCode, ex.StatusCode, ex.ErrorCodes?.FirstOrDefault());
+                        ex.ErrorCode, ex.StatusCode, ex.ErrorCodes?.FirstOrDefault(), ex, tagsEnricher, logger);
                 }
                 catch (OperationCanceledException ex)
                 {
                     logger.WarningPiiWithPrefix(ex, ProactiveRefreshCancellationError);
                     LogBackgroundFailureTelemetry(serviceBundle, apiEvent, callerSdkId, callerSdkVersion,
-                        ex.GetType().Name, httpStatusCode: 0);
+                        ex.GetType().Name, httpStatusCode: 0, tagsEnricher: tagsEnricher, logger: logger);
                 }
                 catch (Exception ex)
                 {
                     logger.ErrorPiiWithPrefix(ex, ProactiveRefreshGeneralError);
                     LogBackgroundFailureTelemetry(serviceBundle, apiEvent, callerSdkId, callerSdkVersion,
-                        ex.GetType().Name, httpStatusCode: 0);
+                        ex.GetType().Name, httpStatusCode: 0, tagsEnricher: tagsEnricher, logger: logger);
                 }
             });
         }
@@ -161,17 +177,28 @@ namespace Microsoft.Identity.Client.Internal
             string callerSdkVersion,
             string errorCode,
             int httpStatusCode,
-            string rawStsErrorCode = null)
+            string rawStsErrorCode = null,
+            MsalException exception = null,
+            Action<ExecutionResult, IList<KeyValuePair<string, object>>> tagsEnricher = null,
+            ILoggerAdapter logger = null)
         {
             var otel = serviceBundle.PlatformProxy.OtelInstrumentation;
             var platform = serviceBundle.PlatformProxy.GetProductName();
 
+            // Invoke the enricher once for this background failure and reuse the materialized tags
+            // across both instruments below.
+            IReadOnlyList<KeyValuePair<string, object>> extraTags = OtelEnrichmentHelper.MaterializeExtraTags(
+                tagsEnricher,
+                () => new ExecutionResult { Successful = false, Exception = exception },
+                logger);
+
             otel.IncrementFailureCounter(
                 platform, errorCode, apiEvent.ApiId, callerSdkId, callerSdkVersion,
-                CacheRefreshReason.ProactivelyRefreshed, apiEvent.TokenType, rawStsErrorCode);
+                CacheRefreshReason.ProactivelyRefreshed, apiEvent.TokenType, rawStsErrorCode,
+                logger, extraTags);
 
             otel.LogFailureHttpDuration(
-                platform, apiEvent, httpStatusCode);
+                platform, apiEvent, httpStatusCode, logger, extraTags);
         }
 
         private static Random s_random = new Random();

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
@@ -34,8 +35,8 @@ namespace Microsoft.Identity.Client.Region
         }
 
         // For information of the current api-version refer: https://learn.microsoft.com/azure/virtual-machines/instance-metadata-service?tabs=windows#versioning
-        private const string ImdsEndpoint = "http://169.254.169.254/metadata/instance/compute/location";
-        private const string DefaultApiVersion = "2020-06-01";
+        private const string ImdsEndpoint = "http://169.254.169.254/metadata/instance/compute";
+        private const string DefaultApiVersion = "2021-02-01";
 
         private readonly IHttpManager _httpManager;
         private readonly int _imdsCallTimeoutMs;
@@ -46,6 +47,13 @@ namespace Microsoft.Identity.Client.Region
         private static string s_autoDiscoveredRegion;
         private static bool s_failedAutoDiscovery = false;
         private static string s_regionDiscoveryDetails;
+
+        // Matches a region short name consisting solely of ASCII letters and digits.
+        // \A...\z (not ^...$) anchors the whole string so a trailing newline cannot slip through,
+        // and the explicit [a-zA-Z0-9] class (not \w / \d) keeps the match ASCII-only, rejecting
+        // Unicode letters/digits and homoglyphs that could otherwise alter the token endpoint host.
+        private static readonly Regex s_validRegionRegex =
+            new Regex(@"\A[a-zA-Z0-9]+\z", RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
         public RegionManager(
             IHttpManager httpManager,
@@ -94,6 +102,18 @@ namespace Microsoft.Identity.Client.Region
                     requestContext.ApiEvent.RegionDiscoveryFailureReason = s_regionDiscoveryDetails;
                     return null;
                 }
+            }
+
+            // For a user-provided region (WithAzureRegion or the MSAL_FORCE_REGION env variable),
+            // validate the format before using it. An invalid region (e.g. one containing a host,
+            // path, or other special characters) must never be prefixed onto the trusted
+            // "{region}.login.microsoft.com" suffix, as that would redirect the request to a
+            // tampered host. Consistent with region handling elsewhere, an invalid value falls
+            // back to the global (non-regional) endpoint rather than failing the request.
+            if (!IsValidRegionName(azureRegionConfig))
+            {
+                logger.Error($"[Region discovery] User provided region '{azureRegionConfig}' is invalid. Falling back to the global endpoint. {DateTime.UtcNow}");
+                return null;
             }
 
             logger.Info(() => $"[Region discovery] Returning user provided region: {azureRegionConfig}.");
@@ -237,12 +257,30 @@ namespace Microsoft.Identity.Client.Region
 
                             if (response.StatusCode == HttpStatusCode.OK && !response.Body.IsNullOrEmpty())
                             {
-                                region = response.Body;
+                                try
+                                {
+                                    LocalImdsComputeResponse computeResponse = JsonHelper.DeserializeFromJson<LocalImdsComputeResponse>(response.Body);
+                                    region = computeResponse?.Location;
+                                }
+                                catch (Exception ex)
+                                {
+                                    // Malformed JSON: treat as an unusable response (region stays null) so the
+                                    // failure reason below is consistent with the empty/missing-location cases
+                                    // instead of leaking an exception string into telemetry.
+                                    region = null;
+                                    logger.Info(() => $"[Region discovery] Failed to parse IMDS compute response: {ex.Message}. {DateTime.UtcNow}");
+                                }
 
                                 if (ValidateRegion(region, $"IMDS call to {imdsUri.AbsoluteUri}", logger))
                                 {
                                     logger.Info(() => $"[Region discovery] Call to local IMDS succeeded. Region: {region}. {DateTime.UtcNow}");
                                     result = new RegionInfo(region, RegionAutodetectionSource.Imds, null);
+                                }
+                                else
+                                {
+                                    // Non-empty but unusable body (missing/null location or malformed JSON).
+                                    s_regionDiscoveryDetails = $"Call to local IMDS failed with status code {response.StatusCode} or an empty response. {DateTime.UtcNow}";
+                                    logger.Error($"[Region discovery] {s_regionDiscoveryDetails}");
                                 }
                             }
                             else
@@ -311,13 +349,25 @@ namespace Microsoft.Identity.Client.Region
                 return false;
             }
 
-            if (!Uri.IsWellFormedUriString($"https://{region}.login.microsoft.com", UriKind.Absolute))
+            if (!IsValidRegionName(region))
             {
                 logger.Error($"[Region discovery] Region from {source} was found but it's invalid: {region}. {DateTime.UtcNow}");
                 return false;
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Validates that a region short name contains only letters and digits (a single
+        /// alphanumeric word). Azure region short names (e.g. "centralus", "eastus2") are
+        /// always alphanumeric. Rejecting any other character prevents a malformed or
+        /// malicious region (e.g. "attacker.com/x") from being prefixed onto the trusted
+        /// "{region}.login.microsoft.com" suffix and altering the resulting token endpoint host.
+        /// </summary>
+        internal static bool IsValidRegionName(string region)
+        {
+            return !string.IsNullOrEmpty(region) && s_validRegionRegex.IsMatch(region);
         }
 
         private async Task<string> GetImdsUriApiVersionAsync(ILoggerAdapter logger, Dictionary<string, string> headers, CancellationToken userCancellationToken, IRetryPolicy retryPolicy)
@@ -363,7 +413,6 @@ namespace Microsoft.Identity.Client.Region
         {
             UriBuilder uriBuilder = new UriBuilder(ImdsEndpoint);
             uriBuilder.AppendQueryParameters($"api-version={apiVersion}");
-            uriBuilder.AppendQueryParameters("format=text");
             return uriBuilder.Uri;
         }
 
