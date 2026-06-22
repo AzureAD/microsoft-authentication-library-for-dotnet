@@ -1,9 +1,10 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
 using System.Linq;
 using System.Net;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
@@ -22,18 +23,18 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     {
         private static readonly string[] s_scopes = { "User.Read" };
 
-        private string _confidentialClientSecret;
+        private X509Certificate2 _labAuthCert;
 
-        private readonly KeyVaultSecretsProvider _keyVault = new KeyVaultSecretsProvider(KeyVaultInstance.MsalTeam);
+        private readonly KeyVaultSecretsProvider _keyVaultMsidLab = new KeyVaultSecretsProvider(KeyVaultInstance.MSIDLab);
 
         #region Test Hooks
         [TestInitialize]
-        public void TestInitialize()
+        public async Task TestInitializeAsync()
         {
             ApplicationBase.ResetStateForTest();
-            if (string.IsNullOrEmpty(_confidentialClientSecret))
+            if (_labAuthCert is null)
             {
-                _confidentialClientSecret = _keyVault.GetSecretByName(TestConstants.MsalOBOKeyVaultSecretName).Value;
+                _labAuthCert = await _keyVaultMsidLab.GetCertificateWithPrivateMaterialAsync("LabAuth").ConfigureAwait(false);
             }
         }
 
@@ -51,7 +52,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             var user1 = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
             var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
-            var appApi = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppWebApi).ConfigureAwait(false);
+            var appApi = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppOBOService).ConfigureAwait(false);
 
             var pca = PublicClientApplicationBuilder
                 .Create(app.AppId)
@@ -106,7 +107,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             var user1 = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
             var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
-            var appApi = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppWebApi).ConfigureAwait(false);
+            var appApi = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppOBOService).ConfigureAwait(false);
 
             var pca = PublicClientApplicationBuilder
                 .Create(app.AppId)
@@ -182,7 +183,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // Arrange
             var user1 = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
             var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
-            var appApi = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppWebApi).ConfigureAwait(false);
+            var appApi = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppOBOService).ConfigureAwait(false);
 
             IPublicClientApplication pca = PublicClientApplicationBuilder
                 .Create(app.AppId)
@@ -256,7 +257,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             var user1 = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
             var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
-            var appApi = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppWebApi).ConfigureAwait(false);
+            var appApi = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppOBOService).ConfigureAwait(false);
 
             var pca = PublicClientApplicationBuilder
                 .Create(app.AppId)
@@ -330,7 +331,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             var user1 = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
             var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
-            var appApi = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppWebApi).ConfigureAwait(false);
+            var appApi = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppOBOService).ConfigureAwait(false);
 
             var pca = PublicClientApplicationBuilder
                 .Create(app.AppId)
@@ -389,7 +390,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             var user1 = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
             var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
-            var appApi = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppWebApi).ConfigureAwait(false);
+            var appApi = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppOBOService).ConfigureAwait(false);
 
             var pca = PublicClientApplicationBuilder
                 .Create(app.AppId)
@@ -442,7 +443,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var builder = ConfidentialClientApplicationBuilder
              .Create(appId)
              .WithAuthority(new Uri($"https://login.microsoftonline.com/{tenantId}"), true)
-             .WithClientSecret(_confidentialClientSecret)
+             .WithCertificate(_labAuthCert)
              .WithLegacyCacheCompatibility(false);
 
             return builder.BuildConcrete();
