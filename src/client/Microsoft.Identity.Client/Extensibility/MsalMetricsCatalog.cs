@@ -16,7 +16,7 @@ namespace Microsoft.Identity.Client.Extensibility
     /// </summary>
     /// <remarks>
     /// <para>
-    /// The tag names listed for a metric are the canonical base tags MSAL always emits for it. They do not
+    /// The tag names listed for a metric are the canonical base tags MSAL emits for it (some are conditional). They do not
     /// include any extra tags supplied through
     /// <see cref="AbstractConfidentialClientAcquireTokenParameterBuilderExtension.WithOtelTagsEnricher{T}"/>,
     /// which are caller-defined and therefore not part of this catalog. Some canonical tags are emitted only

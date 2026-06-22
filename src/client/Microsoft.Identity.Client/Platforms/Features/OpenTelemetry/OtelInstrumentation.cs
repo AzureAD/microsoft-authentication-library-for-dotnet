@@ -150,7 +150,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
         // metricName identifies the instrument these base tags are recorded on. In Debug builds it is used to
         // assert that every canonical base tag is declared in MsalMetricsCatalog for that metric, so the public
         // catalog stays the single source of truth: adding a base tag here without declaring it there fails the
-        // test suite immediately. The check compiles out of shipping builds.
+        // test suite immediately. Calls are omitted from non-DEBUG builds.
         private static TagList BuildTagList(
             string metricName,
             IReadOnlyList<KeyValuePair<string, object>> extraTags,
@@ -189,7 +189,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
         // Debug-only guard that keeps the public MsalMetricsCatalog mapping in sync with the tags actually
         // recorded here. Every canonical base tag emitted for a metric must be declared for that metric in the
         // catalog; a given call may emit a subset of the declared tags (some are conditional), so this checks
-        // containment, not equality. Compiled out of Release builds, so there is no shipping-path overhead.
+        // containment, not equality. Calls are omitted from non-DEBUG builds, so there is no shipping-path overhead.
         [Conditional("DEBUG")]
         private static void AssertCanonicalTagsDeclared(string metricName, KeyValuePair<string, object>[] baseTags)
         {
