@@ -913,6 +913,280 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
+        [TestMethod]
+        [Description("WithOtelTagsEnricher adds caller-supplied tags to MSAL's success metrics and receives a populated ExecutionResult.")]
+        public async Task WithOtelTagsEnricher_SuccessfulAcquisition_AddsCustomTagAndReceivesResultAsync()
+        {
+            using (_harness = CreateTestHarness())
+            {
+                CreateApplication();
+                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                _harness.HttpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                bool? capturedSuccessful = null;
+                bool capturedHasResult = false;
+
+                // Do not assert inside the enricher — exceptions there are swallowed by design.
+                AuthenticationResult result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithExtraQueryParameters(extraQueryParams)
+                    .WithOtelTagsEnricher((executionResult, tags) =>
+                    {
+                        capturedSuccessful = executionResult.Successful;
+                        capturedHasResult = executionResult.Result != null;
+                        tags.Add(new KeyValuePair<string, object>("CustomTag", "CustomValue"));
+                    })
+                    .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+
+                s_meterProvider.ForceFlush();
+
+                Assert.IsTrue(capturedSuccessful.HasValue, "Enricher should have been invoked.");
+                Assert.IsTrue(capturedSuccessful.Value, "ExecutionResult.Successful should be true for a successful acquisition.");
+                Assert.IsTrue(capturedHasResult, "ExecutionResult.Result should be populated for a successful acquisition.");
+
+                var msalSuccess = _exportedMetrics.FirstOrDefault(m => m.Name == "MsalSuccess");
+                Assert.IsNotNull(msalSuccess, "MsalSuccess metric should be emitted.");
+
+                bool foundCustomTag = false;
+                foreach (var metricPoint in msalSuccess.GetMetricPoints())
+                {
+                    var tags = GetTagDictionary(metricPoint.Tags);
+                    if (tags.TryGetValue("CustomTag", out var value) && (string)value == "CustomValue")
+                        foundCustomTag = true;
+                }
+                Assert.IsTrue(foundCustomTag, "MsalSuccess should include the custom tag added by the enricher.");
+            }
+        }
+
+        [TestMethod]
+        [Description("WithOtelTagsEnricher adds caller-supplied tags to MSAL's failure metrics and receives an ExecutionResult carrying the exception.")]
+        public async Task WithOtelTagsEnricher_FailedAcquisition_AddsCustomTagAndReceivesExceptionAsync()
+        {
+            using (_harness = CreateTestHarness())
+            {
+                CreateApplication();
+                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                _harness.HttpManager.AddTokenResponse(TokenResponseType.InvalidClient);
+
+                bool? capturedSuccessful = null;
+                bool capturedHasException = false;
+
+                await AssertException.TaskThrowsAsync<MsalServiceException>(
+                    () => _cca.AcquireTokenForClient(TestConstants.s_scopeForAnotherResource)
+                        .WithExtraQueryParameters(extraQueryParams)
+                        .WithTenantId(TestConstants.Utid)
+                        .WithOtelTagsEnricher((executionResult, tags) =>
+                        {
+                            capturedSuccessful = executionResult.Successful;
+                            capturedHasException = executionResult.Exception != null;
+                            tags.Add(new KeyValuePair<string, object>("CustomTag", "CustomValue"));
+                        })
+                        .ExecuteAsync(CancellationToken.None)).ConfigureAwait(false);
+
+                s_meterProvider.ForceFlush();
+
+                Assert.IsTrue(capturedSuccessful.HasValue, "Enricher should have been invoked.");
+                Assert.IsFalse(capturedSuccessful.Value, "ExecutionResult.Successful should be false for a failed acquisition.");
+                Assert.IsTrue(capturedHasException, "ExecutionResult.Exception should be populated for a failed acquisition.");
+
+                var failureMetric = _exportedMetrics.FirstOrDefault(m => m.Name == "MsalFailure");
+                Assert.IsNotNull(failureMetric, "MsalFailure metric should be emitted.");
+
+                bool foundCustomTag = false;
+                foreach (var metricPoint in failureMetric.GetMetricPoints())
+                {
+                    var tags = GetTagDictionary(metricPoint.Tags);
+                    if (tags.TryGetValue("CustomTag", out var value) && (string)value == "CustomValue")
+                        foundCustomTag = true;
+                }
+                Assert.IsTrue(foundCustomTag, "MsalFailure should include the custom tag added by the enricher.");
+            }
+        }
+
+        [TestMethod]
+        [Description("A throwing OTel tags enricher must not break the token acquisition or telemetry recording, and a warning is logged.")]
+        public async Task WithOtelTagsEnricher_ThrowingEnricher_DoesNotBreakAcquisitionAndLogsWarningAsync()
+        {
+            using (_harness = CreateTestHarness())
+            {
+                var warnings = new List<string>();
+                var cca = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithAuthority(TestConstants.AuthorityUtidTenant)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithHttpManager(_harness.HttpManager)
+                    .WithLogging((level, message, containsPii) =>
+                    {
+                        if (level == LogLevel.Warning)
+                        {
+                            lock (warnings) { warnings.Add(message); }
+                        }
+                    })
+                    .BuildConcrete();
+
+                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                _harness.HttpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                AuthenticationResult result = await cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithExtraQueryParameters(extraQueryParams)
+                    .WithOtelTagsEnricher((executionResult, tags) => throw new InvalidOperationException("boom"))
+                    .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+
+                Assert.IsNotNull(result, "Acquisition should succeed even if the enricher throws.");
+
+                s_meterProvider.ForceFlush();
+                var msalSuccess = _exportedMetrics.FirstOrDefault(m => m.Name == "MsalSuccess");
+                Assert.IsNotNull(msalSuccess, "MsalSuccess metric should still be emitted when the enricher throws.");
+
+                lock (warnings)
+                {
+                    int enricherWarnings = warnings.Count(m => m.Contains("OTel tags enricher threw an exception"));
+                    Assert.AreEqual(1, enricherWarnings,
+                        "A throwing enricher runs once per acquisition and must log exactly one warning, not one per metric instrument.");
+                }
+            }
+        }
+
+        [TestMethod]
+        [Description("An enricher that tries to clear or mutate the tag list it receives cannot remove MSAL's canonical tags — " +
+            "the enricher only ever sees its own additions list, so the canonical metric set is append-only.")]
+        public async Task WithOtelTagsEnricher_AttemptsToRemoveCanonicalTags_CanonicalTagsArePreservedAsync()
+        {
+            using (_harness = CreateTestHarness())
+            {
+                CreateApplication();
+                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                _harness.HttpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                AuthenticationResult result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithExtraQueryParameters(extraQueryParams)
+                    .WithOtelTagsEnricher((executionResult, tags) =>
+                    {
+                        // A hostile/buggy enricher tries to wipe and overwrite the canonical tags.
+                        tags.Clear();
+                        tags.Add(new KeyValuePair<string, object>("CustomTag", "CustomValue"));
+                    })
+                    .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+
+                s_meterProvider.ForceFlush();
+
+                var msalSuccess = _exportedMetrics.FirstOrDefault(m => m.Name == "MsalSuccess");
+                Assert.IsNotNull(msalSuccess, "MsalSuccess metric should be emitted.");
+
+                foreach (var metricPoint in msalSuccess.GetMetricPoints())
+                {
+                    var tags = GetTagDictionary(metricPoint.Tags);
+
+                    // Canonical tags survive despite the enricher's Clear().
+                    Assert.IsTrue(tags.ContainsKey(TelemetryConstants.MsalVersion), "Canonical MsalVersion tag must be preserved.");
+                    Assert.IsTrue(tags.ContainsKey(TelemetryConstants.Platform), "Canonical Platform tag must be preserved.");
+                    Assert.IsTrue(tags.ContainsKey(TelemetryConstants.ApiId), "Canonical ApiId tag must be preserved.");
+
+                    // The enricher's own addition is still applied on top.
+                    Assert.IsTrue(tags.TryGetValue("CustomTag", out var value) && (string)value == "CustomValue",
+                        "The enricher's added tag should still be present.");
+                }
+            }
+        }
+
+        [TestMethod]
+        [Description("The OTel tags enricher is invoked exactly once per acquisition, not once per metric instrument, " +
+            "even though several instruments are recorded for a single successful acquisition.")]
+        public async Task WithOtelTagsEnricher_InvokedOncePerAcquisitionAsync()
+        {
+            using (_harness = CreateTestHarness())
+            {
+                CreateApplication();
+                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                _harness.HttpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                int invocationCount = 0;
+
+                AuthenticationResult result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithExtraQueryParameters(extraQueryParams)
+                    .WithOtelTagsEnricher((executionResult, tags) =>
+                    {
+                        Interlocked.Increment(ref invocationCount);
+                        tags.Add(new KeyValuePair<string, object>("CustomTag", "CustomValue"));
+                    })
+                    .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+
+                s_meterProvider.ForceFlush();
+
+                // A single IDP success records several instruments (success counter, total duration, HTTP duration,
+                // extension duration, remaining token lifetime). The enricher must still run only once.
+                Assert.AreEqual(1, invocationCount,
+                    "Enricher must be invoked exactly once per acquisition, regardless of how many instruments are recorded.");
+
+                // The single materialized tag set is still merged into every recorded instrument.
+                var msalSuccess = _exportedMetrics.FirstOrDefault(m => m.Name == "MsalSuccess");
+                Assert.IsNotNull(msalSuccess, "MsalSuccess metric should be emitted.");
+                bool foundCustomTag = false;
+                foreach (var metricPoint in msalSuccess.GetMetricPoints())
+                {
+                    var tags = GetTagDictionary(metricPoint.Tags);
+                    if (tags.TryGetValue("CustomTag", out var value) && (string)value == "CustomValue")
+                        foundCustomTag = true;
+                }
+                Assert.IsTrue(foundCustomTag, "The single materialized tag set should be merged into the recorded metrics.");
+            }
+        }
+
+        [TestMethod]
+        [Description("An enricher tag whose key collides with a canonical tag key is dropped (the canonical value wins), " +
+            "and tags with null/empty keys are skipped, so the enricher cannot override or corrupt the canonical metric set.")]
+        public async Task WithOtelTagsEnricher_CollidingAndInvalidKeys_AreDroppedAsync()
+        {
+            using (_harness = CreateTestHarness())
+            {
+                CreateApplication();
+                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                _harness.HttpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                AuthenticationResult result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithExtraQueryParameters(extraQueryParams)
+                    .WithOtelTagsEnricher((executionResult, tags) =>
+                    {
+                        // Collides with a canonical key — must NOT override MSAL's value.
+                        tags.Add(new KeyValuePair<string, object>(TelemetryConstants.ApiId, "BOGUS_OVERRIDE"));
+                        // Invalid keys — must be skipped without breaking recording.
+                        tags.Add(new KeyValuePair<string, object>(null, "nullKey"));
+                        tags.Add(new KeyValuePair<string, object>(string.Empty, "emptyKey"));
+                        // A normal tag still gets through.
+                        tags.Add(new KeyValuePair<string, object>("CustomTag", "CustomValue"));
+                    })
+                    .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+
+                Assert.IsNotNull(result, "Acquisition should succeed even when the enricher adds colliding/invalid tags.");
+
+                s_meterProvider.ForceFlush();
+
+                var msalSuccess = _exportedMetrics.FirstOrDefault(m => m.Name == "MsalSuccess");
+                Assert.IsNotNull(msalSuccess, "MsalSuccess metric should be emitted.");
+
+                foreach (var metricPoint in msalSuccess.GetMetricPoints())
+                {
+                    var tags = GetTagDictionary(metricPoint.Tags);
+
+                    // Canonical ApiId is preserved — the colliding enricher value is dropped.
+                    Assert.AreNotEqual("BOGUS_OVERRIDE", tags[TelemetryConstants.ApiId],
+                        "The enricher must not override the canonical ApiId tag.");
+
+                    // The empty-key tag is skipped (a null-key tag is likewise skipped before recording).
+                    Assert.IsFalse(tags.ContainsKey(string.Empty), "Empty-key tag should be skipped.");
+
+                    // The valid custom tag still made it through.
+                    Assert.IsTrue(tags.TryGetValue("CustomTag", out var value) && (string)value == "CustomValue",
+                        "A valid custom tag should still be recorded.");
+                }
+            }
+        }
+
         private static IDictionary<string, object> GetTagDictionary(ReadOnlyTagCollection tags)
         {
             var dict = new Dictionary<string, object>();

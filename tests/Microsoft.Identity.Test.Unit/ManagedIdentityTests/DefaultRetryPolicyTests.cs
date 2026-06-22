@@ -25,23 +25,38 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
     {
         private readonly TestRetryPolicyFactory _testRetryPolicyFactory = new TestRetryPolicyFactory();
 
+        private static ManagedIdentityId BuildManagedIdentityId(UserAssignedIdentityId idType, string id)
+        {
+            switch (idType)
+            {
+                case UserAssignedIdentityId.ClientId:
+                    return ManagedIdentityId.WithUserAssignedClientId(id);
+                case UserAssignedIdentityId.ResourceId:
+                    return ManagedIdentityId.WithUserAssignedResourceId(id);
+                case UserAssignedIdentityId.ObjectId:
+                    return ManagedIdentityId.WithUserAssignedObjectId(id);
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(idType), idType, "Unsupported UserAssignedIdentityId");
+            }
+        }
+
         [TestMethod] // see test class header: all sources that allow UAMI
-        [DataRow(ManagedIdentitySource.AppService, TestConstants.AppServiceEndpoint)]
-        [DataRow(ManagedIdentitySource.MachineLearning, TestConstants.MachineLearningEndpoint)]
-        [DataRow(ManagedIdentitySource.ServiceFabric, TestConstants.ServiceFabricEndpoint)]
+        [DataRow(ManagedIdentitySource.AppService, TestConstants.AppServiceEndpoint, UserAssignedIdentityId.ClientId, TestConstants.ClientId)]
+        [DataRow(ManagedIdentitySource.MachineLearning, TestConstants.MachineLearningEndpoint, UserAssignedIdentityId.ClientId, TestConstants.ClientId)]
+        // Service Fabric only supports ObjectId for user-assigned managed identity (sent as 'principalId').
+        [DataRow(ManagedIdentitySource.ServiceFabric, TestConstants.ServiceFabricEndpoint, UserAssignedIdentityId.ObjectId, TestConstants.ObjectId)]
         public async Task UAMIFails500OnceThenSucceeds200Async(
             ManagedIdentitySource managedIdentitySource,
-            string endpoint)
+            string endpoint,
+            UserAssignedIdentityId userAssignedIdentityId,
+            string userAssignedId)
         {
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
-                string userAssignedId = TestConstants.ClientId;
-                UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.ClientId;
-
-                ManagedIdentityId managedIdentityId = ManagedIdentityId.WithUserAssignedClientId(userAssignedId);
+                ManagedIdentityId managedIdentityId = BuildManagedIdentityId(userAssignedIdentityId, userAssignedId);
                 ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder.Create(managedIdentityId)
                     .WithHttpManager(httpManager)
                     .WithRetryPolicyFactory(_testRetryPolicyFactory);
@@ -83,22 +98,22 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod] // see test class header: all sources that allow UAMI
-        [DataRow(ManagedIdentitySource.AppService, TestConstants.AppServiceEndpoint)]
-        [DataRow(ManagedIdentitySource.MachineLearning, TestConstants.MachineLearningEndpoint)]
-        [DataRow(ManagedIdentitySource.ServiceFabric, TestConstants.ServiceFabricEndpoint)]
+        [DataRow(ManagedIdentitySource.AppService, TestConstants.AppServiceEndpoint, UserAssignedIdentityId.ClientId, TestConstants.ClientId)]
+        [DataRow(ManagedIdentitySource.MachineLearning, TestConstants.MachineLearningEndpoint, UserAssignedIdentityId.ClientId, TestConstants.ClientId)]
+        // Service Fabric only supports ObjectId for user-assigned managed identity (sent as 'principalId').
+        [DataRow(ManagedIdentitySource.ServiceFabric, TestConstants.ServiceFabricEndpoint, UserAssignedIdentityId.ObjectId, TestConstants.ObjectId)]
         public async Task UAMIFails500PermanentlyAsync(
             ManagedIdentitySource managedIdentitySource,
-            string endpoint)
+            string endpoint,
+            UserAssignedIdentityId userAssignedIdentityId,
+            string userAssignedId)
         {
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
-                
-                string userAssignedId = TestConstants.ClientId;
-                UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.ClientId;
 
-                ManagedIdentityId managedIdentityId = ManagedIdentityId.WithUserAssignedClientId(userAssignedId);
+                ManagedIdentityId managedIdentityId = BuildManagedIdentityId(userAssignedIdentityId, userAssignedId);
                 ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder.Create(managedIdentityId)
                     .WithHttpManager(httpManager)
                     .WithRetryPolicyFactory(_testRetryPolicyFactory);

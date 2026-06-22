@@ -499,6 +499,102 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
+        [DataRow("fake.com/x", DisplayName = "Path separator")]
+        [DataRow("fake.com?x", DisplayName = "Query separator")]
+        [DataRow("fake.com#x", DisplayName = "Fragment separator")]
+        [DataRow("east@us", DisplayName = "At sign")]
+        [DataRow("east.us", DisplayName = "Dot")]
+        [DataRow("east us", DisplayName = "Embedded space")]
+        public async Task WithAzureRegionWithInvalidFormatFallsBackToGlobalAsync(string invalidRegion)
+        {
+            // Arrange - a region containing characters other than letters and digits must never be
+            // prefixed onto "{region}.login.microsoft.com". Instead of failing the request, MSAL
+            // falls back to the global (non-regional) endpoint, so the request never reaches the
+            // tampered host. The global token handler below would reject any regionalized URL.
+            using (var harness = base.CreateTestHarness())
+            {
+                var httpManager = harness.HttpManager;
+                httpManager.AddRegionDiscoveryMockHandler(TestConstants.Region);
+                httpManager.AddInstanceDiscoveryMockHandler();
+                httpManager.AddMockHandler(CreateTokenResponseHttpHandler(expectRegional: false));
+
+                IConfidentialClientApplication cca = CreateCca(httpManager, invalidRegion);
+
+                // Act
+                AuthenticationResult result = await cca
+                    .AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert - request succeeded against the global endpoint
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(
+                    "https://login.microsoftonline.com/common/oauth2/v2.0/token",
+                    result.AuthenticationResultMetadata.TokenEndpoint);
+            }
+        }
+
+        [TestMethod]
+        public async Task ForceRegionEnvVariableWithInvalidFormatFallsBackToGlobalAsync()
+        {
+            // Arrange - the MSAL_FORCE_REGION env variable must not bypass region validation either
+            using (new EnvVariableContext())
+            using (var harness = base.CreateTestHarness())
+            {
+                Environment.SetEnvironmentVariable(ConfidentialClientApplicationBuilder.ForceRegionEnvVariable, "fake.com/x");
+
+                var httpManager = harness.HttpManager;
+                httpManager.AddRegionDiscoveryMockHandler(TestConstants.Region);
+                httpManager.AddInstanceDiscoveryMockHandler();
+                httpManager.AddMockHandler(CreateTokenResponseHttpHandler(expectRegional: false));
+
+                var cca = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithHttpManager(httpManager)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .Build();
+
+                // Act
+                AuthenticationResult result = await cca
+                    .AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert - request succeeded against the global endpoint
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(
+                    "https://login.microsoftonline.com/common/oauth2/v2.0/token",
+                    result.AuthenticationResultMetadata.TokenEndpoint);
+            }
+        }
+
+        [TestMethod]
+        public async Task WithAzureRegionWithValidFormatRoutesRegionallyAsync()
+        {
+            // Arrange - a valid (alphanumeric) region must continue to route to the regional endpoint
+            using (var harness = base.CreateTestHarness())
+            {
+                var httpManager = harness.HttpManager;
+                httpManager.AddRegionDiscoveryMockHandler(TestConstants.Region);
+                httpManager.AddMockHandler(CreateTokenResponseHttpHandler(expectRegional: true));
+
+                IConfidentialClientApplication cca = CreateCca(httpManager, TestConstants.Region);
+
+                // Act
+                AuthenticationResult result = await cca
+                    .AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual(TestConstants.Region, result.ApiEvent.RegionUsed);
+                Assert.AreEqual(
+                    $"https://{TestConstants.Region}.login.microsoft.com/common/oauth2/v2.0/token",
+                    result.AuthenticationResultMetadata.TokenEndpoint);
+            }
+        }
+
+        [TestMethod]
         // regression: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2686
         public async Task OtherCloudWithAuthorityValidationAsync()
         {
