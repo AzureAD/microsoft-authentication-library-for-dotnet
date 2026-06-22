@@ -169,5 +169,91 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             Assert.AreEqual(host, result.PreferredCache);
             CollectionAssert.Contains(result.Aliases, host);
         }
+
+        [TestMethod]
+        [DataRow("login.microsoftonline.com", "api://AzureADTokenExchange")]
+        [DataRow("login.windows.net", "api://AzureADTokenExchange")]
+        [DataRow("login.microsoft.com", "api://AzureADTokenExchange")]
+        [DataRow("sts.windows.net", "api://AzureADTokenExchange")]
+        [DataRow("login.microsoftonline.us", "api://AzureADTokenExchangeUSGov")]
+        [DataRow("login.usgovcloudapi.net", "api://AzureADTokenExchangeUSGov")]
+        [DataRow("login.partner.microsoftonline.cn", "api://AzureADTokenExchangeChina")]
+        [DataRow("login.chinacloudapi.cn", "api://AzureADTokenExchangeChina")]
+        [DataRow("login.sovcloud-identity.fr", "api://AzureADTokenExchangeFrance")]
+        [DataRow("login.sovcloud-identity.de", "api://AzureADTokenExchangeGermany")]
+        public void KnownMetadataProvider_TokenExchangeAudience_KnownClouds(string host, string expectedAudience)
+        {
+            // Act
+            bool found = KnownMetadataProvider.TryGetTokenExchangeAudience(host, out string audience);
+
+            // Assert
+            Assert.IsTrue(found, $"Should resolve token exchange audience for {host}");
+            Assert.AreEqual(expectedAudience, audience);
+        }
+
+        [TestMethod]
+        [DataRow("LOGIN.MICROSOFTONLINE.COM", "api://AzureADTokenExchange")]
+        [DataRow("Login.Microsoftonline.Us", "api://AzureADTokenExchangeUSGov")]
+        public void KnownMetadataProvider_TokenExchangeAudience_CaseInsensitive(string host, string expectedAudience)
+        {
+            // Act
+            bool found = KnownMetadataProvider.TryGetTokenExchangeAudience(host, out string audience);
+
+            // Assert
+            Assert.IsTrue(found);
+            Assert.AreEqual(expectedAudience, audience);
+        }
+
+        [TestMethod]
+        [DataRow("bogus")]
+        [DataRow("")]
+        [DataRow(null)]
+        [DataRow("login.windows-ppe.net")]       // PPE — no token exchange audience defined
+        [DataRow("login.microsoftonline.de")]     // Legacy Germany — no audience defined
+        [DataRow("login.sovcloud-identity.sg")]   // GovSG — no audience defined
+        public void KnownMetadataProvider_TokenExchangeAudience_UnknownOrUnsupported(string host)
+        {
+            // Act
+            bool found = KnownMetadataProvider.TryGetTokenExchangeAudience(host, out string audience);
+
+            // Assert
+            Assert.IsFalse(found, $"Should not resolve token exchange audience for {host}");
+            Assert.IsNull(audience);
+        }
+
+        [TestMethod]
+        public void TokenExchangeAudience_NullForDeserializedEntries()
+        {
+            // Arrange — simulate a network-deserialized entry (no TokenExchangeAudience in JSON)
+            var networkEntry = new InstanceDiscoveryMetadataEntry
+            {
+                PreferredNetwork = "login.example.com",
+                PreferredCache = "login.example.com",
+                Aliases = new[] { "login.example.com" }
+            };
+
+            // Assert
+            Assert.IsNull(networkEntry.TokenExchangeAudience,
+                "Entries created without explicit TokenExchangeAudience (e.g., from network JSON) should be null.");
+        }
+
+        [TestMethod]
+        public void TokenExchangeAudience_SetOnKnownEntries()
+        {
+            // Arrange
+            var allEntries = KnownMetadataProvider.GetAllEntriesForTest();
+
+            // Act & Assert — verify that entries for clouds with known token exchange audiences have them set
+            Assert.AreEqual("api://AzureADTokenExchange", allEntries["login.microsoftonline.com"].TokenExchangeAudience);
+            Assert.AreEqual("api://AzureADTokenExchangeUSGov", allEntries["login.microsoftonline.us"].TokenExchangeAudience);
+            Assert.AreEqual("api://AzureADTokenExchangeChina", allEntries["login.partner.microsoftonline.cn"].TokenExchangeAudience);
+            Assert.AreEqual("api://AzureADTokenExchangeFrance", allEntries["login.sovcloud-identity.fr"].TokenExchangeAudience);
+            Assert.AreEqual("api://AzureADTokenExchangeGermany", allEntries["login.sovcloud-identity.de"].TokenExchangeAudience);
+
+            // Clouds without a known token exchange audience should have null
+            Assert.IsNull(allEntries["login.windows-ppe.net"].TokenExchangeAudience);
+            Assert.IsNull(allEntries["login.microsoftonline.de"].TokenExchangeAudience);
+            Assert.IsNull(allEntries["login.sovcloud-identity.sg"].TokenExchangeAudience);
+        }
     }
 }

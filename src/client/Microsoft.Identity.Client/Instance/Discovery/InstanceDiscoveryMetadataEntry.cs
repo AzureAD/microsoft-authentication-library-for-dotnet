@@ -18,5 +18,11 @@ namespace Microsoft.Identity.Client.Instance.Discovery
 
         [JsonProperty("aliases")]
         public string[] Aliases { get; set; }
+
+        /// <summary>
+        /// The cloud-specific AAD Token Exchange audience for Federated Identity Credential (FIC) scenarios.
+        /// Only populated for known cloud entries; null for network-fetched, user-provided, or regional entries.
+        /// </summary>
+        public string TokenExchangeAudience { get; set; }
     }
 }

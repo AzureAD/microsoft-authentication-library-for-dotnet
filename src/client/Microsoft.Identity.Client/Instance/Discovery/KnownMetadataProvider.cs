@@ -41,14 +41,16 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             {
                 Aliases = new[] { "login.microsoftonline.com", "login.windows.net", "login.microsoft.com", "sts.windows.net" },
                 PreferredNetwork = "login.microsoftonline.com",
-                PreferredCache = "login.windows.net"
+                PreferredCache = "login.windows.net",
+                TokenExchangeAudience = "api://AzureADTokenExchange"
             };
 
             InstanceDiscoveryMetadataEntry cloudEntryChina = new InstanceDiscoveryMetadataEntry()
             {
                 Aliases = new[] { "login.partner.microsoftonline.cn", "login.chinacloudapi.cn" },
                 PreferredNetwork = "login.partner.microsoftonline.cn",
-                PreferredCache = "login.partner.microsoftonline.cn"
+                PreferredCache = "login.partner.microsoftonline.cn",
+                TokenExchangeAudience = "api://AzureADTokenExchangeChina"
             };
 
             InstanceDiscoveryMetadataEntry cloudEntryLegacyGermany = new InstanceDiscoveryMetadataEntry()
@@ -62,7 +64,8 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             {
                 Aliases = new[] { "login.microsoftonline.us", "login.usgovcloudapi.net" },
                 PreferredNetwork = "login.microsoftonline.us",
-                PreferredCache = "login.microsoftonline.us"
+                PreferredCache = "login.microsoftonline.us",
+                TokenExchangeAudience = "api://AzureADTokenExchangeUSGov"
             };
 
             InstanceDiscoveryMetadataEntry usCloudEntry = new InstanceDiscoveryMetadataEntry()
@@ -83,14 +86,16 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             {
                 Aliases = new[] { "login.sovcloud-identity.fr" },
                 PreferredNetwork = "login.sovcloud-identity.fr",
-                PreferredCache = "login.sovcloud-identity.fr"
+                PreferredCache = "login.sovcloud-identity.fr",
+                TokenExchangeAudience = "api://AzureADTokenExchangeFrance"
             };
 
             InstanceDiscoveryMetadataEntry delosCloudEntry = new InstanceDiscoveryMetadataEntry()
             {
                 Aliases = new[] { "login.sovcloud-identity.de" },
                 PreferredNetwork = "login.sovcloud-identity.de",
-                PreferredCache = "login.sovcloud-identity.de"
+                PreferredCache = "login.sovcloud-identity.de",
+                TokenExchangeAudience = "api://AzureADTokenExchangeGermany"
             };
 
             InstanceDiscoveryMetadataEntry govSGCloudEntry = new InstanceDiscoveryMetadataEntry()
@@ -163,6 +168,29 @@ namespace Microsoft.Identity.Client.Instance.Discovery
         public static IDictionary<string, InstanceDiscoveryMetadataEntry> GetAllEntriesForTest()
         {
             return s_knownEntries;
+        }
+
+        /// <summary>
+        /// Resolves the cloud-specific AAD Token Exchange audience for FIC scenarios
+        /// from the given authority environment (host). Handles aliases by resolving
+        /// to the known metadata entry and reading its <see cref="InstanceDiscoveryMetadataEntry.TokenExchangeAudience"/>.
+        /// </summary>
+        /// <returns>
+        /// <c>true</c> if the environment maps to a known cloud with a token exchange audience;
+        /// <c>false</c> for unknown or unsupported environments (e.g., PPE, GovSG, legacy Germany).
+        /// </returns>
+        public static bool TryGetTokenExchangeAudience(string environment, out string tokenExchangeAudience)
+        {
+            if (!string.IsNullOrEmpty(environment) &&
+                s_knownEntries.TryGetValue(environment.ToLowerInvariant(), out var entry) &&
+                entry.TokenExchangeAudience is not null)
+            {
+                tokenExchangeAudience = entry.TokenExchangeAudience;
+                return true;
+            }
+
+            tokenExchangeAudience = null;
+            return false;
         }
     }
 }

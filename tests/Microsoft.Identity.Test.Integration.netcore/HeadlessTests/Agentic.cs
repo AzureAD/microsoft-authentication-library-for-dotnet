@@ -7,6 +7,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Extensibility;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -113,6 +114,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         private static async Task<string> GetAppCredentialAsync(string fmiPath)
         {
+            return await GetAppCredentialWithAudienceAsync(fmiPath, TokenExchangeUrl).ConfigureAwait(false);
+        }
+
+        private static async Task<string> GetAppCredentialWithAudienceAsync(string fmiPath, string tokenExchangeScope)
+        {
             Assert.IsNotNull(fmiPath, "fmiPath cannot be null");
             X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
 
@@ -124,7 +130,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                         .WithCertificate(cert, sendX5C: true) //sendX5c enables SN+I auth which is required for FMI flows                        
                         .Build();
 
-            var result = await cca1.AcquireTokenForClient([TokenExchangeUrl])
+            var result = await cca1.AcquireTokenForClient([tokenExchangeScope])
                 .WithFmiPath(fmiPath)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
@@ -133,5 +139,56 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             return result.AccessToken;
         }
+
+        #region Negative tests — wrong token exchange audience
+
+        [TestMethod]
+        public async Task WrongCloudAudience_Leg1_Succeeds_Leg2_Fails_TestAsync()
+        {
+            // Using a sovereign-cloud audience (USGov) in the public cloud: Leg 1 succeeds
+            // silently but Leg 2 fails because ESTS validates the assertion's audience
+            // against the user's FIC entry. This validates that MSAL's auto-resolution of
+            // the correct cloud-specific audience (via KnownMetadataProvider.TryGetTokenExchangeAudience)
+            // prevents this class of failure.
+            const string wrongCloudAudience = "api://AzureADTokenExchangeUSGov/.default";
+
+            string wrongAssertion = await GetAppCredentialWithAudienceAsync(
+                AgentIdentity, wrongCloudAudience).ConfigureAwait(false);
+
+            Assert.IsFalse(string.IsNullOrEmpty(wrongAssertion),
+                "Leg 1 should succeed — ESTS issues tokens for the wrong audience without error.");
+
+            var cca = ConfidentialClientApplicationBuilder
+                .Create(AgentIdentity)
+                .WithAuthority("https://login.microsoftonline.com/", TenantId)
+                .WithCacheOptions(CacheOptions.EnableSharedCacheOptions)
+                .WithExperimentalFeatures(true)
+                .WithClientAssertion((AssertionRequestOptions _) => GetAppCredentialAsync(AgentIdentity))
+                .Build();
+
+            var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(
+                () => (cca as IByUserFederatedIdentityCredential)
+                    .AcquireTokenByUserFederatedIdentityCredential([Scope], UserUpn, wrongAssertion)
+                    .ExecuteAsync(),
+                allowDerived: true).ConfigureAwait(false);
+
+            Assert.AreEqual("invalid_grant", ex.ErrorCode);
+            StringAssert.Contains(ex.Message, "assertion audience");
+        }
+
+        [TestMethod]
+        public async Task BogusAudience_Leg1_Fails_TestAsync()
+        {
+            // A completely unknown audience fails immediately at Leg 1.
+            const string bogusAudience = "api://NotATokenExchange/.default";
+
+            var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(
+                () => GetAppCredentialWithAudienceAsync(AgentIdentity, bogusAudience),
+                allowDerived: true).ConfigureAwait(false);
+
+            Assert.IsFalse(string.IsNullOrEmpty(ex.ErrorCode));
+        }
+
+        #endregion
     }
 }
