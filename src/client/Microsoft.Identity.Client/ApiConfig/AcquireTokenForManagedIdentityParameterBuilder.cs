@@ -145,8 +145,18 @@ namespace Microsoft.Identity.Client
 
                 // Partition by the requested minimum binding strength so a higher-floor request
                 // cannot be satisfied from a cache entry created by a lower/no-floor request.
-                acquireTokenCommonParameters.CacheKeyComponents[MiMinStrengthCacheKeyComponent] =
-                    _ => Task.FromResult(acquireTokenCommonParameters.MtlsPopMinStrength.ToString());
+                // Only stamp the component when a floor is explicitly requested (> None). A no-floor
+                // request keeps the legacy key shape, so existing mTLS PoP MI cache entries remain
+                // shareable across MSAL versions and no avoidable cache miss is introduced on upgrade.
+                if (acquireTokenCommonParameters.MtlsPopMinStrength > AppConfig.MtlsBindingStrength.None)
+                {
+                    acquireTokenCommonParameters.CacheKeyComponents[MiMinStrengthCacheKeyComponent] =
+                        _ => Task.FromResult(acquireTokenCommonParameters.MtlsPopMinStrength.ToString());
+                }
+                else
+                {
+                    acquireTokenCommonParameters.CacheKeyComponents.Remove(MiMinStrengthCacheKeyComponent);
+                }
             }
         }
     }

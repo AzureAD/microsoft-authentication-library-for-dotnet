@@ -41,6 +41,11 @@ namespace Microsoft.Identity.Client
             this AcquireTokenForManagedIdentityParameterBuilder builder,
             PoPOptions options)
         {
+            if (builder == null)
+            {
+                throw new System.ArgumentNullException(nameof(builder));
+            }
+
             if (options == null)
             {
                 throw new System.ArgumentNullException(nameof(options));
