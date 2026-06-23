@@ -4,8 +4,10 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
+using System.Linq;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
@@ -19,7 +21,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
     internal class OtelInstrumentation : IOtelInstrumentation
     {
         /// <summary>
-        /// Constant to hold the name of the Meter.
+        /// Constant to hold the name of the Meter. This is the single definition of the meter name; it lives
+        /// here because this type constructs the <see cref="Meter"/> that MSAL publishes all of its metrics on.
         /// </summary>
         public const string MeterName = "MicrosoftIdentityClient_Common_Meter";
 
@@ -37,17 +40,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                  value.Equals("true", StringComparison.OrdinalIgnoreCase));
         }
 
-        private const string SuccessCounterName = "MsalSuccess";
-        private const string FailedCounterName = "MsalFailure";
-        private const string TotalDurationHistogramName = "MsalTotalDuration.1A";
-        private const string DurationInL1CacheHistogramName = "MsalDurationInL1CacheInUs.1B";
-        private const string DurationInL2CacheHistogramName = "MsalDurationInL2Cache.1A";
-        private const string DurationInHttpHistogramName = "MsalDurationInHttp.1A";
-        private const string DurationInExtensionInMsHistogram = "MsalDurationInExtensionInMs.1B";
-        private const string RemainingTokenLifetimeHistogramName = "MsalRemainingTokenLifetime.1A";
-        private const string TotalDurationV2HistogramName = "MsalTotalDurationV2.1A";
-        private const string DurationInHttpV2HistogramName = "MsalDurationInHttpV2.1A";
-
         /// <summary>
         /// Meter to hold the MSAL metrics.
         /// </summary>
@@ -57,21 +49,21 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
         /// Counter to hold the number of successful token acquisition calls.
         /// </summary>
         internal static readonly Lazy<Counter<long>> s_successCounter = new(() => Meter.CreateCounter<long>(
-            SuccessCounterName,
+            MsalMetricsCatalog.SuccessCounterName,
             description: "Number of successful token acquisition calls"));
 
         /// <summary>
         /// Counter to hold the number of failed token acquisition calls.
         /// </summary>
         internal static readonly Lazy<Counter<long>> s_failureCounter = new(() => Meter.CreateCounter<long>(
-            FailedCounterName,
+            MsalMetricsCatalog.FailureCounterName,
             description: "Number of failed token acquisition calls"));
 
         /// <summary>
         /// Histogram to record total duration in milliseconds of token acquisition calls.
         /// </summary>
         internal static readonly Lazy<Histogram<long>> s_durationTotal = new(() => Meter.CreateHistogram<long>(
-            TotalDurationHistogramName,
+            MsalMetricsCatalog.TotalDurationHistogramName,
             unit: "ms",
             description: "Performance of token acquisition calls total latency"));
 
@@ -80,7 +72,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
         /// Emitted only when extended metrics are enabled via the MSAL_ENABLE_EXTENDED_TOKEN_METRICS environment variable.
         /// </summary>
         internal static readonly Lazy<Histogram<long>> s_durationTotalV2 = new(() => Meter.CreateHistogram<long>(
-            TotalDurationV2HistogramName,
+            MsalMetricsCatalog.TotalDurationV2HistogramName,
             unit: "ms",
             description: "Performance of token acquisition calls total latency including both successes and failures"));
 
@@ -88,7 +80,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
         /// Histogram to record total duration of token acquisition calls in microseconds(us) when token is fetched from L1 cache.
         /// </summary>
         internal static readonly Lazy<Histogram<long>> s_durationInL1CacheInUs = new(() => Meter.CreateHistogram<long>(
-            DurationInL1CacheHistogramName,
+            MsalMetricsCatalog.DurationInL1CacheHistogramName,
             unit: "us",
             description: "Performance of token acquisition calls total latency in microseconds when L1 cache is used."));
 
@@ -96,7 +88,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
         /// Histogram to record duration in L2 cache for token acquisition calls.
         /// </summary>
         internal static readonly Lazy<Histogram<long>> s_durationInL2Cache = new Lazy<Histogram<long>>(() => Meter.CreateHistogram<long>(
-            DurationInL2CacheHistogramName,
+            MsalMetricsCatalog.DurationInL2CacheHistogramName,
             unit: "ms",
             description: "Performance of token acquisition calls cache latency"));
 
@@ -104,7 +96,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
         /// Histogram to record duration in milliseconds in http when the token is fetched from identity provider.
         /// </summary>
         internal static readonly Lazy<Histogram<long>> s_durationInHttp = new Lazy<Histogram<long>>(() => Meter.CreateHistogram<long>(
-            DurationInHttpHistogramName,
+            MsalMetricsCatalog.DurationInHttpHistogramName,
             unit: "ms",
             description: "Performance of token acquisition calls network latency"));
 
@@ -113,7 +105,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
         /// Emitted only when extended metrics are enabled via the MSAL_ENABLE_EXTENDED_TOKEN_METRICS environment variable.
         /// </summary>
         internal static readonly Lazy<Histogram<long>> s_durationInHttpV2 = new(() => Meter.CreateHistogram<long>(
-            DurationInHttpV2HistogramName,
+            MsalMetricsCatalog.DurationInHttpV2HistogramName,
             unit: "ms",
             description: "Performance of token acquisition calls network latency including both successes and failures"));
 
@@ -121,7 +113,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
         /// Histogram to record total duration of extension modifications in microseconds(us).
         /// </summary>
         internal static readonly Lazy<Histogram<long>> s_durationInExtensionInMs = new(() => Meter.CreateHistogram<long>(
-            DurationInExtensionInMsHistogram,
+            MsalMetricsCatalog.DurationInExtensionHistogramName,
             unit: "us",
             description: "Performance of token acquisition calls extension latency."));
 
@@ -129,7 +121,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
         /// Histogram to record the remaining lifetime of acquired tokens in seconds.
         /// </summary>
         internal static readonly Lazy<Histogram<long>> s_remainingTokenLifetime = new(() => Meter.CreateHistogram<long>(
-            RemainingTokenLifetimeHistogramName,
+            MsalMetricsCatalog.RemainingTokenLifetimeHistogramName,
             unit: "s",
             description: "Remaining lifetime of acquired tokens at the time of acquisition."));
 
@@ -154,10 +146,18 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
         // skipped, and an extra tag whose key collides with a canonical base tag key is dropped (a duplicate
         // key would otherwise shadow MSAL's canonical value in last-wins backends). So the canonical metric
         // set cannot be removed, overridden, or altered by the enricher.
+        //
+        // metricName identifies the instrument these base tags are recorded on. In Debug builds it is used to
+        // assert that every canonical base tag is declared in MsalMetricsCatalog for that metric, so the public
+        // catalog stays the single source of truth: adding a base tag here without declaring it there fails the
+        // test suite immediately. Calls are omitted from non-DEBUG builds.
         private static TagList BuildTagList(
+            string metricName,
             IReadOnlyList<KeyValuePair<string, object>> extraTags,
             params KeyValuePair<string, object>[] baseTags)
         {
+            AssertCanonicalTagsDeclared(metricName, baseTags);
+
             if (extraTags == null || extraTags.Count == 0)
             {
                 return new TagList(baseTags);
@@ -184,6 +184,32 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             }
 
             return tagList;
+        }
+
+        // Debug-only guard that keeps the public MsalMetricsCatalog mapping in sync with the tags actually
+        // recorded here. Every canonical base tag emitted for a metric must be declared for that metric in the
+        // catalog; a given call may emit a subset of the declared tags (some are conditional), so this checks
+        // containment, not equality. Calls are omitted from non-DEBUG builds, so there is no shipping-path overhead.
+        [Conditional("DEBUG")]
+        private static void AssertCanonicalTagsDeclared(string metricName, KeyValuePair<string, object>[] baseTags)
+        {
+            // Don't rely on the assert to halt execution: Debug.Assert routes to trace listeners and only the
+            // test host's listener throws; the default listener can continue past a failure. So guard the null
+            // case explicitly with a return, otherwise the foreach below would NullReferenceException on the
+            // very drift scenario this check exists to surface.
+            if (!MsalMetricsCatalog.CanonicalTagsByMetric.TryGetValue(metricName, out IReadOnlyList<string> canonicalTags))
+            {
+                Debug.Fail($"Metric '{metricName}' has no entry in MsalMetricsCatalog.CanonicalTagsByMetric. Add it there.");
+                return;
+            }
+
+            foreach (KeyValuePair<string, object> tag in baseTags)
+            {
+                Debug.Assert(
+                    canonicalTags.Contains(tag.Key),
+                    $"Tag '{tag.Key}' is recorded for metric '{metricName}' but is not declared in " +
+                    "MsalMetricsCatalog.CanonicalTagsByMetric. Add it to the metric's canonical tag list.");
+            }
         }
 
         // Aggregates the successful requests based on token source and cache refresh reason.
@@ -217,7 +243,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             if (s_durationInL1CacheInUs.Value.Enabled && authResultMetadata.TokenSource == TokenSource.Cache
                 && authResultMetadata.CacheLevel.Equals(CacheLevel.L1Cache))
             {
-                var tags = BuildTagList(extraTags,
+                var tags = BuildTagList(MsalMetricsCatalog.DurationInL1CacheHistogramName, extraTags,
                     new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                     new(TelemetryConstants.Platform, platform),
                     new(TelemetryConstants.ApiId, apiId),
@@ -230,7 +256,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             // Only log cache duration if L2 cache was used.
             if (s_durationInL2Cache.Value.Enabled && cacheLevel == CacheLevel.L2Cache)
             {
-                var tags = BuildTagList(extraTags,
+                var tags = BuildTagList(MsalMetricsCatalog.DurationInL2CacheHistogramName, extraTags,
                     new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                     new(TelemetryConstants.Platform, platform),
                     new(TelemetryConstants.ApiId, apiId),
@@ -240,7 +266,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
 
             if (s_durationInExtensionInMs.Value.Enabled)
             {
-                var tags = BuildTagList(extraTags,
+                var tags = BuildTagList(MsalMetricsCatalog.DurationInExtensionHistogramName, extraTags,
                     new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                     new(TelemetryConstants.Platform, platform),
                     new(TelemetryConstants.ApiId, apiId),
@@ -254,7 +280,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             {
                 if (s_durationTotal.Value.Enabled)
                 {
-                    var tags = BuildTagList(extraTags,
+                    var tags = BuildTagList(MsalMetricsCatalog.TotalDurationHistogramName, extraTags,
                         new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                         new(TelemetryConstants.Platform, platform),
                         new(TelemetryConstants.ApiId, apiId),
@@ -268,7 +294,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                 // Only log duration in HTTP when token is fetched from IDP.
                 if (s_durationInHttp.Value.Enabled && authResultMetadata.TokenSource == TokenSource.IdentityProvider)
                 {
-                    var tags = BuildTagList(extraTags,
+                    var tags = BuildTagList(MsalMetricsCatalog.DurationInHttpHistogramName, extraTags,
                         new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                         new(TelemetryConstants.Platform, platform),
                         new(TelemetryConstants.ApiId, apiId),
@@ -280,7 +306,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             {
                 if (s_durationTotalV2.Value.Enabled)
                 {
-                    var tags = BuildTagList(extraTags,
+                    var tags = BuildTagList(MsalMetricsCatalog.TotalDurationV2HistogramName, extraTags,
                         new(TelemetryConstants.MsalVersionPlatform, MsalVersionPlatformTag(platform)),
                         new(TelemetryConstants.ApiId, apiId),
                         new(TelemetryConstants.TokenSource, authResultMetadata.TokenSource),
@@ -295,7 +321,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                 // Only log duration in HTTP when token is fetched from IDP.
                 if (s_durationInHttpV2.Value.Enabled && authResultMetadata.TokenSource == TokenSource.IdentityProvider)
                 {
-                    var tags = BuildTagList(extraTags,
+                    var tags = BuildTagList(MsalMetricsCatalog.DurationInHttpV2HistogramName, extraTags,
                         new(TelemetryConstants.MsalVersionPlatform, MsalVersionPlatformTag(platform)),
                         new(TelemetryConstants.ApiId, apiId),
                         new(TelemetryConstants.TokenType, authResultMetadata.TelemetryTokenType),
@@ -329,7 +355,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
         {
             if (s_successCounter.Value.Enabled)
             {
-                var tags = BuildTagList(extraTags,
+                var tags = BuildTagList(MsalMetricsCatalog.SuccessCounterName, extraTags,
                         new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                         new(TelemetryConstants.Platform, platform),
                         new(TelemetryConstants.ApiId, apiId),
@@ -357,7 +383,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             {
                 if (s_durationInHttp.Value.Enabled)
                 {
-                    var tags = BuildTagList(extraTags,
+                    var tags = BuildTagList(MsalMetricsCatalog.DurationInHttpHistogramName, extraTags,
                         new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                         new(TelemetryConstants.Platform, platform),
                         new(TelemetryConstants.ApiId, apiId),
@@ -369,7 +395,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             {
                 if (s_durationInHttpV2.Value.Enabled)
                 {
-                    var tags = BuildTagList(extraTags,
+                    var tags = BuildTagList(MsalMetricsCatalog.DurationInHttpV2HistogramName, extraTags,
                         new(TelemetryConstants.MsalVersionPlatform, MsalVersionPlatformTag(platform)),
                         new(TelemetryConstants.ApiId, apiId),
                         new(TelemetryConstants.TokenType, authResultMetadata.TelemetryTokenType),
@@ -410,7 +436,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             if (_isExtendedMetricsEnabled && s_durationTotalV2.Value.Enabled)
             {
                 // TokenSource is empty on failure: no token was acquired, so no source applies.
-                var tags = BuildTagList(extraTags,
+                var tags = BuildTagList(MsalMetricsCatalog.TotalDurationV2HistogramName, extraTags,
                     new(TelemetryConstants.MsalVersionPlatform, MsalVersionPlatformTag(platform)),
                     new(TelemetryConstants.ApiId, apiEvent.ApiId),
                     new(TelemetryConstants.TokenSource, string.Empty),
@@ -454,7 +480,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             if (!string.IsNullOrEmpty(rawStsErrorCode))
                 baseTags.Add(new(TelemetryConstants.RawStsErrorCode, rawStsErrorCode));
 
-            var tags = BuildTagList(extraTags, baseTags.ToArray());
+            var tags = BuildTagList(MsalMetricsCatalog.FailureCounterName, extraTags, baseTags.ToArray());
 
             s_failureCounter.Value.Add(1, in tags);
         }
@@ -476,7 +502,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
 
             if (apiEvent.DurationInHttpInMs > 0)
             {
-                var tags = BuildTagList(extraTags,
+                var tags = BuildTagList(MsalMetricsCatalog.DurationInHttpV2HistogramName, extraTags,
                     new(TelemetryConstants.MsalVersionPlatform, MsalVersionPlatformTag(platform)),
                     new(TelemetryConstants.ApiId, apiEvent.ApiId),
                     new(TelemetryConstants.TokenType, apiEvent.TokenType),
@@ -500,7 +526,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             {
                 long remainingSeconds = Math.Max(0, (long)(expiresOn - DateTimeOffset.UtcNow).TotalSeconds);
 
-                var tags = BuildTagList(extraTags,
+                var tags = BuildTagList(MsalMetricsCatalog.RemainingTokenLifetimeHistogramName, extraTags,
                     new(TelemetryConstants.MsalVersionPlatform, MsalVersionPlatformTag(platform)),
                     new(TelemetryConstants.ApiId, apiId),
                     new(TelemetryConstants.TokenSource, tokenSource),
