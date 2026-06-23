@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Client.Extensibility
 
         /// <summary>
         /// Adds a key-value pair to the token cache key without sending it as a query parameter.
-        /// Use this to partition cached tokens (e.g., isolating short-lived sessions from regular
+        /// Use this to partition cached access tokens (e.g., isolating short-lived sessions from regular
         /// sessions for the same user). Both <c>AcquireTokenByAuthorizationCode</c> and
         /// <c>AcquireTokenSilent</c> must use the same partition key to match cached entries.
         /// </summary>
@@ -65,6 +65,31 @@ namespace Microsoft.Identity.Client.Extensibility
             this BaseAbstractAcquireTokenParameterBuilder<T> builder,
             string key,
             string value)
+            where T : BaseAbstractAcquireTokenParameterBuilder<T>
+        {
+            return builder.WithCachePartitionKey(key, value, partitionRefreshToken: false);
+        }
+
+        /// <summary>
+        /// Adds a key-value pair to the token cache key without sending it as a query parameter.
+        /// Use this to partition cached tokens (e.g., isolating short-lived sessions from regular
+        /// sessions for the same user). Both <c>AcquireTokenByAuthorizationCode</c> and
+        /// <c>AcquireTokenSilent</c> must use the same partition key to match cached entries.
+        /// </summary>
+        /// <param name="builder">The builder to chain .With methods.</param>
+        /// <param name="key">The partition key name.</param>
+        /// <param name="value">The partition key value.</param>
+        /// <param name="partitionRefreshToken">
+        /// When <see langword="true"/>, the refresh token is also stored and looked up using
+        /// the partition key. When <see langword="false"/>, only the access token is partitioned
+        /// and the refresh token remains in the shared pool.
+        /// </param>
+        /// <returns>The builder to chain .With methods.</returns>
+        public static T WithCachePartitionKey<T>(
+            this BaseAbstractAcquireTokenParameterBuilder<T> builder,
+            string key,
+            string value,
+            bool partitionRefreshToken)
             where T : BaseAbstractAcquireTokenParameterBuilder<T>
         {
             if (key is null)
@@ -85,6 +110,7 @@ namespace Microsoft.Identity.Client.Extensibility
             builder.CommonParameters.CacheKeyComponents ??= new SortedList<string, Func<CancellationToken, Task<string>>>();
             string capturedValue = value;
             builder.CommonParameters.CacheKeyComponents[key] = (CancellationToken _) => Task.FromResult(capturedValue);
+            builder.CommonParameters.PartitionRefreshToken = partitionRefreshToken;
             return (T)builder;
         }
 

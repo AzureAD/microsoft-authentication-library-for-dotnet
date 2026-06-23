@@ -1,0 +1,1 @@
+static Microsoft.Identity.Client.Extensibility.AcquireTokenParameterBuilderExtensions.WithCachePartitionKey<T>(this Microsoft.Identity.Client.BaseAbstractAcquireTokenParameterBuilder<T> builder, string key, string value, bool partitionRefreshToken) -> T

@@ -101,7 +101,7 @@ namespace Microsoft.Identity.Client
                                     requestParams.AppConfig.ClientId,
                                     response,
                                     homeAccountId,
-                                    requestParams.CacheKeyComponents)
+                                    requestParams.PartitionRefreshToken ? requestParams.CacheKeyComponents : null)
                 {
                     OboCacheKey = CacheKeyFactory.GetOboKey(requestParams.LongRunningOboCacheKey, requestParams.UserAssertion),
                 };
@@ -879,9 +879,20 @@ namespace Microsoft.Identity.Client
 
                 // Skip partition filtering for FRT lookups — FRTs are shared across apps
                 // and are never partitioned, so the partition filter must not apply.
-                if (string.IsNullOrEmpty(familyId))
+                // Also skip when PartitionRefreshToken is not set — the caller only wants AT partition.
+                if (string.IsNullOrEmpty(familyId) && requestParams.PartitionRefreshToken)
                 {
                     FilterRefreshTokensByAdditionalKeyComponents(refreshTokens, requestParams);
+                }
+                else if (string.IsNullOrEmpty(familyId) &&
+                         !requestParams.PartitionRefreshToken &&
+                         refreshTokens.Any(rt => rt.AdditionalCacheKeyComponents != null && rt.AdditionalCacheKeyComponents.Count > 0))
+                {
+                    requestParams.RequestContext.Logger.Warning(
+                        "A partitioned refresh token was found, but the current request did not set " +
+                        "partitionRefreshToken to true. The partitioned RT will be used, but the resulting " +
+                        "access token will not be partitioned. Ensure both the token acquisition and silent " +
+                        "calls use WithCachePartitionKey with partitionRefreshToken: true for consistent isolation.");
                 }
 
                 if (!requestParams.AppConfig.MultiCloudSupportEnabled)

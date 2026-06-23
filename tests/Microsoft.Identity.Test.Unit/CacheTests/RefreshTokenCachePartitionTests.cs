@@ -287,7 +287,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 // Act — acquire with partition
                 var result = await app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, TestConstants.DefaultAuthorizationCode)
-                    .WithCachePartitionKey(partitionKey, partitionValue)
+                    .WithCachePartitionKey(partitionKey, partitionValue, partitionRefreshToken: true)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -354,7 +354,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 // Acquire with partition to seed both AT and RT in cache
                 httpManager.AddSuccessTokenResponseMockHandlerForPost();
                 var result = await app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, TestConstants.DefaultAuthorizationCode)
-                    .WithCachePartitionKey(partitionKey, partitionValue)
+                    .WithCachePartitionKey(partitionKey, partitionValue, partitionRefreshToken: true)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -374,7 +374,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 // Act: silent acquire with partition should find the partitioned RT
                 var account = await app.GetAccountAsync(result.Account.HomeAccountId.Identifier).ConfigureAwait(false);
                 var silentResult = await app.AcquireTokenSilent(TestConstants.s_scope, account)
-                    .WithCachePartitionKey(partitionKey, partitionValue)
+                    .WithCachePartitionKey(partitionKey, partitionValue, partitionRefreshToken: true)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -384,11 +384,13 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [TestMethod]
-        public async Task AcquireTokenSilent_WithoutPartition_DoesNotFindPartitionedRT_Async()
+        public async Task AcquireTokenSilent_WithoutRtPartition_FindsPartitionedRT_BackwardCompat_Async()
         {
             using (var httpManager = new MockHttpManager())
             {
-                // Arrange: only a partitioned RT exists in cache (no non-partitioned one)
+                // Arrange: a partitioned RT exists in cache, but the silent caller
+                // does not opt into RT partitioning. The RT filter should not engage,
+                // so the partitioned RT is still found (backward compat).
                 const string partitionKey = "session_type";
                 const string partitionValue = "transfer";
 
@@ -402,17 +404,64 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 // Seed a partitioned RT
                 httpManager.AddSuccessTokenResponseMockHandlerForPost();
                 var result = await app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, TestConstants.DefaultAuthorizationCode)
-                    .WithCachePartitionKey(partitionKey, partitionValue)
+                    .WithCachePartitionKey(partitionKey, partitionValue, partitionRefreshToken: true)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Expire all ATs so silent must use the RT
+                TokenCacheHelper.ExpireAllAccessTokens(app.UserTokenCacheInternal);
+
+                // Mock the refresh token grant response
+                var handler = httpManager.AddSuccessTokenResponseMockHandlerForPost(
+                    TestConstants.AuthorityUtidTenant);
+                handler.ExpectedPostData = new Dictionary<string, string>
+                {
+                    { OAuth2Parameter.GrantType, OAuth2GrantType.RefreshToken }
+                };
+
+                // Act: silent acquire WITHOUT partitionRefreshToken should still find the RT
+                var account = await app.GetAccountAsync(result.Account.HomeAccountId.Identifier).ConfigureAwait(false);
+                var silentResult = await app.AcquireTokenSilent(TestConstants.s_scope, account)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert: token came from IDP via RT refresh (filter was not engaged)
+                Assert.AreEqual(TokenSource.IdentityProvider, silentResult.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+
+        [TestMethod]
+        public async Task AcquireTokenSilent_WithDifferentPartition_DoesNotFindPartitionedRT_Async()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                // Arrange: only a partitioned RT exists in cache
+                const string partitionKey = "session_type";
+                const string partitionValue = "transfer";
+
+                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithAuthority(new System.Uri(ClientApplicationBase.DefaultAuthority), true)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithHttpManager(httpManager)
+                    .WithInstanceDiscovery(false)
+                    .BuildConcrete();
+
+                // Seed a partitioned RT
+                httpManager.AddSuccessTokenResponseMockHandlerForPost();
+                var result = await app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, TestConstants.DefaultAuthorizationCode)
+                    .WithCachePartitionKey(partitionKey, partitionValue, partitionRefreshToken: true)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
                 // Expire all ATs
                 TokenCacheHelper.ExpireAllAccessTokens(app.UserTokenCacheInternal);
 
-                // Act: silent acquire WITHOUT partition should NOT find the partitioned RT
+                // Act: silent acquire with partitionRefreshToken but a DIFFERENT value should NOT find it
                 var account = await app.GetAccountAsync(result.Account.HomeAccountId.Identifier).ConfigureAwait(false);
                 var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(
-                    () => app.AcquireTokenSilent(TestConstants.s_scope, account).ExecuteAsync())
+                    () => app.AcquireTokenSilent(TestConstants.s_scope, account)
+                        .WithCachePartitionKey(partitionKey, "different_value", partitionRefreshToken: true)
+                        .ExecuteAsync())
                     .ConfigureAwait(false);
 
                 // Assert: interaction required because no matching RT was found
@@ -445,7 +494,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 // Seed partitioned RT (transfer token session)
                 httpManager.AddSuccessTokenResponseMockHandlerForPost();
                 var partitionedResult = await app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, "transfer-code")
-                    .WithCachePartitionKey(partitionKey, partitionValue)
+                    .WithCachePartitionKey(partitionKey, partitionValue, partitionRefreshToken: true)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -469,7 +518,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 var account = await app.GetAccountAsync(regularResult.Account.HomeAccountId.Identifier).ConfigureAwait(false);
                 var silentPartitioned = await app.AcquireTokenSilent(TestConstants.s_scope, account)
-                    .WithCachePartitionKey(partitionKey, partitionValue)
+                    .WithCachePartitionKey(partitionKey, partitionValue, partitionRefreshToken: true)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 

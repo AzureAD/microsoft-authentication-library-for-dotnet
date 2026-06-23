@@ -40,6 +40,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public X509Certificate2 MtlsCertificate { get; internal set; }
         public List<string> AdditionalCacheParameters { get; set; }
         public SortedList<string, Func<CancellationToken, Task<string>>> CacheKeyComponents { get; internal set; }
+        public bool PartitionRefreshToken { get; internal set; }
         public bool? SendOfflineAccessScope { get; set; }
         public string FmiPathSuffix { get; internal set; }
         public string ClientAssertionFmiPath { get; internal set; }
