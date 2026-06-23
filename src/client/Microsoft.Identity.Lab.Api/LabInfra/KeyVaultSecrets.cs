@@ -58,7 +58,8 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         /// </summary>
         public const string AppAdfsNativeClient = "App-AdfsNativeClient-Config";
         /// <summary>
-        /// Represents the configuration key for the application's Web API settings.
+        /// Web API app (23c64cd8) in ID4SLAB1 tenant. Used for mTLS transport tests.
+        /// Distinct from <see cref="AppOBOService"/> which is used for OBO flow tests.
         /// </summary>
         public const string AppWebApi = "App-WebApi-Config";
         //  - More specific test scenarios, edge cases, etc.
@@ -82,6 +83,12 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         /// Represents the application identifier used for Arlington CCA test scenarios in the MSAL App Arlington CCA JSON configuration.
         /// </summary>
         public const string MsalAppArlingtonCCA = "MSAL-App-ArlingtonCCA-JSON";
+
+        /// <summary>
+        /// OBO service app (MSAL-APP-TodoListService) in ID4SLAB1 tenant. Used for On-Behalf-Of flow integration tests
+        /// with certificate-based authentication (LabAuth cert from msidlabs vault).
+        /// </summary>
+        public const string AppOBOService = "MSAL-APP-TodoListService-JSON";
 
         // Name of key vault secrets for app secrets and certificates
         /// <summary>
