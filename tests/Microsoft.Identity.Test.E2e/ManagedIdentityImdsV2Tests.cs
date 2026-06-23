@@ -104,6 +104,54 @@ namespace Microsoft.Identity.Test.E2E
         }
 
         /// <summary>
+        /// Tests that omitting <c>.WithMtlsProofOfPossession()</c> on an IMDSv2-capable host
+        /// causes MSAL to fall back to IMDSv1 for that request and return a plain Bearer token.
+        /// <c>.WithAttestationSupport()</c> is retained but is a no-op on the Bearer path
+        /// (attestation only feeds the mTLS PoP / KeyGuard flow), so no binding certificate is
+        /// produced and the token carries no certificate-binding (cnf) claim.
+        /// Requires Windows Credential Guard (VBS) to be enabled on the MSALMSIV2 VM.
+        /// </summary>
+        [RunOnAzureDevOps]
+        [TestCategory("MI_E2E_ImdsV2_Attested")]
+        [TestMethod]
+        [DataRow(null /*SAMI*/, null, DisplayName = "AcquireToken_OnImdsV2_WithAttestation_NoMtlsPoP_ReturnsBearer-SAMI")]
+        [DataRow(UamiClientId, "clientid", DisplayName = "AcquireToken_OnImdsV2_WithAttestation_NoMtlsPoP_ReturnsBearer-UAMI-ClientId")]
+        public async Task AcquireToken_OnImdsV2_WithAttestation_NoMtlsPoP_ReturnsBearer(string id, string idType)
+        {
+            if (!OperatingSystem.IsWindows())
+            {
+                Assert.Inconclusive("Credential Guard attestation is only available on Windows.");
+            }
+
+            var mi = BuildMi(id, idType);
+
+            try
+            {
+                // No .WithMtlsProofOfPossession() => MSAL routes this request through IMDSv1 (Bearer).
+                // .WithAttestationSupport() is retained but is a no-op on the Bearer path.
+                var result = await mi.AcquireTokenForManagedIdentity(GraphResource)
+                    .WithAttestationSupport()
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.IsFalse(string.IsNullOrEmpty(result.AccessToken), "AccessToken should not be empty.");
+                Assert.AreEqual("Bearer", result.TokenType, "Token type should be 'Bearer' when mTLS PoP is not requested.");
+                Assert.IsNull(result.BindingCertificate, "BindingCertificate should be null for a Bearer token.");
+
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource,
+                    "First call must hit MSI endpoint.");
+            }
+            catch (MsalClientException ex) when (ex.ErrorCode == "credential_guard_not_available")
+            {
+                Assert.Inconclusive("Credential Guard is not available on this machine. Ensure VBS and Credential Guard are enabled.");
+            }
+            catch (CryptographicException ex)
+            {
+                Assert.Inconclusive($"Cryptographic operation failed. Credential Guard may not be properly configured: {ex.Message}");
+            }
+        }
+
+        /// <summary>
         /// Tests graceful degradation when Credential Guard is not available.
         /// Should fall back to non-attested mTLS PoP flow.
         /// </summary>
