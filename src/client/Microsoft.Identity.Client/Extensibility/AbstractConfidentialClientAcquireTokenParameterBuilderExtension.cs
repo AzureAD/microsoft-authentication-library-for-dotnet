@@ -191,7 +191,7 @@ namespace Microsoft.Identity.Client.Extensibility
                 {
                     if (param.Value != null)
                     {
-                        data.BodyParameters.Add(param.Key, await param.Value(data.CancellationToken).ConfigureAwait(false));
+                        data.BodyParameters[param.Key] = await param.Value(data.CancellationToken).ConfigureAwait(false);
                     }
                 }
             });

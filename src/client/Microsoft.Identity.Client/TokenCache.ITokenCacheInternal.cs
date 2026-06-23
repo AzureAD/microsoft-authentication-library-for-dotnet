@@ -100,7 +100,8 @@ namespace Microsoft.Identity.Client
                                     instanceDiscoveryMetadata.PreferredCache,
                                     requestParams.AppConfig.ClientId,
                                     response,
-                                    homeAccountId)
+                                    homeAccountId,
+                                    requestParams.CacheKeyComponents)
                 {
                     OboCacheKey = CacheKeyFactory.GetOboKey(requestParams.LongRunningOboCacheKey, requestParams.UserAssertion),
                 };
@@ -841,6 +842,7 @@ namespace Microsoft.Identity.Client
             if (refreshTokens.Count != 0)
             {
                 FilterRefreshTokensByHomeAccountIdOrAssertion(refreshTokens, requestParams, familyId);
+                FilterRefreshTokensByAdditionalKeyComponents(refreshTokens, requestParams);
 
                 if (!requestParams.AppConfig.MultiCloudSupportEnabled)
                 {
@@ -932,6 +934,32 @@ namespace Microsoft.Identity.Client
                             requestParams.AppConfig.ClientId, StringComparison.OrdinalIgnoreCase),
                             requestParams.RequestContext.Logger,
                             "Filtering RT by client id");
+            }
+        }
+
+        private static void FilterRefreshTokensByAdditionalKeyComponents(
+            List<MsalRefreshTokenCacheItem> refreshTokens,
+            AuthenticationRequestParameters requestParams)
+        {
+            bool requestHasComponents =
+                requestParams.CacheKeyComponents != null &&
+                requestParams.CacheKeyComponents.Count > 0;
+
+            if (requestHasComponents)
+            {
+                refreshTokens.FilterWithLogging(item =>
+                    item.AdditionalCacheKeyComponents != null &&
+                    CollectionHelpers.AreDictionariesEqual(item.AdditionalCacheKeyComponents, requestParams.CacheKeyComponents),
+                    requestParams.RequestContext.Logger,
+                    "Filtering RT by additional key components");
+            }
+            else
+            {
+                refreshTokens.FilterWithLogging(item =>
+                    item.AdditionalCacheKeyComponents == null ||
+                    item.AdditionalCacheKeyComponents.Count == 0,
+                    requestParams.RequestContext.Logger,
+                    "Filtering RT by no additional key components");
             }
         }
 
