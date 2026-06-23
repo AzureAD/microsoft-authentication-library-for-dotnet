@@ -16,16 +16,16 @@ MSAL has shipped three versions of the authentication operation interface:
 |---|---|---|
 | `IAuthenticationOperation` | Base: `FormatResult`, `KeyId`, `GetTokenRequestParams` | Shipped |
 | `IAuthenticationOperation2` | Async `FormatResultAsync`, `ValidateCachedTokenAsync` | Shipped |
-| `IAuthenticationOperation3` | `AfterCredentialEvaluationAsync(CredentialEvaluationContext)` — passes mTLS cert to operation | Shipped (tactical fix for CDT in MISE) |
+| *(internal fork)* | Passes mTLS certificate to operation after credential evaluation | Shipped internally (tactical fix for CDT in MISE) |
 
-`IAuthenticationOperation3` was the tactical fix to ship CDT + mTLS PoP in MISE (now released).
-It works, but the pattern doesn't scale:
+The internal tactical fix enabled CDT + mTLS PoP in MISE (now released), but the
+pattern does not scale:
 
 1. **Every new capability requires a new interface version.** The next piece of context
-   (e.g., authority, client ID, flags) will require `IAuthenticationOperation4`.
+   (e.g., authority, client ID, flags) requires yet another interface.
 
-2. **Context passing is minimal.** `CredentialEvaluationContext` only has `MtlsCertificate`.
-   Adding more data requires changing the class.
+2. **Context passing is minimal.** The internal hook only has `MtlsCertificate`.
+   Adding more data requires changing the context class.
 
 3. **No way for the scheme to declare what it needs.** IdWeb cannot ask "does this
    operation require a certificate?" — it must infer from protocol strings and
@@ -99,8 +99,8 @@ public interface ITokenAcquisitionScheme
     /// MSAL provides runtime context (e.g., the resolved mTLS certificate).
     /// Called once per ExecuteAsync, before cache lookup and before any network
     /// request, after mTLS transport certificate preflight has resolved.
-    /// This preserves the IAuthenticationOperation3 behavior of firing even on
-    /// cache hits.
+    /// This fires even on cache hits, ensuring the scheme can populate result
+    /// properties (e.g., BindingCertificate) regardless of cache state.
     /// </summary>
     ValueTask ConfigureAsync(
         TokenAcquisitionContext context,
@@ -486,10 +486,10 @@ public sealed class TokenAcquisitionSchemeDefinition
 public static class MsalTokenAcquisitionSchemeDefinitions
 {
     private static readonly TokenAcquisitionSchemeMetadata s_bearerMetadata = new(
-        "bearer", "Bearer", "Bearer");
+        "bearer", "Bearer", "bearer");
 
     private static readonly TokenAcquisitionSchemeMetadata s_bearerMtlsMetadata = new(
-        "bearer_mtls", "Bearer", "Bearer",
+        "bearer_mtls", "Bearer", "bearer",
         new CredentialRequirements(
             transport: TokenEndpointTransport.Mtls,
             accessTokenKind: AccessTokenKind.Bearer,
@@ -634,7 +634,7 @@ public sealed class BearerScheme : ITokenAcquisitionScheme
         => ValueTask.CompletedTask;
 
     public TokenRequestDescriptor CreateTokenRequestDescriptor(TokenAcquisitionContext context)
-        => new("bearer", "Bearer", "Bearer");
+        => new("bearer", "Bearer", "bearer");
 
     public bool AcceptsTokenType(string tokenType)
         => string.Equals(tokenType, "bearer", StringComparison.OrdinalIgnoreCase);
@@ -675,7 +675,7 @@ public sealed class BearerOverMtlsScheme : ITokenAcquisitionScheme
         => new(
             schemeId: "bearer_mtls",
             authorizationHeaderPrefix: "Bearer",
-            expectedTokenType: "Bearer");
+            expectedTokenType: "bearer");
             // CacheBindingKeyId = null — access token is NOT key-bound.
             // Cert is for client auth to Entra, not downstream token binding.
 
@@ -962,17 +962,14 @@ internal sealed class LegacySchemeAdapter : ITokenAcquisitionScheme
             // selection must use new scheme types.
     }
 
-    public async ValueTask ConfigureAsync(
+    public ValueTask ConfigureAsync(
         TokenAcquisitionContext context,
         CancellationToken cancellationToken = default)
     {
-        if (_legacy is IAuthenticationOperation3 op3
-            && context.MtlsCertificate is not null)
-        {
-            await op3.AfterCredentialEvaluationAsync(
-                new CredentialEvaluationContext(context.MtlsCertificate),
-                cancellationToken).ConfigureAwait(false);
-        }
+        // For the OSS public IAuthenticationOperation/2, ConfigureAsync is a no-op.
+        // Internal forks that support credential evaluation hooks would extend
+        // this adapter to call the appropriate async hook here.
+        return ValueTask.CompletedTask;
     }
 
     public TokenRequestDescriptor CreateTokenRequestDescriptor(TokenAcquisitionContext context)
