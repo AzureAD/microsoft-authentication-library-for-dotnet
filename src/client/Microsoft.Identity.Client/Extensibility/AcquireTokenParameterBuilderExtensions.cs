@@ -110,7 +110,7 @@ namespace Microsoft.Identity.Client.Extensibility
             builder.CommonParameters.CacheKeyComponents ??= new SortedList<string, Func<CancellationToken, Task<string>>>();
             string capturedValue = value;
             builder.CommonParameters.CacheKeyComponents[key] = (CancellationToken _) => Task.FromResult(capturedValue);
-            builder.CommonParameters.PartitionRefreshToken = partitionRefreshToken;
+            builder.CommonParameters.PartitionRefreshToken |= partitionRefreshToken;
             return (T)builder;
         }
 
