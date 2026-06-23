@@ -104,13 +104,18 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         internal string ToLogString(bool piiEnabled = false)
         {
+            string additionalKeys = AdditionalCacheKeyComponents != null && AdditionalCacheKeyComponents.Count > 0
+                ? CoreHelpers.ComputeAccessTokenExtCacheKey(AdditionalCacheKeyComponents)
+                : null;
+
             return MsalCacheKeys.GetCredentialKey(
                 piiEnabled ? HomeAccountId : HomeAccountId?.GetHashCode().ToString(),
                 Environment,
                 StorageJsonValues.CredentialTypeRefreshToken,
                 ClientId,
                 tenantId: null,
-                scopes: null);
+                scopes: null,
+                additionalKeys);
         }
 
         #region iOS
