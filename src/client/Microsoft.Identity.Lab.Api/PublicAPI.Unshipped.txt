@@ -1,1 +1,0 @@
-const Microsoft.Identity.Test.LabInfrastructure.KeyVaultSecrets.AppOBOService = "MSAL-APP-TodoListService-JSON" -> string
