@@ -1,2 +1,0 @@
-Microsoft.Identity.Client.Extensibility.MsalMetricsCatalog
-static Microsoft.Identity.Client.Extensibility.MsalMetricsCatalog.CanonicalTagsByMetric.get -> System.Collections.Generic.IReadOnlyDictionary<string, System.Collections.Generic.IReadOnlyList<string>>

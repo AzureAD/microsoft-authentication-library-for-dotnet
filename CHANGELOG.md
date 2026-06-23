@@ -1,3 +1,9 @@
+4.85.1
+======
+
+### New Features
+- Exposed canonical OpenTelemetry tag names per metric via `MsalMetricsCatalog.CanonicalTagsByMetric` for discoverability and validation. [#6076](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6076)
+
 4.85.0
 ======
 
