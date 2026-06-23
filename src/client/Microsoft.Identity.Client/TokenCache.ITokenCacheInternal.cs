@@ -884,16 +884,6 @@ namespace Microsoft.Identity.Client
                 {
                     FilterRefreshTokensByAdditionalKeyComponents(refreshTokens, requestParams);
                 }
-                else if (string.IsNullOrEmpty(familyId) &&
-                         !requestParams.PartitionRefreshToken &&
-                         refreshTokens.Any(rt => rt.AdditionalCacheKeyComponents != null && rt.AdditionalCacheKeyComponents.Count > 0))
-                {
-                    requestParams.RequestContext.Logger.Warning(
-                        "A partitioned refresh token was found, but the current request did not set " +
-                        "partitionRefreshToken to true. The partitioned RT will be used, but the resulting " +
-                        "access token will not be partitioned. Ensure both the token acquisition and silent " +
-                        "calls use WithCachePartitionKey with partitionRefreshToken: true for consistent isolation.");
-                }
 
                 if (!requestParams.AppConfig.MultiCloudSupportEnabled)
                 {
