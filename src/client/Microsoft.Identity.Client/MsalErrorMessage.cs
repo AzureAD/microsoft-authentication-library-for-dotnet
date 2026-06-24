@@ -449,6 +449,7 @@ namespace Microsoft.Identity.Client
         public const string MtlsPopNotSupportedForUsGovCloudApiMessage = "login.usgovcloudapi.net is not supported for mTLS PoP, please use login.microsoftonline.us";
         public const string MtlsPopNotSupportedForChinaCloudApiMessage = "login.chinacloudapi.cn is not supported for mTLS PoP, please use login.partner.microsoftonline.cn";
         public const string MtlsPopNotSupportedForNonLoginHostMessage = "mTLS PoP is only supported for hosts that start with 'login.'. The provided authority host does not meet this requirement. See https://aka.ms/msal-net-pop for details.";
+        public const string MtlsPopNotSupportedForManagedIdentityEnvironmentMessage = "mTLS Proof-of-Possession with managed identity is only supported on IMDSv2. The detected managed identity source does not support mTLS PoP.";
         public const string ForceRefreshAndTokenHasNotCompatible = "Cannot specify ForceRefresh and AccessTokenSha256ToRefresh in the same request.";
         public const string RequestTimeOut = "Request to the endpoint timed out.";
         public const string MalformedOidcAuthorityFormat = "Possible cause: When using Entra External ID, you didn't append /v2.0, for example {0}/v2.0\"";

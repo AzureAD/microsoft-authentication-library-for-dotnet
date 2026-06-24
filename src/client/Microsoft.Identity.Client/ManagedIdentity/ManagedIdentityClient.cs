@@ -55,6 +55,38 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             return await msi.AuthenticateAsync(parameters, cancellationToken).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Mints (or reuses) the IMDSv2 mTLS binding without sending the token request, so the caller
+        /// can delegate the token leg to MSAL's internal exchange path (<see cref="OAuth2.TokenClient"/>).
+        /// mTLS PoP always routes to the IMDSv2 source.
+        /// </summary>
+        internal async Task<MtlsBindingInfo> AcquireImdsV2MtlsBindingAsync(
+            RequestContext requestContext,
+            AcquireTokenForManagedIdentityParameters parameters,
+            bool forceRemint,
+            CancellationToken cancellationToken)
+        {
+            // Route through the shared source selection so the same guards apply as the bespoke path
+            // (e.g. throwing MtlsPopTokenNotSupportedinImdsV1 when only IMDSv1 is available). mTLS PoP
+            // always resolves to the IMDSv2 source.
+            AbstractManagedIdentity selected = await GetOrSelectManagedIdentitySourceAsync(
+                requestContext, isMtlsPopRequested: true, cancellationToken).ConfigureAwait(false);
+
+            // An environment-detected source (App Service, Service Fabric, Cloud Shell, Azure Arc,
+            // Machine Learning) does not support mTLS PoP. Fail fast with a clear MSAL error rather
+            // than an opaque InvalidCastException from an unchecked cast.
+            if (selected is not ImdsV2ManagedIdentitySource imdsV2Source)
+            {
+                throw new MsalClientException(
+                    MsalError.MtlsPopNotSupportedForEnvironment,
+                    MsalErrorMessage.MtlsPopNotSupportedForManagedIdentityEnvironmentMessage);
+            }
+
+            return await imdsV2Source
+                .AcquireMtlsBindingForDelegationAsync(parameters, forceRemint, cancellationToken)
+                .ConfigureAwait(false);
+        }
+
         // This method selects the managed identity source for token acquisition.
         // It does NOT probe IMDS. It uses the cached explicit discovery result if available,
         // otherwise checks environment variables, and defaults to IMDS without probing.
