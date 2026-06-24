@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client.KeyAttestation
                     logger,
                     ct).ConfigureAwait(false);
 
-                if (result.Status == AttestationStatus.Success && !string.IsNullOrEmpty(result.Jwt))
+                if (result.Status == AttestationStatus.Success && !string.IsNullOrWhiteSpace(result.Jwt))
                 {
                     return result.Jwt;
                 }

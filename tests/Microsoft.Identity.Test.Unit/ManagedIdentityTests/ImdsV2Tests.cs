@@ -1067,6 +1067,40 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
+        public async Task MtlsPop_WithAttestationSupport_SuccessButWhitespaceJwt_ThrowsAttestationFailedWithReason()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                // Arrange
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
+
+                var mi = await CreateManagedIdentityAsync(httpManager, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
+
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
+
+                // A "Success" status with a whitespace-only JWT must be treated as a failure here so the
+                // richer Status/NativeErrorCode/Reason is surfaced, rather than leaking a blank token that
+                // trips the generic downstream "returned no token" check.
+                PopKeyAttestor.s_testAttestationProvider = (endpoint, keyHandle, clientId, keyId, ct) =>
+                    Task.FromResult(new AttestationResult(AttestationStatus.Success, null, "   ", 0, "whitespace token produced"));
+
+                // Act
+                var ex = await Assert.ThrowsAsync<MsalServiceException>(async () =>
+                    await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                        .WithMtlsProofOfPossession()
+                        .WithAttestationSupport()
+                        .ExecuteAsync().ConfigureAwait(false)
+                ).ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual("attestation_failed", ex.ErrorCode);
+                StringAssert.Contains(ex.Message, "Status: Success");
+                StringAssert.Contains(ex.Message, "whitespace token produced");
+            }
+        }
+
+        [TestMethod]
         public async Task MtlsPop_WithAttestationSupport_Success_IncludesAttestationToken()
         {
             using (new EnvVariableContext())
