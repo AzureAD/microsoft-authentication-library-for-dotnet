@@ -1144,11 +1144,27 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             bridge(IntPtr.Zero, "Tag", AttestationClientLib.LogLevel.Info, "Fn", 3, "i-msg");
             bridge(IntPtr.Zero, "Tag", AttestationClientLib.LogLevel.Debug, "Fn", 4, "d-msg");
 
-            // Assert
-            logger.Received(1).Log(LogLevel.Error, Arg.Any<string>(), Arg.Is<string>(s => s.Contains("e-msg")));
-            logger.Received(1).Log(LogLevel.Warning, Arg.Any<string>(), Arg.Is<string>(s => s.Contains("w-msg")));
-            logger.Received(1).Log(LogLevel.Info, Arg.Any<string>(), Arg.Is<string>(s => s.Contains("i-msg")));
-            logger.Received(1).Log(LogLevel.Verbose, Arg.Any<string>(), Arg.Is<string>(s => s.Contains("d-msg")));
+            // Assert: Error/Warning/Info are non-PII (scrubbed); Debug->Verbose is routed through the PII slot.
+            logger.Received(1).Log(LogLevel.Error, string.Empty, Arg.Is<string>(s => s.Contains("e-msg")));
+            logger.Received(1).Log(LogLevel.Warning, string.Empty, Arg.Is<string>(s => s.Contains("w-msg")));
+            logger.Received(1).Log(LogLevel.Info, string.Empty, Arg.Is<string>(s => s.Contains("i-msg")));
+            logger.Received(1).Log(LogLevel.Verbose, Arg.Is<string>(s => s.Contains("d-msg")), string.Empty);
+        }
+
+        [TestMethod]
+        public void AttestationLogger_CreateLoggerBridge_VerboseLine_LogsAsPiiNotScrubbed()
+        {
+            // Arrange
+            var logger = Substitute.For<ILoggerAdapter>();
+            logger.IsLoggingEnabled(Arg.Any<LogLevel>()).Returns(true);
+            var bridge = AttestationLogger.CreateLoggerBridge(logger);
+
+            // Act: native Debug maps to Verbose, the most verbose slot that may carry payload fragments.
+            bridge(IntPtr.Zero, "AttestationClientLib", AttestationClientLib.LogLevel.Debug, "Attest", 614, "raw-payload-fragment");
+
+            // Assert: verbose text goes to the PII slot and the scrubbed slot is empty, so it is
+            // redacted unless the caller enables PII logging.
+            logger.Received(1).Log(LogLevel.Verbose, Arg.Is<string>(s => s.Contains("raw-payload-fragment")), string.Empty);
         }
 
         [TestMethod]

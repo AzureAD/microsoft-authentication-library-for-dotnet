@@ -58,10 +58,22 @@ namespace Microsoft.Identity.Client.KeyAttestation.Attestation
                         return;
                     }
 
-                    // Native attestation diagnostics are not user PII (TPM cert issuer, MAA policy errors,
-                    // endpoint URLs), so the formatted line is logged as the scrubbed message.
                     string lineText = FormatNativeLog(tag, lvl, func, line, msg);
-                    logger.Log(mapped, string.Empty, lineText);
+
+                    // Native Error/Warning/Info lines (MAA policy-evaluation failures, endpoint
+                    // URLs, TPM cert issuer) are operational diagnostics, not user PII, so they are
+                    // logged as the scrubbed message and stay visible in standard MSAL logs. The
+                    // most verbose native output (Debug -> Verbose, and any unknown level) can carry
+                    // richer payload fragments, so it is routed through the PII slot and only
+                    // surfaces when the caller opts into PII logging.
+                    if (mapped == LogLevel.Verbose)
+                    {
+                        logger.Log(mapped, lineText, string.Empty);
+                    }
+                    else
+                    {
+                        logger.Log(mapped, string.Empty, lineText);
+                    }
                 }
                 catch
                 {
