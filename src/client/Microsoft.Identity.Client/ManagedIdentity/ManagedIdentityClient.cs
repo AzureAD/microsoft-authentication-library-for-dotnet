@@ -51,10 +51,25 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             AcquireTokenForManagedIdentityParameters parameters,
             CancellationToken cancellationToken)
         {
+            AbstractManagedIdentity msi = await GetOrSelectManagedIdentitySourceAsync(requestContext, parameters.IsMtlsPopRequested, cancellationToken).ConfigureAwait(false);
+            return await msi.AuthenticateAsync(parameters, cancellationToken).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Mints (or reuses) the IMDSv2 mTLS binding without sending the token request, so the caller
+        /// can delegate the token leg to MSAL's internal exchange path (<see cref="OAuth2.TokenClient"/>).
+        /// mTLS PoP always routes to the IMDSv2 source.
+        /// </summary>
+        internal async Task<MtlsBindingInfo> AcquireImdsV2MtlsBindingAsync(
+            RequestContext requestContext,
+            AcquireTokenForManagedIdentityParameters parameters,
+            bool forceRemint,
+            CancellationToken cancellationToken)
+        {
             // Enforce a minimum binding strength floor when requested via PoPOptions.MinStrength.
-            // The token-request path normally routes mTLS PoP straight to IMDSv2 without probing,
-            // so explicitly run discovery to learn the host's maximum binding strength and fail
-            // fast if the host cannot meet the required floor.
+            // The mTLS PoP token leg is delegated to the internal TokenClient exchange and never probes
+            // for binding strength on its own, so explicitly run discovery to learn the host's maximum
+            // binding strength and fail fast if the host cannot meet the required floor before minting.
             if (parameters.MtlsPopMinStrength > MtlsBindingStrength.None)
             {
                 ManagedIdentityDiscoveryResult discovery =
@@ -68,8 +83,25 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 }
             }
 
-            AbstractManagedIdentity msi = await GetOrSelectManagedIdentitySourceAsync(requestContext, parameters.IsMtlsPopRequested, cancellationToken).ConfigureAwait(false);
-            return await msi.AuthenticateAsync(parameters, cancellationToken).ConfigureAwait(false);
+            // Route through the shared source selection so the same guards apply as the bespoke path
+            // (e.g. throwing MtlsPopTokenNotSupportedinImdsV1 when only IMDSv1 is available). mTLS PoP
+            // always resolves to the IMDSv2 source.
+            AbstractManagedIdentity selected = await GetOrSelectManagedIdentitySourceAsync(
+                requestContext, isMtlsPopRequested: true, cancellationToken).ConfigureAwait(false);
+
+            // An environment-detected source (App Service, Service Fabric, Cloud Shell, Azure Arc,
+            // Machine Learning) does not support mTLS PoP. Fail fast with a clear MSAL error rather
+            // than an opaque InvalidCastException from an unchecked cast.
+            if (selected is not ImdsV2ManagedIdentitySource imdsV2Source)
+            {
+                throw new MsalClientException(
+                    MsalError.MtlsPopNotSupportedForEnvironment,
+                    MsalErrorMessage.MtlsPopNotSupportedForManagedIdentityEnvironmentMessage);
+            }
+
+            return await imdsV2Source
+                .AcquireMtlsBindingForDelegationAsync(parameters, forceRemint, cancellationToken)
+                .ConfigureAwait(false);
         }
 
         // This method selects the managed identity source for token acquisition.

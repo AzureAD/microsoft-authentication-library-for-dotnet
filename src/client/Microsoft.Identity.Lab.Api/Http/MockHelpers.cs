@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -200,6 +200,26 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return
                 "{\"access_token\":\"" + TestConstants.ATSecret + "\",\"" + expiresOnKey + "\":\"" + expiresOnValue + "\",\"resource\":\"https://management.azure.com/\"," +
                 "\"token_type\":\"" + tokenType + "\",\"client_id\":\"client_id\"}";
+        }
+
+        /// <summary>
+        /// Creates a successful ESTS-R token response for the IMDSv2 mTLS-PoP token leg, which is now
+        /// served by MSAL's internal TokenClient exchange against ESTS-R. Unlike the IMDS endpoint
+        /// (which emits <c>expires_in</c> as an absolute Unix timestamp), ESTS-R returns <c>expires_in</c>
+        /// as a relative lifetime in seconds, so this mock mirrors the real ESTS-R response shape.
+        /// </summary>
+        /// <param name="accessToken">The access token value to return.</param>
+        /// <param name="expiresInSeconds">The relative token lifetime, in seconds.</param>
+        /// <param name="tokenType">The token type to return (defaults to <c>mtls_pop</c>).</param>
+        /// <returns>A JSON ESTS-R token response string.</returns>
+        internal static string GetImdsV2EntraTokenResponse(
+            string accessToken = TestConstants.ATSecret,
+            string expiresInSeconds = "3599",
+            string tokenType = "mtls_pop")
+        {
+            return
+                "{\"token_type\":\"" + tokenType + "\",\"expires_in\":\"" + expiresInSeconds + "\"," +
+                "\"access_token\":\"" + accessToken + "\",\"resource\":\"https://management.azure.com/\"}";
         }
 
         /// <summary>
@@ -1128,9 +1148,13 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         /// Creates a mock Entra token response handler for IMDS v2 token acquisition.
         /// </summary>
         /// <param name="identityLoggerAdapter">The logger adapter used to populate expected MSAL ID headers.</param>
+        /// <param name="expectedClaims">When set, asserts that the delegated ESTS-R POST body carries this <c>claims</c> value.</param>
+        /// <param name="responseOverride">When set, returns this response instead of the default success body (e.g. an <c>invalid_client</c> failure).</param>
         /// <returns>A configured <see cref="MockHttpMessageHandler"/>.</returns>
         internal static MockHttpMessageHandler MockImdsV2EntraTokenRequestResponse(
-            IdentityLoggerAdapter identityLoggerAdapter)
+            IdentityLoggerAdapter identityLoggerAdapter,
+            string expectedClaims = null,
+            HttpResponseMessage responseOverride = null)
         {
             IDictionary<string, string> expectedPostData = new Dictionary<string, string>();
             IDictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>
@@ -1139,7 +1163,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 };
             IList<string> presentRequestHeaders = new List<string>
                 {
-                    OAuth2Header.XMsCorrelationId
+                    OAuth2Header.CorrelationId
                 };
 
             var idParams = MsalIdHelper.GetMsalIdParameters(identityLoggerAdapter);
@@ -1150,6 +1174,11 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
             expectedPostData.Add("token_type", "mtls_pop");
 
+            if (!string.IsNullOrEmpty(expectedClaims))
+            {
+                expectedPostData.Add("claims", expectedClaims);
+            }
+
             var handler = new MockHttpMessageHandler()
             {
                 ExpectedUrl = $"{TestConstants.MtlsAuthenticationEndpoint}/{TestConstants.TenantId}{ImdsV2ManagedIdentitySource.AcquireEntraTokenPath}",
@@ -1157,9 +1186,9 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 ExpectedPostData = expectedPostData,
                 ExpectedRequestHeaders = expectedRequestHeaders,
                 PresentRequestHeaders = presentRequestHeaders,
-                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                ResponseMessage = responseOverride ?? new HttpResponseMessage(HttpStatusCode.OK)
                 {
-                    Content = new StringContent(GetMsiSuccessfulResponse(imdsV2: true)),
+                    Content = new StringContent(GetImdsV2EntraTokenResponse()),
                 }
             };
 
@@ -1271,7 +1300,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         };
             IList<string> presentRequestHeaders = new List<string>
         {
-            OAuth2Header.XMsCorrelationId
+            OAuth2Header.CorrelationId
         };
 
             var idParams = MsalIdHelper.GetMsalIdParameters(identityLoggerAdapter);
@@ -1293,7 +1322,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 PresentRequestHeaders = presentRequestHeaders,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
                 {
-                    Content = new StringContent(GetMsiSuccessfulResponse(imdsV2: true)),
+                    Content = new StringContent(GetImdsV2EntraTokenResponse(tokenType: tokenType)),
                 }
             };
         }
@@ -1418,7 +1447,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 },
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
                 {
-                    Content = new StringContent(GetMsiSuccessfulResponse(imdsV2: true)),
+                    Content = new StringContent(GetImdsV2EntraTokenResponse()),
                 }
             };
 
@@ -1464,3 +1493,4 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         #endregion
     }
 }
+
