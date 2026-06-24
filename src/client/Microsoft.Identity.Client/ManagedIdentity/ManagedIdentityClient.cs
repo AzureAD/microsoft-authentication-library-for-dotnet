@@ -66,6 +66,23 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             bool forceRemint,
             CancellationToken cancellationToken)
         {
+            // Enforce a minimum binding strength floor when requested via PoPOptions.MinStrength.
+            // The mTLS PoP token leg is delegated to the internal TokenClient exchange and never probes
+            // for binding strength on its own, so explicitly run discovery to learn the host's maximum
+            // binding strength and fail fast if the host cannot meet the required floor before minting.
+            if (parameters.MtlsPopMinStrength > MtlsBindingStrength.None)
+            {
+                ManagedIdentityDiscoveryResult discovery =
+                    await GetManagedIdentityCapabilitiesAsync(requestContext, cancellationToken).ConfigureAwait(false);
+
+                if (discovery.MaxSupportedBindingStrength < parameters.MtlsPopMinStrength)
+                {
+                    throw new MsalClientException(
+                        MsalError.MinStrengthNotMet,
+                        MsalErrorMessage.MinStrengthNotMet(discovery.MaxSupportedBindingStrength, parameters.MtlsPopMinStrength));
+                }
+            }
+
             // Route through the shared source selection so the same guards apply as the bespoke path
             // (e.g. throwing MtlsPopTokenNotSupportedinImdsV1 when only IMDSv1 is available). mTLS PoP
             // always resolves to the IMDSv2 source.

@@ -14,7 +14,7 @@ namespace Microsoft.Identity.Client.KeyAttestation
     {
         /// <summary>
         /// Enables Credential Guard attestation support for managed identity mTLS Proof-of-Possession flows.
-        /// This method should be called after <see cref="ManagedIdentityPopExtensions.WithMtlsProofOfPossession"/>.
+        /// This method should be called after <see cref="ManagedIdentityPopExtensions.WithMtlsProofOfPossession(AcquireTokenForManagedIdentityParameterBuilder)"/>.
         /// </summary>
         /// <param name="builder">The AcquireTokenForManagedIdentityParameterBuilder instance.</param>
         /// <returns>The builder to chain .With methods.</returns>
