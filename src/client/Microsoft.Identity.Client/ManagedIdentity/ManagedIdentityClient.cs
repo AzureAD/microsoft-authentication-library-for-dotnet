@@ -83,31 +83,55 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 }
             }
 
-            // Route through the shared source selection so the same guards apply as the bespoke path
+            // Route through the shared source decision so the same guards apply as the bearer path
             // (e.g. throwing MtlsPopTokenNotSupportedinImdsV1 when only IMDSv1 is available). mTLS PoP
             // always resolves to the IMDSv2 source.
-            AbstractManagedIdentity selected = await GetOrSelectManagedIdentitySourceAsync(
-                requestContext, isMtlsPopRequested: true, cancellationToken).ConfigureAwait(false);
+            (ManagedIdentitySource source, bool isImdsV2) = SelectManagedIdentitySourceType(
+                requestContext, isMtlsPopRequested: true, cancellationToken);
 
             // An environment-detected source (App Service, Service Fabric, Cloud Shell, Azure Arc,
-            // Machine Learning) does not support mTLS PoP. Fail fast with a clear MSAL error rather
-            // than an opaque InvalidCastException from an unchecked cast.
-            if (selected is not ImdsV2ManagedIdentitySource imdsV2Source)
+            // Machine Learning) does not support mTLS PoP. Fail fast with a clear MSAL error.
+            if (source != ManagedIdentitySource.Imds || !isImdsV2)
             {
                 throw new MsalClientException(
                     MsalError.MtlsPopNotSupportedForEnvironment,
                     MsalErrorMessage.MtlsPopNotSupportedForManagedIdentityEnvironmentMessage);
             }
 
+            IImdsV2MtlsBindingSource imdsV2Source = ImdsV2ManagedIdentitySource.Create(requestContext);
+
             return await imdsV2Source
                 .AcquireMtlsBindingForDelegationAsync(parameters, forceRemint, cancellationToken)
                 .ConfigureAwait(false);
         }
 
-        // This method selects the managed identity source for token acquisition.
+        // This method selects and instantiates the managed identity source for the bearer token
+        // path. IMDSv2 (mTLS PoP) does not derive from AbstractManagedIdentity and is created via
+        // AcquireImdsV2MtlsBindingAsync, so the IMDS source here always resolves to IMDSv1.
+        private Task<AbstractManagedIdentity> GetOrSelectManagedIdentitySourceAsync(
+            RequestContext requestContext,
+            bool isMtlsPopRequested,
+            CancellationToken cancellationToken)
+        {
+            (ManagedIdentitySource source, _) = SelectManagedIdentitySourceType(
+                requestContext, isMtlsPopRequested, cancellationToken);
+
+            return Task.FromResult<AbstractManagedIdentity>(source switch
+            {
+                ManagedIdentitySource.ServiceFabric => ServiceFabricManagedIdentitySource.Create(requestContext),
+                ManagedIdentitySource.AppService => AppServiceManagedIdentitySource.Create(requestContext),
+                ManagedIdentitySource.MachineLearning => MachineLearningManagedIdentitySource.Create(requestContext),
+                ManagedIdentitySource.CloudShell => CloudShellManagedIdentitySource.Create(requestContext),
+                ManagedIdentitySource.AzureArc => AzureArcManagedIdentitySource.Create(requestContext),
+                ManagedIdentitySource.Imds => ImdsManagedIdentitySource.Create(requestContext),
+                _ => throw CreateManagedIdentityUnavailableException(s_cachedSourceResult)
+            });
+        }
+
+        // Decides the managed identity source (and IMDS version) without instantiating it.
         // It does NOT probe IMDS. It uses the cached explicit discovery result if available,
         // otherwise checks environment variables, and defaults to IMDS without probing.
-        private Task<AbstractManagedIdentity> GetOrSelectManagedIdentitySourceAsync(
+        private (ManagedIdentitySource Source, bool IsImdsV2) SelectManagedIdentitySourceType(
             RequestContext requestContext,
             bool isMtlsPopRequested,
             CancellationToken cancellationToken)
@@ -142,12 +166,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                         {
                             // Route mTLS PoP requests directly to IMDSv2 (no probing)
                             requestContext.Logger.Info("[Managed Identity] mTLS PoP requested, routing to IMDSv2 directly without probing.");
-                            return Task.FromResult<AbstractManagedIdentity>(ImdsV2ManagedIdentitySource.Create(requestContext));
+                            return (ManagedIdentitySource.Imds, true);
                         }
 
                         // Default to IMDSv1 without probing
                         requestContext.Logger.Info("[Managed Identity] Defaulting to IMDSv1 without probing.");
-                        return Task.FromResult<AbstractManagedIdentity>(ImdsManagedIdentitySource.Create(requestContext));
+                        return (ManagedIdentitySource.Imds, false);
                     }
                 }
 
@@ -177,18 +201,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                         MsalErrorMessage.MtlsPopTokenNotSupportedinImdsV1);
                 }
 
-                return Task.FromResult<AbstractManagedIdentity>(source switch
-                {
-                    ManagedIdentitySource.ServiceFabric => ServiceFabricManagedIdentitySource.Create(requestContext),
-                    ManagedIdentitySource.AppService => AppServiceManagedIdentitySource.Create(requestContext),
-                    ManagedIdentitySource.MachineLearning => MachineLearningManagedIdentitySource.Create(requestContext),
-                    ManagedIdentitySource.CloudShell => CloudShellManagedIdentitySource.Create(requestContext),
-                    ManagedIdentitySource.AzureArc => AzureArcManagedIdentitySource.Create(requestContext),
-                    ManagedIdentitySource.Imds => isImdsV2
-                        ? ImdsV2ManagedIdentitySource.Create(requestContext)
-                        : ImdsManagedIdentitySource.Create(requestContext),
-                    _ => throw CreateManagedIdentityUnavailableException(s_cachedSourceResult)
-                });
+                return (source, isImdsV2);
             }
         }
 

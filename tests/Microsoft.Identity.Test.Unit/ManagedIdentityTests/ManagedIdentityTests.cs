@@ -1489,26 +1489,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [TestMethod]
-        public void ValidateServerCertificate_NotSetForImdsV2()
-        {
-            using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager())
-            {
-                SetEnvironmentVariables(ManagedIdentitySource.Imds, "https://identity.endpoint.com");
-
-                var managedIdentityApp = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                    .WithHttpManager(httpManager)
-                    .BuildConcrete();
-                RequestContext requestContext = new RequestContext(managedIdentityApp.ServiceBundle, Guid.NewGuid(), null);
-
-                AbstractManagedIdentity managedIdentity = new ImdsV2ManagedIdentitySource(requestContext);
-
-                Assert.IsNull(managedIdentity.GetValidationCallback(),
-                    "IMDSv2 source should not have ValidateServerCertificate set");
-            }
-        }
-
         private AbstractManagedIdentity CreateManagedIdentitySource(ManagedIdentitySource sourceType, MockHttpManager httpManager)
         {
             string endpoint = "https://identity.endpoint.com";

@@ -22,12 +22,14 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.ManagedIdentity.V2
 {
-    internal class ImdsV2ManagedIdentitySource : AbstractManagedIdentity
+    internal class ImdsV2ManagedIdentitySource : IImdsV2MtlsBindingSource
     {
         // Central, process-local cache for mTLS binding (cert + endpoint + canonical client_id).
         internal static readonly ICertificateCache s_mtlsCertificateCache = new InMemoryCertificateCache();
 
+        private readonly RequestContext _requestContext;
         private readonly IMtlsCertificateCache _mtlsCache;
+        private bool _isMtlsPopRequested;
         private Func<string, SafeHandle, string, string, ILoggerAdapter, CancellationToken, Task<string>> _attestationTokenProvider;
 
         // used in unit tests
@@ -162,7 +164,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             return csrMetadata;
         }
 
-        public static AbstractManagedIdentity Create(RequestContext requestContext)
+        public static ImdsV2ManagedIdentitySource Create(RequestContext requestContext)
         {
             return new ImdsV2ManagedIdentitySource(requestContext);
         }
@@ -177,8 +179,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         internal ImdsV2ManagedIdentitySource(
             RequestContext requestContext,
             IMtlsCertificateCache mtlsCache)
-            : base(requestContext, ManagedIdentitySource.Imds)
         {
+            _requestContext = requestContext;
             _mtlsCache = mtlsCache ?? throw new ArgumentNullException(nameof(mtlsCache));
         }
 
@@ -297,19 +299,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             return certificateRequestResponse;
         }
 
-        // IMDSv2 delegates its token leg to MSAL's internal TokenClient exchange (see
-        // ManagedIdentityAuthRequest.SendDelegatedImdsV2TokenRequestAsync). The cert-mint flow is exposed
-        // via AcquireMtlsBindingForDelegationAsync, so the base AuthenticateAsync/CreateRequestAsync path
-        // is not used for IMDSv2. This override only satisfies the abstract base contract.
-        // DO NOT restore a bespoke token request here: the IMDSv2 token leg must go through TokenClient so
-        // client-originated claims, client-capability (CP1) merge, and claims-based cache keying are preserved.
-        protected override Task<ManagedIdentityRequest> CreateRequestAsync(string resource)
-        {
-            throw new InvalidOperationException(
-                "IMDSv2 delegates its token leg to the internal exchange path; CreateRequestAsync is not used. " +
-                "Mint the mTLS binding via AcquireMtlsBindingForDelegationAsync instead.");
-        }
-
         /// <summary>
         /// Performs the cert-mint flow (/getplatformmetadata + /issuecredential) and returns the
         /// resulting mTLS binding (cert + ESTS-R endpoint + canonical client_id). Extracted so the
@@ -402,7 +391,13 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         /// provider and mTLS-PoP flag from the request parameters, optionally evicts a rejected cert
         /// (invalid_client / SCHANNEL re-mint), and returns the mTLS binding. Does NOT send the token request.
         /// </summary>
-        internal async Task<MtlsBindingInfo> AcquireMtlsBindingForDelegationAsync(
+        /// <remarks>
+        /// IMDSv2 delegates its token leg to MSAL's internal TokenClient exchange (see
+        /// ManagedIdentityAuthRequest.SendDelegatedImdsV2TokenRequestAsync). DO NOT restore a bespoke
+        /// token request: the IMDSv2 token leg must go through TokenClient so client-originated claims,
+        /// client-capability (CP1) merge, and claims-based cache keying are preserved.
+        /// </remarks>
+        public async Task<MtlsBindingInfo> AcquireMtlsBindingForDelegationAsync(
             ApiConfig.Parameters.AcquireTokenForManagedIdentityParameters parameters,
             bool forceRemint,
             CancellationToken cancellationToken)
