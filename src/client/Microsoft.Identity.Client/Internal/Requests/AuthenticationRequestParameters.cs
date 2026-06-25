@@ -122,6 +122,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         }
 
         public bool IsMtlsPopRequested => _commonParameters.IsMtlsPopRequested;
+        public bool IsMtlsBearerRequested => _commonParameters.IsMtlsBearerRequested;
         public bool? SendOfflineAccessScope => _commonParameters.SendOfflineAccessScope;
 
         /// <summary>

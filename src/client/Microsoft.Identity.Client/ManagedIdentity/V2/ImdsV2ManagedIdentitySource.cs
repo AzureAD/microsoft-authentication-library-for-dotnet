@@ -336,11 +336,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         {
             CsrMetadata csrMetadata = await GetCsrMetadataAsync(_requestContext).ConfigureAwait(false);
 
-            // Early validation: Fail-fast if mTLS PoP was requested but KeyGuard is unavailable.
+            // Early validation: Fail-fast if KeyGuard is required (mTLS PoP or mTLS Bearer) but unavailable.
             // This check happens before any network calls to avoid wasted round-trips.
             // Note: This creates/retrieves the key, but on cache hit scenarios (below),
             // this may be the only key access needed.
-            if (_isMtlsPopRequested)
+            if (_isMtlsPopRequested || _isMtlsBearerRequested)
             {
                 IManagedIdentityKeyProvider keyProvider = _requestContext.ServiceBundle.PlatformProxy.ManagedIdentityKeyProvider;
                 ManagedIdentityKeyInfo keyInfo = await keyProvider
@@ -349,12 +349,13 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 
                 if (keyInfo.Type != ManagedIdentityKeyType.KeyGuard)
                 {
+                    string flowName = _isMtlsPopRequested ? "mTLS Proof-of-Possession" : "mTLS Bearer";
                     throw new MsalClientException(
-                        "mtls_pop_requires_keyguard",
-                        $"[ImdsV2] mTLS Proof-of-Possession currently requires a KeyGuard key, but this host produced a '{keyInfo.Type}' key. " +
+                        "credential_guard_not_available",
+                        $"[ImdsV2] {flowName} currently requires a KeyGuard key, but this host produced a '{keyInfo.Type}' key. " +
                         "The host may report Software-strength binding capability (which means it can bind a token to a key), " +
-                        "but the IMDSv2 PoP token flow only accepts VBS-isolated KeyGuard keys today. " +
-                        "Ensure Virtualization-based Security (VBS)/KeyGuard is enabled on the host, or request a bearer token instead.");
+                        "but the IMDSv2 attested flow only accepts VBS-isolated KeyGuard keys today. " +
+                        "Ensure Virtualization-based Security (VBS)/KeyGuard is enabled on the host.");
                 }
             }
 
@@ -429,6 +430,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             request.Headers.Add(ThrottleCommon.ThrottleRetryAfterHeaderName, ThrottleCommon.ThrottleRetryAfterHeaderValue);
             request.Headers.Add(OAuth2Header.RequestCorrelationIdInResponse, "true");
 
+            // mTLS PoP → token_type=mtls_pop; all other IMDSv2 flows → token_type=bearer.
             var tokenType = _isMtlsPopRequested ? Constants.MtlsPoPTokenType : Constants.BearerTokenType;
 
             request.BodyParameters.Add("client_id", clientIdForToken);

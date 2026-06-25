@@ -104,19 +104,17 @@ namespace Microsoft.Identity.Test.E2E
         }
 
         /// <summary>
-        /// Tests that omitting <c>.WithMtlsProofOfPossession()</c> on an IMDSv2-capable host
-        /// causes MSAL to fall back to IMDSv1 for that request and return a plain Bearer token.
-        /// <c>.WithAttestationSupport()</c> is retained but is a no-op on the Bearer path
-        /// (attestation only feeds the mTLS PoP / KeyGuard flow), so no binding certificate is
-        /// produced and the token carries no certificate-binding (cnf) claim.
+        /// Tests that <c>.WithMtlsBearerToken()</c> on an IMDSv2-capable host uses the full attested
+        /// mTLS flow (Credential Guard-issued certificate) to connect to ESTS, but requests
+        /// <c>token_type=bearer</c>, returning a standard bearer token with no binding certificate.
         /// Requires Windows Credential Guard (VBS) to be enabled on the MSALMSIV2 VM.
         /// </summary>
         [RunOnAzureDevOps]
         [TestCategory("MI_E2E_ImdsV2_Attested")]
         [TestMethod]
-        [DataRow(null /*SAMI*/, null, DisplayName = "AcquireToken_OnImdsV2_WithAttestation_NoMtlsPoP_ReturnsBearer-SAMI")]
-        [DataRow(UamiClientId, "clientid", DisplayName = "AcquireToken_OnImdsV2_WithAttestation_NoMtlsPoP_ReturnsBearer-UAMI-ClientId")]
-        public async Task AcquireToken_OnImdsV2_WithAttestation_NoMtlsPoP_ReturnsBearer(string id, string idType)
+        [DataRow(null /*SAMI*/, null, DisplayName = "AcquireToken_OnImdsV2_WithMtlsBearerToken_ReturnsBearer-SAMI")]
+        [DataRow(UamiClientId, "clientid", DisplayName = "AcquireToken_OnImdsV2_WithMtlsBearerToken_ReturnsBearer-UAMI-ClientId")]
+        public async Task AcquireToken_OnImdsV2_WithMtlsBearerToken_ReturnsBearer(string id, string idType)
         {
             if (!OperatingSystem.IsWindows())
             {
@@ -127,19 +125,24 @@ namespace Microsoft.Identity.Test.E2E
 
             try
             {
-                // No .WithMtlsProofOfPossession() => MSAL routes this request through IMDSv1 (Bearer).
-                // .WithAttestationSupport() is retained but is a no-op on the Bearer path.
+                // .WithMtlsBearerToken() routes through the IMDSv2 attested flow (KeyGuard cert + mTLS
+                // connection) but requests token_type=bearer from ESTS, so the result is a plain bearer token with no binding certificate.
                 var result = await mi.AcquireTokenForManagedIdentity(GraphResource)
+                    .WithMtlsBearerToken()
                     .WithAttestationSupport()
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
                 Assert.IsFalse(string.IsNullOrEmpty(result.AccessToken), "AccessToken should not be empty.");
-                Assert.AreEqual("Bearer", result.TokenType, "Token type should be 'Bearer' when mTLS PoP is not requested.");
-                Assert.IsNull(result.BindingCertificate, "BindingCertificate should be null for a Bearer token.");
+                Assert.AreEqual("Bearer", result.TokenType, "Token type should be 'Bearer' for mTLS Bearer.");
+                Assert.IsNull(result.BindingCertificate, "BindingCertificate should be null for a bearer token.");
+
+                // Verify the token has no cnf (certificate-binding) claim.
+                var jwt = new JwtSecurityToken(result.AccessToken);
+                Assert.IsFalse(jwt.Payload.ContainsKey("cnf"), "****** must not contain a cnf claim.");
 
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource,
-                    "First call must hit MSI endpoint.");
+                    "First call must hit the token endpoint.");
             }
             catch (MsalClientException ex) when (ex.ErrorCode == "credential_guard_not_available")
             {

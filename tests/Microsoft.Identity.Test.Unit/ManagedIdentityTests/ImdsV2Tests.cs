@@ -864,7 +864,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                         .ExecuteAsync().ConfigureAwait(false)
                 ).ConfigureAwait(false);
 
-                Assert.AreEqual("mtls_pop_requires_keyguard", ex.ErrorCode);
+                Assert.AreEqual("credential_guard_not_available", ex.ErrorCode);
             }
         }
 

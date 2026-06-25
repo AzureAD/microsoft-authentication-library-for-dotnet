@@ -1,0 +1,1 @@
+static Microsoft.Identity.Client.ManagedIdentityPopExtensions.WithMtlsBearerToken(this Microsoft.Identity.Client.AcquireTokenForManagedIdentityParameterBuilder builder) -> Microsoft.Identity.Client.AcquireTokenForManagedIdentityParameterBuilder
