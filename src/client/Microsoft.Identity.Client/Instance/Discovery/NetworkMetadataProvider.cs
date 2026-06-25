@@ -4,8 +4,10 @@
 using System;
 using System.Linq;
 using System.Globalization;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Http.Retry;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Utils;
@@ -21,15 +23,20 @@ namespace Microsoft.Identity.Client.Instance.Discovery
         private readonly IHttpManager _httpManager;
         private readonly INetworkCacheMetadataProvider _networkCacheMetadataProvider;
         private readonly Uri _userProvidedInstanceDiscoveryUri; // can be null
+        private readonly TimeSpan _instanceDiscoveryTimeout;
+        internal static readonly TimeSpan DefaultInstanceDiscoveryTimeout = TimeSpan.FromSeconds(10);
+        private static readonly IRetryPolicy s_instanceDiscoveryRetryPolicy = new InstanceDiscoveryRetryPolicy();
 
         public NetworkMetadataProvider(
             IHttpManager httpManager,
             INetworkCacheMetadataProvider networkCacheMetadataProvider,
-            Uri userProvidedInstanceDiscoveryUri = null)
+            Uri userProvidedInstanceDiscoveryUri = null,
+            TimeSpan? instanceDiscoveryTimeout = null)
         {
             _httpManager = httpManager ?? throw new ArgumentNullException(nameof(httpManager));
             _networkCacheMetadataProvider = networkCacheMetadataProvider ?? throw new ArgumentNullException(nameof(networkCacheMetadataProvider));
             _userProvidedInstanceDiscoveryUri = userProvidedInstanceDiscoveryUri; // can be null
+            _instanceDiscoveryTimeout = instanceDiscoveryTimeout ?? DefaultInstanceDiscoveryTimeout;
         }
 
         public async Task<InstanceDiscoveryMetadataEntry> GetMetadataAsync(Uri authority, RequestContext requestContext)
@@ -83,11 +90,21 @@ namespace Microsoft.Identity.Client.Instance.Discovery
 
             Uri instanceDiscoveryEndpoint = ComputeHttpEndpoint(authority, requestContext);
 
-            InstanceDiscoveryResponse discoveryResponse = await client
-                .DiscoverAadInstanceAsync(instanceDiscoveryEndpoint, requestContext)
-                .ConfigureAwait(false);
+            using (var timeoutCancellationSource = new CancellationTokenSource(_instanceDiscoveryTimeout))
+            using (var linkedCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(
+                requestContext.UserCancellationToken,
+                timeoutCancellationSource.Token))
+            {
+                InstanceDiscoveryResponse discoveryResponse = await client
+                    .DiscoverAadInstanceAsync(
+                        instanceDiscoveryEndpoint,
+                        requestContext,
+                        linkedCancellationSource.Token,
+                        s_instanceDiscoveryRetryPolicy)
+                    .ConfigureAwait(false);
 
-            return discoveryResponse;
+                return discoveryResponse;
+            }
         }
 
         private Uri ComputeHttpEndpoint(Uri authority, RequestContext requestContext)
@@ -121,6 +138,14 @@ namespace Microsoft.Identity.Client.Instance.Discovery
         {
             // AAD specific
             return uri.AbsolutePath.Split('/')[1];
+        }
+
+        private sealed class InstanceDiscoveryRetryPolicy : IRetryPolicy
+        {
+            public Task<bool> PauseForRetryAsync(HttpResponse response, Exception exception, int retryCount, ILoggerAdapter logger)
+            {
+                return Task.FromResult(false);
+            }
         }
 
     }
