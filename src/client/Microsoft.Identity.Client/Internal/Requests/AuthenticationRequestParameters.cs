@@ -123,6 +123,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         }
 
         public bool IsMtlsPopRequested => _commonParameters.IsMtlsPopRequested;
+        public MtlsBindingStrength MtlsPopMinStrength => _commonParameters.MtlsPopMinStrength;
         public bool? SendOfflineAccessScope => _commonParameters.SendOfflineAccessScope;
 
         /// <summary>
