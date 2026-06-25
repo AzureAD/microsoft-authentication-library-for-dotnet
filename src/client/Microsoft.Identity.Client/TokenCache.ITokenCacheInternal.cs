@@ -100,7 +100,8 @@ namespace Microsoft.Identity.Client
                                     instanceDiscoveryMetadata.PreferredCache,
                                     requestParams.AppConfig.ClientId,
                                     response,
-                                    homeAccountId)
+                                    homeAccountId,
+                                    requestParams.PartitionRefreshToken ? requestParams.CacheKeyComponents : null)
                 {
                     OboCacheKey = CacheKeyFactory.GetOboKey(requestParams.LongRunningOboCacheKey, requestParams.UserAssertion),
                 };
@@ -551,6 +552,40 @@ namespace Microsoft.Identity.Client
             }
         }
 
+        // Symmetric filter for AdditionalCacheKeyComponents on refresh tokens (mirrors AT filter):
+        //   request WITH components    -> keep ONLY items with matching components
+        //   request WITHOUT components -> keep ONLY items without components
+        private void FilterRefreshTokensByAdditionalKeyComponents(List<MsalRefreshTokenCacheItem> refreshTokens, AuthenticationRequestParameters requestParams)
+        {
+            bool requestHasComponents =
+                requestParams.CacheKeyComponents != null &&
+                requestParams.CacheKeyComponents.Count > 0;
+
+            int countBeforeFilter = refreshTokens.Count;
+
+            if (requestHasComponents)
+            {
+                refreshTokens.FilterWithLogging(item =>
+                    item.AdditionalCacheKeyComponents != null &&
+                    CollectionHelpers.AreDictionariesEqual(item.AdditionalCacheKeyComponents, requestParams.CacheKeyComponents),
+                    requestParams.RequestContext.Logger,
+                    "Filtering RTs by additional key components");
+            }
+            else
+            {
+                refreshTokens.FilterWithLogging(item =>
+                    item.AdditionalCacheKeyComponents == null ||
+                    item.AdditionalCacheKeyComponents.Count == 0,
+                    requestParams.RequestContext.Logger,
+                    "Filtering out RTs that have additional key components");
+            }
+
+            if (countBeforeFilter > 0 && refreshTokens.Count == 0)
+            {
+                requestParams.RequestContext.Logger.Verbose(() => "No RTs found that match the additional key components filter. ");
+            }
+        }
+
         private static void FilterTokensByScopes(
             List<MsalAccessTokenCacheItem> tokenCacheItems,
             AuthenticationRequestParameters requestParams)
@@ -841,6 +876,14 @@ namespace Microsoft.Identity.Client
             if (refreshTokens.Count != 0)
             {
                 FilterRefreshTokensByHomeAccountIdOrAssertion(refreshTokens, requestParams, familyId);
+
+                // Skip partition filtering for FRT lookups — FRTs are shared across apps
+                // and are never partitioned, so the partition filter must not apply.
+                // Also skip when PartitionRefreshToken is not set — the caller only wants AT partition.
+                if (string.IsNullOrEmpty(familyId) && requestParams.PartitionRefreshToken)
+                {
+                    FilterRefreshTokensByAdditionalKeyComponents(refreshTokens, requestParams);
+                }
 
                 if (!requestParams.AppConfig.MultiCloudSupportEnabled)
                 {
