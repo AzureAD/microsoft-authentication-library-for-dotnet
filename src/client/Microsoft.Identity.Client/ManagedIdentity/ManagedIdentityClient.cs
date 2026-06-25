@@ -112,7 +112,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 // We do NOT latch this state; future PoP requests can still leverage the cached ImdsV2 discovery.
                 if (isImdsV2 && !isMtlsPopRequested)
                 {
-                    requestContext.Logger.Info("[Managed Identity] ImdsV2 detected, but neither mTLS PoP nor mTLS ****** requested. Using ImdsV1 for this request only. Please use the \"WithMtlsProofOfPossession\" or \"WithMtlsBearerToken\" API to request a token via ImdsV2.");
+                    requestContext.Logger.Info("[Managed Identity] ImdsV2 detected, but neither mTLS PoP nor mTLS Bearer requested. Using IMDSv1 for this request only. Please use the \"WithMtlsProofOfPossession\" or \"WithMtlsBearerToken\" API to request a token via ImdsV2.");
 
                     // Do NOT modify s_cachedSourceResult; keep cached ImdsV2 so future PoP
                     // requests can leverage it. Route this request through IMDSv1 only.

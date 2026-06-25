@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         /// <summary>
         /// When true, MSAL uses the full IMDSv2 attested flow (mTLS connection to ESTS via a
         /// Credential Guard–issued certificate) but requests <c>token_type=bearer</c> from the
-        /// token endpoint, returning a standard ****** with no binding certificate.
+        /// token endpoint, returning a standard bearer token with no binding certificate.
         /// </summary>
         public bool IsMtlsBearerRequested { get; set; }
         public string ExtraClientAssertionClaims { get; internal set; }

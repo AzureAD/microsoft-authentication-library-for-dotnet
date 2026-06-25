@@ -139,7 +139,7 @@ namespace Microsoft.Identity.Test.E2E
 
                 // Verify the token has no cnf (certificate-binding) claim.
                 var jwt = new JwtSecurityToken(result.AccessToken);
-                Assert.IsFalse(jwt.Payload.ContainsKey("cnf"), "****** must not contain a cnf claim.");
+                Assert.IsFalse(jwt.Payload.ContainsKey("cnf"), "Bearer token must not contain a cnf claim.");
 
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource,
                     "First call must hit the token endpoint.");

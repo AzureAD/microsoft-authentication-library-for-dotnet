@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Uses the IMDSv2 attested flow (Credential Guard–issued certificate over mTLS) to acquire
-        /// a standard ****** token. The mTLS certificate authenticates the connection to the ESTS
+        /// a standard bearer token. The mTLS certificate authenticates the connection to the ESTS
         /// token endpoint, but the returned token carries <c>token_type=bearer</c> and has no
         /// binding certificate in the <see cref="AuthenticationResult"/>.
         /// Requires Windows Credential Guard (VBS) to be enabled on the host.

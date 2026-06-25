@@ -143,8 +143,8 @@ namespace Microsoft.Identity.Client
                     _ => acquireTokenCommonParameters.AttestationTokenProvider != null ? s_att1 : s_att0;
             }
 
-            // mTLS-****** requests also need a cache key component so they are stored separately from
-            // plain IMDSv1 ****** tokens and from mTLS PoP tokens for the same resource.
+            // mTLS-bearer requests also need a cache key component so they are stored separately from
+            // plain IMDSv1 bearer tokens and from mTLS PoP tokens for the same resource.
             if (acquireTokenCommonParameters.IsMtlsBearerRequested)
             {
                 acquireTokenCommonParameters.CacheKeyComponents ??=
