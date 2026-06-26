@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.ManagedIdentity;
 
 namespace Microsoft.Identity.Client.ApiConfig.Parameters
@@ -39,6 +40,12 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         /// </summary>
         public bool IsMtlsBearerRequested { get; set; }
 
+        /// <summary>
+        /// The minimum mTLS binding strength the host must support for the request to succeed.
+        /// Defaults to <see cref="MtlsBindingStrength.None"/> (no floor).
+        /// </summary>
+        public MtlsBindingStrength MtlsPopMinStrength { get; set; } = MtlsBindingStrength.None;
+
         internal X509Certificate2 MtlsCertificate { get; set; }
 
         /// <summary>
@@ -62,6 +69,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
                      RevokedTokenHash: {!string.IsNullOrEmpty(RevokedTokenHash)}
                      IsMtlsPopRequested: {IsMtlsPopRequested}
                      IsMtlsBearerRequested: {IsMtlsBearerRequested}
+                     MtlsPopMinStrength: {MtlsPopMinStrength}
                      """);
             }
         }

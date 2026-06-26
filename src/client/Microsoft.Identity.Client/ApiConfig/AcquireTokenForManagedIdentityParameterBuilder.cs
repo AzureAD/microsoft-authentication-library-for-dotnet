@@ -25,6 +25,7 @@ namespace Microsoft.Identity.Client
         AbstractManagedIdentityAcquireTokenParameterBuilder<AcquireTokenForManagedIdentityParameterBuilder>
     {
         private const string MiAttCacheKeyComponent = "mi_att";
+        private const string MiMinStrengthCacheKeyComponent = "mi_minstrength";
         private static readonly Task<string> s_att0 = Task.FromResult("0");
         private static readonly Task<string> s_att1 = Task.FromResult("1");
 
@@ -131,6 +132,7 @@ namespace Microsoft.Identity.Client
         {
             acquireTokenForManagedIdentityParameters.IsMtlsPopRequested = acquireTokenCommonParameters.IsMtlsPopRequested;
             acquireTokenForManagedIdentityParameters.IsMtlsBearerRequested = acquireTokenCommonParameters.IsMtlsBearerRequested;
+            acquireTokenForManagedIdentityParameters.MtlsPopMinStrength = acquireTokenCommonParameters.MtlsPopMinStrength;
             acquireTokenForManagedIdentityParameters.AttestationTokenProvider = acquireTokenCommonParameters.AttestationTokenProvider;
 
             // PoP requests should be partitioned by attestation-support mode.
@@ -141,6 +143,21 @@ namespace Microsoft.Identity.Client
 
                 acquireTokenCommonParameters.CacheKeyComponents[MiAttCacheKeyComponent] =
                     _ => acquireTokenCommonParameters.AttestationTokenProvider != null ? s_att1 : s_att0;
+
+                // Partition by the requested minimum binding strength so a higher-floor request
+                // cannot be satisfied from a cache entry created by a lower/no-floor request.
+                // Only stamp the component when a floor is explicitly requested (> None). A no-floor
+                // request keeps the legacy key shape, so existing mTLS PoP MI cache entries remain
+                // shareable across MSAL versions and no avoidable cache miss is introduced on upgrade.
+                if (acquireTokenCommonParameters.MtlsPopMinStrength > AppConfig.MtlsBindingStrength.None)
+                {
+                    acquireTokenCommonParameters.CacheKeyComponents[MiMinStrengthCacheKeyComponent] =
+                        _ => Task.FromResult(acquireTokenCommonParameters.MtlsPopMinStrength.ToString());
+                }
+                else
+                {
+                    acquireTokenCommonParameters.CacheKeyComponents.Remove(MiMinStrengthCacheKeyComponent);
+                }
             }
 
             // mTLS-bearer requests also need a cache key component so they are stored separately from

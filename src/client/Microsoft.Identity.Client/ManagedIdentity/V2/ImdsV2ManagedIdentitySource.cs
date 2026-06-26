@@ -22,12 +22,14 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.ManagedIdentity.V2
 {
-    internal class ImdsV2ManagedIdentitySource : AbstractManagedIdentity
+    internal class ImdsV2ManagedIdentitySource : IImdsV2MtlsBindingSource
     {
         // Central, process-local cache for mTLS binding (cert + endpoint + canonical client_id).
         internal static readonly ICertificateCache s_mtlsCertificateCache = new InMemoryCertificateCache();
 
+        private readonly RequestContext _requestContext;
         private readonly IMtlsCertificateCache _mtlsCache;
+        private bool _isMtlsPopRequested;
         private Func<string, SafeHandle, string, string, ILoggerAdapter, CancellationToken, Task<string>> _attestationTokenProvider;
 
         // used in unit tests
@@ -162,7 +164,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             return csrMetadata;
         }
 
-        public static AbstractManagedIdentity Create(RequestContext requestContext)
+        public static ImdsV2ManagedIdentitySource Create(RequestContext requestContext)
         {
             return new ImdsV2ManagedIdentitySource(requestContext);
         }
@@ -177,44 +179,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         internal ImdsV2ManagedIdentitySource(
             RequestContext requestContext,
             IMtlsCertificateCache mtlsCache)
-            : base(requestContext, ManagedIdentitySource.Imds)
         {
+            _requestContext = requestContext;
             _mtlsCache = mtlsCache ?? throw new ArgumentNullException(nameof(mtlsCache));
-        }
-
-        public override async Task<ManagedIdentityResponse> AuthenticateAsync(
-            ApiConfig.Parameters.AcquireTokenForManagedIdentityParameters parameters,
-            CancellationToken cancellationToken)
-        {
-            // Capture the attestation token provider delegate before calling base
-            _attestationTokenProvider = parameters.AttestationTokenProvider;
-
-            try
-            {
-                return await base.AuthenticateAsync(parameters, cancellationToken).ConfigureAwait(false);
-            }
-            catch (MsalServiceException ex) when (ex.ErrorCode == MsalError.ManagedIdentityUnreachableNetwork && IsSchanelFailure(ex))
-            {
-                _requestContext.Logger.Verbose(() =>
-                    "[ImdsV2] SCHANNEL mTLS failure detected. Removing bad persisted cert and retrying with fresh mint.");
-
-                // Remove the bad cert from both caches
-                string certCacheKey = GetMtlsCertCacheKey();
-                try
-                {
-                    if (_mtlsCache is MtlsBindingCache mtlsCache)
-                    {
-                        mtlsCache.RemoveBadCert(certCacheKey, _requestContext.Logger);
-                    }
-                }
-                catch (Exception removalEx)
-                {
-                    _requestContext.Logger.Verbose(() => $"[ImdsV2] Error removing bad cert: {removalEx.Message}");
-                }
-
-                // Retry - will mint fresh cert since we just deleted the bad one
-                return await base.AuthenticateAsync(parameters, cancellationToken).ConfigureAwait(false);
-            }
         }
 
         /// <summary>
@@ -223,7 +190,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         /// </summary>
         /// <param name="ex"></param>
         /// <returns></returns>
-        private static bool IsSchanelFailure(MsalServiceException ex)
+        internal static bool IsSchanelFailure(MsalServiceException ex)
         {
             for (Exception e = ex; e != null; e = e.InnerException)
             {
@@ -332,7 +299,13 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             return certificateRequestResponse;
         }
 
-        protected override async Task<ManagedIdentityRequest> CreateRequestAsync(string resource)
+        /// <summary>
+        /// Performs the cert-mint flow (/getplatformmetadata + /issuecredential) and returns the
+        /// resulting mTLS binding (cert + ESTS-R endpoint + canonical client_id). Extracted so the
+        /// binding can be reused by the internal-exchange delegation path without building the
+        /// bespoke token request.
+        /// </summary>
+        private async Task<MtlsBindingInfo> AcquireMtlsBindingAsync()
         {
             CsrMetadata csrMetadata = await GetCsrMetadataAsync(_requestContext).ConfigureAwait(false);
 
@@ -411,37 +384,36 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 _requestContext.Logger)
                 .ConfigureAwait(false);
 
-            X509Certificate2 bindingCertificate = mtlsBinding.Certificate;
-            string endpointBaseForToken = mtlsBinding.Endpoint;
-            string clientIdForToken = mtlsBinding.ClientId;
+            return mtlsBinding;
+        }
 
-            ManagedIdentityRequest request = new ManagedIdentityRequest(
-                HttpMethod.Post,
-                new Uri(endpointBaseForToken + AcquireEntraTokenPath));
+        /// <summary>
+        /// Mint-only entrypoint used by the internal-exchange delegation path. Sets the attestation
+        /// provider and mTLS-PoP flag from the request parameters, optionally evicts a rejected cert
+        /// (invalid_client / SCHANNEL re-mint), and returns the mTLS binding. Does NOT send the token request.
+        /// </summary>
+        /// <remarks>
+        /// IMDSv2 delegates its token leg to MSAL's internal TokenClient exchange (see
+        /// ManagedIdentityAuthRequest.SendDelegatedImdsV2TokenRequestAsync). DO NOT restore a bespoke
+        /// token request: the IMDSv2 token leg must go through TokenClient so client-originated claims,
+        /// client-capability (CP1) merge, and claims-based cache keying are preserved.
+        /// </remarks>
+        public async Task<MtlsBindingInfo> AcquireMtlsBindingForDelegationAsync(
+            ApiConfig.Parameters.AcquireTokenForManagedIdentityParameters parameters,
+            bool forceRemint,
+            CancellationToken cancellationToken)
+        {
+            _attestationTokenProvider = parameters.AttestationTokenProvider;
+            _isMtlsPopRequested = true;
 
-            Dictionary<string, string> idParams = MsalIdHelper.GetMsalIdParameters(_requestContext.Logger);
-
-            foreach (KeyValuePair<string, string> idParam in idParams)
+            if (forceRemint && _mtlsCache is MtlsBindingCache bindingCache)
             {
-                request.Headers[idParam.Key] = idParam.Value;
+                bindingCache.RemoveBadCert(GetMtlsCertCacheKey(), _requestContext.Logger);
             }
 
-            request.Headers.Add(OAuth2Header.XMsCorrelationId, _requestContext.CorrelationId.ToString());
-            request.Headers.Add(ThrottleCommon.ThrottleRetryAfterHeaderName, ThrottleCommon.ThrottleRetryAfterHeaderValue);
-            request.Headers.Add(OAuth2Header.RequestCorrelationIdInResponse, "true");
+            cancellationToken.ThrowIfCancellationRequested();
 
-            // mTLS PoP → token_type=mtls_pop; all other IMDSv2 flows → token_type=bearer.
-            var tokenType = _isMtlsPopRequested ? Constants.MtlsPoPTokenType : Constants.BearerTokenType;
-
-            request.BodyParameters.Add("client_id", clientIdForToken);
-            request.BodyParameters.Add("grant_type", OAuth2GrantType.ClientCredentials);
-            request.BodyParameters.Add("scope", resource.TrimEnd('/') + "/.default");
-            request.BodyParameters.Add("token_type", tokenType);
-
-            request.RequestType = RequestType.STS;
-            request.MtlsCertificate = bindingCertificate;
-
-            return request;
+            return await AcquireMtlsBindingAsync().ConfigureAwait(false);
         }
 
         /// <summary>

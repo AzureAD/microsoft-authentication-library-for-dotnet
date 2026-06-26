@@ -1247,6 +1247,16 @@ namespace Microsoft.Identity.Client
         public const string MtlsPopTokenNotSupportedinImdsV1 = "mtls_pop_token_not_supported_in_imds_v1";
 
         /// <summary>
+        /// <para>What happened?</para> A minimum mTLS binding strength was requested via
+        /// <c>PoPOptions.MinStrength</c>, but the current host cannot produce a key binding that
+        /// meets the required floor.
+        /// <para>Mitigation:</para> Deploy on a host capable of the required binding strength
+        /// (for example, a Trusted Launch or Confidential VM for KeyGuard), or lower the requested
+        /// minimum strength.
+        /// </summary>
+        public const string MinStrengthNotMet = "min_strength_not_met";
+
+        /// <summary>
         /// All managed identity sources are unavailable.
         /// </summary>
         public const string ManagedIdentityAllSourcesUnavailable = "managed_identity_all_sources_unavailable";

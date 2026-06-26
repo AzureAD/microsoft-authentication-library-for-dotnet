@@ -75,7 +75,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             MockHttpManager httpManager,
             UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
             string userAssignedId = null,
-            string certificateRequestCertificate = TestConstants.ValidRawCertificate)
+            string certificateRequestCertificate = TestConstants.ValidRawCertificate,
+            string expectedClaims = null)
         {
             if (userAssignedIdentityId != UserAssignedIdentityId.None && userAssignedId != null)
             {
@@ -88,7 +89,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 httpManager.AddMockHandler(MockHelpers.MockCertificateRequestResponse(certificate: certificateRequestCertificate));
             }
 
-            httpManager.AddMockHandler(MockHelpers.MockImdsV2EntraTokenRequestResponse(_identityLoggerAdapter));
+            httpManager.AddMockHandler(MockHelpers.MockImdsV2EntraTokenRequestResponse(_identityLoggerAdapter, expectedClaims));
         }
 
         private async Task<IManagedIdentityApplication> CreateManagedIdentityAsync(
@@ -99,7 +100,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             bool addSourceCheck = true,
             ManagedIdentityKeyType managedIdentityKeyType = ManagedIdentityKeyType.InMemory,
             ImdsVersion imdsVersion = ImdsVersion.V2,
-            IManagedIdentityKeyProvider keyProvider = null)
+            IManagedIdentityKeyProvider keyProvider = null,
+            bool withExperimentalFeatures = false)
         {
             ManagedIdentityApplicationBuilder miBuilder = null;
 
@@ -116,6 +118,11 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             miBuilder
                 .WithHttpManager(httpManager)
                 .WithRetryPolicyFactory(_testRetryPolicyFactory);
+
+            if (withExperimentalFeatures)
+            {
+                miBuilder.WithExperimentalFeatures(true);
+            }
 
             if (imdsVersion == ImdsVersion.V2)
             {
@@ -352,6 +359,324 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.IsNotNull(result.BindingCertificate);
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
                 */
+            }
+        }
+
+        [TestMethod]
+        public async Task MinStrength_KeyGuardFloorMetByKeyGuardHost_SucceedsAsync()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                // Arrange
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
+
+                var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
+
+                AddMocksToGetEntraToken(httpManager);
+
+                // Act
+                var result = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession(new PoPOptions { MinStrength = MtlsBindingStrength.KeyGuard })
+                    .WithAttestationSupport()
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                // Assert
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(MTLSPoP, result.TokenType);
+                Assert.IsNotNull(result.BindingCertificate);
+            }
+        }
+
+        [TestMethod]
+        public async Task MinStrength_SoftwareFloorMetByKeyGuardHost_SucceedsAsync()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                // Arrange
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
+
+                var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
+
+                AddMocksToGetEntraToken(httpManager);
+
+                // Act
+                var result = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession(new PoPOptions { MinStrength = MtlsBindingStrength.Software })
+                    .WithAttestationSupport()
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                // Assert
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(MTLSPoP, result.TokenType);
+                Assert.IsNotNull(result.BindingCertificate);
+            }
+        }
+
+        [TestMethod]
+        public async Task MinStrength_DefaultNoneFloor_BehavesLikeParameterlessAsync()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                // Arrange
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
+
+                var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
+
+                AddMocksToGetEntraToken(httpManager);
+
+                // Act: default PoPOptions imposes no floor (MinStrength == None).
+                var result = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession(new PoPOptions())
+                    .WithAttestationSupport()
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                // Assert
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(MTLSPoP, result.TokenType);
+                Assert.IsNotNull(result.BindingCertificate);
+            }
+        }
+
+        [TestMethod]
+        public async Task MinStrength_KeyGuardFloorNotMetBySoftwareHost_ThrowsMinStrengthNotMetAsync()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                // Arrange: an in-memory key provider caps the host at the Software tier.
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
+
+                var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, managedIdentityKeyType: ManagedIdentityKeyType.InMemory).ConfigureAwait(false);
+
+                // Act: requesting a KeyGuard floor on a Software host fails fast before any token request.
+                var ex = await Assert.ThrowsAsync<MsalClientException>(async () =>
+                    await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                        .WithMtlsProofOfPossession(new PoPOptions { MinStrength = MtlsBindingStrength.KeyGuard })
+                        .ExecuteAsync().ConfigureAwait(false)
+                ).ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual(MsalError.MinStrengthNotMet, ex.ErrorCode);
+                StringAssert.Contains(ex.Message, MtlsBindingStrength.KeyGuard.ToString());
+                StringAssert.Contains(ex.Message, MtlsBindingStrength.Software.ToString());
+            }
+        }
+
+        [TestMethod]
+        public async Task MinStrength_FloorIsPartOfCacheKey_HigherFloorDoesNotReuseLowerFloorTokenAsync()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                // Arrange
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
+
+                var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
+
+                // Act 1: no floor → mints and caches a token.
+                AddMocksToGetEntraToken(httpManager);
+                var noFloor = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession(new PoPOptions())
+                    .WithAttestationSupport()
+                    .ExecuteAsync().ConfigureAwait(false);
+                Assert.AreEqual(TokenSource.IdentityProvider, noFloor.AuthenticationResultMetadata.TokenSource);
+
+                // Act 2: KeyGuard floor → distinct cache key → token cache miss → fresh token
+                // acquisition (the issued binding certificate is reused from cache, so only the
+                // CSR-metadata and token endpoints are hit), proving the higher-floor request does
+                // not silently reuse the no-floor token entry.
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
+                httpManager.AddMockHandler(MockHelpers.MockImdsV2EntraTokenRequestResponse(_identityLoggerAdapter));
+                var keyGuardFloor = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession(new PoPOptions { MinStrength = MtlsBindingStrength.KeyGuard })
+                    .WithAttestationSupport()
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual(MTLSPoP, keyGuardFloor.TokenType);
+                Assert.AreEqual(TokenSource.IdentityProvider, keyGuardFloor.AuthenticationResultMetadata.TokenSource);
+
+                // Act 3: repeat the KeyGuard-floor request → now served from cache under its own key.
+                var keyGuardCached = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession(new PoPOptions { MinStrength = MtlsBindingStrength.KeyGuard })
+                    .WithAttestationSupport()
+                    .ExecuteAsync().ConfigureAwait(false);
+                Assert.AreEqual(TokenSource.Cache, keyGuardCached.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+
+        [TestMethod]
+        public async Task MinStrength_NullPoPOptions_ThrowsArgumentNullExceptionAsync()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                // Arrange
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
+
+                var managedIdentityApp = await CreateManagedIdentityAsync(
+                    httpManager,
+                    addProbeMock: false,
+                    addSourceCheck: false).ConfigureAwait(false);
+
+                // Act + Assert
+                Assert.Throws<ArgumentNullException>(() =>
+                    managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                        .WithMtlsProofOfPossession(null));
+            }
+        }
+
+        // ---------------------------------------------------------------------------------
+        // Client-originated claims on the IMDSv2 mTLS-PoP path.
+        // Because the IMDSv2 token leg is delegated to MSAL's internal TokenClient exchange,
+        // client claims ride the shared ESTS-R POST body (merged with client capabilities),
+        // are keyed into the cache, and are NOT subject to the MSIv1 `xms_az_nwperimid` allowlist.
+        // ---------------------------------------------------------------------------------
+
+        // A full NSP-style claim. Unlike MSIv1, the IMDSv2 PoP path accepts arbitrary claim keys
+        // because the token leg is served by ESTS-R (same contract as confidential client).
+        private const string ClientClaims = @"{""xms_az_nwperimid"":{""essential"":true}}";
+        private const string OtherClientClaims = @"{""custom_claim"":{""values"":[""abc""]}}";
+
+        [TestMethod]
+        public async Task mTLSPop_WithClaimsFromClient_ForwardsClaimsInEstsBodyAsync()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
+
+                var managedIdentityApp = await CreateManagedIdentityAsync(
+                    httpManager,
+                    managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard,
+                    withExperimentalFeatures: true).ConfigureAwait(false);
+
+                // The token-leg mock asserts the delegated ESTS-R POST body carries claims=<ClientClaims>.
+                // If the claims are not forwarded, the handler will not match and the test fails.
+                AddMocksToGetEntraToken(httpManager, expectedClaims: ClientClaims);
+
+                var result = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession()
+                    .WithAttestationSupport()
+                    .WithClaimsFromClient(ClientClaims)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.AreEqual(MTLSPoP, result.TokenType);
+                Assert.IsNotNull(result.BindingCertificate);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+
+        [TestMethod]
+        public async Task mTLSPop_WithClaimsFromClient_SameClaims_SecondCallFromCacheAsync()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
+
+                var managedIdentityApp = await CreateManagedIdentityAsync(
+                    httpManager,
+                    managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard,
+                    withExperimentalFeatures: true).ConfigureAwait(false);
+
+                // Only one network mock — the second call with identical claims must be served from cache.
+                AddMocksToGetEntraToken(httpManager, expectedClaims: ClientClaims);
+
+                var result1 = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession()
+                    .WithAttestationSupport()
+                    .WithClaimsFromClient(ClientClaims)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                var result2 = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession()
+                    .WithAttestationSupport()
+                    .WithClaimsFromClient(ClientClaims)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.AreEqual(TokenSource.IdentityProvider, result1.AuthenticationResultMetadata.TokenSource,
+                    "First call should hit the network.");
+                Assert.AreEqual(TokenSource.Cache, result2.AuthenticationResultMetadata.TokenSource,
+                    "Second call with identical client claims must be served from cache.");
+            }
+        }
+
+        [TestMethod]
+        public async Task mTLSPop_WithClaimsFromClient_DifferentClaims_SeparateCacheEntriesAsync()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
+
+                var managedIdentityApp = await CreateManagedIdentityAsync(
+                    httpManager,
+                    managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard,
+                    withExperimentalFeatures: true).ConfigureAwait(false);
+
+                // Two distinct network mocks — each claims value must produce a separate cache entry.
+                // The second acquire reuses the cached binding certificate, so it re-runs only the
+                // CSR-metadata + token leg (no /issuecredential), mirroring the cached-cert refresh path.
+                AddMocksToGetEntraToken(httpManager, expectedClaims: ClientClaims);
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
+                httpManager.AddMockHandler(MockHelpers.MockImdsV2EntraTokenRequestResponse(_identityLoggerAdapter, OtherClientClaims));
+
+                var result1 = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession()
+                    .WithAttestationSupport()
+                    .WithClaimsFromClient(ClientClaims)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                var result2 = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession()
+                    .WithAttestationSupport()
+                    .WithClaimsFromClient(OtherClientClaims)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.AreEqual(TokenSource.IdentityProvider, result1.AuthenticationResultMetadata.TokenSource,
+                    "First claims value should hit the network.");
+                Assert.AreEqual(TokenSource.IdentityProvider, result2.AuthenticationResultMetadata.TokenSource,
+                    "A different claims value must produce a separate cache entry and hit the network.");
+            }
+        }
+
+        [TestMethod]
+        public async Task mTLSPop_TokenLeg_InvalidClient_ReMintsBindingAndRetriesOnceAsync()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
+
+                var managedIdentityApp = await CreateManagedIdentityAsync(
+                    httpManager,
+                    managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
+
+                // First attempt: full mint, then ESTS-R rejects the bound cert with invalid_client.
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
+                httpManager.AddMockHandler(MockHelpers.MockCertificateRequestResponse(certificate: TestConstants.ValidRawCertificate));
+                httpManager.AddMockHandler(MockHelpers.MockImdsV2EntraTokenRequestResponse(
+                    _identityLoggerAdapter,
+                    responseOverride: MockHelpers.CreateInvalidClientResponseMessage()));
+
+                // Retry: binding is re-minted (RemoveBadCert → fresh CSR + issuecredential), then token succeeds.
+                AddMocksToGetEntraToken(httpManager);
+
+                var result = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession()
+                    .WithAttestationSupport()
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(MTLSPoP, result.TokenType);
+                Assert.IsNotNull(result.BindingCertificate);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
             }
         }
         #endregion Acceptance Tests
