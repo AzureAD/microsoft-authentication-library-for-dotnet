@@ -30,6 +30,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         private readonly RequestContext _requestContext;
         private readonly IMtlsCertificateCache _mtlsCache;
         private bool _isMtlsPopRequested;
+        private bool _isMtlsBearerRequested;
         private Func<string, SafeHandle, string, string, ILoggerAdapter, CancellationToken, Task<string>> _attestationTokenProvider;
 
         // used in unit tests
@@ -404,7 +405,15 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             CancellationToken cancellationToken)
         {
             _attestationTokenProvider = parameters.AttestationTokenProvider;
-            _isMtlsPopRequested = true;
+            _isMtlsPopRequested = parameters.IsMtlsPopRequested;
+            _isMtlsBearerRequested = parameters.IsMtlsBearerRequested;
+
+            // Ensure at least one IMDSv2 attested flag is set; default to PoP for backward compatibility
+            // with callers that do not set either flag explicitly.
+            if (!_isMtlsPopRequested && !_isMtlsBearerRequested)
+            {
+                _isMtlsPopRequested = true;
+            }
 
             if (forceRemint && _mtlsCache is MtlsBindingCache bindingCache)
             {
