@@ -1,4 +1,4 @@
-# Generic Exception-Content Redaction in MSAL .NET — Design
+# MSAL .NET Exception-Content Redaction — Developer Spec
 
 ## 1. Context and problem
 MSAL .NET surfaces service/server error responses to callers as exceptions. Applications and SDKs routinely catch and log these exceptions. When an exception's message or its raw response body contains sensitive token-like content, that content can appear in application logs or telemetry.
