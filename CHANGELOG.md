@@ -5,7 +5,7 @@
 - Exposed canonical OpenTelemetry tag names per metric via `MsalMetricsCatalog.CanonicalTagsByMetric` for discoverability and validation. [#6076](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6076)
 
 ### Changes
-- Managed identity error messages and request-failure logs now include the detected `ManagedIdentitySource` (e.g., `AppService`, `Imds`, `ServiceFabric`) so the host-issued `Managed Identity Correlation ID` can be traced to the correct host's telemetry. [#TBD](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet)
+- Managed identity error messages and request-failure logs now include the detected `ManagedIdentitySource` (e.g., `AppService`, `Imds`, `ServiceFabric`) so the host-issued `Managed Identity Correlation ID` can be traced to the correct host's telemetry. [#6095](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6095)
 
 4.85.0
 ======
