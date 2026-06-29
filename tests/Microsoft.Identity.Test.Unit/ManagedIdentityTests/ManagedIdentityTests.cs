@@ -559,8 +559,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        [DataRow("{\"statusCode\":500,\"message\":\"Error message\",\"correlationId\":\"GUID\"}", new string[] { "Error message", "GUID" })]
-        [DataRow("{\"message\":\"Error message\",\"correlationId\":\"GUID\"}", new string[] { "Error message", "GUID" })]
+        [DataRow("{\"statusCode\":500,\"message\":\"Error message\",\"correlationId\":\"GUID\"}", new string[] { "Error message", "GUID", "AppService", "managed identity source" })]
+        [DataRow("{\"message\":\"Error message\",\"correlationId\":\"GUID\"}", new string[] { "Error message", "GUID", "AppService", "managed identity source" })]
         [DataRow("{\"error\":\"errorCode\",\"error_description\":\"Error message\"}", new string[] { "errorCode", "Error message" })]
         [DataRow("{\"error_description\":\"Error message\"}", new string[] { "Error message" })]
         [DataRow("{\"message\":\"Error message\"}", new string[] { "Error message" })]
