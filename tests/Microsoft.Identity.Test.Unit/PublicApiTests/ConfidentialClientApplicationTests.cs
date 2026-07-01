@@ -489,12 +489,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     () => cca.AcquireTokenForClient(TestConstants.s_scope.ToArray()).ExecuteAsync())
                     .ConfigureAwait(false);
 
-                // Assert - the failed attempt still surfaces metadata on the exception. Only data that was
-                // actually captured is populated: the token endpoint was resolved, but no region was
-                // configured so RegionDetails is left null.
+                // Assert - the failed attempt still surfaces metadata on the exception. The token endpoint
+                // was resolved; RegionDetails is populated with RegionOutcome.None (no region configured),
+                // consistent with the success path.
                 Assert.IsNotNull(ex.AuthenticationResultMetadata);
                 Assert.IsNotNull(ex.AuthenticationResultMetadata.TokenEndpoint);
-                Assert.IsNull(ex.AuthenticationResultMetadata.RegionDetails);
+                Assert.IsNotNull(ex.AuthenticationResultMetadata.RegionDetails);
+                Assert.AreEqual(Microsoft.Identity.Client.Region.RegionOutcome.None, ex.AuthenticationResultMetadata.RegionDetails!.RegionOutcome);
             }
         }
 
