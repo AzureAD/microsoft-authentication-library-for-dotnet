@@ -47,6 +47,13 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public bool IsMtlsPopRequested { get; set; }
 
         /// <summary>
+        /// When true, MSAL uses the full IMDSv2 attested flow (mTLS connection to ESTS via a
+        /// Credential Guard–issued certificate) but requests <c>token_type=bearer</c> from the
+        /// token endpoint, returning a standard bearer token with no binding certificate.
+        /// </summary>
+        public bool IsMtlsBearerRequested { get; set; }
+
+        /// <summary>
         /// The minimum mTLS binding strength the host must support for the request to succeed.
         /// Set via <see cref="AppConfig.PoPOptions.MinStrength"/>. Defaults to
         /// <see cref="MtlsBindingStrength.None"/> (no floor).

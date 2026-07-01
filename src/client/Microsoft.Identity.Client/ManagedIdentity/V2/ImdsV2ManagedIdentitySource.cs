@@ -30,6 +30,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         private readonly RequestContext _requestContext;
         private readonly IMtlsCertificateCache _mtlsCache;
         private bool _isMtlsPopRequested;
+        private bool _isMtlsBearerRequested;
         private Func<string, SafeHandle, string, string, ILoggerAdapter, CancellationToken, Task<string>> _attestationTokenProvider;
 
         // used in unit tests
@@ -309,11 +310,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         {
             CsrMetadata csrMetadata = await GetCsrMetadataAsync(_requestContext).ConfigureAwait(false);
 
-            // Early validation: Fail-fast if mTLS PoP was requested but KeyGuard is unavailable.
+            // Early validation: Fail-fast if KeyGuard is required (mTLS PoP or mTLS Bearer) but unavailable.
             // This check happens before any network calls to avoid wasted round-trips.
             // Note: This creates/retrieves the key, but on cache hit scenarios (below),
             // this may be the only key access needed.
-            if (_isMtlsPopRequested)
+            if (_isMtlsPopRequested || _isMtlsBearerRequested)
             {
                 IManagedIdentityKeyProvider keyProvider = _requestContext.ServiceBundle.PlatformProxy.ManagedIdentityKeyProvider;
                 ManagedIdentityKeyInfo keyInfo = await keyProvider
@@ -322,12 +323,13 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 
                 if (keyInfo.Type != ManagedIdentityKeyType.KeyGuard)
                 {
+                    string flowName = _isMtlsPopRequested ? "mTLS Proof-of-Possession" : "mTLS Bearer";
                     throw new MsalClientException(
-                        "mtls_pop_requires_keyguard",
-                        $"[ImdsV2] mTLS Proof-of-Possession currently requires a KeyGuard key, but this host produced a '{keyInfo.Type}' key. " +
+                        "credential_guard_not_available",
+                        $"[ImdsV2] {flowName} currently requires a KeyGuard key, but this host produced a '{keyInfo.Type}' key. " +
                         "The host may report Software-strength binding capability (which means it can bind a token to a key), " +
-                        "but the IMDSv2 PoP token flow only accepts VBS-isolated KeyGuard keys today. " +
-                        "Ensure Virtualization-based Security (VBS)/KeyGuard is enabled on the host, or request a bearer token instead.");
+                        "but the IMDSv2 attested flow only accepts VBS-isolated KeyGuard keys today. " +
+                        "Ensure Virtualization-based Security (VBS)/KeyGuard is enabled on the host.");
                 }
             }
 
@@ -403,7 +405,15 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             CancellationToken cancellationToken)
         {
             _attestationTokenProvider = parameters.AttestationTokenProvider;
-            _isMtlsPopRequested = true;
+            _isMtlsPopRequested = parameters.IsMtlsPopRequested;
+            _isMtlsBearerRequested = parameters.IsMtlsBearerRequested;
+
+            // Ensure at least one IMDSv2 attested flag is set; default to PoP for backward compatibility
+            // with callers that do not set either flag explicitly.
+            if (!_isMtlsPopRequested && !_isMtlsBearerRequested)
+            {
+                _isMtlsPopRequested = true;
+            }
 
             if (forceRemint && _mtlsCache is MtlsBindingCache bindingCache)
             {
