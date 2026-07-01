@@ -78,46 +78,45 @@ namespace Microsoft.Identity.Client.Region
                 requestContext.ApiEvent != null,
                 "Do not call GetAzureRegionAsync outside of a request. This can happen if you perform instance discovery outside a request, for example as part of validating input params.");
 
+            if (!IsAutoDiscoveryRequested(azureRegionConfig))
+            {
+                // For a user-provided region (WithAzureRegion or the MSAL_FORCE_REGION env variable),
+                // validate the format before using it. An invalid region (e.g. one containing a host,
+                // path, or other special characters) must never be prefixed onto the trusted
+                // "{region}.login.microsoft.com" suffix, as that would redirect the request to a
+                // tampered host. Consistent with region handling elsewhere, an invalid value falls
+                // back to the global (non-regional) endpoint rather than failing the request.
+                if (!IsValidRegionName(azureRegionConfig))
+                {
+                    logger.Error($"[Region discovery] User provided region '{azureRegionConfig}' is invalid. Falling back to the global endpoint. {DateTime.UtcNow}");
+                    return null;
+                }
+
+                logger.Info(() => $"[Region discovery] Returning user provided region: {azureRegionConfig}.");
+                requestContext.ApiEvent.RegionUsed = azureRegionConfig;
+                return azureRegionConfig;
+            }
+
             IRetryPolicyFactory retryPolicyFactory = requestContext.ServiceBundle.Config.RetryPolicyFactory;
             IRetryPolicy retryPolicy = retryPolicyFactory.GetRetryPolicy(RequestType.RegionDiscovery);
 
-            // MSAL always performs region auto-discovery, even if the user configured an actual region
-            // in order to detect inconsistencies and report via telemetry
             var discoveredRegion = await DiscoverAndCacheAsync(logger, requestContext.UserCancellationToken, retryPolicy).ConfigureAwait(false);
 
             RecordTelemetry(requestContext.ApiEvent, azureRegionConfig, discoveredRegion);
 
-            if (IsAutoDiscoveryRequested(azureRegionConfig))
+            if (discoveredRegion.RegionSource != RegionAutodetectionSource.FailedAutoDiscovery)
             {
-                if (discoveredRegion.RegionSource != RegionAutodetectionSource.FailedAutoDiscovery)
-                {
-                    logger.Verbose(() => $"[Region discovery] Discovered Region {discoveredRegion.Region}");
-                    requestContext.ApiEvent.RegionUsed = discoveredRegion.Region;
-                    requestContext.ApiEvent.AutoDetectedRegion = discoveredRegion.Region;
-                    return discoveredRegion.Region;
-                }
-                else
-                {
-                    logger.Verbose(() => $"[Region discovery] {s_regionDiscoveryDetails}");
-                    requestContext.ApiEvent.RegionDiscoveryFailureReason = s_regionDiscoveryDetails;
-                    return null;
-                }
+                logger.Verbose(() => $"[Region discovery] Discovered Region {discoveredRegion.Region}");
+                requestContext.ApiEvent.RegionUsed = discoveredRegion.Region;
+                requestContext.ApiEvent.AutoDetectedRegion = discoveredRegion.Region;
+                return discoveredRegion.Region;
             }
-
-            // For a user-provided region (WithAzureRegion or the MSAL_FORCE_REGION env variable),
-            // validate the format before using it. An invalid region (e.g. one containing a host,
-            // path, or other special characters) must never be prefixed onto the trusted
-            // "{region}.login.microsoft.com" suffix, as that would redirect the request to a
-            // tampered host. Consistent with region handling elsewhere, an invalid value falls
-            // back to the global (non-regional) endpoint rather than failing the request.
-            if (!IsValidRegionName(azureRegionConfig))
+            else
             {
-                logger.Error($"[Region discovery] User provided region '{azureRegionConfig}' is invalid. Falling back to the global endpoint. {DateTime.UtcNow}");
+                logger.Verbose(() => $"[Region discovery] {s_regionDiscoveryDetails}");
+                requestContext.ApiEvent.RegionDiscoveryFailureReason = s_regionDiscoveryDetails;
                 return null;
             }
-
-            logger.Info(() => $"[Region discovery] Returning user provided region: {azureRegionConfig}.");
-            return azureRegionConfig;
         }
 
         internal static void ResetStaticCacheForTest()
