@@ -293,7 +293,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         /// is left at its default (0 / null). <see cref="AuthenticationResultMetadata.TokenSource"/> has
         /// no meaningful value on failure, so it stays at the constructor default and should not be relied on.
         /// </summary>
-        private static AuthenticationResultMetadata CreateFailureMetadata(ApiEvent apiEvent, long totalDurationInMs)
+        internal static AuthenticationResultMetadata CreateFailureMetadata(ApiEvent apiEvent, long totalDurationInMs)
         {
             return new AuthenticationResultMetadata(TokenSource.IdentityProvider)
             {

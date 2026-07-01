@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Logger;
 using Microsoft.Identity.Client.OAuth2.Throttling;
@@ -534,6 +535,68 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 {
                     wasErrorLogged = true;
                 }
+            }
+        }
+
+        [TestMethod]
+        [Description("Background (proactive) refresh succeeds and the completion callback receives the result.")]
+        public async Task ClientCredentials_BackgroundRefresh_Success_InvokesCallback_Async()
+        {
+            using (MockHttpAndServiceBundle harness = base.CreateTestHarness())
+            {
+                ExecutionResult capturedResult = null;
+                ConfidentialClientApplication app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithAuthority(AzureCloudInstance.AzurePublic, TestConstants.Utid)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithHttpManager(harness.HttpManager)
+                    .WithExperimentalFeatures()
+                    .OnBackgroundTokenRefreshCompleted(r => { capturedResult = r; return Task.CompletedTask; })
+                    .BuildConcrete();
+                TokenCacheHelper.PopulateCache(app.AppTokenCacheInternal.Accessor, addSecondAt: false);
+
+                TestCommon.UpdateATWithRefreshOn(app.AppTokenCacheInternal.Accessor);
+                harness.HttpManager.AddAllMocks(TokenResponseType.Valid_ClientCredentials);
+
+                // Act - foreground returns the cached token and triggers a background refresh.
+                await app.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync().ConfigureAwait(false);
+
+                // Assert - the background refresh completed and the callback received the successful outcome.
+                Assert.IsTrue(TestCommon.YieldTillSatisfied(() => capturedResult != null), "Background refresh callback was not invoked.");
+                Assert.IsTrue(capturedResult.Successful);
+                Assert.IsNotNull(capturedResult.Result);
+                Assert.IsNotNull(capturedResult.Result.AuthenticationResultMetadata);
+            }
+        }
+
+        [TestMethod]
+        [Description("Background (proactive) refresh fails and the completion callback receives the exception with failure metadata.")]
+        public async Task ClientCredentials_BackgroundRefresh_Failure_InvokesCallbackWithMetadata_Async()
+        {
+            using (MockHttpAndServiceBundle harness = base.CreateTestHarness())
+            {
+                ExecutionResult capturedResult = null;
+                ConfidentialClientApplication app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithAuthority(AzureCloudInstance.AzurePublic, TestConstants.Utid)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithHttpManager(harness.HttpManager)
+                    .WithExperimentalFeatures()
+                    .OnBackgroundTokenRefreshCompleted(r => { capturedResult = r; return Task.CompletedTask; })
+                    .BuildConcrete();
+                TokenCacheHelper.PopulateCache(app.AppTokenCacheInternal.Accessor, addSecondAt: false);
+
+                TestCommon.UpdateATWithRefreshOn(app.AppTokenCacheInternal.Accessor);
+                harness.HttpManager.AddAllMocks(TokenResponseType.InvalidGrant);
+
+                // Act
+                await app.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync().ConfigureAwait(false);
+
+                // Assert - the callback received a failed outcome whose exception carries the failed attempt's
+                // metadata (HTTP duration), which is only available because MsalException now exposes it.
+                Assert.IsTrue(TestCommon.YieldTillSatisfied(() => capturedResult != null), "Background refresh callback was not invoked.");
+                Assert.IsFalse(capturedResult.Successful);
+                Assert.IsNotNull(capturedResult.Exception);
+                Assert.IsNotNull(capturedResult.Exception.AuthenticationResultMetadata);
+                Assert.AreEqual(CacheRefreshReason.ProactivelyRefreshed, capturedResult.Exception.AuthenticationResultMetadata.CacheRefreshReason);
             }
         }
         #endregion
