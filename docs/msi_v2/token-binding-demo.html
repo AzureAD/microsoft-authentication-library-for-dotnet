@@ -1,0 +1,885 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>S2S Token Binding (mTLS PoP) — Interactive Guide</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" />
+<style>
+  :root {
+    --bg:#0d1117; --panel:#161b22; --panel2:#1c2430; --border:#30363d;
+    --text:#e6edf3; --muted:#9da7b3; --accent:#58a6ff; --green:#3fb950;
+    --red:#f85149; --amber:#d29922; --purple:#bc8cff;
+    --mono:"Cascadia Code","Consolas","SFMono-Regular",Menlo,monospace;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; line-height:1.55; }
+  header { padding:26px 32px; border-bottom:1px solid var(--border);
+    background:linear-gradient(120deg,#11161d,#1a2230); }
+  header h1 { margin:0 0 6px; font-size:25px; }
+  header p { margin:0 0 12px; color:var(--muted); max-width:760px; }
+  header .legend span { margin-right:10px; }
+  .layout { display:flex; min-height:calc(100vh - 120px); }
+  nav { width:265px; flex-shrink:0; border-right:1px solid var(--border);
+    background:var(--panel); padding:16px 0; position:sticky; top:0; align-self:flex-start;
+    max-height:100vh; overflow-y:auto; }
+  nav button { display:block; width:100%; text-align:left; background:none; border:none;
+    color:var(--muted); padding:10px 22px; font-size:13.5px; cursor:pointer; border-left:3px solid transparent; }
+  nav button:hover { color:var(--text); background:var(--panel2); }
+  nav button.active { color:var(--accent); border-left-color:var(--accent); background:var(--panel2); font-weight:600; }
+  main { flex:1; padding:30px 44px; max-width:1000px; }
+  section { display:block; padding:16px 0 32px; border-bottom:1px solid var(--border);
+    scroll-margin-top:16px; animation:fade .4s ease; }
+  section:last-child { border-bottom:none; }
+  @keyframes fade { from{opacity:0;transform:translateY(6px);} to{opacity:1;transform:none;} }
+  h2 { font-size:22px; margin-top:0; }
+  h3 { font-size:16.5px; margin-top:26px; color:var(--accent); }
+  h4 { margin:0 0 6px; font-size:14px; }
+  p, li { color:#cdd5de; }
+  code { font-family:var(--mono); background:#232b36; padding:2px 6px; border-radius:5px; font-size:12.5px; color:#e6edf3; }
+  pre { background:#010409; border:1px solid var(--border); border-radius:8px; padding:14px 16px;
+    overflow-x:auto; margin:14px 0; }
+  pre code { background:none; padding:0; font-size:12.5px; line-height:1.5; }
+  .card { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:16px 18px; margin:14px 0; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:14px; }
+  .badge { display:inline-block; padding:3px 10px; border-radius:999px; font-size:12px; font-weight:600; }
+  .b-green { background:rgba(63,185,80,.15); color:var(--green); border:1px solid rgba(63,185,80,.4); }
+  .b-red { background:rgba(248,81,73,.15); color:var(--red); border:1px solid rgba(248,81,73,.4); }
+  .b-amber { background:rgba(210,153,34,.15); color:var(--amber); border:1px solid rgba(210,153,34,.4); }
+  .b-blue { background:rgba(88,166,255,.15); color:var(--accent); border:1px solid rgba(88,166,255,.4); }
+  .b-purple { background:rgba(188,140,255,.15); color:var(--purple); border:1px solid rgba(188,140,255,.4); }
+  table { width:100%; border-collapse:collapse; margin-top:14px; font-size:13px; }
+  th, td { text-align:left; padding:9px 10px; border-bottom:1px solid var(--border); vertical-align:top; }
+  th { color:var(--muted); font-weight:600; }
+  .pill { font-family:var(--mono); font-size:12px; color:var(--amber); }
+  .cnf { color:var(--purple); }
+  .tag { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; }
+  a { color:var(--accent); }
+  .note { border-radius:8px; padding:10px 14px; font-size:13px; margin:14px 0; border:1px solid; }
+  .note-info { background:rgba(88,166,255,.1); border-color:rgba(88,166,255,.4); color:#a9c7ff; }
+  .note-warn { background:rgba(210,153,34,.12); border-color:rgba(210,153,34,.4); color:var(--amber); }
+  .note-ok { background:rgba(63,185,80,.1); border-color:rgba(63,185,80,.4); color:#7ee787; }
+  .nextbtn { display:inline-flex; align-items:center; gap:9px; background:var(--panel2);
+    border:1px solid var(--border); color:var(--accent); padding:10px 20px; border-radius:8px;
+    cursor:pointer; font-size:14px; font-weight:600; margin-top:26px; }
+  .nextbtn:hover { border-color:var(--accent); background:#20293a; }
+  .nextbtn .chev { font-size:18px; line-height:1; }
+  .flow { display:flex; align-items:stretch; gap:8px; flex-wrap:wrap; margin:18px 0; }
+  .node { flex:1; min-width:150px; background:var(--panel2); border:1px solid var(--border); border-radius:9px; padding:12px 14px; }
+  .node small { color:var(--muted); }
+  .arrow { display:flex; align-items:center; color:var(--muted); font-size:20px; }
+  .modcard { background:var(--panel2); border:1px solid var(--border); border-radius:9px; padding:12px 14px; }
+  .modcard strong { display:block; margin:7px 0 4px; font-size:13.5px; color:var(--text); }
+  .modcard p { margin:0; font-size:12px; color:var(--muted); }
+  /* interactive acquisition simulator */
+  .sim { background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:18px 20px; margin:16px 0; }
+  .sim-tabs { display:inline-flex; background:var(--panel2); border:1px solid var(--border); border-radius:999px; padding:3px; gap:3px; }
+  .sim-tabs button { background:none; border:none; color:var(--muted); padding:7px 16px; border-radius:999px; cursor:pointer; font-size:13px; font-weight:600; }
+  .sim-tabs button.on { background:var(--accent); color:#06223f; }
+  .sim-stage { position:relative; margin:24px 0 6px; padding-top:30px; }
+  .sim-lane { display:flex; align-items:stretch; }
+  .snode { flex:1; min-width:0; background:var(--panel2); border:1px solid var(--border); border-radius:10px; padding:11px 8px; text-align:center; transition:all .3s; position:relative; }
+  .snode + .snode { margin-left:30px; }
+  .snode + .snode::before { content:""; position:absolute; left:-30px; top:50%; width:30px; height:2px; background:var(--border); transition:background .3s; }
+  .snode.done + .snode::before { background:var(--green); }
+  .snode h5 { margin:0 0 3px; font-size:12.5px; color:var(--text); }
+  .snode small { color:var(--muted); font-size:10.5px; line-height:1.3; display:block; }
+  .snode .nstat { display:block; height:16px; margin-top:6px; }
+  .snode.done { border-color:var(--green); }
+  .snode.active { border-color:var(--accent); box-shadow:0 0 0 3px rgba(88,166,255,.22); transform:translateY(-3px); }
+  .spin { display:inline-block; width:14px; height:14px; border:2px solid rgba(88,166,255,.3); border-top-color:var(--accent); border-radius:50%; animation:spin .65s linear infinite; vertical-align:middle; }
+  .tick { color:var(--green); font-weight:700; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .sim-token { position:absolute; top:0; left:0; transform:translateX(-50%); background:linear-gradient(120deg,#1f6feb,#388bfd); color:#fff; font-size:11px; font-weight:700; padding:4px 11px; border-radius:999px; box-shadow:0 4px 16px rgba(0,0,0,.55); transition:left .6s cubic-bezier(.55,.08,.25,1); white-space:nowrap; opacity:0; }
+  .sim-token.show { opacity:1; }
+  .sim-token.pulse { animation:tokpulse .65s ease-in-out infinite; }
+  @keyframes tokpulse { 0%,100%{ box-shadow:0 4px 16px rgba(0,0,0,.55);} 50%{ box-shadow:0 0 18px 5px rgba(88,166,255,.65);} }
+  .sim-token.pop { background:linear-gradient(120deg,#2ea043,#3fb950); }
+  .sim-token.bearer { background:linear-gradient(120deg,#d29922,#e3b341); color:#1a1206; }
+  .sim-cap { background:#010409; border:1px solid var(--border); border-radius:8px; padding:11px 14px; font-size:13px; min-height:40px; color:#cdd5de; margin-top:16px; }
+  .sim-ctrls { display:flex; gap:8px; align-items:center; margin-top:14px; flex-wrap:wrap; }
+  .sim-ctrls button { background:var(--accent); color:#06223f; border:none; padding:8px 16px; border-radius:7px; font-weight:700; cursor:pointer; font-size:13px; }
+  .sim-ctrls button.ghost { background:var(--panel2); color:var(--accent); border:1px solid var(--border); }
+  .sim-ctrls button:disabled { opacity:.4; cursor:default; }
+  .sim-dots { display:flex; gap:6px; margin-left:auto; }
+  .sim-dots i { width:8px; height:8px; border-radius:50%; background:var(--border); display:block; transition:background .3s; }
+  .sim-dots i.on { background:var(--accent); }
+  .sim-log { margin-top:12px; display:flex; flex-direction:column; gap:5px; }
+  .sim-log .row { font-size:12.5px; display:flex; align-items:center; gap:9px; color:#7d8794; }
+  .sim-log .row .ic { width:14px; height:14px; flex:0 0 14px; display:flex; align-items:center; justify-content:center; }
+  .sim-log .row.done { color:#cdd5de; }
+  .sim-result { margin-top:14px; display:none; gap:12px; flex-wrap:wrap; }
+  .sim-result.show { display:flex; }
+  .sim-result .chip { border-radius:10px; padding:10px 14px; font-size:12px; border:1px solid; line-height:1.45; }
+  .chip.tok-bearer { background:rgba(210,153,34,.12); border-color:rgba(210,153,34,.5); color:var(--amber); }
+  .chip.tok-pop { background:rgba(63,185,80,.12); border-color:rgba(63,185,80,.5); color:var(--green); }
+  .chip.cert { background:rgba(188,140,255,.12); border-color:rgba(188,140,255,.5); color:var(--purple); }
+  .sim-attack { margin-top:16px; border-top:1px dashed var(--border); padding-top:14px; display:none; }
+  .sim-attack.show { display:block; }
+  .sim-attack .attbtn { background:var(--panel2); color:var(--red); border:1px solid rgba(248,81,73,.5); padding:8px 16px; border-radius:7px; font-weight:700; cursor:pointer; font-size:13px; }
+  .attbox { background:#12090b; border:1px solid rgba(248,81,73,.35); border-radius:10px; padding:12px 14px; margin-top:10px; font-size:12.5px; font-family:var(--mono); white-space:pre-wrap; color:#c9d1d9; }
+  .console { background:#010409; border:1px solid var(--border); border-radius:8px;
+    font-family:var(--mono); font-size:12.5px; padding:14px 16px; margin-top:12px;
+    white-space:pre-wrap; min-height:54px; color:#c9d1d9; overflow-x:auto; }
+  .console .ok{color:var(--green);} .console .err{color:var(--red);} .console .dim{color:#6e7681;}
+  .console .warn{color:var(--amber);} .console .info{color:var(--accent);} .console .cnf{color:var(--purple);}
+  button.run { background:var(--accent); color:#06223f; border:none; padding:9px 18px; border-radius:7px;
+    font-weight:700; cursor:pointer; font-size:13px; margin:14px 8px 0 0; }
+  button.run:hover { filter:brightness(1.1); }
+  button.run.alt { background:var(--panel2); color:var(--accent); border:1px solid var(--border); }
+  .quiz-q .opt { display:block; width:100%; text-align:left; margin:6px 0; padding:10px 14px;
+    background:var(--panel2); border:1px solid var(--border); border-radius:7px; color:var(--text);
+    cursor:pointer; font-size:13.5px; }
+  .quiz-q .opt:hover { border-color:var(--accent); }
+  .quiz-q .opt.correct { border-color:var(--green); background:rgba(63,185,80,.12); }
+  .quiz-q .opt.wrong { border-color:var(--red); background:rgba(248,81,73,.12); }
+  .scenrow { display:flex; gap:10px; align-items:center; margin:8px 0; }
+  .scenrow .k { font-weight:600; min-width:160px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>🔐 S2S Token Binding (mTLS Proof-of-Possession)</h1>
+  <p>An interactive walkthrough of service-to-service token binding — what it is, the supported scenarios
+  (SN+I, Managed Identity, FIC), how to do it in MSAL, Microsoft Identity Web, and the Azure Key Vault SDK, and a short quiz.</p>
+  <div class="legend">
+    <span class="badge b-green">SN+I&nbsp;·&nbsp;GA</span>
+    <span class="badge b-amber">Managed Identity&nbsp;·&nbsp;Public preview</span>
+    <span class="badge b-purple">AKV SDK&nbsp;·&nbsp;Beta</span>
+  </div>
+</header>
+<div class="layout">
+  <nav id="nav"></nav>
+  <main id="main">
+
+  <section id="sec-intro" data-title="1 · What is token binding?">
+    <div style="margin-bottom:10px"><span class="badge b-blue">Concept</span></div>
+    <h2>What is S2S token binding?</h2>
+    <p>A standard OAuth access token is a <strong>bearer</strong> token: whoever holds it can use it. If it leaks —
+    via a log, a proxy, or an SSRF — it can be <strong>replayed</strong> from anywhere until it expires.</p>
+    <p><strong>Token binding</strong> issues an access token cryptographically bound to a private key the caller holds,
+    and the token is presented over <span class="pill">mutual-TLS Proof-of-Possession (mTLS PoP)</span>. The caller must
+    <em>prove</em> possession of that key, so a leaked token is useless without it. The resource matches the presented
+    binding certificate to the token's <code class="cnf">cnf</code> (confirmation) claim.</p>
+    <div class="note note-info"><strong>Status:</strong> the <strong>SN+I (certificate)</strong> path is <strong>GA</strong>.
+    The <strong>Managed Identity</strong> path is in <strong>public preview</strong> — on the <strong>MSIT</strong> tenant it
+    works without allow-listing; other tenants may require allow-listing
+    (<a href="mailto:tokenbindingfeatureteam@service.microsoft.com">tokenbindingfeatureteam@service.microsoft.com</a>).
+    The target resource must opt in to accept bound tokens.</div>
+    <h3>The two tokens, side by side</h3>
+    <div class="grid">
+      <div class="card"><span class="badge b-red">Bearer (unbound)</span>
+        <p>Steal it → replay anywhere → ✅ works for the attacker. <strong>This is the risk.</strong></p></div>
+      <div class="card"><span class="badge b-green">Bound (mTLS PoP)</span>
+        <p>Steal it → replay elsewhere → ❌ rejected, no bound key. <strong>Sender-constrained.</strong></p></div>
+    </div>
+    <h3>Why it matters</h3>
+    <table>
+      <tr><th></th><th>Bearer</th><th>Token-bound (mTLS PoP)</th></tr>
+      <tr><td>Replay a leaked token</td><td>Works for the attacker</td><td>Rejected — no bound key</td></tr>
+      <tr><td>Replay from another machine</td><td>Works</td><td>Key is sender-constrained</td></tr>
+      <tr><td>Credential type</td><td>Portable secret</td><td>Sender-constrained</td></tr>
+    </table>
+    <p>Token binding is a core <strong>Secure Future Initiative (SFI)</strong> pattern: it removes token replay as a
+    class of attack for high-value S2S calls.</p>
+  </section>
+
+  <section id="sec-sources" data-title="2 · Credential sources">
+    <h2>Two credential sources (and FIC composes either)</h2>
+    <p>The binding works the same way at the wire; what differs is <em>where the binding key lives</em>.</p>
+    <div class="grid">
+      <div class="card">
+        <h4>🪪 SN+I (certificate) <span class="badge b-green">GA</span></h4>
+        <p>The caller is an <strong>app registration</strong> authenticating with a <strong>certificate</strong>
+        (Subject Name + Issuer). The token is bound to that certificate — <strong>no VM or KeyGuard required</strong>.</p>
+        <p>Optionally, you can <strong>import the certificate and store its private key in KeyGuard</strong> (VBS-isolated, non-exportable) for hardware-backed protection of the binding key.</p>
+        <p><a href="https://identitydivision.visualstudio.com/IdentityWiki/_wiki/wikis/IdentityWiki.wiki/59891/Subject-Name-and-Issuer-Authentication" target="_blank">SN+I Authentication wiki →</a></p>
+      </div>
+      <div class="card">
+        <h4>⚙️ Managed Identity <span class="badge b-amber">Public preview</span></h4>
+        <p>The caller <strong>is</strong> the managed identity. The binding key is generated in
+        <strong>VBS / KeyGuard</strong> on a Trusted Launch / Confidential VM and <strong>attested</strong> by
+        <strong>Microsoft Azure Attestation (MAA)</strong>.</p>
+      </div>
+      <div class="card">
+        <h4>🔗 FIC (Federated Identity Credential)</h4>
+        <p>An app registration uses a federated credential — an <strong>SN+I certificate</strong> <em>or</em> a
+        <strong>Managed Identity</strong> — as its client assertion. FIC composes the two sources above.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="sec-scenarios" data-title="3 · Supported scenarios">
+    <h2>Supported scenarios</h2>
+    <table>
+      <tr><th>Scenario</th><th>Credential</th><th>Host</th><th>Status</th></tr>
+      <tr><td><strong>SN+I</strong> (certificate client credentials)</td><td>App certificate (Subject Name + Issuer)</td>
+          <td>Any host — no VM/KeyGuard</td><td><span class="badge b-green">GA</span></td></tr>
+      <tr><td><strong>Pure Managed Identity</strong></td><td>Managed Identity (SAMI/UAMI)</td>
+          <td>Trusted Launch / Confidential VM with VBS/KeyGuard</td><td><span class="badge b-amber">Public preview</span></td></tr>
+      <tr><td><strong>FIC</strong> (app registration)</td><td>Federated credential — SN+I or Managed Identity</td>
+          <td>Per the underlying credential</td><td>SN+I: GA · MSI: preview</td></tr>
+    </table>
+    <div class="note note-info">SN+I certificate authentication is restricted to allow-listed Microsoft internal / LOB
+    tenants; for new scenarios Microsoft recommends Managed Identity / FIC.</div>
+  </section>
+
+  <section id="sec-configure" data-title="4 · Configure a TVM / CVM (MSI)">
+    <h2>Configure Token Binding on a Trusted Launch / Confidential VM</h2>
+    <div class="note note-info">This applies to the <strong>Managed Identity</strong> flow only. The
+    <strong>SN+I (certificate)</strong> flow needs <strong>no VM or KeyGuard</strong>.</div>
+    <p>Prepare a Windows VM so a Managed Identity can mint bound credentials:</p>
+    <ol>
+      <li>Create a <a href="https://learn.microsoft.com/azure/virtual-machines/trusted-launch" target="_blank">Trusted Launch VM</a>
+      or <a href="https://learn.microsoft.com/azure/confidential-computing/confidential-vm-overview" target="_blank">Confidential VM</a>
+      (Secure Boot + vTPM on).</li>
+      <li>Assign a Managed Identity (SAMI or UAMI) and grant it RBAC on the target (e.g. <em>Key Vault Secrets User</em>).</li>
+      <li>Enable VBS + KeyGuard inside the guest, then reboot:</li>
+    </ol>
+    <pre><code class="language-powershell">reg add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard" /v "EnableVirtualizationBasedSecurity" /t REG_DWORD /d 1 /f
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard" /v "RequirePlatformSecurityFeatures" /t REG_DWORD /d 1 /f
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity" /v "Enabled" /t REG_DWORD /d 1 /f
+Restart-Computer -Force</code></pre>
+    <ol start="4">
+      <li>Install <strong>.NET 8</strong>, the <strong>VC++ x64 redistributable</strong>, and the MSAL packages
+      (<code>Microsoft.Identity.Client</code> + <code>Microsoft.Identity.Client.KeyAttestation</code>).</li>
+    </ol>
+    <div class="note note-warn"><strong>Regions (preview):</strong> Canary (<code>centraluseuap</code>, <code>eastus2euap</code>)
+    and the PROD region <code>westcentralus</code>. More PROD regions are lighting up as the rollout continues.</div>
+  </section>
+
+  <section id="sec-msal" data-title="5 · SDK: MSAL .NET">
+    <h2>SDK Support: MSAL .NET <span class="badge b-blue">the engine</span></h2>
+    <p>MSAL is the engine for all three credential sources. It acquires the bound token <em>and</em> the binding certificate.</p>
+    <pre><code class="language-xml">&lt;ItemGroup&gt;
+  &lt;PackageReference Include="Microsoft.Identity.Client" Version="4.85.2" /&gt;
+  &lt;PackageReference Include="Microsoft.Identity.Client.KeyAttestation" Version="4.85.2" /&gt;
+&lt;/ItemGroup&gt;</code></pre>
+    <div class="note note-warn"><strong>Gotcha:</strong> <code>WithAttestationSupport()</code> lives in the separate
+    <code>Microsoft.Identity.Client.KeyAttestation</code> package. Without that reference <em>and</em> the matching
+    <code>using</code>, you get <code>CS1061: ... does not contain a definition for 'WithAttestationSupport'</code>.</div>
+
+    <h3>SN+I (certificate) <span class="badge b-green">GA</span></h3>
+    <pre><code class="language-csharp">var app = ConfidentialClientApplicationBuilder
+    .Create("&lt;app-client-id&gt;")
+    .WithCertificate(certificate, sendX5C: true)
+    .WithAzureRegion("westus3")
+    .Build();
+
+AuthenticationResult result = await app
+    .AcquireTokenForClient(new[] { "api://&lt;target-app-id&gt;/.default" })
+    .WithMtlsProofOfPossession()
+    .ExecuteAsync();
+// result.TokenType == "mtls_pop"; result.BindingCertificate is set</code></pre>
+    <div class="note note-info"><strong>Bearer over mTLS:</strong> to authenticate over mTLS but receive a regular
+    <strong>bearer</strong> token, use <code>CertificateOptions { SendCertificateOverMtls = true }</code> and omit
+    <code>WithMtlsProofOfPossession()</code>.</div>
+
+    <h3>Pure Managed Identity <span class="badge b-amber">Public preview</span></h3>
+    <pre><code class="language-csharp">IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder
+    .Create(ManagedIdentityId.WithUserAssignedClientId("&lt;UAMI-client-id&gt;"))
+    .Build();
+
+AuthenticationResult result = await mi
+    .AcquireTokenForManagedIdentity("https://vault.azure.net")
+    .WithMtlsProofOfPossession()
+    .WithAttestationSupport()
+    .ExecuteAsync();
+// result.TokenType == "mtls_pop"; result.BindingCertificate is set</code></pre>
+
+    <h3>FIC (confidential client, MSI as the federated credential)</h3>
+    <pre><code class="language-csharp">Func&lt;AssertionRequestOptions, CancellationToken, Task&lt;ClientSignedAssertion&gt;&gt; assertionDelegate =
+    async (opts, ct) =&gt;
+    {
+        var miResult = await miApp
+            .AcquireTokenForManagedIdentity("api://AzureADTokenExchange")
+            .WithMtlsProofOfPossession()
+            .WithAttestationSupport()
+            .ExecuteAsync(ct);
+
+        return new ClientSignedAssertion
+        {
+            Assertion = miResult.AccessToken,
+            TokenBindingCertificate = miResult.BindingCertificate
+        };
+    };
+
+var cca = ConfidentialClientApplicationBuilder.Create("&lt;app-client-id&gt;")
+    .WithAuthority(new Uri("https://login.microsoftonline.com/&lt;tenant-id&gt;"), validateAuthority: false)
+    .WithAzureRegion("westus3")
+    .WithClientAssertion(assertionDelegate)
+    .Build();
+
+var result = await cca
+    .AcquireTokenForClient(new[] { "https://vault.azure.net/.default" })
+    .WithMtlsProofOfPossession()
+    .ExecuteAsync();
+// When TokenBindingCertificate is supplied, MSAL uses
+// client_assertion_type: urn:ietf:params:oauth:client-assertion-type:jwt-pop</code></pre>
+    <p><a href="https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/blob/main/tests/Microsoft.Identity.Test.Integration.netcore/HeadlessTests/ClientCredentialsMtlsPopTests.cs" target="_blank">Working SN+I integration test →</a></p>
+  </section>
+
+  <section id="sec-idweb" data-title="6 · SDK: Microsoft Identity Web">
+    <h2>SDK Support: Microsoft Identity Web <span class="badge b-blue">config-driven</span></h2>
+    <p>Opt in per downstream API with <code>"ProtocolScheme": "MTLS_POP"</code>. <code>IDownstreamApi</code> handles
+    acquisition, the binding certificate, and the mTLS call — you write no plumbing.</p>
+
+    <h3>SN+I (certificate)</h3>
+    <pre><code class="language-json">{
+  "AzureAd": {
+    "Instance": "https://login.microsoftonline.com/",
+    "TenantId": "&lt;tenant-id&gt;",
+    "ClientId": "&lt;app-client-id&gt;",
+    "AzureRegion": "westus3",
+    "ClientCredentials": [
+      {
+        "SourceType": "StoreWithDistinguishedName",
+        "CertificateStorePath": "LocalMachine/My",
+        "CertificateDistinguishedName": "CN=&lt;your-cert&gt;"
+      }
+    ],
+    "SendX5C": true
+  },
+  "MyWebApi": {
+    "BaseUrl": "https://mtlsauth.myapi.microsoft.com",
+    "RelativePath": "api/TodoList",
+    "RequestAppToken": true,
+    "Scopes": [ "api://&lt;target-app-id&gt;/.default" ],
+    "ProtocolScheme": "MTLS_POP"
+  }
+}</code></pre>
+
+    <h3>Pure Managed Identity</h3>
+    <pre><code class="language-json">{
+  "AzureKeyVault": {
+    "BaseUrl": "https://contoso.vault.azure.net/",
+    "RelativePath": "secrets/mysecret?api-version=7.4",
+    "Scopes": [ "https://vault.azure.net/.default" ],
+    "RequestAppToken": true,
+    "ProtocolScheme": "MTLS_POP",
+    "AcquireTokenOptions": {
+      "ManagedIdentity": { "UserAssignedClientId": "&lt;UAMI-client-id&gt;" }
+    }
+  }
+}</code></pre>
+
+    <h3>FIC (Managed Identity as a federated credential)</h3>
+    <pre><code class="language-json">{
+  "AzureAd": {
+    "Instance": "https://login.microsoftonline.com/",
+    "TenantId": "&lt;tenant-id&gt;",
+    "ClientId": "&lt;app-client-id&gt;",
+    "ClientCapabilities": [ "cp1" ],
+    "ClientCredentials": [
+      {
+        "SourceType": "SignedAssertionFromManagedIdentity",
+        "ManagedIdentityClientId": "&lt;UAMI-client-id&gt;"
+      }
+    ]
+  },
+  "AzureKeyVault": {
+    "BaseUrl": "https://contoso.vault.azure.net/",
+    "Scopes": [ "https://vault.azure.net/.default" ],
+    "RequestAppToken": true,
+    "ProtocolScheme": "MTLS_POP"
+  }
+}</code></pre>
+    <div class="note note-info"><code>ClientCapabilities: [ "cp1" ]</code> advertises support for
+    <strong>Continuous Access Evaluation (CAE)</strong>.</div>
+
+    <h3>Call it (same for every credential source)</h3>
+    <pre><code class="language-csharp">var api = serviceProvider.GetRequiredService&lt;IDownstreamApi&gt;();
+HttpResponseMessage resp = await api.CallApiForAppAsync("AzureKeyVault");</code></pre>
+  </section>
+
+  <section id="sec-azuresdk" data-title="7 · SDK: Azure Key Vault (AKV)">
+    <h2>SDK Support: Azure Key Vault SDK (AKV) <span class="badge b-purple">Beta</span></h2>
+    <p>The Azure Key Vault SDK clients (<code>SecretClient</code>, <code>CertificateClient</code>, <code>KeyClient</code>) get
+    token binding <strong>transparently</strong> when you pass a <code>ManagedIdentityCredential</code> (from Azure.Identity):
+    on a supported host it acquires a bound token and the AKV client performs the call over mutual TLS. Token binding is
+    <strong>on by default</strong>; opt out with <code>DisableMtlsProofOfPossession = true</code>.</p>
+    <div class="note note-warn"><strong>Beta / preview.</strong> Pin the exact versions below from the preview feed
+    (note <code>Azure.Core</code> is an alpha build); they will change as the feature moves toward GA.</div>
+    <pre><code class="language-xml">&lt;ItemGroup&gt;
+  &lt;!-- BETA / preview packages for the token-binding Key Vault scenario --&gt;
+  &lt;PackageReference Include="Azure.Security.KeyVault.Secrets" Version="4.12.0-beta.1" /&gt;
+  &lt;PackageReference Include="Azure.Security.KeyVault.Certificates" Version="4.10.0-beta.2" /&gt;
+  &lt;PackageReference Include="Azure.Security.KeyVault.Keys" Version="4.11.0-beta.2" /&gt;
+  &lt;PackageReference Include="Azure.Core" Version="1.60.0-alpha.20260622.10" /&gt;
+  &lt;PackageReference Include="Azure.Identity.Broker" Version="1.8.0-beta.1" /&gt;
+&lt;/ItemGroup&gt;</code></pre>
+    <pre><code class="language-csharp">using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
+
+string keyVaultUrl = "https://&lt;your-kv&gt;.vault.azure.net/";
+string clientId    = "&lt;user-assigned-mi-client-id&gt;";
+
+var credential = new ManagedIdentityCredential(
+    new ManagedIdentityCredentialOptions(ManagedIdentityId.FromUserAssignedClientId(clientId))
+    {
+        // Token binding (mTLS PoP) is ON by default. To opt out:
+        // DisableMtlsProofOfPossession = true,
+        Diagnostics = { IsLoggingContentEnabled = true }
+    });
+
+var secretClient = new SecretClient(new Uri(keyVaultUrl), credential);
+KeyVaultSecret secret = await secretClient.GetSecretAsync("&lt;secret-name&gt;");</code></pre>
+    <p>The same credential works with any Azure SDK client (for example <code>BlobServiceClient</code> for Storage).</p>
+  </section>
+
+  <section id="sec-downstream" data-title="8 · Call downstream (Key Vault)">
+    <h2>Call a downstream API over mTLS (Azure Key Vault)</h2>
+    <p>With raw MSAL you pin <code>result.BindingCertificate</code> to the <code>HttpClient</code>, send the token with the
+    <code>mtls_pop</code> scheme, and include the Key Vault opt-in header.</p>
+    <pre><code class="language-csharp">using var handler = new HttpClientHandler
+{
+    ClientCertificateOptions = ClientCertificateOption.Manual,
+    SslProtocols = SslProtocols.Tls12,
+};
+handler.ClientCertificates.Add(result.BindingCertificate);
+
+using var http = new HttpClient(handler);
+http.DefaultRequestHeaders.Authorization =
+    new AuthenticationHeaderValue(result.TokenType, result.AccessToken); // "mtls_pop &lt;token&gt;"
+http.DefaultRequestHeaders.Add("x-ms-tokenboundauth", "true");          // Key Vault opt-in
+
+var akvUrl = "https://&lt;your-kv&gt;.vault.azure.net/secrets/&lt;name&gt;?api-version=7.4";
+using var resp = await http.GetAsync(akvUrl);
+resp.EnsureSuccessStatusCode();</code></pre>
+    <div class="note note-warn">Send the token with the <code>mtls_pop</code> scheme and the binding certificate on the
+    channel — <strong>never</strong> as a plain <code>Bearer</code> token.</div>
+    <h3>Supported resources</h3>
+    <table>
+      <tr><th>Resource</th><th>Scope</th><th>Status</th></tr>
+      <tr><td>Azure Key Vault</td><td><code>https://vault.azure.net/.default</code></td><td>Supported (requires <code>x-ms-tokenboundauth: true</code>)</td></tr>
+      <tr><td>Microsoft Graph</td><td><code>https://graph.microsoft.com/.default</code></td><td>Verify enforcement for your scenario</td></tr>
+      <tr><td>Your custom web API</td><td><code>api://&lt;app-id&gt;/.default</code></td><td>Supported when validated with MISE</td></tr>
+    </table>
+    <p>A resource accepts bound tokens only when it is on the ESTS <code>MtlsTokenBindingEnabledStateResourceAppList</code>
+    and declares support in its app manifest (<code>rp_tbreq</code>, <code>rp_tbtype</code>).</p>
+  </section>
+
+  <section id="sec-demo" data-title="9 · How it works + scenarios">
+    <h2>Token acquisition — classic MSI vs a bound token, then the scenarios</h2>
+    <p><strong>Then vs now:</strong> classic Managed Identity is <em>one hop</em> to the local endpoint and hands back a
+    plain <strong>bearer</strong> token. A <strong>bound</strong> token takes <em>several hops</em> (MSAL drives them) so the
+    token is cryptographically tied to a key that never leaves the machine. The two cards below show each; the runnable
+    scenarios <strong>A–E</strong> follow.</p>
+    <p style="margin-top:-4px"><span class="tag">Scenarios:</span> <strong>A–E</strong> are token <strong>theft &amp; replay</strong> outcomes — does a stolen token still work from another machine?</p>
+    <div class="sim" id="acqsim"></div>
+
+    <div class="card">
+
+      <span class="tag">Reference — the hops in detail</span>
+      <h4 style="margin-top:10px">The pipeline — module → endpoint → result</h4>
+      <table>
+        <tr><th>#</th><th>Stage</th><th>Module → endpoint</th><th>Result</th></tr>
+        <tr><td>1</td><td>Platform metadata</td><td>HttpManager → IMDSv2 <code>GET /getPlatformMetadata</code></td><td>client_id, tenant_id, CUID, MAA endpoint</td></tr>
+        <tr><td>2</td><td>Key + CSR</td><td>WinKeyProvider (KeyGuard KSP)</td><td>RSA-2048 key + CSR <code>CN={client_id}, DC={tenant_id}</code></td></tr>
+        <tr><td>3</td><td>Attest key</td><td>PopKeyAttestor → MAA <code>POST /attest/keyguard</code></td><td>attestation_token</td></tr>
+        <tr><td>4</td><td>Issue credential</td><td>HttpManager → IMDSv2 <code>POST /issuecredential</code></td><td>x509 binding cert (~7-day) + regional token URL</td></tr>
+        <tr><td>5</td><td>Acquire token</td><td>HttpManager → ESTS-R <code>POST /oauth2/v2.0/token</code> (mTLS)</td><td><code>mtls_pop</code> token (<code class="cnf">xms_tb</code> claim)</td></tr>
+        <tr><td>6</td><td>Return</td><td>ManagedIdentityApplication → your app</td><td>AuthenticationResult = token + BindingCertificate</td></tr>
+      </table>
+
+      <div class="note note-info" style="margin-top:12px"><strong>Attested vs not:</strong> KeyGuard (attested) compute gets an <code>mtls_pop</code> token; unattested compute gets a plain <code>bearer</code>. The binding cert lasts ~7 days and MSAL rotates it ~3 days before expiry. <a href="https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/blob/main/docs/msi_v2/msi_with_credential_design.md" target="_blank">MSI v2 /issuecredential design doc →</a></div>
+
+      <div class="note note-info" style="margin-top:12px"><strong>401 vs 403:</strong> a <code>403 Forbidden</code> from Key Vault is an <strong>RBAC</strong> result, <em>not</em> a token-binding failure — the <code>mtls_pop</code> token is accepted (auth OK) and only the role (e.g. <em>Key Vault Secrets User</em>) is missing. Token-binding/auth failures surface as <code>401</code> (e.g. <code>S2S17001</code>).</div>
+    </div>
+
+    <div class="card">
+      <span class="tag">Scenario A — bearer token stolen &amp; replayed</span> <span class="badge b-red">✅ Exfiltrated</span>
+      <div><button class="run" data-sim="bearer">▶ Run (attacker replay)</button></div>
+      <div class="console" data-console="bearer"><span class="dim">// output appears here…</span></div>
+    </div>
+    <div class="card">
+      <span class="tag">Scenario B — bound token stolen &amp; replayed</span> <span class="badge b-green">❌ 401 Blocked</span>
+      <div><button class="run" data-sim="bound">▶ Run (attacker replay)</button></div>
+      <div class="console" data-console="bound"><span class="dim">// output appears here…</span></div>
+    </div>
+    <div class="card">
+      <span class="tag">Scenario C — fallback to bearer (PoP disabled)</span> <span class="badge b-red">✅ Exfiltrated</span>
+      <div><button class="run alt" data-sim="fallback">▶ Run (DisableMtlsProofOfPossession = true)</button></div>
+      <div class="console" data-console="fallback"><span class="dim">// output appears here…</span></div>
+    </div>
+    <div class="card">
+      <span class="tag">Scenario D — vault: Enforce Token Binding</span> <span class="badge b-green">❌ Still fails</span>
+      <div><button class="run" data-sim="enforce">▶ Run (attacker replay)</button></div>
+      <div class="console" data-console="enforce"><span class="dim">// output appears here…</span></div>
+    </div>
+    <div class="card">
+      <span class="tag">Scenario E — vault: Allow Bearer Auth</span> <span class="badge b-red">✅ Exfiltrated</span>
+      <div><button class="run" data-sim="allowbearer">▶ Run (attacker replay)</button></div>
+      <div class="console" data-console="allowbearer"><span class="dim">// output appears here…</span></div>
+    </div>
+  </section>
+
+  <section id="sec-quiz" data-title="10 · Quiz">
+    <h2>Check your understanding</h2>
+    <div id="quiz"></div>
+    <div class="card" id="score" style="display:none"></div>
+  </section>
+
+  <section id="sec-glossary" data-title="11 · Glossary">
+    <h2>Glossary</h2>
+    <table>
+      <tr><th>Term</th><th>Meaning</th></tr>
+      <tr><td>mTLS PoP</td><td>Mutual-TLS Proof-of-Possession — the caller proves it holds the bound private key during the TLS handshake.</td></tr>
+      <tr><td><code class="cnf">cnf</code></td><td>JWT "confirmation" claim — holds the thumbprint of the key the token is bound to.</td></tr>
+      <tr><td>SN+I</td><td>Subject Name + Issuer — certificate-based client credentials; the token binds to the cert.</td></tr>
+      <tr><td>KeyGuard / VBS</td><td>Virtualization-Based Security enclave that stores the bound key so it can't be exported.</td></tr>
+      <tr><td>MAA</td><td>Microsoft Azure Attestation — attests the KeyGuard-protected key for the Managed Identity flow.</td></tr>
+      <tr><td>FIC</td><td>Federated Identity Credential — an app registration uses an SN+I cert or a Managed Identity as its assertion.</td></tr>
+      <tr><td><code>mtls_pop</code></td><td>The token type / auth scheme for a bound token (vs <code>Bearer</code>).</td></tr>
+      <tr><td>Trusted Launch / CVM</td><td>Azure VM security types (Secure Boot + vTPM / confidential) that KeyGuard requires.</td></tr>
+    </table>
+  </section>
+
+  <section id="sec-resources" data-title="12 · Resources">
+    <h2>Resources</h2>
+    <ul>
+      <li><a href="https://identitydivision.visualstudio.com/IdentityWiki/_wiki/wikis/IdentityWiki.wiki/59891/Subject-Name-and-Issuer-Authentication" target="_blank">SN+I Authentication wiki</a> — onboarding &amp; tenant allow-listing for the certificate flow.</li>
+      <li><a href="https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/blob/main/docs/msi_v2/msi_with_credential_design.md" target="_blank">MSI v2 <code>/issuecredential</code> high-level design (MSAL)</a> — the attestation → ESTS mTLS mechanism.</li>
+      <li><a href="https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/blob/main/tests/Microsoft.Identity.Test.Integration.netcore/HeadlessTests/ClientCredentialsMtlsPopTests.cs" target="_blank">SN+I client-credentials mTLS PoP — MSAL integration tests</a>.</li>
+      <li><a href="https://aka.ms/mise/mtls-pop" target="_blank">Using mTLS Proof of Possession (MISE)</a> — how-to &amp; troubleshooting.</li>
+      <li><a href="https://learn.microsoft.com/entra/msal/dotnet/advanced/managed-identity" target="_blank">Managed identity with MSAL.NET</a>.</li>
+      <li>Tenant allow-listing / feature questions: <a href="mailto:tokenbindingfeatureteam@service.microsoft.com">tokenbindingfeatureteam@service.microsoft.com</a></li>
+    </ul>
+    <p class="tag" style="margin-top:18px">Interactive guide generated from the S2S Token Binding docset · simulated console outputs are illustrative.</p>
+  </section>
+
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/powershell.min.js"></script>
+<script>
+// ---------- simulated console outputs ----------
+const sims = {
+  bearer: [
+    ["dim","// Source app uses current AKV SDK (no PoP) -> mints a BEARER token"],
+    ["info","TokenType = Bearer"],
+    ["dim","// token copied to an attacker machine and replayed..."],
+    ["dim","GET https://contoso.vault.azure.net/secrets/db-pwd?api-version=7.4"],
+    ["dim","Authorization: Bearer eyJ0eXAiOiJKV1Qi..."],
+    ["ok","200 OK  -> secret returned to the ATTACKER"],
+    ["warn","\u26a0 A bearer token has no binding: possession = access. This is the risk."]
+  ],
+  bound: [
+    ["dim","// Source app upgraded to token-binding packages -> mints a BOUND token"],
+    ["info","TokenType = mtls_pop   (cnf = thumbprint of the KeyGuard-bound key)"],
+    ["dim","// attacker steals the token bytes and replays them..."],
+    ["dim","GET https://contoso.vault.azure.net/secrets/db-pwd?api-version=7.4"],
+    ["err","401 Unauthorized -> [AggregatedAuthenticationFailure] token: 'S2S17001'"],
+    ["ok","\u2705 Protection worked: no bound key on the attacker = no proof-of-possession."]
+  ],
+  fallback: [
+    ["warn","DisableMtlsProofOfPossession = true  -> downgrades to a bearer token"],
+    ["info","TokenType = Bearer"],
+    ["err","Replayed token from the attacker -> 200 OK (exfiltrated)"],
+    ["warn","\u26a0 Never disable PoP in production."]
+  ],
+  enforce: [
+    ["info","Vault policy set to: Enforce Token Binding (bearer auth disabled)"],
+    ["dim","// attacker replays a stolen token as Bearer..."],
+    ["err","401 Unauthorized -> BearerAuthenticationDisabledForKeyVault"],
+    ["ok","\u2705 Enforcement on: attacker is blocked regardless of token source."]
+  ],
+  allowbearer: [
+    ["warn","Vault policy set to: Allow Bearer Auth"],
+    ["dim","// attacker replays a stolen bearer token..."],
+    ["err","200 OK -> secret returned to the ATTACKER \ud83d\ude31"],
+    ["warn","\u26a0 Bearer allowed = exfiltration succeeds again. Vault policy controls exposure."]
+  ]
+};
+function typeOut(el, lines) {
+  el.innerHTML = ""; let i = 0;
+  (function next(){
+    if (i >= lines.length) return;
+    const [cls, txt] = lines[i];
+    const span = document.createElement("span");
+    span.className = cls; span.textContent = txt + "\n";
+    el.appendChild(span); el.scrollTop = el.scrollHeight;
+    i++; setTimeout(next, 360);
+  })();
+}
+
+// ---------- smooth scroll ----------
+function smoothScrollTo(targetY, duration) {
+  duration = duration || 650;
+  const startY = window.pageYOffset;
+  const maxY = document.documentElement.scrollHeight - window.innerHeight;
+  const destY = Math.max(0, Math.min(targetY, maxY));
+  const dist = destY - startY; if (Math.abs(dist) < 2) return;
+  let startT = null;
+  const ease = t => (t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2,3)/2);
+  function step(now){ if(startT===null)startT=now;
+    const p=Math.min((now-startT)/duration,1);
+    window.scrollTo(0, startY + dist*ease(p));
+    if(p<1) requestAnimationFrame(step);
+  } requestAnimationFrame(step);
+}
+function scrollToEl(el){ smoothScrollTo(el.getBoundingClientRect().top + window.pageYOffset - 14); }
+
+// ---------- build nav + next buttons ----------
+const main = document.getElementById("main");
+const nav = document.getElementById("nav");
+const secs = Array.from(main.querySelectorAll("section"));
+secs.forEach((sec, idx) => {
+  const b = document.createElement("button");
+  b.textContent = sec.dataset.title; b.dataset.id = sec.id;
+  if (idx === 0) b.classList.add("active");
+  b.onclick = () => scrollToEl(sec);
+  nav.appendChild(b);
+
+  const wrap = document.createElement("div");
+  const nb = document.createElement("button");
+  nb.className = "nextbtn";
+  if (idx < secs.length - 1) {
+    const t = secs[idx+1].dataset.title.replace(/^\d+\s·\s/, "");
+    nb.innerHTML = "Next: " + t + " <span class='chev'>\u2193</span>";
+    nb.dataset.next = secs[idx+1].id;
+  } else {
+    nb.innerHTML = "Back to top <span class='chev'>\u2191</span>";
+    nb.dataset.next = "top";
+  }
+  wrap.appendChild(nb); sec.appendChild(wrap);
+});
+
+// ---------- click delegation: next + run ----------
+main.addEventListener("click", e => {
+  const next = e.target.closest(".nextbtn");
+  if (next) {
+    if (next.dataset.next === "top") smoothScrollTo(0);
+    else scrollToEl(document.getElementById(next.dataset.next));
+    return;
+  }
+  const run = e.target.closest("[data-sim]");
+  if (run) {
+    const key = run.dataset.sim;
+    const el = main.querySelector("[data-console='" + key + "']");
+    if (sims[key] && el) typeOut(el, sims[key]);
+  }
+});
+
+// ---------- scroll-spy ----------
+const spy = new IntersectionObserver(entries => {
+  entries.forEach(en => {
+    if (en.isIntersecting) {
+      document.querySelectorAll("nav button").forEach(b =>
+        b.classList.toggle("active", b.dataset.id === en.target.id));
+    }
+  });
+}, { rootMargin: "-45% 0px -50% 0px" });
+secs.forEach(s => spy.observe(s));
+
+// ---------- quiz ----------
+const quizData = [
+  { q:"What token type / auth scheme does a bound token use?",
+    opts:["Bearer","mtls_pop","Basic","Negotiate"], a:1,
+    e:"A bound token is presented with the mtls_pop scheme over a mutual-TLS channel." },
+  { q:"What is the status of each credential source today?",
+    opts:["Both GA","SN+I GA, Managed Identity public preview","Both preview","SN+I preview, MSI GA"], a:1,
+    e:"SN+I (certificate) is GA; the Managed Identity flow is in public preview." },
+  { q:"Where is the binding key generated for the Managed Identity flow?",
+    opts:["In Key Vault","In VBS / KeyGuard on a TVM/CVM, attested by MAA","In the app's memory","On disk as a .pfx"], a:1,
+    e:"KeyGuard/VBS generates the key in the enclave; MAA attests it. SN+I instead binds to your certificate." },
+  { q:"Which package contains WithAttestationSupport()?",
+    opts:["Microsoft.Identity.Client","Microsoft.Identity.Client.KeyAttestation","Azure.Identity","Microsoft.Identity.Web"], a:1,
+    e:"It's an extension in Microsoft.Identity.Client.KeyAttestation — missing it gives CS1061." },
+  { q:"What must a token-bound Key Vault request include?",
+    opts:["A client secret","The header x-ms-tokenboundauth: true and the mtls_pop scheme","An API key","A SAS token"], a:1,
+    e:"Key Vault opt-in requires x-ms-tokenboundauth: true, and the token is sent as mtls_pop with the cert on the channel." },
+  { q:"In Microsoft Identity Web, how do you opt a downstream API into token binding?",
+    opts:['Set "ProtocolScheme": "MTLS_POP"','Call .WithBearer()','Add a [Bound] attribute','Nothing — it is automatic'], a:0,
+    e:'Per-API config "ProtocolScheme": "MTLS_POP" tells IDownstreamApi to acquire a bound token and do the mTLS call.' },
+  { q:"Why is a stolen bound token rejected from another machine?",
+    opts:["It is encrypted","It is sender-constrained — the attacker lacks the bound private key","Key Vault is offline","It expired instantly"], a:1,
+    e:"Without the bound key the caller can't prove possession (mTLS PoP), so the resource rejects it (S2S17001)." },
+  { q:"In the Azure SDK, how do you fall back to a bearer token?",
+    opts:["DisableMtlsProofOfPossession = true","Remove Azure.Identity","Use a SAS URL","It cannot be disabled"], a:0,
+    e:"Token binding is on by default for ManagedIdentityCredential; set DisableMtlsProofOfPossession = true to opt out." },
+  { q:"With the vault set to 'Enforce Token Binding', a replayed bearer token from an attacker...",
+    opts:["Succeeds","Still fails with 401","Depends on the VM","Crashes the app"], a:1,
+    e:"Enforcement rejects bearer tokens regardless of source; 'Allow Bearer Auth' would let them through again." }
+];
+const quizEl = document.getElementById("quiz");
+let answered = 0, correct = 0;
+quizData.forEach((item, qi) => {
+  const wrap = document.createElement("div");
+  wrap.className = "quiz-q card";
+  const h = document.createElement("p");
+  h.innerHTML = "<strong>Q" + (qi+1) + ".</strong> " + item.q;
+  wrap.appendChild(h);
+  item.opts.forEach((opt, oi) => {
+    const btn = document.createElement("button");
+    btn.className = "opt"; btn.textContent = opt;
+    btn.onclick = () => {
+      if (wrap.dataset.done) return;
+      wrap.dataset.done = "1"; answered++;
+      if (oi === item.a) { btn.classList.add("correct"); correct++; }
+      else { btn.classList.add("wrong"); wrap.querySelectorAll(".opt")[item.a].classList.add("correct"); }
+      const ex = document.createElement("div");
+      ex.style.cssText = "font-size:13px;color:var(--muted);margin-top:8px";
+      ex.textContent = "\ud83d\udca1 " + item.e; wrap.appendChild(ex);
+      if (answered === quizData.length) {
+        const sc = document.getElementById("score");
+        sc.style.display = "block";
+        sc.innerHTML = "<strong>Score: " + correct + " / " + quizData.length + "</strong> — " +
+          (correct === quizData.length ? "\ud83c\udfc6 Token-binding expert!" : "Review the scenarios and try again.");
+      }
+    };
+    wrap.appendChild(btn);
+  });
+  quizEl.appendChild(wrap);
+});
+
+// ---------- interactive acquisition simulator ----------
+(function(){
+  const host = document.getElementById('acqsim');
+  if (!host) return;
+  const SIM = {
+    classic: {
+      nodes: [
+        {t:"Your app", s:"asks for a token"},
+        {t:"IMDS", s:"169.254.169.254"},
+        {t:"\uD83C\uDF9F token", s:"access_token"}
+      ],
+      steps: [
+        {n:0, doing:"App asks for a token for https://vault.azure.net \u2026", done:"Request started \u2014 no key, no cert"},
+        {n:1, doing:"Calling IMDS GET /metadata/identity/oauth2/token (Metadata: true) \u2026", done:"IMDS responded 200 OK"},
+        {n:2, doing:"Reading the response \u2026", done:"Returned a plain Bearer access_token \u26a0"}
+      ],
+      result: {kind:"bearer", label:"\uD83C\uDF9F Bearer", token:"Bearer eyJ0eXAi\u2026", sub:"no binding \u2014 possession = access"}
+    },
+    bound: {
+      nodes: [
+        {t:"Your app", s:"AcquireToken\u2026 (PoP)"},
+        {t:"IMDSv2", s:"GET getPlatformMetadata"},
+        {t:"MSAL \u00b7 KeyGuard", s:"VBS key + CSR"},
+        {t:"Azure MAA", s:"POST /attest/keyguard"},
+        {t:"IMDSv2", s:"POST issuecredential"},
+        {t:"ESTS-R", s:"oauth2/v2.0/token \u00b7 mTLS"},
+        {t:"\uD83C\uDF9F token", s:"+ binding cert"}
+      ],
+      steps: [
+        {n:0, doing:"App calls AcquireTokenForManagedIdentity().WithMtlsProofOfPossession() \u2026", done:"Bound-token request started"},
+        {n:1, doing:"MSAL \u2192 IMDSv2 GET /getPlatformMetadata \u2026", done:"Got client_id, tenant_id, CUID, MAA endpoint"},
+        {n:2, doing:"MSAL builds a VBS-isolated KeyGuard key + CSR (CN={client_id}) \u2026", done:"KeyGuard key + CSR ready (CNG)"},
+        {n:3, doing:"MSAL \u2192 Azure MAA POST /attest/keyguard \u2026", done:"MAA attestation token acquired"},
+        {n:4, doing:"MSAL \u2192 IMDSv2 POST /issuecredential (CSR + attestation) \u2026", done:"Binding certificate issued (~7-day) \u2192 saved to CurrentUser/My"},
+        {n:5, doing:"MSAL \u2192 ESTS-R POST /oauth2/v2.0/token (mTLS) \u2026", done:"ESTS-R token endpoint responded"},
+        {n:6, doing:"Finalizing \u2026", done:"mtls_pop access token + binding cert returned \u2705"}
+      ],
+      result: {kind:"pop", label:"\uD83C\uDF9F mtls_pop", token:"mtls_pop eyJ0eXAi\u2026", sub:"sender-constrained \u2014 bound to a KeyGuard key"}
+    }
+  };
+
+  host.innerHTML =
+    '<div class="sim-tabs">' +
+      '<button data-mode="classic">Classic MSI (v1)</button>' +
+      '<button data-mode="bound" class="on">Bound token \u00b7 MSI v2</button>' +
+    '</div>' +
+    '<div class="sim-stage"><div class="sim-token" id="simTok">\uD83C\uDF9F</div><div class="sim-lane" id="simLane"></div></div>' +
+    '<div class="sim-cap" id="simCap">Press <b>Play</b> to mint a token \u2014 watch each hop call out, spin, and resolve. Or <b>Step</b> through them.</div>' +
+    '<div class="sim-log" id="simLog"></div>' +
+    '<div class="sim-ctrls">' +
+      '<button id="simPlay">\u25b6 Play</button>' +
+      '<button id="simStep" class="ghost">\u23ed Step</button>' +
+      '<button id="simReset" class="ghost">\u27f2 Reset</button>' +
+      '<div class="sim-dots" id="simDots"></div>' +
+    '</div>' +
+    '<div class="sim-result" id="simResult"></div>' +
+    '<div class="sim-attack" id="simAttack">' +
+      '<button class="attbtn" id="simSteal">\uD83E\uDDB9 Steal &amp; replay from another machine</button>' +
+      '<div class="attbox" id="simAtt" style="display:none"></div>' +
+    '</div>';
+
+  const lane = host.querySelector('#simLane');
+  const tok  = host.querySelector('#simTok');
+  const cap  = host.querySelector('#simCap');
+  const logEl= host.querySelector('#simLog');
+  const dots = host.querySelector('#simDots');
+  const resEl= host.querySelector('#simResult');
+  const atkEl= host.querySelector('#simAttack');
+  const atkBox=host.querySelector('#simAtt');
+  let mode='bound', idx=-1, busy=false;
+
+  function render(){
+    const d=SIM[mode];
+    lane.innerHTML = d.nodes.map(n=>'<div class="snode"><h5>'+n.t+'</h5><small>'+n.s+'</small><span class="nstat"></span></div>').join('');
+    dots.innerHTML = d.steps.map(()=>'<i></i>').join('');
+    logEl.innerHTML=''; idx=-1;
+    tok.className='sim-token'; tok.textContent='\uD83C\uDF9F'; tok.style.opacity='0';
+    resEl.className='sim-result'; resEl.innerHTML='';
+    atkEl.className='sim-attack'; atkBox.style.display='none'; atkBox.textContent='';
+    cap.innerHTML='Press <b>Play</b> to mint a token \u2014 watch each hop call out, spin, and resolve. Or <b>Step</b> through them.';
+  }
+  function moveTok(ni){
+    const stage=host.querySelector('.sim-stage'); const n=lane.querySelectorAll('.snode')[ni];
+    if(!n) return; const sr=stage.getBoundingClientRect(), nr=n.getBoundingClientRect();
+    tok.style.left=(nr.left-sr.left+nr.width/2)+'px'; tok.classList.add('show');
+  }
+  function runStep(i, cb){
+    const d=SIM[mode]; if(i>=d.steps.length){ if(cb)cb(); return; }
+    busy=true; idx=i; const st=d.steps[i];
+    moveTok(st.n);
+    lane.querySelectorAll('.snode').forEach(n=>n.classList.remove('active'));
+    const node=lane.querySelectorAll('.snode')[st.n];
+    node.classList.add('active'); node.querySelector('.nstat').innerHTML='<span class="spin"></span>';
+    tok.classList.add('pulse');
+    cap.innerHTML='<b>Hop '+(i+1)+'/'+d.steps.length+'.</b> '+st.doing;
+    const row=document.createElement('div'); row.className='row work';
+    row.innerHTML='<span class="ic"><span class="spin"></span></span><span>'+st.doing+'</span>';
+    logEl.appendChild(row);
+    setTimeout(function(){
+      tok.classList.remove('pulse');
+      node.querySelector('.nstat').innerHTML='<span class="tick">\u2713</span>';
+      node.classList.remove('active'); node.classList.add('done');
+      row.className='row done';
+      row.innerHTML='<span class="ic"><span class="tick">\u2713</span></span><span>'+st.done+'</span>';
+      dots.querySelectorAll('i').forEach(function(dt,k){ if(k<=i) dt.classList.add('on'); });
+      if(i===d.steps.length-1){ tok.textContent=d.result.label; tok.classList.add(d.result.kind==='pop'?'pop':'bearer'); finish(); }
+      busy=false; if(cb)cb();
+    }, 950);
+  }
+  function finish(){
+    const r=SIM[mode].result;
+    resEl.className='sim-result show';
+    resEl.innerHTML = (r.kind==='pop')
+      ? '<div class="chip tok-pop"><b>Access token</b><br>'+r.token+'<br><small>'+r.sub+'</small></div>'+
+        '<div class="chip cert"><b>\uD83D\uDD17 Binding certificate</b><br>thumbprint A1B2 C3D4 \u2026<br><small>persisted to CurrentUser/My</small></div>'
+      : '<div class="chip tok-bearer"><b>Access token</b><br>'+r.token+'<br><small>'+r.sub+'</small></div>';
+    atkEl.className='sim-attack show';
+    cap.innerHTML='<b>Done.</b> '+(r.kind==='pop'?'A sender-constrained <code>mtls_pop</code> token was minted.':'A plain <code>Bearer</code> token was minted.')+' Now try to steal &amp; replay it \u2193';
+  }
+  function play(){ if(busy) return; render();
+    host.querySelector('#simPlay').disabled=true; host.querySelector('#simStep').disabled=true;
+    const d=SIM[mode]; let i=0;
+    (function nx(){ runStep(i, function(){ i++; if(i<d.steps.length) setTimeout(nx,200);
+      else { host.querySelector('#simPlay').disabled=false; host.querySelector('#simStep').disabled=false; } }); })();
+  }
+  function step(){ if(busy) return; const d=SIM[mode]; if(idx+1>=d.steps.length){ render(); return; } runStep(idx+1); }
+  function steal(){ const r=SIM[mode].result; atkBox.style.display='block';
+    atkBox.textContent='Attacker VM (no managed identity) replays the stolen token \u2192';
+    setTimeout(function(){ atkBox.textContent += (r.kind==='bearer')
+      ? '\n200 OK \u2014 secret returned to the ATTACKER \uD83D\uDE31   (bearer = stealable)'
+      : '\n401 Unauthorized \u2014 no bound key, replay blocked \u2705   (S2S17001)'; }, 800);
+  }
+
+  host.querySelectorAll('.sim-tabs button').forEach(function(b){ b.onclick=function(){ if(busy) return;
+    host.querySelectorAll('.sim-tabs button').forEach(function(x){ x.classList.remove('on'); }); b.classList.add('on'); mode=b.dataset.mode; render(); }; });
+  host.querySelector('#simPlay').onclick=play;
+  host.querySelector('#simStep').onclick=step;
+  host.querySelector('#simReset').onclick=render;
+  host.querySelector('#simSteal').onclick=steal;
+  render();
+})();
+
+// ---------- syntax highlight ----------
+if (window.hljs) hljs.highlightAll();
+</script>
+</body>
+</html>
