@@ -17,7 +17,15 @@ namespace Microsoft.Identity.Client.Region
         public const string PublicEnvForRegional = "login.microsoft.com";
         public const string PublicEnvForRegionalMtlsAuth = "mtlsauth.microsoft.com";
 
-        // Map of unsupported sovereign cloud hosts for mTLS PoP to their error messages
+        // ─────────────────────────────────────────────────────────────────────────────
+        // SOVEREIGN GUARDRAIL — single override point for mTLS cloud availability.
+        // mTLS PoP is currently rejected for sovereign clouds (US Gov, China) and any
+        // non-"login." host. mtlsauth.* is rolling out across clouds (Azure Government /
+        // AGC: available; Bleu / Delos: TBD). To enable a cloud, remove its entry here
+        // (and, if needed, relax the non-"login." host check below) — this is the ONLY
+        // place cloud eligibility is enforced, so do not scatter equivalent checks
+        // elsewhere in the codebase.
+        // ─────────────────────────────────────────────────────────────────────────────
         private static readonly Dictionary<string, string> s_unsupportedMtlsHosts =
             new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
@@ -32,7 +40,8 @@ namespace Microsoft.Identity.Client.Region
 
         public async Task<InstanceDiscoveryMetadataEntry> GetMetadataAsync(Uri authority, RequestContext requestContext)
         {
-            // Fail fast: Check for unsupported mTLS hosts before any region discovery
+            // SOVEREIGN GUARDRAIL (see s_unsupportedMtlsHosts above): fail fast for clouds
+            // where mTLS PoP is not yet available, before any region discovery.
             if (requestContext.IsMtlsRequested)
             {
                 string host = authority.Host;
