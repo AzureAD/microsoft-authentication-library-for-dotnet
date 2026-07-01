@@ -115,11 +115,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
                 AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
 
+                // Compute the total duration once so the value stored on the exception metadata matches
+                // the value logged to OpenTelemetry (the stopwatch keeps running, so re-reading it drifts).
+                long totalDurationInMs = requestStopwatch.ElapsedMilliseconds + measureTelemetryDurationResult.Milliseconds;
+
                 if (ex.AuthenticationResultMetadata == null)
                 {
-                    ex.AuthenticationResultMetadata = CreateFailureMetadata(
-                        apiEvent,
-                        requestStopwatch.ElapsedMilliseconds + measureTelemetryDurationResult.Milliseconds);
+                    ex.AuthenticationResultMetadata = CreateFailureMetadata(apiEvent, totalDurationInMs);
                 }
 
                 MsalServiceException serviceException = ex as MsalServiceException;
@@ -130,7 +132,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     apiEvent,
                     apiEvent.CacheInfo,
                     httpStatusCode,
-                    requestStopwatch.ElapsedMilliseconds + measureTelemetryDurationResult.Milliseconds,
+                    totalDurationInMs,
                     exception: ex,
                     rawStsErrorCode: serviceException?.ErrorCodes?.FirstOrDefault());
                 throw;
