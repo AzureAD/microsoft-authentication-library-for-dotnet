@@ -14,6 +14,7 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance.Discovery;
+using Microsoft.Identity.Client.Region;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
@@ -114,7 +115,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
                 AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
 
-                int httpStatusCode = ex is MsalServiceException serviceEx ? serviceEx.StatusCode : 0;
+                if (ex.AuthenticationResultMetadata == null)
+                {
+                    ex.AuthenticationResultMetadata = CreateFailureMetadata(
+                        apiEvent,
+                        requestStopwatch.ElapsedMilliseconds + measureTelemetryDurationResult.Milliseconds);
+                }
+
+                MsalServiceException serviceException = ex as MsalServiceException;
+                int httpStatusCode = serviceException?.StatusCode ?? 0;
 
                 LogFailureTelemetryToOtel(
                     ex.ErrorCode,
@@ -123,7 +132,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     httpStatusCode,
                     requestStopwatch.ElapsedMilliseconds + measureTelemetryDurationResult.Milliseconds,
                     exception: ex,
-                    rawStsErrorCode: (ex as MsalServiceException)?.ErrorCodes?.FirstOrDefault());
+                    rawStsErrorCode: serviceException?.ErrorCodes?.FirstOrDefault());
                 throw;
             }
             catch (Exception ex)
@@ -275,6 +284,26 @@ namespace Microsoft.Identity.Client.Internal.Requests
             authenticationResult.AuthenticationResultMetadata.CachedAccessTokenCount = apiEvent.CachedAccessTokenCount;
 
             Metrics.IncrementTotalDurationInMs(authenticationResult.AuthenticationResultMetadata.DurationTotalInMs);
+        }
+
+        /// <summary>
+        /// Builds the subset of <see cref="AuthenticationResultMetadata"/> that is available when a
+        /// token request fails. Only values that were actually captured are populated; everything else
+        /// is left at its default (0 / null). <see cref="AuthenticationResultMetadata.TokenSource"/> has
+        /// no meaningful value on failure, so it stays at the constructor default and should not be relied on.
+        /// </summary>
+        private static AuthenticationResultMetadata CreateFailureMetadata(ApiEvent apiEvent, long totalDurationInMs)
+        {
+            return new AuthenticationResultMetadata(TokenSource.IdentityProvider)
+            {
+                DurationTotalInMs = totalDurationInMs,
+                DurationInHttpInMs = apiEvent.DurationInHttpInMs,
+                DurationInCacheInMs = apiEvent.DurationInCacheInMs,
+                CachedAccessTokenCount = apiEvent.CachedAccessTokenCount,
+                CacheRefreshReason = apiEvent.CacheInfo,
+                TokenEndpoint = apiEvent.TokenEndpoint,
+                RegionDetails = apiEvent.RegionOutcome == RegionOutcome.None ? null : CreateRegionDetails(apiEvent),
+            };
         }
 
         protected virtual void EnrichTelemetryApiEvent(ApiEvent apiEvent)

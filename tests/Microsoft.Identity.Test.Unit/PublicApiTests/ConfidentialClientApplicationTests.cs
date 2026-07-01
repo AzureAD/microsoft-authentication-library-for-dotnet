@@ -467,6 +467,38 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
+        public async Task ClientCreds_FailedRequest_CarriesFailureMetadata_Async()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                              .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                              .WithClientSecret(TestConstants.ClientSecret)
+                                                              .WithHttpManager(httpManager)
+                                                              .BuildConcrete();
+
+                httpManager.AddInstanceDiscoveryMockHandler();
+                httpManager.AddMockHandler(new MockHttpMessageHandler
+                {
+                    ExpectedMethod = HttpMethod.Post,
+                    ResponseMessage = MockHelpers.CreateInvalidClientResponseMessage()
+                });
+
+                // Act
+                var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(
+                    () => cca.AcquireTokenForClient(TestConstants.s_scope.ToArray()).ExecuteAsync())
+                    .ConfigureAwait(false);
+
+                // Assert - the failed attempt still surfaces metadata on the exception. Only data that was
+                // actually captured is populated: the token endpoint was resolved, but no region was
+                // configured so RegionDetails is left null.
+                Assert.IsNotNull(ex.AuthenticationResultMetadata);
+                Assert.IsNotNull(ex.AuthenticationResultMetadata.TokenEndpoint);
+                Assert.IsNull(ex.AuthenticationResultMetadata.RegionDetails);
+            }
+        }
+
+        [TestMethod]
         public async Task ClientCreds_And_ADFS_LogRequestUri_OnServerError_Async()
         {
             using (var httpManager = new MockHttpManager())
