@@ -195,7 +195,7 @@
         <p>The caller is an <strong>app registration</strong> authenticating with a <strong>certificate</strong>
         (Subject Name + Issuer). The token is bound to that certificate — <strong>no VM or KeyGuard required</strong>.</p>
         <p>Optionally, you can <strong>import the certificate and store its private key in KeyGuard</strong> (VBS-isolated, non-exportable) for hardware-backed protection of the binding key.</p>
-        <p><a href="https://identitydivision.visualstudio.com/IdentityWiki/_wiki/wikis/IdentityWiki.wiki/59891/Subject-Name-and-Issuer-Authentication" target="_blank">SN+I Authentication wiki →</a></p>
+        <p><a href="https://identitydivision.visualstudio.com/IdentityWiki/_wiki/wikis/IdentityWiki.wiki/59891/Subject-Name-and-Issuer-Authentication" target="_blank" rel="noopener noreferrer">SN+I Authentication wiki →</a></p>
       </div>
       <div class="card">
         <h4>⚙️ Managed Identity <span class="badge b-amber">Public preview</span></h4>
@@ -307,7 +307,7 @@ AuthenticationResult result = await mi
     };
 
 var cca = ConfidentialClientApplicationBuilder.Create("&lt;app-client-id&gt;")
-    .WithAuthority(new Uri("https://login.microsoftonline.com/&lt;tenant-id&gt;"), validateAuthority: false)
+    .WithAuthority(new Uri("https://login.microsoftonline.com/&lt;tenant-id&gt;"))
     .WithAzureRegion("westus3")
     .WithClientAssertion(assertionDelegate)
     .Build();
@@ -421,7 +421,7 @@ var credential = new ManagedIdentityCredential(
     {
         // Token binding (mTLS PoP) is ON by default. To opt out:
         // DisableMtlsProofOfPossession = true,
-        Diagnostics = { IsLoggingContentEnabled = true }
+        Diagnostics = { IsLoggingContentEnabled = false }
     });
 
 var secretClient = new SecretClient(new Uri(keyVaultUrl), credential);
@@ -438,6 +438,12 @@ KeyVaultSecret secret = await secretClient.GetSecretAsync("&lt;secret-name&gt;")
     ClientCertificateOptions = ClientCertificateOption.Manual,
     SslProtocols = SslProtocols.Tls12,
 };
+
+if (result.BindingCertificate is null)
+{
+    throw new InvalidOperationException("mTLS PoP binding certificate was not returned. Ensure the token was acquired with WithMtlsProofOfPossession() on a supported host.");
+}
+
 handler.ClientCertificates.Add(result.BindingCertificate);
 
 using var http = new HttpClient(handler);
