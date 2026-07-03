@@ -102,7 +102,7 @@ namespace Microsoft.Identity.Client.Region
 
             var discoveredRegion = await DiscoverAndCacheAsync(logger, requestContext.UserCancellationToken, retryPolicy).ConfigureAwait(false);
 
-            RecordTelemetry(requestContext.ApiEvent, azureRegionConfig, discoveredRegion);
+            RecordTelemetry(requestContext.ApiEvent, discoveredRegion);
 
             if (discoveredRegion.RegionSource != RegionAutodetectionSource.FailedAutoDiscovery)
             {
@@ -131,7 +131,7 @@ namespace Microsoft.Identity.Client.Region
             return string.Equals(azureRegionConfig, ConfidentialClientApplication.AttemptRegionDiscovery);
         }
 
-        private static void RecordTelemetry(ApiEvent apiEvent, string azureRegionConfig, RegionInfo discoveredRegion)
+        private static void RecordTelemetry(ApiEvent apiEvent, RegionInfo discoveredRegion)
         {
             // already emitted telemetry for this request, don't emit again as it will overwrite with "from cache"
             if (IsTelemetryRecorded(apiEvent))
@@ -139,33 +139,11 @@ namespace Microsoft.Identity.Client.Region
                 return;
             }
 
-            bool isAutoDiscoveryRequested = IsAutoDiscoveryRequested(azureRegionConfig);
             apiEvent.RegionAutodetectionSource = discoveredRegion.RegionSource;
-
-            if (isAutoDiscoveryRequested)
-            {
-                apiEvent.RegionUsed = discoveredRegion.Region;
-                apiEvent.RegionOutcome = discoveredRegion.RegionSource == RegionAutodetectionSource.FailedAutoDiscovery ?
-                    RegionOutcome.FallbackToGlobal :
-                    RegionOutcome.AutodetectSuccess;
-            }
-            else
-            {
-                apiEvent.RegionUsed = azureRegionConfig;
-                apiEvent.RegionDiscoveryFailureReason = discoveredRegion.RegionDetails;
-
-                if (discoveredRegion.RegionSource == RegionAutodetectionSource.FailedAutoDiscovery)
-                {
-                    apiEvent.RegionOutcome = RegionOutcome.UserProvidedAutodetectionFailed;
-                }
-
-                if (!string.IsNullOrEmpty(discoveredRegion.Region))
-                {
-                    apiEvent.RegionOutcome = string.Equals(discoveredRegion.Region, azureRegionConfig, StringComparison.OrdinalIgnoreCase) ?
-                        RegionOutcome.UserProvidedValid :
-                        RegionOutcome.UserProvidedInvalid;
-                }
-            }
+            apiEvent.RegionUsed = discoveredRegion.Region;
+            apiEvent.RegionOutcome = discoveredRegion.RegionSource == RegionAutodetectionSource.FailedAutoDiscovery ?
+                RegionOutcome.FallbackToGlobal :
+                RegionOutcome.AutodetectSuccess;
         }
 
         private static bool IsTelemetryRecorded(ApiEvent apiEvent)
