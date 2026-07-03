@@ -559,8 +559,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        [DataRow("{\"statusCode\":500,\"message\":\"Error message\",\"correlationId\":\"GUID\"}", new string[] { "Error message", "GUID" })]
-        [DataRow("{\"message\":\"Error message\",\"correlationId\":\"GUID\"}", new string[] { "Error message", "GUID" })]
+        [DataRow("{\"statusCode\":500,\"message\":\"Error message\",\"correlationId\":\"GUID\"}", new string[] { "Error message", "GUID", "issued by the 'AppService' managed identity source" })]
+        [DataRow("{\"message\":\"Error message\",\"correlationId\":\"GUID\"}", new string[] { "Error message", "GUID", "issued by the 'AppService' managed identity source" })]
         [DataRow("{\"error\":\"errorCode\",\"error_description\":\"Error message\"}", new string[] { "errorCode", "Error message" })]
         [DataRow("{\"error_description\":\"Error message\"}", new string[] { "Error message" })]
         [DataRow("{\"message\":\"Error message\"}", new string[] { "Error message" })]
@@ -603,6 +603,48 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 {
                     Assert.Contains(expectedErrorSubString, ex.Message, $"Expected to contain string {expectedErrorSubString}. Actual error message: {ex.Message}");
                 }
+            }
+        }
+
+        // The correlation-ID branch that attributes the host-issued correlation ID to a managed
+        // identity source is source-agnostic, so this guards it against regression for a
+        // non-AppService source (Imds) as well. It also asserts the full composed phrase rather
+        // than a bare source name, so the check cannot pass merely because the source name appears
+        // in the echoed error body.
+        [TestMethod]
+        [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint)]
+        [DataRow(ManagedIdentitySource.Imds, ImdsEndpoint)]
+        public async Task ManagedIdentityErrorMessageAttributesCorrelationIdToSourceAsync(ManagedIdentitySource managedIdentitySource, string endpoint)
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager(disableInternalRetries: true))
+            {
+                SetEnvironmentVariables(managedIdentitySource, endpoint);
+
+                var mi = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpManager(httpManager)
+                    .Build();
+
+                // camelCase "correlationId" maps to ManagedIdentityErrorResponse.CorrelationId, which
+                // triggers the correlation-ID branch that names the managed identity source.
+                const string errorResponse = "{\"statusCode\":500,\"message\":\"Error message\",\"correlationId\":\"some-correlation-id\"}";
+
+                httpManager.AddManagedIdentityMockHandler(endpoint, Resource, errorResponse,
+                    managedIdentitySource, statusCode: HttpStatusCode.InternalServerError);
+
+                MsalServiceException ex = await Assert.ThrowsAsync<MsalServiceException>(async () =>
+                    await mi.AcquireTokenForManagedIdentity(Resource)
+                    .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
+
+                Assert.IsNotNull(ex);
+                Assert.AreEqual(managedIdentitySource.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
+                Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
+
+                // Assert the exact composed phrase (position-independent-proof): only MSAL's message
+                // builder produces this text, so it cannot be satisfied by the echoed error body.
+                string expectedSourcePhrase = $"issued by the '{managedIdentitySource}' managed identity source";
+                Assert.Contains(expectedSourcePhrase, ex.Message,
+                    $"Expected the message to attribute the correlation ID to the '{managedIdentitySource}' source. Actual error message: {ex.Message}");
             }
         }
 
