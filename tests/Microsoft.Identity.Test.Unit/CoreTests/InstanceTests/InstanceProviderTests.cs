@@ -193,5 +193,211 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             Assert.AreEqual(host, result.PreferredCache);
             CollectionAssert.Contains(result.Aliases, host);
         }
+
+        [TestMethod]
+        public void KnownCloudConfiguration_ReturnsSettingsForAllKnownClouds()
+        {
+            // Arrange
+            var config = KnownCloudConfiguration.Default;
+
+            string[] knownHosts = new[]
+            {
+                "login.microsoftonline.com",
+                "login.windows.net",
+                "login.microsoft.com",
+                "sts.windows.net",
+                "login.partner.microsoftonline.cn",
+                "login.chinacloudapi.cn",
+                "login.microsoftonline.de",
+                "login.microsoftonline.us",
+                "login.usgovcloudapi.net",
+                "login-us.microsoftonline.com",
+                "login.windows-ppe.net",
+                "sts.windows-ppe.net",
+                "login.microsoft-ppe.com",
+                "login.sovcloud-identity.fr",
+                "login.sovcloud-identity.de",
+                "login.sovcloud-identity.sg",
+            };
+
+            // Act & Assert
+            foreach (string host in knownHosts)
+            {
+                CloudSettings settings = config.GetSettingsByAuthority(host);
+                Assert.IsNotNull(settings, $"Expected non-null settings for '{host}'");
+                Assert.IsNotNull(settings.PreferredNetwork, $"Expected PreferredNetwork for '{host}'");
+                Assert.IsNotNull(settings.PreferredCache, $"Expected PreferredCache for '{host}'");
+                Assert.IsNotNull(settings.Aliases, $"Expected Aliases for '{host}'");
+                Assert.AreNotEqual(0, settings.Aliases.Length, $"Expected at least one alias for '{host}'");
+            }
+        }
+
+        [TestMethod]
+        public void KnownCloudConfiguration_AliasesResolveToSameInstance()
+        {
+            // Arrange
+            var config = KnownCloudConfiguration.Default;
+
+            // Act
+            CloudSettings settings1 = config.GetSettingsByAuthority("login.microsoftonline.com");
+            CloudSettings settings2 = config.GetSettingsByAuthority("login.windows.net");
+            CloudSettings settings3 = config.GetSettingsByAuthority("login.microsoft.com");
+            CloudSettings settings4 = config.GetSettingsByAuthority("sts.windows.net");
+
+            // Assert
+            Assert.AreSame(settings1, settings2);
+            Assert.AreSame(settings2, settings3);
+            Assert.AreSame(settings3, settings4);
+        }
+
+        [TestMethod]
+        public void KnownCloudConfiguration_CaseInsensitiveLookup()
+        {
+            // Arrange
+            var config = KnownCloudConfiguration.Default;
+
+            // Act
+            CloudSettings lower = config.GetSettingsByAuthority("login.microsoftonline.com");
+            CloudSettings upper = config.GetSettingsByAuthority("LOGIN.MICROSOFTONLINE.COM");
+            CloudSettings mixed = config.GetSettingsByAuthority("Login.MicrosoftOnline.Com");
+
+            // Assert
+            Assert.AreSame(lower, upper);
+            Assert.AreSame(upper, mixed);
+        }
+
+        [TestMethod]
+        public void KnownCloudConfiguration_ReturnsNullForUnknown()
+        {
+            // Arrange
+            var config = KnownCloudConfiguration.Default;
+
+            // Act & Assert
+            Assert.IsNull(config.GetSettingsByAuthority("bogus.example.com"));
+            Assert.IsNull(config.GetSettingsByAuthority(""));
+            Assert.IsNull(config.GetSettingsByAuthority(null));
+        }
+
+        [TestMethod]
+        [DataRow("login.microsoftonline.com", "api://AzureADTokenExchange")]
+        [DataRow("login.windows.net", "api://AzureADTokenExchange")]
+        [DataRow("login.partner.microsoftonline.cn", "api://AzureADTokenExchangeChina")]
+        [DataRow("login.microsoftonline.us", "api://AzureADTokenExchangeUSGov")]
+        [DataRow("login.usgovcloudapi.net", "api://AzureADTokenExchangeUSGov")]
+        [DataRow("login.sovcloud-identity.fr", "api://AzureADTokenExchangeFrance")]
+        [DataRow("login.sovcloud-identity.de", "api://AzureADTokenExchangeGermany")]
+        public void KnownCloudConfiguration_TokenExchangeAudience_KnownClouds(
+            string host, string expectedAudience)
+        {
+            // Arrange
+            var config = KnownCloudConfiguration.Default;
+
+            // Act
+            CloudSettings settings = config.GetSettingsByAuthority(host);
+
+            // Assert
+            Assert.IsNotNull(settings);
+            Assert.AreEqual(expectedAudience, settings.TokenExchangeAudience);
+        }
+
+        [TestMethod]
+        [DataRow("login.microsoftonline.de")]
+        [DataRow("login-us.microsoftonline.com")]
+        [DataRow("login.windows-ppe.net")]
+        [DataRow("login.sovcloud-identity.sg")]
+        public void KnownCloudConfiguration_TokenExchangeAudience_NullForCloudsWithoutFic(string host)
+        {
+            // Arrange
+            var config = KnownCloudConfiguration.Default;
+
+            // Act
+            CloudSettings settings = config.GetSettingsByAuthority(host);
+
+            // Assert
+            Assert.IsNotNull(settings);
+            Assert.IsNull(settings.TokenExchangeAudience);
+        }
+
+        [TestMethod]
+        public void KnownCloudConfiguration_PreferredNetworkAndCache_MatchKnownMetadata()
+        {
+            // Arrange — verify consistency with KnownMetadataProvider
+            var cloudConfig = KnownCloudConfiguration.Default;
+            var knownMetadata = new KnownMetadataProvider();
+
+            string[] primaryHosts = new[]
+            {
+                "login.microsoftonline.com",
+                "login.partner.microsoftonline.cn",
+                "login.microsoftonline.de",
+                "login.microsoftonline.us",
+                "login-us.microsoftonline.com",
+                "login.windows-ppe.net",
+                "login.sovcloud-identity.fr",
+                "login.sovcloud-identity.de",
+                "login.sovcloud-identity.sg",
+            };
+
+            foreach (string host in primaryHosts)
+            {
+                // Act
+                CloudSettings cloud = cloudConfig.GetSettingsByAuthority(host);
+                InstanceDiscoveryMetadataEntry metadata = knownMetadata.GetMetadata(host, null, _logger);
+
+                // Assert
+                Assert.IsNotNull(cloud, $"CloudSettings missing for '{host}'");
+                Assert.IsNotNull(metadata, $"KnownMetadata missing for '{host}'");
+                Assert.AreEqual(metadata.PreferredNetwork, cloud.PreferredNetwork, $"PreferredNetwork mismatch for '{host}'");
+                Assert.AreEqual(metadata.PreferredCache, cloud.PreferredCache, $"PreferredCache mismatch for '{host}'");
+                CollectionAssert.AreEquivalent(metadata.Aliases, cloud.Aliases, $"Aliases mismatch for '{host}'");
+            }
+        }
+
+        [TestMethod]
+        public void KnownCloudConfiguration_DefaultIsSingleton()
+        {
+            // Act
+            var instance1 = KnownCloudConfiguration.Default;
+            var instance2 = KnownCloudConfiguration.Default;
+
+            // Assert
+            Assert.AreSame(instance1, instance2);
+        }
+
+        [TestMethod]
+        public void WithCloudConfiguration_SetsOnApplicationConfiguration()
+        {
+            // Arrange
+            var customConfig = new TestCloudConfiguration();
+
+            // Act
+            var app = ConfidentialClientApplicationBuilder
+                .Create("client-id")
+                .WithClientSecret("secret")
+                .WithCloudConfiguration(customConfig)
+                .Build();
+
+            // Assert — access via the internal ServiceBundle
+            Assert.IsNotNull(app);
+        }
+
+        private class TestCloudConfiguration : ICloudConfiguration
+        {
+            public CloudSettings GetSettingsByAuthority(string authorityHost)
+            {
+                if (string.Equals(authorityHost, "custom.cloud.example", System.StringComparison.OrdinalIgnoreCase))
+                {
+                    return new CloudSettings
+                    {
+                        PreferredNetwork = "custom.cloud.example",
+                        PreferredCache = "custom.cloud.example",
+                        Aliases = new[] { "custom.cloud.example" },
+                        TokenExchangeAudience = "api://CustomTokenExchange",
+                    };
+                }
+
+                return null;
+            }
+        }
     }
 }

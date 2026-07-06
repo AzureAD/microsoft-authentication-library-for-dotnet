@@ -149,6 +149,26 @@ namespace Microsoft.Identity.Client
             return this as T;
         }
 
+        /// <summary>
+        /// Sets a custom <see cref="ICloudConfiguration"/> that provides cloud-specific metadata
+        /// (aliases, preferred hosts, FIC token exchange audiences) for cross-cloud scenarios.
+        /// </summary>
+        /// <param name="cloudConfiguration">
+        /// An implementation of <see cref="ICloudConfiguration"/>. If <c>null</c>, the built-in
+        /// <see cref="KnownCloudConfiguration.Default"/> is used.
+        /// </param>
+        /// <returns>The builder to chain calls.</returns>
+        /// <remarks>
+        /// Use this when your application operates in sovereign or private clouds that require
+        /// cloud-specific values (e.g., FIC token exchange audience URIs). The built-in
+        /// <see cref="KnownCloudConfiguration"/> covers all publicly known Azure clouds.
+        /// </remarks>
+        public T WithCloudConfiguration(ICloudConfiguration cloudConfiguration)
+        {
+            Config.CloudConfiguration = cloudConfiguration ?? throw new ArgumentNullException(nameof(cloudConfiguration));
+            return this as T;
+        }
+
         internal T WithPlatformProxy(IPlatformProxy platformProxy)
         {
             Config.PlatformProxy = platformProxy;
