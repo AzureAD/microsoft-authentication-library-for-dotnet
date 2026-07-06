@@ -228,7 +228,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 Assert.IsNotNull(settings.PreferredNetwork, $"Expected PreferredNetwork for '{host}'");
                 Assert.IsNotNull(settings.PreferredCache, $"Expected PreferredCache for '{host}'");
                 Assert.IsNotNull(settings.Aliases, $"Expected Aliases for '{host}'");
-                Assert.AreNotEqual(0, settings.Aliases.Length, $"Expected at least one alias for '{host}'");
+                Assert.AreNotEqual(0, settings.Aliases.Count, $"Expected at least one alias for '{host}'");
             }
         }
 
@@ -349,7 +349,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 Assert.IsNotNull(metadata, $"KnownMetadata missing for '{host}'");
                 Assert.AreEqual(metadata.PreferredNetwork, cloud.PreferredNetwork, $"PreferredNetwork mismatch for '{host}'");
                 Assert.AreEqual(metadata.PreferredCache, cloud.PreferredCache, $"PreferredCache mismatch for '{host}'");
-                CollectionAssert.AreEquivalent(metadata.Aliases, cloud.Aliases, $"Aliases mismatch for '{host}'");
+                CollectionAssert.AreEquivalent(metadata.Aliases, (System.Collections.ICollection)cloud.Aliases, $"Aliases mismatch for '{host}'");
             }
         }
 
@@ -377,8 +377,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 .WithCloudConfiguration(customConfig)
                 .Build();
 
-            // Assert — access via the internal ServiceBundle
-            Assert.IsNotNull(app);
+            // Assert
+            var cca = (ConfidentialClientApplication)app;
+            Assert.AreSame(customConfig, cca.ServiceBundle.Config.CloudConfiguration);
         }
 
         private class TestCloudConfiguration : ICloudConfiguration

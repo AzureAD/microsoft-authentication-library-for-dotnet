@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Collections.Generic;
+
 namespace Microsoft.Identity.Client.Instance.Discovery
 {
     /// <summary>
@@ -18,19 +20,19 @@ namespace Microsoft.Identity.Client.Instance.Discovery
         /// The preferred host to use for network requests to this cloud
         /// (e.g., "login.microsoftonline.com").
         /// </summary>
-        public string PreferredNetwork { get; set; }
+        public string PreferredNetwork { get; init; }
 
         /// <summary>
         /// The preferred host to use as the cache key for this cloud
         /// (e.g., "login.windows.net").
         /// </summary>
-        public string PreferredCache { get; set; }
+        public string PreferredCache { get; init; }
 
         /// <summary>
         /// All known host aliases for this cloud. Tokens issued by any alias
         /// are equivalent and share a cache entry.
         /// </summary>
-        public string[] Aliases { get; set; }
+        public IReadOnlyList<string> Aliases { get; init; }
 
         /// <summary>
         /// The cloud-specific FIC (Federated Identity Credential) token exchange
@@ -43,6 +45,6 @@ namespace Microsoft.Identity.Client.Instance.Discovery
         /// Callers should append <c>/.default</c> when using this value as a scope
         /// in the client credentials flow, and omit it for the managed identity flow.
         /// </remarks>
-        public string TokenExchangeAudience { get; set; }
+        public string TokenExchangeAudience { get; init; }
     }
 }

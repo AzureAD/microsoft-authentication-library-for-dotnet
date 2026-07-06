@@ -154,8 +154,9 @@ namespace Microsoft.Identity.Client
         /// (aliases, preferred hosts, FIC token exchange audiences) for cross-cloud scenarios.
         /// </summary>
         /// <param name="cloudConfiguration">
-        /// An implementation of <see cref="ICloudConfiguration"/>. If <c>null</c>, the built-in
-        /// <see cref="KnownCloudConfiguration.Default"/> is used.
+        /// An implementation of <see cref="ICloudConfiguration"/>. Must not be <c>null</c>.
+        /// If not called, no cloud configuration is set on the application;
+        /// callers can use <see cref="KnownCloudConfiguration.Default"/> directly for lookups.
         /// </param>
         /// <returns>The builder to chain calls.</returns>
         /// <remarks>

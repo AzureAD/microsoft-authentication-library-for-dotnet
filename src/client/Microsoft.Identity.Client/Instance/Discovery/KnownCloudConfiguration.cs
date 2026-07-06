@@ -15,6 +15,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
     /// This class reuses the authority host alias data from MSAL's internal
     /// <c>KnownMetadataProvider</c> and adds <see cref="CloudSettings.TokenExchangeAudience"/>
     /// for clouds that have a known FIC token exchange application.
+    /// When updating cloud entries here, keep <c>KnownMetadataProvider</c> in sync.
     /// </para>
     /// <para>
     /// Higher-level SDKs (e.g., MISE) can implement <see cref="ICloudConfiguration"/>
