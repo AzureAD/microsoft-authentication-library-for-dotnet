@@ -460,9 +460,16 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             string assertionJwt = first.AccessToken;
             Assert.IsFalse(string.IsNullOrEmpty(assertionJwt), "First leg did not return an access token to reuse as assertion.");
 
+            // Leg 1 is cert-bound PoP: assert the token type and that the binding cert is the SNI cert.
+            Assert.AreEqual(Constants.MtlsPoPTokenType, first.TokenType, "Leg 1 token type should be MTLS PoP.");
+            Assert.IsNotNull(first.BindingCertificate, "Leg 1 BindingCertificate should be set for cert-bound PoP.");
+            Assert.AreEqual(cert.Thumbprint, first.BindingCertificate.Thumbprint,
+                "Leg 1 BindingCertificate must match the SNI certificate.");
+
             // Step 2: build the assertion-based app — NO region configured (global endpoint)
             bool assertionProviderCalled = false;
             string requestUriSeen = null;
+            string clientAssertionType = null;
 
             IConfidentialClientApplication assertionApp = ConfidentialClientApplicationBuilder.Create(MsiAllowListedAppIdforSNI)
                 .WithExperimentalFeatures()
@@ -474,28 +481,40 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     return Task.FromResult(new ClientSignedAssertion
                     {
                         Assertion = assertionJwt,
-                        TokenBindingCertificate = cert
+                        TokenBindingCertificate = first.BindingCertificate // carry the SAME Leg-1 cert forward
                     });
                 })
                 .WithTestLogging()
                 .Build();
 
-            // Step 3: second leg should succeed using global mTLS endpoint
-            AuthenticationResult second = await assertionApp
+            // Step 3: second leg should succeed using the global mTLS endpoint, returning an mtls_pop
+            // token bound to the SAME certificate as Leg 1 (binding-cert continuity end-to-end).
+            AuthenticationResult second = await ExecuteOrInconclusiveOnTokenTypeMismatchAsync(() => assertionApp
                 .AcquireTokenForClient(new[] { "https://vault.azure.net/.default" })
                 .WithMtlsProofOfPossession()
                 .OnBeforeTokenRequest(data =>
                 {
                     requestUriSeen = data.RequestUri?.ToString();
+                    data.BodyParameters?.TryGetValue("client_assertion_type", out clientAssertionType);
                     return Task.CompletedTask;
                 })
-                .ExecuteAsync()
-                .ConfigureAwait(false);
+                .ExecuteAsync()).ConfigureAwait(false);
 
             // Success assertions
             Assert.IsNotNull(second, "Second leg returned null AuthenticationResult.");
             Assert.IsFalse(string.IsNullOrEmpty(second.AccessToken), "Second leg did not return an access token.");
             Assert.IsTrue(assertionProviderCalled, "Client assertion provider should have been invoked.");
+
+            // Leg 2 is also mtls_pop, presents the jwt-pop client_assertion_type, and is bound to the
+            // SAME certificate as Leg 1 (binding-cert continuity).
+            Assert.AreEqual(Constants.MtlsPoPTokenType, second.TokenType, "Leg 2 token type should be MTLS PoP.");
+            Assert.AreEqual(
+                "urn:ietf:params:oauth:client-assertion-type:jwt-pop",
+                clientAssertionType,
+                "Leg 2 must present the federated assertion with the jwt-pop client_assertion_type.");
+            Assert.IsNotNull(second.BindingCertificate, "Leg 2 BindingCertificate should be set for mtls_pop.");
+            Assert.AreEqual(first.BindingCertificate.Thumbprint, second.BindingCertificate.Thumbprint,
+                "The final token must be bound to the SAME certificate as Leg 1 (binding-cert continuity).");
 
             // Verify global mTLS endpoint was used
             Assert.IsFalse(string.IsNullOrEmpty(requestUriSeen), "Expected token request URI to be captured.");
@@ -505,27 +524,16 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [RunOn(SkipConditions.Linux)] // POP is not supported on Linux
-        public async Task Sni_TwoLeg_S2sFic_BothLegs_Pop_EndToEnd_TestAsync()
-        {
-            // End-to-end two-leg S2S (app) FIC over mTLS PoP using the GLOBAL mtlsauth endpoint
-            // (which reliably honors token_type=mtls_pop), asserting BOTH legs are PoP AND that the
-            // binding certificate is continuous from Leg 1 through the final Leg-2 result:
-            //   Leg 1: SNI cert -> api://AzureADTokenExchange -> mtls_pop federated assertion + BindingCertificate
-            //   Leg 2: carry leg1.BindingCertificate into WithClientAssertion(TokenBindingCertificate=...)
-            //          -> resource token that is ALSO mtls_pop and bound to the SAME Leg-1 thumbprint.
-            await RunTwoLegS2sFicBothLegsPopAsync(MsiAllowListedAppIdforSNI, TokenExchangeUrl).ConfigureAwait(false);
-        }
-
-        [RunOn(SkipConditions.Linux)] // POP is not supported on Linux
         public async Task Sni_TwoLeg_S2sFic_FmiAudience_BothLegs_Pop_EndToEnd_TestAsync()
         {
-            // Same two-leg flow, but Leg 1 uses the FMI exchange audience (api://AzureFMITokenExchange)
-            // and the reserved FMI client id (urn:microsoft:identity:fmi). Proves the exchange audience is
-            // caller-supplied (SME item 5). If FMI + mTLS PoP is not enabled for this app in the lab, ESTS
-            // rejects the exchange and the test is marked inconclusive rather than failing.
+            // Same two-leg flow, but using the FMI exchange audience (api://AzureFMITokenExchange) and the
+            // reserved FMI client id (urn:microsoft:identity:fmi) for BOTH legs. Proves the exchange audience
+            // is caller-supplied (SME item 5). Using the same client id for both legs means an ESTS rejection
+            // is unambiguously an FMI + mTLS PoP enablement issue (marked inconclusive), not a client-id
+            // mismatch between legs.
             try
             {
-                await RunTwoLegS2sFicBothLegsPopAsync(FmiClientId, FmiTokenExchangeUrl).ConfigureAwait(false);
+                await RunTwoLegS2sFicBothLegsPopAsync(FmiClientId, FmiClientId, FmiTokenExchangeUrl).ConfigureAwait(false);
             }
             catch (MsalServiceException ex)
             {
@@ -536,10 +544,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             }
         }
 
-        // Shared driver for the two-leg S2S FIC over mTLS PoP end-to-end flow. Both legs use the global
-        // mtlsauth endpoint (no region) so they reliably return token_type=mtls_pop, and each leg is wrapped
-        // in ExecuteOrInconclusiveOnTokenTypeMismatchAsync to tolerate a server-side downgrade.
-        private static async Task RunTwoLegS2sFicBothLegsPopAsync(string leg1ClientId, string leg1ExchangeScope)
+        // Drives the two-leg S2S FIC over mTLS PoP end-to-end flow for the FMI-audience variant. Both legs
+        // use the global mtlsauth endpoint (no region) so they reliably return token_type=mtls_pop, and each
+        // leg is wrapped in ExecuteOrInconclusiveOnTokenTypeMismatchAsync to tolerate a server-side downgrade.
+        // Leg 1 and Leg 2 client ids are supplied explicitly so callers keep them consistent — a mismatch
+        // would make an ESTS rejection ambiguous (enablement vs. client-id) rather than a clean inconclusive.
+        private static async Task RunTwoLegS2sFicBothLegsPopAsync(string leg1ClientId, string leg2ClientId, string leg1ExchangeScope)
         {
             _ = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
 
@@ -568,7 +578,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             string leg2ClientAssertionType = null;
             string leg2RequestUri = null;
 
-            IConfidentialClientApplication leg2App = ConfidentialClientApplicationBuilder.Create(MsiAllowListedAppIdforSNI)
+            IConfidentialClientApplication leg2App = ConfidentialClientApplicationBuilder.Create(leg2ClientId)
                 .WithAuthority("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c")
                 .WithClientAssertion((AssertionRequestOptions options, CancellationToken ct) =>
                     Task.FromResult(new ClientSignedAssertion
