@@ -170,7 +170,9 @@ namespace Microsoft.Identity.Client.Internal
                     LogBackgroundFailureTelemetry(serviceBundle, apiEvent, callerSdkId, callerSdkVersion,
                         ex.GetType().Name, httpStatusCode: 0, tagsEnricher: tagsEnricher, logger: logger);
 
-                    await InvokeBackgroundRefreshCallbackAsync(serviceBundle, new ExecutionResult { Successful = false, Exception = null }, logger).ConfigureAwait(false);
+                    // Proactive refresh was canceled (e.g., the linked token source was disposed on shutdown).
+                    // This is benign - the foreground caller already holds a cached token - so the completion
+                    // callback is intentionally not invoked for cancellation.
                 }
                 catch (Exception ex)
                 {
@@ -178,8 +180,13 @@ namespace Microsoft.Identity.Client.Internal
                     LogBackgroundFailureTelemetry(serviceBundle, apiEvent, callerSdkId, callerSdkVersion,
                         ex.GetType().Name, httpStatusCode: 0, tagsEnricher: tagsEnricher, logger: logger);
 
-                    MsalException msalException = ex as MsalException;
-                    if (msalException != null && msalException.AuthenticationResultMetadata == null)
+                    // ExecutionResult.Exception is typed as MsalException and the callback contract guarantees
+                    // it is non-null on failure, so wrap any non-MSAL exception (keeping the original as the
+                    // InnerException) rather than handing the callback a null.
+                    MsalException msalException = ex as MsalException ??
+                        new MsalClientException(MsalError.UnknownError, ex.Message, ex);
+
+                    if (msalException.AuthenticationResultMetadata == null)
                     {
                         msalException.AuthenticationResultMetadata = RequestBase.CreateFailureMetadata(apiEvent, totalDurationInMs: 0);
                     }

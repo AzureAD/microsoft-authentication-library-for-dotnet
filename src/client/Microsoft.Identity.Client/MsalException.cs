@@ -150,10 +150,12 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Diagnostic metadata for the failed token-acquisition attempt — the total duration and, when the
-        /// relevant stage ran, HTTP/cache durations, token endpoint, and region used — or <see langword="null"/>
-        /// when MSAL threw before any metadata was collected. Only values actually captured are populated;
-        /// in particular the total duration is always available (useful for latency measurement) while other
-        /// fields may be 0/null when the corresponding stage did not run. On a failure
+        /// relevant stage ran, HTTP/cache durations, token endpoint, and region used. This is
+        /// <see langword="null"/> when the exception was thrown before the request pipeline started collecting
+        /// metadata (for example, parameter or builder validation). When it is non-null — the typical
+        /// in-request failure — <see cref="AuthenticationResultMetadata.DurationTotalInMs"/> is always
+        /// populated (useful for latency measurement), while the other fields may be 0/null when the
+        /// corresponding stage did not run. On a failure
         /// <see cref="AuthenticationResultMetadata.TokenSource"/> has no meaningful value and should not be
         /// relied on. Reuses the type returned by <see cref="AuthenticationResult.AuthenticationResultMetadata"/>
         /// on the success path.

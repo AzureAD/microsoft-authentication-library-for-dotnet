@@ -599,6 +599,54 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(CacheRefreshReason.ProactivelyRefreshed, capturedResult.Exception.AuthenticationResultMetadata.CacheRefreshReason);
             }
         }
+
+        [TestMethod]
+        [Description("Proactive refresh cancellation is benign and must not invoke the completion callback.")]
+        public async Task ClientCredentials_ProactiveRefresh_Canceled_DoesNotInvokeCallback_Async()
+        {
+            bool wasCancellationLogged = false;
+            ExecutionResult capturedResult = null;
+
+            using MockHttpAndServiceBundle harness = CreateTestHarness();
+            harness.HttpManager.AddInstanceDiscoveryMockHandler();
+
+            ConfidentialClientApplication app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                .WithAuthority(AzureCloudInstance.AzurePublic, TestConstants.Utid)
+                .WithClientSecret(TestConstants.ClientSecret)
+                .WithHttpManager(harness.HttpManager)
+                .WithExperimentalFeatures()
+                .WithLogging(LocalLogCallback)
+                .OnBackgroundTokenRefreshCompleted(r => { capturedResult = r; return Task.CompletedTask; })
+                .BuildConcrete();
+            TokenCacheHelper.PopulateCache(app.AppTokenCacheInternal.Accessor, addSecondAt: false);
+            TestCommon.UpdateATWithRefreshOn(app.AppTokenCacheInternal.Accessor);
+
+            var cts = new CancellationTokenSource();
+            var cancellationToken = cts.Token;
+            cts.Cancel();
+            cts.Dispose();
+
+            // Act - foreground returns the cached token and kicks off a background refresh that is already canceled.
+            await app.AcquireTokenForClient(TestConstants.s_scope)
+                .ExecuteAsync(cancellationToken)
+                .ConfigureAwait(false);
+
+            // Assert - the background task observes the cancellation...
+            Assert.IsTrue(TestCommon.YieldTillSatisfied(() => wasCancellationLogged));
+            // ...but the completion callback is intentionally not invoked for a benign cancellation.
+            Assert.IsFalse(
+                TestCommon.YieldTillSatisfied(() => capturedResult != null, maxTimeInMilliSec: 2000),
+                "Completion callback must not be invoked when the proactive refresh is canceled.");
+
+            void LocalLogCallback(LogLevel level, string message, bool containsPii)
+            {
+                if (level == LogLevel.Warning &&
+                    message.Contains(SilentRequestHelper.ProactiveRefreshCancellationError))
+                {
+                    wasCancellationLogged = true;
+                }
+            }
+        }
         #endregion
     }
 }
