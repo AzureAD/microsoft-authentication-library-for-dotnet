@@ -34,7 +34,6 @@ namespace NetDesktopWinForms
             new ClientEntry() { Id = "682992e9-c9c6-49c9-a819-3fbca2dd5111", Name = "Lab 4 - Azure AD MyOrg"}, //https://docs.msidlab.com/accounts/cloudaccounts.html
             new ClientEntry() { Id = "9668f2bd-6103-4292-9024-84fa2d1b6fb2", Name = "Lab 4 - MSA APP"}, //https://docs.msidlab.com/accounts/msaprod.html
             new ClientEntry() { Id = "cb7faed4-b8c0-49ee-b421-f5ed16894c83", Name = "Lab - AzureUSGovernment MyOrg"}, //https://docs.msidlab.com/accounts/arlington-intro.html
-            new ClientEntry() { Id = "952de729-a67a-471e-9717-45f407cb4fd7", Name = "Lab - AzureChinaCloud MyOrg"}, //https://docs.msidlab.com/accounts/mooncake.html
             new ClientEntry() { Id = "682992e9-c9c6-49c9-a819-3fbca2dd5111", Name = "Cross Cloud App"} //https://docs.msidlab.com/accounts/xc.html
         };
 
