@@ -188,7 +188,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             string message = GetMessageFromErrorResponse(response);
 
-            _requestContext.Logger.Error($"[Managed Identity] request failed, HttpStatusCode: {response.StatusCode} Error message: {message}");
+            _requestContext.Logger.Error($"[Managed Identity] request failed, Source: {_sourceType}, HttpStatusCode: {response.StatusCode} Error message: {message}");
 
             MsalException exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
                 MsalError.ManagedIdentityRequestFailed,
@@ -281,7 +281,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             if (!string.IsNullOrEmpty(managedIdentityErrorResponse.CorrelationId))
             {
-                stringBuilder.Append($"Managed Identity Correlation ID: {managedIdentityErrorResponse.CorrelationId} Use this Correlation ID for further investigation.");
+                stringBuilder.Append(
+                    $"Managed Identity Correlation ID: {managedIdentityErrorResponse.CorrelationId} " +
+                    $"(issued by the '{_sourceType}' managed identity source; search that source's telemetry with this correlation ID). " +
+                    $"Use this Correlation ID for further investigation.");
             }
 
             if (stringBuilder.Length == ManagedIdentityPrefix.Length)

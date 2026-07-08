@@ -138,7 +138,7 @@ namespace Microsoft.Identity.Client.KeyAttestation
                     {
                         try
                         {
-                            using var client = new AttestationClient();
+                            using var client = new AttestationClient(logger);
                             return client.Attest(endpoint, safeNCryptKeyHandle, clientId ?? string.Empty);
                         }
                         catch (Exception ex)
@@ -183,7 +183,7 @@ namespace Microsoft.Identity.Client.KeyAttestation
                     {
                         try
                         {
-                            using var client = new AttestationClient();
+                            using var client = new AttestationClient(logger);
                             return client.Attest(endpoint, safeNCryptKeyHandle, clientId ?? string.Empty);
                         }
                         catch (Exception ex)
