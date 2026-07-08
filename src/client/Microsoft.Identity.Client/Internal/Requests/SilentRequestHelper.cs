@@ -142,14 +142,7 @@ namespace Microsoft.Identity.Client.Internal
                 catch (MsalServiceException ex)
                 {
                     string logMsg = $"{ProactiveRefreshServiceError} Is exception retryable? {ex.IsRetryable}";
-                    if (ex.StatusCode == 400)
-                    {
-                        logger.ErrorPiiWithPrefix(ex, logMsg);
-                    }
-                    else
-                    {
-                        logger.ErrorPiiWithPrefix(ex, logMsg);
-                    }
+                    logger.ErrorPiiWithPrefix(ex, logMsg);
 
                     LogBackgroundFailureTelemetry(serviceBundle, apiEvent, callerSdkId, callerSdkVersion,
                         ex.ErrorCode, ex.StatusCode, ex.ErrorCodes?.FirstOrDefault(), ex, tagsEnricher, logger);

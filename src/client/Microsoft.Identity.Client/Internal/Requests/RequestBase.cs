@@ -118,10 +118,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 // the value logged to OpenTelemetry (the stopwatch keeps running, so re-reading it drifts).
                 long totalDurationInMs = requestStopwatch.ElapsedMilliseconds + measureTelemetryDurationResult.Milliseconds;
 
-                if (ex.AuthenticationResultMetadata == null)
-                {
-                    ex.AuthenticationResultMetadata = CreateFailureMetadata(apiEvent, totalDurationInMs);
-                }
+                ex.AuthenticationResultMetadata = CreateFailureMetadata(apiEvent, totalDurationInMs);
 
                 MsalServiceException serviceException = ex as MsalServiceException;
                 int httpStatusCode = serviceException?.StatusCode ?? 0;
