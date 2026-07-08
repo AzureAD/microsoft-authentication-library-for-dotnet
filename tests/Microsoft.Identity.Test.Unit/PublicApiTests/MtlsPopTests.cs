@@ -540,7 +540,6 @@ namespace Microsoft.Identity.Test.Unit
 
             using (var httpManager = new MockHttpManager())
             {
-                httpManager.AddRegionDiscoveryMockHandler(region);
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(tokenType: "mtls_pop");
 
                 var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
@@ -557,7 +556,7 @@ namespace Microsoft.Identity.Test.Unit
 
                 Assert.AreEqual("header.payload.signature", result.AccessToken);
                 Assert.AreEqual(region, result.AuthenticationResultMetadata.RegionDetails.RegionUsed);
-                Assert.AreEqual(RegionOutcome.UserProvidedValid, result.ApiEvent.RegionOutcome);
+                Assert.AreEqual(RegionOutcome.UserProvided, result.ApiEvent.RegionOutcome);
                 Assert.AreEqual(expectedTokenEndpoint, result.AuthenticationResultMetadata.TokenEndpoint);
             }
         }
@@ -572,7 +571,6 @@ namespace Microsoft.Identity.Test.Unit
 
             using (var httpManager = new MockHttpManager())
             {
-                httpManager.AddRegionDiscoveryMockHandler(region);
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(tokenType: "mtls_pop");
 
                 IConfidentialClientApplication regionalApp1 = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)

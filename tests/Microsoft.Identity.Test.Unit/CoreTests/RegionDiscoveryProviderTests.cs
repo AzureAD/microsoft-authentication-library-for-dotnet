@@ -197,18 +197,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         }
 
         [TestMethod]
-        [DataRow(HttpStatusCode.NotFound, 0, TestConstants.RegionAutoDetectNotFoundFailureMessage)]  // No retries for 404 errors
-        [DataRow(HttpStatusCode.InternalServerError, TestRegionDiscoveryRetryPolicy.NumRetries, TestConstants.RegionAutoDetectInternalServerErrorFailureMessage)]
-        public async Task SuccessfulResponseFromUserProvidedRegionAsync(
-            HttpStatusCode statusCode,
-            int expectedRetries,
-            string expectedFailureMessage)
+        public async Task SuccessfulResponseFromUserProvidedRegionDoesNotCallImdsAsync()
         {
-            for (int i = 0; i < (1 + expectedRetries); i++)
-            {
-                AddMockedResponse(MockHelpers.CreateNullMessage(statusCode));
-            }
-
             _testRequestContext.ServiceBundle.Config.AzureRegion = TestConstants.Region;
             RegionManager.ResetStaticCacheForTest();
             IRegionDiscoveryProvider regionDiscoveryProvider = new RegionAndMtlsDiscoveryProvider(_httpManager);
@@ -219,48 +209,12 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             Assert.AreEqual($"centralus.{RegionAndMtlsDiscoveryProvider.PublicEnvForRegional}", regionalMetadata.PreferredNetwork);
 
             Assert.AreEqual(TestConstants.Region, _testRequestContext.ApiEvent.RegionUsed);
-            Assert.AreEqual(RegionAutodetectionSource.FailedAutoDiscovery, _testRequestContext.ApiEvent.RegionAutodetectionSource);
-            Assert.AreEqual(RegionOutcome.UserProvidedAutodetectionFailed, _testRequestContext.ApiEvent.RegionOutcome);
-            Assert.Contains(expectedFailureMessage, _testRequestContext.ApiEvent.RegionDiscoveryFailureReason);
+            Assert.AreEqual(RegionAutodetectionSource.None, _testRequestContext.ApiEvent.RegionAutodetectionSource);
+            Assert.AreEqual(RegionOutcome.UserProvided, _testRequestContext.ApiEvent.RegionOutcome);
+            Assert.IsNull(_testRequestContext.ApiEvent.RegionDiscoveryFailureReason);
 
-            // Verify all mock responses were consumed
+            // Verify no IMDS request was made for the explicit region.
             Assert.AreEqual(0, _httpManager.QueueSize);
-        }
-
-        [TestMethod]
-        public async Task ResponseFromUserProvidedRegionSameAsRegionDetectedAsync()
-        {
-            Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
-            _testRequestContext.ServiceBundle.Config.AzureRegion = TestConstants.Region;
-
-            //            IRegionDiscoveryProvider regionDiscoveryProvider = new RegionDiscoveryProvider(_httpManager);
-            InstanceDiscoveryMetadataEntry regionalMetadata = await _regionDiscoveryProvider.GetMetadataAsync(new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
-
-            Assert.IsNotNull(regionalMetadata);
-            Assert.AreEqual($"centralus.{RegionAndMtlsDiscoveryProvider.PublicEnvForRegional}", regionalMetadata.PreferredNetwork);
-            Assert.AreEqual(TestConstants.Region, _testRequestContext.ApiEvent.RegionUsed);
-            Assert.AreEqual(RegionAutodetectionSource.EnvVariable, _testRequestContext.ApiEvent.RegionAutodetectionSource);
-            Assert.AreEqual(RegionOutcome.UserProvidedValid, _testRequestContext.ApiEvent.RegionOutcome);
-            Assert.IsNull(_testRequestContext.ApiEvent.RegionDiscoveryFailureReason);
-        }
-
-        [TestMethod]
-        public async Task ResponseFromUserProvidedRegionDifferentFromRegionDetectedAsync()
-        {
-            Environment.SetEnvironmentVariable(TestConstants.RegionName, "detectedregion");
-            _testRequestContext.ServiceBundle.Config.AzureRegion = "userregion";
-
-            //IRegionDiscoveryProvider regionDiscoveryProvider = new RegionDiscoveryProvider(_httpManager, new NetworkCacheMetadataProvider());
-            InstanceDiscoveryMetadataEntry regionalMetadata = await _regionDiscoveryProvider.GetMetadataAsync(
-                new Uri("https://login.microsoftonline.com/common/"),
-                _testRequestContext).ConfigureAwait(false);
-
-            Assert.IsNotNull(regionalMetadata);
-            Assert.AreEqual($"userregion.{RegionAndMtlsDiscoveryProvider.PublicEnvForRegional}", regionalMetadata.PreferredNetwork);
-            Assert.AreEqual("userregion", _testRequestContext.ApiEvent.RegionUsed);
-            Assert.AreEqual(RegionAutodetectionSource.EnvVariable, _testRequestContext.ApiEvent.RegionAutodetectionSource);
-            Assert.AreEqual(RegionOutcome.UserProvidedInvalid, _testRequestContext.ApiEvent.RegionOutcome);
-            Assert.IsNull(_testRequestContext.ApiEvent.RegionDiscoveryFailureReason);
         }
 
         [TestMethod]

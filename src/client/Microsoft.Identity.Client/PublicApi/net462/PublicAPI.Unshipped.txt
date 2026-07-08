@@ -1,3 +1,4 @@
+Microsoft.Identity.Client.Region.RegionOutcome.UserProvided = 6 -> Microsoft.Identity.Client.Region.RegionOutcome
 const Microsoft.Identity.Client.MsalError.MinStrengthNotMet = "min_strength_not_met" -> string
 Microsoft.Identity.Client.AppConfig.PoPOptions
 Microsoft.Identity.Client.AppConfig.PoPOptions.MinStrength.get -> Microsoft.Identity.Client.AppConfig.MtlsBindingStrength

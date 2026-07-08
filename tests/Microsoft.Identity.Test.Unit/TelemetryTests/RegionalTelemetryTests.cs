@@ -130,71 +130,27 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         }
 
         [TestMethod]
-        public async Task TelemetryUserProvidedRegionAutoDiscoveryFailsTestsAsync()
+        public async Task TelemetryUserProvidedRegionSkipsAutoDiscoveryTestsAsync()
         {
-            Trace.WriteLine("Acquire token for client with region provided by user and region detection fails.");
-
-            // for simplicity, return 404 so retry is not triggered
-            _harness.HttpManager.AddMockHandlerContentNotFound(HttpMethod.Get, TestConstants.ImdsUrl);
+            Trace.WriteLine("Acquire token for client with region provided by user skips region detection.");
 
             var result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.UserProvidedRegion).ConfigureAwait(false);
             AssertCurrentTelemetry(
                 result.HttpRequest,
                 ApiIds.AcquireTokenForClient,
-                RegionAutodetectionSource.FailedAutoDiscovery.ToString("D"),
-                RegionOutcome.UserProvidedAutodetectionFailed.ToString("D"),
+                string.Empty,
+                RegionOutcome.UserProvided.ToString("D"),
                 isCacheSerialized: false,
                 region: TestConstants.Region);
 
-            // Verify all mock responses were consumed
+            // Verify no IMDS request was made for the explicit region.
             Assert.AreEqual(0, _harness.HttpManager.QueueSize);
-        }
-
-        /// <summary>
-        /// Acquire token for client with regionToUse when auto region discovery passes with region same as regionToUse
-        ///    Current_request = 4 | ATC_ID, 0, centralus, 3, 1 |
-        ///    Last_request = 4 | 0 | | |
-        /// </summary>
-        [TestMethod]
-        public async Task TelemetryUserProvidedRegionAutoDiscoverRegionSameTestsAsync()
-        {
-            Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
-
-            Trace.WriteLine("Acquire token for client with region provided by user and region detected is same as regionToUse.");
-            var result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.UserProvidedRegion).ConfigureAwait(false);
-            AssertCurrentTelemetry(result.HttpRequest,
-                ApiIds.AcquireTokenForClient,
-                RegionAutodetectionSource.EnvVariable.ToString("D"),
-                RegionOutcome.UserProvidedValid.ToString("D"),
-                isCacheSerialized: false,
-                region: TestConstants.Region);
-        }
-
-        /// <summary>
-        /// Acquire token for client with regionToUse when auto region discovery passes with region different from regionToUse
-        ///    Current_request = 4 | ATC_ID, 0, centralus, 3, 1 |
-        ///    Last_request = 4 | 0 | | |
-        /// </summary>
-        [TestMethod]
-        public async Task TelemetryUserProvidedRegionAutoDiscoverRegionMismatchTestsAsync()
-        {
-            Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
-
-            Trace.WriteLine("Acquire token for client with region provided by user and region detected mismatches regionToUse.");
-            var result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.UserProvidedInvalidRegion).ConfigureAwait(false);
-            AssertCurrentTelemetry(result.HttpRequest,
-                ApiIds.AcquireTokenForClient,
-                RegionAutodetectionSource.EnvVariable.ToString("D"),
-                RegionOutcome.UserProvidedInvalid.ToString("D"),
-                isCacheSerialized: false,
-                region: TestConstants.InvalidRegion);
         }
 
         private enum AcquireTokenForClientOutcome
         {
             Success,
             UserProvidedRegion,
-            UserProvidedInvalidRegion,
             AADUnavailableError,
             FallbackToGlobal
         }
@@ -270,27 +226,6 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                      .WithExperimentalFeatures(true)
                      .BuildConcrete();
                     authResult = await app3
-                        .AcquireTokenForClient(TestConstants.s_scope)
-                        .WithForceRefresh(forceRefresh)
-                        .ExecuteAsync()
-                        .ConfigureAwait(false);
-                    correlationId = authResult.CorrelationId;
-                    break;
-
-                case AcquireTokenForClientOutcome.UserProvidedInvalidRegion:
-
-                    tokenRequestHandler = _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost
-                        (authority: TestConstants.AuthorityRegionalInvalidRegion,
-                        responseMessage: MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage());
-
-                    var app4 = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                     .WithAuthority(AzureCloudInstance.AzurePublic, TestConstants.TenantId, false)
-                     .WithClientSecret(TestConstants.ClientSecret)
-                     .WithHttpManager(_harness.HttpManager)
-                     .WithAzureRegion(TestConstants.InvalidRegion)
-                     .WithExperimentalFeatures(true)
-                     .BuildConcrete();
-                    authResult = await app4
                         .AcquireTokenForClient(TestConstants.s_scope)
                         .WithForceRefresh(forceRefresh)
                         .ExecuteAsync()
