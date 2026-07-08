@@ -490,7 +490,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // Step 3: second leg should succeed using the global mTLS endpoint, returning an mtls_pop
             // token bound to the SAME certificate as Leg 1 (binding-cert continuity end-to-end).
             AuthenticationResult second = await ExecuteOrInconclusiveOnTokenTypeMismatchAsync(() => assertionApp
-                .AcquireTokenForClient(new[] { "https://vault.azure.net/.default" })
+                .AcquireTokenForClient(new[] { AllowListedFinalResource })
                 .WithMtlsProofOfPossession()
                 .OnBeforeTokenRequest(data =>
                 {
