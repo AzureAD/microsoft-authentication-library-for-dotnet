@@ -11,27 +11,26 @@ namespace Microsoft.Identity.Client.Region
     public enum RegionOutcome
     {
         /// <summary>
-        /// Indicates that no region outcome was recorded. This includes requests where .WithAzureRegion()
-        /// was not used, and requests where an explicit region was used without auto-discovery.
+        /// Indicates that no region outcome was recorded.
         /// </summary>
         None = 0,
 
         /// <summary>
         /// Region provided by the user, matches auto detected region.
         /// </summary>
-        [Obsolete("MSAL no longer performs auto-discovery for explicitly configured regions. This value is no longer returned.", false)]
+        [Obsolete("MSAL no longer performs auto-discovery for explicitly configured regions. Use UserProvided instead.", false)]
         UserProvidedValid = 1,
 
         /// <summary>
         /// Region provided by the user, auto detection cannot be done.
         /// </summary>
-        [Obsolete("MSAL no longer performs auto-discovery for explicitly configured regions. This value is no longer returned.", false)]
+        [Obsolete("MSAL no longer performs auto-discovery for explicitly configured regions. Use UserProvided instead.", false)]
         UserProvidedAutodetectionFailed = 2,
 
         /// <summary>
         /// Region provided by the user, does not match auto detected region.
         /// </summary>
-        [Obsolete("MSAL no longer performs auto-discovery for explicitly configured regions. This value is no longer returned.", false)]
+        [Obsolete("MSAL no longer performs auto-discovery for explicitly configured regions. Use UserProvided instead.", false)]
         UserProvidedInvalid = 3,
 
         /// <summary>
@@ -42,6 +41,11 @@ namespace Microsoft.Identity.Client.Region
         /// <summary>
         /// Region autodetect requested but failed. Fallback to global
         /// </summary>
-        FallbackToGlobal = 5
+        FallbackToGlobal = 5,
+
+        /// <summary>
+        /// Region provided by the user and used without auto-detection.
+        /// </summary>
+        UserProvided = 6
     }
 }

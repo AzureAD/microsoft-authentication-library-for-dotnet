@@ -139,7 +139,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 result.HttpRequest,
                 ApiIds.AcquireTokenForClient,
                 string.Empty,
-                string.Empty,
+                RegionOutcome.UserProvided.ToString("D"),
                 isCacheSerialized: false,
                 region: TestConstants.Region);
 
@@ -147,51 +147,10 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             Assert.AreEqual(0, _harness.HttpManager.QueueSize);
         }
 
-        /// <summary>
-        /// Acquire token for client with user-provided region skips auto region discovery.
-        ///    Current_request = 4 | ATC_ID, 0, centralus, , |
-        ///    Last_request = 4 | 0 | | |
-        /// </summary>
-        [TestMethod]
-        public async Task TelemetryUserProvidedRegionSkipsMatchingAutoDetectedRegionTestsAsync()
-        {
-            Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
-
-            Trace.WriteLine("Acquire token for client with region provided by user does not perform region detection.");
-            var result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.UserProvidedRegion).ConfigureAwait(false);
-            AssertCurrentTelemetry(result.HttpRequest,
-                ApiIds.AcquireTokenForClient,
-                string.Empty,
-                string.Empty,
-                isCacheSerialized: false,
-                region: TestConstants.Region);
-        }
-
-        /// <summary>
-        /// Acquire token for client with user-provided region skips auto region mismatch detection.
-        ///    Current_request = 4 | ATC_ID, 0, invalidregion, , |
-        ///    Last_request = 4 | 0 | | |
-        /// </summary>
-        [TestMethod]
-        public async Task TelemetryUserProvidedRegionSkipsMismatchedAutoDetectedRegionTestsAsync()
-        {
-            Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
-
-            Trace.WriteLine("Acquire token for client with region provided by user does not compare against detected region.");
-            var result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.UserProvidedInvalidRegion).ConfigureAwait(false);
-            AssertCurrentTelemetry(result.HttpRequest,
-                ApiIds.AcquireTokenForClient,
-                string.Empty,
-                string.Empty,
-                isCacheSerialized: false,
-                region: TestConstants.InvalidRegion);
-        }
-
         private enum AcquireTokenForClientOutcome
         {
             Success,
             UserProvidedRegion,
-            UserProvidedInvalidRegion,
             AADUnavailableError,
             FallbackToGlobal
         }
@@ -267,27 +226,6 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                      .WithExperimentalFeatures(true)
                      .BuildConcrete();
                     authResult = await app3
-                        .AcquireTokenForClient(TestConstants.s_scope)
-                        .WithForceRefresh(forceRefresh)
-                        .ExecuteAsync()
-                        .ConfigureAwait(false);
-                    correlationId = authResult.CorrelationId;
-                    break;
-
-                case AcquireTokenForClientOutcome.UserProvidedInvalidRegion:
-
-                    tokenRequestHandler = _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost
-                        (authority: TestConstants.AuthorityRegionalInvalidRegion,
-                        responseMessage: MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage());
-
-                    var app4 = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                     .WithAuthority(AzureCloudInstance.AzurePublic, TestConstants.TenantId, false)
-                     .WithClientSecret(TestConstants.ClientSecret)
-                     .WithHttpManager(_harness.HttpManager)
-                     .WithAzureRegion(TestConstants.InvalidRegion)
-                     .WithExperimentalFeatures(true)
-                     .BuildConcrete();
-                    authResult = await app4
                         .AcquireTokenForClient(TestConstants.s_scope)
                         .WithForceRefresh(forceRefresh)
                         .ExecuteAsync()

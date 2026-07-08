@@ -556,7 +556,7 @@ namespace Microsoft.Identity.Test.Unit
 
                 Assert.AreEqual("header.payload.signature", result.AccessToken);
                 Assert.AreEqual(region, result.AuthenticationResultMetadata.RegionDetails.RegionUsed);
-                Assert.AreEqual(RegionOutcome.None, result.ApiEvent.RegionOutcome);
+                Assert.AreEqual(RegionOutcome.UserProvided, result.ApiEvent.RegionOutcome);
                 Assert.AreEqual(expectedTokenEndpoint, result.AuthenticationResultMetadata.TokenEndpoint);
             }
         }

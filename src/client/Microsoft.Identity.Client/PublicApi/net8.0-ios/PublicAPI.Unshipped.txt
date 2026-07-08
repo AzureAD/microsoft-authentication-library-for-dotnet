@@ -1,0 +1,1 @@
+Microsoft.Identity.Client.Region.RegionOutcome.UserProvided = 6 -> Microsoft.Identity.Client.Region.RegionOutcome

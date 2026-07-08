@@ -94,6 +94,7 @@ namespace Microsoft.Identity.Client.Region
 
                 logger.Info(() => $"[Region discovery] Returning user provided region: {azureRegionConfig}.");
                 requestContext.ApiEvent.RegionUsed = azureRegionConfig;
+                requestContext.ApiEvent.RegionOutcome = RegionOutcome.UserProvided;
                 return azureRegionConfig;
             }
 
