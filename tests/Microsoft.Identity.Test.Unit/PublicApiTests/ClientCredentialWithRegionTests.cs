@@ -595,6 +595,36 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
+        public async Task FailedTokenRequest_SurfacesMetadataOnMsalServiceException_Async()
+        {
+            // Arrange - a regional client-credentials request whose token endpoint returns a service error.
+            using (var harness = base.CreateTestHarness())
+            {
+                var httpManager = harness.HttpManager;
+                httpManager.AddRegionDiscoveryMockHandler(TestConstants.Region);
+                httpManager.AddMockHandler(new MockHttpMessageHandler()
+                {
+                    ExpectedUrl = $"https://{TestConstants.Region}.login.microsoft.com/common/oauth2/v2.0/token",
+                    ExpectedMethod = HttpMethod.Post,
+                    ResponseMessage = MockHelpers.CreateInvalidClientResponseMessage()
+                });
+
+                IConfidentialClientApplication cca = CreateCca(httpManager, TestConstants.Region);
+
+                // Act
+                MsalServiceException ex = await AssertException.TaskThrowsAsync<MsalServiceException>(() => cca
+                    .AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync())
+                    .ConfigureAwait(false);
+
+                // Assert - failure-path metadata is surfaced on the exception, including the region that was used.
+                Assert.IsNotNull(ex.AuthenticationResultMetadata);
+                Assert.IsNotNull(ex.AuthenticationResultMetadata.RegionDetails);
+                Assert.AreEqual(TestConstants.Region, ex.AuthenticationResultMetadata.RegionDetails.RegionUsed);
+            }
+        }
+
+        [TestMethod]
         // regression: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2686
         public async Task OtherCloudWithAuthorityValidationAsync()
         {

@@ -189,6 +189,14 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                      .ExecuteAsync()).ConfigureAwait(false);
 
                 Assert.AreEqual(MsalError.TokenTypeMismatch, ex.ErrorCode);
+
+                // This MsalClientException is raised while processing the token response (inside the
+                // request), so the failed attempt still carries diagnostic metadata even though it is not
+                // a MsalServiceException — e.g. the token endpoint that was contacted. This is the value of
+                // exposing AuthenticationResultMetadata on the base MsalException (total duration is always
+                // captured for latency measurement).
+                Assert.IsNotNull(ex.AuthenticationResultMetadata);
+                Assert.IsNotNull(ex.AuthenticationResultMetadata.TokenEndpoint);
             }
         }
 

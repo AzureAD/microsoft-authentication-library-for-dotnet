@@ -114,16 +114,23 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
                 AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
 
-                int httpStatusCode = ex is MsalServiceException serviceEx ? serviceEx.StatusCode : 0;
+                // Compute the total duration once so the value stored on the exception metadata matches
+                // the value logged to OpenTelemetry (the stopwatch keeps running, so re-reading it drifts).
+                long totalDurationInMs = requestStopwatch.ElapsedMilliseconds + measureTelemetryDurationResult.Milliseconds;
+
+                ex.AuthenticationResultMetadata = CreateFailureMetadata(apiEvent, totalDurationInMs);
+
+                MsalServiceException serviceException = ex as MsalServiceException;
+                int httpStatusCode = serviceException?.StatusCode ?? 0;
 
                 LogFailureTelemetryToOtel(
                     ex.ErrorCode,
                     apiEvent,
                     apiEvent.CacheInfo,
                     httpStatusCode,
-                    requestStopwatch.ElapsedMilliseconds + measureTelemetryDurationResult.Milliseconds,
+                    totalDurationInMs,
                     exception: ex,
-                    rawStsErrorCode: (ex as MsalServiceException)?.ErrorCodes?.FirstOrDefault());
+                    rawStsErrorCode: serviceException?.ErrorCodes?.FirstOrDefault());
                 throw;
             }
             catch (Exception ex)
@@ -275,6 +282,26 @@ namespace Microsoft.Identity.Client.Internal.Requests
             authenticationResult.AuthenticationResultMetadata.CachedAccessTokenCount = apiEvent.CachedAccessTokenCount;
 
             Metrics.IncrementTotalDurationInMs(authenticationResult.AuthenticationResultMetadata.DurationTotalInMs);
+        }
+
+        /// <summary>
+        /// Builds the subset of <see cref="AuthenticationResultMetadata"/> that is available when a
+        /// token request fails. Only values that were actually captured are populated; everything else
+        /// is left at its default (0 / null). <see cref="AuthenticationResultMetadata.TokenSource"/> has
+        /// no meaningful value on failure, so it stays at the constructor default and should not be relied on.
+        /// </summary>
+        internal static AuthenticationResultMetadata CreateFailureMetadata(ApiEvent apiEvent, long totalDurationInMs)
+        {
+            return new AuthenticationResultMetadata(TokenSource.IdentityProvider)
+            {
+                DurationTotalInMs = totalDurationInMs,
+                DurationInHttpInMs = apiEvent.DurationInHttpInMs,
+                DurationInCacheInMs = apiEvent.DurationInCacheInMs,
+                CachedAccessTokenCount = apiEvent.CachedAccessTokenCount,
+                CacheRefreshReason = apiEvent.CacheInfo,
+                TokenEndpoint = apiEvent.TokenEndpoint,
+                RegionDetails = CreateRegionDetails(apiEvent),
+            };
         }
 
         protected virtual void EnrichTelemetryApiEvent(ApiEvent apiEvent)
