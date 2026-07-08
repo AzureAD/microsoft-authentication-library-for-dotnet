@@ -595,7 +595,6 @@ namespace Microsoft.Identity.Test.Unit
             using (var harness = base.CreateTestHarness())
             {
                 var httpManager = harness.HttpManager;
-                httpManager.AddRegionDiscoveryMockHandler(TestConstants.Region);
                 httpManager.AddMockHandler(new MockHttpMessageHandler()
                 {
                     ExpectedUrl = $"https://{TestConstants.Region}.login.microsoft.com/common/oauth2/v2.0/token",
