@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Threading;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
@@ -274,6 +275,72 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             // Assert
             _knownMetadataProvider.Received(1).GetMetadata("some_env.com", Enumerable.Empty<string>(), Arg.Any<ILoggerAdapter>());
             ValidateSingleEntryMetadata(new Uri("https://some_env.com/tid"), actualResult);
+        }
+
+        [TestMethod]
+        [WorkItem(5804)]
+        public async Task NetworkProviderFailures_AreCachedAsSingleAuthorityFallback_Async()
+        {
+            // Arrange
+            _networkCacheMetadataProvider = new NetworkCacheMetadataProvider();
+            _knownMetadataProvider.GetMetadata(null, null, Arg.Any<ILoggerAdapter>()).ReturnsForAnyArgs((InstanceDiscoveryMetadataEntry)null);
+
+            _discoveryManager = new InstanceDiscoveryManager(
+                _harness.HttpManager,
+                null,
+                null,
+                _knownMetadataProvider,
+                _networkCacheMetadataProvider,
+                _networkMetadataProvider);
+
+            _networkMetadataProvider
+                .When(x => x.GetMetadataAsync(Arg.Any<Uri>(), _testRequestContext))
+                .Do(_ => throw new MsalServiceException("endpoint_busy", "some exception message"));
+
+            AuthorityInfo authorityInfo = AuthorityInfo.FromAuthorityUri("https://some_env.com/tid", true);
+
+            // Act
+            InstanceDiscoveryMetadataEntry firstResult = await _discoveryManager.GetMetadataEntryAsync(
+                authorityInfo,
+                _testRequestContext)
+                .ConfigureAwait(false);
+
+            InstanceDiscoveryMetadataEntry secondResult = await _discoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
+                authorityInfo,
+                Enumerable.Empty<string>(),
+                _testRequestContext)
+                .ConfigureAwait(false);
+
+            // Assert
+            ValidateSingleEntryMetadata(new Uri("https://some_env.com/tid"), firstResult);
+            Assert.AreSame(firstResult, secondResult);
+            await _networkMetadataProvider.Received(1).GetMetadataAsync(Arg.Any<Uri>(), _testRequestContext).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        [WorkItem(5805)]
+        public async Task UserCancellationDuringInstanceDiscovery_IsRethrown_Async()
+        {
+            // Arrange
+            using var cancellationTokenSource = new CancellationTokenSource();
+            cancellationTokenSource.Cancel();
+
+            var requestContext = new RequestContext(
+                _harness.ServiceBundle,
+                Guid.NewGuid(),
+                null,
+                cancellationTokenSource.Token);
+
+            _networkMetadataProvider
+                .When(x => x.GetMetadataAsync(Arg.Any<Uri>(), requestContext))
+                .Do(_ => throw new TaskCanceledException("user canceled"));
+
+            // Act / Assert
+            await Assert.ThrowsAsync<TaskCanceledException>(() =>
+                _discoveryManager.GetMetadataEntryAsync(
+                    AuthorityInfo.FromAuthorityUri("https://some_env.com/tid", true),
+                    requestContext))
+                .ConfigureAwait(false);
         }
 
         [TestMethod]
