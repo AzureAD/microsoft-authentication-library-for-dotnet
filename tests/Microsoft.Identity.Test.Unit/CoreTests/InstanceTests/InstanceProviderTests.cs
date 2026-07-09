@@ -37,6 +37,30 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         }
 
         [TestMethod]
+        public void StaticProviderClearsCacheWhenEntryLimitIsExceeded()
+        {
+            // Arrange
+            NetworkCacheMetadataProvider.ResetStaticCacheForTest();
+            var staticMetadataProvider = new NetworkCacheMetadataProvider();
+            try
+            {
+                // Act
+                for (int i = 0; i < NetworkCacheMetadataProvider.MaxCacheEntries; i++)
+                {
+                    staticMetadataProvider.AddMetadata($"env-{i}", new InstanceDiscoveryMetadataEntry());
+                }
+
+                // Assert
+                Assert.IsNull(staticMetadataProvider.GetMetadata("env-0", _logger));
+                Assert.IsNull(staticMetadataProvider.GetMetadata($"env-{NetworkCacheMetadataProvider.MaxCacheEntries - 1}", _logger));
+            }
+            finally
+            {
+                NetworkCacheMetadataProvider.ResetStaticCacheForTest();
+            }
+        }
+
+        [TestMethod]
         public void KnownMetadataProvider_RespondsIfEnvironmentsAreKnown()
         {
             // Arrange

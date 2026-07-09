@@ -4,6 +4,9 @@
 ### New Features
 - Exposed canonical OpenTelemetry tag names per metric via `MsalMetricsCatalog.CanonicalTagsByMetric` for discoverability and validation. [#6076](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6076)
 
+### Changes
+- Managed identity error messages and request-failure logs now include the detected `ManagedIdentitySource` (e.g., `AppService`, `Imds`, `ServiceFabric`) so the host-issued `Managed Identity Correlation ID` can be traced to the correct host's telemetry. [#6101](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6101)
+
 4.85.0
 ======
 
@@ -43,6 +46,7 @@
 - Fixed `WithExtraQueryParameters` on `ManagedIdentityApplicationBuilder` bypassing token caching. [#6035](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6035)
 - Guarded HTTP status codes on discovery endpoints in `KnownInstanceMetadataIsUpToDateAsync`. [#6048](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6048)
 - Detect orphaned KeyGuard certificates via public-key modulus comparison. [#6020](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6020)
+- KeyGuard/Credential Guard attestation failures now surface as an `MsalServiceException("attestation_failed")` (carrying the MAA status/native error/reason) instead of silently sending a non-attested certificate request to IMDS, and native `AttestationClientLib` (MAA) logs are bridged into the MSAL `ILoggerAdapter`. **Behavior change:** when an attestation provider is configured via `WithAttestationSupport()` and returns no token for a KeyGuard key, the request now fails closed rather than falling back to a non-attested request. [#6081](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6081)
 
 4.84.1
 ======

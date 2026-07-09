@@ -27,9 +27,11 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 .WithClientSecret(TestConstants.ClientSecret)
                 .Build();
 
+#pragma warning disable CS0618 // Test obsolete request-level authority override behavior
             Assert.Throws<ArgumentException>(() =>
                 app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, "code")
                    .WithAdfsAuthority(malformedAuthority));
+#pragma warning restore CS0618
         }
     }
 }
