@@ -314,6 +314,8 @@ namespace Microsoft.Identity.Client
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// <remarks>MSAL.NET supports ADFS 2019 or later.</remarks>
         /// <returns>The builder to chain the .With methods.</returns>                
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete("This API has been deprecated. Configure the ADFS authority at the application level instead. See https://aka.ms/msal-net-application-configuration")]
         public T WithAdfsAuthority(string authorityUri, bool validateAuthority = true)
         {
             if (string.IsNullOrWhiteSpace(authorityUri))
@@ -331,6 +333,7 @@ namespace Microsoft.Identity.Client
         /// <param name="authorityUri">Azure AD B2C authority, including the B2C policy (for instance
         /// <c>"https://fabrikamb2c.b2clogin.com/tfp/{Tenant}/{policy}</c></param>).
         /// <returns>The builder to chain the .With methods.</returns>
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public T WithB2CAuthority(string authorityUri)
         {
             if (string.IsNullOrWhiteSpace(authorityUri))
