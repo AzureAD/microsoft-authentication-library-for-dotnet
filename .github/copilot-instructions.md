@@ -95,6 +95,29 @@ This repository defines **Copilot Agent Skills** under `.github/skills/`.
 
 ---
 
+# MSAL.NET Agent Guidance
+
+## Warning-clean API changes
+- The repo builds with `TreatWarningsAsErrors=true`. When adding `[Obsolete]`, `EditorBrowsable`, or other public API annotations, build both the product project and affected test project(s).
+- If tests intentionally exercise a newly obsolete API, add a narrow warning suppression around that assertion/test instead of suppressing broadly.
+
+## Downstream compatibility checks
+- Before obsoleting, hiding, or changing request-builder authority APIs, telemetry parameters, or query-parameter/cache-key behavior, check known downstream consumers.
+- Treat soft-obsolete changes as downstream-breaking when consumers build with warnings-as-errors. Adding `[Obsolete]` with `error: false`, `[EditorBrowsable]`, or analyzer-facing warnings can still break `Microsoft.Identity.Web` package-bump PRs.
+- `Microsoft.Identity.Web` is commonly available as a sibling checkout at `D:\source\microsoft-identity-web`; search it for production usages before deciding whether a change is safe.
+- Use targeted searches for the exact public API/member names, for example:
+  - `rg "WithB2CAuthority|AffectedApiName" D:\source\microsoft-identity-web\src`
+  - `rg "Microsoft.Identity.Client" D:\source\microsoft-identity-web\Directory.Packages.props D:\source\microsoft-identity-web\src`
+- If `Microsoft.Identity.Web` uses the affected API, do not obsolete, hide, remove, or change it unless the PR also provides a safe migration plan. Prefer updating Identity.Web first or coordinating a staged change.
+- Mention the Identity.Web impact check in the PR summary, including whether the sibling checkout was present and what API names were searched.
+
+## Regression tests for cache and pooling changes
+- Regression tests must prove the changed side effect, not only final success or returned object identity.
+- For cache-key changes, assert the cached entry state after each relevant acquisition call, not only after the final call.
+- For pooling/lazy-creation fixes, verify creation counts or factory invocation counts so the test fails against the old eager-allocation implementation.
+
+---
+
 # Copilot Instructions for MSAL.NET mTLS Proof-of-Possession
 
 ## 🚀 Quick Start: Discover Available Skills
