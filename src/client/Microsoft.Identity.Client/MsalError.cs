@@ -1185,13 +1185,13 @@ namespace Microsoft.Identity.Client
         public const string CryptographicError = "cryptographic_error";
 
         /// <summary>
-        /// <para>What happened?</para>Historical error code. A region is <b>not</b> required for mTLS Proof of Possession — when none is specified, MSAL uses the global mTLS endpoint. This code is no longer raised.
+        /// <para>What happened?</para>A region is <b>not</b> required for mTLS Proof of Possession. When no region is specified, MSAL uses the global mTLS endpoint, so this error is no longer raised. The constant is retained for backwards compatibility.
         /// <para>Mitigation</para>No action needed. Optionally set AzureRegion for improved performance.
         /// </summary>
         public const string MtlsPopWithoutRegion = "mtls_pop_without_region";
 
         /// <summary>
-        /// <para>What happened?</para>Historical error code. A region is <b>not</b> required for Bearer-over-mTLS — when none is specified, MSAL uses the global mTLS endpoint. This code is no longer raised.
+        /// <para>What happened?</para>A region is <b>not</b> required for Bearer-over-mTLS. When no region is specified, MSAL uses the global mTLS endpoint, so this error is no longer raised. The constant is retained for backwards compatibility.
         /// <para>Mitigation</para>No action needed. Optionally set AzureRegion for improved performance.
         /// </summary>
         public const string MtlsBearerWithoutRegion = "mtls_bearer_without_region";
@@ -1203,7 +1203,7 @@ namespace Microsoft.Identity.Client
         public const string MtlsCertificateNotProvided = "mtls_certificate_not_provided";
 
         /// <summary>
-        /// <para>What happened?</para> Historical error code. A region is <b>not</b> required for mTLS Proof of Possession (mTLS PoP). When regional auto-detection does not yield a region, MSAL falls back to the global mTLS endpoint. This code is no longer raised.
+        /// <para>What happened?</para> A region is <b>not</b> required for mTLS Proof of Possession (mTLS PoP). When regional auto-detection does not yield a region, MSAL falls back to the global mTLS endpoint, so this error is no longer raised. The constant is retained for backwards compatibility.
         /// <para>Mitigation:</para> No action needed. Optionally set AzureRegion via WithAzureRegion for improved performance.
         /// </summary>
         public const string RegionRequiredForMtlsPop = "region_required_for_mtls_pop";
