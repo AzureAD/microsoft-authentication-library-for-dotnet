@@ -1,8 +1,8 @@
-# MSAL MSI V2 — Un-attested mTLS PoP Flow (Scoped CSR) high level design document
+# MSAL MSI V2 — Unattested mTLS PoP Flow (Scoped CSR) high level design document
 
 ## Overview
 
-This document describes a new **un-attested** variant of the MSI V2 `/issuecredential` flow.
+This document describes a new **unattested** variant of the MSI V2 `/issuecredential` flow.
 
 As in the attested flow, the compute unit (CU) creates the **strongest key it can**. When no strong key store is available — for example on **Gen1 VMs or Linux** — MSAL falls back to an **in-memory RSA** key. The difference is:
 
@@ -10,7 +10,7 @@ As in the attested flow, the compute unit (CU) creates the **strongest key it ca
 - The requested **scope is carried inside the CSR** via a dedicated attribute OID.
 - ESTS still returns an **`mtls_pop`** access token bound to the key.
 
-This differs from the original design (`msi_with_credential_design.md`), where an **un-attested** CU could only receive a **bearer** token. This flow upgrades that path to **`mtls_pop`** without requiring attestation.
+This differs from the original design (`msi_with_credential_design.md`), where an **unattested** CU could only receive a **bearer** token. This flow upgrades that path to **`mtls_pop`** without requiring attestation.
 
 ## Goals
 
@@ -19,7 +19,7 @@ This differs from the original design (`msi_with_credential_design.md`), where a
 - Keep the rest of the MSI V2 flow (`getPlatformMetadata` -> `issuecredential` -> ESTS mTLS) unchanged.
 - Work on **Windows and Linux** VMs / VMSS.
 
-## Why un-attested + PoP?
+## Why unattested + PoP?
 
 - Attestation (MAA) may be **unavailable or not supported** on some platforms or hardware.
 - **Hardware does not support attested flows** (for example, Gen1 VMs).
@@ -28,7 +28,7 @@ This differs from the original design (`msi_with_credential_design.md`), where a
 
 ## How this differs from the attested flow
 
-| Aspect | Attested flow | **Un-attested PoP flow (this doc)** |
+| Aspect | Attested flow | **Unattested PoP flow (this doc)** |
 |---|---|---|
 | Key strength | KeyGuard | **strongest available, else in-memory RSA** |
 | MAA attestation token | **Required** | **Not requested / omitted** |
@@ -58,7 +58,7 @@ sequenceDiagram
     MSAL -->> App: AuthenticationResult (access_token + mtls_certificate)
 ```
 
-## Steps for MSI V2 Un-attested Authentication
+## Steps for MSI V2 Unattested Authentication
 
 ### 1. Retrieve Platform Metadata
 
@@ -84,7 +84,9 @@ MSAL sources the **strongest key the platform supports**. When no strong key sto
 
 > :warning: **TODO** — confirm the exact **scope attribute OID** and its value encoding (`PrintableString` vs `UTF8String`, single scope vs list).
 
-### 4. Request the certificate (un-attested)
+### 4. Request the certificate (unattested)
+
+The request body contains **only** the CSR - there is **no `attestation_token`**, because the scope is carried inside the CSR.
 
 ```http
 POST /metadata/identity/issuecredential?cred-api-version=2.0 HTTP/1.1
@@ -92,7 +94,6 @@ Content-Type: application/json
 
 {
   "csr": "<Base64 CSR>"
-  // NO attestation_token - the scope is carried inside the CSR
 }
 ```
 
@@ -109,13 +110,14 @@ scope={scope}
 token_type=mtls_pop
 ```
 
-Even though the CU is **un-attested**, ESTS returns an **`mtls_pop`** token: the token is PoP-bound to the key via the presented mTLS certificate, and the scope was established in the CSR. The response may include the `xms_tb` (token binding) claim.
+Even though the CU is **unattested**, ESTS returns an **`mtls_pop`** token: the token is PoP-bound to the key via the presented mTLS certificate, and the scope was established in the CSR. The response may include the `xms_tb` (token binding) claim.
 
 MSAL returns the **access token** and the **mTLS certificate** to the caller; the caller uses the token against the target resource **over mTLS** using that certificate.
 
 ## Notes & open items
 
 - **Scope OID (TBD):** the exact OID and value encoding for the new scope attribute must be finalized before implementation.
-- **Contrast with the original design:** in `msi_with_credential_design.md` an un-attested CU receives a **bearer** token only. This flow upgrades that to **`mtls_pop`** by carrying the scope in the CSR.
+- **Contrast with the original design:** in `msi_with_credential_design.md` an unattested CU receives a **bearer** token only. This flow upgrades that to **`mtls_pop`** by carrying the scope in the CSR.
 - **Certificate lifetime & rotation** are unchanged (7-day certificate; rotate 3 days before expiry).
 - **Retry policy** is unchanged (default Managed Identity retry: 3 retries, 1s pause, on retryable status codes).
+- **Docs to reconcile on implementation:** `token-binding-demo.html` (and any other MSI V2 docs) currently state that unattested compute receives a **bearer** token; update them to reflect this `mtls_pop` flow when it ships.
