@@ -196,7 +196,7 @@ What does "MtlsPopWithoutRegion" error mean?
 ```
 
 ```
-Is a region required for mTLS PoP? (No - it is optional; MSAL falls back to the global mtlsauth.microsoft.com endpoint)
+Is a region required for mTLS PoP? (No - it is optional; MSAL falls back to the cloud's global mtlsauth endpoint, e.g. mtlsauth.microsoft.com in public cloud)
 ```
 
 ```

@@ -114,8 +114,9 @@ existing `WithClientAssertion(...)` seam that accepts a `ClientSignedAssertion` 
 
 - **Leg 1 — SNI cert → federated assertion (cert-bound PoP).** `AcquireTokenForClient` against the
   exchange audience with `WithMtlsProofOfPossession()`. Leg 1 being cert-bound PoP is what produces the
-  `cnf`. The result exposes `AuthenticationResult.BindingCertificate` (public material only — x5c +
-  `x5t#S256`; never a private key).
+  `cnf`. The result exposes `AuthenticationResult.BindingCertificate` — the `X509Certificate2` the token
+  is bound to (surfaced in `cnf` as `x5t#S256`). It is the same cert used on the wire, so it may carry a
+  private key.
 - **Leg 2 — federated assertion → final app token (bound to the Leg-1 cert).** `AcquireTokenForClient`
   against the final resource, supplying the Leg-1 assertion **and** the Leg-1 binding certificate via
   `ClientSignedAssertion.TokenBindingCertificate`, again with `WithMtlsProofOfPossession()`. MSAL sends
@@ -135,7 +136,7 @@ AuthenticationResult leg1 = await leg1App
     .AcquireTokenForClient(new[] { "api://AzureADTokenExchange/.default" })
     .WithMtlsProofOfPossession()
     .ExecuteAsync();
-// leg1.TokenType == "mtls_pop"; leg1.BindingCertificate == the SNI cert (public material).
+// leg1.TokenType == "mtls_pop"; leg1.BindingCertificate == the SNI cert (X509Certificate2; may carry a private key).
 
 // Leg 2: carry the Leg-1 assertion + binding cert -> resource token (mtls_pop)
 var leg2App = ConfidentialClientApplicationBuilder.Create(clientId)

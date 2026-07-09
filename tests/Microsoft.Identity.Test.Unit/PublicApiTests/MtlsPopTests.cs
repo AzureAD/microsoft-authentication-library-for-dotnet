@@ -1241,7 +1241,7 @@ namespace Microsoft.Identity.Test.Unit
         [TestMethod]
         public async Task MtlsPop_SniSendX5C_OmitsClientAssertionAndReqCnfAsync()
         {
-            // Vanilla SN/I over mTLS PoP: the cert is presented on the TLS connection and ESTS
+            // Vanilla SNI over mTLS PoP: the cert is presented on the TLS connection and ESTS
             // resolves Subject Name + Issuer trust from the TLS-presented cert. Even with sendX5C:true,
             // the mTLS body must carry NO client_assertion / client_assertion_type / req_cnf — the cert
             // (cnf / x5t#S256) is the binding, not a signed assertion.

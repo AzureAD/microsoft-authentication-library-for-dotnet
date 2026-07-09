@@ -2,7 +2,7 @@ Unreleased
 ==========
 
 ### Changes
-- Documented that mTLS Proof-of-Possession does **not** require a region: when no region is set, MSAL uses the global `mtlsauth.microsoft.com` endpoint. Corrected the stale `RegionRequiredForMtlsPop` / `MtlsPopWithoutRegion` / `MtlsBearerWithoutRegion` error-message text and doc comments (the public constants are retained for API compatibility; they are no longer raised).
+- Documented that mTLS Proof-of-Possession does **not** require a region: when no region is set, MSAL uses the cloud's global `mtlsauth` endpoint (`mtlsauth.microsoft.com` in public cloud; sovereign clouds use their own host). Corrected the stale `RegionRequiredForMtlsPop` / `MtlsPopWithoutRegion` / `MtlsBearerWithoutRegion` error-message text and doc comments (the public constants are retained for API compatibility; they are no longer raised).
 - Added end-to-end and unit coverage for the two-leg S2S (app) Federated Identity Credential (FIC) flow over mTLS PoP (SNI first leg → federated assertion → resource token bound to the same certificate), including an FMI-audience variant. No public API change; `user_fic` is not supported over mTLS.
 
 4.85.1
