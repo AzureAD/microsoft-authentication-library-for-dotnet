@@ -9,6 +9,9 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Instance.Discovery
 {
+    // Cloud entries here must stay in sync with KnownCloudConfiguration,
+    // which exposes the same alias/preferred-host data publicly along with
+    // additional cloud-specific properties (e.g., TokenExchangeAudience).
     internal class KnownMetadataProvider : IKnownMetadataProvider
     {
         // No need to use a ConcurrentDictionary, because the normal Dictionary is thread safe for read operations

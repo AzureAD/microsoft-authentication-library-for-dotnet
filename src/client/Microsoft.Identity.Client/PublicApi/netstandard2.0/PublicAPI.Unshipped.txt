@@ -10,3 +10,20 @@ Microsoft.Identity.Client.MsalException.AuthenticationResultMetadata.get -> Micr
 Microsoft.Identity.Client.Extensibility.ManagedIdentityApplicationBuilderExtensions
 static Microsoft.Identity.Client.Extensibility.ConfidentialClientApplicationBuilderExtensions.OnBackgroundTokenRefreshCompleted(this Microsoft.Identity.Client.ConfidentialClientApplicationBuilder builder, System.Func<Microsoft.Identity.Client.Extensibility.ExecutionResult, System.Threading.Tasks.Task> onBackgroundTokenRefreshCompleted) -> Microsoft.Identity.Client.ConfidentialClientApplicationBuilder
 static Microsoft.Identity.Client.Extensibility.ManagedIdentityApplicationBuilderExtensions.OnBackgroundTokenRefreshCompleted(this Microsoft.Identity.Client.ManagedIdentityApplicationBuilder builder, System.Func<Microsoft.Identity.Client.Extensibility.ExecutionResult, System.Threading.Tasks.Task> onBackgroundTokenRefreshCompleted) -> Microsoft.Identity.Client.ManagedIdentityApplicationBuilder
+Microsoft.Identity.Client.Instance.Discovery.CloudSettings
+Microsoft.Identity.Client.Instance.Discovery.CloudSettings.CloudSettings() -> void
+Microsoft.Identity.Client.Instance.Discovery.CloudSettings.Aliases.get -> System.Collections.Generic.IReadOnlyList<string>
+Microsoft.Identity.Client.Instance.Discovery.CloudSettings.Aliases.init -> void
+Microsoft.Identity.Client.Instance.Discovery.CloudSettings.PreferredCache.get -> string
+Microsoft.Identity.Client.Instance.Discovery.CloudSettings.PreferredCache.init -> void
+Microsoft.Identity.Client.Instance.Discovery.CloudSettings.PreferredNetwork.get -> string
+Microsoft.Identity.Client.Instance.Discovery.CloudSettings.PreferredNetwork.init -> void
+Microsoft.Identity.Client.Instance.Discovery.CloudSettings.TokenExchangeAudience.get -> string
+Microsoft.Identity.Client.Instance.Discovery.CloudSettings.TokenExchangeAudience.init -> void
+Microsoft.Identity.Client.Instance.Discovery.ICloudConfiguration
+Microsoft.Identity.Client.Instance.Discovery.ICloudConfiguration.GetSettingsByAuthority(string authorityHost) -> Microsoft.Identity.Client.Instance.Discovery.CloudSettings
+Microsoft.Identity.Client.Instance.Discovery.KnownCloudConfiguration
+Microsoft.Identity.Client.Instance.Discovery.KnownCloudConfiguration.GetSettingsByAuthority(string authorityHost) -> Microsoft.Identity.Client.Instance.Discovery.CloudSettings
+Microsoft.Identity.Client.Instance.Discovery.KnownCloudConfiguration.KnownCloudConfiguration() -> void
+static Microsoft.Identity.Client.Instance.Discovery.KnownCloudConfiguration.Default.get -> Microsoft.Identity.Client.Instance.Discovery.KnownCloudConfiguration
+Microsoft.Identity.Client.AbstractApplicationBuilder<T>.WithCloudConfiguration(Microsoft.Identity.Client.Instance.Discovery.ICloudConfiguration cloudConfiguration) -> T

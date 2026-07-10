@@ -216,6 +216,7 @@ namespace Microsoft.Identity.Client
 
         public InstanceDiscoveryResponse CustomInstanceDiscoveryMetadata { get; set; }
         public Uri CustomInstanceDiscoveryMetadataUri { get; set; }
+        public ICloudConfiguration CloudConfiguration { get; set; }
 
         /// <summary>
         /// Should _not_ go in the interface, only for builder usage while determining authorities with ApplicationOptions
