@@ -87,10 +87,11 @@ namespace Microsoft.Identity.Client.Utils
             {
                 var timestamp = expiresOnUnixTimestamp - DateTimeHelpers.CurrDateTimeInUnixTimestamp();
 
-                // If the timestamp is negative, return the original expiresOnUnixTimestamp. Its format is "seconds from now".
+                // A negative delta means the absolute timestamp is in the past (stale token).
+                // Return 0 so the caller treats this as an expired response and re-fetches.
                 if (timestamp < 0)
                 {
-                    return expiresOnUnixTimestamp;
+                    return 0;
                 }
 
                 return timestamp;
