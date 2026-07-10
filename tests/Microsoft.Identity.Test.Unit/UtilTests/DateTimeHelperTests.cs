@@ -67,9 +67,9 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
             Assert.IsGreaterThanOrEqualTo(-1, result, "Common Format 1 failed");
 
             // Example 4: Common format (yyyy-MM-dd HH:mm:ss) — no timezone indicator, parsed as local time.
-            // Use a timestamp well in the future so local-time offset doesn't cause a near-zero result
-            // to flip negative on machines where local time is ahead of UTC.
-            string commonFormat2 = (currentTime + TimeSpan.FromHours(2)).ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
+            // Use a timestamp 1 day in the future so the local-time offset (max UTC+14) can't flip
+            // the result negative on any machine timezone.
+            string commonFormat2 = (currentTime + TimeSpan.FromDays(1)).ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
             result = DateTimeHelpers.GetDurationFromManagedIdentityTimestamp(commonFormat2);
             Assert.IsGreaterThan(0, result, $"Common Format 2 with a future timestamp should return positive duration, got {result}.");
 
@@ -105,5 +105,23 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
             result = DateTimeHelpers.GetDurationFromManagedIdentityTimestamp(ancientTimestamp);
             Assert.AreEqual(0, result, "A well-past absolute timestamp should return 0, not the raw epoch value.");
         }
-    }
-}
+
+        [TestMethod]
+        public void TestGetDurationFromManagedIdentityTimestamp_RelativeExpiresIn_ReturnedDirectly()
+        {
+            // Some MI endpoints (e.g. Azure Arc IMDS) return "expires_in" as a relative
+            // number of seconds-from-now rather than an absolute Unix timestamp. These small
+            // values are stored in ManagedIdentityResponse.ExpiresOn via ExpiresInRaw, so
+            // GetDurationFromManagedIdentityTimestamp must return them as-is, not treat them
+            // as epoch timestamps and subtract current time (which would give a huge negative
+            // value and force an erroneous re-fetch).
+
+            long result = DateTimeHelpers.GetDurationFromManagedIdentityTimestamp("3600");
+            Assert.AreEqual(3600, result, "A relative expires_in of 3600 should be returned as-is.");
+
+            result = DateTimeHelpers.GetDurationFromManagedIdentityTimestamp("86400");
+            Assert.AreEqual(86400, result, "A relative expires_in of 86400 should be returned as-is.");
+
+            result = DateTimeHelpers.GetDurationFromManagedIdentityTimestamp("0");
+            Assert.AreEqual(0, result, "A relative expires_in of 0 should return 0.");
+        }
