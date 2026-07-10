@@ -125,3 +125,5 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
             result = DateTimeHelpers.GetDurationFromManagedIdentityTimestamp("0");
             Assert.AreEqual(0, result, "A relative expires_in of 0 should return 0.");
         }
+    }
+}
