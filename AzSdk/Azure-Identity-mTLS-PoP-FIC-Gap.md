@@ -18,7 +18,7 @@
 ## 1. The gap in one paragraph
 
 MSAL exposes mTLS PoP for confidential clients in two ways: (a) a **certificate application**
-(SN/I cert) + `WithMtlsProofOfPossession()`, and (b) a **cert-bound client assertion** — the assertion
+(SNI cert) + `WithMtlsProofOfPossession()`, and (b) a **cert-bound client assertion** — the assertion
 callback returns a `ClientSignedAssertion` carrying a `TokenBindingCertificate`, which flips
 `client_assertion_type` to **`jwt-pop`**. For managed identity, MSAL exposes
 `AcquireTokenForManagedIdentity(...).WithMtlsProofOfPossession()` (IMDSv2). **Azure.Identity's FIC
@@ -60,8 +60,7 @@ ConfidentialClientApplicationBuilder WithClientAssertion(
 The callback receives an **`AssertionRequestOptions`**
 (`src/client/Microsoft.Identity.Client/AppConfig/AssertionRequestOptions.cs`) exposing `ClientID`,
 `TokenEndpoint`, `Authority`, `TenantId`, `CorrelationId`, `Claims`, `ClientCapabilities`, and
-`ClientAssertionFmiPath` — notably the **`TokenEndpoint`**, which the caller needs when the
-assertion/cert must be bound to a specific (regional) mTLS endpoint.
+`ClientAssertionFmiPath` — notably the **`TokenEndpoint`**, which identifies the token endpoint MSAL intends to use (in explicit mTLS PoP, it can be best-effort during preflight; the actual token request uses the resolved endpoint).
 
 > **Note on the overload set.** MSAL also exposes a context-aware *string* overload
 > (`WithClientAssertion(Func<AssertionRequestOptions, Task<string>>)`) and marks the raw
@@ -92,7 +91,7 @@ public AcquireTokenForClientParameterBuilder WithMtlsProofOfPossession()
 }
 ```
 
-- With a **`WithCertificate` app** (SN/I), the cert *is* the mTLS binding cert.
+- With a **`WithCertificate` app** (SNI), the cert *is* the mTLS binding cert.
 - With a **`WithClientAssertion` app** that returns a `TokenBindingCertificate`, MSAL uses that cert to
   produce a **`jwt-pop`** assertion (no app-level certificate required).
 - On success: `AuthenticationResult.TokenType == "mtls_pop"` and `AuthenticationResult.BindingCertificate`
@@ -147,13 +146,13 @@ public static AcquireTokenForManagedIdentityParameterBuilder WithMtlsProofOfPoss
 
 `tests/Microsoft.Identity.Test.Integration.netcore/HeadlessTests/ClientCredentialsMtlsPopTests.cs`.
 
-**Pattern A — direct SN/I cert app gets an `mtls_pop` token:**
+**Pattern A — direct SNI cert app gets an `mtls_pop` token:**
 
 ```csharp
 var app = ConfidentialClientApplicationBuilder.Create(appId)
     .WithAuthority(authority)
     .WithAzureRegion("westus3")
-    .WithCertificate(cert, sendX5C: true)   // SN/I
+    .WithCertificate(cert, sendX5C: true)   // SNI
     .Build();
 
 var result = await app.AcquireTokenForClient(scopes)
@@ -225,7 +224,7 @@ mTLS-bound means **combining** the two: use the IMDSv2-minted binding certificat
 | String (bearer) client assertion | ✅ `WithClientAssertion(string / Task<string>)` | ✅ (all three) |
 | Cert-bound assertion (`jwt-pop`) | ✅ `ClientSignedAssertion.TokenBindingCertificate` | ❌ callback returns `string` only |
 | Request mTLS PoP on confidential client | ✅ `AcquireTokenForClient().WithMtlsProofOfPossession()` | ❌ never called by `MsalConfidentialClient` |
-| SN/I cert as mTLS binding cert | ✅ `WithCertificate(cert, sendX5C:true)` + PoP | ❌ `ClientCertificateCredential` never requests PoP |
+| SNI cert as mTLS binding cert | ✅ `WithCertificate(cert, sendX5C:true)` + PoP | ❌ `ClientCertificateCredential` never requests PoP |
 | MI mTLS PoP (IMDSv2) | ✅ `AcquireTokenForManagedIdentity().WithMtlsProofOfPossession()` | ✅ **direct** MI only; ❌ MI-as-FIC |
 | Return binding cert to caller | ✅ `AuthenticationResult.BindingCertificate` | ⚠️ `AccessToken.BindingCertificate` exists but FIC creds never set it |
 | Signal PoP intent on a request | — | ⚠️ `TokenRequestContext.IsProofOfPossessionEnabled` (used by direct MI; ignored by FIC creds) |
@@ -298,7 +297,7 @@ routed to the wrong scheme.
 
 ### 4.5 SNI and MSI variants fall out naturally
 
-- **SNI FIC:** either (a) let `ClientCertificateCredential` request PoP so its SN/I cert becomes the
+- **SNI FIC:** either (a) let `ClientCertificateCredential` request PoP so its SNI cert becomes the
   binding cert (Pattern A), or (b) supply the cert via the new cert-bound assertion callback (Pattern B).
 - **MSI FIC:** reuse the direct-MI mTLS path to mint an IMDSv2-bound MI token, then present it as a
   cert-bound assertion — bringing `ManagedIdentityAsFederatedIdentityCredential` up to parity with the
@@ -331,7 +330,7 @@ routed to the wrong scheme.
 **MSAL .NET** — `AzureAD/microsoft-authentication-library-for-dotnet` @ `main` (verified 2026-07-09):
 - `src/client/Microsoft.Identity.Client/AppConfig/ClientSignedAssertion.cs` — `Assertion` + `TokenBindingCertificate`; jwt-pop vs jwt-bearer rule.
 - `src/client/Microsoft.Identity.Client/AppConfig/AssertionRequestOptions.cs` — `TokenEndpoint`, `CorrelationId`, `ClientCapabilities`, etc.
-- `src/client/Microsoft.Identity.Client/AppConfig/ConfidentialClientApplicationBuilder.cs` — `WithClientAssertion` overloads: `[Obsolete]` `WithClientAssertion(string)` (L249–251, steers to the FIC-capable callback), `Func<string>` (L270), `Func<CancellationToken,Task<string>>` (L290), `Func<AssertionRequestOptions,Task<string>>` (L309), and the cert-bound `Func<AssertionRequestOptions,CancellationToken,Task<ClientSignedAssertion>>` (L333–334); plus `WithCertificate(cert, sendX5C)`.
+- `src/client/Microsoft.Identity.Client/AppConfig/ConfidentialClientApplicationBuilder.cs` — `WithClientAssertion` overloads: `[Obsolete]` `WithClientAssertion(string)` (steers to the FIC-capable callback), `Func<string>`, `Func<CancellationToken,Task<string>>`, `Func<AssertionRequestOptions,Task<string>>`, and the cert-bound `Func<AssertionRequestOptions,CancellationToken,Task<ClientSignedAssertion>>`; plus `WithCertificate(cert, sendX5C)`.
 - `src/client/Microsoft.Identity.Client/ApiConfig/AcquireTokenForClientParameterBuilder.cs` — confidential-client `WithMtlsProofOfPossession()` (method body only; **does not** enforce the authority/region constraints — those live deeper in MSAL).
 - `src/client/Microsoft.Identity.Client/ManagedIdentity/ManagedIdentityPopExtensions.cs` — MI `WithMtlsProofOfPossession()` (+ `PoPOptions.MinStrength`).
 - `tests/Microsoft.Identity.Test.Integration.netcore/HeadlessTests/ClientCredentialsMtlsPopTests.cs` — SNI FIC patterns A/B; `CorrelationId` flow into the assertion callback (issue #5924, L243–245); and the mTLS-transport-vs-PoP distinction (`Sni_Over_Mtls_Gets_Bearer_Token_Successfully_TestAsync` → `Bearer` vs `Sni_Gets_Pop_Token_WithSendCertificateOverMtls_*` → `mtls_pop`).
