@@ -83,31 +83,6 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
-        /// <summary>
-        /// Specifies client-originated claims to include in the token request.
-        /// Unlike <see cref="WithClaims(string)"/> (for server-issued claims challenges), tokens acquired
-        /// with client claims are cached and keyed on the claims value. Different claim values produce
-        /// separate cache entries. Use stable, non-dynamic claim values to avoid cache fragmentation.
-        /// </summary>
-        /// <param name="claimsJson">A JSON string containing the client claims. Must be valid JSON.</param>
-        /// <returns>The builder to chain .With methods.</returns>
-        public AcquireTokenForManagedIdentityParameterBuilder WithClaimsFromClient(string claimsJson)
-        {
-            if (string.IsNullOrWhiteSpace(claimsJson))
-            {
-                return this;
-            }
-
-            ValidateUseOfExperimentalFeature();
-
-            CommonParameters.ClientClaims = claimsJson;
-
-            CommonParameters.CacheKeyComponents ??= new SortedList<string, Func<CancellationToken, Task<string>>>();
-            CommonParameters.CacheKeyComponents["client_claims"] = _ => Task.FromResult(claimsJson);
-
-            return this;
-        }
-
         /// <inheritdoc/>
         internal override Task<AuthenticationResult> ExecuteInternalAsync(CancellationToken cancellationToken)
         {

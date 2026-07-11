@@ -5,6 +5,7 @@
 - Exposed canonical OpenTelemetry tag names per metric via `MsalMetricsCatalog.CanonicalTagsByMetric` for discoverability and validation. [#6076](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6076)
 
 ### Changes
+- **Breaking change:** Removed managed identity support for `WithClaimsFromClient(claimsJson)`; the API is now confidential-client only. The `AcquireTokenForManagedIdentityParameterBuilder.WithClaimsFromClient(string)` overload (added in 4.84.2) has been removed, and managed identity no longer forwards client-originated claims to IMDS. Use `WithClaimsFromClient` on the confidential client flows (`AcquireTokenForClient`) instead. [#5999](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5999)
 - Managed identity error messages and request-failure logs now include the detected `ManagedIdentitySource` (e.g., `AppService`, `Imds`, `ServiceFabric`) so the host-issued `Managed Identity Correlation ID` can be traced to the correct host's telemetry. [#6101](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6101)
 
 4.85.0

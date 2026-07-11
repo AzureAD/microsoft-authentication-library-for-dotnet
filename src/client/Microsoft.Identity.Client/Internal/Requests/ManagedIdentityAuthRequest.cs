@@ -222,18 +222,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             _managedIdentityParameters.IsMtlsPopRequested = AuthenticationRequestParameters.IsMtlsPopRequested;
 
-            // Propagate client-originated claims to the MI parameters for transport.
-            // Unlike server-issued Claims (which bypass the cache), ClientClaims participate in caching
-            // via CacheKeyComponents set on the builder — tokens are keyed per distinct claims value.
-            if (!string.IsNullOrEmpty(AuthenticationRequestParameters.ClientClaims))
-            {
-                _managedIdentityParameters.ClientClaims = AuthenticationRequestParameters.ClientClaims;
-            }
-
             // mTLS PoP is served exclusively by IMDSv2. Mint the binding certificate, then delegate the
-            // token leg to MSAL's internal TokenClient exchange (the same path CCA uses) so client-originated
-            // claims, client-capability (CP1) merge, claims-based cache keying, and ESTS error handling are
-            // inherited rather than re-implemented in a bespoke MI token POST.
+            // token leg to MSAL's internal TokenClient exchange (the same path CCA uses) so client-capability
+            // (CP1) merge and ESTS error handling are inherited rather than re-implemented in a bespoke MI token POST.
             if (AuthenticationRequestParameters.IsMtlsPopRequested)
             {
                 return await SendDelegatedImdsV2TokenRequestAsync(logger, cancellationToken).ConfigureAwait(false);
@@ -307,8 +298,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
             _managedIdentityClient.SetRuntimeMtlsBindingCertificate(binding.Certificate);
 
             // grant_type is not added by TokenClient; client_id overrides AppConfig.ClientId
-            // (the SAMI placeholder) with the canonical GUID from the binding. Client-originated claims
-            // are emitted automatically by TokenClient via ClaimsAndClientCapabilities.
+            // (the SAMI placeholder) with the canonical GUID from the binding. Server-issued claims and
+            // client capabilities are emitted automatically by TokenClient via ClaimsAndClientCapabilities.
             var bodyParameters = new Dictionary<string, string>
             {
                 [OAuth2Parameter.GrantType] = OAuth2GrantType.ClientCredentials,
