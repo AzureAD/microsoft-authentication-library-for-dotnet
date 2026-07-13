@@ -61,8 +61,9 @@ namespace Microsoft.Identity.Client.Extensions.Msal.Accessors
         /// https://github.com/NuGet/NuGet.Client/commit/d62db666c710bf95121fe8f5c6a6cbe01985456f
         /// </summary>
         /// <remarks>
-        /// <paramref name="path"/> must not be a symbolic link. The caller (<see cref="FileIOWithRetries.CreateAndWriteToFile"/>
-        /// and <see cref="FileIOWithRetries.TouchFile"/>) enforces this on non-Windows platforms via a pre-check that throws
+        /// <paramref name="path"/> must not be a symbolic link. The caller
+        /// (<see cref="FileIOWithRetries.CreateAndWriteToFile"/> with <c>setChmod600: true</c>)
+        /// enforces this on non-Windows platforms via a pre-check that throws
         /// <see cref="InvalidOperationException"/> before entering the write path.
         /// </remarks>
         private static void WriteToNewFileWithOwnerRWPermissionsUnix(string path, byte[] data)

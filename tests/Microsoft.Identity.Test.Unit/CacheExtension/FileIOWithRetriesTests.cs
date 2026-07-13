@@ -29,7 +29,6 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
         }
 
         [DoNotRunOnWindows]
-        [TestMethod]
         public void CreateAndWriteToFile_SymlinkAtCachePath_ThrowsInvalidOperationException()
         {
             string dir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
@@ -64,7 +63,6 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
         }
 
         [DoNotRunOnWindows]
-        [TestMethod]
         public void TouchFile_SymlinkAtCachePath_ThrowsInvalidOperationException()
         {
             string dir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
@@ -77,6 +75,40 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
             File.CreateSymbolicLink(symlinkPath, realTarget);
 #else
             using var proc = Process.Start(new ProcessStartInfo("ln", $"-s \"{realTarget}\" \"{symlinkPath}\""));
+            proc?.WaitForExit();
+#endif
+
+            try
+            {
+                var ex = AssertException.Throws<InvalidOperationException>(() =>
+                    FileIOWithRetries.TouchFile(
+                        symlinkPath,
+                        new TraceSourceLogger(_logger)));
+
+                StringAssert.Contains(ex.Message, "symbolic link");
+            }
+            finally
+            {
+                Directory.Delete(dir, recursive: true);
+            }
+        }
+
+        [DoNotRunOnWindows]
+        public void TouchFile_DanglingSymlinkAtCachePath_ThrowsInvalidOperationException()
+        {
+            // A dangling symlink (target does not exist) must also be detected and rejected.
+            // If File.GetAttributes ever threw FileNotFoundException for broken links instead of
+            // returning ReparsePoint, the catch block in ThrowIfCacheFileIsSymlink would silently
+            // allow the write. This test pins that the check works for dangling links.
+            string dir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            Directory.CreateDirectory(dir);
+            string nonExistentTarget = Path.Combine(dir, "ghost.bin");
+            string symlinkPath = Path.Combine(dir, "cache.bin");
+
+#if NET6_0_OR_GREATER
+            File.CreateSymbolicLink(symlinkPath, nonExistentTarget);
+#else
+            using var proc = Process.Start(new ProcessStartInfo("ln", $"-s \"{nonExistentTarget}\" \"{symlinkPath}\""));
             proc?.WaitForExit();
 #endif
 
