@@ -530,6 +530,123 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
+        /// <summary>
+        /// Repro for AADSTS500181 (CertificateValidationFailedTlsCertMismatch) in the two-leg mTLS PoP flow.
+        ///
+        /// MSAL keys the mTLS-PoP token cache with <see cref="CoreHelpers.ComputeX5tS256KeyId"/>, which hashes
+        /// only the certificate's PUBLIC KEY. ESTS/MSS, however, bind and validate the token against the DER of
+        /// the presented certificate (x5t#S256, RFC 8705).
+        ///
+        /// When the binding certificate is renewed with the SAME key but a new DER (serial/validity) — exactly
+        /// what IMDS/KeyGuard produces when it reissues the cert over the same non-exportable key — the
+        /// public-key-hash cache key is unchanged. MSAL therefore cannot tell the old cert from the renewed one
+        /// and serves the STALE token (bound to the old cert's DER) while the renewed cert is on the wire,
+        /// producing the certificate/assertion mismatch.
+        ///
+        /// Correct behavior: a same-key renewal is a DIFFERENT certificate and MUST cause a cache miss, re-minting
+        /// a token bound to the renewed cert. This test FAILS on current code (second acquisition returns
+        /// TokenSource.Cache with the cert-A-bound token) and PASSES once the cache key is derived from the DER.
+        /// </summary>
+        [TestMethod]
+        public async Task MtlsPop_SameKeyCertRenewal_MustNotServeStaleCachedTokenAsync()
+        {
+            const string region = "eastus";
+
+            // Two certificates that share ONE RSA key pair but differ in DER (validity + serial).
+            // This models a same-key certificate renewal.
+            using RSA sharedKey = RSA.Create(2048);
+
+            X509Certificate2 certA = new CertificateRequest(
+                    "CN=MtlsPopSameKeyRenewal", sharedKey, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1)
+                .CreateSelfSigned(DateTimeOffset.UtcNow.AddDays(-2), DateTimeOffset.UtcNow.AddDays(30));
+
+            X509Certificate2 certB = new CertificateRequest(
+                    "CN=MtlsPopSameKeyRenewal", sharedKey, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1)
+                .CreateSelfSigned(DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddDays(60));
+
+            try
+            {
+                // Precondition 1: identical public key (same key pair).
+                CollectionAssert.AreEqual(
+                    certA.GetPublicKey(), certB.GetPublicKey(),
+                    "Test setup invalid: the two certificates must share the same public key.");
+
+                // Precondition 2: different certificates (different DER => different x5t#S256 => different thumbprint).
+                Assert.AreNotEqual(
+                    certA.Thumbprint, certB.Thumbprint,
+                    "Test setup invalid: the two certificates must be different (different DER).");
+
+                // The binding certificate presented on the wire. Starts as cert A, then "renews" to cert B.
+                X509Certificate2 currentCert = certA;
+
+                using (var envContext = new EnvVariableContext())
+                {
+                    Environment.SetEnvironmentVariable("REGION_NAME", region);
+
+                    using (var httpManager = new MockHttpManager())
+                    {
+                        // Distinct tokens per mint so we can prove exactly which one is served.
+                        httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(
+                            token: "token_bound_to_certA", tokenType: "mtls_pop");
+
+                        var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                            .WithExperimentalFeatures()
+                            .WithCertificate(_ => Task.FromResult(currentCert), new CertificateOptions())
+                            .WithAuthority("https://login.microsoftonline.com/123456-1234-2345-1234561234")
+                            .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
+                            .WithHttpManager(httpManager)
+                            .BuildConcrete();
+
+                        // ── Request 1: bind a PoP token to cert A. Hits the IdP and caches. ──
+                        AuthenticationResult first = await app.AcquireTokenForClient(TestConstants.s_scope)
+                            .WithMtlsProofOfPossession()
+                            .ExecuteAsync()
+                            .ConfigureAwait(false);
+
+                        Assert.AreEqual(TokenSource.IdentityProvider, first.AuthenticationResultMetadata.TokenSource);
+                        Assert.AreEqual("token_bound_to_certA", first.AccessToken);
+                        Assert.AreEqual(certA.Thumbprint, first.BindingCertificate.Thumbprint);
+
+                        // ── Same-key renewal: the platform reissues the binding cert over the same key. ──
+                        currentCert = certB;
+
+                        // A fresh IdP response is available for the (expected) cache miss on the renewed cert.
+                        httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(
+                            token: "token_bound_to_certB", tokenType: "mtls_pop");
+
+                        // ── Request 2: cert B is now on the wire. ──
+                        AuthenticationResult second = await app.AcquireTokenForClient(TestConstants.s_scope)
+                            .WithMtlsProofOfPossession()
+                            .ExecuteAsync()
+                            .ConfigureAwait(false);
+
+                        // ─────────────────────────────── The bug ───────────────────────────────
+                        // Cert B has a different DER than cert A, so the cert-A-bound cached token is invalid for
+                        // cert B. Correct behavior is a cache MISS and a re-mint bound to cert B. On current code,
+                        // ComputeX5tS256KeyId hashes the public key (identical across the renewal), so the lookup
+                        // HITS the cert-A-bound token and returns it from cache while cert B is on the wire —
+                        // reproducing AADSTS500181.
+                        Assert.AreEqual(
+                            TokenSource.IdentityProvider,
+                            second.AuthenticationResultMetadata.TokenSource,
+                            "A same-key certificate renewal (same public key, different DER) MUST invalidate the " +
+                            "cached mTLS-PoP token. Serving the stale cert-A-bound token while cert B is on the wire " +
+                            "is the root cause of AADSTS500181 (CertificateValidationFailedTlsCertMismatch).");
+
+                        Assert.AreEqual(
+                            "token_bound_to_certB",
+                            second.AccessToken,
+                            "MSAL served the cert-A-bound token for a request presenting cert B.");
+                    }
+                }
+            }
+            finally
+            {
+                certA.Dispose();
+                certB.Dispose();
+            }
+        }
+
         [TestMethod]
         public async Task MtlsPop_KnownRegionAsync()
         {
