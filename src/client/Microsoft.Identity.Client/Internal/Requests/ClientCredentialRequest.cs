@@ -403,17 +403,17 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 string expectedKid = CoreHelpers.ComputeX5tS256KeyId(requestCert);
 
-                // If the certificate cannot produce a valid KeyId (SPKI-SHA256), expectedKid will be null or empty.
+                // If the certificate cannot produce a valid KeyId (x5t#S256 over the cert DER), expectedKid will be null or empty.
                 // In this case, the cache will be bypassed, as we cannot safely match the cached token to the certificate.
                 if (!string.Equals(cacheItem.KeyId, expectedKid, StringComparison.Ordinal))
                 {
                     AuthenticationRequestParameters.RequestContext.Logger.Verbose(() =>
-                    "[ClientCredentialRequest] Cached token KeyId does not match request certificate (SPKI-SHA256 mismatch). Bypassing cache.");
+                    "[ClientCredentialRequest] Cached token KeyId does not match request certificate (x5t#S256 DER mismatch). Bypassing cache.");
                     return false;
                 }
                 
                 AuthenticationRequestParameters.RequestContext.Logger.Verbose(() =>
-                "[ClientCredentialRequest] Cached token KeyId matches request certificate (SPKI-SHA256). Using cached token.");
+                "[ClientCredentialRequest] Cached token KeyId matches request certificate (x5t#S256 DER). Using cached token.");
             }
 
             // 3) If the token's hash matches AccessTokenHashToRefresh, ignore it

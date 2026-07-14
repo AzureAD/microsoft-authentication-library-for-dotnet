@@ -238,13 +238,13 @@ namespace Microsoft.Identity.Client.Utils
 
         internal static string ComputeX5tS256KeyId(X509Certificate2 certificate)
         {
-            // Extract the raw bytes of the certificate’s public key.
-            var publicKey = certificate.GetPublicKey();
-
-            // Compute the SHA-256 hash of the public key.
+            // The mTLS PoP token is bound by ESTS/MSS to the SHA-256 hash of the full DER-encoded
+            // certificate (x5t#S256, RFC 8705) — NOT to the public key alone. Deriving the cache KeyId
+            // from the DER ensures a same-key certificate renewal (identical public key, new
+            // DER/serial/validity) is treated as a distinct credential instead of a stale cache hit.
             using (var sha256 = SHA256.Create())
             {
-                byte[] hash = sha256.ComputeHash(publicKey);
+                byte[] hash = sha256.ComputeHash(certificate.RawData);
 
                 // Return the hash encoded in Base64 URL format.
                 return Base64UrlHelpers.Encode(hash);

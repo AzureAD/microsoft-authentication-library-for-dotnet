@@ -301,7 +301,7 @@ namespace Microsoft.Identity.Test.Unit
         {
             var scheme = new MtlsPopAuthenticationOperation(s_testCertificate);
 
-            // Compute the expected KeyId using SHA-256 on the public key
+            // Compute the expected KeyId using SHA-256 over the certificate DER (x5t#S256)
             var expectedKeyId = ComputeExpectedKeyId(s_testCertificate);
 
             Assert.AreEqual(expectedKeyId, scheme.KeyId);
@@ -332,13 +332,11 @@ namespace Microsoft.Identity.Test.Unit
 
         private static string ComputeExpectedKeyId(X509Certificate2 certificate)
         {
-            // Get the raw public key bytes
-            var publicKey = certificate.GetPublicKey();
-
-            // Compute the SHA-256 hash of the public key
+            // Compute the SHA-256 hash of the full DER-encoded certificate (x5t#S256, RFC 8705),
+            // matching what ESTS/MSS bind the mTLS PoP token to.
             using (var sha256 = SHA256.Create())
             {
-                byte[] hash = sha256.ComputeHash(publicKey);
+                byte[] hash = sha256.ComputeHash(certificate.RawData);
                 return Base64UrlHelpers.Encode(hash);
             }
         }
