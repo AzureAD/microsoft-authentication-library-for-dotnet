@@ -56,8 +56,10 @@ namespace Microsoft.Identity.Client.Internal.Logger
                 return message;
             }
 
-            // Fast path: no pattern present, return the same reference with no allocation.
-            if (!ContainsAnyPattern(message))
+            // Single search for the first match. On the no-match fast path this returns the same
+            // reference with no allocation and without scanning the string twice.
+            int matchStart = FindEarliestMatch(message, 0, out int matchLength);
+            if (matchStart < 0)
             {
                 return message;
             }
@@ -65,16 +67,8 @@ namespace Microsoft.Identity.Client.Internal.Logger
             var sb = new StringBuilder(message.Length);
             int index = 0;
 
-            while (index < message.Length)
+            while (matchStart >= 0)
             {
-                int matchStart = FindEarliestMatch(message, index, out int matchLength);
-
-                if (matchStart < 0)
-                {
-                    sb.Append(message, index, message.Length - index);
-                    break;
-                }
-
                 // Expand the match left and right over the token charset to cover the whole run.
                 int runStart = matchStart;
                 while (runStart > index && IsTokenChar(message[runStart - 1]))
@@ -93,22 +87,15 @@ namespace Microsoft.Identity.Client.Internal.Logger
                 sb.Append(Placeholder);
 
                 index = runEnd;
+                matchStart = index < message.Length ? FindEarliestMatch(message, index, out matchLength) : -1;
+            }
+
+            if (index < message.Length)
+            {
+                sb.Append(message, index, message.Length - index);
             }
 
             return sb.ToString();
-        }
-
-        private static bool ContainsAnyPattern(string message)
-        {
-            for (int i = 0; i < s_patterns.Length; i++)
-            {
-                if (message.IndexOf(s_patterns[i], StringComparison.Ordinal) >= 0)
-                {
-                    return true;
-                }
-            }
-
-            return false;
         }
 
         private static int FindEarliestMatch(string message, int startIndex, out int matchLength)
