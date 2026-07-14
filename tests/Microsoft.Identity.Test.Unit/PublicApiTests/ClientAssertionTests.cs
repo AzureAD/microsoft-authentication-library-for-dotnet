@@ -799,6 +799,79 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
+        // PROVES the double-invocation bug. On a network request MSAL invokes the client-assertion
+        // delegate TWICE: it takes the certificate from call #1 (put on the mTLS wire) and the assertion
+        // from call #2 (put in the client_assertion body). If the delegate returns a different
+        // (assertion, cert) pair across the two invocations - e.g. the binding certificate rotates
+        // between them - MSAL sends the cert from call #1 on the wire together with an assertion bound
+        // to call #2's cert. ESTS rejects that mismatch with AADSTS500181.
+        //
+        // Invariant asserted: the client_assertion actually sent MUST be bound to the certificate
+        // actually presented on the mTLS wire. This FAILS on current MSAL (the pair is split across the
+        // two delegate invocations).
+        public async Task BearerOverMtls_WireCertAndAssertion_MustComeFromSameDelegateInvocation_Async()
+        {
+            const string region = "eastus";
+            const string tenantId = "123456-1234-2345-1234561234";
+
+            using (var envContext = new EnvVariableContext())
+            {
+                Environment.SetEnvironmentVariable("REGION_NAME", region);
+
+                using (var httpManager = new MockHttpManager())
+                {
+                    // Each delegate invocation returns a FRESH cert + an assertion that encodes ITS cert.
+                    var certsIssued = new List<X509Certificate2>();
+                    Func<AssertionRequestOptions, CancellationToken, Task<ClientSignedAssertion>> provider =
+                        (options, ct) =>
+                        {
+                            var cert = CreateSelfSignedCert(TimeSpan.FromDays(3), $"CN=Rotation{certsIssued.Count}");
+                            certsIssued.Add(cert);
+                            return Task.FromResult(new ClientSignedAssertion
+                            {
+                                Assertion = "assertion-for-" + cert.Thumbprint,
+                                TokenBindingCertificate = cert
+                            });
+                        };
+
+                    MockHttpMessageHandler tokenHandler =
+                        httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(token: "bearer-token");
+
+                    var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                        .WithClientSecret(TestConstants.ClientSecret)
+                        .WithClientAssertion(provider)
+                        .WithAuthority(new Uri($"https://login.microsoftonline.com/{tenantId}"), validateAuthority: false)
+                        .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
+                        .WithHttpManager(httpManager)
+                        .BuildConcrete();
+
+                    await app.AcquireTokenForClient(TestConstants.s_scope)
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
+
+                    // The certificate MSAL presented on the mTLS handshake.
+                    var wireCert = tokenHandler.ClientCertificates.Count > 0
+                        ? (X509Certificate2)tokenHandler.ClientCertificates[0]
+                        : null;
+                    Assert.IsNotNull(wireCert, "MSAL should have presented a client certificate on the mTLS handshake.");
+
+                    // The client_assertion MSAL actually sent in the token request body.
+                    Assert.IsTrue(
+                        tokenHandler.ActualRequestPostData.TryGetValue("client_assertion", out string sentAssertion),
+                        "Expected a client_assertion in the token request body.");
+
+                    // INVARIANT: the assertion sent must be bound to the certificate on the wire.
+                    Assert.AreEqual(
+                        "assertion-for-" + wireCert.Thumbprint,
+                        sentAssertion,
+                        $"MSAL sent an assertion bound to a DIFFERENT certificate than the one on the mTLS wire " +
+                        $"(delegate invoked {certsIssued.Count} times). This is the double-invocation assertion/cert " +
+                        $"mismatch behind AADSTS500181.");
+                }
+            }
+        }
+
+        [TestMethod]
         public async Task WithMtlsAssertion_NoRegion_UsesGlobalEndpointAsync()
         {
             using var http = new MockHttpManager();
