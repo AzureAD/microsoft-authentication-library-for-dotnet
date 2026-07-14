@@ -14,7 +14,7 @@ requests mTLS-PoP, and so returns Bearer tokens only. This note records that gap
 
 - **MSAL.NET supports it.** Certificate-bound client tokens via `WithMtlsProofOfPossession()` (confidential
   clients and managed identity), cert-bound assertions (`ClientSignedAssertion` carrying a
-  `TokenBindingCertificate`), and `AuthenticationResult.BindingCertificate`. This ships in the net8.0 API, and
+  `TokenBindingCertificate`), and `AuthenticationResult.BindingCertificate`. This ships in the netstandard2.0 public API (and higher TFMs), and
   the two-leg FIC pattern is documented and tested in the MSAL repo (4.82.1+).
 - **Azure.Identity's FIC path doesn't.** `ClientAssertionCredential`, `WorkloadIdentityCredential`, and the
   internal `ManagedIdentityAsFederatedIdentityCredential` all converge on a `string` assertion, never request
