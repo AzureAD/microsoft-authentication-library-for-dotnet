@@ -1131,3 +1131,15 @@ Microsoft.Identity.Client.AzureCloudInstance.GovSg = 7 -> Microsoft.Identity.Cli
 static Microsoft.Identity.Client.Extensibility.AbstractConfidentialClientAcquireTokenParameterBuilderExtension.WithOtelTagsEnricher<T>(this Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T> builder, System.Action<Microsoft.Identity.Client.Extensibility.ExecutionResult, System.Collections.Generic.IList<System.Collections.Generic.KeyValuePair<string, object>>> tagsEnricher) -> Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T>
 Microsoft.Identity.Client.Extensibility.MsalMetricsCatalog
 static Microsoft.Identity.Client.Extensibility.MsalMetricsCatalog.CanonicalTagsByMetric.get -> System.Collections.Generic.IReadOnlyDictionary<string, System.Collections.Generic.IReadOnlyList<string>>
+Microsoft.Identity.Client.Region.RegionOutcome.UserProvided = 6 -> Microsoft.Identity.Client.Region.RegionOutcome
+const Microsoft.Identity.Client.MsalError.MinStrengthNotMet = "min_strength_not_met" -> string
+Microsoft.Identity.Client.AppConfig.PoPOptions
+Microsoft.Identity.Client.AppConfig.PoPOptions.MinStrength.get -> Microsoft.Identity.Client.AppConfig.MtlsBindingStrength
+Microsoft.Identity.Client.AppConfig.PoPOptions.MinStrength.set -> void
+Microsoft.Identity.Client.AppConfig.PoPOptions.PoPOptions() -> void
+static Microsoft.Identity.Client.Extensibility.AcquireTokenParameterBuilderExtensions.WithCachePartitionKey<T>(this Microsoft.Identity.Client.BaseAbstractAcquireTokenParameterBuilder<T> builder, string key, string value, bool partitionRefreshToken) -> T
+static Microsoft.Identity.Client.ManagedIdentityPopExtensions.WithMtlsProofOfPossession(this Microsoft.Identity.Client.AcquireTokenForManagedIdentityParameterBuilder builder, Microsoft.Identity.Client.AppConfig.PoPOptions options) -> Microsoft.Identity.Client.AcquireTokenForManagedIdentityParameterBuilder
+Microsoft.Identity.Client.MsalException.AuthenticationResultMetadata.get -> Microsoft.Identity.Client.AuthenticationResultMetadata
+Microsoft.Identity.Client.Extensibility.ManagedIdentityApplicationBuilderExtensions
+static Microsoft.Identity.Client.Extensibility.ConfidentialClientApplicationBuilderExtensions.OnBackgroundTokenRefreshCompleted(this Microsoft.Identity.Client.ConfidentialClientApplicationBuilder builder, System.Func<Microsoft.Identity.Client.Extensibility.ExecutionResult, System.Threading.Tasks.Task> onBackgroundTokenRefreshCompleted) -> Microsoft.Identity.Client.ConfidentialClientApplicationBuilder
+static Microsoft.Identity.Client.Extensibility.ManagedIdentityApplicationBuilderExtensions.OnBackgroundTokenRefreshCompleted(this Microsoft.Identity.Client.ManagedIdentityApplicationBuilder builder, System.Func<Microsoft.Identity.Client.Extensibility.ExecutionResult, System.Threading.Tasks.Task> onBackgroundTokenRefreshCompleted) -> Microsoft.Identity.Client.ManagedIdentityApplicationBuilder
