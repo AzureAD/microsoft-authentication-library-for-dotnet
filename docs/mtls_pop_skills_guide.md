@@ -40,6 +40,31 @@ Which frameworks and platforms support mTLS PoP in MSAL.NET?
 
 Use these for token exchange and two-leg flows:
 
+> **Scope note:** FIC over mTLS PoP is supported for **S2S / app (client-credentials)** flows only.
+> A user-delegated **`user_fic`** flow is **not** supported over mTLS.
+
+#### SNI First Leg (S2S FIC)
+
+```
+How do I use an SNI certificate as the first leg of S2S FIC over mTLS PoP?
+```
+
+```
+Show me SNI first leg -> S2S FIC -> mtls_pop end to end in MSAL.NET
+```
+
+```
+How do I carry the Leg-1 BindingCertificate into Leg 2 with WithClientAssertion?
+```
+
+```
+Is user_fic supported over mTLS PoP? (No - S2S/app FIC only)
+```
+
+```
+What exchange audience do I use - api://AzureADTokenExchange vs api://AzureFMITokenExchange?
+```
+
 #### Understanding FIC Two-Leg Flow
 
 ```
@@ -168,6 +193,10 @@ What do I do if I get "MtlsCertificateNotProvided" error?
 
 ```
 What does "MtlsPopWithoutRegion" error mean?
+```
+
+```
+Is a region required for mTLS PoP? (No - it is optional; MSAL falls back to the cloud's global mtlsauth endpoint, e.g. mtlsauth.microsoft.com in public cloud)
 ```
 
 ```

@@ -42,7 +42,12 @@ Bearer tokens are vulnerable to theft. Proof-of-Possession (PoP) tokens mitigate
 
 ### MTLS Endpoint Usage
 
-The mTLS PoP flow relies on tenanted endpoints with support for regional configurations. The behavior varies based on the cloud environment:
+The mTLS PoP flow relies on tenanted endpoints. A region is **optional** — it is recommended for performance, but when no region is configured (or auto-detection yields none) MSAL falls back to the **global** mTLS endpoint, which is production-ready. The behavior varies based on the cloud environment:
+
+#### Region is optional (global fallback)
+
+- **Regional (recommended):** `https://{region}.mtlsauth.microsoft.com/{tenant_id}` — set via `.WithAzureRegion(...)`.
+- **Global (no region):** `https://mtlsauth.microsoft.com/{tenant_id}` (public cloud) — used automatically when no region is set. Sovereign clouds use their own `mtlsauth.<cloud-suffix>` host instead (e.g. `mtlsauth.microsoftonline.us`, `mtlsauth.partner.microsoftonline.cn`); the global host is derived from the authority by swapping the `login.` prefix for `mtlsauth`. There is **no "region required" error**; the earlier `RegionRequiredForMtlsPop` message is stale and retained only for API compatibility.
 
 #### Public Cloud
 
@@ -52,7 +57,7 @@ The base endpoint for public clouds is:
 
 Example: Specifying the `westus` region results in:
 
-`https://eastus.mtlsauth.microsoft.com/{tenant_id}`
+`https://westus.mtlsauth.microsoft.com/{tenant_id}`
 
 #### Sovereign Clouds
 
@@ -97,6 +102,78 @@ AuthenticationResult result = await app.AcquireTokenForClient(scopes).WithMtlsPr
     .ExecuteAsync();
 ```
 
+## Two-Leg S2S (App) FIC over mTLS PoP
+
+A confidential-client app can use its SNI certificate as the **first leg** of a Federated Identity
+Credential (FIC) exchange and obtain an **mTLS-bound PoP** token at the **second leg**. This reuses the
+existing `WithClientAssertion(...)` seam that accepts a `ClientSignedAssertion` carrying an optional
+`TokenBindingCertificate` — no new public API.
+
+> **Scope:** FIC over mTLS PoP is supported for **S2S / app (client-credentials)** flows only.
+> **`user_fic` (a user-delegated FIC) is _not_ supported over mTLS.**
+
+- **Leg 1 — SNI cert → federated assertion (cert-bound PoP).** `AcquireTokenForClient` against the
+  exchange audience with `WithMtlsProofOfPossession()`. Leg 1 being cert-bound PoP is what produces the
+  `cnf`. The result exposes `AuthenticationResult.BindingCertificate` — the `X509Certificate2` the token
+  is bound to (surfaced in `cnf` as `x5t#S256`). It is the same cert used on the wire, so it may carry a
+  private key.
+- **Leg 2 — federated assertion → final app token (bound to the Leg-1 cert).** `AcquireTokenForClient`
+  against the final resource, supplying the Leg-1 assertion **and** the Leg-1 binding certificate via
+  `ClientSignedAssertion.TokenBindingCertificate`, again with `WithMtlsProofOfPossession()`. MSAL sends
+  `client_assertion` + `client_assertion_type = urn:ietf:params:oauth:client-assertion-type:jwt-pop`
+  over mTLS, and the returned token is `mtls_pop`, bound to the **same** certificate as Leg 1.
+
+```csharp
+X509Certificate2 sniCert = GetCertificateFromStore("Use The Lab Auth Cert");
+
+// Leg 1: SNI cert -> federated assertion (mtls_pop)
+var leg1App = ConfidentialClientApplicationBuilder.Create(clientId)
+    .WithAuthority(authority)
+    .WithCertificate(sniCert, sendX5C: true)
+    .Build();
+
+AuthenticationResult leg1 = await leg1App
+    .AcquireTokenForClient(new[] { "api://AzureADTokenExchange/.default" })
+    .WithMtlsProofOfPossession()
+    .ExecuteAsync();
+// leg1.TokenType == "mtls_pop"; leg1.BindingCertificate == the SNI cert (X509Certificate2; may carry a private key).
+
+// Leg 2: carry the Leg-1 assertion + binding cert -> resource token (mtls_pop)
+var leg2App = ConfidentialClientApplicationBuilder.Create(clientId)
+    .WithAuthority(authority)
+    .WithClientAssertion((options, ct) => Task.FromResult(new ClientSignedAssertion
+    {
+        Assertion = leg1.AccessToken,                 // the federated assertion
+        TokenBindingCertificate = leg1.BindingCertificate // carry the SAME cert forward
+    }))
+    .Build();
+
+AuthenticationResult leg2 = await leg2App
+    .AcquireTokenForClient(new[] { "https://vault.azure.net/.default" })
+    .WithMtlsProofOfPossession()
+    .ExecuteAsync();
+// leg2.TokenType == "mtls_pop", bound to leg1.BindingCertificate.Thumbprint.
+```
+
+### Exchange audience is caller-supplied
+
+MSAL does **not** hardcode the exchange audience — it passes through whatever scope the caller requests
+at Leg 1:
+
+- **Generic S2S FIC:** `api://AzureADTokenExchange/.default`.
+- **FMI variant:** `api://AzureFMITokenExchange/.default`, using the reserved client id
+  `urn:microsoft:identity:fmi`.
+
+Both produce the same PoP outcome; the choice is the caller's.
+
+### Transport ownership (mTLS requires MSAL's built-in handler)
+
+mTLS requires MSAL to **own the HTTP transport handler** so it can attach the client certificate to the
+outbound TLS connection. The built-in factory (`IMsalMtlsHttpClientFactory` / `SimpleHttpClientFactory`,
+which is the default) does this. A caller-supplied **plain** `IMsalHttpClientFactory` (a bare
+`HttpClient`) **cannot** carry the mTLS certificate — supply an mTLS-capable factory or rely on the
+built-in transport.
+
 ## Tests to Validate mTLS PoP Tokens
 
 ### Certificate Validation Tests
@@ -114,7 +191,7 @@ AuthenticationResult result = await app.AcquireTokenForClient(scopes).WithMtlsPr
 
 ### Region Validation Tests
 
-- Ensure `MsalClientException` is thrown when no region is set and `WithMtlsProofOfPossession()` is called.
+- Ensure a **no-region** `WithMtlsProofOfPossession()` request succeeds against the **global** `mtlsauth.microsoft.com` endpoint (region is optional; there is no "region required" failure).
 - Validate successful token acquisition with a specified region.
 - Test auto-detected region functionality and confirm the expected region is used.
 - Region is not required if the authority is DSTS.

@@ -1349,6 +1349,144 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
+        #region SNI trust path and S2S FIC carry-over
+
+        [TestMethod]
+        public async Task MtlsPop_SniSendX5C_OmitsClientAssertionAndReqCnfAsync()
+        {
+            // Vanilla SNI over mTLS PoP: the cert is presented on the TLS connection and ESTS
+            // resolves Subject Name + Issuer trust from the TLS-presented cert. Even with sendX5C:true,
+            // the mTLS body must carry NO client_assertion / client_assertion_type / req_cnf — the cert
+            // (cnf / x5t#S256) is the binding, not a signed assertion.
+            string authorityUrl = "https://login.microsoftonline.com/123456-1234-2345-1234561234";
+
+            using (var envContext = new EnvVariableContext())
+            {
+                Environment.SetEnvironmentVariable("REGION_NAME", EastUsRegion);
+
+                using (var harness = new MockHttpAndServiceBundle())
+                {
+                    var tokenHttpCallHandler = new MockHttpMessageHandler()
+                    {
+                        ExpectedUrl = $"https://{EastUsRegion}.mtlsauth.microsoft.com/123456-1234-2345-1234561234/oauth2/v2.0/token",
+                        ExpectedMethod = HttpMethod.Post,
+                        ResponseMessage = CreateResponse(tokenType: "mtls_pop"),
+                        ExpectedPostData = new Dictionary<string, string>
+                        {
+                            { OAuth2Parameter.ClientId, TestConstants.ClientId },
+                            { OAuth2Parameter.GrantType, OAuth2GrantType.ClientCredentials },
+                            { "token_type", "mtls_pop" }
+                        },
+                        UnExpectedPostData = new Dictionary<string, string>
+                        {
+                            { "client_assertion", "n/a" },
+                            { "client_assertion_type", "n/a" },
+                            { OAuth2Parameter.RequestConfirmation, "n/a" }
+                        }
+                    };
+
+                    harness.HttpManager.AddMockHandler(tokenHttpCallHandler);
+
+                    var app = ConfidentialClientApplicationBuilder
+                                 .Create(TestConstants.ClientId)
+                                 .WithAuthority(authorityUrl)
+                                 .WithHttpManager(harness.HttpManager)
+                                 .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
+                                 .WithCertificate(s_testCertificate, sendX5C: true)
+                                 .Build();
+
+                    AuthenticationResult result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                        .WithMtlsProofOfPossession()
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
+
+                    Assert.AreEqual(Constants.MtlsPoPAuthHeaderPrefix, result.TokenType);
+                    Assert.IsNotNull(result.BindingCertificate);
+                    Assert.AreEqual(s_testCertificate.Thumbprint, result.BindingCertificate.Thumbprint);
+                }
+            }
+        }
+
+        [TestMethod]
+        public async Task MtlsPop_S2sFic_ClientAssertionCarryOver_SendsJwtPopAndBindsToCarriedCertAsync()
+        {
+            // S2S (app) FIC "Leg 2" over mTLS PoP: the caller supplies the Leg-1 federated assertion
+            // together with the Leg-1 binding certificate via ClientSignedAssertion.TokenBindingCertificate.
+            // MSAL must forward the assertion as client_assertion, set client_assertion_type to jwt-pop,
+            // present the carried cert on the mTLS connection, and return a token bound to that cert.
+            const string leg1Assertion = "eyLeg1.federated.assertion";
+            var carriedCert = CertHelper.GetOrCreateTestCert(regenerateCert: true);
+            Assert.AreNotEqual(s_testCertificate.Thumbprint, carriedCert.Thumbprint);
+
+            string authorityUrl = "https://login.microsoftonline.com/123456-1234-2345-1234561234";
+
+            using (var envContext = new EnvVariableContext())
+            {
+                Environment.SetEnvironmentVariable("REGION_NAME", EastUsRegion);
+
+                using (var harness = new MockHttpAndServiceBundle())
+                {
+                    var tokenHttpCallHandler = new MockHttpMessageHandler()
+                    {
+                        ExpectedUrl = $"https://{EastUsRegion}.mtlsauth.microsoft.com/123456-1234-2345-1234561234/oauth2/v2.0/token",
+                        ExpectedMethod = HttpMethod.Post,
+                        ResponseMessage = CreateResponse(tokenType: "mtls_pop"),
+                        ExpectedPostData = new Dictionary<string, string>
+                        {
+                            { OAuth2Parameter.ClientId, TestConstants.ClientId },
+                            { OAuth2Parameter.GrantType, OAuth2GrantType.ClientCredentials },
+                            { "token_type", "mtls_pop" },
+                            { "client_assertion", leg1Assertion },
+                            { "client_assertion_type", OAuth2AssertionType.JwtPop }
+                        }
+                    };
+
+                    harness.HttpManager.AddMockHandler(tokenHttpCallHandler);
+
+                    var app = ConfidentialClientApplicationBuilder
+                                 .Create(TestConstants.ClientId)
+                                 .WithAuthority(authorityUrl)
+                                 .WithHttpManager(harness.HttpManager)
+                                 .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
+                                 .WithClientAssertion((AssertionRequestOptions _, CancellationToken _) =>
+                                     Task.FromResult(new ClientSignedAssertion
+                                     {
+                                         Assertion = leg1Assertion,
+                                         TokenBindingCertificate = carriedCert
+                                     }))
+                                 .Build();
+
+                    AuthenticationResult result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                        .WithMtlsProofOfPossession()
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
+
+                    Assert.AreEqual(Constants.MtlsPoPAuthHeaderPrefix, result.TokenType);
+                    Assert.IsNotNull(result.BindingCertificate);
+                    Assert.AreEqual(carriedCert.Thumbprint, result.BindingCertificate.Thumbprint,
+                        "The final token must be bound to the carried Leg-1 certificate.");
+                }
+            }
+        }
+
+        [TestMethod]
+        public void MtlsPop_DefaultHttpClientFactory_IsMtlsCapable_TransportOwnedByMsal()
+        {
+            // mTLS requires MSAL to own the transport handler so it can attach the client certificate.
+            // MSAL's default factory must be mTLS-capable (IMsalMtlsHttpClientFactory); a plain
+            // caller-supplied IMsalHttpClientFactory cannot carry the mTLS cert.
+            IMsalHttpClientFactory defaultFactory =
+                Microsoft.Identity.Client.PlatformsCommon.Factories.PlatformProxyFactory
+                    .CreatePlatformProxy(null)
+                    .CreateDefaultHttpClientFactory();
+
+            Assert.IsInstanceOfType(defaultFactory, typeof(IMsalMtlsHttpClientFactory),
+                "MSAL's default HTTP transport must be mTLS-capable so it can present the client certificate " +
+                "on the mutual-TLS connection to the token endpoint.");
+        }
+
+        #endregion
+
         #region SendCertificateOverMtls tests
 
         [TestMethod]
