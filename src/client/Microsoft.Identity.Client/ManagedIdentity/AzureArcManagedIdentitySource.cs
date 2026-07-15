@@ -17,7 +17,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 {
     internal class AzureArcManagedIdentitySource : AbstractManagedIdentity
     {
-        private const string ArcApiVersion = "2019-11-01";
+        private const string ArcApiVersion = "2026-06-15-preview";
         private const string AzureArc = "Azure Arc";
 
         private readonly Uri _endpoint;
@@ -63,20 +63,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             base(requestContext, ManagedIdentitySource.AzureArc)
         {
             _endpoint = endpoint;
-
-            if (requestContext.ServiceBundle.Config.ManagedIdentityId.IsUserAssigned)
-            {
-                string errorMessage = string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityUserAssignedNotSupported, AzureArc);
-
-                var exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
-                    MsalError.UserAssignedManagedIdentityNotSupported, 
-                    errorMessage, 
-                    null, 
-                    ManagedIdentitySource.AzureArc, 
-                    null);
-
-                throw exception;
-            }
         }
 
         protected override Task<ManagedIdentityRequest> CreateRequestAsync(string resource)
@@ -86,6 +72,24 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             request.Headers.Add("Metadata", "true");
             request.QueryParameters["api-version"] = ArcApiVersion;
             request.QueryParameters["resource"] = resource;
+
+            switch (_requestContext.ServiceBundle.Config.ManagedIdentityId.IdType)
+            {
+                case AppConfig.ManagedIdentityIdType.ClientId:
+                    _requestContext.Logger.Info("[Managed Identity] Adding user assigned client id to the request.");
+                    request.QueryParameters[Constants.ManagedIdentityClientId] = _requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId;
+                    break;
+
+                case AppConfig.ManagedIdentityIdType.ResourceId:
+                    _requestContext.Logger.Info("[Managed Identity] Adding user assigned resource id to the request.");
+                    request.QueryParameters[Constants.ManagedIdentityResourceId] = _requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId;
+                    break;
+
+                case AppConfig.ManagedIdentityIdType.ObjectId:
+                    _requestContext.Logger.Info("[Managed Identity] Adding user assigned object id to the request.");
+                    request.QueryParameters[Constants.ManagedIdentityObjectId] = _requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId;
+                    break;
+            }
 
             return Task.FromResult(request);
         }

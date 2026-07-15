@@ -25,9 +25,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
         [TestMethod]
         [DataRow(TestConstants.ClientId, UserAssignedIdentityId.ClientId)]
-        [DataRow("resourceId", UserAssignedIdentityId.ResourceId)]
+        [DataRow(TestConstants.MiResourceId, UserAssignedIdentityId.ResourceId)]
         [DataRow(TestConstants.ObjectId, UserAssignedIdentityId.ObjectId)]
-        public async Task AzureArcUserAssignedManagedIdentityNotSupportedAsync(string userAssignedId, UserAssignedIdentityId userAssignedIdentityId)
+        public async Task AzureArcUserAssignedManagedIdentityHappyPathAsync(string userAssignedId, UserAssignedIdentityId userAssignedIdentityId)
         {
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
@@ -39,14 +39,27 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 IManagedIdentityApplication mi = miBuilder.Build();
 
-                MsalServiceException ex = await Assert.ThrowsAsync<MsalServiceException>(async () =>
-                    await mi.AcquireTokenForManagedIdentity("scope")
-                    .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
+                httpManager.AddManagedIdentityMockHandler(
+                    ManagedIdentityTests.AzureArcEndpoint,
+                    ManagedIdentityTests.Resource,
+                    MockHelpers.GetMsiSuccessfulResponse(),
+                    ManagedIdentitySource.AzureArc,
+                    userAssignedId: userAssignedId,
+                    userAssignedIdentityId: userAssignedIdentityId);
 
-                Assert.IsNotNull(ex);
-                Assert.AreEqual(ManagedIdentitySource.AzureArc.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
-                Assert.AreEqual(MsalError.UserAssignedManagedIdentityNotSupported, ex.ErrorCode);
-                Assert.AreEqual(string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityUserAssignedNotSupported, AzureArc), ex.Message);
+                AuthenticationResult result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+
+                result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
             }
         }
 
