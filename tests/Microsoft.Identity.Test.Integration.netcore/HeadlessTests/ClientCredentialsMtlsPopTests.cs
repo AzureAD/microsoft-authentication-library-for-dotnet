@@ -33,8 +33,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private const string FmiTokenExchangeUrl = "api://AzureFMITokenExchange/.default";
 
         // Note A: the final resource must be ESTS allow-listed for mtls_pop (e.g. Key Vault / MS Graph),
-        // NOT the client app. Keep it a single swappable constant so it can move when ESTS switches to
-        // the app model.
+        // NOT the client app. The two-leg FIC tests below reference this constant; other tests in this
+        // file still inline the same literal, so update all of them if ESTS switches to the app model.
         private const string AllowListedFinalResource = "https://vault.azure.net/.default";
 
         [TestInitialize]
