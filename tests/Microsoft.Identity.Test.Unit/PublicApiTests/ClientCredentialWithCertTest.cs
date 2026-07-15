@@ -25,10 +25,12 @@ using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Identity.Client.Extensibility;
-#if NETFRAMEWORK
 using Microsoft.Identity.Client.Internal.Logger;
-using Microsoft.Identity.Client.Platforms.netdesktop;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+#if NETFRAMEWORK
+using Microsoft.Identity.Client.Platforms.netdesktop;
+#else
+using Microsoft.Identity.Client.Platforms.netstandard;
 #endif
 
 namespace Microsoft.Identity.Test.Unit
@@ -664,7 +666,6 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
-#if NETFRAMEWORK
         [TestMethod]
         public async Task AcquireTokenForClientWhenPssSigningFailsSendsRs256AssertionAsync()
         {
@@ -746,7 +747,11 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
+#if NETFRAMEWORK
         private sealed class PssFailingPlatformProxy : NetDesktopPlatformProxy
+#else
+        private sealed class PssFailingPlatformProxy : NetCorePlatformProxy
+#endif
         {
             private readonly ICryptographyManager _cryptographyManager;
 
@@ -781,7 +786,6 @@ namespace Microsoft.Identity.Test.Unit
                 return base.SignWithCertificate(message, certificate, signaturePadding);
             }
         }
-#endif
 
         private static void AssertClientAssertionHeader(
             X509Certificate2 cert,
