@@ -89,7 +89,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
                 clientInformation,
                 message);
 
-            return TokenScrubber.Scrub(formattedMessage);
+            return formattedMessage;
         }
 
         internal static string GetPiiScrubbedExceptionDetails(Exception ex)
