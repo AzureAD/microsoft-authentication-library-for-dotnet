@@ -81,19 +81,33 @@ namespace Microsoft.Identity.Client.Utils
                 return 0;
             }
 
-            // First, try to parse as Unix timestamp (number of seconds since epoch)
-            // Example: "1697490590" (Unix timestamp representing seconds since 1970-01-01)
+            // First, try to parse as a numeric value. This covers two shapes:
+            //
+            // 1. Absolute Unix timestamp ("expires_on"): a large epoch value such as
+            //    "1697490590" (2023-10-17). Values at or above the year-2001 epoch
+            //    (978307200) are treated as absolute timestamps; the remaining time is
+            //    computed and clamped to 0 for past values so stale tokens are re-fetched.
+            //
+            // 2. Relative lifetime ("expires_in"): a small number of seconds such as
+            //    "3600". Values below the year-2001 threshold are returned as-is because
+            //    they represent seconds-from-now, not an epoch point.
+            //
+            // The threshold 978307200 = 2001-01-01T00:00:00Z, well below any real
+            // future `expires_on` and well above any reasonable `expires_in` value.
+            const long AbsoluteTimestampThreshold = 978307200L;
+
             if (long.TryParse(dateTimeStamp, out long expiresOnUnixTimestamp))
             {
-                var timestamp = expiresOnUnixTimestamp - DateTimeHelpers.CurrDateTimeInUnixTimestamp();
-
-                // If the timestamp is negative, return the original expiresOnUnixTimestamp. Its format is "seconds from now".
-                if (timestamp < 0)
+                if (expiresOnUnixTimestamp < AbsoluteTimestampThreshold)
                 {
+                    // Relative lifetime (expires_in): return directly.
                     return expiresOnUnixTimestamp;
                 }
 
-                return timestamp;
+                // Absolute timestamp (expires_on): compute remaining seconds.
+                // Return 0 for past values so the caller treats this as expired.
+                long remaining = expiresOnUnixTimestamp - DateTimeHelpers.CurrDateTimeInUnixTimestamp();
+                return remaining < 0 ? 0 : remaining;
             }
 
             // Try parsing as ISO 8601 
