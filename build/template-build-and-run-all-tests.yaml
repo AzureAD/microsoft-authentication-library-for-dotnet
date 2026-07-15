@@ -291,7 +291,7 @@ stages:
   - job: 'RunManagedIdentityE2ETestsOnAzureArc'
     displayName: 'Managed Identity E2E Tests – Azure ARC Agent'
     pool:
-      name: 'MSALMSIAZUREARC'
+      name: 'MISEAZUREARC'
     condition: and(succeeded(), eq(variables['RunManagedIdentityE2EArcTests'], 'true'))
 
     steps:
@@ -311,7 +311,7 @@ stages:
   - job: 'RunManagedIdentityE2ETestsOnImds'
     displayName: 'Managed Identity E2E Tests – VM / IMDS'
     pool:
-      name: 'MSALMSIV2'
+      name: 'MISEManagedIdentity'
     condition: and(succeeded(), eq(variables['RunManagedIdentityE2EVmTests'], 'true'))
 
     steps:
@@ -331,7 +331,7 @@ stages:
   - job: 'RunManagedIdentityE2ETestsOnImdsV2'
     displayName: 'Managed Identity E2E Tests – VM / IMDS V2'
     pool:
-      name: 'MSALMSIV2'
+      name: 'MISEManagedIdentity'
     condition: and(succeeded(), eq(variables['RunManagedIdentityE2EVmTests'], 'true'))
 
     steps:
