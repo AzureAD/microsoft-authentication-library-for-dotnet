@@ -17,7 +17,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 {
     internal class AzureArcManagedIdentitySource : AbstractManagedIdentity
     {
-        private const string ArcApiVersion = "2026-06-15-preview";
+        private const string ArcApiVersion = "2019-11-01";
         private const string AzureArc = "Azure Arc";
 
         private readonly Uri _endpoint;

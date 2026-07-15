@@ -509,7 +509,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                     break;
                 case ManagedIdentitySource.AzureArc:
                     httpMessageHandler.ExpectedMethod = HttpMethod.Get;
-                    expectedQueryParams.Add("api-version", "2026-06-15-preview");
+                    expectedQueryParams.Add("api-version", "2019-11-01");
                     expectedQueryParams.Add("resource", resource);
                     expectedRequestHeaders.Add("Metadata", "true");
                     break;
