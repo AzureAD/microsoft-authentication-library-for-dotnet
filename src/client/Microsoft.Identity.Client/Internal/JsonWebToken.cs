@@ -127,10 +127,46 @@ namespace Microsoft.Identity.Client.Internal
 
         public string Sign(X509Certificate2 certificate, bool sendX5C, bool useSha2AndPss)
         {
-            // Base64Url encoded header and claims
-            string token = CreateJwtHeaderAndBody(certificate, sendX5C, useSha2AndPss);
+            string encodedPayload = Base64UrlHelpers.EncodeString(CreateJsonPayload());
 
-            // Length check before sign
+            // Base64Url encoded header and claims
+            string token = CreateJwtHeaderAndBody(
+                certificate,
+                sendX5C,
+                useSha2AndPss,
+                encodedPayload);
+
+            try
+            {
+                return SignToken(
+                    token,
+                    certificate,
+                    useSha2AndPss ?
+                        RSASignaturePadding.Pss :      // ESTS added support for PSS
+                        RSASignaturePadding.Pkcs1);    // Other IdPs may only support PKCS1
+            }
+            catch (RsaPssPaddingNotSupportedException) when (useSha2AndPss)
+            {
+                // RSACryptoServiceProvider does not support PSS. Retry with an RS256 header
+                // so the JWT algorithm and thumbprint remain consistent with PKCS#1 signing.
+                string fallbackToken = CreateJwtHeaderAndBody(
+                    certificate,
+                    sendX5C,
+                    useSha2AndPss: false,
+                    encodedPayload);
+
+                return SignToken(
+                    fallbackToken,
+                    certificate,
+                    RSASignaturePadding.Pkcs1);
+            }
+        }
+
+        private string SignToken(
+            string token,
+            X509Certificate2 certificate,
+            RSASignaturePadding signaturePadding)
+        {
             if (MaxTokenLength < token.Length)
             {
                 throw new MsalClientException(MsalError.EncodedTokenTooLong);
@@ -140,9 +176,7 @@ namespace Microsoft.Identity.Client.Internal
             byte[] signature = _cryptographyManager.SignWithCertificate(
                 token,
                 certificate,
-                useSha2AndPss ?
-                    RSASignaturePadding.Pss :      // ESTS added support for PSS
-                    RSASignaturePadding.Pkcs1);    // Other IdPs may only support PKCS1
+                signaturePadding);
 
             return string.Concat(token, ".", Base64UrlHelpers.Encode(signature));
         }
@@ -206,14 +240,11 @@ namespace Microsoft.Identity.Client.Internal
         private string CreateJwtHeaderAndBody(
             X509Certificate2 certificate,
             bool addX5C,
-            bool useSha2AndPss)
+            bool useSha2AndPss,
+            string encodedPayload)
         {
-
             string jsonHeader = CreateJsonHeader(certificate, addX5C, useSha2AndPss);
             string encodedHeader = Base64UrlHelpers.EncodeString(jsonHeader);
-
-            string jsonPayload = CreateJsonPayload();
-            string encodedPayload = Base64UrlHelpers.EncodeString(jsonPayload);
 
             return string.Concat(encodedHeader, ".", encodedPayload);
         }
