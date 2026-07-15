@@ -194,7 +194,8 @@ namespace Microsoft.Identity.Test.Common
                atItem.KeyId,
                refreshOn,
                atItem.TokenType,
-               atItem.OboCacheKey);
+               atItem.OboCacheKey,
+               atItem.AdditionalCacheKeyComponents);
 
             return newAtItem;
         }

@@ -5,6 +5,26 @@ Unreleased
 - Documented that mTLS Proof-of-Possession does **not** require a region: when no region is set, MSAL uses the cloud's global `mtlsauth` endpoint (`mtlsauth.microsoft.com` in public cloud; sovereign clouds use their own host).
 - Added end-to-end and unit coverage for the two-leg S2S (app) Federated Identity Credential (FIC) flow over mTLS PoP (SNI first leg → federated assertion → resource token bound to the same certificate), including an FMI-audience variant. No public API change; `user_fic` is not supported over mTLS.
 
+4.86.0
+======
+
+### New Features
+- Surfaced token-acquisition diagnostics on failure via `MsalException.AuthenticationResultMetadata` (durations, region, and cache-refresh reason), mirroring the metadata available on the success path. [#6096](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6096)
+- Added an `OnBackgroundTokenRefreshCompleted` callback on the confidential client and managed identity builders to observe the outcome of fire-and-forget proactive token refreshes. [#6099](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6099)
+
+### Changes
+- Skip IMDS region auto-discovery when a region is explicitly configured; adds `RegionOutcome.UserProvided` and deprecates the auto-detection region outcomes. [#6092](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6092)
+
+### Bug Fixes
+- Propagate KeyGuard attestation failures instead of sending an empty token to IMDS, and bridge native MAA attestation logs to the MSAL logger for the IMDSv2 mTLS PoP flow. [#6081](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6081)
+
+4.85.2
+======
+
+### New Features
+- Added refresh-token cache partitioning via a new `WithCachePartitionKey` overload accepting a `partitionRefreshToken` flag. [#6077](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6077)
+- Added minimum mTLS Proof-of-Possession binding-strength enforcement for managed identity via `PoPOptions.MinStrength` and `WithMtlsProofOfPossession(PoPOptions)`; requests below the required strength fail with `MsalError.MinStrengthNotMet`. [#6059](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6059)
+
 4.85.1
 ======
 

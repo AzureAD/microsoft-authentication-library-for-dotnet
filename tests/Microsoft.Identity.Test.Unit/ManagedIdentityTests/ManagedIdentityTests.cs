@@ -11,6 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.ManagedIdentity.KeyProviders;
@@ -998,6 +999,45 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .ConfigureAwait(false);
 
                 Assert.AreEqual(CacheRefreshReason.NotApplicable, result.AuthenticationResultMetadata.CacheRefreshReason);
+            }
+        }
+
+        [TestMethod]
+        [Description("Background (proactive) refresh for managed identity invokes the completion callback with the result.")]
+        public async Task ManagedIdentity_BackgroundRefresh_InvokesCallback_Async()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.AppService, AppServiceEndpoint);
+
+                ExecutionResult capturedResult = null;
+                var mi = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpManager(httpManager)
+                    .WithExperimentalFeatures()
+                    .OnBackgroundTokenRefreshCompleted(r => { capturedResult = r; return Task.CompletedTask; })
+                    .BuildConcrete();
+
+                // 1. Prime the cache with a token.
+                httpManager.AddManagedIdentityMockHandler(
+                    AppServiceEndpoint, Resource, MockHelpers.GetMsiSuccessfulResponse(), ManagedIdentitySource.AppService);
+                await mi.AcquireTokenForManagedIdentity(Resource).ExecuteAsync().ConfigureAwait(false);
+
+                // 2. Mark the cached token as needing a proactive refresh.
+                TestCommon.UpdateATWithRefreshOn(mi.AppTokenCacheInternal.Accessor);
+
+                // 3. Response the background refresh will consume.
+                httpManager.AddManagedIdentityMockHandler(
+                    AppServiceEndpoint, Resource, MockHelpers.GetMsiSuccessfulResponse(), ManagedIdentitySource.AppService);
+
+                // 4. Foreground returns the cached token and kicks off the background refresh.
+                await mi.AcquireTokenForManagedIdentity(Resource).ExecuteAsync().ConfigureAwait(false);
+
+                // Assert - the background refresh completed and the callback received the successful outcome.
+                Assert.IsTrue(TestCommon.YieldTillSatisfied(() => capturedResult != null), "Managed identity background refresh callback was not invoked.");
+                Assert.IsTrue(capturedResult.Successful);
+                Assert.IsNotNull(capturedResult.Result);
+                Assert.IsNotNull(capturedResult.Result.AuthenticationResultMetadata);
             }
         }
 
