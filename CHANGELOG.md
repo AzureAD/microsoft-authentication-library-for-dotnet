@@ -7,6 +7,7 @@
 
 ### Changes
 - Skip IMDS region auto-discovery when a region is explicitly configured; adds `RegionOutcome.UserProvided` and deprecates the auto-detection region outcomes. [#6092](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6092)
+- Corrected misleading "region required" mTLS Proof-of-Possession error messages and doc comments: a region is optional — when none is set, MSAL uses the cloud's global `mtlsauth` endpoint. The public `RegionRequiredForMtlsPop` / `MtlsPopWithoutRegion` / `MtlsBearerWithoutRegion` constants are unchanged and no longer raised. [#6127](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6127)
 
 ### Bug Fixes
 - Propagate KeyGuard attestation failures instead of sending an empty token to IMDS, and bridge native MAA attestation logs to the MSAL logger for the IMDSv2 mTLS PoP flow. [#6081](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6081)
