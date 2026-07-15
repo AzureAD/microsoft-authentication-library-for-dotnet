@@ -38,6 +38,11 @@ namespace Microsoft.Identity.Client.Extensions.Msal
         {
             EnsureParentDirectoryExists(filePath, logger);
 
+            if (!SharedUtilities.IsWindowsPlatform())
+            {
+                ThrowIfCacheFileIsSymlink(filePath);
+            }
+
             logger.LogInformation($"Writing cache file");
 
             TryProcessFile(() =>
@@ -76,6 +81,12 @@ namespace Microsoft.Identity.Client.Extensions.Msal
         internal static void TouchFile(string filePath, TraceSourceLogger logger)
         {
             EnsureParentDirectoryExists(filePath, logger);
+
+            if (!SharedUtilities.IsWindowsPlatform())
+            {
+                ThrowIfCacheFileIsSymlink(filePath);
+            }
+
             logger.LogInformation($"Touching file...");
 
             TryProcessFile(() =>
@@ -91,6 +102,33 @@ namespace Microsoft.Identity.Client.Extensions.Msal
                 File.SetLastWriteTimeUtc(filePath, DateTime.UtcNow);
 
             }, logger);
+        }
+
+        /// <summary>
+        /// Throws <see cref="InvalidOperationException"/> if <paramref name="filePath"/> is a
+        /// symbolic link. Called on non-Windows platforms before writing or touching the cache
+        /// file to prevent a symlink from being used as a write-anywhere primitive.
+        /// </summary>
+        /// <remarks>
+        /// Uses <see cref="File.GetAttributes(string)"/> which maps to <c>lstat(2)</c> on Unix and
+        /// therefore returns <see cref="FileAttributes.ReparsePoint"/> for the symlink itself
+        /// rather than following it to the target. If the path does not yet exist the method
+        /// returns silently — the caller will create the file normally.
+        /// </remarks>
+        private static void ThrowIfCacheFileIsSymlink(string filePath)
+        {
+            try
+            {
+                if ((File.GetAttributes(filePath) & FileAttributes.ReparsePoint) != 0)
+                {
+                    throw new InvalidOperationException(
+                        $"The cache file path '{filePath}' is a symbolic link. MSAL cache paths must not be symbolic links.");
+                }
+            }
+            catch (FileNotFoundException)
+            {
+                // File does not exist yet — not a symlink, proceed normally.
+            }
         }
 
         internal static void TryProcessFile(Action action, TraceSourceLogger logger)

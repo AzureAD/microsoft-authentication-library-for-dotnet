@@ -19,7 +19,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
         public MtlsPopAuthenticationOperation(X509Certificate2 mtlsCert)
         {
             _mtlsCert = mtlsCert;
-            KeyId = CoreHelpers.ComputeX5tS256KeyId(_mtlsCert);
+            KeyId = _mtlsCert.ComputeX5tS256KeyId();
         }
 
         public int TelemetryTokenType => TelemetryTokenTypeConstants.MtlsPop;
