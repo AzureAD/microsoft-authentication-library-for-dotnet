@@ -145,9 +145,9 @@ namespace Microsoft.Identity.Client.Internal
                         RSASignaturePadding.Pss :      // ESTS added support for PSS
                         RSASignaturePadding.Pkcs1);    // Other IdPs may only support PKCS1
             }
-            catch (RsaPssPaddingNotSupportedException) when (useSha2AndPss)
+            catch (CryptographicException) when (useSha2AndPss)
             {
-                // RSACryptoServiceProvider does not support PSS. Retry with an RS256 header
+                // Some private key providers do not support PSS. Retry with an RS256 header
                 // so the JWT algorithm and thumbprint remain consistent with PKCS#1 signing.
                 string fallbackToken = CreateJwtHeaderAndBody(
                     certificate,

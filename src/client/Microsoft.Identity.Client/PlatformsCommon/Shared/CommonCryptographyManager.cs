@@ -92,10 +92,6 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             {
                 return SignDataAndCacheProvider(message);
             }
-            catch (RsaPssPaddingNotSupportedException)
-            {
-                throw;
-            }
             catch (Exception ex)
             {
                 Logger?.Warning($"Exception occurred when signing data with a certificate. {ex}");
@@ -108,21 +104,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             byte[] SignDataAndCacheProvider(string message)
             {
                 // CodeQL [SM03799] PKCS1 padding is for Identity Providers not supporting PSS (older ADFS, dSTS)
-                byte[] signedData;
-
-                try
-                {
-                    signedData = rsa.SignData(
-                        Encoding.UTF8.GetBytes(message),
-                        HashAlgorithmName.SHA256,
-                        signaturePadding);
-                }
-                catch (CryptographicException ex) when (
-                    signaturePadding == RSASignaturePadding.Pss &&
-                    rsa is RSACryptoServiceProvider)
-                {
-                    throw new RsaPssPaddingNotSupportedException(ex);
-                }
+                var signedData = rsa.SignData(Encoding.UTF8.GetBytes(message), HashAlgorithmName.SHA256, signaturePadding);
 
                 // Cache only valid RSA crypto providers, which are able to sign data successfully
                 s_certificateToRsaMap[certificate.Thumbprint] = rsa;

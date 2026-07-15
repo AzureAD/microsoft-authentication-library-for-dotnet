@@ -746,41 +746,6 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
-        [TestMethod]
-        public void ClientAssertionDoesNotFallbackForUnrelatedCryptographicException()
-        {
-            // Arrange
-            using (RSA rsa = RSA.Create(2048))
-            using (X509Certificate2 certificate = new CertificateRequest(
-                "CN=Unrelated Cryptographic Failure Test",
-                rsa,
-                HashAlgorithmName.SHA256,
-                RSASignaturePadding.Pkcs1).CreateSelfSigned(
-                    DateTimeOffset.UtcNow.AddMinutes(-1),
-                    DateTimeOffset.UtcNow.AddDays(1)))
-            {
-                var cryptographyManager = new UnrelatedFailureCryptographyManager();
-                var jwtToken = new JsonWebToken(
-                    cryptographyManager,
-                    TestConstants.ClientId,
-                    "aud");
-
-                // Act
-                CryptographicException exception = Assert.Throws<CryptographicException>(
-                    () => jwtToken.Sign(
-                        certificate,
-                        sendX5C: true,
-                        useSha2AndPss: true));
-
-                // Assert
-                Assert.AreEqual(
-                    UnrelatedFailureCryptographyManager.ErrorMessage,
-                    exception.Message);
-                Assert.AreEqual(1, cryptographyManager.PssSigningAttempts);
-                Assert.AreEqual(0, cryptographyManager.Pkcs1SigningAttempts);
-            }
-        }
-
         private sealed class PssFailingPlatformProxy : NetDesktopPlatformProxy
         {
             private readonly ICryptographyManager _cryptographyManager;
@@ -809,45 +774,7 @@ namespace Microsoft.Identity.Test.Unit
                 if (signaturePadding == RSASignaturePadding.Pss)
                 {
                     PssSigningAttempts++;
-
-                    using (var unsupportedPssRsa = new RSACryptoServiceProvider(2048))
-                    {
-                        try
-                        {
-                            return unsupportedPssRsa.SignData(
-                                Encoding.UTF8.GetBytes(message),
-                                HashAlgorithmName.SHA256,
-                                RSASignaturePadding.Pss);
-                        }
-                        catch (CryptographicException ex)
-                        {
-                            throw new RsaPssPaddingNotSupportedException(ex);
-                        }
-                    }
-                }
-
-                Pkcs1SigningAttempts++;
-                return base.SignWithCertificate(message, certificate, signaturePadding);
-            }
-        }
-
-        private sealed class UnrelatedFailureCryptographyManager : CommonCryptographyManager
-        {
-            public const string ErrorMessage = "The private key is unavailable.";
-
-            public int PssSigningAttempts { get; private set; }
-
-            public int Pkcs1SigningAttempts { get; private set; }
-
-            public override byte[] SignWithCertificate(
-                string message,
-                X509Certificate2 certificate,
-                RSASignaturePadding signaturePadding)
-            {
-                if (signaturePadding == RSASignaturePadding.Pss)
-                {
-                    PssSigningAttempts++;
-                    throw new CryptographicException(ErrorMessage);
+                    throw new CryptographicException("PSS signing is not supported by this key provider.");
                 }
 
                 Pkcs1SigningAttempts++;
