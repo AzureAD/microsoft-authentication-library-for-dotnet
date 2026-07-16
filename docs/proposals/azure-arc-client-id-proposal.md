@@ -2,7 +2,7 @@
 
 ## Summary
 
-We enabled Azure Arc user-assigned managed identity request handling in the client SDK by removing the existing Azure Arc-specific guard and forwarding the requested identity selector to the local HIMDS token endpoint.
+This proposal recommends enabling Azure Arc user-assigned managed identity request handling in the client SDK by removing the existing Azure Arc-specific guard and forwarding the requested identity selector to the local HIMDS token endpoint.
 
 The result was clear:
 
