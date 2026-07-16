@@ -69,7 +69,7 @@ namespace Microsoft.Identity.Test.E2E
         [RunOnAzureDevOps]
         [TestCategory("MI_E2E_ImdsV2")]
         [TestMethod]
-        [DataRow(null, DisplayName = "FicTwoLeg_Bearer_SAMI")]
+        [DataRow(null, DisplayName = "FicTwoLeg_Bearer_SAMI")] //SAMI Object ID ("11a5d2ba-f08b-4e99-9361-2a07b4bf7af9")
         [DataRow(UamiClientId, DisplayName = "FicTwoLeg_Bearer_UAMI-ClientId")]
         public async Task AcquireToken_OnImdsV2_FicTwoLeg_BearerToken_Succeeds(string uamiClientId)
         {
