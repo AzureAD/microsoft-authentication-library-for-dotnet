@@ -1,3 +1,12 @@
+4.86.1
+======
+
+### Bug Fixes
+- Fixed the mTLS Proof-of-Possession token cache to key on the certificate's full DER (`x5t#S256`) instead of only the public key, preventing a stale token (and `AADSTS500181`) after a same-key certificate renewal. [#6123](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6123)
+- Fell back to RS256 when a certificate's PSS signing operation is rejected by `RSACryptoServiceProvider`, rebuilding the client assertion so authentication can proceed. [#6126](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6126)
+- Detect and reject symbolic links in the Unix cache-file write path (lstat pre-check plus `O_NOFOLLOW`), closing a TOCTOU window. [#6115](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6115)
+- Corrected misleading "region required" error messages and doc comments in the mTLS PoP flow. [#6127](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6127)
+
 4.86.0
 ======
 
