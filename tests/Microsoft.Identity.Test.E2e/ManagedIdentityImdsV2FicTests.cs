@@ -31,8 +31,8 @@ namespace Microsoft.Identity.Test.E2E
         private const string UamiClientId = "6325cd32-9911-41f3-819c-416cdf9104e7";
 
         // ConfApp registered in the MSI team tenant with FIC trusting the MSALMSIV2 pool MSI
-        private const string FicConfAppClientId = "163ffef9-a313-45b4-ab2f-c7e2f5e0e23e";
-        private const string FicConfAppAuthority = "https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c";
+        private const string FicConfAppClientId = "f62c5ae3-bf3a-4af5-afa8-a68b800396e9";
+        private const string FicConfAppAuthority = "https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47";
 
         private static IManagedIdentityApplication BuildMsi(string userAssignedClientId = null)
         {
