@@ -32,6 +32,9 @@ namespace Microsoft.Identity.Test.Unit
 
         /// <summary>
         /// Gets the extra HTTP headers used in test requests.
+        /// Treat as read-only by convention — do not call Add/Remove/Clear on this instance.
+        /// If you need to add headers for a single test, create a local copy first:
+        /// <c>var headers = new Dictionary&lt;string, string&gt;(s_extraHttpHeader, s_extraHttpHeader.Comparer);</c>
         /// </summary>
         public static readonly Dictionary<string, string> s_extraHttpHeader = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) { { "SomeExtraHeadderKey", "SomeExtraHeadderValue" } };
 
@@ -872,7 +875,7 @@ namespace Microsoft.Identity.Test.Unit
         /// <summary>
         /// IMDS region discovery URL.
         /// </summary>
-        public const string ImdsUrl = $"http://{ImdsHost}/metadata/instance/compute/location";
+        public const string ImdsUrl = $"http://{ImdsHost}/metadata/instance/compute";
 
         /// <summary>
         /// App Service MSI endpoint used in tests.

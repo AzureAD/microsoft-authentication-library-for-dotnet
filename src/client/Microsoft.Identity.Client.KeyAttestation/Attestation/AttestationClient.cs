@@ -3,6 +3,7 @@
 
 using System;
 using System.Runtime.InteropServices;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Win32.SafeHandles;
 
 namespace Microsoft.Identity.Client.KeyAttestation.Attestation
@@ -15,19 +16,33 @@ namespace Microsoft.Identity.Client.KeyAttestation.Attestation
     {
         private bool _initialized;
 
+        // Strong reference to the native log callback for the lifetime of this client. The native library
+        // stores the function pointer during InitAttestationLib and invokes it until UninitAttestationLib;
+        // keeping the delegate referenced here prevents the GC from collecting it (which would crash the
+        // native callback).
+        private readonly AttestationClientLib.LogFunc _logBridge;
+
         /// <summary>
         /// AttestationClient constructor. Relies on the default OS loader to locate the native DLL.
         /// </summary>
+        /// <param name="logger">
+        /// Optional MSAL logger. When supplied, native <c>AttestationClientLib.dll</c> log lines are
+        /// forwarded into the MSAL logging pipeline so MAA diagnostics appear in MSAL logs. When null,
+        /// native logs fall back to <see cref="System.Diagnostics.Trace"/>.
+        /// </param>
         /// <exception cref="InvalidOperationException"></exception>
-        public AttestationClient()
+        public AttestationClient(ILoggerAdapter logger = null)
         {
             string dllError = NativeDiagnostics.ProbeNativeDll();
             // intentionally not throwing on dllError
 
+            // Bridge native logs into the MSAL logger when available; otherwise Trace.
+            _logBridge = AttestationLogger.CreateLoggerBridge(logger);
+
             // Load & initialize (logger is required by native lib)
             var info = new AttestationClientLib.AttestationLogInfo
             {
-                Log = AttestationLogger.ConsoleLogger,
+                Log = _logBridge,
                 Ctx = IntPtr.Zero
             };
 
@@ -58,7 +73,13 @@ namespace Microsoft.Identity.Client.KeyAttestation.Attestation
                     endpoint, null, null, keyHandle, out buf, clientId);
 
                 if (rc != 0)
-                    return new(AttestationStatus.NativeError, null, null, rc, null);
+                {
+                    // Translate the native return code into a human-readable reason so the failure
+                    // (e.g. MAA policy evaluation / dbx validation) propagates back to the caller
+                    // instead of being silently dropped.
+                    string reason = AttestationErrors.Describe((AttestationResultErrorCode)rc);
+                    return new(AttestationStatus.NativeError, null, null, rc, reason);
+                }
 
                 if (buf == IntPtr.Zero)
                     return new(AttestationStatus.TokenEmpty, null, null, 0,

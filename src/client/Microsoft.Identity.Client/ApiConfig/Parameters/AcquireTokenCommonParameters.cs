@@ -31,6 +31,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public IEnumerable<string> Scopes { get; set; }
         public IDictionary<string, string> ExtraQueryParameters { get; set; }
         public string Claims { get; set; }
+        public string ClientClaims { get; internal set; }
         public AuthorityInfo AuthorityOverride { get; set; }
         public IAuthenticationOperation AuthenticationOperation { get; set; } = new BearerAuthenticationOperation();
         public IDictionary<string, string> ExtraHttpHeaders { get; set; }
@@ -39,10 +40,35 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public X509Certificate2 MtlsCertificate { get; internal set; }
         public List<string> AdditionalCacheParameters { get; set; }
         public SortedList<string, Func<CancellationToken, Task<string>>> CacheKeyComponents { get; internal set; }
+        public bool PartitionRefreshToken { get; internal set; }
+        public bool? SendOfflineAccessScope { get; set; }
         public string FmiPathSuffix { get; internal set; }
         public string ClientAssertionFmiPath { get; internal set; }
         public bool IsMtlsPopRequested { get; set; }
+
+        /// <summary>
+        /// The minimum mTLS binding strength the host must support for the request to succeed.
+        /// Set via <see cref="AppConfig.PoPOptions.MinStrength"/>. Defaults to
+        /// <see cref="MtlsBindingStrength.None"/> (no floor).
+        /// </summary>
+        public MtlsBindingStrength MtlsPopMinStrength { get; set; } = MtlsBindingStrength.None;
         public string ExtraClientAssertionClaims { get; internal set; }
+
+        /// <summary>
+        /// Optional caller-supplied delegate that adds extra tags to the OpenTelemetry metrics MSAL records
+        /// for this request. It receives the <see cref="ExecutionResult"/> of the acquisition (success or failure)
+        /// and a mutable list of tags to which additional dimensions can be appended.
+        /// Set via <c>WithOtelTagsEnricher</c>.
+        /// </summary>
+        /// <remarks>
+        /// The tags returned by the enricher are applied to every metric MSAL records for the request, so keep
+        /// both their value cardinality and their number low. High-cardinality tag values (for example correlation
+        /// ids, timestamps, or user identifiers) are the dominant cost: each distinct value multiplies the number
+        /// of metric time series the downstream backend must store and aggregate. A large number of tags is a
+        /// secondary cost that adds per-record overhead on MSAL's metric-recording path. Prefer a small set of
+        /// low-cardinality dimensions; avoid using request-unique values as tags.
+        /// </remarks> 
+        public Action<ExecutionResult, IList<KeyValuePair<string, object>>> OtelTagsEnricher { get; set; }
 
         /// <summary>
         /// Optional delegate for obtaining attestation JWT for Credential Guard keys.

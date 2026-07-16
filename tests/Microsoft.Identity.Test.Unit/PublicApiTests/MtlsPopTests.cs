@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.AuthScheme.PoP;
+using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Region;
@@ -87,6 +88,124 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
+        public async Task MtlsPop_WithDynamicCertificate_WithoutRegion_UsesGlobalMtlsEndpointAsync()
+        {
+            // Dynamic cert + mTLS PoP without region should fall through to the global mTLS endpoint,
+            // matching the static-cert behavior validated by MtlsPop_WithoutRegion_UsesGlobalMtlsEndpoint.
+            const string globalEndpoint = "mtlsauth.microsoft.com";
+            string expectedTokenEndpoint = $"https://{globalEndpoint}/{TestConstants.TenantId}/oauth2/v2.0/token";
+
+            using (var envContext = new EnvVariableContext())
+            {
+                Environment.SetEnvironmentVariable("REGION_NAME", null);
+                Environment.SetEnvironmentVariable("MSAL_FORCE_REGION", null);
+
+                using (var httpManager = new MockHttpManager())
+                {
+                    httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(
+                        tokenType: "mtls_pop");
+
+                    var app = ConfidentialClientApplicationBuilder
+                        .Create(TestConstants.ClientId)
+                        .WithExperimentalFeatures()
+                        .WithAuthority(TestConstants.AuthorityTenant)
+                        .WithCertificate(_ => Task.FromResult(s_testCertificate), new CertificateOptions())
+                        .WithHttpManager(httpManager)
+                        .Build();
+
+                    AuthenticationResult result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                        .WithMtlsProofOfPossession()
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
+
+                    Assert.AreEqual(Constants.MtlsPoPAuthHeaderPrefix, result.TokenType);
+                    Assert.AreEqual(expectedTokenEndpoint, result.AuthenticationResultMetadata.TokenEndpoint);
+                }
+            }
+        }
+
+        [TestMethod]
+        public async Task MtlsPop_WithDynamicCertificate_NullFromProvider_ThrowsAsync()
+        {
+            using (var envContext = new EnvVariableContext())
+            {
+                Environment.SetEnvironmentVariable("REGION_NAME", EastUsRegion);
+
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithExperimentalFeatures()
+                    .WithAuthority(TestConstants.AuthorityTenant)
+                    .WithCertificate(_ => Task.FromResult<X509Certificate2>(null), new CertificateOptions())
+                    .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
+                    .Build();
+
+                MsalClientException ex = await AssertException.TaskThrowsAsync<MsalClientException>(() =>
+                    app.AcquireTokenForClient(TestConstants.s_scope)
+                       .WithMtlsProofOfPossession()
+                       .ExecuteAsync())
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual(MsalError.MtlsCertificateNotProvided, ex.ErrorCode);
+            }
+        }
+
+        [TestMethod]
+        public async Task MtlsPop_WithDynamicCertificate_SuccessAsync()
+        {
+            const string region = "eastus";
+            int providerCallCount = 0;
+
+            using (var envContext = new EnvVariableContext())
+            {
+                Environment.SetEnvironmentVariable("REGION_NAME", region);
+
+                string globalEndpoint = "mtlsauth.microsoft.com";
+                string expectedTokenEndpoint = $"https://{region}.{globalEndpoint}/123456-1234-2345-1234561234/oauth2/v2.0/token";
+
+                using (var httpManager = new MockHttpManager())
+                {
+                    httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(
+                        tokenType: "mtls_pop");
+
+                    var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                        .WithExperimentalFeatures()
+                        .WithCertificate(
+                            _ =>
+                            {
+                                Interlocked.Increment(ref providerCallCount);
+                                return Task.FromResult(s_testCertificate);
+                            },
+                            new CertificateOptions())
+                        .WithAuthority($"https://login.microsoftonline.com/123456-1234-2345-1234561234")
+                        .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
+                        .WithHttpManager(httpManager)
+                        .BuildConcrete();
+
+                    AuthenticationResult result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                        .WithMtlsProofOfPossession()
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
+
+                    Assert.AreEqual("header.payload.signature", result.AccessToken);
+                    Assert.AreEqual(Constants.MtlsPoPAuthHeaderPrefix, result.TokenType);
+                    Assert.AreEqual(region, result.AuthenticationResultMetadata.RegionDetails.RegionUsed);
+                    Assert.AreEqual(expectedTokenEndpoint, result.AuthenticationResultMetadata.TokenEndpoint);
+
+                    Assert.IsNotNull(result.BindingCertificate, "BindingCertificate should be present.");
+                    Assert.AreEqual(s_testCertificate.Thumbprint, result.BindingCertificate.Thumbprint);
+
+                    // Provider must be invoked exactly once per mTLS PoP request.
+                    // Preflight (MtlsPopParametersInitializer) resolves the cert and stashes it
+                    // on the request; runtime (CredentialMaterialResolver.ResolveAsync) detects
+                    // the preflight-resolved cert on a certificate credential and short-circuits
+                    // the credential roundtrip. This locks in the single-invocation principle
+                    // from issue #5943.
+                    Assert.AreEqual(1, providerCallCount, "The certificate provider must be invoked exactly once per mTLS PoP token request (#5943 principle). If this assertion fails with count=2, the resolver short-circuit in CredentialMaterialResolver.ResolveAsync is no longer reusing the preflight-resolved certificate on requestParams.MtlsCertificate.");
+                }
+            }
+        }
+
+        [TestMethod]
         public async Task MtlsPopWithoutCertificateWithClientClaimsAsync()
         {
             var ipAddress = new Dictionary<string, string>
@@ -109,6 +228,11 @@ namespace Microsoft.Identity.Test.Unit
                 .ConfigureAwait(false);
 
             Assert.AreEqual(MsalError.MtlsCertificateNotProvided, ex.ErrorCode);
+
+            // Lock in the message wording so a future "centralise error messages" refactor cannot
+            // silently re-broaden it back to MtlsCertificateNotProvidedMessage and lose the
+            // WithClientClaims-specific diagnostic.
+            StringAssert.Contains(ex.Message, "WithClientClaims");
         }
 
         [TestMethod]
@@ -177,7 +301,7 @@ namespace Microsoft.Identity.Test.Unit
         {
             var scheme = new MtlsPopAuthenticationOperation(s_testCertificate);
 
-            // Compute the expected KeyId using SHA-256 on the public key
+            // Compute the expected KeyId using SHA-256 over the certificate DER (x5t#S256)
             var expectedKeyId = ComputeExpectedKeyId(s_testCertificate);
 
             Assert.AreEqual(expectedKeyId, scheme.KeyId);
@@ -208,13 +332,11 @@ namespace Microsoft.Identity.Test.Unit
 
         private static string ComputeExpectedKeyId(X509Certificate2 certificate)
         {
-            // Get the raw public key bytes
-            var publicKey = certificate.GetPublicKey();
-
-            // Compute the SHA-256 hash of the public key
+            // Compute the SHA-256 hash of the full DER-encoded certificate (x5t#S256, RFC 8705),
+            // matching what ESTS/MSS bind the mTLS PoP token to.
             using (var sha256 = SHA256.Create())
             {
-                byte[] hash = sha256.ComputeHash(publicKey);
+                byte[] hash = sha256.ComputeHash(certificate.RawData);
                 return Base64UrlHelpers.Encode(hash);
             }
         }
@@ -406,6 +528,123 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
+        /// <summary>
+        /// Repro for AADSTS500181 (CertificateValidationFailedTlsCertMismatch) in the two-leg mTLS PoP flow.
+        ///
+        /// MSAL keys the mTLS-PoP token cache with <see cref="CoreHelpers.ComputeX5tS256KeyId"/>, which hashes
+        /// only the certificate's PUBLIC KEY. ESTS/MSS, however, bind and validate the token against the DER of
+        /// the presented certificate (x5t#S256, RFC 8705).
+        ///
+        /// When the binding certificate is renewed with the SAME key but a new DER (serial/validity) — exactly
+        /// what IMDS/KeyGuard produces when it reissues the cert over the same non-exportable key — the
+        /// public-key-hash cache key is unchanged. MSAL therefore cannot tell the old cert from the renewed one
+        /// and serves the STALE token (bound to the old cert's DER) while the renewed cert is on the wire,
+        /// producing the certificate/assertion mismatch.
+        ///
+        /// Correct behavior: a same-key renewal is a DIFFERENT certificate and MUST cause a cache miss, re-minting
+        /// a token bound to the renewed cert. This test FAILS on current code (second acquisition returns
+        /// TokenSource.Cache with the cert-A-bound token) and PASSES once the cache key is derived from the DER.
+        /// </summary>
+        [TestMethod]
+        public async Task MtlsPop_SameKeyCertRenewal_MustNotServeStaleCachedTokenAsync()
+        {
+            const string region = "eastus";
+
+            // Two certificates that share ONE RSA key pair but differ in DER (validity + serial).
+            // This models a same-key certificate renewal.
+            using RSA sharedKey = RSA.Create(2048);
+
+            X509Certificate2 certA = new CertificateRequest(
+                    "CN=MtlsPopSameKeyRenewal", sharedKey, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1)
+                .CreateSelfSigned(DateTimeOffset.UtcNow.AddDays(-2), DateTimeOffset.UtcNow.AddDays(30));
+
+            X509Certificate2 certB = new CertificateRequest(
+                    "CN=MtlsPopSameKeyRenewal", sharedKey, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1)
+                .CreateSelfSigned(DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddDays(60));
+
+            try
+            {
+                // Precondition 1: identical public key (same key pair).
+                CollectionAssert.AreEqual(
+                    certA.GetPublicKey(), certB.GetPublicKey(),
+                    "Test setup invalid: the two certificates must share the same public key.");
+
+                // Precondition 2: different certificates (different DER => different x5t#S256 => different thumbprint).
+                Assert.AreNotEqual(
+                    certA.Thumbprint, certB.Thumbprint,
+                    "Test setup invalid: the two certificates must be different (different DER).");
+
+                // The binding certificate presented on the wire. Starts as cert A, then "renews" to cert B.
+                X509Certificate2 currentCert = certA;
+
+                using (var envContext = new EnvVariableContext())
+                {
+                    Environment.SetEnvironmentVariable("REGION_NAME", region);
+
+                    using (var httpManager = new MockHttpManager())
+                    {
+                        // Distinct tokens per mint so we can prove exactly which one is served.
+                        httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(
+                            token: "token_bound_to_certA", tokenType: "mtls_pop");
+
+                        var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                            .WithExperimentalFeatures()
+                            .WithCertificate(_ => Task.FromResult(currentCert), new CertificateOptions())
+                            .WithAuthority("https://login.microsoftonline.com/123456-1234-2345-1234561234")
+                            .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
+                            .WithHttpManager(httpManager)
+                            .BuildConcrete();
+
+                        // ── Request 1: bind a PoP token to cert A. Hits the IdP and caches. ──
+                        AuthenticationResult first = await app.AcquireTokenForClient(TestConstants.s_scope)
+                            .WithMtlsProofOfPossession()
+                            .ExecuteAsync()
+                            .ConfigureAwait(false);
+
+                        Assert.AreEqual(TokenSource.IdentityProvider, first.AuthenticationResultMetadata.TokenSource);
+                        Assert.AreEqual("token_bound_to_certA", first.AccessToken);
+                        Assert.AreEqual(certA.Thumbprint, first.BindingCertificate.Thumbprint);
+
+                        // ── Same-key renewal: the platform reissues the binding cert over the same key. ──
+                        currentCert = certB;
+
+                        // A fresh IdP response is available for the (expected) cache miss on the renewed cert.
+                        httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(
+                            token: "token_bound_to_certB", tokenType: "mtls_pop");
+
+                        // ── Request 2: cert B is now on the wire. ──
+                        AuthenticationResult second = await app.AcquireTokenForClient(TestConstants.s_scope)
+                            .WithMtlsProofOfPossession()
+                            .ExecuteAsync()
+                            .ConfigureAwait(false);
+
+                        // ─────────────────────────────── The bug ───────────────────────────────
+                        // Cert B has a different DER than cert A, so the cert-A-bound cached token is invalid for
+                        // cert B. Correct behavior is a cache MISS and a re-mint bound to cert B. On current code,
+                        // ComputeX5tS256KeyId hashes the public key (identical across the renewal), so the lookup
+                        // HITS the cert-A-bound token and returns it from cache while cert B is on the wire —
+                        // reproducing AADSTS500181.
+                        Assert.AreEqual(
+                            TokenSource.IdentityProvider,
+                            second.AuthenticationResultMetadata.TokenSource,
+                            "A same-key certificate renewal (same public key, different DER) MUST invalidate the " +
+                            "cached mTLS-PoP token. Serving the stale cert-A-bound token while cert B is on the wire " +
+                            "is the root cause of AADSTS500181 (CertificateValidationFailedTlsCertMismatch).");
+
+                        Assert.AreEqual(
+                            "token_bound_to_certB",
+                            second.AccessToken,
+                            "MSAL served the cert-A-bound token for a request presenting cert B.");
+                    }
+                }
+            }
+            finally
+            {
+                certA.Dispose();
+                certB.Dispose();
+            }
+        }
+
         [TestMethod]
         public async Task MtlsPop_KnownRegionAsync()
         {
@@ -416,7 +655,6 @@ namespace Microsoft.Identity.Test.Unit
 
             using (var httpManager = new MockHttpManager())
             {
-                httpManager.AddRegionDiscoveryMockHandler(region);
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(tokenType: "mtls_pop");
 
                 var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
@@ -433,7 +671,7 @@ namespace Microsoft.Identity.Test.Unit
 
                 Assert.AreEqual("header.payload.signature", result.AccessToken);
                 Assert.AreEqual(region, result.AuthenticationResultMetadata.RegionDetails.RegionUsed);
-                Assert.AreEqual(RegionOutcome.UserProvidedValid, result.ApiEvent.RegionOutcome);
+                Assert.AreEqual(RegionOutcome.UserProvided, result.ApiEvent.RegionOutcome);
                 Assert.AreEqual(expectedTokenEndpoint, result.AuthenticationResultMetadata.TokenEndpoint);
             }
         }
@@ -448,7 +686,6 @@ namespace Microsoft.Identity.Test.Unit
 
             using (var httpManager = new MockHttpManager())
             {
-                httpManager.AddRegionDiscoveryMockHandler(region);
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(tokenType: "mtls_pop");
 
                 IConfidentialClientApplication regionalApp1 = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
@@ -1227,6 +1464,52 @@ namespace Microsoft.Identity.Test.Unit
                         "BindingCertificate should be present for mTLS PoP.");
                 }
             }
+        }
+
+        [TestMethod]
+        public async Task SendCertificateOverMtls_WithClientClaims_ThrowsClearMessageAsync()
+        {
+            // Regression test for the misconfiguration where an app combines:
+            //   .WithCertificate(cert, new CertificateOptions { SendCertificateOverMtls = true })
+            //   .WithClientClaims(cert, claims)   // overwrites credential, keeps options
+            // and does NOT call .WithMtlsProofOfPossession().
+            //
+            // ConfidentialClientApplicationBuilder.Validate() allows this combo (the credential is
+            // still a CertificateAndClaimsClientCredential, so the cert-only guard passes). At token
+            // request time, TryInitImplicitBearerOverMtlsAsync.Case 1 fires on SendCertificateOverMtls
+            // and asks the credential for material in mTLS mode, which trips the
+            // _claimsToSign != null guard in CertificateAndClaimsClientCredential.
+            //
+            // The message must NOT falsely blame Proof-of-Possession — the user never requested PoP.
+            // It must name both transports (PoP and SendCertificateOverMtls) and the WithClientClaims
+            // incompatibility so the diagnostic is actionable.
+            var ipAddress = new Dictionary<string, string>
+            {
+                { "client_ip", "192.168.1.2" }
+            };
+
+            var options = new CertificateOptions { SendCertificateOverMtls = true };
+
+#pragma warning disable CS0618 // WithClientClaims is obsolete
+            IConfidentialClientApplication app = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithCertificate(s_testCertificate, options)
+                .WithClientClaims(s_testCertificate, ipAddress)
+                .WithAuthority("https://login.microsoftonline.com/123456-1234-2345-1234561234")
+                .Build();
+#pragma warning restore CS0618
+
+            // No .WithMtlsProofOfPossession() — Bearer-over-mTLS path only.
+            MsalClientException ex = await Assert.ThrowsAsync<MsalClientException>(() =>
+                app.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync())
+                .ConfigureAwait(false);
+
+            Assert.AreEqual(MsalError.MtlsCertificateNotProvided, ex.ErrorCode);
+
+            // The diagnostic must name both transports and the offending API.
+            StringAssert.Contains(ex.Message, "WithClientClaims");
+            StringAssert.Contains(ex.Message, "SendCertificateOverMtls");
+            StringAssert.Contains(ex.Message, "Proof-of-Possession");
         }
 
         #endregion

@@ -380,12 +380,12 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                     new MockHttpMessageHandler
                     {
                         ExpectedMethod = HttpMethod.Get,
-                        ExpectedUrl = "http://169.254.169.254/metadata/instance/compute/location",
+                        ExpectedUrl = "http://169.254.169.254/metadata/instance/compute",
                         ExpectedRequestHeaders = new Dictionary<string, string>
                          {
                             {"Metadata", "true"}
                          },
-                        ResponseMessage = MockHelpers.CreateSuccessResponseMessage(response)
+                        ResponseMessage = MockHelpers.CreateSuccessResponseMessage($"{{\"location\":\"{response}\"}}")
                     });
         }
 
@@ -440,6 +440,14 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             }
             else if (userAssignedIdentityId == UserAssignedIdentityId.ClientId)
             {
+                // Service Fabric does not support ClientId; production throws in the source's
+                // constructor. Fail tests fast so a mock cannot mask a misconfiguration.
+                if (managedIdentitySourceType == ManagedIdentitySource.ServiceFabric)
+                {
+                    throw new InvalidOperationException(
+                        "Service Fabric does not support ClientId for user-assigned managed identity. Use ObjectId.");
+                }
+
                 // For App Service 2019, Azure Arc, IMDS, etc., the param is "client_id"
                 httpMessageHandler.ExpectedQueryParams.Add(
                     Constants.ManagedIdentityClientId, 
@@ -447,6 +455,12 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             }
             else if (userAssignedIdentityId == UserAssignedIdentityId.ResourceId)
             {
+                if (managedIdentitySourceType == ManagedIdentitySource.ServiceFabric)
+                {
+                    throw new InvalidOperationException(
+                        "Service Fabric does not support ResourceId for user-assigned managed identity. Use ObjectId.");
+                }
+
                 httpMessageHandler.ExpectedQueryParams.Add(
                     managedIdentitySourceType == ManagedIdentitySource.Imds ? 
                         Constants.ManagedIdentityResourceIdImds : Constants.ManagedIdentityResourceId, 
@@ -454,9 +468,15 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             }
             else if (userAssignedIdentityId == UserAssignedIdentityId.ObjectId)
             {
-                httpMessageHandler.ExpectedQueryParams.Add(
-                    Constants.ManagedIdentityObjectId,
-                    userAssignedId);
+                // Service Fabric uses 'principalId'; all other sources use 'object_id'.
+                // MockHttpMessageHandler.ValidateExpectedQueryParams compares against keys
+                // lowercased by CoreHelpers.ParseKeyValueList, so store the expected key in
+                // lower-case to keep the comparison consistent. The on-the-wire value emitted
+                // by the production code path remains camelCase ('principalId').
+                string objectIdParamName = managedIdentitySourceType == ManagedIdentitySource.ServiceFabric
+                    ? Constants.ServiceFabricManagedIdentityPrincipalId.ToLowerInvariant()
+                    : Constants.ManagedIdentityObjectId;
+                httpMessageHandler.ExpectedQueryParams.Add(objectIdParamName, userAssignedId);
             }
 
             httpMessageHandler.ResponseMessage = responseMessage;

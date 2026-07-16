@@ -19,9 +19,12 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             CacheLevel cacheLevel,
             long totalDurationInUs,
             AuthenticationResultMetadata authResultMetadata,
-            ILoggerAdapter logger);
+            ILoggerAdapter logger,
+            DateTimeOffset expiresOn,
+            IReadOnlyList<KeyValuePair<string, object>> extraTags = null);
 
-        internal void IncrementSuccessCounter(string platform,
+        internal void IncrementSuccessCounter(
+            string platform,
             ApiEvent.ApiIds apiId,
             string callerSdkId,
             string callerSdkVersion,
@@ -29,15 +32,58 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             CacheRefreshReason cacheRefreshReason,
             CacheLevel cacheLevel,
             ILoggerAdapter logger,
-            int TokenType);
+            int TokenType,
+            IReadOnlyList<KeyValuePair<string, object>> extraTags = null);
 
-        internal void LogFailureMetrics(string platform,
+        internal void LogFailureMetrics(
+            string platform,
+            string errorCode,
+            ApiEvent apiEvent,
+            string callerSdkId,
+            string callerSdkVersion,
+            CacheRefreshReason cacheRefreshReason,
+            int tokenType,
+            int httpStatusCode,
+            long totalDurationInMs,
+            string rawStsErrorCode = null,
+            ILoggerAdapter logger = null,
+            IReadOnlyList<KeyValuePair<string, object>> extraTags = null);
+
+        internal void IncrementFailureCounter(
+            string platform,
             string errorCode,
             ApiEvent.ApiIds apiId,
             string callerSdkId,
             string callerSdkVersion,
             CacheRefreshReason cacheRefreshReason,
             int tokenType,
-            string rawStsErrorCode = null);
+            string rawStsErrorCode = null,
+            ILoggerAdapter logger = null,
+            IReadOnlyList<KeyValuePair<string, object>> extraTags = null);
+
+        internal void LogFailureHttpDuration(
+            string platform,
+            ApiEvent apiEvent,
+            int httpStatusCode,
+            ILoggerAdapter logger = null,
+            IReadOnlyList<KeyValuePair<string, object>> extraTags = null);
+
+        internal void LogRemainingTokenLifetime(
+            string platform,
+            ApiEvent.ApiIds apiId,
+            TokenSource tokenSource,
+            CacheLevel cacheLevel,
+            CacheRefreshReason cacheRefreshReason,
+            int tokenType,
+            DateTimeOffset expiresOn,
+            ILoggerAdapter logger = null,
+            IReadOnlyList<KeyValuePair<string, object>> extraTags = null);
+
+        internal void LogSuccessHttpDuration(
+            string platform,
+            ApiEvent.ApiIds apiId,
+            AuthenticationResultMetadata authResultMetadata,
+            ILoggerAdapter logger = null,
+            IReadOnlyList<KeyValuePair<string, object>> extraTags = null);
     }
 }

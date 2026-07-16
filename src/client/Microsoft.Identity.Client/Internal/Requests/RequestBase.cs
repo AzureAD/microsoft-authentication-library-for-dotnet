@@ -24,6 +24,7 @@ using Microsoft.Identity.Client.TelemetryCore.OpenTelemetry;
 using Microsoft.Identity.Client.Internal.Broker;
 using System.Runtime.ConstrainedExecution;
 using Microsoft.Identity.Client.AuthScheme;
+using Microsoft.Identity.Client.Extensibility;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -85,6 +86,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 AuthenticationRequestParameters.RequestContext.ApiEvent = apiEvent;
             });
 
+            var requestStopwatch = Stopwatch.StartNew();
             try
             {
                 AuthenticationResult authenticationResult = null;
@@ -112,9 +114,23 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
                 AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
 
+                // Compute the total duration once so the value stored on the exception metadata matches
+                // the value logged to OpenTelemetry (the stopwatch keeps running, so re-reading it drifts).
+                long totalDurationInMs = requestStopwatch.ElapsedMilliseconds + measureTelemetryDurationResult.Milliseconds;
+
+                ex.AuthenticationResultMetadata = CreateFailureMetadata(apiEvent, totalDurationInMs);
+
+                MsalServiceException serviceException = ex as MsalServiceException;
+                int httpStatusCode = serviceException?.StatusCode ?? 0;
+
                 LogFailureTelemetryToOtel(
-                    ex.ErrorCode, apiEvent, apiEvent.CacheInfo,
-                    (ex as MsalServiceException)?.ErrorCodes?.FirstOrDefault());
+                    ex.ErrorCode,
+                    apiEvent,
+                    apiEvent.CacheInfo,
+                    httpStatusCode,
+                    totalDurationInMs,
+                    exception: ex,
+                    rawStsErrorCode: serviceException?.ErrorCodes?.FirstOrDefault());
                 throw;
             }
             catch (Exception ex)
@@ -122,37 +138,68 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 apiEvent.ApiErrorCode = ex.GetType().Name;
                 AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
 
-                LogFailureTelemetryToOtel(ex.GetType().Name, apiEvent, apiEvent.CacheInfo);
+                LogFailureTelemetryToOtel(ex.GetType().Name, apiEvent, apiEvent.CacheInfo, httpStatusCode: 0, totalDurationInMs: requestStopwatch.ElapsedMilliseconds + measureTelemetryDurationResult.Milliseconds);
                 throw;
             }
         }
 
         private void LogSuccessTelemetryToOtel(AuthenticationResult authenticationResult, ApiEvent apiEvent, long durationInUs)
         {
+            CacheLevel cacheLevel = GetCacheLevel(authenticationResult);
+
+            // Invoke the caller-supplied enricher once per acquisition and merge the resulting fixed set of
+            // extra tags into every instrument below, so the delegate is not re-run per metric.
+            IReadOnlyList<KeyValuePair<string, object>> extraTags = OtelEnrichmentHelper.MaterializeExtraTags(
+                AuthenticationRequestParameters.OtelTagsEnricher,
+                () => new ExecutionResult
+                {
+                    Successful = true,
+                    Result = authenticationResult,
+                    ClientCertificate = AuthenticationRequestParameters.ResolvedCertificate
+                },
+                AuthenticationRequestParameters.RequestContext.Logger);
+
             // Log metrics
             ServiceBundle.PlatformProxy.OtelInstrumentation.LogSuccessMetrics(
                         ServiceBundle.PlatformProxy.GetProductName(),
                         apiEvent.ApiId,
                         apiEvent.CallerSdkApiId,
                         apiEvent.CallerSdkVersion,
-                        GetCacheLevel(authenticationResult),
+                        cacheLevel,
                         durationInUs,
                         authenticationResult.AuthenticationResultMetadata,
-                        AuthenticationRequestParameters.RequestContext.Logger);
+                        AuthenticationRequestParameters.RequestContext.Logger,
+                        authenticationResult.ExpiresOn,
+                        extraTags);
         }
 
-        private void LogFailureTelemetryToOtel(string errorCodeToLog, ApiEvent apiEvent, CacheRefreshReason cacheRefreshReason, string rawStsErrorCode = null)
+        private void LogFailureTelemetryToOtel(string errorCodeToLog, ApiEvent apiEvent, CacheRefreshReason cacheRefreshReason, int httpStatusCode, long totalDurationInMs, MsalException exception = null, string rawStsErrorCode = null)
         {
-            // Log metrics
+            // Invoke the caller-supplied enricher once per acquisition and merge the resulting fixed set of
+            // extra tags into every instrument below, so the delegate is not re-run per metric.
+            IReadOnlyList<KeyValuePair<string, object>> extraTags = OtelEnrichmentHelper.MaterializeExtraTags(
+                AuthenticationRequestParameters.OtelTagsEnricher,
+                () => new ExecutionResult
+                {
+                    Successful = false,
+                    Exception = exception,
+                    ClientCertificate = AuthenticationRequestParameters.ResolvedCertificate
+                },
+                AuthenticationRequestParameters.RequestContext.Logger);
+
             ServiceBundle.PlatformProxy.OtelInstrumentation.LogFailureMetrics(
                         ServiceBundle.PlatformProxy.GetProductName(),
                         errorCodeToLog,
-                        apiEvent.ApiId,
+                        apiEvent,
                         apiEvent.CallerSdkApiId,
                         apiEvent.CallerSdkVersion,
                         cacheRefreshReason,
                         apiEvent.TokenType,
-                        rawStsErrorCode);
+                        httpStatusCode,
+                        totalDurationInMs,
+                        rawStsErrorCode,
+                        AuthenticationRequestParameters.RequestContext.Logger,
+                        extraTags);
         }
 
         private Tuple<string, string> ParseScopesForTelemetry()
@@ -237,6 +284,26 @@ namespace Microsoft.Identity.Client.Internal.Requests
             Metrics.IncrementTotalDurationInMs(authenticationResult.AuthenticationResultMetadata.DurationTotalInMs);
         }
 
+        /// <summary>
+        /// Builds the subset of <see cref="AuthenticationResultMetadata"/> that is available when a
+        /// token request fails. Only values that were actually captured are populated; everything else
+        /// is left at its default (0 / null). <see cref="AuthenticationResultMetadata.TokenSource"/> has
+        /// no meaningful value on failure, so it stays at the constructor default and should not be relied on.
+        /// </summary>
+        internal static AuthenticationResultMetadata CreateFailureMetadata(ApiEvent apiEvent, long totalDurationInMs)
+        {
+            return new AuthenticationResultMetadata(TokenSource.IdentityProvider)
+            {
+                DurationTotalInMs = totalDurationInMs,
+                DurationInHttpInMs = apiEvent.DurationInHttpInMs,
+                DurationInCacheInMs = apiEvent.DurationInCacheInMs,
+                CachedAccessTokenCount = apiEvent.CachedAccessTokenCount,
+                CacheRefreshReason = apiEvent.CacheInfo,
+                TokenEndpoint = apiEvent.TokenEndpoint,
+                RegionDetails = CreateRegionDetails(apiEvent),
+            };
+        }
+
         protected virtual void EnrichTelemetryApiEvent(ApiEvent apiEvent)
         {
             // In base classes have them override this to add their properties/fields to the event.
@@ -279,6 +346,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
             string callerSdkId;
             string callerSdkVer;
 
+            RemoveCallerSdkCacheKeyComponents();
+
             // Check if ExtraQueryParameters contains caller-sdk-id and caller-sdk-ver
             if (AuthenticationRequestParameters.ExtraQueryParameters.TryGetValue(Constants.CallerSdkIdKey, out callerSdkId))
             {
@@ -300,6 +369,29 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             apiEvent.CallerSdkApiId = callerSdkId == null ? null : callerSdkId.Substring(0, Math.Min(callerSdkId.Length, Constants.CallerSdkIdMaxLength));
             apiEvent.CallerSdkVersion = callerSdkVer == null ? null : callerSdkVer.Substring(0, Math.Min(callerSdkVer.Length, Constants.CallerSdkVersionMaxLength));
+        }
+
+        private void RemoveCallerSdkCacheKeyComponents()
+        {
+            RemoveCacheKeyComponent(Constants.CallerSdkIdKey);
+            RemoveCacheKeyComponent(Constants.CallerSdkVersionKey);
+        }
+
+        private void RemoveCacheKeyComponent(string key)
+        {
+            var cacheKeyComponents = AuthenticationRequestParameters.CacheKeyComponents;
+
+            if (cacheKeyComponents == null)
+            {
+                return;
+            }
+
+            foreach (string cacheKeyComponent in cacheKeyComponents.Keys
+                .Where(cacheKeyComponent => string.Equals(cacheKeyComponent, key, StringComparison.OrdinalIgnoreCase))
+                .ToArray())
+            {
+                cacheKeyComponents.Remove(cacheKeyComponent);
+            }
         }
 
         private AssertionType GetAssertionType()

@@ -19,7 +19,39 @@ namespace Microsoft.Identity.Client.Extensibility
     public static class AbstractConfidentialClientAcquireTokenParameterBuilderExtension
     {
         /// <summary>
-        /// Intervenes in the request pipeline, by executing a user provided delegate before MSAL makes the token request. 
+        /// Specifies client-originated claims to include in the token request.
+        /// Unlike <see cref="AbstractAcquireTokenParameterBuilder{T}.WithClaims"/> (for server-issued
+        /// claims challenges), tokens acquired with client claims <b>are cached</b> and the cache entry
+        /// is keyed on the claims value. Different claims values produce separate cache entries.
+        /// Use stable, non-dynamic values to avoid unbounded cache growth.
+        /// </summary>
+        /// <typeparam name="T">The concrete confidential client builder type.</typeparam>
+        /// <param name="builder">The builder to chain options to.</param>
+        /// <param name="claimsJson">A JSON string containing the client-originated claims. Must be valid JSON.</param>
+        /// <returns>The builder to chain the .With methods.</returns>
+        public static T WithClaimsFromClient<T>(
+            this AbstractConfidentialClientAcquireTokenParameterBuilder<T> builder,
+            string claimsJson)
+            where T : AbstractConfidentialClientAcquireTokenParameterBuilder<T>
+        {
+            if (string.IsNullOrWhiteSpace(claimsJson))
+            {
+                return (T)builder;
+            }
+
+            builder.ValidateUseOfExperimentalFeature();
+
+            builder.CommonParameters.ClientClaims = claimsJson;
+
+            // Use indexer (not SortedList.Add) so repeated calls are last-write-wins rather than throwing.
+            builder.CommonParameters.CacheKeyComponents ??= new SortedList<string, Func<CancellationToken, Task<string>>>();
+            builder.CommonParameters.CacheKeyComponents["client_claims"] = _ => Task.FromResult(claimsJson);
+
+            return (T)builder;
+        }
+
+        /// <summary>
+        /// Intervenes in the request pipeline, by executing a user provided delegate before MSAL makes the token request.
         /// The delegate can modify the request payload by adding or removing  body parameters and headers. <see cref="OnBeforeTokenRequestData"/>
         /// </summary>
         /// <typeparam name="T"></typeparam>
@@ -98,7 +130,7 @@ namespace Microsoft.Identity.Client.Extensibility
                     if (trimmed.Any(char.IsWhiteSpace))
                     {
                         throw new ArgumentException(
-                            $"Attribute tokens must not contain whitespace. Invalid token: '{trimmed}'",
+                            "Attribute tokens must not contain whitespace.",
                             nameof(attributeTokens));
                     }
 
@@ -363,5 +395,42 @@ namespace Microsoft.Identity.Client.Extensibility
 
             return builder;
         }
-    }   
+
+        /// <summary>
+        /// Registers a delegate that adds additional tags (dimensions) to the OpenTelemetry metrics MSAL emits
+        /// for this token acquisition. The delegate is invoked while MSAL records its metrics and receives the
+        /// <see cref="ExecutionResult"/> of the acquisition (indicating success or failure, with the result or
+        /// exception) together with a mutable list of tags. Tags appended to that list are attached to every metric
+        /// recorded for the request.
+        /// </summary>
+        /// <typeparam name="T">The concrete builder type.</typeparam>
+        /// <param name="builder">The builder to chain options to.</param>
+        /// <param name="tagsEnricher">
+        /// A delegate that receives the <see cref="ExecutionResult"/> and a mutable list of tags to enrich.
+        /// The delegate runs on MSAL's metric-recording path, so it should be fast, non-blocking and must not throw.
+        /// The supplied tag list must be populated synchronously; do not retain or mutate it after the delegate returns.
+        /// </param>
+        /// <returns>The builder to chain the .With methods.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="tagsEnricher"/> is null.</exception>
+        /// <remarks>
+        /// Keep both the number of added tags and — more importantly — their value cardinality low. High-cardinality
+        /// tag values (such as correlation ids, timestamps, or user identifiers) can cause an unbounded number of
+        /// metric time series in the downstream telemetry backend. The tags are applied to every metric MSAL records
+        /// for the request, so a large number of tags also adds overhead on the metric-recording path.
+        /// </remarks>
+        public static AbstractAcquireTokenParameterBuilder<T> WithOtelTagsEnricher<T>(
+            this AbstractAcquireTokenParameterBuilder<T> builder,
+            Action<ExecutionResult, IList<KeyValuePair<string, object>>> tagsEnricher)
+            where T : AbstractAcquireTokenParameterBuilder<T>
+        {
+            if (tagsEnricher == null)
+            {
+                throw new ArgumentNullException(nameof(tagsEnricher));
+            }
+
+            builder.CommonParameters.OtelTagsEnricher = tagsEnricher;
+
+            return builder;
+        }
+    }
 }

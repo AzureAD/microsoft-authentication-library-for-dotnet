@@ -262,7 +262,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .BuildConcrete();
                 app.ServiceBundle.ConfigureMockWebUI();
                 var userCacheAccess = app.UserTokenCache.RecordAccess();
-                var extraExpectedHeaders = TestConstants.s_extraHttpHeader;
+                // Copy preserving the original OrdinalIgnoreCase comparer so header-key lookups
+                // remain case-insensitive, matching HTTP header semantics.
+                var extraExpectedHeaders = new Dictionary<string, string>(
+                    TestConstants.s_extraHttpHeader,
+                    TestConstants.s_extraHttpHeader.Comparer);
                 extraExpectedHeaders.Add(Constants.CcsRoutingHintHeader, CoreHelpers.GetCcsUpnHint(TestConstants.s_user.Username));
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant, null, null, false, null, extraExpectedHeaders);
 
@@ -271,7 +275,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 AuthenticationResult result = app
                     .AcquireTokenInteractive(TestConstants.s_scope)
                     .WithCorrelationId(correlationId)
-                    .WithExtraHttpHeaders(TestConstants.s_extraHttpHeader)
+                    .WithExtraHttpHeaders(extraExpectedHeaders)
                     .WithLoginHint(TestConstants.s_user.Username)
                     .ExecuteAsync(CancellationToken.None)
                     .Result;

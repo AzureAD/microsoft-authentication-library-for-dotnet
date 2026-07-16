@@ -202,15 +202,24 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                 requestContext.Logger.Error($"[Instance Discovery] Instance discovery failed - invalid instance! ");
                 throw;
             }
+            catch (OperationCanceledException) when (requestContext.UserCancellationToken.IsCancellationRequested)
+            {
+                requestContext.Logger.Info("[Instance Discovery] Instance discovery was canceled by the caller. ");
+                throw;
+            }
             catch (Exception e) 
             { 
                 requestContext.Logger.Warning(
                     $"[Instance Discovery] Instance Discovery failed. MSAL will continue without network instance metadata. \n\r" +
                     $" Exception: {e} ");
-                
-                return 
-                    _knownMetadataProvider.GetMetadata(authorityUri.Host, Enumerable.Empty<string>(), requestContext.Logger)
-                ?? CreateEntryForSingleAuthority(authorityUri);
+
+                InstanceDiscoveryMetadataEntry entry =
+                    _knownMetadataProvider.GetMetadata(authorityUri.Host, Enumerable.Empty<string>(), requestContext.Logger) ??
+                    CreateEntryForSingleAuthority(authorityUri);
+
+                _networkCacheMetadataProvider.AddMetadata(authorityUri.Host, entry);
+
+                return entry;
             }
         }
 

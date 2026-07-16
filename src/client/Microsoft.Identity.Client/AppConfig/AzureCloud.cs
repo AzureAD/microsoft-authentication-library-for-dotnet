@@ -31,5 +31,20 @@ namespace Microsoft.Identity.Client
         /// US Government cloud. Maps to https://login.microsoftonline.us
         /// </summary>
         AzureUsGovernment,
+
+        /// <summary>
+        /// French sovereign cloud (Bleu). Maps to https://login.sovcloud-identity.fr
+        /// </summary>
+        GovFr,
+
+        /// <summary>
+        /// German sovereign cloud (Delos). Maps to https://login.sovcloud-identity.de
+        /// </summary>
+        GovDe,
+
+        /// <summary>
+        /// Singapore Government cloud. Maps to https://login.sovcloud-identity.sg
+        /// </summary>
+        GovSg,
     };
 }

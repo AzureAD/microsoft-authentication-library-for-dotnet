@@ -22,34 +22,89 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             CacheLevel cacheLevel,
             long totalDurationInUs,
             AuthenticationResultMetadata authResultMetadata,
-            ILoggerAdapter logger)
+            ILoggerAdapter logger,
+            DateTimeOffset expiresOn,
+            IReadOnlyList<KeyValuePair<string, object>> extraTags = null)
+        {
+            // No op
+        }
+
+        public void LogSuccessHttpDuration(
+            string platform,
+            ApiEvent.ApiIds apiId,
+            AuthenticationResultMetadata authResultMetadata,
+            ILoggerAdapter logger = null,
+            IReadOnlyList<KeyValuePair<string, object>> extraTags = null)
         {
             // No op
         }
 
         public void LogFailureMetrics(string platform,
             string errorCode,
+            ApiEvent apiEvent,
+            string callerSdkId,
+            string callerSdkVersion,
+            CacheRefreshReason cacheRefreshReason,
+            int tokenType,
+            int httpStatusCode,
+            long totalDurationInMs,
+            string rawStsErrorCode = null,
+            ILoggerAdapter logger = null,
+            IReadOnlyList<KeyValuePair<string, object>> extraTags = null)
+        {
+            // No op
+        }
+
+        public void IncrementFailureCounter(string platform,
+            string errorCode,
             ApiEvent.ApiIds apiId,
             string callerSdkId,
             string callerSdkVersion,
             CacheRefreshReason cacheRefreshReason,
             int tokenType,
-            string rawStsErrorCode = null)
+            string rawStsErrorCode = null,
+            ILoggerAdapter logger = null,
+            IReadOnlyList<KeyValuePair<string, object>> extraTags = null)
         {
             // No op
         }
 
-        void IOtelInstrumentation.IncrementSuccessCounter(string platform, 
-            ApiEvent.ApiIds apiId,
-            string callerSdkId,
-            string callerSdkVersion,
-            TokenSource tokenSource, 
-            CacheRefreshReason cacheRefreshReason, 
-            CacheLevel cacheLevel, 
-            ILoggerAdapter logger,
-            int tokenType)
+        public void LogFailureHttpDuration(string platform,
+            ApiEvent apiEvent,
+            int httpStatusCode,
+            ILoggerAdapter logger = null,
+            IReadOnlyList<KeyValuePair<string, object>> extraTags = null)
         {
             // No op
         }
+
+        void IOtelInstrumentation.IncrementSuccessCounter(string platform,
+            ApiEvent.ApiIds apiId,
+            string callerSdkId,
+            string callerSdkVersion,
+            TokenSource tokenSource,
+            CacheRefreshReason cacheRefreshReason,
+            CacheLevel cacheLevel,
+            ILoggerAdapter logger,
+            int tokenType,
+            IReadOnlyList<KeyValuePair<string, object>> extraTags)
+        {
+            // No op
+        }
+
+        public void LogRemainingTokenLifetime(
+            string platform,
+            ApiEvent.ApiIds apiId,
+            TokenSource tokenSource,
+            CacheLevel cacheLevel,
+            CacheRefreshReason cacheRefreshReason,
+            int tokenType,
+            DateTimeOffset expiresOn,
+            ILoggerAdapter logger = null,
+            IReadOnlyList<KeyValuePair<string, object>> extraTags = null)
+        {
+            // No op
+        }
+
     }
 }
