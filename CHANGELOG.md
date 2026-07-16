@@ -1,3 +1,32 @@
+4.86.1
+======
+
+### Bug Fixes
+- Fixed the mTLS Proof-of-Possession token cache to key on the certificate's full DER (`x5t#S256`) instead of only the public key, preventing a stale token (and `AADSTS500181`) after a same-key certificate renewal. [#6123](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6123)
+- Fell back to RS256 when a certificate's PSS signing operation is rejected by `RSACryptoServiceProvider`, rebuilding the client assertion so authentication can proceed. [#6126](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6126)
+- Detect and reject symbolic links in the Unix cache-file write path (lstat pre-check plus `O_NOFOLLOW`), closing a TOCTOU window. [#6115](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6115)
+- Corrected misleading "region required" error messages and doc comments in the mTLS PoP flow. [#6127](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6127)
+
+4.86.0
+======
+
+### New Features
+- Surfaced token-acquisition diagnostics on failure via `MsalException.AuthenticationResultMetadata` (durations, region, and cache-refresh reason), mirroring the metadata available on the success path. [#6096](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6096)
+- Added an `OnBackgroundTokenRefreshCompleted` callback on the confidential client and managed identity builders to observe the outcome of fire-and-forget proactive token refreshes. [#6099](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6099)
+
+### Changes
+- Skip IMDS region auto-discovery when a region is explicitly configured; adds `RegionOutcome.UserProvided` and deprecates the auto-detection region outcomes. [#6092](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6092)
+
+### Bug Fixes
+- Propagate KeyGuard attestation failures instead of sending an empty token to IMDS, and bridge native MAA attestation logs to the MSAL logger for the IMDSv2 mTLS PoP flow. [#6081](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6081)
+
+4.85.2
+======
+
+### New Features
+- Added refresh-token cache partitioning via a new `WithCachePartitionKey` overload accepting a `partitionRefreshToken` flag. [#6077](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6077)
+- Added minimum mTLS Proof-of-Possession binding-strength enforcement for managed identity via `PoPOptions.MinStrength` and `WithMtlsProofOfPossession(PoPOptions)`; requests below the required strength fail with `MsalError.MinStrengthNotMet`. [#6059](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6059)
+
 4.85.1
 ======
 

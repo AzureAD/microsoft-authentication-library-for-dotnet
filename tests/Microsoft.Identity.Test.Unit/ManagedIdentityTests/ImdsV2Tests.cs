@@ -21,6 +21,7 @@ using Microsoft.Identity.Client.ManagedIdentity.KeyProviders;
 using Microsoft.Identity.Client.ManagedIdentity.V2;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
+using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Unit.Helpers;
@@ -2568,6 +2569,105 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Assert.AreEqual(TokenSource.Cache, second.AuthenticationResultMetadata.TokenSource, $"[{label}] second should be cache.");
                 Assert.AreEqual(first.BindingCertificate.Thumbprint, second.BindingCertificate.Thumbprint, $"[{label}] cached cert must be reused.");
+            }
+        }
+
+        /// <summary>
+        /// Encodes the proactive-refresh + cert-rotation trace for the pure MI mTLS PoP flow.
+        ///
+        /// A cached token is served (bound to cert 1) and, because it is past RefreshOn, a background
+        /// proactive refresh runs and mints a NEW binding certificate (cert 2 — same CSR key, new DER;
+        /// short-lived certs are never cached, so every acquisition re-mints).
+        ///
+        /// Invariant under test: the SERVED (cache-hit) result stays a consistent pair — it carries
+        /// cert 1, the certificate its token is bound to — and is NOT corrupted by the cert 2 the
+        /// background refresh is minting. cert 2 becomes visible only on the NEXT request. In other
+        /// words, the binding certificate MSAL hands back is pinned to the served token; a background
+        /// rotation never leaks into the in-flight result. This demonstrates the proactive-refresh
+        /// race is not a source of the certificate/assertion mismatch.
+        /// </summary>
+        [TestMethod]
+        public async Task mTLSPop_ProactiveRefresh_RotatesCert_ServedResultStaysConsistentAsync()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                ManagedIdentityClient.ResetSourceForTest();
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
+
+                // cert 1 and cert 2 share the CSR key but differ in DER; both < 24h, so neither is cached
+                // and every acquisition re-mints a fresh cert (this is what lets the proactive refresh rotate).
+                var cert1Raw = CreateRawCertForCsrKeyWithCnDc(
+                    Constants.ManagedIdentityDefaultClientId, TestConstants.TenantId, DateTimeOffset.UtcNow.AddHours(23));
+                var cert2Raw = CreateRawCertForCsrKeyWithCnDc(
+                    Constants.ManagedIdentityDefaultClientId, TestConstants.TenantId, DateTimeOffset.UtcNow.AddHours(23).AddMinutes(5));
+
+                var mi = (await CreateManagedIdentityAsync(
+                    httpManager,
+                    managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false)) as ManagedIdentityApplication;
+
+                // --- Initial mint: token 1 bound to cert 1 ---
+                AddMocksToGetEntraToken(httpManager, certificateRequestCertificate: cert1Raw);
+
+                var first = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession()
+                    .WithAttestationSupport()
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.AreEqual(TokenSource.IdentityProvider, first.AuthenticationResultMetadata.TokenSource);
+                string thumb1 = first.BindingCertificate.Thumbprint;
+
+                // Mark the cached token as needing a background (proactive) refresh.
+                TestCommon.UpdateATWithRefreshOn(mi.AppTokenCacheInternal.Accessor);
+
+                // The background refresh will mint cert 2 + token 2.
+                AddMocksToGetEntraToken(httpManager, certificateRequestCertificate: cert2Raw);
+
+                var cacheAccess = mi.AppTokenCacheInternal.RecordAccess();
+
+                // --- The traced request: cache hit serves cert 1 + token 1, and fires the proactive
+                //     refresh that rotates to cert 2 in the background. ---
+                var served = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession()
+                    .WithAttestationSupport()
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                // Capture the exact object reference handed back, so we can prove later that a background
+                // rotation does not repoint it.
+                X509Certificate2 servedCert = served.BindingCertificate;
+
+                // INVARIANT: the served result is the cached cert-1 pair, captured before the background
+                // refresh completes — NOT the cert 2 the refresh is minting.
+                Assert.AreEqual(TokenSource.Cache, served.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(CacheRefreshReason.ProactivelyRefreshed, served.AuthenticationResultMetadata.CacheRefreshReason);
+                Assert.AreEqual(thumb1, served.BindingCertificate.Thumbprint,
+                    "The served (cache-hit) result must carry cert 1 - the cert its token is bound to - NOT the " +
+                    "cert 2 minted by the background proactive refresh. A background rotation must never leak into the in-flight result.");
+
+                // Let the background refresh finish (consumes the cert-2 mocks, rotates
+                // RuntimeMtlsBindingCertificate to cert 2, and writes token 2 to the cache).
+                Assert.IsTrue(TestCommon.YieldTillSatisfied(() => httpManager.QueueSize == 0), "Background proactive refresh did not run.");
+                cacheAccess.WaitTo_AssertAcessCounts(1, 1);
+
+                // REFERENCE INVARIANT: even though the background refresh has now rotated the runtime binding
+                // certificate to cert 2, the previously-returned result must STILL reference cert 1.
+                // AuthenticationResult.BindingCertificate is a plain snapshot property, not a live alias to the
+                // rotating cert - so the reference handed to the caller never changes underneath them.
+                Assert.AreEqual(thumb1, served.BindingCertificate.Thumbprint,
+                    "After the background rotation completed, the already-returned result's BindingCertificate must STILL be cert 1.");
+                Assert.IsTrue(ReferenceEquals(servedCert, served.BindingCertificate),
+                    "BindingCertificate must remain the exact same object reference - a background rotation must not repoint it to cert 2.");
+
+                // --- Next request: the cache now holds token 2 (cert 2). The rotation is visible only here. ---
+                var next = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession()
+                    .WithAttestationSupport()
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.AreEqual(TokenSource.Cache, next.AuthenticationResultMetadata.TokenSource);
+                Assert.AreNotEqual(thumb1, next.BindingCertificate.Thumbprint,
+                    "After the background refresh completes, the next request serves the rotated cert 2 - " +
+                    "the rotation affects only subsequent requests, never the one that triggered it.");
             }
         }
         #endregion
