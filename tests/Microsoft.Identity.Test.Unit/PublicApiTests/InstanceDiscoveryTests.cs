@@ -156,5 +156,103 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // Assert happens when httpManager disposes and checks for unconsumed handlers 
             }
         }
+
+        [TestMethod]
+        [WorkItem(5804)]
+        [DataRow(HttpStatusCode.NotFound)]
+        [DataRow(HttpStatusCode.BadGateway)]
+        public async Task FailedInstanceDiscoveryIsCachedForUnknownAuthorityAsync(HttpStatusCode discoveryStatusCode)
+        {
+            using (var httpManager = new MockHttpManager(disableInternalRetries: true))
+            {
+                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                              .WithAuthority(TestConstants.AuthorityNotKnownTenanted)
+                                                              .WithClientSecret(TestConstants.ClientSecret)
+                                                              .WithHttpManager(httpManager)
+                                                              .Build();
+
+                AddFailingInstanceDiscoveryMockHandler(httpManager, discoveryStatusCode);
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                // Act
+                AuthenticationResult firstResult = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                                                            .ExecuteAsync(CancellationToken.None)
+                                                            .ConfigureAwait(false);
+
+                AuthenticationResult cachedResult = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                                                             .ExecuteAsync(CancellationToken.None)
+                                                             .ConfigureAwait(false);
+
+                AuthenticationResult refreshedResult = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                                                               .WithForceRefresh(true)
+                                                               .ExecuteAsync(CancellationToken.None)
+                                                               .ConfigureAwait(false);
+
+                // Assert
+                Assert.IsNotNull(firstResult);
+                Assert.IsNotNull(cachedResult);
+                Assert.IsNotNull(refreshedResult);
+            }
+        }
+
+        [TestMethod]
+        [WorkItem(5805)]
+        public async Task TimedOutInstanceDiscoveryIsCachedForUnknownAuthorityAsync()
+        {
+            using (var httpManager = new MockHttpManager(disableInternalRetries: true))
+            {
+                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                              .WithAuthority(TestConstants.AuthorityNotKnownTenanted)
+                                                              .WithClientSecret(TestConstants.ClientSecret)
+                                                              .WithHttpManager(httpManager)
+                                                              .Build();
+
+                httpManager.AddMockHandler(
+                    new MockHttpMessageHandler
+                    {
+                        ExpectedMethod = HttpMethod.Get,
+                        ExpectedUrl = "https://login.microsoftonline.com/common/discovery/instance",
+                        ExceptionToThrow = new TaskCanceledException("Simulated instance discovery timeout")
+                    });
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                // Act
+                AuthenticationResult firstResult = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                                                            .ExecuteAsync(CancellationToken.None)
+                                                            .ConfigureAwait(false);
+
+                AuthenticationResult cachedResult = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                                                             .ExecuteAsync(CancellationToken.None)
+                                                             .ConfigureAwait(false);
+
+                AuthenticationResult refreshedResult = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                                                               .WithForceRefresh(true)
+                                                               .ExecuteAsync(CancellationToken.None)
+                                                               .ConfigureAwait(false);
+
+                // Assert
+                Assert.IsNotNull(firstResult);
+                Assert.IsNotNull(cachedResult);
+                Assert.IsNotNull(refreshedResult);
+            }
+        }
+
+        private static void AddFailingInstanceDiscoveryMockHandler(
+            MockHttpManager httpManager,
+            HttpStatusCode discoveryStatusCode)
+        {
+            httpManager.AddMockHandler(
+                new MockHttpMessageHandler
+                {
+                    ExpectedMethod = HttpMethod.Get,
+                    ExpectedUrl = "https://login.microsoftonline.com/common/discovery/instance",
+                    ResponseMessage = new HttpResponseMessage(discoveryStatusCode)
+                    {
+                        Content = new StringContent(string.Empty)
+                    }
+                });
+        }
     }
 }

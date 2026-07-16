@@ -1,11 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-#if SUPPORTS_SYSTEM_TEXT_JSON
-    using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
-#else
-    using Microsoft.Identity.Json;
-#endif
+using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
 
 namespace Microsoft.Identity.Client.ManagedIdentity.V2
 {

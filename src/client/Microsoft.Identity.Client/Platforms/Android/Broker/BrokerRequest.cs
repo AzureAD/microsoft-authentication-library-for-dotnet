@@ -9,7 +9,9 @@ using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Json;
+using Microsoft.Identity.Client.Platforms.net;
+using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
+using JsonIgnore = System.Text.Json.Serialization.JsonIgnoreAttribute;
 
 namespace Microsoft.Identity.Client.Platforms.Android.Broker
 {

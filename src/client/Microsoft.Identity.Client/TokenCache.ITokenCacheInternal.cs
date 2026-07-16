@@ -100,7 +100,8 @@ namespace Microsoft.Identity.Client
                                     instanceDiscoveryMetadata.PreferredCache,
                                     requestParams.AppConfig.ClientId,
                                     response,
-                                    homeAccountId)
+                                    homeAccountId,
+                                    requestParams.PartitionRefreshToken ? requestParams.CacheKeyComponents : null)
                 {
                     OboCacheKey = CacheKeyFactory.GetOboKey(requestParams.LongRunningOboCacheKey, requestParams.UserAssertion),
                 };
@@ -229,7 +230,8 @@ namespace Microsoft.Identity.Client
                             tenantId,
                             msalAccessTokenCacheItem.ScopeSet,
                             msalAccessTokenCacheItem.HomeAccountId,
-                            msalAccessTokenCacheItem.TokenType);
+                            msalAccessTokenCacheItem.TokenType,
+                            msalAccessTokenCacheItem.AdditionalCacheKeyComponents);
 
                         Accessor.SaveAccessToken(msalAccessTokenCacheItem);
                     }
@@ -514,20 +516,73 @@ namespace Microsoft.Identity.Client
             return msalAccessTokenCacheItem;
         }
 
+        // Symmetric filter for AdditionalCacheKeyComponents (GH #5963):
+        //   request WITH components    -> keep ONLY items with matching components
+        //   request WITHOUT components -> keep ONLY items without components
         private void FilterTokensByAdditionalKeyComponents(List<MsalAccessTokenCacheItem> accessTokens, AuthenticationRequestParameters requestParams)
         {
-            if (requestParams.CacheKeyComponents != null)
+            bool requestHasComponents =
+                requestParams.CacheKeyComponents != null &&
+                requestParams.CacheKeyComponents.Count > 0;
+
+            int countBeforeFilter = accessTokens.Count;
+
+            if (requestHasComponents)
             {
                 accessTokens.FilterWithLogging(item =>
                     item.AdditionalCacheKeyComponents != null &&
                     CollectionHelpers.AreDictionariesEqual(item.AdditionalCacheKeyComponents, requestParams.CacheKeyComponents),
                     requestParams.RequestContext.Logger,
                     "Filtering by additional key components");
+            }
+            else
+            {
+                accessTokens.FilterWithLogging(item =>
+                    item.AdditionalCacheKeyComponents == null ||
+                    item.AdditionalCacheKeyComponents.Count == 0,
+                    requestParams.RequestContext.Logger,
+                    "Filtering out tokens that have additional key components");
+            }
 
-                if (accessTokens.Count == 0)
-                {
-                    requestParams.RequestContext.Logger.Verbose(() => "No tokens found that match the provided key components. ");
-                }
+            // Only attribute the miss to this filter if it is actually responsible for
+            // emptying the candidate set (i.e., entered with > 0 and exited with 0).
+            if (countBeforeFilter > 0 && accessTokens.Count == 0)
+            {
+                requestParams.RequestContext.Logger.Verbose(() => "No tokens found that match the additional key components filter. ");
+            }
+        }
+
+        // Symmetric filter for AdditionalCacheKeyComponents on refresh tokens (mirrors AT filter):
+        //   request WITH components    -> keep ONLY items with matching components
+        //   request WITHOUT components -> keep ONLY items without components
+        private void FilterRefreshTokensByAdditionalKeyComponents(List<MsalRefreshTokenCacheItem> refreshTokens, AuthenticationRequestParameters requestParams)
+        {
+            bool requestHasComponents =
+                requestParams.CacheKeyComponents != null &&
+                requestParams.CacheKeyComponents.Count > 0;
+
+            int countBeforeFilter = refreshTokens.Count;
+
+            if (requestHasComponents)
+            {
+                refreshTokens.FilterWithLogging(item =>
+                    item.AdditionalCacheKeyComponents != null &&
+                    CollectionHelpers.AreDictionariesEqual(item.AdditionalCacheKeyComponents, requestParams.CacheKeyComponents),
+                    requestParams.RequestContext.Logger,
+                    "Filtering RTs by additional key components");
+            }
+            else
+            {
+                refreshTokens.FilterWithLogging(item =>
+                    item.AdditionalCacheKeyComponents == null ||
+                    item.AdditionalCacheKeyComponents.Count == 0,
+                    requestParams.RequestContext.Logger,
+                    "Filtering out RTs that have additional key components");
+            }
+
+            if (countBeforeFilter > 0 && refreshTokens.Count == 0)
+            {
+                requestParams.RequestContext.Logger.Verbose(() => "No RTs found that match the additional key components filter. ");
             }
         }
 
@@ -597,7 +652,7 @@ namespace Microsoft.Identity.Client
                 // then we cannot filter by tenant and will use whatever is in the cache.
                 filterByTenantId =
                     !string.IsNullOrEmpty(requestTenantId) &&
-                    !AadAuthority.IsCommonOrganizationsOrConsumersTenant(requestTenantId);
+                    !AadAuthority.IsCommonOrOrganizationsTenant(requestTenantId);
             }
 
             if (filterByTenantId)
@@ -702,8 +757,13 @@ namespace Microsoft.Identity.Client
             }
 
             // at this point we need environment aliases, try to get them without a discovery call
+            // Use OriginalAuthority so that mTLS-transformed authorities (mtlsauth.microsoft.com) don't
+            // propagate into alias resolution. After ResolveAuthorityAsync, requestParams.AuthorityInfo
+            // may reflect the mtlsauth host; passing that to GetMetadataEntryTryAvoidNetworkAsync causes
+            // RegionAndMtlsDiscoveryProvider to throw MtlsPopNotSupportedForEnvironment. Using the
+            // original login.* authority ensures alias lookup always succeeds via instance discovery.
             var instanceMetadata = await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
-                                     requestParams.AuthorityInfo,
+                                     requestParams.AuthorityManager.OriginalAuthority.AuthorityInfo,
                                      tokenCacheItems.Select(at => at.Environment),  // if all environments are known, a network call can be avoided
                                      requestParams.RequestContext)
                             .ConfigureAwait(false);
@@ -817,11 +877,19 @@ namespace Microsoft.Identity.Client
             {
                 FilterRefreshTokensByHomeAccountIdOrAssertion(refreshTokens, requestParams, familyId);
 
+                // Skip partition filtering for FRT lookups — FRTs are shared across apps
+                // and are never partitioned, so the partition filter must not apply.
+                // Also skip when PartitionRefreshToken is not set — the caller only wants AT partition.
+                if (string.IsNullOrEmpty(familyId) && requestParams.PartitionRefreshToken)
+                {
+                    FilterRefreshTokensByAdditionalKeyComponents(refreshTokens, requestParams);
+                }
+
                 if (!requestParams.AppConfig.MultiCloudSupportEnabled)
                 {
                     var metadata =
                     await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
-                        requestParams.AuthorityInfo,
+                        requestParams.AuthorityManager.OriginalAuthority.AuthorityInfo,
                         refreshTokens.Select(rt => rt.Environment),  // if all environments are known, a network call can be avoided
                         requestParams.RequestContext)
                     .ConfigureAwait(false);
@@ -851,7 +919,7 @@ namespace Microsoft.Identity.Client
             {
                 var metadata =
                   await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
-                      requestParams.AuthorityInfo,
+                      requestParams.AuthorityManager.OriginalAuthority.AuthorityInfo,
                       refreshTokens.Select(rt => rt.Environment),  // if all environments are known, a network call can be avoided
                       requestParams.RequestContext)
                   .ConfigureAwait(false);
@@ -1163,8 +1231,14 @@ namespace Microsoft.Identity.Client
                     idTokenCacheItems.Select(aci => aci.Environment),
                     StringComparer.OrdinalIgnoreCase);
 
+                // Use OriginalAuthority for alias resolution so that mTLS-transformed authorities
+                // (mtlsauth.microsoft.com) don't propagate into the cache lookup.
+                // _currentAuthority may be set to the mTLS endpoint (PreferredNetwork) after instance
+                // discovery; using OriginalAuthority ensures we always look up aliases from the
+                // canonical login.* host, which is where id tokens are stored.
+                var authorityInfoForAliases = requestParameters.AuthorityManager.OriginalAuthority.AuthorityInfo;
                 InstanceDiscoveryMetadataEntry instanceMetadata = await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
-                    requestParameters.AuthorityInfo,
+                    authorityInfoForAliases,
                     allEnvironmentsInCache,
                     requestParameters.RequestContext).ConfigureAwait(false);
 

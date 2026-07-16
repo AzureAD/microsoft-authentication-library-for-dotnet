@@ -96,14 +96,18 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                         SilentRequestHelper.ProcessFetchInBackground(
                         cachedAccessTokenItem,
-                        () =>
+                        async () =>
                         {
                             // Use a linked token source, in case the original cancellation token source is disposed before this background task completes.
+                            // IMPORTANT: The lambda must be async and await the inner call. Without async/await, `using var` disposes the linked CTS
+                            // before the async operation completes, breaking cancellation propagation and causing unbounded SemaphoreSlim convoy.
+                            // See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/6053
                             using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-                            return GetAccessTokenAsync(tokenSource.Token, logger);
+                            return await GetAccessTokenAsync(tokenSource.Token, logger).ConfigureAwait(false);
                         }, logger, ServiceBundle, AuthenticationRequestParameters.RequestContext.ApiEvent,
-                        AuthenticationRequestParameters.RequestContext.ApiEvent.CallerSdkApiId, 
-                        AuthenticationRequestParameters.RequestContext.ApiEvent.CallerSdkVersion);
+                        AuthenticationRequestParameters.RequestContext.ApiEvent.CallerSdkApiId,
+                        AuthenticationRequestParameters.RequestContext.ApiEvent.CallerSdkVersion,
+                        AuthenticationRequestParameters.OtelTagsEnricher);
                     }
                 }
                 catch (MsalServiceException e)
@@ -397,19 +401,19 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             if (requestCert != null && AuthenticationRequestParameters.IsMtlsPopRequested)
             {
-                string expectedKid = CoreHelpers.ComputeX5tS256KeyId(requestCert);
+                string expectedKid = requestCert.ComputeX5tS256KeyId();
 
-                // If the certificate cannot produce a valid KeyId (SPKI-SHA256), expectedKid will be null or empty.
+                // If the certificate cannot produce a valid KeyId (the SHA256 cert thumbprint, equivalent to X5T#SHA256), expectedKid will be null or empty.
                 // In this case, the cache will be bypassed, as we cannot safely match the cached token to the certificate.
                 if (!string.Equals(cacheItem.KeyId, expectedKid, StringComparison.Ordinal))
                 {
                     AuthenticationRequestParameters.RequestContext.Logger.Verbose(() =>
-                    "[ClientCredentialRequest] Cached token KeyId does not match request certificate (SPKI-SHA256 mismatch). Bypassing cache.");
+                    "[ClientCredentialRequest] Cached token KeyId does not match request certificate (x5t#S256 DER mismatch). Bypassing cache.");
                     return false;
                 }
                 
                 AuthenticationRequestParameters.RequestContext.Logger.Verbose(() =>
-                "[ClientCredentialRequest] Cached token KeyId matches request certificate (SPKI-SHA256). Using cached token.");
+                "[ClientCredentialRequest] Cached token KeyId matches request certificate (x5t#S256 DER). Using cached token.");
             }
 
             // 3) If the token's hash matches AccessTokenHashToRefresh, ignore it

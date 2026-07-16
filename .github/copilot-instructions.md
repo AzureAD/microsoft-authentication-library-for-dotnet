@@ -1,26 +1,68 @@
-Carefully review all markdown documents in the ../.clinerules folder. Those are your custom instructions.
+# Code Review Rules
+
+These rules apply to Copilot code review. Read all rules before commenting.
+
+## Review scope
+
+- Only comment on lines added or modified in the PR diff
+- Do not comment on pre-existing code unless the PR directly introduces the issue
+- Do not comment on style, formatting, or indentation
+- Focus exclusively on: bugs, security issues, logic errors, API contract violations
+- If unsure whether something is a bug, do not comment
+- Prefer no comment over a speculative comment
+- Do not re-post a comment already made on an earlier commit in the same PR
+
+## Repo-specific patterns — do NOT flag these
+
+These patterns are correct in this repo. Do not suggest changes:
+
+- `[RunOn]` inherits from `TestMethodAttribute`. Do not flag as missing `[TestMethod]`
+- `Client.AppConfig.X` resolves via parent namespace `Microsoft.Identity`. Do not flag as unresolved namespace
+- `Assert.IsTrue(bool?)` is a valid MSTest overload. Do not flag nullable bool as a type mismatch
+- `Assert.DoesNotContain(substring, value)` — MSTest v4 signature is substring first, value second
+- `ConfigureAwait(false)` is intentional in library code. Do not suggest removal
+
+## ConcurrentDictionary.GetOrAdd — always use factory delegate
+
+`GetOrAdd(key, value)` eagerly evaluates the value arg. Flag any call where the second argument is not a delegate/lambda/method group:
+
+- Bad: `pool.GetOrAdd(key, new ExpensiveObject());`
+- Good: `pool.GetOrAdd(key, _ => new ExpensiveObject());`
+
+## C# coding standards
+
+- Use `is null` / `is not null` instead of `== null` / `!= null`
+- No reflection in product code (`/src`). Acceptable in tests
+- Static fields: `s_camelCase` (e.g., `s_knownHosts`)
+- Ordinal string comparisons for protocol values, identifiers, cache keys
+- Validate inputs at method boundaries (fail fast with specific exception types)
+- Do not include secrets/tokens/PII in exception messages or logs
+- Use `nameof` instead of string literals for member names
+
+## Testing standards
+
+- MSTest SDK v4 with NSubstitute for mocking
+- Use `// Arrange`, `// Act`, `// Assert` comments
+- Prefer deterministic tests (no timing flakiness)
+
+## Public API changes
+
+- Update `PublicAPI.Unshipped.txt` for any public API additions/removals
+- XML doc comments required on all public APIs
+- Maintain backward compatibility
+
+## MSAL-specific rules
+
+- Use certificate-based auth over client secrets when possible
+- Use async APIs consistently
+- Keep dependencies minimal and well-justified
 
 ---
 
-# Code Review Rules
+<!-- Everything below this line is for Copilot Chat and Copilot Agent only. -->
+<!-- Copilot code review reads only the first 4,000 characters of this file. -->
 
-## ConcurrentDictionary.GetOrAdd — always use the factory delegate overload
-
-`ConcurrentDictionary.GetOrAdd(key, value)` **eagerly evaluates** the second argument before checking the dictionary. If the value is a constructor call or method invocation (e.g., `new HttpClient(...)`, `CreateFoo()`), a new object is created and discarded on every cache hit.
-
-**Bad** — object created on every call, discarded on cache hit:
-```csharp
-pool.GetOrAdd(key, new ExpensiveObject());
-pool.GetOrAdd(key, CreateExpensiveObject());
-```
-
-**Good** — factory lambda only runs on cache miss:
-```csharp
-pool.GetOrAdd(key, _ => new ExpensiveObject());
-pool.GetOrAdd(key, _ => CreateExpensiveObject());
-```
-
-When reviewing code, flag any `GetOrAdd` call where the second argument is **not** a delegate/lambda/method group. All other usages of GetOrAdd(key, value) should be justified.
+Carefully review all markdown documents in the ../.clinerules folder. Those are your custom instructions.
 
 ---
 
@@ -50,6 +92,29 @@ This repository defines **Copilot Agent Skills** under `.github/skills/`.
 - Follow the skill’s guidance and patterns exactly (APIs, naming, examples).
 - If code is requested, provide complete, runnable code with required imports.
 - If multiple approaches exist, explain the tradeoffs and recommend one.
+
+---
+
+# MSAL.NET Agent Guidance
+
+## Warning-clean API changes
+- The repo builds with `TreatWarningsAsErrors=true`. When adding `[Obsolete]`, `EditorBrowsable`, or other public API annotations, build both the product project and affected test project(s).
+- If tests intentionally exercise a newly obsolete API, add a narrow warning suppression around that assertion/test instead of suppressing broadly.
+
+## Downstream compatibility checks
+- Before obsoleting, hiding, or changing request-builder authority APIs, telemetry parameters, or query-parameter/cache-key behavior, check known downstream consumers.
+- Treat soft-obsolete changes as downstream-breaking when consumers build with warnings-as-errors. Adding `[Obsolete]` with `error: false`, `[EditorBrowsable]`, or analyzer-facing warnings can still break `Microsoft.Identity.Web` package-bump PRs.
+- `Microsoft.Identity.Web` is commonly available as a sibling checkout at `D:\source\microsoft-identity-web`; search it for production usages before deciding whether a change is safe.
+- Use targeted searches for the exact public API/member names, for example:
+  - `rg "WithB2CAuthority|AffectedApiName" D:\source\microsoft-identity-web\src`
+  - `rg "Microsoft.Identity.Client" D:\source\microsoft-identity-web\Directory.Packages.props D:\source\microsoft-identity-web\src`
+- If `Microsoft.Identity.Web` uses the affected API, do not obsolete, hide, remove, or change it unless the PR also provides a safe migration plan. Prefer updating Identity.Web first or coordinating a staged change.
+- Mention the Identity.Web impact check in the PR summary, including whether the sibling checkout was present and what API names were searched.
+
+## Regression tests for cache and pooling changes
+- Regression tests must prove the changed side effect, not only final success or returned object identity.
+- For cache-key changes, assert the cached entry state after each relevant acquisition call, not only after the final call.
+- For pooling/lazy-creation fixes, verify creation counts or factory invocation counts so the test fails against the old eager-allocation implementation.
 
 ---
 

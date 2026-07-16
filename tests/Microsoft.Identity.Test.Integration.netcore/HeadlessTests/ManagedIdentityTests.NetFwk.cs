@@ -11,6 +11,7 @@ using System.Linq.Expressions;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Azure.Core;
 using Castle.Core.Internal;
@@ -442,13 +443,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             //process the response
             if (!string.IsNullOrEmpty(environmentVariableResponse))
             {
-#if NET8_0_OR_GREATER
                 environmentVariables = System.Text.Json.JsonSerializer.Deserialize
                     <Dictionary<string, string>>(environmentVariableResponse);
-#else
-                environmentVariables = Microsoft.Identity.Json.JsonConvert.DeserializeObject
-                    <Dictionary<string, string>>(environmentVariableResponse);
-#endif
             }
 
             return environmentVariables;

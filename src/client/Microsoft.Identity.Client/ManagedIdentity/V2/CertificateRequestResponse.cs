@@ -3,11 +3,7 @@
 
 using System.Buffers.Text;
 using System.Net;
-#if SUPPORTS_SYSTEM_TEXT_JSON
-    using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
-#else
-using Microsoft.Identity.Json;
-#endif
+using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
 
 namespace Microsoft.Identity.Client.ManagedIdentity.V2
 {
@@ -45,7 +41,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                     MsalError.ManagedIdentityRequestFailed,
                     $"[ImdsV2] ImdsV2ManagedIdentitySource.ExecuteCertificateRequestAsync failed because the certificate request response is malformed. Status code: 200",
                     null,
-                    ManagedIdentitySource.ImdsV2,
+                    ManagedIdentitySource.Imds,
                     (int)HttpStatusCode.OK);
             }
         }

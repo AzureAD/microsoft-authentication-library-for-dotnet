@@ -64,6 +64,50 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         }
 
         [TestMethod]
+        [DataRow("eastus", true, DisplayName = "Lowercase letters")]
+        [DataRow("eastus2", true, DisplayName = "Letters and digits")]
+        [DataRow("EastUs", true, DisplayName = "Mixed case")]
+        [DataRow("TryAutoDetect", true, DisplayName = "Auto-detect sentinel is alphanumeric")]
+        [DataRow("fake.com/x", false, DisplayName = "Path separator rejected")]
+        [DataRow("fake.com?x", false, DisplayName = "Query separator rejected")]
+        [DataRow("fake.com#x", false, DisplayName = "Fragment separator rejected")]
+        [DataRow("east us", false, DisplayName = "Embedded space rejected")]
+        [DataRow("east.us", false, DisplayName = "Dot rejected")]
+        [DataRow("east@us", false, DisplayName = "At sign rejected")]
+        [DataRow("eastus\n", false, DisplayName = "Trailing newline rejected")]
+        [DataRow("eastus\r\n", false, DisplayName = "Trailing CRLF rejected")]
+        [DataRow("east\nus", false, DisplayName = "Embedded newline rejected")]
+        [DataRow("eastus\u00B2", false, DisplayName = "Unicode superscript digit rejected")]
+        [DataRow("eastus\uFF10", false, DisplayName = "Unicode fullwidth digit rejected")]
+        [DataRow("", false, DisplayName = "Empty rejected")]
+        public void IsValidRegionName_EnforcesAlphanumericOnly(string region, bool expected)
+        {
+            // Act
+            bool actual = RegionManager.IsValidRegionName(region);
+
+            // Assert
+            Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public async Task RegionWithSpecialCharactersFromEnvironmentVariableIsRejectedAsync()
+        {
+            // Arrange - a poisoned REGION_NAME must not be used as the region
+            Environment.SetEnvironmentVariable(TestConstants.RegionName, "fake.com/x");
+            _testRequestContext.ServiceBundle.Config.AzureRegion = ConfidentialClientApplication.AttemptRegionDiscovery;
+            _httpManager.AddRegionDiscoveryMockHandlerWithError(HttpStatusCode.NotFound);
+
+            // Act
+            InstanceDiscoveryMetadataEntry regionalMetadata = await _regionDiscoveryProvider.GetMetadataAsync(
+                new Uri("https://login.microsoftonline.com/common/"), _testRequestContext)
+                .ConfigureAwait(false);
+
+            // Assert - the invalid env region is ignored, discovery falls through and fails over to global
+            Assert.IsNull(regionalMetadata);
+            Assert.AreNotEqual("fake.com/x", _testRequestContext.ApiEvent.RegionUsed);
+        }
+
+        [TestMethod]
         public async Task SuccessfulResponseFromEnvironmentVariableAsync()
         {
             Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
@@ -80,7 +124,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         [TestMethod]
         public async Task SuccessfulResponseFromLocalImdsAsync()
         {
-            AddMockedResponse(MockHelpers.CreateSuccessResponseMessage(TestConstants.Region));
+            AddMockedResponse(CreateImdsComputeResponse(TestConstants.Region));
 
             _testRequestContext.ServiceBundle.Config.AzureRegion =
                 ConfidentialClientApplication.AttemptRegionDiscovery;
@@ -97,7 +141,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             const int MaxThreadCount = 5;
             // add the mock response only once and call it 5 times on multiple threads
             // if the http mock is called more than once, it will fail in dispose as queue will be non-empty
-            AddMockedResponse(MockHelpers.CreateSuccessResponseMessage(TestConstants.Region));
+            AddMockedResponse(CreateImdsComputeResponse(TestConstants.Region));
             int threadCount = MaxThreadCount;
 #pragma warning disable VSTHRD101 // Avoid unsupported async delegates - acceptable risk (crash the test proj)
             var result = Parallel.For(0, MaxThreadCount, async (i) =>
@@ -136,7 +180,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         [TestMethod]
         public async Task FetchRegionFromLocalImdsThenGetMetadataFromCacheAsync()
         {
-            AddMockedResponse(MockHelpers.CreateSuccessResponseMessage(TestConstants.Region));
+            AddMockedResponse(CreateImdsComputeResponse(TestConstants.Region));
 
             _testRequestContext.ServiceBundle.Config.AzureRegion =
                ConfidentialClientApplication.AttemptRegionDiscovery;
@@ -153,18 +197,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         }
 
         [TestMethod]
-        [DataRow(HttpStatusCode.NotFound, 0, TestConstants.RegionAutoDetectNotFoundFailureMessage)]  // No retries for 404 errors
-        [DataRow(HttpStatusCode.InternalServerError, TestRegionDiscoveryRetryPolicy.NumRetries, TestConstants.RegionAutoDetectInternalServerErrorFailureMessage)]
-        public async Task SuccessfulResponseFromUserProvidedRegionAsync(
-            HttpStatusCode statusCode,
-            int expectedRetries,
-            string expectedFailureMessage)
+        public async Task SuccessfulResponseFromUserProvidedRegionDoesNotCallImdsAsync()
         {
-            for (int i = 0; i < (1 + expectedRetries); i++)
-            {
-                AddMockedResponse(MockHelpers.CreateNullMessage(statusCode));
-            }
-
             _testRequestContext.ServiceBundle.Config.AzureRegion = TestConstants.Region;
             RegionManager.ResetStaticCacheForTest();
             IRegionDiscoveryProvider regionDiscoveryProvider = new RegionAndMtlsDiscoveryProvider(_httpManager);
@@ -175,48 +209,12 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             Assert.AreEqual($"centralus.{RegionAndMtlsDiscoveryProvider.PublicEnvForRegional}", regionalMetadata.PreferredNetwork);
 
             Assert.AreEqual(TestConstants.Region, _testRequestContext.ApiEvent.RegionUsed);
-            Assert.AreEqual(RegionAutodetectionSource.FailedAutoDiscovery, _testRequestContext.ApiEvent.RegionAutodetectionSource);
-            Assert.AreEqual(RegionOutcome.UserProvidedAutodetectionFailed, _testRequestContext.ApiEvent.RegionOutcome);
-            Assert.Contains(expectedFailureMessage, _testRequestContext.ApiEvent.RegionDiscoveryFailureReason);
+            Assert.AreEqual(RegionAutodetectionSource.None, _testRequestContext.ApiEvent.RegionAutodetectionSource);
+            Assert.AreEqual(RegionOutcome.UserProvided, _testRequestContext.ApiEvent.RegionOutcome);
+            Assert.IsNull(_testRequestContext.ApiEvent.RegionDiscoveryFailureReason);
 
-            // Verify all mock responses were consumed
+            // Verify no IMDS request was made for the explicit region.
             Assert.AreEqual(0, _httpManager.QueueSize);
-        }
-
-        [TestMethod]
-        public async Task ResponseFromUserProvidedRegionSameAsRegionDetectedAsync()
-        {
-            Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
-            _testRequestContext.ServiceBundle.Config.AzureRegion = TestConstants.Region;
-
-            //            IRegionDiscoveryProvider regionDiscoveryProvider = new RegionDiscoveryProvider(_httpManager);
-            InstanceDiscoveryMetadataEntry regionalMetadata = await _regionDiscoveryProvider.GetMetadataAsync(new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
-
-            Assert.IsNotNull(regionalMetadata);
-            Assert.AreEqual($"centralus.{RegionAndMtlsDiscoveryProvider.PublicEnvForRegional}", regionalMetadata.PreferredNetwork);
-            Assert.AreEqual(TestConstants.Region, _testRequestContext.ApiEvent.RegionUsed);
-            Assert.AreEqual(RegionAutodetectionSource.EnvVariable, _testRequestContext.ApiEvent.RegionAutodetectionSource);
-            Assert.AreEqual(RegionOutcome.UserProvidedValid, _testRequestContext.ApiEvent.RegionOutcome);
-            Assert.IsNull(_testRequestContext.ApiEvent.RegionDiscoveryFailureReason);
-        }
-
-        [TestMethod]
-        public async Task ResponseFromUserProvidedRegionDifferentFromRegionDetectedAsync()
-        {
-            Environment.SetEnvironmentVariable(TestConstants.RegionName, "detected_region");
-            _testRequestContext.ServiceBundle.Config.AzureRegion = "user_region";
-
-            //IRegionDiscoveryProvider regionDiscoveryProvider = new RegionDiscoveryProvider(_httpManager, new NetworkCacheMetadataProvider());
-            InstanceDiscoveryMetadataEntry regionalMetadata = await _regionDiscoveryProvider.GetMetadataAsync(
-                new Uri("https://login.microsoftonline.com/common/"),
-                _testRequestContext).ConfigureAwait(false);
-
-            Assert.IsNotNull(regionalMetadata);
-            Assert.AreEqual($"user_region.{RegionAndMtlsDiscoveryProvider.PublicEnvForRegional}", regionalMetadata.PreferredNetwork);
-            Assert.AreEqual("user_region", _testRequestContext.ApiEvent.RegionUsed);
-            Assert.AreEqual(RegionAutodetectionSource.EnvVariable, _testRequestContext.ApiEvent.RegionAutodetectionSource);
-            Assert.AreEqual(RegionOutcome.UserProvidedInvalid, _testRequestContext.ApiEvent.RegionOutcome);
-            Assert.IsNull(_testRequestContext.ApiEvent.RegionDiscoveryFailureReason);
         }
 
         [TestMethod]
@@ -261,7 +259,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         {
             Environment.SetEnvironmentVariable(TestConstants.RegionName, "invalid`region");
 
-            AddMockedResponse(MockHelpers.CreateSuccessResponseMessage(TestConstants.Region)); // IMDS will return a valid region
+            AddMockedResponse(CreateImdsComputeResponse(TestConstants.Region)); // IMDS will return a valid region
 
             _testRequestContext.ServiceBundle.Config.AzureRegion =
                 ConfidentialClientApplication.AttemptRegionDiscovery;
@@ -277,7 +275,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         [DataRow("invalid`region")]
         public async Task InvalidImdsAsync(string region)
         {
-            AddMockedResponse(MockHelpers.CreateSuccessResponseMessage(region)); // IMDS will return an invalid region
+            AddMockedResponse(CreateImdsComputeResponse(region)); // IMDS will return an invalid region
 
             _testRequestContext.ServiceBundle.Config.AzureRegion =
                 ConfidentialClientApplication.AttemptRegionDiscovery;
@@ -322,6 +320,28 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         }
 
         [TestMethod]
+        [DataRow("{\"vmId\":\"11111111-1111-1111-1111-111111111111\"}", DisplayName = "Missing location field")]
+        [DataRow("{\"location\":null}", DisplayName = "Null location field")]
+        [DataRow("{ this is not valid json", DisplayName = "Malformed JSON")]
+        public async Task ResponseWithUnusableBodyFromLocalImdsAsync(string responseBody)
+        {
+            // Arrange - 200 OK with a non-empty but unusable body (missing/null location or malformed JSON)
+            AddMockedResponse(MockHelpers.CreateSuccessResponseMessage(responseBody));
+            _testRequestContext.ServiceBundle.Config.AzureRegion = ConfidentialClientApplication.AttemptRegionDiscovery;
+
+            // Act
+            InstanceDiscoveryMetadataEntry regionalMetadata = await _regionDiscoveryProvider.GetMetadataAsync(new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
+
+            // Assert
+            Assert.IsNull(regionalMetadata, "Discovery requested, but it failed.");
+            Assert.IsNull(_testRequestContext.ApiEvent.RegionUsed);
+            Assert.AreEqual(RegionAutodetectionSource.FailedAutoDiscovery, _testRequestContext.ApiEvent.RegionAutodetectionSource);
+            Assert.AreEqual(RegionOutcome.FallbackToGlobal, _testRequestContext.ApiEvent.RegionOutcome);
+            // Unusable bodies funnel into the same "status code OK or an empty response" failure reason.
+            Assert.Contains(TestConstants.RegionAutoDetectOkFailureMessage, _testRequestContext.ApiEvent.RegionDiscoveryFailureReason);
+        }
+
+        [TestMethod]
         [DataRow(HttpStatusCode.NotFound, 0, TestConstants.RegionAutoDetectNotFoundFailureMessage)]  // No retries for 404 errors
         [DataRow(HttpStatusCode.InternalServerError, TestRegionDiscoveryRetryPolicy.NumRetries, TestConstants.RegionAutoDetectInternalServerErrorFailureMessage)]
         public async Task ErrorResponseFromLocalImdsAsync(
@@ -354,10 +374,14 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         public async Task UpdateImdsApiVersionWhenCurrentVersionExpiresForImdsAsync()
         {
             // Arrange
+            // Two different api-versions appear by design:
+            //   1. The first call uses the default api-version (2021-02-01) and is rejected with 400 BadRequest.
+            //   2. MSAL then probes IMDS for supported versions; the error response's "newest-versions"
+            //      yields 2020-10-01, and the retry succeeds using that negotiated api-version.
             AddMockedResponse(MockHelpers.CreateNullMessage(System.Net.HttpStatusCode.BadRequest));
             AddMockedResponse(MockHelpers.CreateFailureMessage(System.Net.HttpStatusCode.BadRequest, File.ReadAllText(
                         ResourceHelper.GetTestResourceRelativePath("local-imds-error-response.json"))), expectedParams: false);
-            AddMockedResponse(MockHelpers.CreateSuccessResponseMessage(TestConstants.Region), apiVersion: "2020-10-01");
+            AddMockedResponse(CreateImdsComputeResponse(TestConstants.Region), apiVersion: "2020-10-01");
             _testRequestContext.ServiceBundle.Config.AzureRegion = ConfidentialClientApplication.AttemptRegionDiscovery;
 
             // Act
@@ -415,7 +439,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         public async Task RegionDiscoveryFails500OnceThenSucceeds200Async()
         {
             AddMockedResponse(MockHelpers.CreateNullMessage(HttpStatusCode.InternalServerError));
-            AddMockedResponse(MockHelpers.CreateSuccessResponseMessage(TestConstants.Region));
+            AddMockedResponse(CreateImdsComputeResponse(TestConstants.Region));
 
             _testRequestContext.ServiceBundle.Config.AzureRegion = ConfidentialClientApplication.AttemptRegionDiscovery;
 
@@ -480,14 +504,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             Assert.AreEqual(NumRequests, requestsMade);
         }
 
-        private void AddMockedResponse(HttpResponseMessage responseMessage, string apiVersion = "2020-06-01", bool expectedParams = true)
+        private void AddMockedResponse(HttpResponseMessage responseMessage, string apiVersion = "2021-02-01", bool expectedParams = true)
         {
             var queryParams = new Dictionary<string, string>();
 
             if (expectedParams)
             {
                 queryParams.Add("api-version", apiVersion);
-                queryParams.Add("format", "text");
 
                 _httpManager.AddMockHandler(
                    new MockHttpMessageHandler
@@ -516,6 +539,11 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                         ResponseMessage = responseMessage
                     });
             }
+        }
+
+        private static HttpResponseMessage CreateImdsComputeResponse(string location)
+        {
+            return MockHelpers.CreateSuccessResponseMessage($"{{\"location\":\"{location}\"}}");
         }
 
         private void ValidateInstanceMetadata(InstanceDiscoveryMetadataEntry entry, string region = "centralus")

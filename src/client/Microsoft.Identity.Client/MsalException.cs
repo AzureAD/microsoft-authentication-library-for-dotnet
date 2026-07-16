@@ -7,15 +7,10 @@ using System.Globalization;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.Utils;
-#if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text.Json;
 using System.Text.Encodings.Web;
 using System.Text.Unicode;
 using JObject = System.Text.Json.Nodes.JsonObject;
-#else
-using Microsoft.Identity.Json;
-using Microsoft.Identity.Json.Linq;
-#endif
 
 namespace Microsoft.Identity.Client
 {
@@ -154,6 +149,24 @@ namespace Microsoft.Identity.Client
             = CollectionHelpers.GetEmptyDictionary<string, string>();
 
         /// <summary>
+        /// Diagnostic metadata for the failed token-acquisition attempt — the total duration and, when the
+        /// relevant stage ran, HTTP/cache durations, token endpoint, and region used. This is
+        /// <see langword="null"/> when the exception was thrown before the request pipeline started collecting
+        /// metadata (for example, parameter or builder validation). When it is non-null — the typical
+        /// in-request failure — <see cref="AuthenticationResultMetadata.DurationTotalInMs"/> is always
+        /// populated (useful for latency measurement), while the other fields may be 0/null when the
+        /// corresponding stage did not run. On a failure
+        /// <see cref="AuthenticationResultMetadata.TokenSource"/> has no meaningful value and should not be
+        /// relied on. Reuses the type returned by <see cref="AuthenticationResult.AuthenticationResultMetadata"/>
+        /// on the success path.
+        /// </summary>
+        /// <remarks>
+        /// Populated in-process after the request completes; it is intentionally not part of the exception's
+        /// JSON serialization, so it is not preserved if the exception is marshaled across a process boundary.
+        /// </remarks>
+        public AuthenticationResultMetadata AuthenticationResultMetadata { get; internal set; }
+
+        /// <summary>
         /// Creates and returns a string representation of the current exception.
         /// </summary>
         /// <returns>A string representation of the current exception.</returns>
@@ -273,7 +286,6 @@ namespace Microsoft.Identity.Client
             JObject jObject = new JObject();
             PopulateJson(jObject);
 
-#if SUPPORTS_SYSTEM_TEXT_JSON
             // By default, STJ is more restrictive (escapes more characters) than Newtonsoft,
             // so the telemetry string is less readable.
             // Relax the encoding rules to match Newtonsoft behavior.
@@ -282,9 +294,6 @@ namespace Microsoft.Identity.Client
                 WriteIndented = true,
                 Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
             });
-#else
-            return jObject.ToString();
-#endif
         }
 
         /// <summary>

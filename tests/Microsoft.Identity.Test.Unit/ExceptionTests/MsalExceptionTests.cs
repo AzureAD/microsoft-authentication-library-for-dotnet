@@ -154,7 +154,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             Assert.Contains(ExMessage, msalException.Message);
             Assert.AreEqual("some_claims", msalException.Claims);
             Assert.AreEqual("6347d33d-941a-4c35-9912-a9cf54fb1b3e", msalException.CorrelationId);
-            Assert.AreEqual(suberror ?? "", msalException.SubError);
+            Assert.AreEqual(suberror ?? "", msalException.SubErrorForLogging);
 
             if (expectUiRequiredException)
             {
@@ -194,7 +194,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             Assert.AreEqual(ExMessage + " " + MsalErrorMessage.ClaimsChallenge, msalServiceException.Message);
             Assert.AreEqual("some_claims", msalServiceException.Claims);
             Assert.AreEqual("6347d33d-941a-4c35-9912-a9cf54fb1b3e", msalServiceException.CorrelationId);
-            Assert.AreEqual("some_suberror", msalServiceException.SubError);
+            Assert.AreEqual("some_suberror", msalServiceException.SubErrorForLogging);
 
             ValidateExceptionProductInformation(msalException);
         }      
@@ -265,7 +265,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
 
             Assert.AreEqual("some_claims", msalServiceException.Claims);
             Assert.AreEqual("6347d33d-941a-4c35-9912-a9cf54fb1b3e", msalServiceException.CorrelationId);
-            Assert.AreEqual("some_suberror", msalServiceException.SubError);
+            Assert.AreEqual("some_suberror", msalServiceException.SubErrorForLogging);
             ValidateExceptionProductInformation(msalException);
 
             // Act
@@ -343,7 +343,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             Assert.AreEqual(responseBody, msalServiceException.ResponseBody);
             Assert.AreEqual(ExMessage + " " + MsalErrorMessage.ClaimsChallenge, msalServiceException.Message);
             Assert.AreEqual((int)statusCode, msalServiceException.StatusCode);
-            Assert.AreEqual("some_suberror", msalServiceException.SubError);
+            Assert.AreEqual("some_suberror", msalServiceException.SubErrorForLogging);
 
             Assert.AreEqual(retryAfterSpan, msalServiceException.Headers.RetryAfter.Delta);
             ValidateExceptionProductInformation(msalException);

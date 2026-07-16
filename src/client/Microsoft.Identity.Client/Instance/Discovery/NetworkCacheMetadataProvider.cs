@@ -9,6 +9,8 @@ namespace Microsoft.Identity.Client.Instance.Discovery
 {
     internal class NetworkCacheMetadataProvider : INetworkCacheMetadataProvider
     {
+        internal const int MaxCacheEntries = 10_000;
+
         private static readonly ConcurrentDictionary<string, InstanceDiscoveryMetadataEntry> s_cache =
              new ConcurrentDictionary<string, InstanceDiscoveryMetadataEntry>();
 
@@ -24,6 +26,11 @@ namespace Microsoft.Identity.Client.Instance.Discovery
         {
             // Always take the most recent value
             s_cache.AddOrUpdate(environment, entry, (_, _) => entry);
+
+            if (s_cache.Count >= MaxCacheEntries)
+            {
+                s_cache.Clear();
+            }
         }
 
         internal static void ResetStaticCacheForTest()

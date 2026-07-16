@@ -3,11 +3,7 @@
 using System;
 using System.ComponentModel;
 
-#if SUPPORTS_SYSTEM_TEXT_JSON
 using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
-#else
-using Microsoft.Identity.Json;
-#endif
 
 namespace Microsoft.Identity.Client.Kerberos
 {

@@ -145,6 +145,16 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public Func<AssertionRequestOptions, ExecutionResult, Task> OnCompletion { get; set; }
 
+        /// <summary>
+        /// Callback invoked when a fire-and-forget background (proactive) token refresh completes, giving
+        /// callers visibility into an otherwise-unobservable path. Receives an <see cref="ExecutionResult"/>
+        /// describing the outcome: on success <see cref="ExecutionResult.Result"/> is the refreshed token; on
+        /// failure <see cref="ExecutionResult.Exception"/> is the thrown exception (whose
+        /// <see cref="MsalException.AuthenticationResultMetadata"/> carries the failed attempt's HTTP duration).
+        /// Only set for confidential-client and managed-identity applications.
+        /// </summary>
+        public Func<ExecutionResult, Task> OnBackgroundTokenRefreshCompleted { get; set; }
+
         #endregion
 
         #region ClientCredentials

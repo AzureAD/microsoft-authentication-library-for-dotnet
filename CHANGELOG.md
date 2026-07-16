@@ -1,3 +1,124 @@
+4.86.1
+======
+
+### Bug Fixes
+- Fixed the mTLS Proof-of-Possession token cache to key on the certificate's full DER (`x5t#S256`) instead of only the public key, preventing a stale token (and `AADSTS500181`) after a same-key certificate renewal. [#6123](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6123)
+- Fell back to RS256 when a certificate's PSS signing operation is rejected by `RSACryptoServiceProvider`, rebuilding the client assertion so authentication can proceed. [#6126](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6126)
+- Detect and reject symbolic links in the Unix cache-file write path (lstat pre-check plus `O_NOFOLLOW`), closing a TOCTOU window. [#6115](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6115)
+- Corrected misleading "region required" error messages and doc comments in the mTLS PoP flow. [#6127](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6127)
+
+4.86.0
+======
+
+### New Features
+- Surfaced token-acquisition diagnostics on failure via `MsalException.AuthenticationResultMetadata` (durations, region, and cache-refresh reason), mirroring the metadata available on the success path. [#6096](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6096)
+- Added an `OnBackgroundTokenRefreshCompleted` callback on the confidential client and managed identity builders to observe the outcome of fire-and-forget proactive token refreshes. [#6099](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6099)
+
+### Changes
+- Skip IMDS region auto-discovery when a region is explicitly configured; adds `RegionOutcome.UserProvided` and deprecates the auto-detection region outcomes. [#6092](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6092)
+
+### Bug Fixes
+- Propagate KeyGuard attestation failures instead of sending an empty token to IMDS, and bridge native MAA attestation logs to the MSAL logger for the IMDSv2 mTLS PoP flow. [#6081](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6081)
+
+4.85.2
+======
+
+### New Features
+- Added refresh-token cache partitioning via a new `WithCachePartitionKey` overload accepting a `partitionRefreshToken` flag. [#6077](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6077)
+- Added minimum mTLS Proof-of-Possession binding-strength enforcement for managed identity via `PoPOptions.MinStrength` and `WithMtlsProofOfPossession(PoPOptions)`; requests below the required strength fail with `MsalError.MinStrengthNotMet`. [#6059](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6059)
+
+4.85.1
+======
+
+### New Features
+- Exposed canonical OpenTelemetry tag names per metric via `MsalMetricsCatalog.CanonicalTagsByMetric` for discoverability and validation. [#6076](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6076)
+
+### Changes
+- Managed identity error messages and request-failure logs now include the detected `ManagedIdentitySource` (e.g., `AppService`, `Imds`, `ServiceFabric`) so the host-issued `Managed Identity Correlation ID` can be traced to the correct host's telemetry. [#6101](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6101)
+
+4.85.0
+======
+
+### New Features
+- Added `WithOtelTagsEnricher` extension on `AbstractAcquireTokenParameterBuilder<T>` to enrich OpenTelemetry tags from token acquisition results. [#6071](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6071)
+- Promoted `MsalServiceException.SubErrorForLogging` to public for diagnostic logging of service sub-errors. [#6063](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6063)
+- Added `GovFr`, `GovDe`, and `GovSg` values to the `AzureCloudInstance` enum for sovereign cloud support. [#6023](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6023)
+
+### Changes
+- Migrated region discovery to the IMDS `/compute` JSON endpoint. [#6039](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/6039)
+
+### Bug Fixes
+- Excluded caller SDK telemetry headers (`caller-sdk-id`, `caller-sdk-ver`) from access token cache keys to prevent cache fragmentation. [#6073](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/6073)
+- Service Fabric Managed Identity now sends `principalId` for `ObjectId` and rejects `ClientId`/`ResourceId` identifiers. [#6065](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/6065)
+- Validated Azure region format to prevent region poisoning. [#6060](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/6060)
+- Fixed proactive token refresh bypassing cancellation, which could lead to unbounded semaphore waits. [#6053](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/6053)
+- Fall back to the home account from the request when not available elsewhere. [#5618](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5618)
+
+4.84.2
+======
+
+### New Features
+- Added `ManagedIdentityApplication.GetManagedIdentityCapabilitiesAsync(CancellationToken)` returning a `ManagedIdentityCapabilities` object that reports the detected managed identity `Source`, the host's `MaxSupportedBindingStrength` (new `MtlsBindingStrength` enum: `None`, `Software`, `KeyGuard`), and a derived `IsMtlsPopSupportedByHost`. Replaces `GetManagedIdentitySourceAsync()`/`ManagedIdentitySourceResult`. The public `ManagedIdentitySource.ImdsV2` value is folded into `Imds` (v1/v2 routing remains internal). [#6049](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6049)
+- Added OID-based user identification to the User Federated Identity Credential (`user_fic`) flow via `AcquireTokenByUserFederatedIdentityCredential(scopes, Guid userObjectId, assertion)`. [#6050](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6050)
+- Added `WithClaimsFromClient(claimsJson)` to forward client-originated claims across managed identity and confidential client flows. [#5999](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5999)
+- Added mTLS PoP support for `WithCertificate(() => x509)` (dynamic certificate credential). [#5957](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5957)
+- Added opt-in token-acquisition metrics covering both successful and failed attempts. [#6004](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6004)
+
+### Changes
+- Extended mTLS bearer transport (`CertificateOptions.SendCertificateOverMtls`) to the OBO, refresh-token, and authorization-code flows. [#6009](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6009)
+- General Availability of the `Microsoft.Identity.Client.KeyAttestation` package. [#6038](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6038)
+- Managed identity now probes IMDSv2 first and the preview latch was removed. [#6041](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6041)
+- Updated NativeInterop baseline and corrected devapp version ranges. [#6045](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6045)
+- Simplified `GetTenantedAuthority` in `CiamAuthority` and `DstsAuthority`. [#6001](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6001)
+
+### Bug Fixes
+- Fixed `WithExtraQueryParameters` on `ManagedIdentityApplicationBuilder` bypassing token caching. [#6035](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6035)
+- Guarded HTTP status codes on discovery endpoints in `KnownInstanceMetadataIsUpToDateAsync`. [#6048](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6048)
+- Detect orphaned KeyGuard certificates via public-key modulus comparison. [#6020](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6020)
+- KeyGuard/Credential Guard attestation failures now surface as an `MsalServiceException("attestation_failed")` (carrying the MAA status/native error/reason) instead of silently sending a non-attested certificate request to IMDS, and native `AttestationClientLib` (MAA) logs are bridged into the MSAL `ILoggerAdapter`. **Behavior change:** when an attestation provider is configured via `WithAttestationSupport()` and returns no token for a KeyGuard key, the request now fails closed rather than falling back to a non-attested request. [#6081](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6081)
+
+4.84.1
+======
+
+### New Features
+- Added `WithReservedScopes` and `WithCachePartitionKey` public API extensions on `AcquireTokenByAuthorizationCodeParameterBuilder` and `BaseAbstractAcquireTokenParameterBuilder`. [#6014](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6014)
+- Added `IAuthenticationOperation3` interface for CDT + mTLS PoP composition, with `CredentialEvaluationContext` for post-credential evaluation hooks. [#5996](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5996)
+- Added `MsalRemainingTokenLifetime` histogram metric for token expiry tracking. [#5920](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5920)
+
+### Changes
+- Removed `[Obsolete]` attribute from `WithExtraBodyParameters` extension method. [#6006](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6006)
+- Replaced `ConcurrentHashSet<T>` with `ConcurrentDictionary<T, byte>` to eliminate custom collection. [#5975](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5975)
+
+### Bug Fixes
+- Fixed `WithTenantId` not honoring MSA tenant GUID when specified at request level. [#5958](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5958)
+- Fixed OBO cache returning `multiple_matching_tokens_detected` when attributed tokens share a partition. [#5993](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5993)
+
+4.84.0
+======
+
+### New Features
+- Added `CacheOptions.DisableInternalCacheOptions` static property and `CacheOptions.IsInternalCacheDisabled` to allow disabling MSAL's internal token cache. Added `CacheRefreshReason.CacheDisabled` and `MsalError.InternalCacheDisabled` to support this scenario. [#5947](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5947)
+- Added `AuthenticationResultExtensions.GetRefreshToken()` extension method for accessing refresh tokens from `AuthenticationResult`. [#5947](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5947)
+- Added `WithAttributeTokens` and `WithExtraBodyParameters` extension methods on `AbstractConfidentialClientAcquireTokenParameterBuilder` for enhanced extensibility. [#5888](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5888)
+- Added `CertificateOptions.SendCertificateOverMtls` for mTLS Proof-of-Possession certificate support. [#5849](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5849)
+- Added `AssertionRequestOptions.CorrelationId` property for correlation ID support in FIC assertion requests. [#5937](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5937)
+
+### Changes
+- Removed experimental feature gate from `WithClientAssertion(ClientSignedAssertion)` overload. [#5945](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5945)
+- Removed embedded Newtonsoft.Json dependency, migrated to `System.Text.Json` exclusively. [#5959](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5959)
+- Removed mTLS PoP region as a hard requirement. [#5902](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5902)
+- Refactored client credential material resolution. [#5835](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5835)
+- Added in-process MAA token caching to PopKeyAttestor. [#5887](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5887)
+- Added raw STS error code to MsalFailure metric. [#5961](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5961)
+- Support forwarding MSAL client metadata headers through IMDS to ESTS. [#5912](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5912)
+
+### Bug Fixes
+- Fixed eager evaluation in `ConcurrentDictionary.GetOrAdd` calls. [#5950](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5950)
+- Fixed `System.ValueTuple` conditional dependency to `net462` only. [#5894](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5894)
+- Validated `clientSignedAssertionProvider` delegate is non-null in `WithClientAssertion`. [#5956](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5956)
+- Improved `MtlsPopTokenNotSupportedinImdsV1` error message clarity. [#5908](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5908)
+- Added additional checks for issuer validation. [#5931](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5931)
+
 4.83.3
 ======
 

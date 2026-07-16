@@ -28,6 +28,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private readonly IServiceBundle _serviceBundle;
         private readonly AcquireTokenCommonParameters _commonParameters;
         private string _loginHint;
+        private Lazy<string> _claimsAndClientCapabilities;
 
         public AuthenticationRequestParameters(
             IServiceBundle serviceBundle,
@@ -69,12 +70,16 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
             }
 
-            ClaimsAndClientCapabilities = ClaimsHelper.GetMergedClaimsAndClientCapabilities(
-                _commonParameters.Claims,
-                _serviceBundle.Config.ClientCapabilities);
-
             HomeAccountId = homeAccountId;
             CacheKeyComponents = cacheKeyComponents;
+            PartitionRefreshToken = commonParameters.PartitionRefreshToken;
+
+            // Defer JSON merge to first access — cache hits never read ClaimsAndClientCapabilities,
+            // so we avoid parsing on the hot path.
+            _claimsAndClientCapabilities = new Lazy<string>(() =>
+                ClaimsHelper.GetMergedClaimsAndClientCapabilities(
+                    ClaimsHelper.MergeClaimsObjects(_commonParameters.Claims, _commonParameters.ClientClaims),
+                    _serviceBundle.Config.ClientCapabilities));
         }
 
         public ApplicationConfiguration AppConfig => _serviceBundle.Config;
@@ -107,7 +112,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public IDictionary<string, string> ExtraQueryParameters { get; }
 
-        public string ClaimsAndClientCapabilities { get; private set; }
+        public string ClaimsAndClientCapabilities => _claimsAndClientCapabilities.Value;
 
         public Guid CorrelationId => _commonParameters.CorrelationId;
 
@@ -118,6 +123,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
         }
 
         public bool IsMtlsPopRequested => _commonParameters.IsMtlsPopRequested;
+        public MtlsBindingStrength MtlsPopMinStrength => _commonParameters.MtlsPopMinStrength;
+        public bool? SendOfflineAccessScope => _commonParameters.SendOfflineAccessScope;
 
         /// <summary>
         /// The certificate resolved and used for client authentication (if certificate-based authentication was used).
@@ -137,6 +144,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
         }
 
+        /// <summary>
+        /// Client-originated claims set via .WithClaimsFromClient(). These are cached (no bypass) and
+        /// keyed on the raw claims string as passed by the caller.
+        /// </summary>
+        public string ClientClaims => _commonParameters.ClientClaims;
+
         private IAuthenticationOperation _requestOverrideScheme;
 
         /// <summary>
@@ -152,6 +165,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public IEnumerable<string> PersistedCacheParameters => _commonParameters.AdditionalCacheParameters;
 
         public SortedList<string, string> CacheKeyComponents {get; private set; }
+
+        public bool PartitionRefreshToken { get; private set; }
 
         #region TODO REMOVE FROM HERE AND USE FROM SPECIFIC REQUEST PARAMETERS
         // TODO: ideally, these can come from the particular request instance and not be in RequestBase since it's not valid for all requests.
@@ -206,6 +221,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
         #endregion
 
         public string ExtraClientAssertionClaims => _commonParameters.ExtraClientAssertionClaims;
+
+        /// <summary>
+        /// Optional caller-supplied delegate that adds extra tags to the OpenTelemetry metrics MSAL records
+        /// for this request. Configured via <c>WithOtelTagsEnricher</c>.
+        /// </summary>
+        public Action<ExecutionResult, IList<KeyValuePair<string, object>>> OtelTagsEnricher => _commonParameters.OtelTagsEnricher;
 
         public void LogParameters()
         {

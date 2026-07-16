@@ -59,9 +59,27 @@ namespace Microsoft.Identity.Client.Region
             string region = null;
             bool isMtlsEnabled = requestContext.IsMtlsRequested;
 
-            if (requestContext.ApiEvent?.ApiId == TelemetryCore.Internal.Events.ApiEvent.ApiIds.AcquireTokenForClient)
+            // Always attempt region discovery for AcquireTokenForClient.
+            // Also attempt it for mTLS-enabled user flows when the app has opted in to
+            // regional endpoints (AzureRegion != null), so that OBO/RT can use a regional
+            // mTLS endpoint (e.g. eastus.mtlsauth.microsoft.com) when configured.
+            bool shouldAttemptRegionDiscovery =
+                requestContext.ApiEvent?.ApiId == TelemetryCore.Internal.Events.ApiEvent.ApiIds.AcquireTokenForClient ||
+                (isMtlsEnabled && requestContext.ServiceBundle.Config.AzureRegion != null);
+
+            if (shouldAttemptRegionDiscovery)
             {
                 region = await _regionManager.GetAzureRegionAsync(requestContext).ConfigureAwait(false);
+            }
+
+            // Defense-in-depth: never prefix an invalid region onto a trusted host. The region
+            // is validated at configuration time and during auto-detection, but re-validate here
+            // (the single point where the regional host is constructed) so a malformed value can
+            // never alter the authority host. An invalid region is ignored and falls back to global.
+            if (!string.IsNullOrEmpty(region) && !RegionManager.IsValidRegionName(region))
+            {
+                requestContext.Logger.Error($"[Region discovery] Region '{region}' has an invalid format and will be ignored.");
+                region = null;
             }
 
             if (string.IsNullOrEmpty(region))

@@ -15,7 +15,29 @@ variables:
   #intended for running all ui automation tests as one to reduce time
   ConsolidateAppCenterTests: true
 
+# Nightly IdWeb-against-MSAL integration.
+#
+# The IdWebAgainstMsal stage (see template-idweb-against-msal.yaml) is gated by
+# `eq(variables['RunIdWebIntegration'], 'true')`. We deliberately do NOT
+# declare RunIdWebIntegration or IdWebRef in this YAML's variables block --
+# root-level YAML variables override pipeline-definition Variables UI values
+# in ADO, which would defeat the per-definition override.
+#
+# - On PR pipeline 905 (.NET MSAL PR): variables are unset, stage is Skipped,
+#   zero agent time, zero impact on PR gating.
+# - On the separate ADO pipeline definition (.NET MSAL Nightly IdWeb
+#   Integration), the Variables UI sets RunIdWebIntegration='true' and
+#   IdWebRef='master' (IdWeb's default branch; or any branch/tag/SHA),
+#   and the Triggers UI attaches a scheduled trigger.
+
 #BUILD PHASE 
 
 stages:
 - template: template-build-and-run-all-tests.yaml
+
+# Nightly IdWeb integration -- runs only when RunIdWebIntegration='true'.
+# See template-idweb-against-msal.yaml for the stage definition + condition.
+- template: template-idweb-against-msal.yaml
+  parameters:
+    buildConfiguration: $(BuildConfiguration)
+    dependsOnStage: 'Build'

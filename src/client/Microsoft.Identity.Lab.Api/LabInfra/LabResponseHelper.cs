@@ -4,8 +4,9 @@
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace Microsoft.Identity.Test.LabInfrastructure
 {
@@ -14,6 +15,10 @@ namespace Microsoft.Identity.Test.LabInfrastructure
     /// </summary>
     public static class LabResponseHelper
     {
+        private static readonly JsonSerializerOptions s_caseInsensitiveOptions = new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        };
         /// <summary>
         /// key vault secrets provider for retrieving lab configuration secrets, using MSAL-based authentication. This provider is used to access secrets containing user and app configuration data for lab testing scenarios.
         /// </summary>
@@ -62,8 +67,8 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 try
                 {
                     // Parse as JObject to extract the 'user' property (case-insensitive)
-                    var jsonObject = JObject.Parse(userData);
-                    var userToken = jsonObject.GetValue("user", StringComparison.OrdinalIgnoreCase);
+                    var jsonObject = JsonNode.Parse(userData).AsObject();
+                    var userToken = jsonObject.FirstOrDefault(kvp => string.Equals(kvp.Key, "user", StringComparison.OrdinalIgnoreCase)).Value;
                     
                     if (userToken == null)
                     {
@@ -71,7 +76,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                         throw new InvalidOperationException($"Key Vault secret '{secret}' does not contain a 'user' property.");
                     }
 
-                    var userConfig = userToken.ToObject<UserConfig>() ?? throw new InvalidOperationException($"Failed to deserialize 'user' property from Key Vault secret '{secret}' to LabUser.");
+                    var userConfig = userToken.Deserialize<UserConfig>(s_caseInsensitiveOptions) ?? throw new InvalidOperationException($"Failed to deserialize 'user' property from Key Vault secret '{secret}' to LabUser.");
                     Debug.WriteLine($"KeyVault '{secret}': {userConfig.Upn ?? "Unknown user"}");
 
                     // Cache the result
@@ -119,8 +124,8 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 try
                 {
                     // Parse as JObject to extract the 'app' property (case-insensitive)
-                    var jsonObject = JObject.Parse(appData);
-                    var appToken = jsonObject.GetValue("app", StringComparison.OrdinalIgnoreCase);
+                    var jsonObject = JsonNode.Parse(appData).AsObject();
+                    var appToken = jsonObject.FirstOrDefault(kvp => string.Equals(kvp.Key, "app", StringComparison.OrdinalIgnoreCase)).Value;
                     
                     if (appToken == null)
                     {
@@ -128,7 +133,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                         throw new InvalidOperationException($"Key Vault secret '{secret}' does not contain an 'app' property.");
                     }
 
-                    var appConfig = appToken.ToObject<AppConfig>() ?? throw new InvalidOperationException($"Failed to deserialize 'app' property from Key Vault secret '{secret}' to AppConfig.");
+                    var appConfig = appToken.Deserialize<AppConfig>(s_caseInsensitiveOptions) ?? throw new InvalidOperationException($"Failed to deserialize 'app' property from Key Vault secret '{secret}' to AppConfig.");
                     Debug.WriteLine($"KeyVault '{secret}': {appConfig.AppId ?? "Unknown app"}");
 
                     // Cache the result
