@@ -2,7 +2,7 @@
 
 ## Summary
 
-This proposal recommends enabling Azure Arc user-assigned managed identity (UAMI) request handling in the client SDK by replacing the unconditional Azure Arc UAMI guard with agent-version-gated forwarding. MSAL forwards the requested identity selector (`client_id`, `object_id`, or `mi_res_id`) to the local HIMDS token endpoint only when the Arc agent advertises UAMI support through the `ARC_AGENT_VERSION` environment variable (agent version >= 1.66); otherwise it continues to fail closed and reject the request.
+This proposal recommends enabling Azure Arc user-assigned managed identity (UAMI) request handling in the client SDK by replacing the unconditional Azure Arc UAMI guard with agent-version-gated forwarding. MSAL forwards the identity selector (`client_id`, `object_id`, or `mi_res_id`) only when `ARC_AGENT_VERSION` shows a supported agent (>= 1.66). Otherwise it throws `user_assigned_managed_identity_not_supported` instead of sending the request - an old agent would ignore the selector and return the system-assigned token.
 
 The result was clear:
 
@@ -195,7 +195,7 @@ To detect support without adding an HTTP round trip, the Azure Arc agent now exp
 MSAL uses this variable as the gate:
 
 - If `ARC_AGENT_VERSION` is present and the version is **>= 1.66** (the first `azcmagent` version with UAMI support), MSAL forwards the requested selector to HIMDS.
-- If `ARC_AGENT_VERSION` is absent, unparseable, or **< 1.66**, MSAL does **not** forward the selector and continues to reject the UAMI request (fail closed), preserving today's safe behavior.
+- If `ARC_AGENT_VERSION` is missing or **< 1.66**, MSAL throws `user_assigned_managed_identity_not_supported` and does not send the request. It does not just drop the selector - a request with no selector returns the system-assigned token.
 
 For private-preview customers on an agent that supports UAMI but does not yet set the variable, the value can be exported via script until the capability ships in the next agent release.
 
@@ -306,7 +306,7 @@ Approve the following direction:
 
 - Replace the unconditional Azure Arc UAMI prohibition with agent-version-gated forwarding, using the `ARC_AGENT_VERSION` environment variable (supported when >= 1.66).
 - Forward the requested selector (`client_id`, `object_id`, or `mi_res_id`) to HIMDS on supported agents.
-- On agents missing `ARC_AGENT_VERSION` or below the supported version, keep rejecting UAMI (fail closed) so MSAL never receives a silently substituted system-assigned token.
+- On agents missing `ARC_AGENT_VERSION` or below 1.66, throw an error instead of sending the request, so MSAL never silently gets the system-assigned token.
 - Use HIMDS errors as the source of truth for identity availability on supported agents.
 - Keep only protocol-independent client validation (for example, mutually exclusive selectors) in the SDK.
 - Validate the positive UAMI flow on the Arc private-preview environment before merging to public release branches.
