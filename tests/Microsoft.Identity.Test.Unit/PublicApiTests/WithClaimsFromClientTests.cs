@@ -336,10 +336,15 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithExperimentalFeatures(true)
                     .BuildConcrete();
 
-                // Standard success response — no body parameter expectation
-                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(
+                // Standard success response — assert the `claims` body parameter is absent
+                var handler = harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(
                     TestConstants.AuthorityUtidTenant,
                     responseMessage: MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage());
+
+                handler.UnExpectedPostData = new Dictionary<string, string>
+                {
+                    { OAuth2Parameter.Claims, null }
+                };
 
                 // Act — no WithClaimsFromClient
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope)
