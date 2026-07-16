@@ -60,9 +60,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             requestContext.Logger.Verbose(() => "[Managed Identity] Creating IMDS managed identity source. Endpoint URI: " + _imdsEndpoint);
         }
 
-        // IMDSv1 enforces MSIv1-specific claims validation; IMDSv2 does not.
-        protected override bool RequiresMsiV1ClaimsValidation => true;
-
         protected override Task<ManagedIdentityRequest> CreateRequestAsync(string resource)
         {
             ManagedIdentityRequest request = new(HttpMethod.Get, _imdsEndpoint);
