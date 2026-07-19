@@ -141,6 +141,9 @@ namespace Microsoft.Identity.Test.E2E
                 string.Equals(leg2Result.TokenType, "Bearer", StringComparison.OrdinalIgnoreCase),
                 $"Leg 2: Expected Bearer token type, got '{leg2Result.TokenType}'.");
 
+            Assert.AreEqual(TokenSource.IdentityProvider, leg2Result.AuthenticationResultMetadata.TokenSource,
+                "Leg 2: First call must hit the identity provider so the cache check below is meaningful.");
+
             // --- Cache hit verification ---
 
             var leg2Cached = await confApp
@@ -188,6 +191,9 @@ namespace Microsoft.Identity.Test.E2E
             Assert.IsNotNull(leg2Result.BindingCertificate,
                 "Leg 2: BindingCertificate must not be null for an mTLS PoP token.");
 
+            Assert.AreEqual(TokenSource.IdentityProvider, leg2Result.AuthenticationResultMetadata.TokenSource,
+                "Leg 2: First call must hit the identity provider so the cache check below is meaningful.");
+
             // --- Cache hit verification (same request shape hits the same cache entry) ---
 
             var leg2Cached = await confApp
@@ -200,6 +206,8 @@ namespace Microsoft.Identity.Test.E2E
                 "Leg 2: Second call should be served from cache.");
             Assert.AreEqual(leg2Result.AccessToken, leg2Cached.AccessToken,
                 "Leg 2: Cached token should match original.");
+            Assert.IsNotNull(leg2Cached.BindingCertificate,
+                "Leg 2: Cached mTLS PoP token must retain its BindingCertificate.");
         }
     }
 }
