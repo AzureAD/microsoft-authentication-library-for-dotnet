@@ -61,8 +61,10 @@ function ConvertTo-Base64Url {
 }
 
 # --- Acquire an app-only token as the Easy Auth app using the LabAuth certificate. ---
+# Load the certificate for signing only, keeping the private key in memory (EphemeralKeySet)
+# so key material is not persisted to the agent user profile on disk.
 $cert = [System.Security.Cryptography.X509Certificates.X509Certificate2]::new(
-    $pfxPath, '', [System.Security.Cryptography.X509Certificates.X509KeyStorageFlags]::Exportable)
+    $pfxPath, '', [System.Security.Cryptography.X509Certificates.X509KeyStorageFlags]::EphemeralKeySet)
 
 $tokenEndpoint = "https://login.microsoftonline.com/$TenantId/oauth2/v2.0/token"
 $now = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
@@ -81,6 +83,9 @@ $unsigned = (ConvertTo-Base64Url ([System.Text.Encoding]::UTF8.GetBytes($header)
             (ConvertTo-Base64Url ([System.Text.Encoding]::UTF8.GetBytes($payload)))
 
 $rsa = [System.Security.Cryptography.X509Certificates.RSACertificateExtensions]::GetRSAPrivateKey($cert)
+if ($null -eq $rsa) {
+    throw 'Unable to load the RSA private key from the LabAuth certificate. Ensure the PFX contains an accessible private key.'
+}
 $signature = $rsa.SignData(
     [System.Text.Encoding]::UTF8.GetBytes($unsigned),
     [System.Security.Cryptography.HashAlgorithmName]::SHA256,
