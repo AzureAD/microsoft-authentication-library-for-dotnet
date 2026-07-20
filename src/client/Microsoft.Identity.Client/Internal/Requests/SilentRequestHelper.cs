@@ -98,12 +98,13 @@ namespace Microsoft.Identity.Client.Internal
                 try
                 {
                     var authResult = await fetchAction().ConfigureAwait(false);
+                    var executionResult = new ExecutionResult { Successful = true, Result = authResult };
 
                     // Invoke the enricher once for this background refresh and reuse the materialized
                     // tags across every instrument below.
                     IReadOnlyList<KeyValuePair<string, object>> extraTags = OtelEnrichmentHelper.MaterializeExtraTags(
                         tagsEnricher,
-                        () => new ExecutionResult { Successful = true, Result = authResult },
+                        () => executionResult,
                         logger);
 
                     serviceBundle.PlatformProxy.OtelInstrumentation.IncrementSuccessCounter(
@@ -135,35 +136,81 @@ namespace Microsoft.Identity.Client.Internal
                         authResult.AuthenticationResultMetadata,
                         logger,
                         extraTags);
+
+                    await InvokeBackgroundRefreshCallbackAsync(serviceBundle, executionResult, logger).ConfigureAwait(false);
                 }
                 catch (MsalServiceException ex)
                 {
                     string logMsg = $"{ProactiveRefreshServiceError} Is exception retryable? {ex.IsRetryable}";
-                    if (ex.StatusCode == 400)
-                    {
-                        logger.ErrorPiiWithPrefix(ex, logMsg);
-                    }
-                    else
-                    {
-                        logger.ErrorPiiWithPrefix(ex, logMsg);
-                    }
+                    logger.ErrorPiiWithPrefix(ex, logMsg);
 
                     LogBackgroundFailureTelemetry(serviceBundle, apiEvent, callerSdkId, callerSdkVersion,
                         ex.ErrorCode, ex.StatusCode, ex.ErrorCodes?.FirstOrDefault(), ex, tagsEnricher, logger);
+
+                    // Background refresh doesn't go through RunAsync, so the exception isn't carrying metadata yet.
+                    // Fill it in from apiEvent so the callback can see the HTTP duration and cache-refresh reason.
+                    // Total duration stays 0 on purpose - the caller already got a token from the cache.
+                    if (ex.AuthenticationResultMetadata == null)
+                    {
+                        ex.AuthenticationResultMetadata = RequestBase.CreateFailureMetadata(apiEvent, totalDurationInMs: 0);
+                    }
+
+                    await InvokeBackgroundRefreshCallbackAsync(serviceBundle, new ExecutionResult { Successful = false, Exception = ex }, logger).ConfigureAwait(false);
                 }
                 catch (OperationCanceledException ex)
                 {
                     logger.WarningPiiWithPrefix(ex, ProactiveRefreshCancellationError);
                     LogBackgroundFailureTelemetry(serviceBundle, apiEvent, callerSdkId, callerSdkVersion,
                         ex.GetType().Name, httpStatusCode: 0, tagsEnricher: tagsEnricher, logger: logger);
+
+                    // Proactive refresh was canceled (e.g., the linked token source was disposed on shutdown).
+                    // This is benign - the foreground caller already holds a cached token - so the completion
+                    // callback is intentionally not invoked for cancellation.
                 }
                 catch (Exception ex)
                 {
                     logger.ErrorPiiWithPrefix(ex, ProactiveRefreshGeneralError);
                     LogBackgroundFailureTelemetry(serviceBundle, apiEvent, callerSdkId, callerSdkVersion,
                         ex.GetType().Name, httpStatusCode: 0, tagsEnricher: tagsEnricher, logger: logger);
+
+                    // ExecutionResult.Exception is typed as MsalException and the callback contract guarantees
+                    // it is non-null on failure, so wrap any non-MSAL exception (keeping the original as the
+                    // InnerException) rather than handing the callback a null.
+                    MsalException msalException = ex as MsalException ??
+                        new MsalClientException(MsalError.UnknownError, ex.Message, ex);
+
+                    if (msalException.AuthenticationResultMetadata == null)
+                    {
+                        msalException.AuthenticationResultMetadata = RequestBase.CreateFailureMetadata(apiEvent, totalDurationInMs: 0);
+                    }
+
+                    await InvokeBackgroundRefreshCallbackAsync(serviceBundle, new ExecutionResult { Successful = false, Exception = msalException }, logger).ConfigureAwait(false);
                 }
             });
+        }
+
+        // Invokes the app-configured background-refresh completion callback (confidential client and managed
+        // identity only). Runs on the fire-and-forget background thread; a throwing callback is caught and
+        // logged so it cannot disrupt the refresh.
+        private static async Task InvokeBackgroundRefreshCallbackAsync(
+            IServiceBundle serviceBundle,
+            ExecutionResult executionResult,
+            ILoggerAdapter logger)
+        {
+            Func<ExecutionResult, Task> callback = serviceBundle.Config.OnBackgroundTokenRefreshCompleted;
+            if (callback == null)
+            {
+                return;
+            }
+
+            try
+            {
+                await callback(executionResult).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                logger.WarningPiiWithPrefix(ex, "OnBackgroundTokenRefreshCompleted callback threw an exception; it was suppressed.");
+            }
         }
 
         // Records telemetry for a fire-and-forget background refresh failure: increments the

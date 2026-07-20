@@ -17,6 +17,7 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client.Http.Retry;
+using System.Threading;
 
 using System.Text.Json;
 
@@ -76,6 +77,20 @@ namespace Microsoft.Identity.Client.OAuth2
             return ExecuteRequestAsync<InstanceDiscoveryResponse>(endpoint, HttpMethod.Get, requestContext);
         }
 
+        public Task<InstanceDiscoveryResponse> DiscoverAadInstanceAsync(
+            Uri endpoint,
+            RequestContext requestContext,
+            CancellationToken cancellationToken,
+            IRetryPolicy retryPolicy)
+        {
+            return ExecuteRequestAsync<InstanceDiscoveryResponse>(
+                endpoint,
+                HttpMethod.Get,
+                requestContext,
+                cancellationToken: cancellationToken,
+                retryPolicy: retryPolicy);
+        }
+
         public Task<OidcMetadata> DiscoverOidcMetadataAsync(Uri endpoint, RequestContext requestContext)
         {
             return ExecuteRequestAsync<OidcMetadata>(endpoint, HttpMethod.Get, requestContext);
@@ -102,7 +117,9 @@ namespace Microsoft.Identity.Client.OAuth2
             RequestContext requestContext,
             bool expectErrorsOn200OK = false,
             bool addCommonHeaders = true,
-            IList<Func<OnBeforeTokenRequestData, Task>> onBeforePostRequestHandlers = null)
+            IList<Func<OnBeforeTokenRequestData, Task>> onBeforePostRequestHandlers = null,
+            CancellationToken? cancellationToken = null,
+            IRetryPolicy retryPolicy = null)
         {
             //Requests that are replayed by PKeyAuth do not need to have headers added because they already exist
             if (addCommonHeaders)
@@ -116,7 +133,8 @@ namespace Microsoft.Identity.Client.OAuth2
             using (requestContext.Logger.LogBlockDuration($"[Oauth2Client] Sending {method} request "))
             {
                 IRetryPolicyFactory retryPolicyFactory = requestContext.ServiceBundle.Config.RetryPolicyFactory;
-                IRetryPolicy retryPolicy = retryPolicyFactory.GetRetryPolicy(RequestType.STS);
+                IRetryPolicy effectiveRetryPolicy = retryPolicy ?? retryPolicyFactory.GetRetryPolicy(RequestType.STS);
+                CancellationToken effectiveCancellationToken = cancellationToken ?? requestContext.UserCancellationToken;
 
                 try
                 {
@@ -125,7 +143,7 @@ namespace Microsoft.Identity.Client.OAuth2
                         if (onBeforePostRequestHandlers != null)
                         {
                             requestContext.Logger.Verbose(() => "[Oauth2Client] Processing onBeforePostRequestData ");
-                            var requestData = new OnBeforeTokenRequestData(_bodyParameters, _headers, endpointUri, requestContext.UserCancellationToken);
+                            var requestData = new OnBeforeTokenRequestData(_bodyParameters, _headers, endpointUri, effectiveCancellationToken);
                             
                             foreach(var handler in onBeforePostRequestHandlers)
                             {
@@ -144,8 +162,8 @@ namespace Microsoft.Identity.Client.OAuth2
                             doNotThrow: false,
                             mtlsCertificate: _mtlsCertificate,
                             validateServerCertificate: null,
-                            cancellationToken: requestContext.UserCancellationToken,
-                            retryPolicy: retryPolicy)
+                            cancellationToken: effectiveCancellationToken,
+                            retryPolicy: effectiveRetryPolicy)
                         .ConfigureAwait(false);
                     }
                     else
@@ -159,8 +177,8 @@ namespace Microsoft.Identity.Client.OAuth2
                             doNotThrow: false,
                             mtlsCertificate: null,
                             validateServerCertificate: null,
-                            cancellationToken: requestContext.UserCancellationToken,
-                            retryPolicy: retryPolicy)
+                            cancellationToken: effectiveCancellationToken,
+                            retryPolicy: effectiveRetryPolicy)
                         .ConfigureAwait(false);
                     }
                 }

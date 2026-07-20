@@ -11,6 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.ManagedIdentity.KeyProviders;
@@ -559,8 +560,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        [DataRow("{\"statusCode\":500,\"message\":\"Error message\",\"correlationId\":\"GUID\"}", new string[] { "Error message", "GUID" })]
-        [DataRow("{\"message\":\"Error message\",\"correlationId\":\"GUID\"}", new string[] { "Error message", "GUID" })]
+        [DataRow("{\"statusCode\":500,\"message\":\"Error message\",\"correlationId\":\"GUID\"}", new string[] { "Error message", "GUID", "issued by the 'AppService' managed identity source" })]
+        [DataRow("{\"message\":\"Error message\",\"correlationId\":\"GUID\"}", new string[] { "Error message", "GUID", "issued by the 'AppService' managed identity source" })]
         [DataRow("{\"error\":\"errorCode\",\"error_description\":\"Error message\"}", new string[] { "errorCode", "Error message" })]
         [DataRow("{\"error_description\":\"Error message\"}", new string[] { "Error message" })]
         [DataRow("{\"message\":\"Error message\"}", new string[] { "Error message" })]
@@ -603,6 +604,48 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 {
                     Assert.Contains(expectedErrorSubString, ex.Message, $"Expected to contain string {expectedErrorSubString}. Actual error message: {ex.Message}");
                 }
+            }
+        }
+
+        // The correlation-ID branch that attributes the host-issued correlation ID to a managed
+        // identity source is source-agnostic, so this guards it against regression for a
+        // non-AppService source (Imds) as well. It also asserts the full composed phrase rather
+        // than a bare source name, so the check cannot pass merely because the source name appears
+        // in the echoed error body.
+        [TestMethod]
+        [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint)]
+        [DataRow(ManagedIdentitySource.Imds, ImdsEndpoint)]
+        public async Task ManagedIdentityErrorMessageAttributesCorrelationIdToSourceAsync(ManagedIdentitySource managedIdentitySource, string endpoint)
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager(disableInternalRetries: true))
+            {
+                SetEnvironmentVariables(managedIdentitySource, endpoint);
+
+                var mi = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpManager(httpManager)
+                    .Build();
+
+                // camelCase "correlationId" maps to ManagedIdentityErrorResponse.CorrelationId, which
+                // triggers the correlation-ID branch that names the managed identity source.
+                const string errorResponse = "{\"statusCode\":500,\"message\":\"Error message\",\"correlationId\":\"some-correlation-id\"}";
+
+                httpManager.AddManagedIdentityMockHandler(endpoint, Resource, errorResponse,
+                    managedIdentitySource, statusCode: HttpStatusCode.InternalServerError);
+
+                MsalServiceException ex = await Assert.ThrowsAsync<MsalServiceException>(async () =>
+                    await mi.AcquireTokenForManagedIdentity(Resource)
+                    .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
+
+                Assert.IsNotNull(ex);
+                Assert.AreEqual(managedIdentitySource.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
+                Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
+
+                // Assert the exact composed phrase (position-independent-proof): only MSAL's message
+                // builder produces this text, so it cannot be satisfied by the echoed error body.
+                string expectedSourcePhrase = $"issued by the '{managedIdentitySource}' managed identity source";
+                Assert.Contains(expectedSourcePhrase, ex.Message,
+                    $"Expected the message to attribute the correlation ID to the '{managedIdentitySource}' source. Actual error message: {ex.Message}");
             }
         }
 
@@ -956,6 +999,45 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .ConfigureAwait(false);
 
                 Assert.AreEqual(CacheRefreshReason.NotApplicable, result.AuthenticationResultMetadata.CacheRefreshReason);
+            }
+        }
+
+        [TestMethod]
+        [Description("Background (proactive) refresh for managed identity invokes the completion callback with the result.")]
+        public async Task ManagedIdentity_BackgroundRefresh_InvokesCallback_Async()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.AppService, AppServiceEndpoint);
+
+                ExecutionResult capturedResult = null;
+                var mi = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpManager(httpManager)
+                    .WithExperimentalFeatures()
+                    .OnBackgroundTokenRefreshCompleted(r => { capturedResult = r; return Task.CompletedTask; })
+                    .BuildConcrete();
+
+                // 1. Prime the cache with a token.
+                httpManager.AddManagedIdentityMockHandler(
+                    AppServiceEndpoint, Resource, MockHelpers.GetMsiSuccessfulResponse(), ManagedIdentitySource.AppService);
+                await mi.AcquireTokenForManagedIdentity(Resource).ExecuteAsync().ConfigureAwait(false);
+
+                // 2. Mark the cached token as needing a proactive refresh.
+                TestCommon.UpdateATWithRefreshOn(mi.AppTokenCacheInternal.Accessor);
+
+                // 3. Response the background refresh will consume.
+                httpManager.AddManagedIdentityMockHandler(
+                    AppServiceEndpoint, Resource, MockHelpers.GetMsiSuccessfulResponse(), ManagedIdentitySource.AppService);
+
+                // 4. Foreground returns the cached token and kicks off the background refresh.
+                await mi.AcquireTokenForManagedIdentity(Resource).ExecuteAsync().ConfigureAwait(false);
+
+                // Assert - the background refresh completed and the callback received the successful outcome.
+                Assert.IsTrue(TestCommon.YieldTillSatisfied(() => capturedResult != null), "Managed identity background refresh callback was not invoked.");
+                Assert.IsTrue(capturedResult.Successful);
+                Assert.IsNotNull(capturedResult.Result);
+                Assert.IsNotNull(capturedResult.Result.AuthenticationResultMetadata);
             }
         }
 
@@ -1486,26 +1568,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     Assert.IsNull(managedIdentity.GetValidationCallback(),
                         $"Non-ServiceFabric source type {managedIdentitySource} should not have ValidateServerCertificate set");
                 }
-            }
-        }
-
-        [TestMethod]
-        public void ValidateServerCertificate_NotSetForImdsV2()
-        {
-            using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager())
-            {
-                SetEnvironmentVariables(ManagedIdentitySource.Imds, "https://identity.endpoint.com");
-
-                var managedIdentityApp = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                    .WithHttpManager(httpManager)
-                    .BuildConcrete();
-                RequestContext requestContext = new RequestContext(managedIdentityApp.ServiceBundle, Guid.NewGuid(), null);
-
-                AbstractManagedIdentity managedIdentity = new ImdsV2ManagedIdentitySource(requestContext);
-
-                Assert.IsNull(managedIdentity.GetValidationCallback(),
-                    "IMDSv2 source should not have ValidateServerCertificate set");
             }
         }
 

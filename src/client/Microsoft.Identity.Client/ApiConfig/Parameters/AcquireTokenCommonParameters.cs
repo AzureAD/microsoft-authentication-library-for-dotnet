@@ -40,10 +40,18 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public X509Certificate2 MtlsCertificate { get; internal set; }
         public List<string> AdditionalCacheParameters { get; set; }
         public SortedList<string, Func<CancellationToken, Task<string>>> CacheKeyComponents { get; internal set; }
+        public bool PartitionRefreshToken { get; internal set; }
         public bool? SendOfflineAccessScope { get; set; }
         public string FmiPathSuffix { get; internal set; }
         public string ClientAssertionFmiPath { get; internal set; }
         public bool IsMtlsPopRequested { get; set; }
+
+        /// <summary>
+        /// The minimum mTLS binding strength the host must support for the request to succeed.
+        /// Set via <see cref="AppConfig.PoPOptions.MinStrength"/>. Defaults to
+        /// <see cref="MtlsBindingStrength.None"/> (no floor).
+        /// </summary>
+        public MtlsBindingStrength MtlsPopMinStrength { get; set; } = MtlsBindingStrength.None;
         public string ExtraClientAssertionClaims { get; internal set; }
 
         /// <summary>

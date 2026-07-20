@@ -1187,6 +1187,99 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
+        [TestMethod]
+        [Description("MsalMetricsCatalog is internally consistent: it maps every metric-name constant it declares, " +
+            "and every canonical tag it references is one of the declared tag-name constants.")]
+        public void MsalMetricsCatalog_IsInternallyConsistent()
+        {
+            var metricNames = new[]
+            {
+                MsalMetricsCatalog.SuccessCounterName,
+                MsalMetricsCatalog.FailureCounterName,
+                MsalMetricsCatalog.TotalDurationHistogramName,
+                MsalMetricsCatalog.TotalDurationV2HistogramName,
+                MsalMetricsCatalog.DurationInL1CacheHistogramName,
+                MsalMetricsCatalog.DurationInL2CacheHistogramName,
+                MsalMetricsCatalog.DurationInHttpHistogramName,
+                MsalMetricsCatalog.DurationInHttpV2HistogramName,
+                MsalMetricsCatalog.DurationInExtensionHistogramName,
+                MsalMetricsCatalog.RemainingTokenLifetimeHistogramName,
+            };
+
+            foreach (var name in metricNames)
+            {
+                Assert.IsTrue(MsalMetricsCatalog.CanonicalTagsByMetric.ContainsKey(name),
+                    $"Metric-name constant '{name}' has no canonical-tag entry in MsalMetricsCatalog.CanonicalTagsByMetric.");
+            }
+
+            Assert.HasCount(metricNames.Length, MsalMetricsCatalog.CanonicalTagsByMetric,
+                "CanonicalTagsByMetric has an entry for a metric not declared as a metric-name constant (or vice versa).");
+
+            var knownTags = new HashSet<string>(StringComparer.Ordinal)
+            {
+                TelemetryConstants.MsalVersion,
+                TelemetryConstants.MsalVersionPlatform,
+                TelemetryConstants.Platform,
+                TelemetryConstants.ApiId,
+                TelemetryConstants.CallerSdkId,
+                TelemetryConstants.TokenSource,
+                TelemetryConstants.CacheRefreshReason,
+                TelemetryConstants.CacheLevel,
+                TelemetryConstants.TokenType,
+                TelemetryConstants.ErrorCode,
+                TelemetryConstants.RawStsErrorCode,
+                TelemetryConstants.Succeeded,
+                TelemetryConstants.HttpStatusCode,
+            };
+
+            foreach (var entry in MsalMetricsCatalog.CanonicalTagsByMetric)
+            {
+                foreach (var tag in entry.Value)
+                {
+                    Assert.Contains(tag, knownTags,
+                        $"Metric '{entry.Key}' references canonical tag '{tag}' that is not a declared tag-name constant.");
+                }
+            }
+
+            // The meter name is owned by OtelInstrumentation (it constructs the Meter); the catalog only
+            // declares the metric-to-canonical-tag mapping.
+        }
+
+        [TestMethod]
+        [Description("MsalMetricsCatalog stays in sync with what MSAL actually emits: every emitted metric has a catalog " +
+            "entry, and every tag MSAL emits for a metric is declared as a canonical tag for that metric in the catalog.")]
+        public async Task MsalMetricsCatalog_MatchesEmittedMetricsAndTagsAsync()
+        {
+            using (_harness = CreateTestHarness())
+            {
+                CreateApplication();
+                await AcquireTokenSuccessAsync().ConfigureAwait(false);
+                await AcquireTokenMsalServiceExceptionAsync().ConfigureAwait(false);
+                await AcquireTokenMsalClientExceptionAsync().ConfigureAwait(false);
+
+                s_meterProvider.ForceFlush();
+
+                Assert.IsGreaterThan(0, _exportedMetrics.Count, "Expected at least one metric to be exported.");
+
+                foreach (Metric metric in _exportedMetrics)
+                {
+                    Assert.IsTrue(
+                        MsalMetricsCatalog.CanonicalTagsByMetric.TryGetValue(metric.Name, out var canonicalTags),
+                        $"Metric '{metric.Name}' is emitted by MSAL but missing from MsalMetricsCatalog.CanonicalTagsByMetric.");
+
+                    foreach (var metricPoint in metric.GetMetricPoints())
+                    {
+                        foreach (var tag in metricPoint.Tags)
+                        {
+                            Assert.IsTrue(
+                                canonicalTags.Contains(tag.Key),
+                                $"Metric '{metric.Name}' emitted tag '{tag.Key}', which is not declared as a canonical tag in MsalMetricsCatalog.");
+                        }
+                    }
+                }
+            }
+        }
+
         private static IDictionary<string, object> GetTagDictionary(ReadOnlyTagCollection tags)
         {
             var dict = new Dictionary<string, object>();

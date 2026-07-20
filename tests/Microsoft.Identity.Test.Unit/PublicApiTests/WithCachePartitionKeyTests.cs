@@ -120,6 +120,27 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.AreEqual("value", exception.ParamName);
         }
 
+        [TestMethod]
+        public void WithCachePartitionKey_PartitionRefreshToken_StickyAcrossChainedCalls()
+        {
+            // Arrange
+            var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                .WithClientSecret(TestConstants.ClientSecret)
+                .BuildConcrete();
+
+            // Act: first call enables RT partition, second call adds another key without it
+            var builder = app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, "code")
+                .WithCachePartitionKey("k1", "v1", partitionRefreshToken: true)
+                .WithCachePartitionKey("k2", "v2");
+
+            // Assert: PartitionRefreshToken must remain true
+            var commonParameters = GetCommonParameters(builder);
+            Assert.IsTrue(commonParameters.PartitionRefreshToken,
+                "PartitionRefreshToken must stay true once set, even if a later call omits it");
+            Assert.HasCount(2, commonParameters.CacheKeyComponents);
+        }
+
         private static AcquireTokenCommonParameters GetCommonParameters(object builder)
         {
             Type currentType = builder.GetType();

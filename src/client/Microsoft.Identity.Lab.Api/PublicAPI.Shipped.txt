@@ -505,3 +505,4 @@ static readonly Microsoft.Identity.Test.Unit.TestConstants.s_extraHttpHeader -> 
 static readonly Microsoft.Identity.Test.Unit.TestConstants.s_graphScopes -> string[]
 static readonly Microsoft.Identity.Test.Unit.TestConstants.s_scopeForAnotherResource -> System.Collections.Generic.SortedSet<string>
 static readonly Microsoft.Identity.Test.Unit.TestConstants.s_userIdentifier -> string
+const Microsoft.Identity.Test.LabInfrastructure.KeyVaultSecrets.AppOBOService = "MSAL-APP-TodoListService-JSON" -> string
