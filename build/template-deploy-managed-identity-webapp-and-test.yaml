@@ -208,3 +208,16 @@ steps:
   displayName: 'Test protected endpoint (Bearer token via LabAuth)'
   env:
     LABAUTH_PFX_PATH: $(LabAuthPfxPath)
+
+# Remove the LabAuth private-key PFX from the agent after use (runs even if earlier steps fail).
+- powershell: |
+    if (Test-Path $env:LABAUTH_PFX_PATH) {
+      Remove-Item $env:LABAUTH_PFX_PATH -Force
+      Write-Host 'Removed LabAuth PFX from the agent.'
+    } else {
+      Write-Host 'LabAuth PFX not found; nothing to remove.'
+    }
+  displayName: 'Clean up LabAuth certificate'
+  condition: always()
+  env:
+    LABAUTH_PFX_PATH: $(LabAuthPfxPath)
