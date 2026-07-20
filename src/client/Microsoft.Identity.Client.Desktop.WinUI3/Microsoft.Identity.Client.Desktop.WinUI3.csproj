@@ -5,7 +5,11 @@
     <UseWinUI>true</UseWinUI>
     <EnableMsixTooling>true</EnableMsixTooling>
     <DefineConstants>$(DefineConstants);WINUI3</DefineConstants>
-    <IsAotCompatible>true</IsAotCompatible>
+
+    <!-- The Windows App SDK only supports Native AOT on .NET 10+, so only claim AOT
+         compatibility (and run the AOT/trim analyzers) for the net10 target. The explicit
+         assignment also overrides the net8.0-wide default from src/Directory.Build.props. -->
+    <IsAotCompatible>$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net10.0'))</IsAotCompatible>
     
     <PathToMsalSources>$(MSBuildThisFileDirectory)../Microsoft.Identity.Client/</PathToMsalSources>
     <PlatformTarget>AnyCPU</PlatformTarget>
