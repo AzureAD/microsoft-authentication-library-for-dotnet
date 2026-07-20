@@ -85,11 +85,11 @@ steps:
   displayName: 'Restore ManagedIdentityWebApi'
   workingDirectory: '$(Build.SourcesDirectory)/${{ parameters.ProjectDirectory }}'
 
-- powershell: dotnet build --configuration ${{ parameters.BuildConfiguration }} --no-restore -p:NetCoreOnly=true
+- powershell: dotnet build --configuration ${{ parameters.BuildConfiguration }} --framework ${{ parameters.TargetFramework }} --no-restore -p:NetCoreOnly=true
   displayName: 'Build ManagedIdentityWebApi'
   workingDirectory: '$(Build.SourcesDirectory)/${{ parameters.ProjectDirectory }}'
 
-- powershell: dotnet publish --configuration ${{ parameters.BuildConfiguration }} --no-build --output '$(Build.ArtifactStagingDirectory)/webapp' -p:NetCoreOnly=true
+- powershell: dotnet publish --configuration ${{ parameters.BuildConfiguration }} --framework ${{ parameters.TargetFramework }} --no-build --output '$(Build.ArtifactStagingDirectory)/webapp' -p:NetCoreOnly=true
   displayName: 'Publish ManagedIdentityWebApi'
   workingDirectory: '$(Build.SourcesDirectory)/${{ parameters.ProjectDirectory }}'
 
@@ -121,6 +121,12 @@ steps:
 
 # Acquire an Entra app-only token as the Easy Auth app (LabAuth certificate credential) and
 # call the protected endpoint. Easy Auth returns 401 for unauthenticated callers.
+#
+# Token version: the resource app registration uses the default requestedAccessTokenVersion (v1),
+# so requesting 'api://<clientId>/.default' from the v2.0 token endpoint still yields a v1-form
+# access token (iss = https://sts.windows.net/<tenantId>/, aud = api://<clientId>), which matches
+# the Easy Auth issuer/audience. If the app is ever switched to requestedAccessTokenVersion=2,
+# update the Easy Auth issuer to the v2 endpoint (.../v2.0) to keep them aligned.
 - powershell: |
     $ErrorActionPreference = 'Stop'
     $clientId = '${{ parameters.EasyAuthClientId }}'
