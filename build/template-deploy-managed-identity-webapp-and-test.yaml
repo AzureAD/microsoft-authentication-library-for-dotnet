@@ -47,6 +47,9 @@ parameters:
 - name: TestResourceUri
   type: string
   default: 'https://vault.azure.net'
+- name: UserAssignedClientId
+  type: string
+  default: 'e9207e64-f339-4a63-b074-90dc105a1954'
 
 steps:
 - task: UseDotNet@2
@@ -162,27 +165,41 @@ steps:
     $accessToken = $tokenResponse.access_token
     if ([string]::IsNullOrEmpty($accessToken)) { throw 'Failed to acquire access token for Easy Auth.' }
 
-    $webAppUrl = 'https://${{ parameters.WebAppName }}.azurewebsites.net/AppService?resourceuri=${{ parameters.TestResourceUri }}'
-    Write-Host ('Calling protected endpoint: {0}' -f $webAppUrl)
+    $baseUrl = 'https://${{ parameters.WebAppName }}.azurewebsites.net/AppService?resourceuri=${{ parameters.TestResourceUri }}'
+    $headers = @{ Authorization = ('Bearer ' + $accessToken) }
 
-    # Allow the freshly deployed app to warm up; retry a few times.
-    $response = $null
-    for ($attempt = 1; $attempt -le 5; $attempt++) {
-      try {
-        $response = Invoke-RestMethod -Uri $webAppUrl -Method Get -Headers @{ Authorization = ('Bearer ' + $accessToken) } -TimeoutSec 120
-        break
-      } catch {
-        Write-Host ('Attempt {0} failed: {1}' -f $attempt, $_.Exception.Message)
-        Start-Sleep -Seconds 15
+    function Invoke-MiEndpoint([string]$label, [string]$url) {
+      Write-Host ('[{0}] Calling: {1}' -f $label, $url)
+      $resp = $null
+      # Allow the freshly deployed app to warm up; retry a few times.
+      for ($attempt = 1; $attempt -le 5; $attempt++) {
+        try {
+          $resp = Invoke-RestMethod -Uri $url -Method Get -Headers $headers -TimeoutSec 120
+          break
+        } catch {
+          Write-Host ('[{0}] attempt {1} failed: {2}' -f $label, $attempt, $_.Exception.Message)
+          Start-Sleep -Seconds 15
+        }
       }
+      Write-Host ('[{0}] Response: {1}' -f $label, $resp)
+      if ("$resp" -notmatch 'Access token received') {
+        throw ('[' + $label + '] Unexpected response from protected endpoint: ' + $resp)
+      }
+      Write-Host ('[{0}] OK' -f $label)
     }
 
-    Write-Host ('Response: {0}' -f $response)
-    if ("$response" -match 'Access token received') {
-      Write-Host 'Successfully retrieved access token from the protected Managed Identity WebApi.'
+    # System-assigned managed identity (no userAssignedId)
+    Invoke-MiEndpoint 'SAMI' $baseUrl
+
+    # User-assigned managed identity (userAssignedId = UAMI client id)
+    $uamiClientId = '${{ parameters.UserAssignedClientId }}'
+    if (-not [string]::IsNullOrWhiteSpace($uamiClientId)) {
+      Invoke-MiEndpoint 'UAMI' ($baseUrl + '&userAssignedId=' + $uamiClientId)
     } else {
-      throw ('Unexpected response from protected endpoint: ' + $response)
+      Write-Host 'UserAssignedClientId not provided; skipping UAMI check.'
     }
+
+    Write-Host 'All managed identity checks passed.'
   displayName: 'Test protected endpoint (Bearer token via LabAuth)'
   env:
     LABAUTH_PFX_PATH: $(LabAuthPfxPath)
