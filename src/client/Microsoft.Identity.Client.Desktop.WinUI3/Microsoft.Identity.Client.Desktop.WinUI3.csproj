@@ -9,7 +9,16 @@
     <!-- The Windows App SDK only supports Native AOT on .NET 10+, so only claim AOT
          compatibility (and run the AOT/trim analyzers) for the net10 target. The explicit
          assignment also overrides the net8.0-wide default from src/Directory.Build.props. -->
-    <IsAotCompatible>$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net10.0'))</IsAotCompatible>
+    <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net10.0'))">true</IsAotCompatible>
+
+    <!-- Disable runtime marshalling (CsWinRT doesn't rely on it anymore) -->
+    <DisableRuntimeMarshalling Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net10.0'))">true</DisableRuntimeMarshalling>
+
+    <!-- Ensure the CsWinRT AOT analyzer is enabled (it should be the default, but it doesn't seem to be running
+         in this project without explicitly setting these properties. Can be removed in the future once fixed.
+         For now, leaving these in doesn't cause any issues anyway, these are the same as the default values. -->
+    <CsWinRTAotOptimizerEnabled>true</CsWinRTAotOptimizerEnabled>
+    <CsWinRTAotWarningLevel>2</CsWinRTAotWarningLevel>
     
     <PathToMsalSources>$(MSBuildThisFileDirectory)../Microsoft.Identity.Client/</PathToMsalSources>
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -48,7 +57,6 @@
   <!-- WinUI3 and Windows App SDK dependencies -->
   <ItemGroup>
     <PackageReference Include="Microsoft.WindowsAppSDK.WinUI" />
-    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" />
   </ItemGroup>
   
   <!-- Project references -->
