@@ -73,7 +73,7 @@ steps:
     $kvSecretBytes = [System.Convert]::FromBase64String('$(LabAuth)')
     $certCollection = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2Collection
     $certCollection.Import($kvSecretBytes, $null, [System.Security.Cryptography.X509Certificates.X509KeyStorageFlags]::Exportable)
-    $pfxPath = Join-Path '$(Build.SourcesDirectory)' 'LabAuthClient.pfx'
+    $pfxPath = Join-Path '$(Agent.TempDirectory)' 'LabAuthClient.pfx'
     $protectedBytes = $certCollection.Export([System.Security.Cryptography.X509Certificates.X509ContentType]::Pkcs12, '')
     [System.IO.File]::WriteAllBytes($pfxPath, $protectedBytes)
     $len = (Get-Item $pfxPath).Length
@@ -171,15 +171,20 @@ steps:
     function Invoke-MiEndpoint([string]$label, [string]$url) {
       Write-Host ('[{0}] Calling: {1}' -f $label, $url)
       $resp = $null
+      $lastError = $null
       # Allow the freshly deployed app to warm up; retry a few times.
       for ($attempt = 1; $attempt -le 5; $attempt++) {
         try {
           $resp = Invoke-RestMethod -Uri $url -Method Get -Headers $headers -TimeoutSec 120
           break
         } catch {
-          Write-Host ('[{0}] attempt {1} failed: {2}' -f $label, $attempt, $_.Exception.Message)
+          $lastError = $_.Exception.Message
+          Write-Host ('[{0}] attempt {1} failed: {2}' -f $label, $attempt, $lastError)
           Start-Sleep -Seconds 15
         }
+      }
+      if ($null -eq $resp) {
+        throw ('[' + $label + '] All attempts to call the protected endpoint failed. Last error: ' + $lastError)
       }
       Write-Host ('[{0}] Response: {1}' -f $label, $resp)
       if ("$resp" -notmatch 'Access token received') {
