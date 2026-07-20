@@ -1,17 +1,20 @@
 # template-deploy-managed-identity-webapp-and-test.yaml
 #
-# Builds and deploys the ManagedIdentityWebApi dev app to an Azure App Service that is
-# protected by App Service Authentication (Easy Auth / Microsoft Entra ID), then verifies
-# the protected endpoint by acquiring a bearer token with the LabAuth certificate.
+# Builds and deploys the ManagedIdentityWebApi dev app to an Azure App Service protected by
+# App Service Authentication (Easy Auth / Microsoft Entra ID), then verifies the protected
+# endpoint by acquiring a bearer token with the LabAuth certificate for both system-assigned
+# and user-assigned managed identity.
 #
 # Auth model:
-#   * Deploy uses the web app publish profile stored in Key Vault (Kudu Zip Deploy) -
-#     no ARM service connection is required for the deployment itself.
+#   * The LabAuth client certificate is fetched from Key Vault and installed by the shared
+#     'template-install-keyvault-secrets.yaml' template (exposes $(generateLabCert.certDir)).
+#   * Deploy uses the web app publish profile stored in Key Vault (Kudu Zip Deploy) - no ARM
+#     service connection is required for the deployment itself.
 #   * The test step acquires an app-only token as the Easy Auth app registration using the
-#     LabAuth client certificate (already pulled from 'msidlabs'), then calls the endpoint
-#     with 'Authorization: Bearer'. Easy Auth rejects unauthenticated callers with HTTP 401.
+#     LabAuth certificate, then calls the endpoint with 'Authorization: Bearer'. Easy Auth
+#     rejects unauthenticated callers with HTTP 401.
 #
-# Prerequisites (already provisioned outside this pipeline):
+# Prerequisites (provisioned outside this pipeline):
 #   * App Service '<WebAppName>' with Easy Auth configured to accept 'api://<EasyAuthClientId>'.
 #   * App registration '<EasyAuthClientId>' carrying the LabAuth certificate.
 #   * Key Vault 'msidlabs' secrets: 'LabAuth' and '<PublishProfileSecretName>'.
@@ -58,28 +61,17 @@ steps:
     packageType: 'sdk'
     version: '8.0.x'
 
-# Pull the LabAuth client certificate and the web app publish profile from Key Vault using
-# the workload-identity service connection (same one used to install LabAuth elsewhere).
+# Reuse the shared template to fetch LabAuth from Key Vault and install the client certificate.
+# It publishes the PFX path as the output variable $(generateLabCert.certDir).
+- template: template-install-keyvault-secrets.yaml
+
+# Fetch the web app publish profile (separate Key Vault secret used only by this stage).
 - task: AzureKeyVault@2
-  displayName: 'Fetch secrets (LabAuth + publish profile)'
+  displayName: 'Fetch web app publish profile'
   inputs:
     azureSubscription: '${{ parameters.AzureServiceConnection }}'
     KeyVaultName: '${{ parameters.KeyVaultName }}'
-    SecretsFilter: 'LabAuth,${{ parameters.PublishProfileSecretName }}'
-
-# Materialize the LabAuth certificate (with private key) as a PFX on the agent.
-- powershell: |
-    $ErrorActionPreference = 'Stop'
-    $kvSecretBytes = [System.Convert]::FromBase64String('$(LabAuth)')
-    $certCollection = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2Collection
-    $certCollection.Import($kvSecretBytes, $null, [System.Security.Cryptography.X509Certificates.X509KeyStorageFlags]::Exportable)
-    $pfxPath = Join-Path '$(Agent.TempDirectory)' 'LabAuthClient.pfx'
-    $protectedBytes = $certCollection.Export([System.Security.Cryptography.X509Certificates.X509ContentType]::Pkcs12, '')
-    [System.IO.File]::WriteAllBytes($pfxPath, $protectedBytes)
-    $len = (Get-Item $pfxPath).Length
-    Write-Host "##vso[task.setvariable variable=LabAuthPfxPath]$pfxPath"
-    Write-Host "Installed LabAuth client certificate to $pfxPath ($len bytes)."
-  displayName: 'Install LabAuth client certificate'
+    SecretsFilter: '${{ parameters.PublishProfileSecretName }}'
 
 # NetCoreOnly restricts the referenced Microsoft.Identity.Client project to netstandard2.0 + net8.0,
 # avoiding the mobile (net8.0-ios / net8.0-android) target frameworks that require MAUI workloads
@@ -96,128 +88,33 @@ steps:
   displayName: 'Publish ManagedIdentityWebApi'
   workingDirectory: '$(Build.SourcesDirectory)/${{ parameters.ProjectDirectory }}'
 
-# Deploy using the publish profile (Kudu Zip Deploy). The publish profile carries its own
-# SCM basic-auth credentials, so no ARM service connection is needed for the deployment.
-- powershell: |
-    $ErrorActionPreference = 'Stop'
-    [xml]$pubXml = $env:PUBLISH_PROFILE_XML
-    $msdeploy = $pubXml.publishData.publishProfile | Where-Object { $_.publishMethod -eq 'MSDeploy' } | Select-Object -First 1
-    if ($null -eq $msdeploy) { throw 'MSDeploy entry not found in publish profile.' }
-    $scmHost = ($msdeploy.publishUrl -split ':')[0]
-    $user = $msdeploy.userName
-    $pass = $msdeploy.userPWD
-
-    $zipPath = Join-Path '$(Build.ArtifactStagingDirectory)' 'webapp.zip'
-    if (Test-Path $zipPath) { Remove-Item $zipPath -Force }
-    Compress-Archive -Path '$(Build.ArtifactStagingDirectory)/webapp/*' -DestinationPath $zipPath -Force
-
-    $pair = $user + ':' + $pass
-    $auth = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes($pair))
-    $uri = 'https://' + $scmHost + '/api/zipdeploy'
-    $zipLen = (Get-Item $zipPath).Length
-    Write-Host ('Deploying {0} bytes to {1}' -f $zipLen, $uri)
-    Invoke-RestMethod -Uri $uri -Method Post -InFile $zipPath -ContentType 'application/zip' -Headers @{ Authorization = ('Basic ' + $auth) } -TimeoutSec 300 | Out-Null
-    Write-Host 'Deployment complete.'
+# Deploy using the publish profile (Kudu Zip Deploy). The publish profile carries its own SCM
+# basic-auth credentials, so no ARM service connection is needed for the deployment.
+- task: PowerShell@2
   displayName: 'Deploy to Azure Web App (Zip Deploy via publish profile)'
+  inputs:
+    filePath: '$(Build.SourcesDirectory)/build/scripts/Deploy-WebAppZipDeploy.ps1'
+    arguments: '-PublishDirectory "$(Build.ArtifactStagingDirectory)/webapp" -ZipPath "$(Build.ArtifactStagingDirectory)/webapp.zip"'
   env:
     PUBLISH_PROFILE_XML: $(${{ parameters.PublishProfileSecretName }})
 
-# Acquire an Entra app-only token as the Easy Auth app (LabAuth certificate credential) and
-# call the protected endpoint. Easy Auth returns 401 for unauthenticated callers.
+# Acquire an app-only token as the Easy Auth app (LabAuth cert, installed by the shared template)
+# and verify the protected endpoint for system-assigned and user-assigned managed identity.
 #
 # Token version: the resource app registration uses the default requestedAccessTokenVersion (v1),
 # so requesting 'api://<clientId>/.default' from the v2.0 token endpoint still yields a v1-form
 # access token (iss = https://sts.windows.net/<tenantId>/, aud = api://<clientId>), which matches
-# the Easy Auth issuer/audience. If the app is ever switched to requestedAccessTokenVersion=2,
-# update the Easy Auth issuer to the v2 endpoint (.../v2.0) to keep them aligned.
-- powershell: |
-    $ErrorActionPreference = 'Stop'
-    $clientId = '${{ parameters.EasyAuthClientId }}'
-    $tenantId = '${{ parameters.TenantId }}'
-    $tokenEndpoint = 'https://login.microsoftonline.com/' + $tenantId + '/oauth2/v2.0/token'
-
-    $cert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2($env:LABAUTH_PFX_PATH, '', [System.Security.Cryptography.X509Certificates.X509KeyStorageFlags]::Exportable)
-
-    function ConvertTo-Base64Url([byte[]]$bytes) {
-      return [Convert]::ToBase64String($bytes).TrimEnd('=').Replace('+', '-').Replace('/', '_')
-    }
-
-    # Signed JWT client assertion (RS256) for certificate-based client credentials.
-    $now = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
-    $x5t = ConvertTo-Base64Url ($cert.GetCertHash())
-    $header  = @{ alg = 'RS256'; typ = 'JWT'; x5t = $x5t } | ConvertTo-Json -Compress
-    $payload = @{ aud = $tokenEndpoint; iss = $clientId; sub = $clientId; jti = [guid]::NewGuid().ToString(); nbf = $now; exp = $now + 600 } | ConvertTo-Json -Compress
-    $h64 = ConvertTo-Base64Url ([Text.Encoding]::UTF8.GetBytes($header))
-    $p64 = ConvertTo-Base64Url ([Text.Encoding]::UTF8.GetBytes($payload))
-    $unsigned = $h64 + '.' + $p64
-    $rsa = [System.Security.Cryptography.X509Certificates.RSACertificateExtensions]::GetRSAPrivateKey($cert)
-    $sig = $rsa.SignData([Text.Encoding]::UTF8.GetBytes($unsigned), [Security.Cryptography.HashAlgorithmName]::SHA256, [Security.Cryptography.RSASignaturePadding]::Pkcs1)
-    $assertion = $unsigned + '.' + (ConvertTo-Base64Url $sig)
-
-    $body = @{
-      client_id             = $clientId
-      scope                 = 'api://' + $clientId + '/.default'
-      grant_type            = 'client_credentials'
-      client_assertion_type = 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
-      client_assertion      = $assertion
-    }
-    $tokenResponse = Invoke-RestMethod -Uri $tokenEndpoint -Method Post -Body $body -ContentType 'application/x-www-form-urlencoded'
-    $accessToken = $tokenResponse.access_token
-    if ([string]::IsNullOrEmpty($accessToken)) { throw 'Failed to acquire access token for Easy Auth.' }
-
-    $baseUrl = 'https://${{ parameters.WebAppName }}.azurewebsites.net/AppService?resourceuri=${{ parameters.TestResourceUri }}'
-    $headers = @{ Authorization = ('Bearer ' + $accessToken) }
-
-    function Invoke-MiEndpoint([string]$label, [string]$url) {
-      Write-Host ('[{0}] Calling: {1}' -f $label, $url)
-      $resp = $null
-      $lastError = $null
-      # Allow the freshly deployed app to warm up; retry a few times.
-      for ($attempt = 1; $attempt -le 5; $attempt++) {
-        try {
-          $resp = Invoke-RestMethod -Uri $url -Method Get -Headers $headers -TimeoutSec 120
-          break
-        } catch {
-          $lastError = $_.Exception.Message
-          Write-Host ('[{0}] attempt {1} failed: {2}' -f $label, $attempt, $lastError)
-          Start-Sleep -Seconds 15
-        }
-      }
-      if ($null -eq $resp) {
-        throw ('[' + $label + '] All attempts to call the protected endpoint failed. Last error: ' + $lastError)
-      }
-      Write-Host ('[{0}] Response: {1}' -f $label, $resp)
-      if ("$resp" -notmatch 'Access token received') {
-        throw ('[' + $label + '] Unexpected response from protected endpoint: ' + $resp)
-      }
-      Write-Host ('[{0}] OK' -f $label)
-    }
-
-    # System-assigned managed identity (no userAssignedId)
-    Invoke-MiEndpoint 'SAMI' $baseUrl
-
-    # User-assigned managed identity (userAssignedId = UAMI client id)
-    $uamiClientId = '${{ parameters.UserAssignedClientId }}'
-    if (-not [string]::IsNullOrWhiteSpace($uamiClientId)) {
-      Invoke-MiEndpoint 'UAMI' ($baseUrl + '&userAssignedId=' + $uamiClientId)
-    } else {
-      Write-Host 'UserAssignedClientId not provided; skipping UAMI check.'
-    }
-
-    Write-Host 'All managed identity checks passed.'
-  displayName: 'Test protected endpoint (Bearer token via LabAuth)'
+# the Easy Auth issuer/audience. If the app is switched to requestedAccessTokenVersion=2, update
+# the Easy Auth issuer to the v2 endpoint (.../v2.0) to keep them aligned.
+- task: PowerShell@2
+  displayName: 'Test protected endpoint (SAMI + UAMI via LabAuth)'
+  inputs:
+    filePath: '$(Build.SourcesDirectory)/build/scripts/Invoke-ManagedIdentityWebAppTest.ps1'
+    arguments: >-
+      -ClientId "${{ parameters.EasyAuthClientId }}"
+      -TenantId "${{ parameters.TenantId }}"
+      -WebAppName "${{ parameters.WebAppName }}"
+      -ResourceUri "${{ parameters.TestResourceUri }}"
+      -UserAssignedClientId "${{ parameters.UserAssignedClientId }}"
   env:
-    LABAUTH_PFX_PATH: $(LabAuthPfxPath)
-
-# Remove the LabAuth private-key PFX from the agent after use (runs even if earlier steps fail).
-- powershell: |
-    if (Test-Path $env:LABAUTH_PFX_PATH) {
-      Remove-Item $env:LABAUTH_PFX_PATH -Force
-      Write-Host 'Removed LabAuth PFX from the agent.'
-    } else {
-      Write-Host 'LabAuth PFX not found; nothing to remove.'
-    }
-  displayName: 'Clean up LabAuth certificate'
-  condition: always()
-  env:
-    LABAUTH_PFX_PATH: $(LabAuthPfxPath)
+    LABAUTH_PFX_PATH: $(generateLabCert.certDir)
