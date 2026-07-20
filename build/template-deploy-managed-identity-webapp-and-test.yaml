@@ -78,15 +78,18 @@ steps:
     Write-Host "Installed LabAuth client certificate to $pfxPath ($len bytes)."
   displayName: 'Install LabAuth client certificate'
 
-- powershell: dotnet restore
+# NetCoreOnly restricts the referenced Microsoft.Identity.Client project to netstandard2.0 + net8.0,
+# avoiding the mobile (net8.0-ios / net8.0-android) target frameworks that require MAUI workloads
+# which are not installed on the hosted Windows agent.
+- powershell: dotnet restore -p:NetCoreOnly=true
   displayName: 'Restore ManagedIdentityWebApi'
   workingDirectory: '$(Build.SourcesDirectory)/${{ parameters.ProjectDirectory }}'
 
-- powershell: dotnet build --configuration ${{ parameters.BuildConfiguration }} --no-restore
+- powershell: dotnet build --configuration ${{ parameters.BuildConfiguration }} --no-restore -p:NetCoreOnly=true
   displayName: 'Build ManagedIdentityWebApi'
   workingDirectory: '$(Build.SourcesDirectory)/${{ parameters.ProjectDirectory }}'
 
-- powershell: dotnet publish --configuration ${{ parameters.BuildConfiguration }} --no-build --output '$(Build.ArtifactStagingDirectory)/webapp'
+- powershell: dotnet publish --configuration ${{ parameters.BuildConfiguration }} --no-build --output '$(Build.ArtifactStagingDirectory)/webapp' -p:NetCoreOnly=true
   displayName: 'Publish ManagedIdentityWebApi'
   workingDirectory: '$(Build.SourcesDirectory)/${{ parameters.ProjectDirectory }}'
 
