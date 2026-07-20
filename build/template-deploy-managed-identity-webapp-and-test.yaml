@@ -1,0 +1,179 @@
+# template-deploy-managed-identity-webapp-and-test.yaml
+#
+# Builds and deploys the ManagedIdentityWebApi dev app to an Azure App Service that is
+# protected by App Service Authentication (Easy Auth / Microsoft Entra ID), then verifies
+# the protected endpoint by acquiring a bearer token with the LabAuth certificate.
+#
+# Auth model:
+#   * Deploy uses the web app publish profile stored in Key Vault (Kudu Zip Deploy) -
+#     no ARM service connection is required for the deployment itself.
+#   * The test step acquires an app-only token as the Easy Auth app registration using the
+#     LabAuth client certificate (already pulled from 'msidlabs'), then calls the endpoint
+#     with 'Authorization: Bearer'. Easy Auth rejects unauthenticated callers with HTTP 401.
+#
+# Prerequisites (already provisioned outside this pipeline):
+#   * App Service '<WebAppName>' with Easy Auth configured to accept 'api://<EasyAuthClientId>'.
+#   * App registration '<EasyAuthClientId>' carrying the LabAuth certificate.
+#   * Key Vault 'msidlabs' secrets: 'LabAuth' and '<PublishProfileSecretName>'.
+
+parameters:
+- name: BuildConfiguration
+  type: string
+  default: 'Release'
+- name: TargetFramework
+  type: string
+  default: 'net8.0'
+- name: WebAppName
+  type: string
+  default: 'msal-webapp-ci-auth-913a8e'
+- name: EasyAuthClientId
+  type: string
+  default: '1060f219-d935-462d-a624-97cbdd648f9e'
+- name: TenantId
+  type: string
+  default: '10c419d4-4a50-45b2-aa4e-919fb84df24f'
+- name: ProjectDirectory
+  type: string
+  default: 'tests/devapps/Managed Identity apps/ManagedIdentityWebApi'
+- name: PublishProfileSecretName
+  type: string
+  default: 'MSAL-WebApp-CI-PublishProfile'
+- name: KeyVaultName
+  type: string
+  default: 'msidlabs'
+- name: AzureServiceConnection
+  type: string
+  default: 'AuthSdkResourceManager'
+- name: TestResourceUri
+  type: string
+  default: 'https://vault.azure.net'
+
+steps:
+- task: UseDotNet@2
+  displayName: 'Install .NET 8 SDK'
+  inputs:
+    packageType: 'sdk'
+    version: '8.0.x'
+
+# Pull the LabAuth client certificate and the web app publish profile from Key Vault using
+# the workload-identity service connection (same one used to install LabAuth elsewhere).
+- task: AzureKeyVault@2
+  displayName: 'Fetch secrets (LabAuth + publish profile)'
+  inputs:
+    azureSubscription: '${{ parameters.AzureServiceConnection }}'
+    KeyVaultName: '${{ parameters.KeyVaultName }}'
+    SecretsFilter: 'LabAuth,${{ parameters.PublishProfileSecretName }}'
+
+# Materialize the LabAuth certificate (with private key) as a PFX on the agent.
+- powershell: |
+    $ErrorActionPreference = 'Stop'
+    $kvSecretBytes = [System.Convert]::FromBase64String('$(LabAuth)')
+    $certCollection = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2Collection
+    $certCollection.Import($kvSecretBytes, $null, [System.Security.Cryptography.X509Certificates.X509KeyStorageFlags]::Exportable)
+    $pfxPath = Join-Path '$(Build.SourcesDirectory)' 'LabAuthClient.pfx'
+    $protectedBytes = $certCollection.Export([System.Security.Cryptography.X509Certificates.X509ContentType]::Pkcs12, '')
+    [System.IO.File]::WriteAllBytes($pfxPath, $protectedBytes)
+    $len = (Get-Item $pfxPath).Length
+    Write-Host "##vso[task.setvariable variable=LabAuthPfxPath]$pfxPath"
+    Write-Host "Installed LabAuth client certificate to $pfxPath ($len bytes)."
+  displayName: 'Install LabAuth client certificate'
+
+- powershell: dotnet restore
+  displayName: 'Restore ManagedIdentityWebApi'
+  workingDirectory: '$(Build.SourcesDirectory)/${{ parameters.ProjectDirectory }}'
+
+- powershell: dotnet build --configuration ${{ parameters.BuildConfiguration }} --no-restore
+  displayName: 'Build ManagedIdentityWebApi'
+  workingDirectory: '$(Build.SourcesDirectory)/${{ parameters.ProjectDirectory }}'
+
+- powershell: dotnet publish --configuration ${{ parameters.BuildConfiguration }} --no-build --output '$(Build.ArtifactStagingDirectory)/webapp'
+  displayName: 'Publish ManagedIdentityWebApi'
+  workingDirectory: '$(Build.SourcesDirectory)/${{ parameters.ProjectDirectory }}'
+
+# Deploy using the publish profile (Kudu Zip Deploy). The publish profile carries its own
+# SCM basic-auth credentials, so no ARM service connection is needed for the deployment.
+- powershell: |
+    $ErrorActionPreference = 'Stop'
+    [xml]$pubXml = $env:PUBLISH_PROFILE_XML
+    $msdeploy = $pubXml.publishData.publishProfile | Where-Object { $_.publishMethod -eq 'MSDeploy' } | Select-Object -First 1
+    if ($null -eq $msdeploy) { throw 'MSDeploy entry not found in publish profile.' }
+    $scmHost = ($msdeploy.publishUrl -split ':')[0]
+    $user = $msdeploy.userName
+    $pass = $msdeploy.userPWD
+
+    $zipPath = Join-Path '$(Build.ArtifactStagingDirectory)' 'webapp.zip'
+    if (Test-Path $zipPath) { Remove-Item $zipPath -Force }
+    Compress-Archive -Path '$(Build.ArtifactStagingDirectory)/webapp/*' -DestinationPath $zipPath -Force
+
+    $pair = $user + ':' + $pass
+    $auth = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes($pair))
+    $uri = 'https://' + $scmHost + '/api/zipdeploy'
+    $zipLen = (Get-Item $zipPath).Length
+    Write-Host ('Deploying {0} bytes to {1}' -f $zipLen, $uri)
+    Invoke-RestMethod -Uri $uri -Method Post -InFile $zipPath -ContentType 'application/zip' -Headers @{ Authorization = ('Basic ' + $auth) } -TimeoutSec 300 | Out-Null
+    Write-Host 'Deployment complete.'
+  displayName: 'Deploy to Azure Web App (Zip Deploy via publish profile)'
+  env:
+    PUBLISH_PROFILE_XML: $(${{ parameters.PublishProfileSecretName }})
+
+# Acquire an Entra app-only token as the Easy Auth app (LabAuth certificate credential) and
+# call the protected endpoint. Easy Auth returns 401 for unauthenticated callers.
+- powershell: |
+    $ErrorActionPreference = 'Stop'
+    $clientId = '${{ parameters.EasyAuthClientId }}'
+    $tenantId = '${{ parameters.TenantId }}'
+    $tokenEndpoint = 'https://login.microsoftonline.com/' + $tenantId + '/oauth2/v2.0/token'
+
+    $cert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2($env:LABAUTH_PFX_PATH, '', [System.Security.Cryptography.X509Certificates.X509KeyStorageFlags]::Exportable)
+
+    function ConvertTo-Base64Url([byte[]]$bytes) {
+      return [Convert]::ToBase64String($bytes).TrimEnd('=').Replace('+', '-').Replace('/', '_')
+    }
+
+    # Signed JWT client assertion (RS256) for certificate-based client credentials.
+    $now = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
+    $x5t = ConvertTo-Base64Url ($cert.GetCertHash())
+    $header  = @{ alg = 'RS256'; typ = 'JWT'; x5t = $x5t } | ConvertTo-Json -Compress
+    $payload = @{ aud = $tokenEndpoint; iss = $clientId; sub = $clientId; jti = [guid]::NewGuid().ToString(); nbf = $now; exp = $now + 600 } | ConvertTo-Json -Compress
+    $h64 = ConvertTo-Base64Url ([Text.Encoding]::UTF8.GetBytes($header))
+    $p64 = ConvertTo-Base64Url ([Text.Encoding]::UTF8.GetBytes($payload))
+    $unsigned = $h64 + '.' + $p64
+    $rsa = $cert.GetRSAPrivateKey()
+    $sig = $rsa.SignData([Text.Encoding]::UTF8.GetBytes($unsigned), [Security.Cryptography.HashAlgorithmName]::SHA256, [Security.Cryptography.RSASignaturePadding]::Pkcs1)
+    $assertion = $unsigned + '.' + (ConvertTo-Base64Url $sig)
+
+    $body = @{
+      client_id             = $clientId
+      scope                 = 'api://' + $clientId + '/.default'
+      grant_type            = 'client_credentials'
+      client_assertion_type = 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
+      client_assertion      = $assertion
+    }
+    $tokenResponse = Invoke-RestMethod -Uri $tokenEndpoint -Method Post -Body $body -ContentType 'application/x-www-form-urlencoded'
+    $accessToken = $tokenResponse.access_token
+    if ([string]::IsNullOrEmpty($accessToken)) { throw 'Failed to acquire access token for Easy Auth.' }
+
+    $webAppUrl = 'https://${{ parameters.WebAppName }}.azurewebsites.net/AppService?resourceuri=${{ parameters.TestResourceUri }}'
+    Write-Host ('Calling protected endpoint: {0}' -f $webAppUrl)
+
+    # Allow the freshly deployed app to warm up; retry a few times.
+    $response = $null
+    for ($attempt = 1; $attempt -le 5; $attempt++) {
+      try {
+        $response = Invoke-RestMethod -Uri $webAppUrl -Method Get -Headers @{ Authorization = ('Bearer ' + $accessToken) } -TimeoutSec 120
+        break
+      } catch {
+        Write-Host ('Attempt {0} failed: {1}' -f $attempt, $_.Exception.Message)
+        Start-Sleep -Seconds 15
+      }
+    }
+
+    Write-Host ('Response: {0}' -f $response)
+    if ("$response" -match 'Access token received') {
+      Write-Host 'Successfully retrieved access token from the protected Managed Identity WebApi.'
+    } else {
+      throw ('Unexpected response from protected endpoint: ' + $response)
+    }
+  displayName: 'Test protected endpoint (Bearer token via LabAuth)'
+  env:
+    LABAUTH_PFX_PATH: $(LabAuthPfxPath)
