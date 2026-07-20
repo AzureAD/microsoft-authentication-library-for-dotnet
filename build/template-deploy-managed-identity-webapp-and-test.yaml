@@ -141,7 +141,7 @@ steps:
     $h64 = ConvertTo-Base64Url ([Text.Encoding]::UTF8.GetBytes($header))
     $p64 = ConvertTo-Base64Url ([Text.Encoding]::UTF8.GetBytes($payload))
     $unsigned = $h64 + '.' + $p64
-    $rsa = $cert.GetRSAPrivateKey()
+    $rsa = [System.Security.Cryptography.X509Certificates.RSACertificateExtensions]::GetRSAPrivateKey($cert)
     $sig = $rsa.SignData([Text.Encoding]::UTF8.GetBytes($unsigned), [Security.Cryptography.HashAlgorithmName]::SHA256, [Security.Cryptography.RSASignaturePadding]::Pkcs1)
     $assertion = $unsigned + '.' + (ConvertTo-Base64Url $sig)
 
