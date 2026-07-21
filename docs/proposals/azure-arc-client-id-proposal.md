@@ -46,10 +46,6 @@ For a system-assigned request (no selector): no check; return the token as today
 
 The default is to reject: the SDK returns a user-assigned token only when the response positively confirms the identity. The SDK keeps client-side checks that do not depend on the agent, such as rejecting more than one selector.
 
-## Independent of the challenge flow
-
-The check lives on the final token response, not on the `401` + `WWW-Authenticate` challenge. This keeps it compatible with the Azure Arc team's plan to retire that challenge later (for example, Guest Proxy Agent authenticating callers through OS mechanisms). The SDK treats the challenge as optional: if it receives a full token immediately with no challenge, it accepts it the same way it does for Azure IMDS, and still validates the identity field on that response.
-
 ## What we need from the Azure Arc team
 
 1. Add `client_id` / `object_id` / `msi_res_id` to the HIMDS token response.
@@ -65,8 +61,7 @@ For each SDK:
 1. Remove the hardcoded Azure Arc UAMI block.
 2. Read the used-identity field from the token response and validate it against the request.
 3. Fail closed when the field is missing.
-4. Treat the `401` challenge as optional.
-5. Keep selector-specific cache partitioning (separate cache entries for SAMI and each UAMI).
+4. Keep selector-specific cache partitioning (separate cache entries for SAMI and each UAMI).
 
 ## Tests
 
@@ -87,4 +82,3 @@ Negative:
 - Replace the client-side Azure Arc UAMI block with response-based validation of the used identity.
 - Azure Arc team adds `client_id` / `object_id` / `msi_res_id` to the token response and sets them only when the identity was honored.
 - The SDK fails closed when the field is missing.
-- Treat the `401` challenge as optional so the design survives its future removal.
