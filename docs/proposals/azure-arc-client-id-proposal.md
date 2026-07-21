@@ -81,4 +81,3 @@ Negative:
 
 - Replace the client-side Azure Arc UAMI block with response-based validation of the used identity.
 - Azure Arc team adds `client_id` / `object_id` / `msi_res_id` to the token response and sets them only when the identity was honored.
-- The SDK fails closed when the field is missing.
