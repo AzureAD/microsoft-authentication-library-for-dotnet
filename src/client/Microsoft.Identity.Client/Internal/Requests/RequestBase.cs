@@ -138,7 +138,28 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 apiEvent.ApiErrorCode = ex.GetType().Name;
                 AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
 
-                LogFailureTelemetryToOtel(ex.GetType().Name, apiEvent, apiEvent.CacheInfo, httpStatusCode: 0, totalDurationInMs: requestStopwatch.ElapsedMilliseconds + measureTelemetryDurationResult.Milliseconds);
+                // Compute the total duration once so the value on the synthesized metadata matches the
+                // value logged to OpenTelemetry (the stopwatch keeps running, so re-reading it drifts).
+                long totalDurationInMs = requestStopwatch.ElapsedMilliseconds + measureTelemetryDurationResult.Milliseconds;
+
+                // The original exception is re-thrown below; MSAL never surfaces this wrapper. It exists only
+                // so the OpenTelemetry tag enricher observes a populated ExecutionResult.Exception (carrying
+                // failure metadata) for non-MSAL failures, mirroring the MsalException path above. The
+                // originating exception's type is captured as the ErrorCode and it is preserved as the
+                // InnerException so consumers retain full fidelity.
+                MsalException enricherException = new MsalException(ex.GetType().FullName, ex.Message, ex)
+                {
+                    AuthenticationResultMetadata = CreateFailureMetadata(apiEvent, totalDurationInMs),
+                    CorrelationId = AuthenticationRequestParameters.CorrelationId.ToString(),
+                };
+
+                LogFailureTelemetryToOtel(
+                    ex.GetType().Name,
+                    apiEvent,
+                    apiEvent.CacheInfo,
+                    httpStatusCode: 0,
+                    totalDurationInMs: totalDurationInMs,
+                    exception: enricherException);
                 throw;
             }
         }
