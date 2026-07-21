@@ -112,7 +112,8 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                 authority: requestParams.AuthorityManager.Authority.AuthorityInfo.CanonicalAuthority?.ToString(),
                 tenantId: requestParams.AuthorityManager.Authority.TenantId,
                 correlationId: requestParams.RequestContext.CorrelationId,
-                logger: requestParams.RequestContext.Logger);
+                logger: requestParams.RequestContext.Logger,
+                otelTagsEnricher: requestParams.OtelTagsEnricher);
         }
     }
 }

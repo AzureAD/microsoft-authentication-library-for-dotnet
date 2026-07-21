@@ -1,0 +1,2 @@
+Microsoft.Identity.Client.AssertionRequestOptions.OtelTagsEnricher.get -> System.Action<Microsoft.Identity.Client.Extensibility.ExecutionResult, System.Collections.Generic.IList<System.Collections.Generic.KeyValuePair<string, object>>>
+Microsoft.Identity.Client.AssertionRequestOptions.OtelTagsEnricher.set -> void
