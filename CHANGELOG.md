@@ -1,3 +1,9 @@
+4.87.0
+======
+
+### New Features
+- Exposed `MsalServiceException.ErrorCodes` (as a public `IReadOnlyList<string>`), surfacing the raw STS-specific error codes (for example the numeric `AADSTS` codes) for diagnostics and logging. [#TBD](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/TBD)
+
 4.86.1
 ======
 
