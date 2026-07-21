@@ -224,7 +224,16 @@ namespace Microsoft.Identity.Client.Utils
 
             foreach (var component in cacheKeyComponents)
             {
+                // Length-prefix (netstring) encoding: <byteLen(key)>:<key><byteLen(value)>:<value>.
+                // This is injective, preventing cache-key collisions where different component
+                // sets would otherwise serialize to the same string (e.g. {fmi_path:"value"} and
+                // {fmi_pat:"hvalue"}). UTF-8 byte length is used (not string.Length) to stay
+                // byte-identical to the parallel MSAL Go/Java/Python/JS fixes.
+                stringBuilder.Append(Encoding.UTF8.GetByteCount(component.Key));
+                stringBuilder.Append(':');
                 stringBuilder.Append(component.Key);
+                stringBuilder.Append(Encoding.UTF8.GetByteCount(component.Value));
+                stringBuilder.Append(':');
                 stringBuilder.Append(component.Value);
             }
 
