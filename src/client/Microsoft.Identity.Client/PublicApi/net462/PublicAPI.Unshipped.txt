@@ -1,0 +1,1 @@
+const Microsoft.Identity.Client.MsalException.AuthenticationResultMetadataKey = "MsalAuthenticationResultMetadata" -> string
