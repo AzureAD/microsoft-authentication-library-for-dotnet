@@ -870,7 +870,7 @@ namespace Microsoft.Identity.Test.Unit
                         .WithTenantId(TestConstants.Utid)
                         .ExecuteAsync(CancellationToken.None)).ConfigureAwait(false);
 
-                Assert.IsNotNull(ex.ErrorCodes, "ErrorCodes should be populated from IDP response.");
+                Assert.IsNotNull(ex.ErrorCodesForLogging, "ErrorCodesForLogging should be populated from IDP response.");
 
                 s_meterProvider.ForceFlush();
 
@@ -880,7 +880,7 @@ namespace Microsoft.Identity.Test.Unit
                     var tags = GetTagDictionary(metricPoint.Tags);
                     Assert.IsTrue(tags.ContainsKey(TelemetryConstants.RawStsErrorCode),
                         "RawStsErrorCode tag should be present when the IDP response contains error_codes.");
-                    Assert.AreEqual(ex.ErrorCodes.FirstOrDefault(), tags[TelemetryConstants.RawStsErrorCode]);
+                    Assert.AreEqual(ex.ErrorCodesForLogging.FirstOrDefault(), tags[TelemetryConstants.RawStsErrorCode]);
                 }
             }
         }
