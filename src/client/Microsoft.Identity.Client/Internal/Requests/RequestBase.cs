@@ -149,7 +149,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 // wrapper - can surface token-acquisition diagnostics (Bug 3696194). The value is the same
                 // strongly-typed object MSAL builds for the success path, so consumers reuse their mapper.
                 // Guarded because a derived exception may expose a null or read-only Data bag, and telemetry
-                // plumbing must never throw here and mask the caller's original exception.
+                // plumbing must never throw here and mask the caller's original exception. On .NET Framework /
+                // netstandard the Data bag also rejects non-serializable values, so AuthenticationResultMetadata
+                // is marked [Serializable] on those targets (see AuthenticationResultMetadata.cs).
                 if (ex.Data is { IsReadOnly: false })
                 {
                     ex.Data[MsalException.AuthenticationResultMetadataKey] = failureMetadata;
