@@ -145,7 +145,7 @@ namespace Microsoft.Identity.Client.Internal
                     logger.ErrorPiiWithPrefix(ex, logMsg);
 
                     LogBackgroundFailureTelemetry(serviceBundle, apiEvent, callerSdkId, callerSdkVersion,
-                        ex.ErrorCode, ex.StatusCode, ex.ErrorCodes?.FirstOrDefault(), ex, tagsEnricher, logger);
+                        ex.ErrorCode, ex.StatusCode, ex.ErrorCodesForLogging?.FirstOrDefault(), ex, tagsEnricher, logger);
 
                     // Background refresh doesn't go through RunAsync, so the exception isn't carrying metadata yet.
                     // Fill it in from apiEvent so the callback can see the HTTP duration and cache-refresh reason.
