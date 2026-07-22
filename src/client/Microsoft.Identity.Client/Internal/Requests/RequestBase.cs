@@ -130,7 +130,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     httpStatusCode,
                     totalDurationInMs,
                     exception: ex,
-                    rawStsErrorCode: serviceException?.ErrorCodes?.FirstOrDefault());
+                    rawStsErrorCode: serviceException?.ErrorCodesForLogging?.FirstOrDefault());
                 throw;
             }
             catch (Exception ex)

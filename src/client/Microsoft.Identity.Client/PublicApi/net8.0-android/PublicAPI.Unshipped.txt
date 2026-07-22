@@ -1,1 +1,1 @@
-Microsoft.Identity.Client.MsalServiceException.ErrorCodes.get -> System.Collections.Generic.IReadOnlyList<string>
+Microsoft.Identity.Client.MsalServiceException.ErrorCodesForLogging.get -> System.Collections.Generic.IReadOnlyList<string>

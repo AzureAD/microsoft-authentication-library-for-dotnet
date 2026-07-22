@@ -221,7 +221,7 @@ namespace Microsoft.Identity.Client
         /// without notice; intended for diagnostics and logging — do not branch production behavior
         /// on this value. Returns <see langword="null"/> when the service did not supply error codes.
         /// </summary>
-        public IReadOnlyList<string> ErrorCodes { get; internal set; }
+        public IReadOnlyList<string> ErrorCodesForLogging { get; internal set; }
 
         /// <summary>
         /// As per discussion with Evo, AAD 

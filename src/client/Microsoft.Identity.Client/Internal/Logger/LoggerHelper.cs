@@ -109,9 +109,9 @@ namespace Microsoft.Identity.Client.Internal.Logger
             {
                 sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "HTTP StatusCode {0}", msalServiceException.StatusCode));
                 sb.AppendLine($"CorrelationId {msalServiceException.CorrelationId}");
-                if (msalServiceException.ErrorCodes is {Count: > 0})
+                if (msalServiceException.ErrorCodesForLogging is {Count: > 0})
                 {
-                    sb.AppendLine($"Microsoft Entra ID Error Code AADSTS{string.Join(" ", msalServiceException.ErrorCodes)}");
+                    sb.AppendLine($"Microsoft Entra ID Error Code AADSTS{string.Join(" ", msalServiceException.ErrorCodesForLogging)}");
                 }
             }
 
