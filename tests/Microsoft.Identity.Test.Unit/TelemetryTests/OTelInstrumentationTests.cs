@@ -1005,6 +1005,166 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
+        [Description("For a non-MSAL failure the enricher still receives an ExecutionResult carrying a wrapper MsalException with failure metadata, while the original exception propagates unchanged to the caller.")]
+        public async Task WithOtelTagsEnricher_NonMsalFailure_ReceivesWrappedExceptionWithMetadataAsync()
+        {
+            using (_harness = CreateTestHarness())
+            {
+                // A non-MSAL exception (e.g. a transport failure while a federated-credential callback fetches
+                // the client assertion) propagates out of MSAL unwrapped. This exercises RequestBase's generic
+                // catch, which must still hand the OTel enricher a populated ExecutionResult.Exception.
+                var transportException = new HttpRequestException("Simulated transport failure while fetching the federated credential assertion.");
+
+                Func<CancellationToken, Task<string>> throwingAssertion = async _ =>
+                {
+                    await Task.Yield();
+                    throw transportException;
+                };
+
+                var cca = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithAuthority(TestConstants.AuthorityUtidTenant)
+                    .WithClientAssertion(throwingAssertion)
+                    .WithHttpManager(_harness.HttpManager)
+                    .BuildConcrete();
+
+                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+
+                bool? capturedSuccessful = null;
+                Exception capturedException = null;
+
+                var thrown = await AssertException.TaskThrowsAsync<HttpRequestException>(
+                    () => cca.AcquireTokenForClient(TestConstants.s_scope)
+                        .WithExtraQueryParameters(extraQueryParams)
+                        .WithOtelTagsEnricher((executionResult, tags) =>
+                        {
+                            capturedSuccessful = executionResult.Successful;
+                            capturedException = executionResult.Exception;
+                            tags.Add(new KeyValuePair<string, object>("CustomTag", "CustomValue"));
+                        })
+                        .ExecuteAsync(CancellationToken.None)).ConfigureAwait(false);
+
+                s_meterProvider.ForceFlush();
+
+                // The caller must observe the ORIGINAL exception, never the telemetry-only wrapper.
+                Assert.AreSame(transportException, thrown, "The original non-MSAL exception must propagate unchanged to the caller.");
+
+                Assert.IsTrue(capturedSuccessful.HasValue, "Enricher should have been invoked.");
+                Assert.IsFalse(capturedSuccessful.Value, "ExecutionResult.Successful should be false for a failed acquisition.");
+                Assert.IsNotNull(capturedException, "ExecutionResult.Exception should be populated even for a non-MSAL failure.");
+
+                var wrapper = capturedException as MsalException;
+                Assert.IsNotNull(wrapper, "ExecutionResult.Exception should be surfaced as an MsalException wrapper for the enricher.");
+                Assert.AreEqual(typeof(HttpRequestException).FullName, wrapper.ErrorCode, "The wrapper's ErrorCode should capture the originating exception type.");
+                Assert.AreSame(transportException, wrapper.InnerException, "The original exception should be preserved as the wrapper's InnerException.");
+                Assert.AreEqual(transportException.Message, wrapper.Message, "The wrapper should retain the original exception message.");
+
+                Assert.IsNotNull(wrapper.AuthenticationResultMetadata, "The wrapper should carry failure metadata for the enricher.");
+
+                var failureMetric = _exportedMetrics.FirstOrDefault(m => m.Name == "MsalFailure");
+                Assert.IsNotNull(failureMetric, "MsalFailure metric should be emitted.");
+
+                bool foundCustomTag = false;
+                foreach (var metricPoint in failureMetric.GetMetricPoints())
+                {
+                    var tags = GetTagDictionary(metricPoint.Tags);
+                    if (tags.TryGetValue("CustomTag", out var value) && (string)value == "CustomValue")
+                        foundCustomTag = true;
+                }
+                Assert.IsTrue(foundCustomTag, "MsalFailure should include the custom tag added by the enricher.");
+            }
+        }
+
+        [TestMethod]
+        [Description("A non-MSAL failure whose Message is empty must still propagate unchanged: the telemetry-only MsalException wrapper falls back to the type name so its ctor cannot throw and mask the original exception.")]
+        public async Task WithOtelTagsEnricher_NonMsalFailureWithEmptyMessage_PropagatesOriginalAndWrapsSafelyAsync()
+        {
+            using (_harness = CreateTestHarness())
+            {
+                // An exception with an empty message is the edge case: MsalException's ctor rejects a
+                // null/whitespace errorMessage (and errorCode), so without a type-name fallback the wrapper
+                // construction would throw ArgumentNullException and replace the original exception.
+                var emptyMessageException = new InvalidOperationException(string.Empty);
+
+                Func<CancellationToken, Task<string>> throwingAssertion = async _ =>
+                {
+                    await Task.Yield();
+                    throw emptyMessageException;
+                };
+
+                var cca = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithAuthority(TestConstants.AuthorityUtidTenant)
+                    .WithClientAssertion(throwingAssertion)
+                    .WithHttpManager(_harness.HttpManager)
+                    .BuildConcrete();
+
+                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+
+                Exception capturedException = null;
+
+                var thrown = await AssertException.TaskThrowsAsync<InvalidOperationException>(
+                    () => cca.AcquireTokenForClient(TestConstants.s_scope)
+                        .WithExtraQueryParameters(extraQueryParams)
+                        .WithOtelTagsEnricher((executionResult, tags) =>
+                        {
+                            capturedException = executionResult.Exception;
+                        })
+                        .ExecuteAsync(CancellationToken.None)).ConfigureAwait(false);
+
+                s_meterProvider.ForceFlush();
+
+                // The caller must still observe the ORIGINAL exception, not an ArgumentNullException from the wrapper.
+                Assert.AreSame(emptyMessageException, thrown, "The original exception must propagate unchanged even when its message is empty.");
+
+                var wrapper = capturedException as MsalException;
+                Assert.IsNotNull(wrapper, "ExecutionResult.Exception should be surfaced as an MsalException wrapper for the enricher.");
+                Assert.AreEqual(typeof(InvalidOperationException).FullName, wrapper.ErrorCode, "The wrapper's ErrorCode should capture the originating exception type.");
+                Assert.AreEqual(typeof(InvalidOperationException).Name, wrapper.Message, "The wrapper should fall back to the type name when the original message is empty.");
+                Assert.AreSame(emptyMessageException, wrapper.InnerException, "The original exception should be preserved as the wrapper's InnerException.");
+            }
+        }
+
+        [TestMethod]
+        [Description("For a non-MSAL failure MSAL stashes the AuthenticationResultMetadata on the original exception's Data bag so header-creation providers can surface token-acquisition diagnostics (Bug 3696194).")]
+        public async Task NonMsalFailure_ExposesAuthenticationResultMetadataOnExceptionDataAsync()
+        {
+            using (_harness = CreateTestHarness())
+            {
+                var transportException = new HttpRequestException("Simulated transport failure while fetching the federated credential assertion.");
+
+                Func<CancellationToken, Task<string>> throwingAssertion = async _ =>
+                {
+                    await Task.Yield();
+                    throw transportException;
+                };
+
+                var cca = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithAuthority(TestConstants.AuthorityUtidTenant)
+                    .WithClientAssertion(throwingAssertion)
+                    .WithHttpManager(_harness.HttpManager)
+                    .BuildConcrete();
+
+                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+
+                var thrown = await AssertException.TaskThrowsAsync<HttpRequestException>(
+                    () => cca.AcquireTokenForClient(TestConstants.s_scope)
+                        .ExecuteAsync(CancellationToken.None)).ConfigureAwait(false);
+
+                // The original exception propagates unchanged; the metadata rides along on its Data bag and
+                // casts cleanly for consumers (e.g. IdWeb, in a separate assembly) that read the same public
+                // getters their success-path mapper uses.
+                Assert.AreSame(transportException, thrown, "Original exception must propagate unchanged.");
+
+                var metadata = thrown.Data[MsalException.AuthenticationResultMetadataKey] as AuthenticationResultMetadata;
+                Assert.IsNotNull(metadata, "AuthenticationResultMetadata should be exposed on the exception's Data bag for a non-MSAL failure.");
+                Assert.AreEqual(TestConstants.AuthorityUtidTenant + "oauth2/v2.0/token", metadata.TokenEndpoint, "Metadata should carry the MSAL-internal token endpoint.");
+                Assert.AreEqual(CacheRefreshReason.NoCachedAccessToken, metadata.CacheRefreshReason, "Metadata should carry the MSAL-internal cache-refresh reason.");
+            }
+        }
+
+        [TestMethod]
         [Description("A throwing OTel tags enricher must not break the token acquisition or telemetry recording, and a warning is logged.")]
         public async Task WithOtelTagsEnricher_ThrowingEnricher_DoesNotBreakAcquisitionAndLogsWarningAsync()
         {
