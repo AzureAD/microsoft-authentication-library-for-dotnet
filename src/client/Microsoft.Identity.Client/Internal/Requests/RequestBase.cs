@@ -142,6 +142,19 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 // value logged to OpenTelemetry (the stopwatch keeps running, so re-reading it drifts).
                 long totalDurationInMs = requestStopwatch.ElapsedMilliseconds + measureTelemetryDurationResult.Milliseconds;
 
+                AuthenticationResultMetadata failureMetadata = CreateFailureMetadata(apiEvent, totalDurationInMs);
+
+                // Expose the failure metadata on the ORIGINAL exception via its Data bag so downstream
+                // header-creation providers - which catch the raw non-MSAL exception, not the enricher
+                // wrapper - can surface token-acquisition diagnostics (Bug 3696194). The value is the same
+                // strongly-typed object MSAL builds for the success path, so consumers reuse their mapper.
+                // Guarded because a derived exception may expose a null or read-only Data bag, and telemetry
+                // plumbing must never throw here and mask the caller's original exception.
+                if (ex.Data is { IsReadOnly: false })
+                {
+                    ex.Data[MsalException.AuthenticationResultMetadataKey] = failureMetadata;
+                }
+
                 // The original exception is re-thrown below; MSAL never surfaces this wrapper. It exists only
                 // so the OpenTelemetry tag enricher observes a populated ExecutionResult.Exception (carrying
                 // failure metadata) for non-MSAL failures, mirroring the MsalException path above. The
@@ -155,7 +168,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 MsalException enricherException = new MsalException(enricherErrorCode, enricherErrorMessage, ex)
                 {
-                    AuthenticationResultMetadata = CreateFailureMetadata(apiEvent, totalDurationInMs),
+                    AuthenticationResultMetadata = failureMetadata,
                     CorrelationId = AuthenticationRequestParameters.CorrelationId.ToString(),
                 };
 

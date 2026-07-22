@@ -1126,6 +1126,45 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
+        [Description("For a non-MSAL failure MSAL stashes the AuthenticationResultMetadata on the original exception's Data bag so header-creation providers can surface token-acquisition diagnostics (Bug 3696194).")]
+        public async Task NonMsalFailure_ExposesAuthenticationResultMetadataOnExceptionDataAsync()
+        {
+            using (_harness = CreateTestHarness())
+            {
+                var transportException = new HttpRequestException("Simulated transport failure while fetching the federated credential assertion.");
+
+                Func<CancellationToken, Task<string>> throwingAssertion = async _ =>
+                {
+                    await Task.Yield();
+                    throw transportException;
+                };
+
+                var cca = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithAuthority(TestConstants.AuthorityUtidTenant)
+                    .WithClientAssertion(throwingAssertion)
+                    .WithHttpManager(_harness.HttpManager)
+                    .BuildConcrete();
+
+                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+
+                var thrown = await AssertException.TaskThrowsAsync<HttpRequestException>(
+                    () => cca.AcquireTokenForClient(TestConstants.s_scope)
+                        .ExecuteAsync(CancellationToken.None)).ConfigureAwait(false);
+
+                // The original exception propagates unchanged; the metadata rides along on its Data bag and
+                // casts cleanly for consumers (e.g. IdWeb, in a separate assembly) that read the same public
+                // getters their success-path mapper uses.
+                Assert.AreSame(transportException, thrown, "Original exception must propagate unchanged.");
+
+                var metadata = thrown.Data[MsalException.AuthenticationResultMetadataKey] as AuthenticationResultMetadata;
+                Assert.IsNotNull(metadata, "AuthenticationResultMetadata should be exposed on the exception's Data bag for a non-MSAL failure.");
+                Assert.AreEqual(TestConstants.AuthorityUtidTenant + "oauth2/v2.0/token", metadata.TokenEndpoint, "Metadata should carry the MSAL-internal token endpoint.");
+                Assert.AreEqual(CacheRefreshReason.NoCachedAccessToken, metadata.CacheRefreshReason, "Metadata should carry the MSAL-internal cache-refresh reason.");
+            }
+        }
+
+        [TestMethod]
         [Description("A throwing OTel tags enricher must not break the token acquisition or telemetry recording, and a warning is logged.")]
         public async Task WithOtelTagsEnricher_ThrowingEnricher_DoesNotBreakAcquisitionAndLogsWarningAsync()
         {
