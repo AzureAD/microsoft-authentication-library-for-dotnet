@@ -146,8 +146,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 // so the OpenTelemetry tag enricher observes a populated ExecutionResult.Exception (carrying
                 // failure metadata) for non-MSAL failures, mirroring the MsalException path above. The
                 // originating exception's type is captured as the ErrorCode and it is preserved as the
-                // InnerException so consumers retain full fidelity.
-                MsalException enricherException = new MsalException(ex.GetType().FullName, ex.Message, ex)
+                // InnerException so consumers retain full fidelity. Fall back to the type name when
+                // FullName is null (some generic/array types) or Message is empty/whitespace, because the
+                // MsalException ctor rejects a null/empty errorCode or errorMessage - without the fallback
+                // that ArgumentNullException would replace the original exception we re-throw below.
+                string enricherErrorCode = ex.GetType().FullName ?? ex.GetType().Name;
+                string enricherErrorMessage = string.IsNullOrWhiteSpace(ex.Message) ? ex.GetType().Name : ex.Message;
+
+                MsalException enricherException = new MsalException(enricherErrorCode, enricherErrorMessage, ex)
                 {
                     AuthenticationResultMetadata = CreateFailureMetadata(apiEvent, totalDurationInMs),
                     CorrelationId = AuthenticationRequestParameters.CorrelationId.ToString(),

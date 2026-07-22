@@ -1076,6 +1076,56 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
+        [Description("A non-MSAL failure whose Message is empty must still propagate unchanged: the telemetry-only MsalException wrapper falls back to the type name so its ctor cannot throw and mask the original exception.")]
+        public async Task WithOtelTagsEnricher_NonMsalFailureWithEmptyMessage_PropagatesOriginalAndWrapsSafelyAsync()
+        {
+            using (_harness = CreateTestHarness())
+            {
+                // An exception with an empty message is the edge case: MsalException's ctor rejects a
+                // null/whitespace errorMessage (and errorCode), so without a type-name fallback the wrapper
+                // construction would throw ArgumentNullException and replace the original exception.
+                var emptyMessageException = new InvalidOperationException(string.Empty);
+
+                Func<CancellationToken, Task<string>> throwingAssertion = async _ =>
+                {
+                    await Task.Yield();
+                    throw emptyMessageException;
+                };
+
+                var cca = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithAuthority(TestConstants.AuthorityUtidTenant)
+                    .WithClientAssertion(throwingAssertion)
+                    .WithHttpManager(_harness.HttpManager)
+                    .BuildConcrete();
+
+                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+
+                Exception capturedException = null;
+
+                var thrown = await AssertException.TaskThrowsAsync<InvalidOperationException>(
+                    () => cca.AcquireTokenForClient(TestConstants.s_scope)
+                        .WithExtraQueryParameters(extraQueryParams)
+                        .WithOtelTagsEnricher((executionResult, tags) =>
+                        {
+                            capturedException = executionResult.Exception;
+                        })
+                        .ExecuteAsync(CancellationToken.None)).ConfigureAwait(false);
+
+                s_meterProvider.ForceFlush();
+
+                // The caller must still observe the ORIGINAL exception, not an ArgumentNullException from the wrapper.
+                Assert.AreSame(emptyMessageException, thrown, "The original exception must propagate unchanged even when its message is empty.");
+
+                var wrapper = capturedException as MsalException;
+                Assert.IsNotNull(wrapper, "ExecutionResult.Exception should be surfaced as an MsalException wrapper for the enricher.");
+                Assert.AreEqual(typeof(InvalidOperationException).FullName, wrapper.ErrorCode, "The wrapper's ErrorCode should capture the originating exception type.");
+                Assert.AreEqual(typeof(InvalidOperationException).Name, wrapper.Message, "The wrapper should fall back to the type name when the original message is empty.");
+                Assert.AreSame(emptyMessageException, wrapper.InnerException, "The original exception should be preserved as the wrapper's InnerException.");
+            }
+        }
+
+        [TestMethod]
         [Description("A throwing OTel tags enricher must not break the token acquisition or telemetry recording, and a warning is logged.")]
         public async Task WithOtelTagsEnricher_ThrowingEnricher_DoesNotBreakAcquisitionAndLogsWarningAsync()
         {
