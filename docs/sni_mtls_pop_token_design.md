@@ -88,7 +88,6 @@ IConfidentialClientApplication app = ConfidentialClientApplicationBuilder.Create
     .WithAuthority(authority)
     .WithAzureRegion("westus")
     .WithCertificate(certificate, true)
-    .WithExperimentalFeatures(true)
     .Build();
 
 AuthenticationResult result = await app.AcquireTokenForClient(scopes).WithMtlsProofOfPossession()
