@@ -229,12 +229,18 @@ namespace Microsoft.Identity.Client.Utils
                 // sets would otherwise serialize to the same string (e.g. {fmi_path:"value"} and
                 // {fmi_pat:"hvalue"}). UTF-8 byte length is used (not string.Length) to stay
                 // byte-identical to the parallel MSAL Go/Java/Python/JS fixes.
-                stringBuilder.Append(Encoding.UTF8.GetByteCount(component.Key));
+                // Null key/value are treated as empty string (encoded as "0:") to preserve the
+                // previous no-op behavior of StringBuilder.Append(null) and avoid throwing when a
+                // component Func or extra query parameter supplies a null value.
+                string key = component.Key ?? string.Empty;
+                string value = component.Value ?? string.Empty;
+
+                stringBuilder.Append(Encoding.UTF8.GetByteCount(key));
                 stringBuilder.Append(':');
-                stringBuilder.Append(component.Key);
-                stringBuilder.Append(Encoding.UTF8.GetByteCount(component.Value));
+                stringBuilder.Append(key);
+                stringBuilder.Append(Encoding.UTF8.GetByteCount(value));
                 stringBuilder.Append(':');
-                stringBuilder.Append(component.Value);
+                stringBuilder.Append(value);
             }
 
             using (SHA256 hash = SHA256.Create())

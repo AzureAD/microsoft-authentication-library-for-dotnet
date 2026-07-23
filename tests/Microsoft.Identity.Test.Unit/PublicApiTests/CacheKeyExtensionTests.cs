@@ -693,6 +693,25 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
+        public void ComputeAccessTokenExtCacheKey_NullValue_TreatedAsEmpty_DoesNotThrow()
+        {
+            // Arrange
+            // A component Func (InitializeCacheKeyComponentsAsync) or extra query parameter can
+            // supply a null value. GetByteCount(null) would throw, so null must be coerced to
+            // string.Empty, producing the same hash as an explicit empty value.
+            var nullValue = new SortedList<string, string> { { "k", null } };
+            var emptyValue = new SortedList<string, string> { { "k", string.Empty } };
+
+            // Act
+            string keyNull = CoreHelpers.ComputeAccessTokenExtCacheKey(nullValue);
+            string keyEmpty = CoreHelpers.ComputeAccessTokenExtCacheKey(emptyValue);
+
+            // Assert
+            Assert.IsFalse(string.IsNullOrEmpty(keyNull), "null value must not throw and must hash");
+            Assert.AreEqual(keyEmpty, keyNull, "null value must hash identically to an empty value");
+        }
+
+        [TestMethod]
         public void ComputeAccessTokenExtCacheKey_GoldenVectors_MatchCrossSdk()
         {
             // The MSAL SDK family (Go/Java/Python/JS) emits byte-identical hashes, lowercased
