@@ -1,0 +1,2 @@
+const Microsoft.Identity.Client.MsalException.AuthenticationResultMetadataKey = "MsalAuthenticationResultMetadata" -> string
+Microsoft.Identity.Client.MsalServiceException.ErrorCodesForLogging.get -> System.Collections.Generic.IReadOnlyList<string>

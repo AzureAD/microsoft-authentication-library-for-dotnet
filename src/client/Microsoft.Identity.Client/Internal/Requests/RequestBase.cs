@@ -130,7 +130,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     httpStatusCode,
                     totalDurationInMs,
                     exception: ex,
-                    rawStsErrorCode: serviceException?.ErrorCodes?.FirstOrDefault());
+                    rawStsErrorCode: serviceException?.ErrorCodesForLogging?.FirstOrDefault());
                 throw;
             }
             catch (Exception ex)
@@ -138,7 +138,49 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 apiEvent.ApiErrorCode = ex.GetType().Name;
                 AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
 
-                LogFailureTelemetryToOtel(ex.GetType().Name, apiEvent, apiEvent.CacheInfo, httpStatusCode: 0, totalDurationInMs: requestStopwatch.ElapsedMilliseconds + measureTelemetryDurationResult.Milliseconds);
+                // Compute the total duration once so the value on the synthesized metadata matches the
+                // value logged to OpenTelemetry (the stopwatch keeps running, so re-reading it drifts).
+                long totalDurationInMs = requestStopwatch.ElapsedMilliseconds + measureTelemetryDurationResult.Milliseconds;
+
+                AuthenticationResultMetadata failureMetadata = CreateFailureMetadata(apiEvent, totalDurationInMs);
+
+                // Expose the failure metadata on the ORIGINAL exception via its Data bag so downstream
+                // header-creation providers - which catch the raw non-MSAL exception, not the enricher
+                // wrapper - can surface token-acquisition diagnostics (Bug 3696194). The value is the same
+                // strongly-typed object MSAL builds for the success path, so consumers reuse their mapper.
+                // Guarded because a derived exception may expose a null or read-only Data bag, and telemetry
+                // plumbing must never throw here and mask the caller's original exception. On .NET Framework /
+                // netstandard the Data bag also rejects non-serializable values, so AuthenticationResultMetadata
+                // is marked [Serializable] on those targets (see AuthenticationResultMetadata.cs).
+                if (ex.Data is { IsReadOnly: false })
+                {
+                    ex.Data[MsalException.AuthenticationResultMetadataKey] = failureMetadata;
+                }
+
+                // The original exception is re-thrown below; MSAL never surfaces this wrapper. It exists only
+                // so the OpenTelemetry tag enricher observes a populated ExecutionResult.Exception (carrying
+                // failure metadata) for non-MSAL failures, mirroring the MsalException path above. The
+                // originating exception's type is captured as the ErrorCode and it is preserved as the
+                // InnerException so consumers retain full fidelity. Fall back to the type name when
+                // FullName is null (some generic/array types) or Message is empty/whitespace, because the
+                // MsalException ctor rejects a null/empty errorCode or errorMessage - without the fallback
+                // that ArgumentNullException would replace the original exception we re-throw below.
+                string enricherErrorCode = ex.GetType().FullName ?? ex.GetType().Name;
+                string enricherErrorMessage = string.IsNullOrWhiteSpace(ex.Message) ? ex.GetType().Name : ex.Message;
+
+                MsalException enricherException = new MsalException(enricherErrorCode, enricherErrorMessage, ex)
+                {
+                    AuthenticationResultMetadata = failureMetadata,
+                    CorrelationId = AuthenticationRequestParameters.CorrelationId.ToString(),
+                };
+
+                LogFailureTelemetryToOtel(
+                    ex.GetType().Name,
+                    apiEvent,
+                    apiEvent.CacheInfo,
+                    httpStatusCode: 0,
+                    totalDurationInMs: totalDurationInMs,
+                    exception: enricherException);
                 throw;
             }
         }

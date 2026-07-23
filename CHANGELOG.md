@@ -1,3 +1,18 @@
+4.87.0
+======
+
+### New Features
+- Exposed `MsalServiceException.ErrorCodesForLogging` (as a public `IReadOnlyList<string>`), surfacing the raw STS-specific error codes (for example the numeric `AADSTS` codes) for diagnostics and logging. [#6138](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6138)
+
+4.86.1
+======
+
+### Bug Fixes
+- Fixed the mTLS Proof-of-Possession token cache to key on the certificate's full DER (`x5t#S256`) instead of only the public key, preventing a stale token (and `AADSTS500181`) after a same-key certificate renewal. [#6123](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6123)
+- Fell back to RS256 when a certificate's PSS signing operation is rejected by `RSACryptoServiceProvider`, rebuilding the client assertion so authentication can proceed. [#6126](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6126)
+- Detect and reject symbolic links in the Unix cache-file write path (lstat pre-check plus `O_NOFOLLOW`), closing a TOCTOU window. [#6115](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6115)
+- Corrected misleading "region required" error messages and doc comments in the mTLS PoP flow. [#6127](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6127)
+
 4.86.0
 ======
 
@@ -25,6 +40,7 @@
 - Exposed canonical OpenTelemetry tag names per metric via `MsalMetricsCatalog.CanonicalTagsByMetric` for discoverability and validation. [#6076](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6076)
 
 ### Changes
+- **Breaking change:** Removed the **experimental** managed identity support for `WithClaimsFromClient(claimsJson)`; the API is now confidential-client only. The `AcquireTokenForManagedIdentityParameterBuilder.WithClaimsFromClient(string)` overload (introduced experimentally in 4.84.2, gated behind `WithExperimentalFeatures`) has been removed, and managed identity no longer forwards client-originated claims to IMDS. Use `WithClaimsFromClient` on the confidential client flows (`AcquireTokenForClient`) instead. [#6113](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6113) (feature originally introduced in [#5999](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/5999))
 - Managed identity error messages and request-failure logs now include the detected `ManagedIdentitySource` (e.g., `AppService`, `Imds`, `ServiceFabric`) so the host-issued `Managed Identity Correlation ID` can be traced to the correct host's telemetry. [#6101](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6101)
 
 4.85.0
