@@ -224,8 +224,23 @@ namespace Microsoft.Identity.Client.Utils
 
             foreach (var component in cacheKeyComponents)
             {
-                stringBuilder.Append(component.Key);
-                stringBuilder.Append(component.Value);
+                // Length-prefix (netstring) encoding: <byteLen(key)>:<key><byteLen(value)>:<value>.
+                // This is injective, preventing cache-key collisions where different component
+                // sets would otherwise serialize to the same string (e.g. {fmi_path:"value"} and
+                // {fmi_pat:"hvalue"}). UTF-8 byte length is used (not string.Length) to stay
+                // byte-identical to the parallel MSAL Go/Java/Python/JS fixes.
+                // Null key/value are treated as empty string (encoded as "0:") to preserve the
+                // previous no-op behavior of StringBuilder.Append(null) and avoid throwing when a
+                // component Func or extra query parameter supplies a null value.
+                string key = component.Key ?? string.Empty;
+                string value = component.Value ?? string.Empty;
+
+                stringBuilder.Append(Encoding.UTF8.GetByteCount(key));
+                stringBuilder.Append(':');
+                stringBuilder.Append(key);
+                stringBuilder.Append(Encoding.UTF8.GetByteCount(value));
+                stringBuilder.Append(':');
+                stringBuilder.Append(value);
             }
 
             using (SHA256 hash = SHA256.Create())

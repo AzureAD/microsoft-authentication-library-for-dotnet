@@ -1,9 +1,10 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -107,8 +108,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         private async Task RunHappyPathTest(ConfidentialClientApplication app, MockHttpManager httpManager)
         {
-            string expectedCacheKey1 = "-login.windows.net-atext-d3adb33f-c0de-ed0c-c0de-deadb33fc0d3-common-r1/scope1 r1/scope2-bns2ytmx5hxkh4fnfixridmezpbbayhnmuh6t4bbghi";
-            string expectedCacheKey2 = "-login.windows.net-atext-d3adb33f-c0de-ed0c-c0de-deadb33fc0d3-common-r1/scope1 r1/scope2-3-rg6_wyjx5bcy0c3cqq7gajtzgsqy3oxqpwj4y8k4u";
+            string expectedCacheKey1 = "-login.windows.net-atext-d3adb33f-c0de-ed0c-c0de-deadb33fc0d3-common-r1/scope1 r1/scope2-latlwkpewb_a0rcsmjvkecqt0_huumkw4sflzociike";
+            string expectedCacheKey2 = "-login.windows.net-atext-d3adb33f-c0de-ed0c-c0de-deadb33fc0d3-common-r1/scope1 r1/scope2-jjoe9jgfmdtnj0rzuetsqy7kzs2m1xfnjjxwsfxsrxq";
 
             string expectedCacheKeyHash = string.Empty;
             var appCacheAccess = app.AppTokenCache.RecordAccess((args) =>
@@ -158,8 +159,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.AreEqual("header.payload.signature", result.AccessToken);
             Assert.HasCount(2, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens());
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-            ValidateCacheKeyComponents(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Where(x => x.CacheKey.Contains("bns2ytmx5hxkh4fnfixridmezpbbayhnmuh6t4bbghi")).FirstOrDefault(), _additionalCacheKeys1, expectedCacheKey1);
-            ValidateCacheKeyComponents(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Where(x => x.CacheKey.Contains("3-rg6_wyjx5bcy0c3cqq7gajtzgsqy3oxqpwj4y8k4u")).FirstOrDefault(), _additionalCacheKeys2, expectedCacheKey2);
+            ValidateCacheKeyComponents(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Where(x => x.CacheKey.Contains("latlwkpewb_a0rcsmjvkecqt0_huumkw4sflzociike")).FirstOrDefault(), _additionalCacheKeys1, expectedCacheKey1);
+            ValidateCacheKeyComponents(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Where(x => x.CacheKey.Contains("jjoe9jgfmdtnj0rzuetsqy7kzs2m1xfnjjxwsfxsrxq")).FirstOrDefault(), _additionalCacheKeys2, expectedCacheKey2);
         }
 
         private void ValidateCacheKeyComponents(MsalAccessTokenCacheItem msalAccessTokenCacheItem,
@@ -282,7 +283,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                string expectedPopCacheKey = "-login.windows.net-atext-d3adb33f-c0de-ed0c-c0de-deadb33fc0d3-my-utid-r1/scope1 r1/scope2-pop-bns2ytmx5hxkh4fnfixridmezpbbayhnmuh6t4bbghi";
+                string expectedPopCacheKey = "-login.windows.net-atext-d3adb33f-c0de-ed0c-c0de-deadb33fc0d3-my-utid-r1/scope1 r1/scope2-pop-latlwkpewb_a0rcsmjvkecqt0_huumkw4sflzociike";
                 string ProtectedUrl = "https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b";
 
                 ConfidentialClientApplication app =
@@ -329,7 +330,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestMethod]
         public async Task CacheExtEnsureInputKeysAddedCorrectlyTestAsync()
         {
-            string expectedPopCacheKey = "-login.windows.net-atext-d3adb33f-c0de-ed0c-c0de-deadb33fc0d3-common-r1/scope1 r1/scope2-ap4mvs3cq7ewsb5cl17miymk5r1nqogqh11uzwqjvw4";
+            string expectedPopCacheKey = "-login.windows.net-atext-d3adb33f-c0de-ed0c-c0de-deadb33fc0d3-common-r1/scope1 r1/scope2-hjvvw1vwz3vtsfowyllfgwoevbbhkazpbm1rgwklj0u";
             using (var httpManager = new MockHttpManager())
             {
                 var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
@@ -515,5 +516,268 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             _serializedCache = args.TokenCache.SerializeMsalV3();
         }
+
+        #region ComputeAccessTokenExtCacheKey collision-resistance tests
+
+        // These tests pin the length-prefix (netstring) encoding used to hash the additional
+        // cache-key components. The encoding is <byteLen(key)>:<key><byteLen(value)>:<value>
+        // per (sorted) entry, using UTF-8 byte length. It is byte-identical to the parallel
+        // MSAL Go/Java/Python/JS fixes, so the golden vectors below double as a cross-SDK guard.
+
+        [TestMethod]
+        public void ComputeAccessTokenExtCacheKey_BoundaryAmbiguity_ProducesDifferentKeys()
+        {
+            // Arrange
+            // The pre-fix delimiter-less concatenation mapped both of these to "fmi_pathvalue".
+            var a1 = new SortedList<string, string> { { "fmi_path", "value" } };
+            var a2 = new SortedList<string, string> { { "fmi_pat", "hvalue" } };
+
+            // Multi-entry boundary: pre-fix both concatenated to "abcde".
+            var b1 = new SortedList<string, string> { { "a", "b" }, { "cd", "e" } };
+            var b2 = new SortedList<string, string> { { "ab", "c" }, { "d", "e" } };
+
+            // A value that itself contains the colon/digit characters used by the encoding.
+            var c1 = new SortedList<string, string> { { "k", "3:xy" } };
+            var c2 = new SortedList<string, string> { { "k3", ":xy" } };
+
+            // Act
+            string ka1 = CoreHelpers.ComputeAccessTokenExtCacheKey(a1);
+            string ka2 = CoreHelpers.ComputeAccessTokenExtCacheKey(a2);
+            string kb1 = CoreHelpers.ComputeAccessTokenExtCacheKey(b1);
+            string kb2 = CoreHelpers.ComputeAccessTokenExtCacheKey(b2);
+            string kc1 = CoreHelpers.ComputeAccessTokenExtCacheKey(c1);
+            string kc2 = CoreHelpers.ComputeAccessTokenExtCacheKey(c2);
+
+            // Assert
+            Assert.AreNotEqual(ka1, ka2, "key/value boundary ambiguity must not collide");
+            Assert.AreNotEqual(kb1, kb2, "multi-entry boundary ambiguity must not collide");
+            Assert.AreNotEqual(kc1, kc2, "colon/digit values must not collide");
+        }
+
+        [TestMethod]
+        public void ComputeAccessTokenExtCacheKey_InjectivityFuzz_NoCollisions()
+        {
+            // Arrange
+            // Adversarial alphabet: digits, the encoding delimiter ':', pipe, backslash, the
+            // empty string, and multi-byte code points (accented, combining, emoji).
+            string[] atoms =
+            {
+                "", "1", "12", ":", "1:", ":1", "|", "\\", "e", "\u00e9", "e\u0301", "\U0001F642"
+            };
+
+            var inputs = new List<SortedList<string, string>>();
+
+            // Single-entry component sets.
+            foreach (string key in atoms)
+            {
+                foreach (string value in atoms)
+                {
+                    inputs.Add(new SortedList<string, string> { { key, value } });
+                }
+            }
+
+            // Two-entry component sets (keys must differ for a valid SortedList). Use an
+            // ordinal comparer so byte-distinct keys (e.g. "é" vs "e" + combining accent) are
+            // treated as distinct rather than collapsed by the default culture-aware comparer.
+            foreach (string k1 in atoms)
+            {
+                foreach (string k2 in atoms)
+                {
+                    if (string.Equals(k1, k2, StringComparison.Ordinal))
+                    {
+                        continue;
+                    }
+
+                    inputs.Add(new SortedList<string, string>(StringComparer.Ordinal)
+                    {
+                        { k1, "v" }, { k2, "v" }
+                    });
+                }
+            }
+
+            // De-duplicate inputs using a separator that cannot appear in the adversarial
+            // alphabet, so equal canonical forms mean genuinely equal inputs.
+            const char sep = '\u0001';
+            var distinctInputs = new HashSet<string>();
+            var hashToInput = new Dictionary<string, string>();
+
+            // Act + Assert
+            foreach (var input in inputs)
+            {
+                string canonical = string.Join(sep.ToString(),
+                    input.Select(kvp => kvp.Key + sep + kvp.Value));
+
+                if (!distinctInputs.Add(canonical))
+                {
+                    continue; // already covered
+                }
+
+                string hash = CoreHelpers.ComputeAccessTokenExtCacheKey(input);
+
+                if (hashToInput.TryGetValue(hash, out string previous))
+                {
+                    Assert.Fail(
+                        $"Cache-key collision between distinct inputs: [{previous}] and [{canonical}] both hashed to {hash}");
+                }
+
+                hashToInput[hash] = canonical;
+            }
+
+            // Sanity: every distinct input produced a distinct hash.
+            Assert.HasCount(distinctInputs.Count, hashToInput);
+        }
+
+        [TestMethod]
+        public void ComputeAccessTokenExtCacheKey_IsInputOrderIndependent()
+        {
+            // Arrange
+            // Same components, different insertion order into the underlying Dictionary.
+            var forward = new Dictionary<string, string>
+            {
+                { "alpha", "1" }, { "beta", "2" }, { "gamma", "3" }
+            };
+            var reverse = new Dictionary<string, string>
+            {
+                { "gamma", "3" }, { "beta", "2" }, { "alpha", "1" }
+            };
+
+            // Act
+            string keyForward = CoreHelpers.ComputeAccessTokenExtCacheKey(new SortedList<string, string>(forward));
+            string keyReverse = CoreHelpers.ComputeAccessTokenExtCacheKey(new SortedList<string, string>(reverse));
+
+            // Assert
+            Assert.AreEqual(keyForward, keyReverse, "cache key must not depend on input insertion order");
+        }
+
+        [TestMethod]
+        public void ComputeAccessTokenExtCacheKey_UsesUtf8ByteLength_NotStringLength()
+        {
+            // Arrange
+            // 'é' is U+00E9: 1 UTF-16 code unit but 2 UTF-8 bytes.
+            var components = new SortedList<string, string> { { "\u00e9", "\u00e9" } };
+
+            // Correct (byte-length) serialization: "2:é2:é".
+            string byteLengthSerialized = BuildByteLengthNetstring(components);
+            string expectedByteLength = Sha256Base64Url(byteLengthSerialized);
+
+            // Wrong (UTF-16 string.Length) serialization would be "1:é1:é".
+            string stringLengthSerialized = BuildStringLengthNetstring(components);
+            string wrongStringLength = Sha256Base64Url(stringLengthSerialized);
+
+            // Act
+            string actual = CoreHelpers.ComputeAccessTokenExtCacheKey(components);
+
+            // Assert
+            Assert.AreEqual(expectedByteLength, actual, "must use UTF-8 GetByteCount for the length prefix");
+            Assert.AreNotEqual(wrongStringLength, actual, "must NOT use string.Length (UTF-16 units)");
+        }
+
+        [TestMethod]
+        public void ComputeAccessTokenExtCacheKey_EmptyAndSingleEntryEdges()
+        {
+            // Arrange + Act + Assert
+            Assert.AreEqual(string.Empty, CoreHelpers.ComputeAccessTokenExtCacheKey(null));
+            Assert.AreEqual(string.Empty, CoreHelpers.ComputeAccessTokenExtCacheKey(new SortedList<string, string>()));
+
+            string single = CoreHelpers.ComputeAccessTokenExtCacheKey(
+                new SortedList<string, string> { { "k", "v" } });
+            Assert.IsFalse(string.IsNullOrEmpty(single));
+
+            // An empty value is distinct from moving those characters into the key.
+            string emptyValue = CoreHelpers.ComputeAccessTokenExtCacheKey(
+                new SortedList<string, string> { { "k", string.Empty } });
+            string emptyKey = CoreHelpers.ComputeAccessTokenExtCacheKey(
+                new SortedList<string, string> { { string.Empty, "k" } });
+            Assert.IsFalse(string.IsNullOrEmpty(emptyValue));
+            Assert.AreNotEqual(emptyValue, emptyKey);
+        }
+
+        [TestMethod]
+        public void ComputeAccessTokenExtCacheKey_NullValue_TreatedAsEmpty_DoesNotThrow()
+        {
+            // Arrange
+            // A component Func (InitializeCacheKeyComponentsAsync) or extra query parameter can
+            // supply a null value. GetByteCount(null) would throw, so null must be coerced to
+            // string.Empty, producing the same hash as an explicit empty value.
+            var nullValue = new SortedList<string, string> { { "k", null } };
+            var emptyValue = new SortedList<string, string> { { "k", string.Empty } };
+
+            // Act
+            string keyNull = CoreHelpers.ComputeAccessTokenExtCacheKey(nullValue);
+            string keyEmpty = CoreHelpers.ComputeAccessTokenExtCacheKey(emptyValue);
+
+            // Assert
+            Assert.IsFalse(string.IsNullOrEmpty(keyNull), "null value must not throw and must hash");
+            Assert.AreEqual(keyEmpty, keyNull, "null value must hash identically to an empty value");
+        }
+
+        [TestMethod]
+        public void ComputeAccessTokenExtCacheKey_GoldenVectors_MatchCrossSdk()
+        {
+            // The MSAL SDK family (Go/Java/Python/JS) emits byte-identical hashes, lowercased
+            // and padding-free. .NET's Base64Url encoder preserves case, so compare
+            // case-insensitively after stripping any padding.
+            AssertGoldenVector(
+                new SortedList<string, string> { { "fmi_path", "agent-app-id" } },
+                "a0ry_zl4gccsdp7gnw927x8s0mrmnodv6tyilt0u07m");
+            AssertGoldenVector(
+                new SortedList<string, string> { { "a", "b" }, { "cd", "e" } },
+                "cybgactkrvlzlen1aiwzwl3ay5krkyixommrobc-ri4");
+            AssertGoldenVector(
+                new SortedList<string, string> { { "fmi_path", "value" } },
+                "n_lucewkadzv_nybtg-2wtorgf2nrns6ihlfa7vbuzg");
+            AssertGoldenVector(
+                new SortedList<string, string> { { "fmi_pat", "hvalue" } },
+                "tjtm16m-suk2_bkniblr25lyuki40qyceco7knuyu0k");
+            AssertGoldenVector(
+                new SortedList<string, string> { { "\u00e9", "\u00e9" } },
+                "xskzaoz4ibr3mznftyxctvg1ptuh-0fuzpty7ndbfls");
+        }
+
+        private static void AssertGoldenVector(SortedList<string, string> components, string expectedLowerNoPad)
+        {
+            string actual = CoreHelpers.ComputeAccessTokenExtCacheKey(components);
+
+            // Confirm the output is URL-safe and padding-free.
+            Assert.DoesNotContain("=", actual, "Base64Url output must be padding-free");
+            Assert.DoesNotContain("+", actual, "Base64Url output must be URL-safe");
+            Assert.DoesNotContain("/", actual, "Base64Url output must be URL-safe");
+
+            Assert.IsTrue(
+                string.Equals(actual.TrimEnd('='), expectedLowerNoPad, StringComparison.OrdinalIgnoreCase),
+                $"cross-SDK golden vector mismatch. expected (case-insensitive): {expectedLowerNoPad}, actual: {actual}");
+        }
+
+        private static string BuildByteLengthNetstring(SortedList<string, string> components)
+        {
+            var sb = new StringBuilder();
+            foreach (var component in components)
+            {
+                sb.Append(Encoding.UTF8.GetByteCount(component.Key)).Append(':').Append(component.Key);
+                sb.Append(Encoding.UTF8.GetByteCount(component.Value)).Append(':').Append(component.Value);
+            }
+            return sb.ToString();
+        }
+
+        private static string BuildStringLengthNetstring(SortedList<string, string> components)
+        {
+            var sb = new StringBuilder();
+            foreach (var component in components)
+            {
+                sb.Append(component.Key.Length).Append(':').Append(component.Key);
+                sb.Append(component.Value.Length).Append(':').Append(component.Value);
+            }
+            return sb.ToString();
+        }
+
+        private static string Sha256Base64Url(string serialized)
+        {
+            using (SHA256 hash = SHA256.Create())
+            {
+                return Base64UrlHelpers.Encode(hash.ComputeHash(Encoding.UTF8.GetBytes(serialized)));
+            }
+        }
+
+        #endregion
     }
 }
