@@ -2,3 +2,5 @@ const Microsoft.Identity.Client.MsalException.AuthenticationResultMetadataKey = 
 Microsoft.Identity.Client.AssertionRequestOptions.OtelTagsEnricher.get -> System.Action<Microsoft.Identity.Client.Extensibility.ExecutionResult, System.Collections.Generic.IList<System.Collections.Generic.KeyValuePair<string, object>>>
 Microsoft.Identity.Client.AssertionRequestOptions.OtelTagsEnricher.set -> void
 Microsoft.Identity.Client.MsalServiceException.ErrorCodesForLogging.get -> System.Collections.Generic.IReadOnlyList<string>
+Microsoft.Identity.Client.Extensibility.AbstractManagedIdentityAcquireTokenParameterBuilderExtension
+static Microsoft.Identity.Client.Extensibility.AbstractManagedIdentityAcquireTokenParameterBuilderExtension.WithOtelTagsEnricher<T>(this Microsoft.Identity.Client.AbstractManagedIdentityAcquireTokenParameterBuilder<T> builder, System.Action<Microsoft.Identity.Client.Extensibility.ExecutionResult, System.Collections.Generic.IList<System.Collections.Generic.KeyValuePair<string, object>>> tagsEnricher) -> Microsoft.Identity.Client.AbstractManagedIdentityAcquireTokenParameterBuilder<T>
