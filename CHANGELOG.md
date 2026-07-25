@@ -3,6 +3,18 @@
 
 ### New Features
 - Exposed `MsalServiceException.ErrorCodesForLogging` (as a public `IReadOnlyList<string>`), surfacing the raw STS-specific error codes (for example the numeric `AADSTS` codes) for diagnostics and logging. [#6138](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6138)
+- Added `WithOtelTagsEnricher` on the managed identity request builder, allowing callers to enrich the OpenTelemetry tags emitted for managed identity token requests. [#6144](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6144)
+- Added `AssertionRequestOptions.OtelTagsEnricher`, forwarding the OpenTelemetry tags enricher to the client-assertion callback. [#6142](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6142)
+- Added a client-side opaque-token log scrubber that redacts token-like values from MSAL logs. [#6119](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6119)
+
+### Bug Fixes
+- Populated `ExecutionResult.Exception` for non-MSAL failures and exposed the `MsalException.AuthenticationResultMetadataKey` constant so callbacks can retrieve the associated authentication-result metadata. [#6139](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6139)
+- Hardened the KeyGuard liveness probe to use RSA-PSS padding (CodeQL SM03799). [#6141](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6141)
+
+### Changes
+- Removed managed identity support from `WithClaimsFromClient`; it now applies to confidential-client scenarios only. [#6113](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6113)
+- Removed experimental features from the default client setup. [#6143](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6143)
+- Updated the Azure Arc managed identity endpoint API version from `2019-11-01` to `2020-06-01`. [#6130](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6130)
 
 4.86.1
 ======
