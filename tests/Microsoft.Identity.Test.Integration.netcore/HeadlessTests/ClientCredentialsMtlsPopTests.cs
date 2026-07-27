@@ -95,8 +95,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                             authResult.BindingCertificate.Thumbprint,
                             "BindingCertificate must match the certificate supplied via WithCertificate().");
 
-            // Act: present the cert-bound token to Microsoft Graph over mTLS (the developer end-to-end
-            // experience — same binding certificate on the TLS handshake + "mtls_pop" Authorization scheme).
             (HttpStatusCode status, string body) =
                 await CallResourceOverMtlsPopAsync(authResult, GraphMtlsResourceUri).ConfigureAwait(false);
             AssertResourceAcceptedPopToken(status, body);
@@ -163,7 +161,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                             authResult.BindingCertificate.Thumbprint,
                             "BindingCertificate must match the certificate supplied via WithCertificate().");
 
-            // Act: present the cert-bound token to Microsoft Graph over mTLS with the same certificate.
             (HttpStatusCode status, string body) =
                 await CallResourceOverMtlsPopAsync(authResult, GraphMtlsResourceUri).ConfigureAwait(false);
             AssertResourceAcceptedPopToken(status, body);
@@ -268,7 +265,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(expectedCorrelationId, correlationIdSeenByProvider,
                 "CorrelationId from WithCorrelationId() must flow to the assertion callback for FIC two-leg tracing.");
 
-            // Present the Graph-scoped, cert-bound Leg-2 token to Microsoft Graph over mTLS.
             (HttpStatusCode status, string body) =
                 await CallResourceOverMtlsPopAsync(second, GraphMtlsResourceUri).ConfigureAwait(false);
             AssertResourceAcceptedPopToken(status, body);
@@ -457,7 +453,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(cert.Thumbprint, authResult.BindingCertificate.Thumbprint,
                 "BindingCertificate must match the certificate supplied via WithCertificate().");
 
-            // Present the cert-bound token to Microsoft Graph over mTLS with the same certificate.
             (HttpStatusCode status, string body) =
                 await CallResourceOverMtlsPopAsync(authResult, GraphMtlsResourceUri).ConfigureAwait(false);
             AssertResourceAcceptedPopToken(status, body);
@@ -484,7 +479,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             string assertionJwt = first.AccessToken;
             Assert.IsFalse(string.IsNullOrEmpty(assertionJwt), "First leg did not return an access token to reuse as assertion.");
 
-            // Leg 1 is cert-bound PoP: assert the token type and that the binding cert is the SNI cert.
             Assert.AreEqual(Constants.MtlsPoPTokenType, first.TokenType, "Leg 1 token type should be MTLS PoP.");
             Assert.IsNotNull(first.BindingCertificate, "Leg 1 BindingCertificate should be set for cert-bound PoP.");
             Assert.AreEqual(cert.Thumbprint, first.BindingCertificate.Thumbprint,
@@ -510,8 +504,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithTestLogging()
                 .Build();
 
-            // Step 3: second leg should succeed using the global mTLS endpoint, returning an mtls_pop
-            // token bound to the SAME certificate as Leg 1 (binding-cert continuity end-to-end).
+            // Step 3: second leg exchanges the assertion for the Graph-scoped token.
             AuthenticationResult second = await ExecuteOrInconclusiveOnTokenTypeMismatchAsync(() => assertionApp
                 .AcquireTokenForClient(new[] { GraphAppScope })
                 .WithMtlsProofOfPossession()
@@ -528,8 +521,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsFalse(string.IsNullOrEmpty(second.AccessToken), "Second leg did not return an access token.");
             Assert.IsTrue(assertionProviderCalled, "Client assertion provider should have been invoked.");
 
-            // Leg 2 is also mtls_pop, presents the jwt-pop client_assertion_type, and is bound to the
-            // SAME certificate as Leg 1 (binding-cert continuity).
             Assert.AreEqual(Constants.MtlsPoPTokenType, second.TokenType, "Leg 2 token type should be MTLS PoP.");
             Assert.AreEqual(
                 "urn:ietf:params:oauth:client-assertion-type:jwt-pop",
@@ -545,7 +536,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual("mtlsauth.microsoft.com", requestUri.Host,
                 "Should use global mtlsauth endpoint when no region is configured.");
 
-            // Present the Graph-scoped, cert-bound Leg-2 token to Microsoft Graph over mTLS.
             (HttpStatusCode status, string body) =
                 await CallResourceOverMtlsPopAsync(second, GraphMtlsResourceUri).ConfigureAwait(false);
             AssertResourceAcceptedPopToken(status, body);
@@ -579,12 +569,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(cert.Thumbprint, authResult.BindingCertificate.Thumbprint,
                 "BindingCertificate must match the certificate supplied via WithCertificate().");
 
-            // Act 2: present the cert-bound token to Microsoft Graph over mTLS. This is the developer
-            // experience: same binding certificate on the TLS handshake + "mtls_pop" Authorization scheme.
             (HttpStatusCode status, string body) =
                 await CallResourceOverMtlsPopAsync(authResult, GraphMtlsResourceUri).ConfigureAwait(false);
-
-            // Assert: the resource accepted the cert-bound token.
             AssertResourceAcceptedPopToken(status, body);
         }
 
@@ -659,7 +645,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 })
                 .ExecuteAsync()).ConfigureAwait(false);
 
-            // Both legs are PoP and the binding certificate is continuous end-to-end.
             Assert.IsNotNull(leg2, "Leg 2 returned null AuthenticationResult.");
             Assert.AreEqual(Constants.MtlsPoPTokenType, leg2.TokenType, "Leg 2 token type should be MTLS PoP.");
             Assert.IsFalse(string.IsNullOrEmpty(leg2.AccessToken), "Leg 2 did not return an access token.");
@@ -675,7 +660,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(leg1.BindingCertificate.Thumbprint, leg2.BindingCertificate.Thumbprint,
                 "The final token must be bound to the SAME certificate as Leg 1 (binding-cert continuity).");
 
-            // Global mtlsauth endpoint (no region) reliably honors token_type=mtls_pop.
             Assert.IsFalse(string.IsNullOrEmpty(leg2RequestUri), "Expected Leg 2 token request URI to be captured.");
             Assert.AreEqual("mtlsauth.microsoft.com", new System.Uri(leg2RequestUri).Host,
                 "Leg 2 should use the global mtlsauth endpoint when no region is configured.");
