@@ -169,7 +169,8 @@ Both produce the same PoP outcome; the choice is the caller's.
 
 mTLS requires MSAL to **own the HTTP transport handler** so it can attach the client certificate to the
 outbound TLS connection. The built-in factory (`IMsalMtlsHttpClientFactory` / `SimpleHttpClientFactory`,
-which is the default) does this. A caller-supplied **plain** `IMsalHttpClientFactory` (a bare
+which is the default on the .NET desktop/server platforms where mTLS PoP applies) does this. A
+caller-supplied **plain** `IMsalHttpClientFactory` (a bare
 `HttpClient`) **cannot** carry the mTLS certificate — supply an mTLS-capable factory or rely on the
 built-in transport.
 

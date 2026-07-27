@@ -62,7 +62,7 @@ Is user_fic supported over mTLS PoP? (No - S2S/app FIC only)
 ```
 
 ```
-What exchange audience do I use - api://AzureADTokenExchange vs api://AzureFMITokenExchange?
+What exchange audience do I use for S2S FIC over mTLS PoP? (api://AzureADTokenExchange)
 ```
 
 #### Understanding FIC Two-Leg Flow

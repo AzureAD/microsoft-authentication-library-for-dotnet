@@ -346,7 +346,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNotNull(second, "Second leg returned null AuthenticationResult.");
             Assert.IsFalse(string.IsNullOrEmpty(second.AccessToken), "Second leg did not return an access token.");
             CollectionAssert.Contains(second.Scopes.ToArray(), "https://storage.azure.com/.default",
-                "Second leg token is not for Key Vault scope.");
+                "Second leg token is not for the Storage scope.");
 
             // Prove MSAL used the assertion + jwt-pop binding
             Assert.IsTrue(assertionProviderCalled, "Client assertion provider should have been invoked.");
@@ -496,7 +496,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             string clientAssertionType = null;
 
             IConfidentialClientApplication assertionApp = ConfidentialClientApplicationBuilder.Create(MsiAllowListedAppIdforSNI)
-                .WithExperimentalFeatures()
                 .WithAuthority("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c")
                 .WithClientAssertion((AssertionRequestOptions options, CancellationToken ct) =>
                 {
@@ -597,7 +596,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // Both legs use an allow-listed app over the global mtlsauth endpoint, so a service exception
             // here is a real regression rather than an enablement gap - let it surface and fail the test.
             AuthenticationResult leg2 = await RunTwoLegS2sFicBothLegsPopAsync(
-                MsiAllowListedAppIdforSNI, MsiAllowListedAppIdforSNI, TokenExchangeUrl, GraphAppScope).ConfigureAwait(false);
+                MsiAllowListedAppIdforSNI, TokenExchangeUrl, GraphAppScope).ConfigureAwait(false);
 
             (HttpStatusCode status, string body) =
                 await CallResourceOverMtlsPopAsync(leg2, GraphMtlsResourceUri).ConfigureAwait(false);
@@ -605,19 +604,18 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             AssertResourceAcceptedPopTokenOrInconclusive(status, body);
         }
 
-        // Drives the two-leg S2S FIC over mTLS PoP end-to-end flow. Both legs use the global mtlsauth
-        // endpoint (no region) so they reliably return token_type=mtls_pop, and each leg is wrapped in
-        // ExecuteOrInconclusiveOnTokenTypeMismatchAsync to tolerate a server-side downgrade. Leg 1 and
-        // Leg 2 client ids are supplied explicitly so callers keep them consistent — a mismatch would
-        // make an ESTS rejection ambiguous (client-id mismatch vs. a genuine flow issue).
-        private static async Task<AuthenticationResult> RunTwoLegS2sFicBothLegsPopAsync(string leg1ClientId, string leg2ClientId, string leg1ExchangeScope, string finalResourceScope)
+        // Drives the two-leg S2S FIC over mTLS PoP end-to-end flow. Both legs run as the same
+        // confidential-client app (self-issued S2S FIC) and use the global mtlsauth endpoint (no
+        // region) so they reliably return token_type=mtls_pop, and each leg is wrapped in
+        // ExecuteOrInconclusiveOnTokenTypeMismatchAsync to tolerate a server-side downgrade.
+        private static async Task<AuthenticationResult> RunTwoLegS2sFicBothLegsPopAsync(string clientId, string leg1ExchangeScope, string finalResourceScope)
         {
             _ = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
 
             X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
 
             // ----- Leg 1: SNI cert -> federated assertion (mtls_pop) on the global endpoint -----
-            IConfidentialClientApplication leg1App = ConfidentialClientApplicationBuilder.Create(leg1ClientId)
+            IConfidentialClientApplication leg1App = ConfidentialClientApplicationBuilder.Create(clientId)
                 .WithAuthority("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c")
                 .WithCertificate(cert, true)
                 .WithTestLogging()
@@ -639,7 +637,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             string leg2ClientAssertionType = null;
             string leg2RequestUri = null;
 
-            IConfidentialClientApplication leg2App = ConfidentialClientApplicationBuilder.Create(leg2ClientId)
+            IConfidentialClientApplication leg2App = ConfidentialClientApplicationBuilder.Create(clientId)
                 .WithAuthority("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c")
                 .WithClientAssertion((AssertionRequestOptions options, CancellationToken ct) =>
                     Task.FromResult(new ClientSignedAssertion
