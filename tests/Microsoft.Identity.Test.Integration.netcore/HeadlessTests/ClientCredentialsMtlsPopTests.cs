@@ -99,7 +99,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // experience — same binding certificate on the TLS handshake + "mtls_pop" Authorization scheme).
             (HttpStatusCode status, string body) =
                 await CallResourceOverMtlsPopAsync(authResult, GraphMtlsResourceUri).ConfigureAwait(false);
-            AssertResourceAcceptedPopTokenOrInconclusive(status, body);
+            AssertResourceAcceptedPopToken(status, body);
         }
 
         [RunOn(SkipConditions.Linux)] // POP is not supported on Linux
@@ -166,7 +166,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // Act: present the cert-bound token to Microsoft Graph over mTLS with the same certificate.
             (HttpStatusCode status, string body) =
                 await CallResourceOverMtlsPopAsync(authResult, GraphMtlsResourceUri).ConfigureAwait(false);
-            AssertResourceAcceptedPopTokenOrInconclusive(status, body);
+            AssertResourceAcceptedPopToken(status, body);
         }
 
         [RunOn(SkipConditions.Linux)]
@@ -271,7 +271,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // Present the Graph-scoped, cert-bound Leg-2 token to Microsoft Graph over mTLS.
             (HttpStatusCode status, string body) =
                 await CallResourceOverMtlsPopAsync(second, GraphMtlsResourceUri).ConfigureAwait(false);
-            AssertResourceAcceptedPopTokenOrInconclusive(status, body);
+            AssertResourceAcceptedPopToken(status, body);
         }
 
         //Downgraded test to verify bearer token acquisition works in SNI + jwt-pop scenario
@@ -460,7 +460,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // Present the cert-bound token to Microsoft Graph over mTLS with the same certificate.
             (HttpStatusCode status, string body) =
                 await CallResourceOverMtlsPopAsync(authResult, GraphMtlsResourceUri).ConfigureAwait(false);
-            AssertResourceAcceptedPopTokenOrInconclusive(status, body);
+            AssertResourceAcceptedPopToken(status, body);
         }
 
         [RunOn(SkipConditions.Linux)]
@@ -548,7 +548,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // Present the Graph-scoped, cert-bound Leg-2 token to Microsoft Graph over mTLS.
             (HttpStatusCode status, string body) =
                 await CallResourceOverMtlsPopAsync(second, GraphMtlsResourceUri).ConfigureAwait(false);
-            AssertResourceAcceptedPopTokenOrInconclusive(status, body);
+            AssertResourceAcceptedPopToken(status, body);
         }
 
         [RunOn(SkipConditions.Linux)] // POP is not supported on Linux
@@ -585,7 +585,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 await CallResourceOverMtlsPopAsync(authResult, GraphMtlsResourceUri).ConfigureAwait(false);
 
             // Assert: the resource accepted the cert-bound token.
-            AssertResourceAcceptedPopTokenOrInconclusive(status, body);
+            AssertResourceAcceptedPopToken(status, body);
         }
 
         [RunOn(SkipConditions.Linux)] // POP is not supported on Linux
@@ -601,7 +601,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             (HttpStatusCode status, string body) =
                 await CallResourceOverMtlsPopAsync(leg2, GraphMtlsResourceUri).ConfigureAwait(false);
 
-            AssertResourceAcceptedPopTokenOrInconclusive(status, body);
+            AssertResourceAcceptedPopToken(status, body);
         }
 
         // Drives the two-leg S2S FIC over mTLS PoP end-to-end flow. Both legs run as the same
@@ -715,11 +715,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             }
         }
 
-        // A 200 proves the resource accepted the cert-bound token. The app/cert is allow-listed for mTLS PoP
-        // on this resource and holds the required Graph permission, so a 401/403 is a real regression (e.g., the
-        // binding cert was not presented on the handshake, or the "mtls_pop" scheme was wrong) and fails the
-        // test. Only genuinely transient responses (429 / 5xx) are reported inconclusive.
-        private static void AssertResourceAcceptedPopTokenOrInconclusive(HttpStatusCode status, string body)
+        private static void AssertResourceAcceptedPopToken(HttpStatusCode status, string body)
         {
             if (status == HttpStatusCode.OK)
             {
@@ -732,15 +728,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     $"Resource rejected the mTLS PoP token ({(int)status}). The app/cert is allow-listed for mTLS PoP " +
                     "on this resource, so this indicates a regression (e.g., the binding cert was not presented on the " +
                     $"TLS handshake, or the Authorization scheme was not \"mtls_pop\"). Response: {TruncateForLog(body)}");
-            }
-
-            // Throttling (429) or a server-side 5xx from the resource is transient and unrelated to MSAL, so
-            // report inconclusive rather than failing the run (several tests call Graph in quick succession).
-            if (status == (HttpStatusCode)429 || (int)status >= 500)
-            {
-                Assert.Inconclusive(
-                    $"Resource returned a transient/server-side response ({(int)status}) over mTLS PoP, unrelated " +
-                    $"to MSAL. Response: {TruncateForLog(body)}");
             }
 
             Assert.Fail($"Unexpected response calling the resource over mTLS PoP: {(int)status}. Response: {TruncateForLog(body)}");
