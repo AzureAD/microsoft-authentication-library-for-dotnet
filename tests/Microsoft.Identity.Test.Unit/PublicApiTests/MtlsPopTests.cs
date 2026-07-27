@@ -1371,6 +1371,7 @@ namespace Microsoft.Identity.Test.Unit
                         ExpectedUrl = $"https://{EastUsRegion}.mtlsauth.microsoft.com/123456-1234-2345-1234561234/oauth2/v2.0/token",
                         ExpectedMethod = HttpMethod.Post,
                         ResponseMessage = CreateResponse(tokenType: "mtls_pop"),
+                        ExpectedMtlsBindingCertificate = s_testCertificate,
                         ExpectedPostData = new Dictionary<string, string>
                         {
                             { OAuth2Parameter.ClientId, TestConstants.ClientId },
@@ -1431,6 +1432,7 @@ namespace Microsoft.Identity.Test.Unit
                         ExpectedUrl = $"https://{EastUsRegion}.mtlsauth.microsoft.com/123456-1234-2345-1234561234/oauth2/v2.0/token",
                         ExpectedMethod = HttpMethod.Post,
                         ResponseMessage = CreateResponse(tokenType: "mtls_pop"),
+                        ExpectedMtlsBindingCertificate = carriedCert,
                         ExpectedPostData = new Dictionary<string, string>
                         {
                             { OAuth2Parameter.ClientId, TestConstants.ClientId },
