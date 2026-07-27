@@ -733,7 +733,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 Assert.Fail(
                     $"Resource rejected the mTLS PoP token ({(int)status}). The app/cert is allow-listed for mTLS PoP " +
                     "on this resource, so this indicates a regression (e.g., the binding cert was not presented on the " +
-                    $"TLS handshake, or the Authorization scheme was not \"mtls_pop\"). Response: {body}");
+                    $"TLS handshake, or the Authorization scheme was not \"mtls_pop\"). Response: {TruncateForLog(body)}");
             }
 
             // Throttling (429) or a server-side 5xx from the resource is transient and unrelated to MSAL, so
@@ -742,10 +742,22 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             {
                 Assert.Inconclusive(
                     $"Resource returned a transient/server-side response ({(int)status}) over mTLS PoP, unrelated " +
-                    $"to MSAL. Response: {body}");
+                    $"to MSAL. Response: {TruncateForLog(body)}");
             }
 
-            Assert.Fail($"Unexpected response calling the resource over mTLS PoP: {(int)status}. Response: {body}");
+            Assert.Fail($"Unexpected response calling the resource over mTLS PoP: {(int)status}. Response: {TruncateForLog(body)}");
+        }
+
+        // External response bodies are truncated before being emitted into (public) CI logs so a failing
+        // assertion stays diagnosable (status + error prefix) without dumping full tenant/application data.
+        private static string TruncateForLog(string body, int maxChars = 200)
+        {
+            if (string.IsNullOrEmpty(body))
+            {
+                return "<empty>";
+            }
+
+            return body.Length <= maxChars ? body : body.Substring(0, maxChars) + "...(truncated)";
         }
 
         // TODO: Remove once the AAD westus3 test-slice mtlsauth endpoint reliably honors

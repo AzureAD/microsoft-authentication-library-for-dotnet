@@ -47,7 +47,7 @@ The mTLS PoP flow relies on tenanted endpoints. A region is **optional** — it 
 #### Region is optional (global fallback)
 
 - **Regional (recommended):** `https://{region}.mtlsauth.microsoft.com/{tenant_id}` — set via `.WithAzureRegion(...)`.
-- **Global (no region):** `https://mtlsauth.microsoft.com/{tenant_id}` (public cloud) — used automatically when no region is set. Sovereign clouds use their own `mtlsauth.<cloud-suffix>` host instead (e.g. `mtlsauth.microsoftonline.us`, `mtlsauth.partner.microsoftonline.cn`); the global host is derived from the authority by swapping the `login.` prefix for `mtlsauth`. There is **no "region required" error**; the earlier `RegionRequiredForMtlsPop` message is stale and retained only for API compatibility.
+- **Global (no region):** `https://mtlsauth.microsoft.com/{tenant_id}` (public cloud) — used automatically when no region is set. Sovereign clouds use their own `mtlsauth.<cloud-suffix>` host instead (e.g. `mtlsauth.microsoftonline.us`, `mtlsauth.partner.microsoftonline.cn`); the global host is derived from the authority by swapping the `login.` prefix for `mtlsauth`. There is **no "region required" error**; the `RegionRequiredForMtlsPop` error code is retained for API compatibility but is no longer raised for mTLS PoP.
 
 #### Public Cloud
 
