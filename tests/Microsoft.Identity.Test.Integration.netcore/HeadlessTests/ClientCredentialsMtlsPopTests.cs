@@ -567,33 +567,26 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithTestLogging()
                 .Build();
 
-            try
-            {
-                // Act 1: acquire a Graph-scoped mTLS PoP token bound to the SNI certificate.
-                AuthenticationResult authResult = await ExecuteOrInconclusiveOnTokenTypeMismatchAsync(() => confidentialApp
-                    .AcquireTokenForClient(new[] { GraphAppScope })
-                    .WithMtlsProofOfPossession()
-                    .ExecuteAsync()).ConfigureAwait(false);
+            // Act 1: acquire a Graph-scoped mTLS PoP token bound to the SNI certificate. The app is
+            // allow-listed for the Graph scope, so a service exception here is a real regression rather
+            // than an enablement gap - let it surface and fail the test.
+            AuthenticationResult authResult = await ExecuteOrInconclusiveOnTokenTypeMismatchAsync(() => confidentialApp
+                .AcquireTokenForClient(new[] { GraphAppScope })
+                .WithMtlsProofOfPossession()
+                .ExecuteAsync()).ConfigureAwait(false);
 
-                Assert.AreEqual(Constants.MtlsPoPTokenType, authResult.TokenType, "Token type should be MTLS PoP.");
-                Assert.IsNotNull(authResult.BindingCertificate, "BindingCertificate should be set in SNI flow.");
-                Assert.AreEqual(cert.Thumbprint, authResult.BindingCertificate.Thumbprint,
-                    "BindingCertificate must match the certificate supplied via WithCertificate().");
+            Assert.AreEqual(Constants.MtlsPoPTokenType, authResult.TokenType, "Token type should be MTLS PoP.");
+            Assert.IsNotNull(authResult.BindingCertificate, "BindingCertificate should be set in SNI flow.");
+            Assert.AreEqual(cert.Thumbprint, authResult.BindingCertificate.Thumbprint,
+                "BindingCertificate must match the certificate supplied via WithCertificate().");
 
-                // Act 2: present the cert-bound token to Microsoft Graph over mTLS. This is the developer
-                // experience: same binding certificate on the TLS handshake + "mtls_pop" Authorization scheme.
-                (HttpStatusCode status, string body) =
-                    await CallResourceOverMtlsPopAsync(authResult, GraphMtlsResourceUri).ConfigureAwait(false);
+            // Act 2: present the cert-bound token to Microsoft Graph over mTLS. This is the developer
+            // experience: same binding certificate on the TLS handshake + "mtls_pop" Authorization scheme.
+            (HttpStatusCode status, string body) =
+                await CallResourceOverMtlsPopAsync(authResult, GraphMtlsResourceUri).ConfigureAwait(false);
 
-                // Assert: the resource accepted the cert-bound token.
-                AssertResourceAcceptedPopTokenOrInconclusive(status, body);
-            }
-            catch (MsalServiceException ex)
-            {
-                Assert.Inconclusive(
-                    "Graph-scoped mTLS PoP token issuance was rejected by ESTS for this app/lab configuration " +
-                    $"(the app may not be allow-listed for the Graph scope). Underlying error: {ex.Message}");
-            }
+            // Assert: the resource accepted the cert-bound token.
+            AssertResourceAcceptedPopTokenOrInconclusive(status, body);
         }
 
         [RunOn(SkipConditions.Linux)] // POP is not supported on Linux
@@ -601,22 +594,15 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             // Two-leg S2S FIC over mTLS PoP (SNI first leg -> federated assertion -> Graph-scoped resource
             // token bound to the same certificate), then call Microsoft Graph over mTLS with that cert.
-            try
-            {
-                AuthenticationResult leg2 = await RunTwoLegS2sFicBothLegsPopAsync(
-                    MsiAllowListedAppIdforSNI, MsiAllowListedAppIdforSNI, TokenExchangeUrl, GraphAppScope).ConfigureAwait(false);
+            // Both legs use an allow-listed app over the global mtlsauth endpoint, so a service exception
+            // here is a real regression rather than an enablement gap - let it surface and fail the test.
+            AuthenticationResult leg2 = await RunTwoLegS2sFicBothLegsPopAsync(
+                MsiAllowListedAppIdforSNI, MsiAllowListedAppIdforSNI, TokenExchangeUrl, GraphAppScope).ConfigureAwait(false);
 
-                (HttpStatusCode status, string body) =
-                    await CallResourceOverMtlsPopAsync(leg2, GraphMtlsResourceUri).ConfigureAwait(false);
+            (HttpStatusCode status, string body) =
+                await CallResourceOverMtlsPopAsync(leg2, GraphMtlsResourceUri).ConfigureAwait(false);
 
-                AssertResourceAcceptedPopTokenOrInconclusive(status, body);
-            }
-            catch (MsalServiceException ex)
-            {
-                Assert.Inconclusive(
-                    "Two-leg S2S FIC mTLS PoP exchange (or Graph-scoped issuance) was rejected by ESTS for this " +
-                    $"app/lab configuration. Underlying error: {ex.Message}");
-            }
+            AssertResourceAcceptedPopTokenOrInconclusive(status, body);
         }
 
         // Drives the two-leg S2S FIC over mTLS PoP end-to-end flow. Both legs use the global mtlsauth
@@ -731,9 +717,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             }
         }
 
-        // A 200 proves the resource accepted the cert-bound token. A 401/403 means the app/cert is not yet
-        // allow-listed for mTLS PoP on this resource (or lacks the required Graph permission) — an
-        // enablement/config issue, not a MSAL regression — so it is reported inconclusive rather than failed.
+        // A 200 proves the resource accepted the cert-bound token. The app/cert is allow-listed for mTLS PoP
+        // on this resource and holds the required Graph permission, so a 401/403 is a real regression (e.g., the
+        // binding cert was not presented on the handshake, or the "mtls_pop" scheme was wrong) and fails the
+        // test. Only genuinely transient responses (429 / 5xx) are reported inconclusive.
         private static void AssertResourceAcceptedPopTokenOrInconclusive(HttpStatusCode status, string body)
         {
             if (status == HttpStatusCode.OK)
@@ -743,10 +730,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             if (status == HttpStatusCode.Unauthorized || status == HttpStatusCode.Forbidden)
             {
-                Assert.Inconclusive(
-                    $"Resource rejected the mTLS PoP token ({(int)status}). The app/cert is likely not allow-listed " +
-                    "for mTLS PoP on this resource (or lacks the required permission), which is a configuration " +
-                    $"issue rather than a MSAL one. Response: {body}");
+                Assert.Fail(
+                    $"Resource rejected the mTLS PoP token ({(int)status}). The app/cert is allow-listed for mTLS PoP " +
+                    "on this resource, so this indicates a regression (e.g., the binding cert was not presented on the " +
+                    $"TLS handshake, or the Authorization scheme was not \"mtls_pop\"). Response: {body}");
             }
 
             // Throttling (429) or a server-side 5xx from the resource is transient and unrelated to MSAL, so
