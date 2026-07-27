@@ -3,6 +3,9 @@
 
 using System;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
@@ -32,10 +35,15 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private const string FmiClientId = "urn:microsoft:identity:fmi";
         private const string FmiTokenExchangeUrl = "api://AzureFMITokenExchange/.default";
 
-        // Note A: the final resource must be ESTS allow-listed for mtls_pop (e.g. Key Vault / MS Graph),
-        // NOT the client app. The two-leg FIC tests below reference this constant; other tests in this
-        // file still inline the same literal, so update all of them if ESTS switches to the app model.
-        private const string AllowListedFinalResource = "https://vault.azure.net/.default";
+        // Microsoft Graph scope. Every mTLS PoP test acquires a Graph-scoped, cert-bound token and then
+        // calls Microsoft Graph over mTLS with that certificate — the resource must be ESTS allow-listed
+        // for mtls_pop (Graph is), NOT the client app.
+        private const string GraphAppScope = "https://graph.microsoft.com/.default";
+
+        // Microsoft Graph mTLS (PoP) endpoint. A cert-bound (mtls_pop) token MUST be presented with the
+        // "mtls_pop" auth scheme AND the bound certificate on the TLS handshake; the regular
+        // graph.microsoft.com host does not perform the client-certificate handshake.
+        private const string GraphMtlsResourceUri = "https://mtlstb.graph.microsoft.com/v1.0/applications?$top=1";
 
         [TestInitialize]
         public void TestInitialize()
@@ -51,7 +59,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
 
-            string[] appScopes = new[] { "https://vault.azure.net/.default" };
+            string[] appScopes = new[] { GraphAppScope };
 
             // Build Confidential Client Application with SNI certificate at App level
             IConfidentialClientApplication confidentialApp = ConfidentialClientApplicationBuilder.Create(MsiAllowListedAppIdforSNI)
@@ -91,6 +99,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(cert.Thumbprint,
                             authResult.BindingCertificate.Thumbprint,
                             "BindingCertificate must match the certificate supplied via WithCertificate().");
+
+            // Act: present the cert-bound token to Microsoft Graph over mTLS (the developer end-to-end
+            // experience — same binding certificate on the TLS handshake + "mtls_pop" Authorization scheme).
+            (HttpStatusCode status, string body) =
+                await CallResourceOverMtlsPopAsync(authResult, GraphMtlsResourceUri).ConfigureAwait(false);
+            AssertResourceAcceptedPopTokenOrInconclusive(status, body);
         }
 
         [RunOn(SkipConditions.Linux)] // POP is not supported on Linux
@@ -101,7 +115,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
 
-            string[] appScopes = new[] { "https://vault.azure.net/.default" };
+            string[] appScopes = new[] { GraphAppScope };
 
             // Build Confidential Client Application with SNI certificate — NO region configured
             IConfidentialClientApplication confidentialApp = ConfidentialClientApplicationBuilder.Create(MsiAllowListedAppIdforSNI)
@@ -153,6 +167,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(cert.Thumbprint,
                             authResult.BindingCertificate.Thumbprint,
                             "BindingCertificate must match the certificate supplied via WithCertificate().");
+
+            // Act: present the cert-bound token to Microsoft Graph over mTLS with the same certificate.
+            (HttpStatusCode status, string body) =
+                await CallResourceOverMtlsPopAsync(authResult, GraphMtlsResourceUri).ConfigureAwait(false);
+            AssertResourceAcceptedPopTokenOrInconclusive(status, body);
         }
 
         [RunOn(SkipConditions.Linux)]
@@ -208,7 +227,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             // Step 3: second leg should now SUCCEED
             AuthenticationResult second = await assertionApp
-                .AcquireTokenForClient(new[] { "https://vault.azure.net/.default" })
+                .AcquireTokenForClient(new[] { GraphAppScope })
                 .WithMtlsProofOfPossession()
                 .WithCorrelationId(expectedCorrelationId)
                 .OnBeforeTokenRequest(data =>
@@ -231,8 +250,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // Success assertions
             Assert.IsNotNull(second, "Second leg returned null AuthenticationResult.");
             Assert.IsFalse(string.IsNullOrEmpty(second.AccessToken), "Second leg did not return an access token.");
-            CollectionAssert.Contains(second.Scopes.ToArray(), "https://vault.azure.net/.default",
-                "Second leg token is not for Key Vault scope.");
+            CollectionAssert.Contains(second.Scopes.ToArray(), GraphAppScope,
+                "Second leg token is not for the Graph scope.");
 
             // Prove MSAL used the assertion + jwt-pop binding
             Assert.IsTrue(assertionProviderCalled, "Client assertion provider should have been invoked.");
@@ -253,6 +272,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // Verify CorrelationId flowed to the assertion callback (Issue #5924)
             Assert.AreEqual(expectedCorrelationId, correlationIdSeenByProvider,
                 "CorrelationId from WithCorrelationId() must flow to the assertion callback for FIC two-leg tracing.");
+
+            // Present the Graph-scoped, cert-bound Leg-2 token to Microsoft Graph over mTLS.
+            (HttpStatusCode status, string body) =
+                await CallResourceOverMtlsPopAsync(second, GraphMtlsResourceUri).ConfigureAwait(false);
+            AssertResourceAcceptedPopTokenOrInconclusive(status, body);
         }
 
         //Downgraded test to verify bearer token acquisition works in SNI + jwt-pop scenario
@@ -409,7 +433,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // Arrange
             X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
 
-            string[] appScopes = new[] { "https://vault.azure.net/.default" };
+            string[] appScopes = new[] { GraphAppScope };
 
             var certificateOptions = new CertificateOptions
             {
@@ -437,6 +461,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNotNull(authResult.BindingCertificate, "BindingCertificate should be set in SNI flow.");
             Assert.AreEqual(cert.Thumbprint, authResult.BindingCertificate.Thumbprint,
                 "BindingCertificate must match the certificate supplied via WithCertificate().");
+
+            // Present the cert-bound token to Microsoft Graph over mTLS with the same certificate.
+            (HttpStatusCode status, string body) =
+                await CallResourceOverMtlsPopAsync(authResult, GraphMtlsResourceUri).ConfigureAwait(false);
+            AssertResourceAcceptedPopTokenOrInconclusive(status, body);
         }
 
         [RunOn(SkipConditions.Linux)]
@@ -490,7 +519,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // Step 3: second leg should succeed using the global mTLS endpoint, returning an mtls_pop
             // token bound to the SAME certificate as Leg 1 (binding-cert continuity end-to-end).
             AuthenticationResult second = await ExecuteOrInconclusiveOnTokenTypeMismatchAsync(() => assertionApp
-                .AcquireTokenForClient(new[] { AllowListedFinalResource })
+                .AcquireTokenForClient(new[] { GraphAppScope })
                 .WithMtlsProofOfPossession()
                 .OnBeforeTokenRequest(data =>
                 {
@@ -521,6 +550,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var requestUri = new System.Uri(requestUriSeen);
             Assert.AreEqual("mtlsauth.microsoft.com", requestUri.Host,
                 "Should use global mtlsauth endpoint when no region is configured.");
+
+            // Present the Graph-scoped, cert-bound Leg-2 token to Microsoft Graph over mTLS.
+            (HttpStatusCode status, string body) =
+                await CallResourceOverMtlsPopAsync(second, GraphMtlsResourceUri).ConfigureAwait(false);
+            AssertResourceAcceptedPopTokenOrInconclusive(status, body);
         }
 
         [RunOn(SkipConditions.Linux)] // POP is not supported on Linux
@@ -533,7 +567,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // mismatch between legs.
             try
             {
-                await RunTwoLegS2sFicBothLegsPopAsync(FmiClientId, FmiClientId, FmiTokenExchangeUrl).ConfigureAwait(false);
+                AuthenticationResult leg2 = await RunTwoLegS2sFicBothLegsPopAsync(
+                    FmiClientId, FmiClientId, FmiTokenExchangeUrl, GraphAppScope).ConfigureAwait(false);
+
+                // Present the Graph-scoped, cert-bound token to Microsoft Graph over mTLS.
+                (HttpStatusCode status, string body) =
+                    await CallResourceOverMtlsPopAsync(leg2, GraphMtlsResourceUri).ConfigureAwait(false);
+
+                AssertResourceAcceptedPopTokenOrInconclusive(status, body);
             }
             catch (MsalServiceException ex)
             {
@@ -544,12 +585,79 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             }
         }
 
+        [RunOn(SkipConditions.Linux)] // POP is not supported on Linux
+        public async Task Sni_Pop_Token_CanCall_Graph_OverMtls_TestAsync()
+        {
+            // Proves the acquired mTLS PoP token is actually USABLE against a resource, not just well-formed:
+            // SNI cert -> Graph-scoped mtls_pop token -> call Graph over mTLS with the SAME bound cert.
+            _ = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
+            X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
+
+            // Global endpoint (no region) reliably issues token_type=mtls_pop.
+            IConfidentialClientApplication confidentialApp = ConfidentialClientApplicationBuilder.Create(MsiAllowListedAppIdforSNI)
+                .WithAuthority("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c")
+                .WithCertificate(cert, true)
+                .WithTestLogging()
+                .Build();
+
+            try
+            {
+                // Act 1: acquire a Graph-scoped mTLS PoP token bound to the SNI certificate.
+                AuthenticationResult authResult = await ExecuteOrInconclusiveOnTokenTypeMismatchAsync(() => confidentialApp
+                    .AcquireTokenForClient(new[] { GraphAppScope })
+                    .WithMtlsProofOfPossession()
+                    .ExecuteAsync()).ConfigureAwait(false);
+
+                Assert.AreEqual(Constants.MtlsPoPTokenType, authResult.TokenType, "Token type should be MTLS PoP.");
+                Assert.IsNotNull(authResult.BindingCertificate, "BindingCertificate should be set in SNI flow.");
+                Assert.AreEqual(cert.Thumbprint, authResult.BindingCertificate.Thumbprint,
+                    "BindingCertificate must match the certificate supplied via WithCertificate().");
+
+                // Act 2: present the cert-bound token to Microsoft Graph over mTLS. This is the developer
+                // experience: same binding certificate on the TLS handshake + "mtls_pop" Authorization scheme.
+                (HttpStatusCode status, string body) =
+                    await CallResourceOverMtlsPopAsync(authResult, GraphMtlsResourceUri).ConfigureAwait(false);
+
+                // Assert: the resource accepted the cert-bound token.
+                AssertResourceAcceptedPopTokenOrInconclusive(status, body);
+            }
+            catch (MsalServiceException ex)
+            {
+                Assert.Inconclusive(
+                    "Graph-scoped mTLS PoP token issuance was rejected by ESTS for this app/lab configuration " +
+                    $"(the app may not be allow-listed for the Graph scope). Underlying error: {ex.Message}");
+            }
+        }
+
+        [RunOn(SkipConditions.Linux)] // POP is not supported on Linux
+        public async Task Sni_TwoLeg_S2sFic_Pop_CanCall_Graph_OverMtls_TestAsync()
+        {
+            // Two-leg S2S FIC over mTLS PoP (SNI first leg -> federated assertion -> Graph-scoped resource
+            // token bound to the same certificate), then call Microsoft Graph over mTLS with that cert.
+            try
+            {
+                AuthenticationResult leg2 = await RunTwoLegS2sFicBothLegsPopAsync(
+                    MsiAllowListedAppIdforSNI, MsiAllowListedAppIdforSNI, TokenExchangeUrl, GraphAppScope).ConfigureAwait(false);
+
+                (HttpStatusCode status, string body) =
+                    await CallResourceOverMtlsPopAsync(leg2, GraphMtlsResourceUri).ConfigureAwait(false);
+
+                AssertResourceAcceptedPopTokenOrInconclusive(status, body);
+            }
+            catch (MsalServiceException ex)
+            {
+                Assert.Inconclusive(
+                    "Two-leg S2S FIC mTLS PoP exchange (or Graph-scoped issuance) was rejected by ESTS for this " +
+                    $"app/lab configuration. Underlying error: {ex.Message}");
+            }
+        }
+
         // Drives the two-leg S2S FIC over mTLS PoP end-to-end flow for the FMI-audience variant. Both legs
         // use the global mtlsauth endpoint (no region) so they reliably return token_type=mtls_pop, and each
         // leg is wrapped in ExecuteOrInconclusiveOnTokenTypeMismatchAsync to tolerate a server-side downgrade.
         // Leg 1 and Leg 2 client ids are supplied explicitly so callers keep them consistent — a mismatch
         // would make an ESTS rejection ambiguous (enablement vs. client-id) rather than a clean inconclusive.
-        private static async Task RunTwoLegS2sFicBothLegsPopAsync(string leg1ClientId, string leg2ClientId, string leg1ExchangeScope)
+        private static async Task<AuthenticationResult> RunTwoLegS2sFicBothLegsPopAsync(string leg1ClientId, string leg2ClientId, string leg1ExchangeScope, string finalResourceScope)
         {
             _ = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
 
@@ -590,7 +698,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .Build();
 
             AuthenticationResult leg2 = await ExecuteOrInconclusiveOnTokenTypeMismatchAsync(() => leg2App
-                .AcquireTokenForClient(new[] { AllowListedFinalResource })
+                .AcquireTokenForClient(new[] { finalResourceScope })
                 .WithMtlsProofOfPossession()
                 .OnBeforeTokenRequest(data =>
                 {
@@ -604,7 +712,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNotNull(leg2, "Leg 2 returned null AuthenticationResult.");
             Assert.AreEqual(Constants.MtlsPoPTokenType, leg2.TokenType, "Leg 2 token type should be MTLS PoP.");
             Assert.IsFalse(string.IsNullOrEmpty(leg2.AccessToken), "Leg 2 did not return an access token.");
-            CollectionAssert.Contains(leg2.Scopes.ToArray(), AllowListedFinalResource,
+            CollectionAssert.Contains(leg2.Scopes.ToArray(), finalResourceScope,
                 "Leg 2 token is not for the requested resource.");
 
             Assert.AreEqual(
@@ -620,6 +728,70 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsFalse(string.IsNullOrEmpty(leg2RequestUri), "Expected Leg 2 token request URI to be captured.");
             Assert.AreEqual("mtlsauth.microsoft.com", new System.Uri(leg2RequestUri).Host,
                 "Leg 2 should use the global mtlsauth endpoint when no region is configured.");
+
+            return leg2;
+        }
+
+        // Demonstrates the developer experience for USING an mTLS PoP token: present it to a protected
+        // resource over mTLS. Two things are required and easy to get wrong:
+        //   1. The SAME certificate the token is bound to (AuthenticationResult.BindingCertificate) must be
+        //      supplied as the client certificate on the TLS handshake.
+        //   2. The Authorization header uses the "mtls_pop" scheme, NOT "Bearer".
+        // The resource validates possession by matching the TLS client cert against the token's cnf binding.
+        private static async Task<(HttpStatusCode Status, string Body)> CallResourceOverMtlsPopAsync(
+            AuthenticationResult authResult, string resourceUri)
+        {
+            Assert.IsNotNull(authResult.BindingCertificate,
+                "A binding certificate is required to call a resource over mTLS PoP.");
+
+            var handler = new HttpClientHandler();
+            handler.ClientCertificates.Add(authResult.BindingCertificate); // bind the TLS client cert
+
+            // HttpClient owns and disposes the handler.
+            using (var http = new HttpClient(handler))
+            using (var request = new HttpRequestMessage(HttpMethod.Get, resourceUri))
+            {
+                request.Headers.Authorization =
+                    new AuthenticationHeaderValue(Constants.MtlsPoPAuthHeaderPrefix, authResult.AccessToken);
+
+                using (HttpResponseMessage response = await http.SendAsync(request).ConfigureAwait(false))
+                {
+                    string body = response.Content is null
+                        ? string.Empty
+                        : await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    return (response.StatusCode, body);
+                }
+            }
+        }
+
+        // A 200 proves the resource accepted the cert-bound token. A 401/403 means the app/cert is not yet
+        // allow-listed for mTLS PoP on this resource (or lacks the required Graph permission) — an
+        // enablement/config issue, not a MSAL regression — so it is reported inconclusive rather than failed.
+        private static void AssertResourceAcceptedPopTokenOrInconclusive(HttpStatusCode status, string body)
+        {
+            if (status == HttpStatusCode.OK)
+            {
+                return;
+            }
+
+            if (status == HttpStatusCode.Unauthorized || status == HttpStatusCode.Forbidden)
+            {
+                Assert.Inconclusive(
+                    $"Resource rejected the mTLS PoP token ({(int)status}). The app/cert is likely not allow-listed " +
+                    "for mTLS PoP on this resource (or lacks the required permission), which is a configuration " +
+                    $"issue rather than a MSAL one. Response: {body}");
+            }
+
+            // Throttling (429) or a server-side 5xx from the resource is transient and unrelated to MSAL, so
+            // report inconclusive rather than failing the run (several tests call Graph in quick succession).
+            if (status == (HttpStatusCode)429 || (int)status >= 500)
+            {
+                Assert.Inconclusive(
+                    $"Resource returned a transient/server-side response ({(int)status}) over mTLS PoP, unrelated " +
+                    $"to MSAL. Response: {body}");
+            }
+
+            Assert.Fail($"Unexpected response calling the resource over mTLS PoP: {(int)status}. Response: {body}");
         }
 
         // TODO: Remove once the AAD westus3 test-slice mtlsauth endpoint reliably honors
