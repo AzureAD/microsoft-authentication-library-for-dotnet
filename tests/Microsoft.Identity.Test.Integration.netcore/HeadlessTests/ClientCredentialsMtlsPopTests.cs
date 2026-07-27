@@ -30,11 +30,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private const string MsiAllowListedAppIdforSNI = "163ffef9-a313-45b4-ab2f-c7e2f5e0e23e";
         private const string TokenExchangeUrl = "api://AzureADTokenExchange/.default";
 
-        // FMI variant of the exchange audience (SME item 5: the exchange audience is caller-supplied,
-        // not SDK-hardcoded). The FMI leg uses the reserved client id urn:microsoft:identity:fmi.
-        private const string FmiClientId = "urn:microsoft:identity:fmi";
-        private const string FmiTokenExchangeUrl = "api://AzureFMITokenExchange/.default";
-
         // Microsoft Graph scope. Every mTLS PoP test acquires a Graph-scoped, cert-bound token and then
         // calls Microsoft Graph over mTLS with that certificate — the resource must be ESTS allow-listed
         // for mtls_pop (Graph is), NOT the client app.
@@ -558,34 +553,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [RunOn(SkipConditions.Linux)] // POP is not supported on Linux
-        public async Task Sni_TwoLeg_S2sFic_FmiAudience_BothLegs_Pop_EndToEnd_TestAsync()
-        {
-            // Same two-leg flow, but using the FMI exchange audience (api://AzureFMITokenExchange) and the
-            // reserved FMI client id (urn:microsoft:identity:fmi) for BOTH legs. Proves the exchange audience
-            // is caller-supplied (SME item 5). Using the same client id for both legs means an ESTS rejection
-            // is unambiguously an FMI + mTLS PoP enablement issue (marked inconclusive), not a client-id
-            // mismatch between legs.
-            try
-            {
-                AuthenticationResult leg2 = await RunTwoLegS2sFicBothLegsPopAsync(
-                    FmiClientId, FmiClientId, FmiTokenExchangeUrl, GraphAppScope).ConfigureAwait(false);
-
-                // Present the Graph-scoped, cert-bound token to Microsoft Graph over mTLS.
-                (HttpStatusCode status, string body) =
-                    await CallResourceOverMtlsPopAsync(leg2, GraphMtlsResourceUri).ConfigureAwait(false);
-
-                AssertResourceAcceptedPopTokenOrInconclusive(status, body);
-            }
-            catch (MsalServiceException ex)
-            {
-                Assert.Inconclusive(
-                    "FMI-audience mTLS PoP exchange was rejected by ESTS for this app/lab configuration. " +
-                    "This variant only proves the exchange audience is caller-supplied; the generic " +
-                    $"api://AzureADTokenExchange path remains under test. Underlying error: {ex.Message}");
-            }
-        }
-
-        [RunOn(SkipConditions.Linux)] // POP is not supported on Linux
         public async Task Sni_Pop_Token_CanCall_Graph_OverMtls_TestAsync()
         {
             // Proves the acquired mTLS PoP token is actually USABLE against a resource, not just well-formed:
@@ -652,11 +619,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             }
         }
 
-        // Drives the two-leg S2S FIC over mTLS PoP end-to-end flow for the FMI-audience variant. Both legs
-        // use the global mtlsauth endpoint (no region) so they reliably return token_type=mtls_pop, and each
-        // leg is wrapped in ExecuteOrInconclusiveOnTokenTypeMismatchAsync to tolerate a server-side downgrade.
-        // Leg 1 and Leg 2 client ids are supplied explicitly so callers keep them consistent — a mismatch
-        // would make an ESTS rejection ambiguous (enablement vs. client-id) rather than a clean inconclusive.
+        // Drives the two-leg S2S FIC over mTLS PoP end-to-end flow. Both legs use the global mtlsauth
+        // endpoint (no region) so they reliably return token_type=mtls_pop, and each leg is wrapped in
+        // ExecuteOrInconclusiveOnTokenTypeMismatchAsync to tolerate a server-side downgrade. Leg 1 and
+        // Leg 2 client ids are supplied explicitly so callers keep them consistent — a mismatch would
+        // make an ESTS rejection ambiguous (client-id mismatch vs. a genuine flow issue).
         private static async Task<AuthenticationResult> RunTwoLegS2sFicBothLegsPopAsync(string leg1ClientId, string leg2ClientId, string leg1ExchangeScope, string finalResourceScope)
         {
             _ = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
