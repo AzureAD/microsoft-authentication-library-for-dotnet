@@ -144,12 +144,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
         }
 
-        /// <summary>
-        /// Client-originated claims set via .WithClaimsFromClient(). These are cached (no bypass) and
-        /// keyed on the raw claims string as passed by the caller.
-        /// </summary>
-        public string ClientClaims => _commonParameters.ClientClaims;
-
         private IAuthenticationOperation _requestOverrideScheme;
 
         /// <summary>

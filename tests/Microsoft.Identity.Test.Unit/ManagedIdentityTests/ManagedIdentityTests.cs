@@ -1042,6 +1042,60 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
+        [Description("The OpenTelemetry tags enricher can be set on a managed identity request and is invoked with the result, including on the proactive background refresh.")]
+        public async Task ManagedIdentity_BackgroundRefresh_InvokesOtelTagsEnricher_Async()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.AppService, AppServiceEndpoint);
+
+                ExecutionResult capturedResult = null;
+                int enricherInvocations = 0;
+                bool backgroundRefreshCompleted = false;
+                Action<ExecutionResult, IList<KeyValuePair<string, object>>> enricher = (executionResult, tags) =>
+                {
+                    Interlocked.Increment(ref enricherInvocations);
+                    capturedResult = executionResult;
+                    tags.Add(new KeyValuePair<string, object>("mi_custom_tag", "mi_value"));
+                };
+
+                // The completion callback is used purely as a reliable barrier: it fires only once the proactive
+                // background refresh has finished, guaranteeing the background enricher invocation has occurred.
+                var mi = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpManager(httpManager)
+                    .WithExperimentalFeatures()
+                    .OnBackgroundTokenRefreshCompleted(r => { backgroundRefreshCompleted = true; return Task.CompletedTask; })
+                    .BuildConcrete();
+
+                // 1. Prime the cache with a token.
+                httpManager.AddManagedIdentityMockHandler(
+                    AppServiceEndpoint, Resource, MockHelpers.GetMsiSuccessfulResponse(), ManagedIdentitySource.AppService);
+                await mi.AcquireTokenForManagedIdentity(Resource).ExecuteAsync().ConfigureAwait(false);
+
+                // 2. Mark the cached token as needing a proactive refresh.
+                TestCommon.UpdateATWithRefreshOn(mi.AppTokenCacheInternal.Accessor);
+
+                // 3. Response the background refresh will consume.
+                httpManager.AddManagedIdentityMockHandler(
+                    AppServiceEndpoint, Resource, MockHelpers.GetMsiSuccessfulResponse(), ManagedIdentitySource.AppService);
+
+                // 4. Foreground returns the cached token and kicks off the background refresh; the enricher supplied
+                //    here is propagated onto the managed identity background-refresh metrics.
+                await mi.AcquireTokenForManagedIdentity(Resource)
+                    .WithOtelTagsEnricher(enricher)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                // Assert - the background refresh ran and the enricher was invoked with a successful outcome.
+                Assert.IsTrue(TestCommon.YieldTillSatisfied(() => backgroundRefreshCompleted), "Managed identity background refresh did not complete.");
+                Assert.AreNotEqual(0, enricherInvocations, "Managed identity OTel tags enricher was not invoked.");
+                Assert.IsNotNull(capturedResult);
+                Assert.IsTrue(capturedResult.Successful);
+                Assert.IsNotNull(capturedResult.Result);
+            }
+        }
+
+        [TestMethod]
         public async Task ProactiveRefresh_CancelsSuccessfully_Async()
         {
             bool wasErrorLogged = false;

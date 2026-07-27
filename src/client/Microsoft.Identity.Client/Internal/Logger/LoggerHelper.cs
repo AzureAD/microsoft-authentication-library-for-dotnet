@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
 
         public static string FormatLogMessage(string message, bool piiEnabled, string correlationId, string clientInformation)
         {
-            return string.Format(
+            string formattedMessage = string.Format(
                 CultureInfo.InvariantCulture,
                 "{0} MSAL {1} {2} {3} {4} [{5}{6}]{7} {8}",
                 piiEnabled,
@@ -88,6 +88,8 @@ namespace Microsoft.Identity.Client.Internal.Logger
                 correlationId,
                 clientInformation,
                 message);
+
+            return formattedMessage;
         }
 
         internal static string GetPiiScrubbedExceptionDetails(Exception ex)
@@ -109,9 +111,9 @@ namespace Microsoft.Identity.Client.Internal.Logger
             {
                 sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "HTTP StatusCode {0}", msalServiceException.StatusCode));
                 sb.AppendLine($"CorrelationId {msalServiceException.CorrelationId}");
-                if (msalServiceException.ErrorCodes is {Length: > 0})
+                if (msalServiceException.ErrorCodesForLogging is {Count: > 0})
                 {
-                    sb.AppendLine($"Microsoft Entra ID Error Code AADSTS{string.Join(" ", msalServiceException.ErrorCodes)}");
+                    sb.AppendLine($"Microsoft Entra ID Error Code AADSTS{string.Join(" ", msalServiceException.ErrorCodesForLogging)}");
                 }
             }
 

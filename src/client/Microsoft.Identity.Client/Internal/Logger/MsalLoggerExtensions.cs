@@ -30,7 +30,12 @@ namespace Microsoft.Identity.Client.Core
 
         public static void ErrorPiiWithPrefix(this ILoggerAdapter logger, Exception exWithPii, string prefix)
         {
-            logger.Log(LogLevel.Error, prefix + exWithPii, prefix + LoggerHelper.GetPiiScrubbedExceptionDetails(exWithPii));
+            if (!logger.IsLoggingEnabled(LogLevel.Error))
+            {
+                return;
+            }
+
+            logger.Log(LogLevel.Error, prefix + TokenScrubber.Scrub(exWithPii?.ToString()), prefix + LoggerHelper.GetPiiScrubbedExceptionDetails(exWithPii));
         }
 
         public static void ErrorPii(this ILoggerAdapter logger, string messageWithPii, string messageScrubbed)
@@ -40,7 +45,12 @@ namespace Microsoft.Identity.Client.Core
 
         public static void ErrorPii(this ILoggerAdapter logger, Exception exWithPii)
         {
-            logger.Log(LogLevel.Error, exWithPii.ToString(), LoggerHelper.GetPiiScrubbedExceptionDetails(exWithPii));
+            if (!logger.IsLoggingEnabled(LogLevel.Error))
+            {
+                return;
+            }
+
+            logger.Log(LogLevel.Error, TokenScrubber.Scrub(exWithPii?.ToString()), LoggerHelper.GetPiiScrubbedExceptionDetails(exWithPii));
         }
 
         public static void Warning(this ILoggerAdapter logger, string message)
@@ -55,12 +65,22 @@ namespace Microsoft.Identity.Client.Core
 
         public static void WarningPii(this ILoggerAdapter logger, Exception exWithPii)
         {
-            logger.Log(LogLevel.Warning, exWithPii.ToString(), LoggerHelper.GetPiiScrubbedExceptionDetails(exWithPii));
+            if (!logger.IsLoggingEnabled(LogLevel.Warning))
+            {
+                return;
+            }
+
+            logger.Log(LogLevel.Warning, TokenScrubber.Scrub(exWithPii?.ToString()), LoggerHelper.GetPiiScrubbedExceptionDetails(exWithPii));
         }
 
         public static void WarningPiiWithPrefix(this ILoggerAdapter logger, Exception exWithPii, string prefix)
         {
-            logger.Log(LogLevel.Warning, prefix + exWithPii, prefix + LoggerHelper.GetPiiScrubbedExceptionDetails(exWithPii));
+            if (!logger.IsLoggingEnabled(LogLevel.Warning))
+            {
+                return;
+            }
+
+            logger.Log(LogLevel.Warning, prefix + TokenScrubber.Scrub(exWithPii?.ToString()), prefix + LoggerHelper.GetPiiScrubbedExceptionDetails(exWithPii));
         }
 
         public static void Info(this ILoggerAdapter logger, string message)
@@ -97,7 +117,12 @@ namespace Microsoft.Identity.Client.Core
 
         public static void InfoPii(this ILoggerAdapter logger, Exception exWithPii)
         {
-            logger.Log(LogLevel.Info, exWithPii?.ToString(), LoggerHelper.GetPiiScrubbedExceptionDetails(exWithPii));
+            if (!logger.IsLoggingEnabled(LogLevel.Info))
+            {
+                return;
+            }
+
+            logger.Log(LogLevel.Info, TokenScrubber.Scrub(exWithPii?.ToString()), LoggerHelper.GetPiiScrubbedExceptionDetails(exWithPii));
         }
        
         public static void Verbose(this ILoggerAdapter logger, Func<string> messageProducer)
