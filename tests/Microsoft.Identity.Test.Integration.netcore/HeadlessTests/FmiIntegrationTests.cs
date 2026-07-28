@@ -12,7 +12,6 @@ using Microsoft.Identity.Test.Common.Core.Helpers;
 using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Collections.Generic;
-using Microsoft.Identity.Test.Integration.NetFx.Infrastructure;
 using OpenTelemetry.Logs;
 
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
