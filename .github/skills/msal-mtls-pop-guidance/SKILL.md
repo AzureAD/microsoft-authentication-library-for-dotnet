@@ -271,6 +271,7 @@ IConfidentialClientApplication bearerApp = ConfidentialClientApplicationBuilder.
 AuthenticationResult bearerResult = await bearerApp
     .AcquireTokenForClient(new[] { "https://vault.azure.net/.default" })
     .ExecuteAsync()                        // no WithMtlsProofOfPossession → Bearer token
+    .ConfigureAwait(false);
 
 Assert.AreEqual("Bearer", bearerResult.TokenType);
 
