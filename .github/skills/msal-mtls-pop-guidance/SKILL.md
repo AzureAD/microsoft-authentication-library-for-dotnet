@@ -13,6 +13,7 @@ tags:
   - proof-of-possession
   - terminology
   - conventions
+  - sni
 ---
 
 # MSAL.NET mTLS PoP Guidance - Shared Terminology & Conventions
@@ -51,6 +52,14 @@ This skill provides shared terminology, conventions, and patterns for working wi
 - **Leg 2**: Exchange Leg 1 token for final target resource (Confidential Client ONLY)
 - Used in: Kubernetes workload identity, multi-tenant scenarios, complex authentication chains
 
+**SNI mTLS PoP Flow (Single-Step, Confidential Client)**
+- SNI (Subject Name/Issuer) certificate configured at the **app builder level**: `.WithCertificate(cert, sendX5c: true)`
+- mTLS PoP requested at the **request level**: `.WithMtlsProofOfPossession()`
+- Result token type is `mtls_pop` (`Constants.MtlsPoPTokenType`)
+- `AuthenticationResult.BindingCertificate` is populated; its `Thumbprint` matches the certificate passed to `WithCertificate()`
+- Supports regional endpoints (`.WithAzureRegion("westus3")`) and the global `mtlsauth.microsoft.com` endpoint
+- SNI certificate authentication works **cross-platform, including Linux**; only the mTLS PoP token flow is Windows/macOS only
+
 ### Token Types
 
 **Bearer Token**
@@ -71,6 +80,7 @@ This skill provides shared terminology, conventions, and patterns for working wi
 - Certificate authentication method using X.509 certificate subject and issuer
 - Configured at app builder level: `.WithCertificate(cert, sendX5c: true)`
 - Used with Confidential Client only
+- **Works cross-platform, including Linux** (only the mTLS PoP token flow is Windows/macOS only)
 
 **BindingCertificate**
 - Certificate that was cryptographically bound to a PoP token
@@ -143,6 +153,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;        // ← For ManagedIdentityId
+using Microsoft.Identity.Client.Extensibility;    // ← For ClientSignedAssertion, AssertionRequestOptions (SNI assertion flow)
 using Microsoft.Identity.Client.KeyAttestation;   // ← For WithAttestationSupport()
 ```
 
@@ -186,6 +197,152 @@ public async Task<AuthenticationResult> AcquireTokenAsync(
 }
 ```
 
+## SNI mTLS PoP Flow - Details & Examples
+
+### 1. Basic SNI mTLS PoP (Single-Step, Confidential Client)
+
+Configure SNI at the app builder level with `sendX5c: true`, then request PoP at the request level:
+
+```csharp
+X509Certificate2 cert = /* load your certificate */;
+
+IConfidentialClientApplication app = ConfidentialClientApplicationBuilder.Create("<client-id>")
+    .WithAuthority("https://login.microsoftonline.com/<tenant-id>")
+    .WithAzureRegion("westus3")          // use an actual Azure production region
+    .WithCertificate(cert, sendX5c: true) // SNI at app level
+    .Build();
+
+AuthenticationResult result = await app
+    .AcquireTokenForClient(new[] { "https://vault.azure.net/.default" })
+    .WithMtlsProofOfPossession()          // PoP at request level
+    .ExecuteAsync()
+    .ConfigureAwait(false);
+
+// Verify token type and binding
+Assert.AreEqual("mtls_pop", result.TokenType);
+Assert.IsNotNull(result.BindingCertificate);
+Assert.AreEqual(cert.Thumbprint, result.BindingCertificate.Thumbprint);
+```
+
+### 2. Regional vs Global mTLS Endpoints
+
+- **Regional**: Call `.WithAzureRegion("westus3")` to route to the regional endpoint, e.g. `westus3.mtlsauth.microsoft.com`. `westus3` is a stable Azure production region — no extra query parameters or test-slice configuration is involved.
+- **Global**: Omit `.WithAzureRegion(...)` to use the global endpoint `mtlsauth.microsoft.com`.
+- Verify the endpoint used via `result.AuthenticationResultMetadata.TokenEndpoint`.
+
+```csharp
+// Regional endpoint
+IConfidentialClientApplication regionalApp = ConfidentialClientApplicationBuilder.Create("<client-id>")
+    .WithAuthority("https://login.microsoftonline.com/<tenant-id>")
+    .WithAzureRegion("westus3")           // routes to westus3.mtlsauth.microsoft.com
+    .WithCertificate(cert, sendX5c: true)
+    .Build();
+
+// Global endpoint (no WithAzureRegion)
+IConfidentialClientApplication globalApp = ConfidentialClientApplicationBuilder.Create("<client-id>")
+    .WithAuthority("https://login.microsoftonline.com/<tenant-id>")
+    .WithCertificate(cert, sendX5c: true) // uses mtlsauth.microsoft.com
+    .Build();
+
+AuthenticationResult globalResult = await globalApp
+    .AcquireTokenForClient(new[] { "https://vault.azure.net/.default" })
+    .WithMtlsProofOfPossession()
+    .ExecuteAsync()
+    .ConfigureAwait(false);
+
+Uri endpoint = new Uri(globalResult.AuthenticationResultMetadata.TokenEndpoint);
+Assert.AreEqual("mtlsauth.microsoft.com", endpoint.Host);
+```
+
+### 3. `CertificateOptions.SendCertificateOverMtls`
+
+`CertificateOptions { SendCertificateOverMtls = true }` routes authentication over the mTLS transport but yields a **Bearer** token when PoP is **not** requested. When `.WithMtlsProofOfPossession()` is explicitly called, the result is **always** an `mtls_pop` token regardless of `SendCertificateOverMtls`.
+
+```csharp
+var certOptions = new CertificateOptions { SendCertificateOverMtls = true };
+
+// ****** mTLS transport (NO WithMtlsProofOfPossession)
+IConfidentialClientApplication bearerApp = ConfidentialClientApplicationBuilder.Create("<client-id>")
+    .WithAuthority("https://login.microsoftonline.com/<tenant-id>")
+    .WithAzureRegion("westus3")
+    .WithCertificate(cert, certOptions)
+    .Build();
+
+AuthenticationResult bearerResult = await bearerApp
+    .AcquireTokenForClient(new[] { "https://vault.azure.net/.default" })
+    .ExecuteAsync()                        // no WithMtlsProofOfPossession → ******;
+
+Assert.AreEqual("Bearer", bearerResult.TokenType);
+
+// mTLS PoP always wins when WithMtlsProofOfPossession() is called
+IConfidentialClientApplication popApp = ConfidentialClientApplicationBuilder.Create("<client-id>")
+    .WithAuthority("https://login.microsoftonline.com/<tenant-id>")
+    .WithAzureRegion("westus3")
+    .WithCertificate(cert, certOptions)    // SendCertificateOverMtls = true or false
+    .Build();
+
+AuthenticationResult popResult = await popApp
+    .AcquireTokenForClient(new[] { "https://vault.azure.net/.default" })
+    .WithMtlsProofOfPossession()           // always produces mtls_pop
+    .ExecuteAsync()
+    .ConfigureAwait(false);
+
+Assert.AreEqual("mtls_pop", popResult.TokenType);
+Assert.AreEqual(cert.Thumbprint, popResult.BindingCertificate.Thumbprint);
+```
+
+### 4. SNI + jwt-pop Assertion Flow (Two-Leg)
+
+In the assertion (FIC) flow, the second app has **no** `WithCertificate` call — the certificate is supplied via `ClientSignedAssertion.TokenBindingCertificate`. When `TokenBindingCertificate` is set and `.WithMtlsProofOfPossession()` is called, MSAL emits `client_assertion_type = urn:ietf:params:oauth:client-assertion-type:jwt-pop`.
+
+`AssertionRequestOptions.TokenEndpoint` and `AssertionRequestOptions.CorrelationId` are passed into the assertion callback; use `.WithCorrelationId(...)` to set a correlation ID and verify it flows through.
+
+```csharp
+using Microsoft.Identity.Client.Extensibility; // ClientSignedAssertion, AssertionRequestOptions
+
+// Leg 1: acquire assertion token using SNI cert (regional or global)
+IConfidentialClientApplication firstApp = ConfidentialClientApplicationBuilder.Create("<client-id>")
+    .WithAuthority("https://login.microsoftonline.com/<tenant-id>")
+    .WithAzureRegion("westus3")
+    .WithCertificate(cert, sendX5c: true)
+    .Build();
+
+AuthenticationResult leg1 = await firstApp
+    .AcquireTokenForClient(new[] { "api://AzureADTokenExchange/.default" })
+    .WithMtlsProofOfPossession()
+    .ExecuteAsync()
+    .ConfigureAwait(false);
+
+string assertionJwt = leg1.AccessToken;
+
+// Leg 2: assertion app — NO WithCertificate; cert supplied via TokenBindingCertificate
+IConfidentialClientApplication assertionApp = ConfidentialClientApplicationBuilder.Create("<client-id>")
+    .WithAuthority("https://login.microsoftonline.com/<tenant-id>")
+    .WithAzureRegion("westus3")
+    .WithClientAssertion((AssertionRequestOptions options, CancellationToken ct) =>
+    {
+        // options.TokenEndpoint and options.CorrelationId are populated by MSAL
+        return Task.FromResult(new ClientSignedAssertion
+        {
+            Assertion = assertionJwt,
+            TokenBindingCertificate = cert   // binds assertion → jwt-pop client_assertion_type
+        });
+    })
+    .Build();
+
+Guid correlationId = Guid.NewGuid();
+AuthenticationResult leg2 = await assertionApp
+    .AcquireTokenForClient(new[] { "https://vault.azure.net/.default" })
+    .WithMtlsProofOfPossession()
+    .WithCorrelationId(correlationId)
+    .ExecuteAsync()
+    .ConfigureAwait(false);
+
+Assert.AreEqual("mtls_pop", leg2.TokenType);
+```
+
+**Global-endpoint variant**: omit `.WithAzureRegion(...)` on the assertion app — the global `mtlsauth.microsoft.com` endpoint is used automatically.
+
 ## Reviewer Expectations
 
 When reviewing mTLS PoP code, check for:
@@ -198,6 +355,10 @@ When reviewing mTLS PoP code, check for:
 - [ ] Correct flow terminology (vanilla vs FIC two-leg, no "legs" in vanilla)
 - [ ] MSI limitation documented (no WithClientAssertion for Leg 2)
 - [ ] All 3 UAMI ID types shown in examples
+- [ ] **SNI**: `sendX5c: true` passed to `.WithCertificate()` at app builder level
+- [ ] **SNI**: `.WithMtlsProofOfPossession()` called at request level (not app level)
+- [ ] **SNI**: `result.BindingCertificate` is non-null and its `Thumbprint` matches the certificate passed to `WithCertificate()`
+- [ ] **SNI assertion flow**: `ClientSignedAssertion.TokenBindingCertificate` set (not `WithCertificate` on the assertion app)
 
 ### Should Have
 - [ ] `ConfigureAwait(false)` on all awaits
@@ -216,6 +377,11 @@ When reviewing mTLS PoP code, check for:
 - ❌ Using MSAL version < 4.82.1
 - ❌ Not checking `BindingCertificate` for null
 - ❌ Disposing RSA keys from `GetRSAPrivateKey()` (handled by cert)
+- ❌ **SNI**: Forgetting `sendX5c: true` in `.WithCertificate(cert, sendX5c: true)` — SNI requires the public certificate to be sent
+- ❌ **SNI**: Assuming `SendCertificateOverMtls = true` controls PoP vs ****** PoP is explicitly requested — `.WithMtlsProofOfPossession()` always produces `mtls_pop` regardless of `SendCertificateOverMtls`
+- ❌ **SNI assertion flow**: Omitting `TokenBindingCertificate` in `ClientSignedAssertion` — without it, MSAL cannot emit `client_assertion_type: jwt-pop`
+- ❌ **SNI assertion flow**: Missing `using Microsoft.Identity.Client.Extensibility;` (needed for `ClientSignedAssertion` and `AssertionRequestOptions`)
+- ❌ Claiming SNI is unsupported on Linux — **SNI certificate authentication works on Linux**; only the mTLS PoP token flow is Windows/macOS only
 
 ## Testing Guidance
 
@@ -227,10 +393,11 @@ When reviewing mTLS PoP code, check for:
 ### Azure Environments
 - **SAMI**: Azure VM, App Service, Functions, Container Instances, AKS
 - **UAMI**: Same as SAMI, plus requires UAMI assignment to resource
-- **Region**: Use actual region (e.g., "westus3") for SNI scenarios
+- **Region**: Use an actual Azure production region (e.g., `westus3`) for SNI scenarios
 
-### Test Slice Region
-For MSAL.NET integration tests, the test slice region is **westus3**.
+### SNI Test Notes
+- mTLS PoP tests only run on the allow-listed SNI app and tenant.
+- `[RunOn(SkipConditions.Linux)]` is required on all mTLS PoP tests — the mTLS PoP token flow is not supported on Linux. SNI certificate authentication itself is cross-platform and works on Linux.
 
 ## Troubleshooting Quick Reference
 
@@ -244,6 +411,9 @@ For MSAL.NET integration tests, the test slice region is **westus3**.
 | `WithAttestationSupport()` not found | Add `Microsoft.Identity.Client.KeyAttestation` NuGet |
 | IMDS timeout (local machine) | Use UAMI or Confidential Client for local dev |
 | Unable to get UAMI token | Check UAMI exists, assigned to resource, correct ID type |
+| `ClientSignedAssertion` or `AssertionRequestOptions` not found | Add `using Microsoft.Identity.Client.Extensibility;` |
+| SNI assertion flow not using `jwt-pop` `client_assertion_type` | Set `ClientSignedAssertion.TokenBindingCertificate` and call `.WithMtlsProofOfPossession()` |
+| mTLS PoP not working on Linux | mTLS PoP token flow is Windows/macOS only; use `[RunOn(SkipConditions.Linux)]` on PoP tests |
 
 ### General Credential and Authentication Issues
 
