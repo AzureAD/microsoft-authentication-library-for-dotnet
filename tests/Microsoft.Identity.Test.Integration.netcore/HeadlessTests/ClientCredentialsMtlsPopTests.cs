@@ -46,16 +46,17 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // Build Confidential Client Application with SNI certificate at App level
             IConfidentialClientApplication confidentialApp = ConfidentialClientApplicationBuilder.Create(MsiAllowListedAppIdforSNI)
                 .WithAuthority("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c")
-                .WithAzureRegion("westus3") //test slice region 
+                .WithAzureRegion("westus3")
                 .WithCertificate(cert, true)
                 .WithTestLogging()
                 .Build();
 
             // Act: Acquire token with MTLS Proof of Possession at Request level
-            AuthenticationResult authResult = await ExecuteOrInconclusiveOnTokenTypeMismatchAsync(() => confidentialApp
+            AuthenticationResult authResult = await confidentialApp
                 .AcquireTokenForClient(appScopes)
                 .WithMtlsProofOfPossession()
-                .ExecuteAsync()).ConfigureAwait(false);
+                .ExecuteAsync()
+                .ConfigureAwait(false);
 
             // Assert: Check that the MTLS PoP token acquisition was successful
             Assert.IsNotNull(authResult, "The authentication result should not be null.");
@@ -158,10 +159,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithTestLogging()
                 .Build();
 
-            AuthenticationResult first = await ExecuteOrInconclusiveOnTokenTypeMismatchAsync(() => firstApp
+            AuthenticationResult first = await firstApp
                 .AcquireTokenForClient(new[] { TokenExchangeUrl })
                 .WithMtlsProofOfPossession()
-                .ExecuteAsync()).ConfigureAwait(false);
+                .ExecuteAsync()
+                .ConfigureAwait(false);
 
             string assertionJwt = first.AccessToken;
             Assert.IsFalse(string.IsNullOrEmpty(assertionJwt), "First leg did not return an access token to reuse as assertion.");
@@ -259,10 +261,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithTestLogging()
                 .Build();
 
-            AuthenticationResult first = await ExecuteOrInconclusiveOnTokenTypeMismatchAsync(() => firstApp
+            AuthenticationResult first = await firstApp
                 .AcquireTokenForClient(new[] { TokenExchangeUrl })
                 .WithMtlsProofOfPossession()
-                .ExecuteAsync()).ConfigureAwait(false);
+                .ExecuteAsync()
+                .ConfigureAwait(false);
 
             string assertionJwt = first.AccessToken;
             Assert.IsFalse(string.IsNullOrEmpty(assertionJwt), "First leg did not return an access token to reuse as assertion.");
@@ -351,7 +354,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // Build Confidential Client Application with mTLS Bearer transport
             IConfidentialClientApplication confidentialApp = ConfidentialClientApplicationBuilder.Create(MsiAllowListedAppIdforSNI)
                 .WithAuthority("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c")
-                .WithAzureRegion("westus3") //test slice region
+                .WithAzureRegion("westus3")
                 .WithCertificate(cert, certificateOptions)
                 .WithTestLogging()
                 .Build();
@@ -415,10 +418,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .Build();
 
             // Act: WithMtlsProofOfPossession should always produce PoP, regardless of SendCertificateOverMtls
-            AuthenticationResult authResult = await ExecuteOrInconclusiveOnTokenTypeMismatchAsync(() => confidentialApp
+            AuthenticationResult authResult = await confidentialApp
                 .AcquireTokenForClient(appScopes)
                 .WithMtlsProofOfPossession()
-                .ExecuteAsync()).ConfigureAwait(false);
+                .ExecuteAsync()
+                .ConfigureAwait(false);
 
             // Assert
             Assert.IsNotNull(authResult, "The authentication result should not be null.");
@@ -442,10 +446,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithTestLogging()
                 .Build();
 
-            AuthenticationResult first = await ExecuteOrInconclusiveOnTokenTypeMismatchAsync(() => firstApp
+            AuthenticationResult first = await firstApp
                 .AcquireTokenForClient(new[] { TokenExchangeUrl })
                 .WithMtlsProofOfPossession()
-                .ExecuteAsync()).ConfigureAwait(false);
+                .ExecuteAsync()
+                .ConfigureAwait(false);
 
             string assertionJwt = first.AccessToken;
             Assert.IsFalse(string.IsNullOrEmpty(assertionJwt), "First leg did not return an access token to reuse as assertion.");
@@ -494,26 +499,5 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 "Should use global mtlsauth endpoint when no region is configured.");
         }
 
-        // TODO: Remove once the AAD westus3 test-slice mtlsauth endpoint reliably honors
-        // token_type=mtls_pop. Today the test slice intermittently downgrades to Bearer,
-        // which is a server-side issue, not a MSAL regression. The global mtlsauth endpoint
-        // (covered by Sni_Gets_Pop_Token_WithGlobalEndpoint_TestAsync) continues to be
-        // exercised end-to-end, so MSAL-side mTLS PoP behavior remains under test.
-        private static async Task<AuthenticationResult> ExecuteOrInconclusiveOnTokenTypeMismatchAsync(
-            Func<Task<AuthenticationResult>> action)
-        {
-            try
-            {
-                return await action().ConfigureAwait(false);
-            }
-            catch (MsalClientException ex) when (ex.ErrorCode == MsalError.TokenTypeMismatch)
-            {
-                Assert.Inconclusive(
-                    "AAD westus3 test-slice mTLS endpoint returned Bearer instead of mtls_pop. " +
-                    "This is a server-side issue on the test slice, not a MSAL regression. " +
-                    $"Underlying error: {ex.Message}");
-                throw; // Unreachable: Assert.Inconclusive throws.
-            }
-        }
     }
 }
