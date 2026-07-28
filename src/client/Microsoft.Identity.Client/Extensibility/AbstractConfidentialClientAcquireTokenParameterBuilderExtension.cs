@@ -300,7 +300,7 @@ namespace Microsoft.Identity.Client.Extensibility
         /// <item><description>In order for the tokens to be successfully retrieved from the cache, all components used to cache the token must be provided.</description></item>
         /// </list>
         /// </remarks>
-        internal static AbstractAcquireTokenParameterBuilder<T> WithAdditionalCacheKeyComponents<T>(
+        public static AbstractAcquireTokenParameterBuilder<T> WithAdditionalCacheKeyComponents<T>(
             this AbstractAcquireTokenParameterBuilder<T> builder,
             IDictionary<string, Func<CancellationToken, Task<string>>> cacheKeyComponents)
             where T : AbstractAcquireTokenParameterBuilder<T>
