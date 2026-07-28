@@ -58,7 +58,7 @@ This skill provides shared terminology, conventions, and patterns for working wi
 - Result token type is `mtls_pop` (`Constants.MtlsPoPTokenType`)
 - `AuthenticationResult.BindingCertificate` is populated; its `Thumbprint` matches the certificate passed to `WithCertificate()`
 - Supports regional endpoints (`.WithAzureRegion("westus3")`) and the global `mtlsauth.microsoft.com` endpoint
-- SNI certificate authentication works **cross-platform, including Linux**; only the mTLS PoP token flow is Windows/macOS only
+- SNI certificate authentication works **cross-platform, including Linux**;
 
 ### Token Types
 
@@ -80,7 +80,7 @@ This skill provides shared terminology, conventions, and patterns for working wi
 - Certificate authentication method using X.509 certificate subject and issuer
 - Configured at app builder level: `.WithCertificate(cert, sendX5c: true)`
 - Used with Confidential Client only
-- **Works cross-platform, including Linux** (only the mTLS PoP token flow is Windows/macOS only)
+- **Works cross-platform, including Linux** 
 
 **BindingCertificate**
 - Certificate that was cryptographically bound to a PoP token
@@ -382,7 +382,7 @@ When reviewing mTLS PoP code, check for:
 - ❌ **SNI**: Assuming `SendCertificateOverMtls = true` controls PoP vs Bearer when PoP is explicitly requested — `.WithMtlsProofOfPossession()` always produces `mtls_pop` regardless of `SendCertificateOverMtls`
 - ❌ **SNI assertion flow**: Omitting `TokenBindingCertificate` in `ClientSignedAssertion` — without it, MSAL cannot emit `client_assertion_type: jwt-pop`
 - ❌ **SNI assertion flow**: Missing `using Microsoft.Identity.Client.Extensibility;` (needed for `ClientSignedAssertion` and `AssertionRequestOptions`)
-- ❌ Claiming SNI is unsupported on Linux — **SNI certificate authentication works on Linux**; only the mTLS PoP token flow is Windows/macOS only
+- ❌ Claiming SNI is unsupported on Linux — **SNI certificate authentication works on Linux**; 
 
 ## Testing Guidance
 
@@ -414,7 +414,6 @@ When reviewing mTLS PoP code, check for:
 | Unable to get UAMI token | Check UAMI exists, assigned to resource, correct ID type |
 | `ClientSignedAssertion` or `AssertionRequestOptions` not found | Add `using Microsoft.Identity.Client.Extensibility;` |
 | SNI assertion flow not using `jwt-pop` `client_assertion_type` | Set `ClientSignedAssertion.TokenBindingCertificate` and call `.WithMtlsProofOfPossession()` |
-| mTLS PoP not working on Linux | mTLS PoP token flow is Windows/macOS only; use `[RunOn(SkipConditions.Linux)]` on PoP tests |
 
 ### General Credential and Authentication Issues
 
