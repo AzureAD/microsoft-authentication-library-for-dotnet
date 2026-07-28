@@ -270,7 +270,7 @@ IConfidentialClientApplication bearerApp = ConfidentialClientApplicationBuilder.
 
 AuthenticationResult bearerResult = await bearerApp
     .AcquireTokenForClient(new[] { "https://vault.azure.net/.default" })
-    .ExecuteAsync()                        // no WithMtlsProofOfPossession → ******;
+    .ExecuteAsync()                        // no WithMtlsProofOfPossession → Bearer token
 
 Assert.AreEqual("Bearer", bearerResult.TokenType);
 
@@ -378,7 +378,7 @@ When reviewing mTLS PoP code, check for:
 - ❌ Not checking `BindingCertificate` for null
 - ❌ Disposing RSA keys from `GetRSAPrivateKey()` (handled by cert)
 - ❌ **SNI**: Forgetting `sendX5c: true` in `.WithCertificate(cert, sendX5c: true)` — SNI requires the public certificate to be sent
-- ❌ **SNI**: Assuming `SendCertificateOverMtls = true` controls PoP vs ****** PoP is explicitly requested — `.WithMtlsProofOfPossession()` always produces `mtls_pop` regardless of `SendCertificateOverMtls`
+- ❌ **SNI**: Assuming `SendCertificateOverMtls = true` controls PoP vs Bearer when PoP is explicitly requested — `.WithMtlsProofOfPossession()` always produces `mtls_pop` regardless of `SendCertificateOverMtls`
 - ❌ **SNI assertion flow**: Omitting `TokenBindingCertificate` in `ClientSignedAssertion` — without it, MSAL cannot emit `client_assertion_type: jwt-pop`
 - ❌ **SNI assertion flow**: Missing `using Microsoft.Identity.Client.Extensibility;` (needed for `ClientSignedAssertion` and `AssertionRequestOptions`)
 - ❌ Claiming SNI is unsupported on Linux — **SNI certificate authentication works on Linux**; only the mTLS PoP token flow is Windows/macOS only
