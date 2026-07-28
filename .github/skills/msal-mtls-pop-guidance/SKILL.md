@@ -261,7 +261,7 @@ Assert.AreEqual("mtlsauth.microsoft.com", endpoint.Host);
 ```csharp
 var certOptions = new CertificateOptions { SendCertificateOverMtls = true };
 
-// ****** mTLS transport (NO WithMtlsProofOfPossession)
+// Bearer token over mTLS transport (NO WithMtlsProofOfPossession)
 IConfidentialClientApplication bearerApp = ConfidentialClientApplicationBuilder.Create("<client-id>")
     .WithAuthority("https://login.microsoftonline.com/<tenant-id>")
     .WithAzureRegion("westus3")
