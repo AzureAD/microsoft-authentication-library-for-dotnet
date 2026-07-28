@@ -1,9 +1,3 @@
-Unreleased
-==========
-
-### Changes
-- Added end-to-end and unit coverage for the two-leg S2S (app) Federated Identity Credential (FIC) flow over mTLS PoP (SNI first leg → federated assertion → resource token bound to the same certificate). No public API change; `user_fic` is not supported over mTLS.
-
 4.87.0
 ======
 

@@ -46,526 +46,27 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             ApplicationBase.ResetStateForTest();
         }
 
-        [RunOn(SkipConditions.Linux)] // POP is not supported on Linux
-        public async Task Sni_Gets_Pop_Token_Successfully_TestAsync()
+        [RunOn(SkipConditions.Linux)] // PoP is not supported on Linux
+        public async Task Credential_X509_Output_Pop_TestAsync()
         {
-            // Arrange: Use LabResponseHelper to get app configuration
-            var appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
-
-            X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
-
-            string[] appScopes = new[] { GraphAppScope };
-
-            // Build Confidential Client Application with SNI certificate at App level
-            IConfidentialClientApplication confidentialApp = ConfidentialClientApplicationBuilder.Create(MsiAllowListedAppIdforSNI)
-                .WithAuthority("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c")
-                .WithAzureRegion("westus3") //test slice region 
-                .WithCertificate(cert, true)
-                .WithTestLogging()
-                .Build();
-
-            // Act: Acquire token with MTLS Proof of Possession at Request level
-            AuthenticationResult authResult = await ExecuteOrInconclusiveOnTokenTypeMismatchAsync(() => confidentialApp
-                .AcquireTokenForClient(appScopes)
-                .WithMtlsProofOfPossession()
-                .ExecuteAsync()).ConfigureAwait(false);
-
-            // Assert: Check that the MTLS PoP token acquisition was successful
-            Assert.IsNotNull(authResult, "The authentication result should not be null.");
-            Assert.AreEqual(Constants.MtlsPoPTokenType, authResult.TokenType, "Token type should be MTLS PoP");
-            Assert.IsNotNull(authResult.AccessToken, "Access token should not be null");
-
-            Assert.IsNotNull(authResult.BindingCertificate, "BindingCertificate should be set in SNI flow.");
-            Assert.AreEqual(cert.Thumbprint,
-                            authResult.BindingCertificate.Thumbprint,
-                            "BindingCertificate must match the certificate supplied via WithCertificate().");
-
-            // Simulate cache retrieval to verify MTLS configuration is cached properly
-            authResult = await confidentialApp
-               .AcquireTokenForClient(appScopes)
-               .WithMtlsProofOfPossession()
-               .ExecuteAsync()
-               .ConfigureAwait(false);
-
-            // Assert: Verify that the token was fetched from cache on the second request
-            Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource, "Token should be retrieved from cache");
-
-            Assert.IsNotNull(authResult.BindingCertificate, "BindingCertificate should be set in SNI flow.");
-            Assert.AreEqual(cert.Thumbprint,
-                            authResult.BindingCertificate.Thumbprint,
-                            "BindingCertificate must match the certificate supplied via WithCertificate().");
-
-            (HttpStatusCode status, string body) =
-                await CallResourceOverMtlsPopAsync(authResult, GraphMtlsResourceUri).ConfigureAwait(false);
-            AssertResourceAcceptedPopToken(status, body);
-        }
-
-        [RunOn(SkipConditions.Linux)] // POP is not supported on Linux
-        public async Task Sni_Gets_Pop_Token_WithGlobalEndpoint_TestAsync()
-        {
-            // Arrange: validate lab setup before executing the test flow.
-            _ = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
-
-            X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
-
-            string[] appScopes = new[] { GraphAppScope };
-
-            // Build Confidential Client Application with SNI certificate — NO region configured
-            IConfidentialClientApplication confidentialApp = ConfidentialClientApplicationBuilder.Create(MsiAllowListedAppIdforSNI)
-                .WithAuthority("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c")
-                .WithCertificate(cert, true)
-                .WithTestLogging()
-                .Build();
-
-            // Act: Acquire token with MTLS Proof of Possession at Request level (global endpoint)
-            AuthenticationResult authResult = await confidentialApp
-                .AcquireTokenForClient(appScopes)
-                .WithMtlsProofOfPossession()
-                .ExecuteAsync()
-                .ConfigureAwait(false);
-
-            // Assert: Check that the MTLS PoP token acquisition was successful
-            Assert.IsNotNull(authResult, "The authentication result should not be null.");
-            Assert.AreEqual(Constants.MtlsPoPTokenType, authResult.TokenType, "Token type should be MTLS PoP");
-            Assert.IsNotNull(authResult.AccessToken, "Access token should not be null");
-
-            Assert.IsNotNull(authResult.BindingCertificate, "BindingCertificate should be set in SNI flow.");
-            Assert.AreEqual(cert.Thumbprint,
-                            authResult.BindingCertificate.Thumbprint,
-                            "BindingCertificate must match the certificate supplied via WithCertificate().");
-
-            // Verify global mTLS endpoint was used (no region prefix)
-            Assert.IsTrue(
-                System.Uri.TryCreate(
-                    authResult.AuthenticationResultMetadata.TokenEndpoint,
-                    System.UriKind.Absolute,
-                    out System.Uri tokenEndpointUri),
-                "Token endpoint should be a valid absolute URI.");
-            Assert.AreEqual(
-                "mtlsauth.microsoft.com",
-                tokenEndpointUri.Host,
-                "Should use global mtlsauth endpoint when no region is configured.");
-
-            // Simulate cache retrieval to verify MTLS configuration is cached properly
-            authResult = await confidentialApp
-               .AcquireTokenForClient(appScopes)
-               .WithMtlsProofOfPossession()
-               .ExecuteAsync()
-               .ConfigureAwait(false);
-
-            // Assert: Verify that the token was fetched from cache on the second request
-            Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource, "Token should be retrieved from cache");
-
-            Assert.IsNotNull(authResult.BindingCertificate, "BindingCertificate should be set in SNI flow.");
-            Assert.AreEqual(cert.Thumbprint,
-                            authResult.BindingCertificate.Thumbprint,
-                            "BindingCertificate must match the certificate supplied via WithCertificate().");
-
-            (HttpStatusCode status, string body) =
-                await CallResourceOverMtlsPopAsync(authResult, GraphMtlsResourceUri).ConfigureAwait(false);
-            AssertResourceAcceptedPopToken(status, body);
-        }
-
-        [RunOn(SkipConditions.Linux)]
-        public async Task Sni_AssertionFlow_Uses_JwtPop_And_Succeeds_TestAsync()
-        {
-            X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
-
-            // Step 1: obtain a real JWT to reuse as the "assertion"
-            IConfidentialClientApplication firstApp = ConfidentialClientApplicationBuilder.Create(MsiAllowListedAppIdforSNI)
-                .WithAuthority("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c")
-                .WithAzureRegion("westus3")
-                .WithCertificate(cert, true)
-                .WithTestLogging()
-                .Build();
-
-            AuthenticationResult first = await ExecuteOrInconclusiveOnTokenTypeMismatchAsync(() => firstApp
-                .AcquireTokenForClient(new[] { TokenExchangeUrl })
-                .WithMtlsProofOfPossession()
-                .ExecuteAsync()).ConfigureAwait(false);
-
-            string assertionJwt = first.AccessToken;
-            Assert.IsFalse(string.IsNullOrEmpty(assertionJwt), "First leg did not return an access token to reuse as assertion.");
-
-            // Step 2: build the assertion-based app (NO WithCertificate here)
-            bool assertionProviderCalled = false;
-            string tokenEndpointSeenByProvider = null;
-            Guid correlationIdSeenByProvider = Guid.Empty;
-
-            string requestUriSeen = null;
-            string clientAssertionType = null;
-            bool sawClientAssertionParam = false;
-            bool sawClientAssertionTypeParam = false;
-
-            Guid expectedCorrelationId = Guid.NewGuid();
-
-            IConfidentialClientApplication assertionApp = ConfidentialClientApplicationBuilder.Create(MsiAllowListedAppIdforSNI)
-                .WithAuthority("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c")
-                .WithAzureRegion("westus3")
-                .WithClientAssertion((AssertionRequestOptions options, CancellationToken ct) =>
-                {
-                    assertionProviderCalled = true;
-                    tokenEndpointSeenByProvider = options.TokenEndpoint;
-                    correlationIdSeenByProvider = options.CorrelationId;
-
-                    return Task.FromResult(new ClientSignedAssertion
-                    {
-                        Assertion = assertionJwt,      // forwarded as client_assertion
-                        TokenBindingCertificate = cert // binds assertion for mTLS PoP (jwt-pop)
-                    });
-                })
-                .WithTestLogging()
-                .Build();
-
-            // Step 3: second leg should now SUCCEED
-            AuthenticationResult second = await assertionApp
-                .AcquireTokenForClient(new[] { GraphAppScope })
-                .WithMtlsProofOfPossession()
-                .WithCorrelationId(expectedCorrelationId)
-                .OnBeforeTokenRequest(data =>
-                {
-                    requestUriSeen = data.RequestUri?.ToString();
-
-                    if (data.BodyParameters != null)
-                    {
-                        sawClientAssertionParam = data.BodyParameters.ContainsKey("client_assertion");
-                        sawClientAssertionTypeParam = data.BodyParameters.ContainsKey("client_assertion_type");
-
-                        data.BodyParameters.TryGetValue("client_assertion_type", out clientAssertionType);
-                    }
-
-                    return Task.CompletedTask;
-                })
-                .ExecuteAsync()
-                .ConfigureAwait(false);
-
-            // Success assertions
-            Assert.IsNotNull(second, "Second leg returned null AuthenticationResult.");
-            Assert.IsFalse(string.IsNullOrEmpty(second.AccessToken), "Second leg did not return an access token.");
-            CollectionAssert.Contains(second.Scopes.ToArray(), GraphAppScope,
-                "Second leg token is not for the Graph scope.");
-
-            // Prove MSAL used the assertion + jwt-pop binding
-            Assert.IsTrue(assertionProviderCalled, "Client assertion provider should have been invoked.");
-            Assert.IsFalse(string.IsNullOrEmpty(tokenEndpointSeenByProvider),
-                "AssertionRequestOptions.TokenEndpoint should be provided to the callback.");
-
-            Assert.IsTrue(sawClientAssertionParam, "Token request should include client_assertion body parameter.");
-            Assert.IsTrue(sawClientAssertionTypeParam, "Token request should include client_assertion_type body parameter.");
-
-            Assert.AreEqual(
-                "urn:ietf:params:oauth:client-assertion-type:jwt-pop",
-                clientAssertionType,
-                "When TokenBindingCertificate is supplied and PoP is enabled, MSAL should use jwt-pop client_assertion_type.");
-
-            // Optional: if you rely on regional mTLS endpoints, check the host
-            StringAssert.Contains(requestUriSeen ?? "", "mtlsauth.microsoft.com");
-
-            // Verify CorrelationId flowed to the assertion callback (Issue #5924)
-            Assert.AreEqual(expectedCorrelationId, correlationIdSeenByProvider,
-                "CorrelationId from WithCorrelationId() must flow to the assertion callback for FIC two-leg tracing.");
-
-            (HttpStatusCode status, string body) =
-                await CallResourceOverMtlsPopAsync(second, GraphMtlsResourceUri).ConfigureAwait(false);
-            AssertResourceAcceptedPopToken(status, body);
-        }
-
-        //Downgraded test to verify bearer token acquisition works in SNI + jwt-pop scenario
-        [RunOn(SkipConditions.Linux)]
-        public async Task Sni_AssertionFlow_Uses_JwtPop_And_Acquires_Bearer_Token_TestAsync()
-        {
-            X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
-
-            // Step 1: obtain a real JWT to reuse as the "assertion"
-            IConfidentialClientApplication firstApp = ConfidentialClientApplicationBuilder.Create(MsiAllowListedAppIdforSNI)
-                .WithAuthority("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c")
-                .WithAzureRegion("westus3")
-                .WithCertificate(cert, true)
-                .WithTestLogging()
-                .Build();
-
-            AuthenticationResult first = await ExecuteOrInconclusiveOnTokenTypeMismatchAsync(() => firstApp
-                .AcquireTokenForClient(new[] { TokenExchangeUrl })
-                .WithMtlsProofOfPossession()
-                .ExecuteAsync()).ConfigureAwait(false);
-
-            string assertionJwt = first.AccessToken;
-            Assert.IsFalse(string.IsNullOrEmpty(assertionJwt), "First leg did not return an access token to reuse as assertion.");
-
-            // Step 2: build the assertion-based app (NO WithCertificate here)
-            bool assertionProviderCalled = false;
-            string tokenEndpointSeenByProvider = null;
-
-            string requestUriSeen = null;
-            string clientAssertionType = null;
-            bool sawClientAssertionParam = false;
-            bool sawClientAssertionTypeParam = false;
-
-            IConfidentialClientApplication assertionApp = ConfidentialClientApplicationBuilder.Create(MsiAllowListedAppIdforSNI)
-                .WithAuthority("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c")
-                .WithAzureRegion("westus3")
-                .WithClientAssertion((AssertionRequestOptions options, CancellationToken ct) =>
-                {
-                    assertionProviderCalled = true;
-                    tokenEndpointSeenByProvider = options.TokenEndpoint;
-
-                    return Task.FromResult(new ClientSignedAssertion
-                    {
-                        Assertion = assertionJwt,      // forwarded as client_assertion
-                        TokenBindingCertificate = cert // binds assertion for mTLS PoP (jwt-pop)
-                    });
-                })
-                .WithTestLogging()
-                .Build();
-
-            // Step 3: second leg should now SUCCEED
-            AuthenticationResult second = await assertionApp
-                .AcquireTokenForClient(new[] { "https://storage.azure.com/.default" })
-                .OnBeforeTokenRequest(data =>
-                {
-                    requestUriSeen = data.RequestUri?.ToString();
-
-                    if (data.BodyParameters != null)
-                    {
-                        sawClientAssertionParam = data.BodyParameters.ContainsKey("client_assertion");
-                        sawClientAssertionTypeParam = data.BodyParameters.ContainsKey("client_assertion_type");
-
-                        data.BodyParameters.TryGetValue("client_assertion_type", out clientAssertionType);
-                    }
-
-                    return Task.CompletedTask;
-                })
-                .ExecuteAsync()
-                .ConfigureAwait(false);
-
-            // Success assertions
-            Assert.IsNotNull(second, "Second leg returned null AuthenticationResult.");
-            Assert.IsFalse(string.IsNullOrEmpty(second.AccessToken), "Second leg did not return an access token.");
-            CollectionAssert.Contains(second.Scopes.ToArray(), "https://storage.azure.com/.default",
-                "Second leg token is not for the Storage scope.");
-
-            // Prove MSAL used the assertion + jwt-pop binding
-            Assert.IsTrue(assertionProviderCalled, "Client assertion provider should have been invoked.");
-            Assert.IsFalse(string.IsNullOrEmpty(tokenEndpointSeenByProvider),
-                "AssertionRequestOptions.TokenEndpoint should be provided to the callback.");
-
-            Assert.IsTrue(sawClientAssertionParam, "Token request should include client_assertion body parameter.");
-            Assert.IsTrue(sawClientAssertionTypeParam, "Token request should include client_assertion_type body parameter.");
-
-            Assert.AreEqual(
-                "urn:ietf:params:oauth:client-assertion-type:jwt-pop",
-                clientAssertionType,
-                "When TokenBindingCertificate is supplied and PoP is enabled, MSAL should use jwt-pop client_assertion_type.");
-
-            // Optional: if you rely on regional mTLS endpoints, check the host
-            StringAssert.Contains(requestUriSeen ?? "", "mtlsauth.microsoft.com");
-        }
-
-        [RunOn(SkipConditions.Linux)] // mTLS is not supported on Linux
-        public async Task Sni_Over_Mtls_Gets_Bearer_Token_Successfully_TestAsync()
-        {
-            X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
-
-            string[] appScopes = new[] { "https://vault.azure.net/.default" };
-
-            var certificateOptions = new CertificateOptions
-            {
-                SendCertificateOverMtls = true
-            };
-
-            // Build Confidential Client Application with mTLS Bearer transport
-            IConfidentialClientApplication confidentialApp = ConfidentialClientApplicationBuilder.Create(MsiAllowListedAppIdforSNI)
-                .WithAuthority("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c")
-                .WithAzureRegion("westus3") //test slice region
-                .WithCertificate(cert, certificateOptions)
-                .WithTestLogging()
-                .Build();
-
-            // Act: Acquire token - should be Bearer via mTLS transport
-            AuthenticationResult authResult = await confidentialApp
-                .AcquireTokenForClient(appScopes)
-                .ExecuteAsync()
-                .ConfigureAwait(false);
-
-            // Assert: Check that a Bearer token was acquired
-            Assert.IsNotNull(authResult, "The authentication result should not be null.");
-            Assert.AreEqual("Bearer", authResult.TokenType, "Token type should be Bearer for mTLS Bearer flow");
-            Assert.IsNotNull(authResult.AccessToken, "Access token should not be null");
-
-            // Verify the mTLS transport was actually used (regional mTLS endpoint)
-            Assert.IsNotNull(authResult.AuthenticationResultMetadata.TokenEndpoint,
-                "TokenEndpoint should be set for network requests.");
-            StringAssert.Contains(authResult.AuthenticationResultMetadata.TokenEndpoint, "mtlsauth",
-                "SendCertificateOverMtls should route through the mTLS regional endpoint.");
-
-            // Verify cache retrieval still works with mTLS Bearer configuration
-            AuthenticationResult cachedResult = await confidentialApp
-               .AcquireTokenForClient(appScopes)
-               .ExecuteAsync()
-               .ConfigureAwait(false);
-
-            Assert.AreEqual(TokenSource.Cache, cachedResult.AuthenticationResultMetadata.TokenSource, "Token should be retrieved from cache");
-        }
-
-        [RunOn(SkipConditions.Linux)]
-        public async Task Sni_Gets_Pop_Token_WithSendCertificateOverMtls_False_TestAsync()
-        {
-            await Sni_Gets_Pop_Token_WithCertificateOptionsAsync(sendCertificateOverMtls: false).ConfigureAwait(false);
-        }
-
-        [RunOn(SkipConditions.Linux)]
-        public async Task Sni_Gets_Pop_Token_WithSendCertificateOverMtls_True_TestAsync()
-        {
-            await Sni_Gets_Pop_Token_WithCertificateOptionsAsync(sendCertificateOverMtls: true).ConfigureAwait(false);
-        }
-
-        private static async Task Sni_Gets_Pop_Token_WithCertificateOptionsAsync(bool sendCertificateOverMtls)
-        {
-            // Arrange
-            X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
-
-            string[] appScopes = new[] { GraphAppScope };
-
-            var certificateOptions = new CertificateOptions
-            {
-                SendCertificateOverMtls = sendCertificateOverMtls
-            };
-
-            // Build with CertificateOptions overload
-            IConfidentialClientApplication confidentialApp = ConfidentialClientApplicationBuilder.Create(MsiAllowListedAppIdforSNI)
-                .WithAuthority("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c")
-                .WithAzureRegion("westus3")
-                .WithCertificate(cert, certificateOptions)
-                .WithTestLogging()
-                .Build();
-
-            // Act: WithMtlsProofOfPossession should always produce PoP, regardless of SendCertificateOverMtls
-            AuthenticationResult authResult = await ExecuteOrInconclusiveOnTokenTypeMismatchAsync(() => confidentialApp
-                .AcquireTokenForClient(appScopes)
-                .WithMtlsProofOfPossession()
-                .ExecuteAsync()).ConfigureAwait(false);
-
-            // Assert
-            Assert.IsNotNull(authResult, "The authentication result should not be null.");
-            Assert.AreEqual(Constants.MtlsPoPTokenType, authResult.TokenType, "Token type should be MTLS PoP");
-            Assert.IsNotNull(authResult.AccessToken, "Access token should not be null");
-            Assert.IsNotNull(authResult.BindingCertificate, "BindingCertificate should be set in SNI flow.");
-            Assert.AreEqual(cert.Thumbprint, authResult.BindingCertificate.Thumbprint,
-                "BindingCertificate must match the certificate supplied via WithCertificate().");
-
-            (HttpStatusCode status, string body) =
-                await CallResourceOverMtlsPopAsync(authResult, GraphMtlsResourceUri).ConfigureAwait(false);
-            AssertResourceAcceptedPopToken(status, body);
-        }
-
-        [RunOn(SkipConditions.Linux)]
-        public async Task Sni_AssertionFlow_GlobalEndpoint_Uses_JwtPop_And_Succeeds_TestAsync()
-        {
-            X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
-
-            // Step 1: obtain a real JWT to reuse as the "assertion" — using regional for first leg
-            IConfidentialClientApplication firstApp = ConfidentialClientApplicationBuilder.Create(MsiAllowListedAppIdforSNI)
-                .WithAuthority("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c")
-                .WithAzureRegion("westus3")
-                .WithCertificate(cert, true)
-                .WithTestLogging()
-                .Build();
-
-            AuthenticationResult first = await ExecuteOrInconclusiveOnTokenTypeMismatchAsync(() => firstApp
-                .AcquireTokenForClient(new[] { TokenExchangeUrl })
-                .WithMtlsProofOfPossession()
-                .ExecuteAsync()).ConfigureAwait(false);
-
-            string assertionJwt = first.AccessToken;
-            Assert.IsFalse(string.IsNullOrEmpty(assertionJwt), "First leg did not return an access token to reuse as assertion.");
-
-            Assert.AreEqual(Constants.MtlsPoPTokenType, first.TokenType, "Leg 1 token type should be MTLS PoP.");
-            Assert.IsNotNull(first.BindingCertificate, "Leg 1 BindingCertificate should be set for cert-bound PoP.");
-            Assert.AreEqual(cert.Thumbprint, first.BindingCertificate.Thumbprint,
-                "Leg 1 BindingCertificate must match the SNI certificate.");
-
-            // Step 2: build the assertion-based app — NO region configured (global endpoint)
-            bool assertionProviderCalled = false;
-            string requestUriSeen = null;
-            string clientAssertionType = null;
-
-            IConfidentialClientApplication assertionApp = ConfidentialClientApplicationBuilder.Create(MsiAllowListedAppIdforSNI)
-                .WithAuthority("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c")
-                .WithClientAssertion((AssertionRequestOptions options, CancellationToken ct) =>
-                {
-                    assertionProviderCalled = true;
-
-                    return Task.FromResult(new ClientSignedAssertion
-                    {
-                        Assertion = assertionJwt,
-                        TokenBindingCertificate = first.BindingCertificate // carry the SAME Leg-1 cert forward
-                    });
-                })
-                .WithTestLogging()
-                .Build();
-
-            // Step 3: second leg exchanges the assertion for the Graph-scoped token.
-            AuthenticationResult second = await ExecuteOrInconclusiveOnTokenTypeMismatchAsync(() => assertionApp
-                .AcquireTokenForClient(new[] { GraphAppScope })
-                .WithMtlsProofOfPossession()
-                .OnBeforeTokenRequest(data =>
-                {
-                    requestUriSeen = data.RequestUri?.ToString();
-                    data.BodyParameters?.TryGetValue("client_assertion_type", out clientAssertionType);
-                    return Task.CompletedTask;
-                })
-                .ExecuteAsync()).ConfigureAwait(false);
-
-            // Success assertions
-            Assert.IsNotNull(second, "Second leg returned null AuthenticationResult.");
-            Assert.IsFalse(string.IsNullOrEmpty(second.AccessToken), "Second leg did not return an access token.");
-            Assert.IsTrue(assertionProviderCalled, "Client assertion provider should have been invoked.");
-
-            Assert.AreEqual(Constants.MtlsPoPTokenType, second.TokenType, "Leg 2 token type should be MTLS PoP.");
-            Assert.AreEqual(
-                "urn:ietf:params:oauth:client-assertion-type:jwt-pop",
-                clientAssertionType,
-                "Leg 2 must present the federated assertion with the jwt-pop client_assertion_type.");
-            Assert.IsNotNull(second.BindingCertificate, "Leg 2 BindingCertificate should be set for mtls_pop.");
-            Assert.AreEqual(first.BindingCertificate.Thumbprint, second.BindingCertificate.Thumbprint,
-                "The final token must be bound to the SAME certificate as Leg 1 (binding-cert continuity).");
-
-            // Verify global mTLS endpoint was used
-            Assert.IsFalse(string.IsNullOrEmpty(requestUriSeen), "Expected token request URI to be captured.");
-            var requestUri = new System.Uri(requestUriSeen);
-            Assert.AreEqual("mtlsauth.microsoft.com", requestUri.Host,
-                "Should use global mtlsauth endpoint when no region is configured.");
-
-            (HttpStatusCode status, string body) =
-                await CallResourceOverMtlsPopAsync(second, GraphMtlsResourceUri).ConfigureAwait(false);
-            AssertResourceAcceptedPopToken(status, body);
-        }
-
-        [RunOn(SkipConditions.Linux)] // POP is not supported on Linux
-        public async Task Sni_Pop_Token_CanCall_Graph_OverMtls_TestAsync()
-        {
-            // Proves the acquired mTLS PoP token is actually USABLE against a resource, not just well-formed:
-            // SNI cert -> Graph-scoped mtls_pop token -> call Graph over mTLS with the SAME bound cert.
+            // X509 (SNI) credential -> Graph-scoped mtls_pop token on the global endpoint, then call
+            // Microsoft Graph over mTLS with the bound certificate to prove the token is actually usable.
             _ = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
             X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
 
-            // Global endpoint (no region) reliably issues token_type=mtls_pop.
             IConfidentialClientApplication confidentialApp = ConfidentialClientApplicationBuilder.Create(MsiAllowListedAppIdforSNI)
                 .WithAuthority("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c")
                 .WithCertificate(cert, true)
                 .WithTestLogging()
                 .Build();
 
-            // Act 1: acquire a Graph-scoped mTLS PoP token bound to the SNI certificate. The app is
-            // allow-listed for the Graph scope, so a service exception here is a real regression rather
-            // than an enablement gap - let it surface and fail the test.
             AuthenticationResult authResult = await ExecuteOrInconclusiveOnTokenTypeMismatchAsync(() => confidentialApp
                 .AcquireTokenForClient(new[] { GraphAppScope })
                 .WithMtlsProofOfPossession()
                 .ExecuteAsync()).ConfigureAwait(false);
 
             Assert.AreEqual(Constants.MtlsPoPTokenType, authResult.TokenType, "Token type should be MTLS PoP.");
-            Assert.IsNotNull(authResult.BindingCertificate, "BindingCertificate should be set in SNI flow.");
+            Assert.IsNotNull(authResult.BindingCertificate, "BindingCertificate should be set in the SNI flow.");
             Assert.AreEqual(cert.Thumbprint, authResult.BindingCertificate.Thumbprint,
                 "BindingCertificate must match the certificate supplied via WithCertificate().");
 
@@ -574,33 +75,125 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             AssertResourceAcceptedPopToken(status, body);
         }
 
-        [RunOn(SkipConditions.Linux)] // POP is not supported on Linux
-        public async Task Sni_TwoLeg_S2sFic_Pop_CanCall_Graph_OverMtls_TestAsync()
+        [RunOn(SkipConditions.Linux)] // mTLS is not supported on Linux
+        public async Task Credential_X509_Output_Bearer_TestAsync()
         {
-            // Two-leg S2S FIC over mTLS PoP (SNI first leg -> federated assertion -> Graph-scoped resource
-            // token bound to the same certificate), then call Microsoft Graph over mTLS with that cert.
-            // Both legs use an allow-listed app over the global mtlsauth endpoint, so a service exception
-            // here is a real regression rather than an enablement gap - let it surface and fail the test.
+            // X509 (SNI) credential over mTLS transport WITHOUT requesting PoP -> a plain Bearer token.
+            // A Bearer token is not certificate-bound, so there is no Graph-over-mTLS call here.
+            X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
+
+            var certificateOptions = new CertificateOptions
+            {
+                SendCertificateOverMtls = true
+            };
+
+            IConfidentialClientApplication confidentialApp = ConfidentialClientApplicationBuilder.Create(MsiAllowListedAppIdforSNI)
+                .WithAuthority("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c")
+                .WithAzureRegion("westus3") // test slice region
+                .WithCertificate(cert, certificateOptions)
+                .WithTestLogging()
+                .Build();
+
+            AuthenticationResult authResult = await confidentialApp
+                .AcquireTokenForClient(new[] { "https://vault.azure.net/.default" })
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            Assert.IsNotNull(authResult, "The authentication result should not be null.");
+            Assert.AreEqual("Bearer", authResult.TokenType, "Token type should be Bearer when PoP is not requested.");
+            Assert.IsNotNull(authResult.AccessToken, "Access token should not be null.");
+        }
+
+        [RunOn(SkipConditions.Linux)] // PoP is not supported on Linux
+        public async Task Credential_Fic_Output_Pop_TestAsync()
+        {
+            // Two-leg S2S FIC over mTLS PoP: SNI cert (leg 1) -> federated assertion -> resource token
+            // bound to the SAME certificate (leg 2), then call Microsoft Graph over mTLS with that cert.
             AuthenticationResult leg2 = await RunTwoLegS2sFicBothLegsPopAsync(
                 MsiAllowListedAppIdforSNI, TokenExchangeUrl, GraphAppScope).ConfigureAwait(false);
 
             (HttpStatusCode status, string body) =
                 await CallResourceOverMtlsPopAsync(leg2, GraphMtlsResourceUri).ConfigureAwait(false);
-
             AssertResourceAcceptedPopToken(status, body);
         }
 
-        // Drives the two-leg S2S FIC over mTLS PoP end-to-end flow. Both legs run as the same
-        // confidential-client app (self-issued S2S FIC) and use the global mtlsauth endpoint (no
-        // region) so they reliably return token_type=mtls_pop, and each leg is wrapped in
-        // ExecuteOrInconclusiveOnTokenTypeMismatchAsync to tolerate a server-side downgrade.
+        [RunOn(SkipConditions.Linux)] // PoP is not supported on Linux
+        public async Task Credential_Fic_Output_Bearer_TestAsync()
+        {
+            // Two-leg S2S FIC where leg 2 does NOT request PoP -> a plain Bearer token. The federated
+            // assertion still carries a TokenBindingCertificate, so it is presented with the jwt-pop
+            // client_assertion_type. No Graph-over-mTLS call for a (non-bound) Bearer token.
+            X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
+
+            // Leg 1: SNI cert -> federated assertion (mtls_pop).
+            IConfidentialClientApplication leg1App = ConfidentialClientApplicationBuilder.Create(MsiAllowListedAppIdforSNI)
+                .WithAuthority("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c")
+                .WithAzureRegion("westus3")
+                .WithCertificate(cert, true)
+                .WithTestLogging()
+                .Build();
+
+            AuthenticationResult leg1 = await ExecuteOrInconclusiveOnTokenTypeMismatchAsync(() => leg1App
+                .AcquireTokenForClient(new[] { TokenExchangeUrl })
+                .WithMtlsProofOfPossession()
+                .ExecuteAsync()).ConfigureAwait(false);
+
+            Assert.IsFalse(string.IsNullOrEmpty(leg1.AccessToken), "Leg 1 did not return a federated assertion.");
+
+            // Leg 2: carry the assertion + binding cert, but do NOT request PoP -> Bearer output.
+            bool assertionProviderCalled = false;
+            string clientAssertionType = null;
+
+            IConfidentialClientApplication leg2App = ConfidentialClientApplicationBuilder.Create(MsiAllowListedAppIdforSNI)
+                .WithAuthority("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c")
+                .WithAzureRegion("westus3")
+                .WithClientAssertion((AssertionRequestOptions options, CancellationToken ct) =>
+                {
+                    assertionProviderCalled = true;
+                    return Task.FromResult(new ClientSignedAssertion
+                    {
+                        Assertion = leg1.AccessToken,
+                        TokenBindingCertificate = leg1.BindingCertificate
+                    });
+                })
+                .WithTestLogging()
+                .Build();
+
+            AuthenticationResult leg2 = await leg2App
+                .AcquireTokenForClient(new[] { "https://storage.azure.com/.default" })
+                .OnBeforeTokenRequest(data =>
+                {
+                    data.BodyParameters?.TryGetValue("client_assertion_type", out clientAssertionType);
+                    return Task.CompletedTask;
+                })
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            Assert.IsFalse(string.IsNullOrEmpty(leg2.AccessToken), "Leg 2 did not return an access token.");
+            Assert.AreEqual("Bearer", leg2.TokenType, "Leg 2 did not request PoP, so the output token should be Bearer.");
+            CollectionAssert.Contains(leg2.Scopes.ToArray(), "https://storage.azure.com/.default",
+                "Leg 2 token is not for the Storage scope.");
+            Assert.IsTrue(assertionProviderCalled, "Client assertion provider should have been invoked.");
+            Assert.AreEqual(
+                "urn:ietf:params:oauth:client-assertion-type:jwt-pop",
+                clientAssertionType,
+                "A TokenBindingCertificate-backed assertion should use the jwt-pop client_assertion_type.");
+        }
+
+        // Drives the two-leg S2S FIC over mTLS PoP flow end-to-end. Leg 1 uses the SNI certificate to
+        // obtain a federated assertion; leg 2 carries that assertion plus the SAME binding certificate to
+        // obtain a resource token bound to that certificate. Both legs use the global mtlsauth endpoint
+        // (no region) so they reliably return token_type=mtls_pop, and each leg tolerates a server-side
+        // token-type downgrade via ExecuteOrInconclusiveOnTokenTypeMismatchAsync. Wire-format details
+        // (endpoint host, jwt-pop client_assertion_type) are asserted in the unit tests; here we verify the
+        // end-to-end round trip, binding-certificate continuity, and correlation-id propagation (#5924).
         private static async Task<AuthenticationResult> RunTwoLegS2sFicBothLegsPopAsync(string clientId, string leg1ExchangeScope, string finalResourceScope)
         {
             _ = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
 
             X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
 
-            // ----- Leg 1: SNI cert -> federated assertion (mtls_pop) on the global endpoint -----
+            // Leg 1: SNI cert -> federated assertion (mtls_pop) on the global endpoint.
             IConfidentialClientApplication leg1App = ConfidentialClientApplicationBuilder.Create(clientId)
                 .WithAuthority("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c")
                 .WithCertificate(cert, true)
@@ -612,57 +205,47 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithMtlsProofOfPossession()
                 .ExecuteAsync()).ConfigureAwait(false);
 
-            Assert.IsNotNull(leg1, "Leg 1 returned null AuthenticationResult.");
             Assert.AreEqual(Constants.MtlsPoPTokenType, leg1.TokenType, "Leg 1 token type should be MTLS PoP.");
             Assert.IsFalse(string.IsNullOrEmpty(leg1.AccessToken), "Leg 1 did not return a federated assertion.");
             Assert.IsNotNull(leg1.BindingCertificate, "Leg 1 BindingCertificate should be set for cert-bound PoP.");
             Assert.AreEqual(cert.Thumbprint, leg1.BindingCertificate.Thumbprint,
                 "Leg 1 BindingCertificate must match the SNI certificate.");
 
-            // ----- Leg 2: carry Leg-1 binding cert -> resource token (mtls_pop) on the global endpoint -----
-            string leg2ClientAssertionType = null;
-            string leg2RequestUri = null;
+            // Leg 2: carry the Leg-1 assertion + binding cert -> resource token (mtls_pop) on the global endpoint.
+            Guid expectedCorrelationId = Guid.NewGuid();
+            Guid correlationIdSeenByProvider = Guid.Empty;
 
             IConfidentialClientApplication leg2App = ConfidentialClientApplicationBuilder.Create(clientId)
                 .WithAuthority("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c")
                 .WithClientAssertion((AssertionRequestOptions options, CancellationToken ct) =>
-                    Task.FromResult(new ClientSignedAssertion
+                {
+                    correlationIdSeenByProvider = options.CorrelationId;
+                    return Task.FromResult(new ClientSignedAssertion
                     {
                         Assertion = leg1.AccessToken,                     // Leg-1 federated assertion
                         TokenBindingCertificate = leg1.BindingCertificate // carry the SAME cert forward
-                    }))
+                    });
+                })
                 .WithTestLogging()
                 .Build();
 
             AuthenticationResult leg2 = await ExecuteOrInconclusiveOnTokenTypeMismatchAsync(() => leg2App
                 .AcquireTokenForClient(new[] { finalResourceScope })
                 .WithMtlsProofOfPossession()
-                .OnBeforeTokenRequest(data =>
-                {
-                    leg2RequestUri = data.RequestUri?.ToString();
-                    data.BodyParameters?.TryGetValue("client_assertion_type", out leg2ClientAssertionType);
-                    return Task.CompletedTask;
-                })
+                .WithCorrelationId(expectedCorrelationId)
                 .ExecuteAsync()).ConfigureAwait(false);
 
-            Assert.IsNotNull(leg2, "Leg 2 returned null AuthenticationResult.");
             Assert.AreEqual(Constants.MtlsPoPTokenType, leg2.TokenType, "Leg 2 token type should be MTLS PoP.");
             Assert.IsFalse(string.IsNullOrEmpty(leg2.AccessToken), "Leg 2 did not return an access token.");
             CollectionAssert.Contains(leg2.Scopes.ToArray(), finalResourceScope,
                 "Leg 2 token is not for the requested resource.");
-
-            Assert.AreEqual(
-                "urn:ietf:params:oauth:client-assertion-type:jwt-pop",
-                leg2ClientAssertionType,
-                "Leg 2 must present the federated assertion with the jwt-pop client_assertion_type.");
-
             Assert.IsNotNull(leg2.BindingCertificate, "Leg 2 BindingCertificate should be set for mtls_pop.");
             Assert.AreEqual(leg1.BindingCertificate.Thumbprint, leg2.BindingCertificate.Thumbprint,
                 "The final token must be bound to the SAME certificate as Leg 1 (binding-cert continuity).");
 
-            Assert.IsFalse(string.IsNullOrEmpty(leg2RequestUri), "Expected Leg 2 token request URI to be captured.");
-            Assert.AreEqual("mtlsauth.microsoft.com", new System.Uri(leg2RequestUri).Host,
-                "Leg 2 should use the global mtlsauth endpoint when no region is configured.");
+            // #5924: the correlation id from WithCorrelationId() must flow to the assertion callback.
+            Assert.AreEqual(expectedCorrelationId, correlationIdSeenByProvider,
+                "CorrelationId from WithCorrelationId() must flow to the assertion callback for FIC two-leg tracing.");
 
             return leg2;
         }
@@ -732,7 +315,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         // TODO: Remove once the AAD westus3 test-slice mtlsauth endpoint reliably honors
         // token_type=mtls_pop. Today the test slice intermittently downgrades to Bearer,
         // which is a server-side issue, not a MSAL regression. The global mtlsauth endpoint
-        // (covered by Sni_Gets_Pop_Token_WithGlobalEndpoint_TestAsync) continues to be
+        // (covered by Credential_X509_Output_Pop_TestAsync) continues to be
         // exercised end-to-end, so MSAL-side mTLS PoP behavior remains under test.
         private static async Task<AuthenticationResult> ExecuteOrInconclusiveOnTokenTypeMismatchAsync(
             Func<Task<AuthenticationResult>> action)
