@@ -143,7 +143,7 @@ ManagedIdentityId.WithUserAssignedObjectId("ecb2ad92-3e30-4505-b79f-ac640d069f24
 
 ## Required Namespaces
 
-Always include these namespaces in mTLS PoP code:
+Include these core namespaces in mTLS PoP code:
 
 ```csharp
 using System;
@@ -153,9 +153,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;        // ← For ManagedIdentityId
-using Microsoft.Identity.Client.Extensibility;    // ← For ClientSignedAssertion, AssertionRequestOptions (SNI assertion flow)
 using Microsoft.Identity.Client.KeyAttestation;   // ← For WithAttestationSupport()
 ```
+
+Add `using Microsoft.Identity.Client.Extensibility;` only when you use extensibility hooks such as `OnBeforeTokenRequest`.
 
 ## Version Requirements
 
@@ -299,7 +300,7 @@ In the assertion (FIC) flow, the second app has **no** `WithCertificate` call �
 `AssertionRequestOptions.TokenEndpoint` and `AssertionRequestOptions.CorrelationId` are passed into the assertion callback; use `.WithCorrelationId(...)` to set a correlation ID and verify it flows through.
 
 ```csharp
-using Microsoft.Identity.Client.Extensibility; // ClientSignedAssertion, AssertionRequestOptions
+using Microsoft.Identity.Client; // ClientSignedAssertion, AssertionRequestOptions
 
 // Leg 1: acquire assertion token using SNI cert (regional or global)
 IConfidentialClientApplication firstApp = ConfidentialClientApplicationBuilder.Create("<client-id>")
@@ -381,7 +382,7 @@ When reviewing mTLS PoP code, check for:
 - ❌ **SNI**: Forgetting `sendX5c: true` in `.WithCertificate(cert, sendX5c: true)` — SNI requires the public certificate to be sent
 - ❌ **SNI**: Assuming `SendCertificateOverMtls = true` controls PoP vs Bearer when PoP is explicitly requested — `.WithMtlsProofOfPossession()` always produces `mtls_pop` regardless of `SendCertificateOverMtls`
 - ❌ **SNI assertion flow**: Omitting `TokenBindingCertificate` in `ClientSignedAssertion` — without it, MSAL cannot emit `client_assertion_type: jwt-pop`
-- ❌ **SNI assertion flow**: Missing `using Microsoft.Identity.Client.Extensibility;` (needed for `ClientSignedAssertion` and `AssertionRequestOptions`)
+- ❌ **SNI assertion flow**: Importing `Microsoft.Identity.Client.Extensibility` for `ClientSignedAssertion`/`AssertionRequestOptions` — these types are in `Microsoft.Identity.Client`
 - ❌ Claiming SNI is unsupported on Linux — **SNI certificate authentication works on Linux**; 
 
 ## Testing Guidance
@@ -412,7 +413,7 @@ When reviewing mTLS PoP code, check for:
 | `WithAttestationSupport()` not found | Add `Microsoft.Identity.Client.KeyAttestation` NuGet |
 | IMDS timeout (local machine) | Use UAMI or Confidential Client for local dev |
 | Unable to get UAMI token | Check UAMI exists, assigned to resource, correct ID type |
-| `ClientSignedAssertion` or `AssertionRequestOptions` not found | Add `using Microsoft.Identity.Client.Extensibility;` |
+| `ClientSignedAssertion` or `AssertionRequestOptions` not found | Add `using Microsoft.Identity.Client;` |
 | SNI assertion flow not using `jwt-pop` `client_assertion_type` | Set `ClientSignedAssertion.TokenBindingCertificate` and call `.WithMtlsProofOfPossession()` |
 
 ### General Credential and Authentication Issues
