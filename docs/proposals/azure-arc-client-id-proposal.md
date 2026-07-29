@@ -41,6 +41,7 @@ For a user-assigned request (caller passed `client_id`, `object_id`, or `msi_res
 
 - The matching field is present in the response -> the identity was honored -> return the token. The SDK also checks the value equals the requested identity as a sanity guard.
 - The matching field is absent -> older agent that ignored the selector and returned SAMI -> fail with `user_assigned_managed_identity_not_supported`.
+- HIMDS returns a 404 (new agent, requested identity not assigned to this machine) -> surface the service error; no token is returned.
 
 For a system-assigned request (no selector): no check; return the token as today.
 
