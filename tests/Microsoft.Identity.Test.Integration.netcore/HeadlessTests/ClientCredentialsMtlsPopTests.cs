@@ -60,10 +60,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithTestLogging()
                 .Build();
 
-            AuthenticationResult authResult = await ExecuteOrInconclusiveOnTokenTypeMismatchAsync(() => confidentialApp
+            AuthenticationResult authResult = await confidentialApp
                 .AcquireTokenForClient(new[] { GraphAppScope })
                 .WithMtlsProofOfPossession()
-                .ExecuteAsync()).ConfigureAwait(false);
+                .ExecuteAsync()
+                .ConfigureAwait(false);
 
             Assert.AreEqual(Constants.MtlsPoPTokenType, authResult.TokenType, "Token type should be MTLS PoP.");
             Assert.IsNotNull(authResult.BindingCertificate, "BindingCertificate should be set in the SNI flow.");
@@ -89,7 +90,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             IConfidentialClientApplication confidentialApp = ConfidentialClientApplicationBuilder.Create(MsiAllowListedAppIdforSNI)
                 .WithAuthority("https://login.microsoftonline.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c")
-                .WithAzureRegion("westus3") // test slice region
+                .WithAzureRegion("westus3")
                 .WithCertificate(cert, certificateOptions)
                 .WithTestLogging()
                 .Build();
@@ -133,10 +134,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithTestLogging()
                 .Build();
 
-            AuthenticationResult leg1 = await ExecuteOrInconclusiveOnTokenTypeMismatchAsync(() => leg1App
+            AuthenticationResult leg1 = await leg1App
                 .AcquireTokenForClient(new[] { TokenExchangeUrl })
                 .WithMtlsProofOfPossession()
-                .ExecuteAsync()).ConfigureAwait(false);
+                .ExecuteAsync()
+                .ConfigureAwait(false);
 
             Assert.IsFalse(string.IsNullOrEmpty(leg1.AccessToken), "Leg 1 did not return a federated assertion.");
 
@@ -183,8 +185,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         // Drives the two-leg S2S FIC over mTLS PoP flow end-to-end. Leg 1 uses the SNI certificate to
         // obtain a federated assertion; leg 2 carries that assertion plus the SAME binding certificate to
         // obtain a resource token bound to that certificate. Both legs use the global mtlsauth endpoint
-        // (no region) so they reliably return token_type=mtls_pop, and each leg tolerates a server-side
-        // token-type downgrade via ExecuteOrInconclusiveOnTokenTypeMismatchAsync. Wire-format details
+        // (no region) so they reliably return token_type=mtls_pop. Wire-format details
         // (endpoint host, jwt-pop client_assertion_type) are asserted in the unit tests; here we verify the
         // end-to-end round trip, binding-certificate continuity, and correlation-id propagation (#5924).
         private static async Task<AuthenticationResult> RunTwoLegS2sFicBothLegsPopAsync(string clientId, string leg1ExchangeScope, string finalResourceScope)
@@ -200,10 +201,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithTestLogging()
                 .Build();
 
-            AuthenticationResult leg1 = await ExecuteOrInconclusiveOnTokenTypeMismatchAsync(() => leg1App
+            AuthenticationResult leg1 = await leg1App
                 .AcquireTokenForClient(new[] { leg1ExchangeScope })
                 .WithMtlsProofOfPossession()
-                .ExecuteAsync()).ConfigureAwait(false);
+                .ExecuteAsync()
+                .ConfigureAwait(false);
 
             Assert.AreEqual(Constants.MtlsPoPTokenType, leg1.TokenType, "Leg 1 token type should be MTLS PoP.");
             Assert.IsFalse(string.IsNullOrEmpty(leg1.AccessToken), "Leg 1 did not return a federated assertion.");
@@ -229,11 +231,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithTestLogging()
                 .Build();
 
-            AuthenticationResult leg2 = await ExecuteOrInconclusiveOnTokenTypeMismatchAsync(() => leg2App
+            AuthenticationResult leg2 = await leg2App
                 .AcquireTokenForClient(new[] { finalResourceScope })
                 .WithMtlsProofOfPossession()
                 .WithCorrelationId(expectedCorrelationId)
-                .ExecuteAsync()).ConfigureAwait(false);
+                .ExecuteAsync()
+                .ConfigureAwait(false);
 
             Assert.AreEqual(Constants.MtlsPoPTokenType, leg2.TokenType, "Leg 2 token type should be MTLS PoP.");
             Assert.IsFalse(string.IsNullOrEmpty(leg2.AccessToken), "Leg 2 did not return an access token.");
@@ -310,28 +313,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             }
 
             return body.Length <= maxChars ? body : body.Substring(0, maxChars) + "...(truncated)";
-        }
-
-        // TODO: Remove once the AAD westus3 test-slice mtlsauth endpoint reliably honors
-        // token_type=mtls_pop. Today the test slice intermittently downgrades to Bearer,
-        // which is a server-side issue, not a MSAL regression. The global mtlsauth endpoint
-        // (covered by Credential_X509_Output_Pop_TestAsync) continues to be
-        // exercised end-to-end, so MSAL-side mTLS PoP behavior remains under test.
-        private static async Task<AuthenticationResult> ExecuteOrInconclusiveOnTokenTypeMismatchAsync(
-            Func<Task<AuthenticationResult>> action)
-        {
-            try
-            {
-                return await action().ConfigureAwait(false);
-            }
-            catch (MsalClientException ex) when (ex.ErrorCode == MsalError.TokenTypeMismatch)
-            {
-                Assert.Inconclusive(
-                    "AAD westus3 test-slice mTLS endpoint returned Bearer instead of mtls_pop. " +
-                    "This is a server-side issue on the test slice, not a MSAL regression. " +
-                    $"Underlying error: {ex.Message}");
-                throw; // Unreachable: Assert.Inconclusive throws.
-            }
         }
     }
 }
