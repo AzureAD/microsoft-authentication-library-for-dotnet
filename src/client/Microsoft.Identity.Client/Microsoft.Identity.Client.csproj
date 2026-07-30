@@ -75,6 +75,15 @@
     <None Include="$(PathToMsalSources)\..\..\..\README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
+  <!-- KMPP (Linux KeyGuard/OP-TEE) managed identity key provider uses net8.0+ crypto APIs
+       (X509Certificate2.CreateFromPem, SHA256.HashData, RandomNumberGenerator.Fill).
+       Exclude it from the older target frameworks; Linux there falls back to InMemory. -->
+  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop462)' or '$(TargetFramework)' == '$(TargetFrameworkNetDesktop472)' or '$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
+    <Compile Remove="$(PathToMsalSources)\ManagedIdentity\KeyProviders\KmppNativeMethods.cs" />
+    <Compile Remove="$(PathToMsalSources)\ManagedIdentity\KeyProviders\KmppRsa.cs" />
+    <Compile Remove="$(PathToMsalSources)\ManagedIdentity\KeyProviders\LinuxManagedIdentityKeyProvider.cs" />
+  </ItemGroup>
+
   <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
     <Compile Include="$(PathToMsalSources)\Platforms\netstandard\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DesktopOS\**\*.cs" />
