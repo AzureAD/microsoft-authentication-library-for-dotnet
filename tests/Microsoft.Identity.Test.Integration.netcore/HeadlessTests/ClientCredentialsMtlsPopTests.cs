@@ -71,9 +71,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(cert.Thumbprint, authResult.BindingCertificate.Thumbprint,
                 "BindingCertificate must match the certificate supplied via WithCertificate().");
 
-            (HttpStatusCode status, string body) =
-                await CallResourceOverMtlsPopAsync(authResult, GraphMtlsResourceUri).ConfigureAwait(false);
-            AssertResourceAcceptedPopToken(status, body);
+            await CallResourceOverMtlsPopAsync(authResult, GraphMtlsResourceUri).ConfigureAwait(false);
         }
 
         [RunOn(SkipConditions.Linux)] // mTLS is not supported on Linux
@@ -113,9 +111,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             AuthenticationResult leg2 = await RunTwoLegS2sFicBothLegsPopAsync(
                 MsiAllowListedAppIdforSNI, TokenExchangeUrl, GraphAppScope).ConfigureAwait(false);
 
-            (HttpStatusCode status, string body) =
-                await CallResourceOverMtlsPopAsync(leg2, GraphMtlsResourceUri).ConfigureAwait(false);
-            AssertResourceAcceptedPopToken(status, body);
+            await CallResourceOverMtlsPopAsync(leg2, GraphMtlsResourceUri).ConfigureAwait(false);
         }
 
         [RunOn(SkipConditions.Linux)] // PoP is not supported on Linux
@@ -254,12 +250,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         // Demonstrates the developer experience for USING an mTLS PoP token: present it to a protected
-        // resource over mTLS. Two things are required and easy to get wrong:
+        // resource over mTLS and require the resource to accept it (HTTP 200). Two things are required
+        // and easy to get wrong:
         //   1. The SAME certificate the token is bound to (AuthenticationResult.BindingCertificate) must be
         //      supplied as the client certificate on the TLS handshake.
         //   2. The Authorization header uses the "mtls_pop" scheme, NOT "Bearer".
         // The resource validates possession by matching the TLS client cert against the token's cnf binding.
-        private static async Task<(HttpStatusCode Status, string Body)> CallResourceOverMtlsPopAsync(
+        private static async Task CallResourceOverMtlsPopAsync(
             AuthenticationResult authResult, string resourceUri)
         {
             Assert.IsNotNull(authResult.BindingCertificate,
@@ -280,27 +277,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     string body = response.Content is null
                         ? string.Empty
                         : await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                    return (response.StatusCode, body);
+
+                    Assert.AreEqual(
+                        HttpStatusCode.OK, response.StatusCode,
+                        $"Resource did not accept the mTLS PoP token (got {(int)response.StatusCode}). App/cert is " +
+                        "allow-listed for mtls_pop here, so a 401/403 signals a regression (binding cert not presented " +
+                        $"on the TLS handshake, or Authorization scheme wasn't \"mtls_pop\"). Response: {TruncateForLog(body)}");
                 }
             }
-        }
-
-        private static void AssertResourceAcceptedPopToken(HttpStatusCode status, string body)
-        {
-            if (status == HttpStatusCode.OK)
-            {
-                return;
-            }
-
-            if (status == HttpStatusCode.Unauthorized || status == HttpStatusCode.Forbidden)
-            {
-                Assert.Fail(
-                    $"Resource rejected the mTLS PoP token ({(int)status}). The app/cert is allow-listed for mTLS PoP " +
-                    "on this resource, so this indicates a regression (e.g., the binding cert was not presented on the " +
-                    $"TLS handshake, or the Authorization scheme was not \"mtls_pop\"). Response: {TruncateForLog(body)}");
-            }
-
-            Assert.Fail($"Unexpected response calling the resource over mTLS PoP: {(int)status}. Response: {TruncateForLog(body)}");
         }
 
         // External response bodies are truncated before being emitted into (public) CI logs so a failing

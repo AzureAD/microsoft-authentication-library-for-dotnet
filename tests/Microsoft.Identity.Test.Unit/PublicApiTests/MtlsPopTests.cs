@@ -1357,7 +1357,8 @@ namespace Microsoft.Identity.Test.Unit
             // Vanilla SNI over mTLS PoP: the cert is presented on the TLS connection and ESTS
             // resolves Subject Name + Issuer trust from the TLS-presented cert. Even with sendX5C:true,
             // the mTLS body must carry NO client_assertion / client_assertion_type / req_cnf — the cert
-            // (cnf / x5t#S256) is the binding, not a signed assertion.
+            // (cnf / x5t#S256) is the binding, not a signed assertion. The non-mTLS SNI/Bearer path still
+            // sends a signed client_assertion for now; the omission is specific to mTLS PoP.
             string authorityUrl = "https://login.microsoftonline.com/123456-1234-2345-1234561234";
 
             using (var envContext = new EnvVariableContext())
