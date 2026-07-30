@@ -14,7 +14,7 @@ This needs no environment variable, no extra network call, and no new endpoint. 
 - On an older Azure Arc agent, HIMDS ignores the `client_id` / `object_id` / `msi_res_id` selector and returns a token for the system-assigned identity.
 - The access token is opaque to the SDK, so the caller cannot tell they got the wrong identity. They run as the machine identity, with different permissions, and find out late or never.
 
-This silent substitution is why the SDK blocks Azure Arc UAMI today. We saw the same class of break in IMDS when the default identity flipped from UAMI to SAMI.
+This silent substitution is why the SDK blocks Azure Arc UAMI today. We saw the same kind of break in IMDS when the default identity flipped from UAMI to SAMI.
 
 ## Why not detect capability another way
 
