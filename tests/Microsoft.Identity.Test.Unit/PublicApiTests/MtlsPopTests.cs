@@ -900,6 +900,10 @@ namespace Microsoft.Identity.Test.Unit
         [DataRow("login.sovcloud-identity.fr", "mtlsauth.sovcloud-identity.fr")]
         [DataRow("login.sovcloud-identity.de", "mtlsauth.sovcloud-identity.de")]
         [DataRow("login.sovcloud-identity.sg", "mtlsauth.sovcloud-identity.sg")]
+        // Legacy sovereign aliases must resolve to their preferred-network mTLS endpoint
+        // (regression: #5684 wrongly rejected these for mTLS PoP).
+        [DataRow("login.chinacloudapi.cn", "mtlsauth.partner.microsoftonline.cn")]
+        [DataRow("login.usgovcloudapi.net", "mtlsauth.microsoftonline.us")]
         public async Task PublicAndSovereignCloud_UsesPreferredNetwork_AndNoDiscovery_Async(string inputEnv, string expectedEnv)
         {
             // Append the input environment to create the authority URL
@@ -964,6 +968,10 @@ namespace Microsoft.Identity.Test.Unit
         [DataRow("login.sovcloud-identity.fr", "mtlsauth.sovcloud-identity.fr")]
         [DataRow("login.sovcloud-identity.de", "mtlsauth.sovcloud-identity.de")]
         [DataRow("login.sovcloud-identity.sg", "mtlsauth.sovcloud-identity.sg")]
+        // Legacy sovereign aliases must resolve to their preferred-network global mTLS endpoint
+        // (regression: #5684 wrongly rejected these for mTLS PoP). login.chinacloudapi.cn reproduces the Mooncake case.
+        [DataRow("login.chinacloudapi.cn", "mtlsauth.partner.microsoftonline.cn")]
+        [DataRow("login.usgovcloudapi.net", "mtlsauth.microsoftonline.us")]
         public async Task PublicAndSovereignCloud_NoRegion_UsesGlobalMtlsEndpoint_Async(string inputEnv, string expectedMtlsEnv)
         {
             string tenantId = "17b189bc-2b81-4ec5-aa51-3e628cbc931b";
@@ -1103,43 +1111,6 @@ namespace Microsoft.Identity.Test.Unit
                     Assert.AreEqual("header.payload.signature", result.AccessToken);
                     Assert.AreEqual(Constants.MtlsPoPAuthHeaderPrefix, result.TokenType);
                     Assert.AreEqual(expectedTokenEndpoint, result.AuthenticationResultMetadata.TokenEndpoint);
-                }
-            }
-        }
-
-        [TestMethod]
-        [DataRow("login.usgovcloudapi.net", MsalErrorMessage.MtlsPopNotSupportedForUsGovCloudApiMessage)]
-        [DataRow("login.chinacloudapi.cn", MsalErrorMessage.MtlsPopNotSupportedForChinaCloudApiMessage)]
-        public async Task UnsupportedSovereignHosts_ThrowsMsalClientException_Async(string unsupportedHost, string expectedErrorMessage)
-        {
-            // Arrange
-            string authorityUrl = $"https://{unsupportedHost}/17b189bc-2b81-4ec5-aa51-3e628cbc931b";
-
-            using (var envContext = new EnvVariableContext())
-            {
-                Environment.SetEnvironmentVariable("REGION_NAME", EastUsRegion);
-
-                using (var harness = new MockHttpAndServiceBundle())
-                {
-                    var app = ConfidentialClientApplicationBuilder
-                                        .Create(TestConstants.ClientId)
-                                        .WithAuthority(authorityUrl)
-                                        .WithHttpManager(harness.HttpManager)
-                                        .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
-                                        .WithCertificate(s_testCertificate)
-                                        .Build();
-
-                    // Act & Assert
-                    var exception = await Assert.ThrowsAsync<MsalClientException>(async () =>
-                    {
-                        await app.AcquireTokenForClient(TestConstants.s_scope)
-                            .WithMtlsProofOfPossession()
-                            .ExecuteAsync()
-                            .ConfigureAwait(false);
-                    }).ConfigureAwait(false);
-
-                    Assert.AreEqual(MsalError.MtlsPopNotSupportedForEnvironment, exception.ErrorCode);
-                    Assert.AreEqual(expectedErrorMessage, exception.Message);
                 }
             }
         }

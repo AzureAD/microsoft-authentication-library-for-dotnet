@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
@@ -17,14 +16,6 @@ namespace Microsoft.Identity.Client.Region
         public const string PublicEnvForRegional = "login.microsoft.com";
         public const string PublicEnvForRegionalMtlsAuth = "mtlsauth.microsoft.com";
 
-        // Map of unsupported sovereign cloud hosts for mTLS PoP to their error messages
-        private static readonly Dictionary<string, string> s_unsupportedMtlsHosts =
-            new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-            {
-                { "login.usgovcloudapi.net", MsalErrorMessage.MtlsPopNotSupportedForUsGovCloudApiMessage },
-                { "login.chinacloudapi.cn", MsalErrorMessage.MtlsPopNotSupportedForChinaCloudApiMessage }
-            };
-
         public RegionAndMtlsDiscoveryProvider(IHttpManager httpManager)
         {
             _regionManager = new RegionManager(httpManager);
@@ -32,19 +23,13 @@ namespace Microsoft.Identity.Client.Region
 
         public async Task<InstanceDiscoveryMetadataEntry> GetMetadataAsync(Uri authority, RequestContext requestContext)
         {
-            // Fail fast: Check for unsupported mTLS hosts before any region discovery
+            // Fail fast: mTLS PoP requires a login.* host before any region discovery. Known sovereign
+            // aliases (for example login.chinacloudapi.cn and login.usgovcloudapi.net) are valid; they are
+            // normalized to their preferred-network host and swapped to the correct mtlsauth.* endpoint
+            // during region resolution, so they must not be rejected here.
             if (requestContext.IsMtlsRequested)
             {
                 string host = authority.Host;
-
-                // Check if host is in the unsupported list
-                if (s_unsupportedMtlsHosts.TryGetValue(host, out string errorMessage))
-                {
-                    requestContext.Logger.Error($"[Region discovery] mTLS PoP is not supported for host: {host}");
-                    throw new MsalClientException(
-                        MsalError.MtlsPopNotSupportedForEnvironment,
-                        errorMessage);
-                }
 
                 // Check if host starts with "login."
                 if (!host.StartsWith("login.", StringComparison.OrdinalIgnoreCase))
