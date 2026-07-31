@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 httpManager.AddManagedIdentityMockHandler(
                     ManagedIdentityTests.AzureArcEndpoint,
                     ManagedIdentityTests.Resource,
-                    MockHelpers.GetMsiSuccessfulResponse(),
+                    GetArcUserAssignedSuccessResponse(userAssignedId, userAssignedIdentityId),
                     ManagedIdentitySource.AzureArc,
                     userAssignedId: userAssignedId,
                     userAssignedIdentityId: userAssignedIdentityId);
@@ -61,6 +61,73 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.IsNotNull(result.AccessToken);
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
             }
+        }
+
+        [TestMethod]
+        [DataRow(TestConstants.ClientId, UserAssignedIdentityId.ClientId)]
+        [DataRow(TestConstants.MiResourceId, UserAssignedIdentityId.ResourceId)]
+        [DataRow(TestConstants.ObjectId, UserAssignedIdentityId.ObjectId)]
+        public async Task AzureArcUserAssignedManagedIdentityNotHonoredFailsAsync(string userAssignedId, UserAssignedIdentityId userAssignedIdentityId)
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.AzureArc, ManagedIdentityTests.AzureArcEndpoint);
+
+                ManagedIdentityApplicationBuilder miBuilder = CreateMIABuilder(userAssignedId, userAssignedIdentityId);
+                miBuilder.WithHttpManager(httpManager);
+
+                IManagedIdentityApplication mi = miBuilder.Build();
+
+                // Simulate a legacy Azure Arc agent: it ignores the selector and returns a token that
+                // does not confirm the requested user-assigned identity (no matching echo field).
+                httpManager.AddManagedIdentityMockHandler(
+                    ManagedIdentityTests.AzureArcEndpoint,
+                    ManagedIdentityTests.Resource,
+                    MockHelpers.GetMsiSuccessfulResponse(),
+                    ManagedIdentitySource.AzureArc,
+                    userAssignedId: userAssignedId,
+                    userAssignedIdentityId: userAssignedIdentityId);
+
+                MsalServiceException ex = await Assert.ThrowsAsync<MsalServiceException>(async () =>
+                    await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
+
+                Assert.IsNotNull(ex);
+                Assert.AreEqual(ManagedIdentitySource.AzureArc.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
+                Assert.AreEqual(MsalError.UserAssignedManagedIdentityNotSupported, ex.ErrorCode);
+                Assert.AreEqual(string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityUserAssignedNotSupported, AzureArc), ex.Message);
+            }
+        }
+
+        // Builds an Azure Arc token response that echoes the requested user-assigned identity,
+        // simulating an agent that honors the selector.
+        private static string GetArcUserAssignedSuccessResponse(string userAssignedId, UserAssignedIdentityId userAssignedIdentityId)
+        {
+            string echoedField;
+            switch (userAssignedIdentityId)
+            {
+                case UserAssignedIdentityId.ClientId:
+                    echoedField = "\"client_id\":\"" + userAssignedId + "\"";
+                    break;
+                case UserAssignedIdentityId.ResourceId:
+                    echoedField = "\"msi_res_id\":\"" + userAssignedId + "\"";
+                    break;
+                case UserAssignedIdentityId.ObjectId:
+                    echoedField = "\"object_id\":\"" + userAssignedId + "\"";
+                    break;
+                default:
+                    echoedField = null;
+                    break;
+            }
+
+            string expiresOn = ((long)(DateTime.UtcNow.AddHours(1) - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds)
+                .ToString(CultureInfo.InvariantCulture);
+
+            string identityPart = echoedField is null ? string.Empty : "," + echoedField;
+
+            return "{\"access_token\":\"" + TestConstants.ATSecret + "\",\"expires_on\":\"" + expiresOn +
+                   "\",\"resource\":\"https://management.azure.com/\",\"token_type\":\"Bearer\"" + identityPart + "}";
         }
 
         [TestMethod]

@@ -66,5 +66,17 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         [JsonProperty("client_id")]
         public string ClientId { get; set; }
 
+        /// <summary>
+        /// The object id of the user-assigned managed identity that issued the token, if the endpoint echoes it back.
+        /// </summary>
+        [JsonProperty("object_id")]
+        public string ObjectId { get; set; }
+
+        /// <summary>
+        /// The Azure resource id of the user-assigned managed identity that issued the token, if the endpoint echoes it back.
+        /// </summary>
+        [JsonProperty("msi_res_id")]
+        public string ResourceId { get; set; }
+
     }
 }

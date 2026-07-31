@@ -143,11 +143,59 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                          cancellationToken: cancellationToken,
                          retryPolicy: retryPolicy)
                     .ConfigureAwait(false);
-
-                return await base.HandleResponseAsync(parameters, response, cancellationToken).ConfigureAwait(false);
             }
 
-            return await base.HandleResponseAsync(parameters, response, cancellationToken).ConfigureAwait(false);
+            ManagedIdentityResponse managedIdentityResponse =
+                await base.HandleResponseAsync(parameters, response, cancellationToken).ConfigureAwait(false);
+
+            VerifyUserAssignedIdentityWasHonored(managedIdentityResponse);
+
+            return managedIdentityResponse;
+        }
+
+        // Azure Arc user-assigned managed identity is a preview capability. A legacy Arc agent
+        // ignores the client_id / object_id / mi_res_id selector and silently returns the machine's
+        // system-assigned identity. An agent that honors the request echoes the selected identity
+        // back in the token response. When the caller asked for a user-assigned identity but the
+        // response does not confirm it, fail closed so the caller never receives a token for a
+        // different identity than the one requested.
+        private void VerifyUserAssignedIdentityWasHonored(ManagedIdentityResponse managedIdentityResponse)
+        {
+            var managedIdentityId = _requestContext.ServiceBundle.Config.ManagedIdentityId;
+
+            if (!managedIdentityId.IsUserAssigned)
+            {
+                return;
+            }
+
+            string echoedIdentity;
+            switch (managedIdentityId.IdType)
+            {
+                case AppConfig.ManagedIdentityIdType.ClientId:
+                    echoedIdentity = managedIdentityResponse.ClientId;
+                    break;
+                case AppConfig.ManagedIdentityIdType.ResourceId:
+                    echoedIdentity = managedIdentityResponse.ResourceId;
+                    break;
+                case AppConfig.ManagedIdentityIdType.ObjectId:
+                    echoedIdentity = managedIdentityResponse.ObjectId;
+                    break;
+                default:
+                    echoedIdentity = null;
+                    break;
+            }
+
+            if (string.IsNullOrEmpty(echoedIdentity) ||
+                !string.Equals(echoedIdentity, managedIdentityId.UserAssignedId, StringComparison.OrdinalIgnoreCase))
+            {
+                _requestContext.Logger.Error(
+                    "[Managed Identity] Azure Arc did not confirm the requested user-assigned identity in the token response. " +
+                    "The agent likely does not support user-assigned managed identity and returned the system-assigned identity.");
+
+                throw CreateManagedIdentityException(
+                    MsalError.UserAssignedManagedIdentityNotSupported,
+                    string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityUserAssignedNotSupported, AzureArc));
+            }
         }
 
         private void ValidateSplitChallenge(string[] splitChallenge)
