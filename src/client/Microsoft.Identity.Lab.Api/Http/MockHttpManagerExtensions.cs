@@ -40,7 +40,11 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                                            ? authorityURI.Host
                                            : AadAuthority.DefaultTrustedHost;
 
-                discoveryEndpoint = UriBuilderExtensions.GetHttpsUriWithOptionalPort($"https://{discoveryHost}/common/discovery/instance", authorityURI.Port);
+                discoveryEndpoint = $"https://{discoveryHost}/common/discovery/instance";
+                if (string.Equals(discoveryHost, authorityURI.Host, StringComparison.OrdinalIgnoreCase))
+                {
+                    discoveryEndpoint = UriBuilderExtensions.GetHttpsUriWithOptionalPort(discoveryEndpoint, authorityURI.Port);
+                }
             }
             else
             {
