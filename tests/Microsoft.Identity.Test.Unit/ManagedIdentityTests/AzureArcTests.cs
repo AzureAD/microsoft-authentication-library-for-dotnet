@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.ManagedIdentity;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
@@ -194,6 +195,48 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Assert.IsNotNull(ex);
                 Assert.AreEqual(MsalError.UserAssignedManagedIdentityNotSupported, ex.ErrorCode);
+            }
+        }
+
+        [TestMethod]
+        public async Task AzureArcUserAssignedManagedIdentityCacheIsPartitionedByIdentityAsync()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.AzureArc, ManagedIdentityTests.AzureArcEndpoint);
+
+                var uami = ManagedIdentityApplicationBuilder
+                    .Create(ManagedIdentityId.WithUserAssignedClientId(TestConstants.ClientId))
+                    .WithHttpManager(httpManager)
+                    .BuildConcrete();
+
+                // The cache is partitioned by the requested identity: a user-assigned request is keyed
+                // by its own client id, not the system-assigned default, so SAMI and each UAMI get
+                // separate cache entries.
+                var recorder = uami.AppTokenCacheInternal.RecordAccess((args) =>
+                {
+                    Assert.AreEqual(TestConstants.ClientId, args.ClientId);
+                    Assert.AreNotEqual(Constants.ManagedIdentityDefaultClientId, args.ClientId);
+                });
+
+                httpManager.AddManagedIdentityMockHandler(
+                    ManagedIdentityTests.AzureArcEndpoint,
+                    ManagedIdentityTests.Resource,
+                    GetArcUserAssignedSuccessResponse(TestConstants.ClientId, UserAssignedIdentityId.ClientId),
+                    ManagedIdentitySource.AzureArc,
+                    userAssignedId: TestConstants.ClientId,
+                    userAssignedIdentityId: UserAssignedIdentityId.ClientId);
+
+                AuthenticationResult idp = await uami.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .ExecuteAsync().ConfigureAwait(false);
+                Assert.AreEqual(TokenSource.IdentityProvider, idp.AuthenticationResultMetadata.TokenSource);
+
+                AuthenticationResult cached = await uami.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .ExecuteAsync().ConfigureAwait(false);
+                Assert.AreEqual(TokenSource.Cache, cached.AuthenticationResultMetadata.TokenSource);
+
+                recorder.AssertAccessCounts(2, 1);
             }
         }
 
