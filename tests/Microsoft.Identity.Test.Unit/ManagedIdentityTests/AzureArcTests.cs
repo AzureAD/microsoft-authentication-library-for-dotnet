@@ -103,7 +103,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
         // Builds an Azure Arc token response that echoes the requested user-assigned identity,
         // simulating an agent that honors the selector.
-        private static string GetArcUserAssignedSuccessResponse(string userAssignedId, UserAssignedIdentityId userAssignedIdentityId)
+        private static string GetArcUserAssignedSuccessResponse(string userAssignedId, UserAssignedIdentityId userAssignedIdentityId, bool useArcResourceIdSpelling = false)
         {
             string echoedField;
             switch (userAssignedIdentityId)
@@ -112,7 +112,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     echoedField = "\"client_id\":\"" + userAssignedId + "\"";
                     break;
                 case UserAssignedIdentityId.ResourceId:
-                    echoedField = "\"msi_res_id\":\"" + userAssignedId + "\"";
+                    echoedField = "\"" + (useArcResourceIdSpelling ? "mi_res_id" : "msi_res_id") + "\":\"" + userAssignedId + "\"";
                     break;
                 case UserAssignedIdentityId.ObjectId:
                     echoedField = "\"object_id\":\"" + userAssignedId + "\"";
@@ -199,34 +199,67 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        public async Task AzureArcUserAssignedManagedIdentityCacheIsPartitionedByIdentityAsync()
+        public async Task AzureArcUserAssignedResourceIdEchoedAsMiResIdIsAcceptedAsync()
         {
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(ManagedIdentitySource.AzureArc, ManagedIdentityTests.AzureArcEndpoint);
 
-                var uami = ManagedIdentityApplicationBuilder
-                    .Create(ManagedIdentityId.WithUserAssignedClientId(TestConstants.ClientId))
+                ManagedIdentityApplicationBuilder miBuilder = CreateMIABuilder(TestConstants.MiResourceId, UserAssignedIdentityId.ResourceId);
+                miBuilder.WithHttpManager(httpManager);
+
+                IManagedIdentityApplication mi = miBuilder.Build();
+
+                // The agent may echo the resource id under "mi_res_id" (the spelling MSAL sends on the
+                // request) instead of the IMDS "msi_res_id". MSAL must accept either spelling.
+                httpManager.AddManagedIdentityMockHandler(
+                    ManagedIdentityTests.AzureArcEndpoint,
+                    ManagedIdentityTests.Resource,
+                    GetArcUserAssignedSuccessResponse(TestConstants.MiResourceId, UserAssignedIdentityId.ResourceId, useArcResourceIdSpelling: true),
+                    ManagedIdentitySource.AzureArc,
+                    userAssignedId: TestConstants.MiResourceId,
+                    userAssignedIdentityId: UserAssignedIdentityId.ResourceId);
+
+                AuthenticationResult result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+
+        [TestMethod]
+        [DataRow(TestConstants.ClientId, UserAssignedIdentityId.ClientId)]
+        [DataRow(TestConstants.MiResourceId, UserAssignedIdentityId.ResourceId)]
+        [DataRow(TestConstants.ObjectId, UserAssignedIdentityId.ObjectId)]
+        public async Task AzureArcUserAssignedManagedIdentityCacheIsPartitionedByIdentityAsync(string userAssignedId, UserAssignedIdentityId userAssignedIdentityId)
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.AzureArc, ManagedIdentityTests.AzureArcEndpoint);
+
+                var uami = CreateMIABuilder(userAssignedId, userAssignedIdentityId)
                     .WithHttpManager(httpManager)
                     .BuildConcrete();
 
                 // The cache is partitioned by the requested identity: a user-assigned request is keyed
-                // by its own client id, not the system-assigned default, so SAMI and each UAMI get
-                // separate cache entries.
+                // by its own identity (client id / resource id / object id), not the system-assigned
+                // default, so SAMI and each UAMI get separate cache entries.
                 var recorder = uami.AppTokenCacheInternal.RecordAccess((args) =>
                 {
-                    Assert.AreEqual(TestConstants.ClientId, args.ClientId);
+                    Assert.AreEqual(userAssignedId, args.ClientId);
                     Assert.AreNotEqual(Constants.ManagedIdentityDefaultClientId, args.ClientId);
                 });
 
                 httpManager.AddManagedIdentityMockHandler(
                     ManagedIdentityTests.AzureArcEndpoint,
                     ManagedIdentityTests.Resource,
-                    GetArcUserAssignedSuccessResponse(TestConstants.ClientId, UserAssignedIdentityId.ClientId),
+                    GetArcUserAssignedSuccessResponse(userAssignedId, userAssignedIdentityId),
                     ManagedIdentitySource.AzureArc,
-                    userAssignedId: TestConstants.ClientId,
-                    userAssignedIdentityId: UserAssignedIdentityId.ClientId);
+                    userAssignedId: userAssignedId,
+                    userAssignedIdentityId: userAssignedIdentityId);
 
                 AuthenticationResult idp = await uami.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .ExecuteAsync().ConfigureAwait(false);
