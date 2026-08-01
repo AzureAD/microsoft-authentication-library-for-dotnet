@@ -131,6 +131,73 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
+        public async Task AzureArcUserAssignedManagedIdentityNotFoundSurfacesServiceErrorAsync()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.AzureArc, ManagedIdentityTests.AzureArcEndpoint);
+
+                ManagedIdentityApplicationBuilder miBuilder = CreateMIABuilder(TestConstants.ClientId, UserAssignedIdentityId.ClientId);
+                miBuilder.WithHttpManager(httpManager);
+
+                IManagedIdentityApplication mi = miBuilder.Build();
+
+                // A new Arc agent returns 404 when the requested user-assigned identity is not assigned
+                // to the machine. This must surface as a service error, not the "not supported" error.
+                httpManager.AddManagedIdentityMockHandler(
+                    ManagedIdentityTests.AzureArcEndpoint,
+                    ManagedIdentityTests.Resource,
+                    MockHelpers.GetMsiErrorResponse(ManagedIdentitySource.AzureArc),
+                    ManagedIdentitySource.AzureArc,
+                    userAssignedId: TestConstants.ClientId,
+                    userAssignedIdentityId: UserAssignedIdentityId.ClientId,
+                    statusCode: HttpStatusCode.NotFound);
+
+                MsalServiceException ex = await Assert.ThrowsAsync<MsalServiceException>(async () =>
+                    await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
+
+                Assert.IsNotNull(ex);
+                Assert.AreEqual(ManagedIdentitySource.AzureArc.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
+                Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
+                Assert.AreNotEqual(MsalError.UserAssignedManagedIdentityNotSupported, ex.ErrorCode);
+            }
+        }
+
+        [TestMethod]
+        public async Task AzureArcUserAssignedManagedIdentityDifferentIdentityEchoedFailsAsync()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.AzureArc, ManagedIdentityTests.AzureArcEndpoint);
+
+                ManagedIdentityApplicationBuilder miBuilder = CreateMIABuilder(TestConstants.ClientId, UserAssignedIdentityId.ClientId);
+                miBuilder.WithHttpManager(httpManager);
+
+                IManagedIdentityApplication mi = miBuilder.Build();
+
+                // The agent echoes a different client_id than the caller requested. This is distinct from
+                // the "no echo field" case, and must still fail closed.
+                httpManager.AddManagedIdentityMockHandler(
+                    ManagedIdentityTests.AzureArcEndpoint,
+                    ManagedIdentityTests.Resource,
+                    GetArcUserAssignedSuccessResponse(TestConstants.ObjectId, UserAssignedIdentityId.ClientId),
+                    ManagedIdentitySource.AzureArc,
+                    userAssignedId: TestConstants.ClientId,
+                    userAssignedIdentityId: UserAssignedIdentityId.ClientId);
+
+                MsalServiceException ex = await Assert.ThrowsAsync<MsalServiceException>(async () =>
+                    await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
+
+                Assert.IsNotNull(ex);
+                Assert.AreEqual(MsalError.UserAssignedManagedIdentityNotSupported, ex.ErrorCode);
+            }
+        }
+
+        [TestMethod]
         public async Task AzureArcAuthHeaderMissingAsync()
         {
             using (new EnvVariableContext())

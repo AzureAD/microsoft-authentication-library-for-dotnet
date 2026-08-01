@@ -137,7 +137,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                          body: null,
                          method: System.Net.Http.HttpMethod.Get,
                          logger: _requestContext.Logger,
-                         doNotThrow: false,
+                         doNotThrow: true,
                          mtlsCertificate: null,
                          validateServerCertificate: null,
                          cancellationToken: cancellationToken,
@@ -185,6 +185,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     break;
             }
 
+            // Compare identifiers case-insensitively: client_id / object_id are GUIDs, and an ARM
+            // resource id (msi_res_id) can legitimately differ in segment casing.
             if (string.IsNullOrEmpty(echoedIdentity) ||
                 !string.Equals(echoedIdentity, managedIdentityId.UserAssignedId, StringComparison.OrdinalIgnoreCase))
             {
