@@ -313,17 +313,39 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private void UpdateTelemetry(long elapsedMilliseconds, ApiEvent apiEvent, AuthenticationResult authenticationResult)
         {
-            authenticationResult.AuthenticationResultMetadata.DurationTotalInMs = elapsedMilliseconds;
-            authenticationResult.AuthenticationResultMetadata.DurationInHttpInMs = apiEvent.DurationInHttpInMs;
-            authenticationResult.AuthenticationResultMetadata.DurationInCacheInMs = apiEvent.DurationInCacheInMs;
-            authenticationResult.AuthenticationResultMetadata.TokenEndpoint = apiEvent.TokenEndpoint;
-            authenticationResult.AuthenticationResultMetadata.CacheRefreshReason = apiEvent.CacheInfo;
-            authenticationResult.AuthenticationResultMetadata.CacheLevel = GetCacheLevel(authenticationResult);
-            authenticationResult.AuthenticationResultMetadata.Telemetry = apiEvent.MsalRuntimeTelemetry;
-            authenticationResult.AuthenticationResultMetadata.RegionDetails = CreateRegionDetails(apiEvent);
-            authenticationResult.AuthenticationResultMetadata.CachedAccessTokenCount = apiEvent.CachedAccessTokenCount;
+            PopulateSuccessMetadata(
+                authenticationResult.AuthenticationResultMetadata,
+                apiEvent,
+                elapsedMilliseconds,
+                GetCacheLevel(authenticationResult));
 
             Metrics.IncrementTotalDurationInMs(authenticationResult.AuthenticationResultMetadata.DurationTotalInMs);
+        }
+
+        /// <summary>
+        /// Copies the telemetry captured on <paramref name="apiEvent"/> onto a successful result's metadata.
+        /// Shared by the foreground path (<see cref="UpdateTelemetry"/>) and the proactive-refresh path in
+        /// <see cref="Microsoft.Identity.Client.Internal.SilentRequestHelper.ProcessFetchInBackground"/>, which
+        /// runs the fetch outside <see cref="RunAsync"/> and would otherwise leave TokenEndpoint / duration /
+        /// cache-refresh reason at their constructor defaults (Bug 3707191). The global
+        /// <see cref="Metrics.IncrementTotalDurationInMs"/> counter is intentionally left to the foreground
+        /// caller so background latency does not inflate the user-facing aggregate.
+        /// </summary>
+        internal static void PopulateSuccessMetadata(
+            AuthenticationResultMetadata metadata,
+            ApiEvent apiEvent,
+            long totalDurationInMs,
+            CacheLevel cacheLevel)
+        {
+            metadata.DurationTotalInMs = totalDurationInMs;
+            metadata.DurationInHttpInMs = apiEvent.DurationInHttpInMs;
+            metadata.DurationInCacheInMs = apiEvent.DurationInCacheInMs;
+            metadata.TokenEndpoint = apiEvent.TokenEndpoint;
+            metadata.CacheRefreshReason = apiEvent.CacheInfo;
+            metadata.CacheLevel = cacheLevel;
+            metadata.Telemetry = apiEvent.MsalRuntimeTelemetry;
+            metadata.RegionDetails = CreateRegionDetails(apiEvent);
+            metadata.CachedAccessTokenCount = apiEvent.CachedAccessTokenCount;
         }
 
         /// <summary>
