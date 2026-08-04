@@ -4,6 +4,19 @@ Applies to: src/**/*.cs
 
 These rules apply when reviewing production source code in this repository.
 
+## Multi-targetting support
+
+To support multi-targetting, 2 approaches are used:
+
+- #if directives to conditionally compile code for different target frameworks
+- conditional compilaton of entire files in src/client/Microsoft.Identity.Client/Platforms
+
+Since most development happens in .NET and .NET FWK, which have similar capabilities, we generally prefer #if directives, as they are easier to understand. 
+
+### Mobile support
+
+Some interfaces are implemented differently on mobile platforms. The regular build does not build the entire solution, it skips the mobile targets. 
+
 ## Namespace resolution — do NOT flag
 
 - `Client.AppConfig.X`, `Client.Internal.X`, and similar short namespace references resolve via parent namespace `Microsoft.Identity`. Do not flag as unresolved.
