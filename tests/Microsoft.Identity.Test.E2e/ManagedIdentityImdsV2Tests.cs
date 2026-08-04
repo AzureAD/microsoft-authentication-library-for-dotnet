@@ -104,7 +104,7 @@ namespace Microsoft.Identity.Test.E2E
         }
 
         /// <summary>
-        /// Tests that <c>.WithMtlsBearerToken()</c> on an IMDSv2-capable host uses the full attested
+        /// Tests that <c>.WithBearerOverMtls()</c> on an IMDSv2-capable host uses the full attested
         /// mTLS flow (Credential Guard-issued certificate) to connect to ESTS, but requests
         /// <c>token_type=bearer</c>, returning a standard bearer token with no binding certificate.
         /// Requires Windows Credential Guard (VBS) to be enabled on the MSALMSIV2 VM.
@@ -112,9 +112,9 @@ namespace Microsoft.Identity.Test.E2E
         [RunOnAzureDevOps]
         [TestCategory("MI_E2E_ImdsV2_Attested")]
         [TestMethod]
-        [DataRow(null /*SAMI*/, null, DisplayName = "AcquireToken_OnImdsV2_WithMtlsBearerToken_ReturnsBearer-SAMI")]
-        [DataRow(UamiClientId, "clientid", DisplayName = "AcquireToken_OnImdsV2_WithMtlsBearerToken_ReturnsBearer-UAMI-ClientId")]
-        public async Task AcquireToken_OnImdsV2_WithMtlsBearerToken_ReturnsBearer(string id, string idType)
+        [DataRow(null /*SAMI*/, null, DisplayName = "AcquireToken_OnImdsV2_WithBearerOverMtls_ReturnsBearer-SAMI")]
+        [DataRow(UamiClientId, "clientid", DisplayName = "AcquireToken_OnImdsV2_WithBearerOverMtls_ReturnsBearer-UAMI-ClientId")]
+        public async Task AcquireToken_OnImdsV2_WithBearerOverMtls_ReturnsBearer(string id, string idType)
         {
             if (!OperatingSystem.IsWindows())
             {
@@ -125,10 +125,10 @@ namespace Microsoft.Identity.Test.E2E
 
             try
             {
-                // .WithMtlsBearerToken() routes through the IMDSv2 attested flow (KeyGuard cert + mTLS
+                // .WithBearerOverMtls() routes through the IMDSv2 attested flow (KeyGuard cert + mTLS
                 // connection) but requests token_type=bearer from ESTS, so the result is a plain bearer token with no binding certificate.
                 var result = await mi.AcquireTokenForManagedIdentity(GraphResource)
-                    .WithMtlsBearerToken()
+                    .WithBearerOverMtls()
                     .WithAttestationSupport()
                     .ExecuteAsync()
                     .ConfigureAwait(false);

@@ -131,7 +131,7 @@ namespace Microsoft.Identity.Client
             AcquireTokenForManagedIdentityParameters acquireTokenForManagedIdentityParameters)
         {
             acquireTokenForManagedIdentityParameters.IsMtlsPopRequested = acquireTokenCommonParameters.IsMtlsPopRequested;
-            acquireTokenForManagedIdentityParameters.IsMtlsBearerRequested = acquireTokenCommonParameters.IsMtlsBearerRequested;
+            acquireTokenForManagedIdentityParameters.PreferMsiV2 = acquireTokenCommonParameters.PreferMsiV2;
             acquireTokenForManagedIdentityParameters.MtlsPopMinStrength = acquireTokenCommonParameters.MtlsPopMinStrength;
             acquireTokenForManagedIdentityParameters.AttestationTokenProvider = acquireTokenCommonParameters.AttestationTokenProvider;
 
@@ -162,7 +162,7 @@ namespace Microsoft.Identity.Client
 
             // mTLS-bearer requests also need a cache key component so they are stored separately from
             // plain IMDSv1 bearer tokens and from mTLS PoP tokens for the same resource.
-            if (acquireTokenCommonParameters.IsMtlsBearerRequested)
+            if (acquireTokenCommonParameters.PreferMsiV2)
             {
                 acquireTokenCommonParameters.CacheKeyComponents ??=
                     new SortedList<string, Func<CancellationToken, Task<string>>>();

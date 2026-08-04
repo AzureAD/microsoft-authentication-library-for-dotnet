@@ -221,7 +221,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             await ResolveAuthorityAsync().ConfigureAwait(false);
 
             _managedIdentityParameters.IsMtlsPopRequested = AuthenticationRequestParameters.IsMtlsPopRequested;
-            _managedIdentityParameters.IsMtlsBearerRequested = AuthenticationRequestParameters.IsMtlsBearerRequested;
+            _managedIdentityParameters.PreferMsiV2 = AuthenticationRequestParameters.PreferMsiV2;
 
             // Propagate client-originated claims to the MI parameters for transport.
             // Unlike server-issued Claims (which bypass the cache), ClientClaims participate in caching
@@ -231,11 +231,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 _managedIdentityParameters.ClientClaims = AuthenticationRequestParameters.ClientClaims;
             }
 
-            // mTLS PoP and mTLS ****** both served exclusively by IMDSv2. Mint the binding certificate,
+            // mTLS PoP and mTLS Bearer are both served exclusively by IMDSv2. Mint the binding certificate,
             // then delegate the token leg to MSAL's internal TokenClient exchange (the same path CCA uses)
             // so client-originated claims, client-capability (CP1) merge, claims-based cache keying, and
             // ESTS error handling are inherited rather than re-implemented in a bespoke MI token POST.
-            if (AuthenticationRequestParameters.IsMtlsPopRequested || AuthenticationRequestParameters.IsMtlsBearerRequested)
+            if (AuthenticationRequestParameters.IsMtlsPopRequested || AuthenticationRequestParameters.PreferMsiV2)
             {
                 return await SendDelegatedImdsV2TokenRequestAsync(logger, cancellationToken).ConfigureAwait(false);
             }
@@ -304,8 +304,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
             // For Bearer: inject the cert only for the mTLS channel (no PoP scheme); the resulting
             // token is a standard bearer token with no binding certificate.
             AuthenticationRequestParameters.MtlsCertificate = binding.Certificate;
-            bool isMtlsBearer = AuthenticationRequestParameters.IsMtlsBearerRequested;
-            if (!isMtlsBearer)
+            bool preferMsiV2 = AuthenticationRequestParameters.PreferMsiV2;
+            if (!preferMsiV2)
             {
                 AuthenticationRequestParameters.AuthenticationScheme =
                     new MtlsPopAuthenticationOperation(binding.Certificate);
@@ -325,7 +325,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             // For mTLS Bearer, explicitly request token_type=bearer so ESTS returns a standard
             // bearer token (no cnf claim, no binding certificate).
-            if (isMtlsBearer)
+            if (preferMsiV2)
             {
                 bodyParameters[OAuth2Parameter.TokenType] = Constants.BearerTokenType;
             }

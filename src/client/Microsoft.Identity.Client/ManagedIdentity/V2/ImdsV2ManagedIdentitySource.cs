@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         private readonly RequestContext _requestContext;
         private readonly IMtlsCertificateCache _mtlsCache;
         private bool _isMtlsPopRequested;
-        private bool _isMtlsBearerRequested;
+        private bool _preferMsiV2;
         private Func<string, SafeHandle, string, string, ILoggerAdapter, CancellationToken, Task<string>> _attestationTokenProvider;
 
         // used in unit tests
@@ -314,7 +314,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             // This check happens before any network calls to avoid wasted round-trips.
             // Note: This creates/retrieves the key, but on cache hit scenarios (below),
             // this may be the only key access needed.
-            if (_isMtlsPopRequested || _isMtlsBearerRequested)
+            if (_isMtlsPopRequested || _preferMsiV2)
             {
                 IManagedIdentityKeyProvider keyProvider = _requestContext.ServiceBundle.PlatformProxy.ManagedIdentityKeyProvider;
                 ManagedIdentityKeyInfo keyInfo = await keyProvider
@@ -406,11 +406,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         {
             _attestationTokenProvider = parameters.AttestationTokenProvider;
             _isMtlsPopRequested = parameters.IsMtlsPopRequested;
-            _isMtlsBearerRequested = parameters.IsMtlsBearerRequested;
+            _preferMsiV2 = parameters.PreferMsiV2;
 
             // Ensure at least one IMDSv2 attested flag is set; default to PoP for backward compatibility
             // with callers that do not set either flag explicitly.
-            if (!_isMtlsPopRequested && !_isMtlsBearerRequested)
+            if (!_isMtlsPopRequested && !_preferMsiV2)
             {
                 _isMtlsPopRequested = true;
             }

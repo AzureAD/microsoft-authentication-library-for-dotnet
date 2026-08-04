@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         /// Credential Guard–issued certificate) but requests <c>token_type=bearer</c> from the
         /// token endpoint, returning a standard bearer token with no binding certificate.
         /// </summary>
-        public bool IsMtlsBearerRequested { get; set; }
+        public bool PreferMsiV2 { get; set; }
 
         /// <summary>
         /// The minimum mTLS binding strength the host must support for the request to succeed.
