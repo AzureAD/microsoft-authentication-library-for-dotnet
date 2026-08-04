@@ -566,10 +566,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsNotNull(capturedResult.Result);
                 Assert.IsNotNull(capturedResult.Result.AuthenticationResultMetadata);
 
-                // Regression (Bug 3707191): proactive refresh runs outside RequestBase.RunAsync, which used to
-                // leave the result's telemetry metadata stripped. The result must now carry the same metadata a
-                // foreground refresh would - populated from the shared apiEvent. Assert the deterministically
-                // populated fields (a sub-millisecond mock round-trip makes DurationTotalInMs an unreliable check).
+                // Regression (Bug 3707191): proactive refresh must carry the same metadata a foreground refresh
+                // would. Assert the deterministically backfilled fields (DurationTotalInMs is flaky under a
+                // sub-millisecond mock round-trip).
                 AuthenticationResultMetadata metadata = capturedResult.Result.AuthenticationResultMetadata;
                 Assert.AreEqual(CacheRefreshReason.ProactivelyRefreshed, metadata.CacheRefreshReason);
                 Assert.IsFalse(string.IsNullOrEmpty(metadata.TokenEndpoint), "TokenEndpoint must be populated on a proactive-refresh result.");

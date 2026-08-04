@@ -1038,6 +1038,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.IsTrue(capturedResult.Successful);
                 Assert.IsNotNull(capturedResult.Result);
                 Assert.IsNotNull(capturedResult.Result.AuthenticationResultMetadata);
+
+                // Regression (Bug 3707191): the proactive-refresh result must carry telemetry backfilled from the
+                // apiEvent. Managed identity does not flow through TokenClient, so TokenEndpoint stays null even in
+                // the foreground; assert the fields that do apply here.
+                AuthenticationResultMetadata metadata = capturedResult.Result.AuthenticationResultMetadata;
+                Assert.AreEqual(CacheRefreshReason.ProactivelyRefreshed, metadata.CacheRefreshReason);
+                Assert.AreEqual(TokenSource.IdentityProvider, metadata.TokenSource);
             }
         }
 

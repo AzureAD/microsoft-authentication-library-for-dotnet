@@ -323,13 +323,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
         }
 
         /// <summary>
-        /// Copies the telemetry captured on <paramref name="apiEvent"/> onto a successful result's metadata.
-        /// Shared by the foreground path (<see cref="UpdateTelemetry"/>) and the proactive-refresh path in
-        /// <see cref="Microsoft.Identity.Client.Internal.SilentRequestHelper.ProcessFetchInBackground"/>, which
-        /// runs the fetch outside <see cref="RunAsync"/> and would otherwise leave TokenEndpoint / duration /
-        /// cache-refresh reason at their constructor defaults (Bug 3707191). The global
-        /// <see cref="Metrics.IncrementTotalDurationInMs"/> counter is intentionally left to the foreground
-        /// caller so background latency does not inflate the user-facing aggregate.
+        /// Copies telemetry from <paramref name="apiEvent"/> onto a successful result's metadata. Shared by the
+        /// foreground path (<see cref="UpdateTelemetry"/>) and proactive refresh, which runs outside
+        /// <see cref="RunAsync"/> (Bug 3707191). Callers own the <see cref="Metrics.IncrementTotalDurationInMs"/>
+        /// increment so background latency does not inflate the foreground aggregate.
         /// </summary>
         internal static void PopulateSuccessMetadata(
             AuthenticationResultMetadata metadata,

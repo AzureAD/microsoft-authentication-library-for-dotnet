@@ -102,11 +102,8 @@ namespace Microsoft.Identity.Client.Internal
                     var authResult = await fetchAction().ConfigureAwait(false);
                     stopwatch.Stop();
 
-                    // Proactive refresh runs the fetch outside RequestBase.RunAsync, so the telemetry that
-                    // RunAsync normally copies onto the result (token endpoint, durations, cache-refresh reason)
-                    // is missing. Backfill it from the shared apiEvent - which the background HTTP call has
-                    // populated by now - using this background operation's own elapsed time as the total
-                    // duration. TokenSource is IdentityProvider here, so no cache level applies (Bug 3707191).
+                    // Proactive refresh runs outside RequestBase.RunAsync, so backfill the result's telemetry
+                    // from the shared apiEvent using this operation's own elapsed time (Bug 3707191).
                     RequestBase.PopulateSuccessMetadata(
                         authResult.AuthenticationResultMetadata,
                         apiEvent,
