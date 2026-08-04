@@ -301,7 +301,7 @@ namespace Microsoft.Identity.Test.Unit
         {
             var scheme = new MtlsPopAuthenticationOperation(s_testCertificate);
 
-            // Compute the expected KeyId using SHA-256 on the public key
+            // Compute the expected KeyId using SHA-256 over the certificate DER (x5t#S256)
             var expectedKeyId = ComputeExpectedKeyId(s_testCertificate);
 
             Assert.AreEqual(expectedKeyId, scheme.KeyId);
@@ -332,13 +332,11 @@ namespace Microsoft.Identity.Test.Unit
 
         private static string ComputeExpectedKeyId(X509Certificate2 certificate)
         {
-            // Get the raw public key bytes
-            var publicKey = certificate.GetPublicKey();
-
-            // Compute the SHA-256 hash of the public key
+            // Compute the SHA-256 hash of the full DER-encoded certificate (x5t#S256, RFC 8705),
+            // matching what ESTS/MSS bind the mTLS PoP token to.
             using (var sha256 = SHA256.Create())
             {
-                byte[] hash = sha256.ComputeHash(publicKey);
+                byte[] hash = sha256.ComputeHash(certificate.RawData);
                 return Base64UrlHelpers.Encode(hash);
             }
         }
@@ -527,6 +525,123 @@ namespace Microsoft.Identity.Test.Unit
                     Assert.AreEqual(expectedTokenEndpoint, result.AuthenticationResultMetadata.TokenEndpoint);
                     Assert.AreEqual(certB.Thumbprint, secondResult.BindingCertificate.Thumbprint);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Repro for AADSTS500181 (CertificateValidationFailedTlsCertMismatch) in the two-leg mTLS PoP flow.
+        ///
+        /// MSAL keys the mTLS-PoP token cache with <see cref="CoreHelpers.ComputeX5tS256KeyId"/>, which hashes
+        /// only the certificate's PUBLIC KEY. ESTS/MSS, however, bind and validate the token against the DER of
+        /// the presented certificate (x5t#S256, RFC 8705).
+        ///
+        /// When the binding certificate is renewed with the SAME key but a new DER (serial/validity) — exactly
+        /// what IMDS/KeyGuard produces when it reissues the cert over the same non-exportable key — the
+        /// public-key-hash cache key is unchanged. MSAL therefore cannot tell the old cert from the renewed one
+        /// and serves the STALE token (bound to the old cert's DER) while the renewed cert is on the wire,
+        /// producing the certificate/assertion mismatch.
+        ///
+        /// Correct behavior: a same-key renewal is a DIFFERENT certificate and MUST cause a cache miss, re-minting
+        /// a token bound to the renewed cert. This test FAILS on current code (second acquisition returns
+        /// TokenSource.Cache with the cert-A-bound token) and PASSES once the cache key is derived from the DER.
+        /// </summary>
+        [TestMethod]
+        public async Task MtlsPop_SameKeyCertRenewal_MustNotServeStaleCachedTokenAsync()
+        {
+            const string region = "eastus";
+
+            // Two certificates that share ONE RSA key pair but differ in DER (validity + serial).
+            // This models a same-key certificate renewal.
+            using RSA sharedKey = RSA.Create(2048);
+
+            X509Certificate2 certA = new CertificateRequest(
+                    "CN=MtlsPopSameKeyRenewal", sharedKey, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1)
+                .CreateSelfSigned(DateTimeOffset.UtcNow.AddDays(-2), DateTimeOffset.UtcNow.AddDays(30));
+
+            X509Certificate2 certB = new CertificateRequest(
+                    "CN=MtlsPopSameKeyRenewal", sharedKey, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1)
+                .CreateSelfSigned(DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddDays(60));
+
+            try
+            {
+                // Precondition 1: identical public key (same key pair).
+                CollectionAssert.AreEqual(
+                    certA.GetPublicKey(), certB.GetPublicKey(),
+                    "Test setup invalid: the two certificates must share the same public key.");
+
+                // Precondition 2: different certificates (different DER => different x5t#S256 => different thumbprint).
+                Assert.AreNotEqual(
+                    certA.Thumbprint, certB.Thumbprint,
+                    "Test setup invalid: the two certificates must be different (different DER).");
+
+                // The binding certificate presented on the wire. Starts as cert A, then "renews" to cert B.
+                X509Certificate2 currentCert = certA;
+
+                using (var envContext = new EnvVariableContext())
+                {
+                    Environment.SetEnvironmentVariable("REGION_NAME", region);
+
+                    using (var httpManager = new MockHttpManager())
+                    {
+                        // Distinct tokens per mint so we can prove exactly which one is served.
+                        httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(
+                            token: "token_bound_to_certA", tokenType: "mtls_pop");
+
+                        var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                            .WithExperimentalFeatures()
+                            .WithCertificate(_ => Task.FromResult(currentCert), new CertificateOptions())
+                            .WithAuthority("https://login.microsoftonline.com/123456-1234-2345-1234561234")
+                            .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
+                            .WithHttpManager(httpManager)
+                            .BuildConcrete();
+
+                        // ── Request 1: bind a PoP token to cert A. Hits the IdP and caches. ──
+                        AuthenticationResult first = await app.AcquireTokenForClient(TestConstants.s_scope)
+                            .WithMtlsProofOfPossession()
+                            .ExecuteAsync()
+                            .ConfigureAwait(false);
+
+                        Assert.AreEqual(TokenSource.IdentityProvider, first.AuthenticationResultMetadata.TokenSource);
+                        Assert.AreEqual("token_bound_to_certA", first.AccessToken);
+                        Assert.AreEqual(certA.Thumbprint, first.BindingCertificate.Thumbprint);
+
+                        // ── Same-key renewal: the platform reissues the binding cert over the same key. ──
+                        currentCert = certB;
+
+                        // A fresh IdP response is available for the (expected) cache miss on the renewed cert.
+                        httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(
+                            token: "token_bound_to_certB", tokenType: "mtls_pop");
+
+                        // ── Request 2: cert B is now on the wire. ──
+                        AuthenticationResult second = await app.AcquireTokenForClient(TestConstants.s_scope)
+                            .WithMtlsProofOfPossession()
+                            .ExecuteAsync()
+                            .ConfigureAwait(false);
+
+                        // ─────────────────────────────── The bug ───────────────────────────────
+                        // Cert B has a different DER than cert A, so the cert-A-bound cached token is invalid for
+                        // cert B. Correct behavior is a cache MISS and a re-mint bound to cert B. On current code,
+                        // ComputeX5tS256KeyId hashes the public key (identical across the renewal), so the lookup
+                        // HITS the cert-A-bound token and returns it from cache while cert B is on the wire —
+                        // reproducing AADSTS500181.
+                        Assert.AreEqual(
+                            TokenSource.IdentityProvider,
+                            second.AuthenticationResultMetadata.TokenSource,
+                            "A same-key certificate renewal (same public key, different DER) MUST invalidate the " +
+                            "cached mTLS-PoP token. Serving the stale cert-A-bound token while cert B is on the wire " +
+                            "is the root cause of AADSTS500181 (CertificateValidationFailedTlsCertMismatch).");
+
+                        Assert.AreEqual(
+                            "token_bound_to_certB",
+                            second.AccessToken,
+                            "MSAL served the cert-A-bound token for a request presenting cert B.");
+                    }
+                }
+            }
+            finally
+            {
+                certA.Dispose();
+                certB.Dispose();
             }
         }
 
@@ -785,6 +900,10 @@ namespace Microsoft.Identity.Test.Unit
         [DataRow("login.sovcloud-identity.fr", "mtlsauth.sovcloud-identity.fr")]
         [DataRow("login.sovcloud-identity.de", "mtlsauth.sovcloud-identity.de")]
         [DataRow("login.sovcloud-identity.sg", "mtlsauth.sovcloud-identity.sg")]
+        // Legacy sovereign aliases must resolve to their preferred-network mTLS endpoint
+        // (regression: #5684 wrongly rejected these for mTLS PoP).
+        [DataRow("login.chinacloudapi.cn", "mtlsauth.partner.microsoftonline.cn")]
+        [DataRow("login.usgovcloudapi.net", "mtlsauth.microsoftonline.us")]
         public async Task PublicAndSovereignCloud_UsesPreferredNetwork_AndNoDiscovery_Async(string inputEnv, string expectedEnv)
         {
             // Append the input environment to create the authority URL
@@ -849,6 +968,10 @@ namespace Microsoft.Identity.Test.Unit
         [DataRow("login.sovcloud-identity.fr", "mtlsauth.sovcloud-identity.fr")]
         [DataRow("login.sovcloud-identity.de", "mtlsauth.sovcloud-identity.de")]
         [DataRow("login.sovcloud-identity.sg", "mtlsauth.sovcloud-identity.sg")]
+        // Legacy sovereign aliases must resolve to their preferred-network global mTLS endpoint
+        // (regression: #5684 wrongly rejected these for mTLS PoP). login.chinacloudapi.cn reproduces the Mooncake case.
+        [DataRow("login.chinacloudapi.cn", "mtlsauth.partner.microsoftonline.cn")]
+        [DataRow("login.usgovcloudapi.net", "mtlsauth.microsoftonline.us")]
         public async Task PublicAndSovereignCloud_NoRegion_UsesGlobalMtlsEndpoint_Async(string inputEnv, string expectedMtlsEnv)
         {
             string tenantId = "17b189bc-2b81-4ec5-aa51-3e628cbc931b";
@@ -988,43 +1111,6 @@ namespace Microsoft.Identity.Test.Unit
                     Assert.AreEqual("header.payload.signature", result.AccessToken);
                     Assert.AreEqual(Constants.MtlsPoPAuthHeaderPrefix, result.TokenType);
                     Assert.AreEqual(expectedTokenEndpoint, result.AuthenticationResultMetadata.TokenEndpoint);
-                }
-            }
-        }
-
-        [TestMethod]
-        [DataRow("login.usgovcloudapi.net", MsalErrorMessage.MtlsPopNotSupportedForUsGovCloudApiMessage)]
-        [DataRow("login.chinacloudapi.cn", MsalErrorMessage.MtlsPopNotSupportedForChinaCloudApiMessage)]
-        public async Task UnsupportedSovereignHosts_ThrowsMsalClientException_Async(string unsupportedHost, string expectedErrorMessage)
-        {
-            // Arrange
-            string authorityUrl = $"https://{unsupportedHost}/17b189bc-2b81-4ec5-aa51-3e628cbc931b";
-
-            using (var envContext = new EnvVariableContext())
-            {
-                Environment.SetEnvironmentVariable("REGION_NAME", EastUsRegion);
-
-                using (var harness = new MockHttpAndServiceBundle())
-                {
-                    var app = ConfidentialClientApplicationBuilder
-                                        .Create(TestConstants.ClientId)
-                                        .WithAuthority(authorityUrl)
-                                        .WithHttpManager(harness.HttpManager)
-                                        .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
-                                        .WithCertificate(s_testCertificate)
-                                        .Build();
-
-                    // Act & Assert
-                    var exception = await Assert.ThrowsAsync<MsalClientException>(async () =>
-                    {
-                        await app.AcquireTokenForClient(TestConstants.s_scope)
-                            .WithMtlsProofOfPossession()
-                            .ExecuteAsync()
-                            .ConfigureAwait(false);
-                    }).ConfigureAwait(false);
-
-                    Assert.AreEqual(MsalError.MtlsPopNotSupportedForEnvironment, exception.ErrorCode);
-                    Assert.AreEqual(expectedErrorMessage, exception.Message);
                 }
             }
         }
@@ -1233,6 +1319,147 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.IsNull(bearerResult.BindingCertificate, "BindingCertificate must be null for Bearer tokens.");
             }
         }
+
+        #region SNI trust path and S2S FIC carry-over
+
+        [TestMethod]
+        public async Task MtlsPop_SniSendX5C_OmitsClientAssertionAndReqCnfAsync()
+        {
+            // Vanilla SNI over mTLS PoP: the cert is presented on the TLS connection and ESTS
+            // resolves Subject Name + Issuer trust from the TLS-presented cert. Even with sendX5C:true,
+            // the mTLS body must carry NO client_assertion / client_assertion_type / req_cnf — the cert
+            // (cnf / x5t#S256) is the binding, not a signed assertion. The non-mTLS SNI/Bearer path still
+            // sends a signed client_assertion for now; the omission is specific to mTLS PoP.
+            string authorityUrl = "https://login.microsoftonline.com/123456-1234-2345-1234561234";
+
+            using (var envContext = new EnvVariableContext())
+            {
+                Environment.SetEnvironmentVariable("REGION_NAME", EastUsRegion);
+
+                using (var harness = new MockHttpAndServiceBundle())
+                {
+                    var tokenHttpCallHandler = new MockHttpMessageHandler()
+                    {
+                        ExpectedUrl = $"https://{EastUsRegion}.mtlsauth.microsoft.com/123456-1234-2345-1234561234/oauth2/v2.0/token",
+                        ExpectedMethod = HttpMethod.Post,
+                        ResponseMessage = CreateResponse(tokenType: "mtls_pop"),
+                        ExpectedMtlsBindingCertificate = s_testCertificate,
+                        ExpectedPostData = new Dictionary<string, string>
+                        {
+                            { OAuth2Parameter.ClientId, TestConstants.ClientId },
+                            { OAuth2Parameter.GrantType, OAuth2GrantType.ClientCredentials },
+                            { "token_type", "mtls_pop" }
+                        },
+                        UnExpectedPostData = new Dictionary<string, string>
+                        {
+                            { "client_assertion", "n/a" },
+                            { "client_assertion_type", "n/a" },
+                            { OAuth2Parameter.RequestConfirmation, "n/a" }
+                        }
+                    };
+
+                    harness.HttpManager.AddMockHandler(tokenHttpCallHandler);
+
+                    var app = ConfidentialClientApplicationBuilder
+                                 .Create(TestConstants.ClientId)
+                                 .WithAuthority(authorityUrl)
+                                 .WithHttpManager(harness.HttpManager)
+                                 .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
+                                 .WithCertificate(s_testCertificate, sendX5C: true)
+                                 .Build();
+
+                    AuthenticationResult result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                        .WithMtlsProofOfPossession()
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
+
+                    Assert.AreEqual(Constants.MtlsPoPAuthHeaderPrefix, result.TokenType);
+                    Assert.IsNotNull(result.BindingCertificate);
+                    Assert.AreEqual(s_testCertificate.Thumbprint, result.BindingCertificate.Thumbprint);
+                }
+            }
+        }
+
+        [TestMethod]
+        public async Task MtlsPop_S2sFic_ClientAssertionCarryOver_SendsJwtPopAndBindsToCarriedCertAsync()
+        {
+            // S2S (app) FIC "Leg 2" over mTLS PoP: the caller supplies the Leg-1 federated assertion
+            // together with the Leg-1 binding certificate via ClientSignedAssertion.TokenBindingCertificate.
+            // MSAL must forward the assertion as client_assertion, set client_assertion_type to jwt-pop,
+            // present the carried cert on the mTLS connection, and return a token bound to that cert.
+            const string leg1Assertion = "eyLeg1.federated.assertion";
+            var carriedCert = CertHelper.GetOrCreateTestCert(regenerateCert: true);
+            Assert.AreNotEqual(s_testCertificate.Thumbprint, carriedCert.Thumbprint);
+
+            string authorityUrl = "https://login.microsoftonline.com/123456-1234-2345-1234561234";
+
+            using (var envContext = new EnvVariableContext())
+            {
+                Environment.SetEnvironmentVariable("REGION_NAME", EastUsRegion);
+
+                using (var harness = new MockHttpAndServiceBundle())
+                {
+                    var tokenHttpCallHandler = new MockHttpMessageHandler()
+                    {
+                        ExpectedUrl = $"https://{EastUsRegion}.mtlsauth.microsoft.com/123456-1234-2345-1234561234/oauth2/v2.0/token",
+                        ExpectedMethod = HttpMethod.Post,
+                        ResponseMessage = CreateResponse(tokenType: "mtls_pop"),
+                        ExpectedMtlsBindingCertificate = carriedCert,
+                        ExpectedPostData = new Dictionary<string, string>
+                        {
+                            { OAuth2Parameter.ClientId, TestConstants.ClientId },
+                            { OAuth2Parameter.GrantType, OAuth2GrantType.ClientCredentials },
+                            { "token_type", "mtls_pop" },
+                            { "client_assertion", leg1Assertion },
+                            { "client_assertion_type", OAuth2AssertionType.JwtPop }
+                        }
+                    };
+
+                    harness.HttpManager.AddMockHandler(tokenHttpCallHandler);
+
+                    var app = ConfidentialClientApplicationBuilder
+                                 .Create(TestConstants.ClientId)
+                                 .WithAuthority(authorityUrl)
+                                 .WithHttpManager(harness.HttpManager)
+                                 .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
+                                 .WithClientAssertion((AssertionRequestOptions _, CancellationToken _) =>
+                                     Task.FromResult(new ClientSignedAssertion
+                                     {
+                                         Assertion = leg1Assertion,
+                                         TokenBindingCertificate = carriedCert
+                                     }))
+                                 .Build();
+
+                    AuthenticationResult result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                        .WithMtlsProofOfPossession()
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
+
+                    Assert.AreEqual(Constants.MtlsPoPAuthHeaderPrefix, result.TokenType);
+                    Assert.IsNotNull(result.BindingCertificate);
+                    Assert.AreEqual(carriedCert.Thumbprint, result.BindingCertificate.Thumbprint,
+                        "The final token must be bound to the carried Leg-1 certificate.");
+                }
+            }
+        }
+
+        [TestMethod]
+        public void MtlsPop_DefaultHttpClientFactory_IsMtlsCapable_TransportOwnedByMsal()
+        {
+            // mTLS requires MSAL to own the transport handler so it can attach the client certificate.
+            // MSAL's default factory must be mTLS-capable (IMsalMtlsHttpClientFactory); a plain
+            // caller-supplied IMsalHttpClientFactory cannot carry the mTLS cert.
+            IMsalHttpClientFactory defaultFactory =
+                Microsoft.Identity.Client.PlatformsCommon.Factories.PlatformProxyFactory
+                    .CreatePlatformProxy(null)
+                    .CreateDefaultHttpClientFactory();
+
+            Assert.IsInstanceOfType(defaultFactory, typeof(IMsalMtlsHttpClientFactory),
+                "MSAL's default HTTP transport must be mTLS-capable so it can present the client certificate " +
+                "on the mutual-TLS connection to the token endpoint.");
+        }
+
+        #endregion
 
         #region SendCertificateOverMtls tests
 
