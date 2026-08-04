@@ -1,0 +1,21 @@
+const Microsoft.Identity.Client.Instance.Discovery.MsalCloudKeys.TokenExchangeAudience = "token_exchange_audience" -> string
+Microsoft.Identity.Client.Instance.Discovery.CloudSettings
+Microsoft.Identity.Client.Instance.Discovery.CloudSettings.CloudSettings(System.Collections.Generic.IReadOnlyDictionary<string, string> values) -> void
+Microsoft.Identity.Client.Instance.Discovery.CloudSettings.GetValueOrDefault(string key) -> string
+Microsoft.Identity.Client.Instance.Discovery.CloudSettings.TryGetValue(string key, out string value) -> bool
+Microsoft.Identity.Client.Instance.Discovery.CloudSettings.Values.get -> System.Collections.Generic.IReadOnlyDictionary<string, string>
+Microsoft.Identity.Client.Instance.Discovery.CloudSettingsExtensions
+Microsoft.Identity.Client.Instance.Discovery.ICloudConfiguration
+Microsoft.Identity.Client.Instance.Discovery.ICloudConfiguration.GetSettingsByAuthorityHost(string authorityHost) -> Microsoft.Identity.Client.Instance.Discovery.CloudSettings
+Microsoft.Identity.Client.Instance.Discovery.InMemoryCloudConfiguration
+Microsoft.Identity.Client.Instance.Discovery.InMemoryCloudConfiguration.AddOrUpdate(string authorityHost, System.Collections.Generic.IReadOnlyDictionary<string, string> values) -> Microsoft.Identity.Client.Instance.Discovery.InMemoryCloudConfiguration
+Microsoft.Identity.Client.Instance.Discovery.InMemoryCloudConfiguration.AddOrUpdate(string authorityHost, string key, string value) -> Microsoft.Identity.Client.Instance.Discovery.InMemoryCloudConfiguration
+Microsoft.Identity.Client.Instance.Discovery.InMemoryCloudConfiguration.GetSettingsByAuthorityHost(string authorityHost) -> Microsoft.Identity.Client.Instance.Discovery.CloudSettings
+Microsoft.Identity.Client.Instance.Discovery.InMemoryCloudConfiguration.InMemoryCloudConfiguration(Microsoft.Identity.Client.Instance.Discovery.ICloudConfiguration fallback = null) -> void
+Microsoft.Identity.Client.Instance.Discovery.KnownCloudConfiguration
+Microsoft.Identity.Client.Instance.Discovery.KnownCloudConfiguration.GetSettingsByAuthorityHost(string authorityHost) -> Microsoft.Identity.Client.Instance.Discovery.CloudSettings
+Microsoft.Identity.Client.Instance.Discovery.KnownCloudConfiguration.KnownCloudConfiguration() -> void
+Microsoft.Identity.Client.Instance.Discovery.MsalCloudKeys
+static Microsoft.Identity.Client.Instance.Discovery.CloudSettingsExtensions.TokenExchangeAudience(this Microsoft.Identity.Client.Instance.Discovery.CloudSettings settings) -> string
+static Microsoft.Identity.Client.Instance.Discovery.CloudSettingsExtensions.TokenExchangeScope(this Microsoft.Identity.Client.Instance.Discovery.CloudSettings settings) -> string
+static Microsoft.Identity.Client.Instance.Discovery.KnownCloudConfiguration.Default.get -> Microsoft.Identity.Client.Instance.Discovery.KnownCloudConfiguration
