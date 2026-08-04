@@ -103,7 +103,7 @@ namespace Microsoft.Identity.Client.Internal
                     stopwatch.Stop();
 
                     // Proactive refresh runs outside RequestBase.RunAsync, so backfill the result's telemetry
-                    // from the shared apiEvent using this operation's own elapsed time (Bug 3707191).
+                    // from the shared apiEvent using this operation's own elapsed time.
                     RequestBase.PopulateSuccessMetadata(
                         authResult.AuthenticationResultMetadata,
                         apiEvent,

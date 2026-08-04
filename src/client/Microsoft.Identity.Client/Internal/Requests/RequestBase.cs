@@ -325,7 +325,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         /// <summary>
         /// Copies telemetry from <paramref name="apiEvent"/> onto a successful result's metadata. Shared by the
         /// foreground path (<see cref="UpdateTelemetry"/>) and proactive refresh, which runs outside
-        /// <see cref="RunAsync"/> (Bug 3707191). Callers own the <see cref="Metrics.IncrementTotalDurationInMs"/>
+        /// <see cref="RunAsync"/>. Callers own the <see cref="Metrics.IncrementTotalDurationInMs"/>
         /// increment so background latency does not inflate the foreground aggregate.
         /// </summary>
         internal static void PopulateSuccessMetadata(

@@ -566,7 +566,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsNotNull(capturedResult.Result);
                 Assert.IsNotNull(capturedResult.Result.AuthenticationResultMetadata);
 
-                // Regression (Bug 3707191): proactive refresh must carry the same metadata a foreground refresh
+                // The proactive-refresh result must carry the same metadata a foreground refresh
                 // would. Assert the deterministically backfilled fields (DurationTotalInMs is flaky under a
                 // sub-millisecond mock round-trip).
                 AuthenticationResultMetadata metadata = capturedResult.Result.AuthenticationResultMetadata;
