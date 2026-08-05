@@ -62,9 +62,9 @@ namespace Microsoft.Identity.Client.Instance.Discovery
         /// <returns>This instance, to allow chaining.</returns>
         public InMemoryCloudConfiguration AddOrUpdate(string authorityHost, IReadOnlyDictionary<string, string> values)
         {
-            if (string.IsNullOrEmpty(authorityHost))
+            if (string.IsNullOrWhiteSpace(authorityHost))
             {
-                throw new ArgumentNullException(nameof(authorityHost));
+                throw new ArgumentException("Authority host cannot be null or whitespace.", nameof(authorityHost));
             }
 
             if (values is null)
@@ -94,14 +94,14 @@ namespace Microsoft.Identity.Client.Instance.Discovery
         /// <returns>This instance, to allow chaining.</returns>
         public InMemoryCloudConfiguration AddOrUpdate(string authorityHost, string key, string value)
         {
-            if (string.IsNullOrEmpty(authorityHost))
+            if (string.IsNullOrWhiteSpace(authorityHost))
             {
-                throw new ArgumentNullException(nameof(authorityHost));
+                throw new ArgumentException("Authority host cannot be null or whitespace.", nameof(authorityHost));
             }
 
-            if (string.IsNullOrEmpty(key))
+            if (string.IsNullOrWhiteSpace(key))
             {
-                throw new ArgumentNullException(nameof(key));
+                throw new ArgumentException("Key cannot be null or whitespace.", nameof(key));
             }
 
             if (value is null)

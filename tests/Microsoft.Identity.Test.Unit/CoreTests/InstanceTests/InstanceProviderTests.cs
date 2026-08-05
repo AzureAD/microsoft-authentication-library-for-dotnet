@@ -524,23 +524,31 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         {
             var provider = new InMemoryCloudConfiguration();
 
-            // Per-cloud overload.
-            AssertException.Throws<System.ArgumentNullException>(
+            // Per-cloud overload. Host is rejected for null/empty/whitespace (ArgumentException); a null
+            // values bag is an ArgumentNullException. Kept consistent with the Abstractions and MISE twins.
+            AssertException.Throws<System.ArgumentException>(
                 () => provider.AddOrUpdate(null, new Dictionary<string, string>()));
-            AssertException.Throws<System.ArgumentNullException>(
+            AssertException.Throws<System.ArgumentException>(
                 () => provider.AddOrUpdate("", new Dictionary<string, string>()));
+            AssertException.Throws<System.ArgumentException>(
+                () => provider.AddOrUpdate("   ", new Dictionary<string, string>()));
             AssertException.Throws<System.ArgumentNullException>(
                 () => provider.AddOrUpdate("login.example.com", (IReadOnlyDictionary<string, string>)null));
 
-            // Per-key overload.
-            AssertException.Throws<System.ArgumentNullException>(
+            // Per-key overload. Host and key are rejected for null/empty/whitespace (ArgumentException); a
+            // null value is an ArgumentNullException.
+            AssertException.Throws<System.ArgumentException>(
                 () => provider.AddOrUpdate(null, MsalCloudKeys.TokenExchangeAudience, "api://X"));
-            AssertException.Throws<System.ArgumentNullException>(
+            AssertException.Throws<System.ArgumentException>(
                 () => provider.AddOrUpdate("", MsalCloudKeys.TokenExchangeAudience, "api://X"));
-            AssertException.Throws<System.ArgumentNullException>(
+            AssertException.Throws<System.ArgumentException>(
+                () => provider.AddOrUpdate("   ", MsalCloudKeys.TokenExchangeAudience, "api://X"));
+            AssertException.Throws<System.ArgumentException>(
                 () => provider.AddOrUpdate("login.example.com", null, "api://X"));
-            AssertException.Throws<System.ArgumentNullException>(
+            AssertException.Throws<System.ArgumentException>(
                 () => provider.AddOrUpdate("login.example.com", "", "api://X"));
+            AssertException.Throws<System.ArgumentException>(
+                () => provider.AddOrUpdate("login.example.com", "   ", "api://X"));
             AssertException.Throws<System.ArgumentNullException>(
                 () => provider.AddOrUpdate("login.example.com", MsalCloudKeys.TokenExchangeAudience, null));
         }
