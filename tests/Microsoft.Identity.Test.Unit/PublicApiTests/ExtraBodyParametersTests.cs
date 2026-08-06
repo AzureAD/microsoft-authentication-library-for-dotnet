@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                             .BuildConcrete();
 
                 //Recording test data for Asserts
-                _expectedParameterHash = "8cY9AFTXo3uSqueI1A_HPiX0j66dJXB-3c3BTDcJVxE";
+                _expectedParameterHash = "CIrQtkl8Nr9NUGzgmYq6F2GfO9tfuTaNmcWjfuwD_IY";
                 var appCacheAccess = confidentialApp.AppTokenCache.RecordAccess(
                     (args) => 
                     { 
@@ -99,7 +99,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                         { "attributetoken3", "AttributeToken" }
                     });
 
-                _expectedParameterHash = "aPnz3SdIoSMmI5yKcFs9h2vMKdZB_vahvt61jBrsCIE";
+                _expectedParameterHash = "dWRpwsigCH5bvOwffB1LVopCmuTUdKxxHqRxrEYm_-4";
                 authResult = await confidentialApp.AcquireTokenForClient(new[] { _scope })
                         .WithFmiPath("SomeFmiPath/FmiCredentialPath") //Sets fmi path in client credential request.
                         .WithExtraBodyParameters(extraBodyParams2) //Sets attributes in client credential request.
@@ -111,7 +111,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
 
                 //Ensure the first token can still be retrieved from the cache
-                _expectedParameterHash = "8cY9AFTXo3uSqueI1A_HPiX0j66dJXB-3c3BTDcJVxE";
+                _expectedParameterHash = "CIrQtkl8Nr9NUGzgmYq6F2GfO9tfuTaNmcWjfuwD_IY";
                 authResult = await confidentialApp.AcquireTokenForClient(new[] { _scope })
                         .WithFmiPath("SomeFmiPath/FmiCredentialPath") //Sets fmi path in client credential request.
                         .WithExtraBodyParameters(extraBodyParams) //Sets attributes in client credential request.
@@ -145,7 +145,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                             .BuildConcrete();
 
                 //Recording test data for Asserts
-                _expectedParameterHash = "zl6sDTLdSw06EytxoYRBItblGzbgi4qzQ8gvIyRywxc";
+                _expectedParameterHash = "gbZ-K5rm2VgvPYtqD0pP4Oihs91IlhZeEa6y341hT8Q";
                 var appCacheAccess = confidentialApp.AppTokenCache.RecordAccess(
                     (args) =>
                         {
@@ -210,7 +210,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         { "attributetoken5", "AttributeToken" }
                     });
 
-                _expectedParameterHash = "y6I4j3oaWfbZglcRJJsyBj7ROXrfqSMdYoglx8Fdp4A";
+                _expectedParameterHash = "Ade7sX3kx0BV8-08QgWceDSrim2hnNeUFVvX3g75WpU";
                 authResult = await confidentialApp.AcquireTokenForClient(new[] { scope })
                         .WithFmiPath("SomeFmiPath/FmiCredentialPath") //Sets fmi path in client credential request.
                         .WithExtraBodyParameters(extraBodyParams2) //Sets attributes in client credential request.
@@ -228,7 +228,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         { "attributetoken2", "AttributeToken" }
                     });
 
-                _expectedParameterHash = "9VQZ-ObNKwbMeTs51ehDhjCE2mB4n5N_KoAy85Sr3yQ";
+                _expectedParameterHash = "9yULcb0-qBhB25_0PpAL-m1Cdz-49CQLOTywgx1Ie24";
                 authResult = await confidentialApp.AcquireTokenForClient(new[] { scope })
                         .WithFmiPath("SomeFmiPath/FmiCredentialPath") //Sets fmi path in client credential request.
                         .WithExtraBodyParameters(extraBodyParams) //Sets attributes in client credential request.
