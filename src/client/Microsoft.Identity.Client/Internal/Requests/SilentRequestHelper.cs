@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -97,7 +98,18 @@ namespace Microsoft.Identity.Client.Internal
             {
                 try
                 {
+                    var stopwatch = Stopwatch.StartNew();
                     var authResult = await fetchAction().ConfigureAwait(false);
+                    stopwatch.Stop();
+
+                    // Proactive refresh runs outside RequestBase.RunAsync, so backfill the result's telemetry
+                    // from the shared apiEvent using this operation's own elapsed time.
+                    RequestBase.PopulateSuccessMetadata(
+                        authResult.AuthenticationResultMetadata,
+                        apiEvent,
+                        stopwatch.ElapsedMilliseconds,
+                        Cache.CacheLevel.None);
+
                     var executionResult = new ExecutionResult { Successful = true, Result = authResult };
 
                     // Invoke the enricher once for this background refresh and reuse the materialized
