@@ -65,6 +65,71 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
+        public async Task SignedAssertionDelegateClientCredential_ForwardsOtelTagsEnricher()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                Action<ExecutionResult, IList<KeyValuePair<string, object>>> enricher =
+                    (executionResult, tags) => tags.Add(new KeyValuePair<string, object>("k", "v"));
+
+                Action<ExecutionResult, IList<KeyValuePair<string, object>>> capturedEnricher = null;
+
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithHttpManager(httpManager)
+                    .WithClientAssertion(async (AssertionRequestOptions options) =>
+                    {
+                        // The enricher configured on the outer request must be forwarded to the
+                        // assertion callback so a callback that acquires the assertion via an inner
+                        // token request (e.g. a Federated Identity Credential) can enrich it identically.
+                        capturedEnricher = options.OtelTagsEnricher;
+                        return await Task.FromResult("dummy_assertion").ConfigureAwait(false);
+                    })
+                    .BuildConcrete();
+
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithOtelTagsEnricher(enricher)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.AreSame(enricher, capturedEnricher, "OtelTagsEnricher should be forwarded to the assertion callback.");
+            }
+        }
+
+        [TestMethod]
+        public async Task SignedAssertionDelegateClientCredential_NoEnricher_LeavesOtelTagsEnricherNull()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                bool enricherWasNull = false;
+
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithHttpManager(httpManager)
+                    .WithClientAssertion(async (AssertionRequestOptions options) =>
+                    {
+                        enricherWasNull = options.OtelTagsEnricher == null;
+                        return await Task.FromResult("dummy_assertion").ConfigureAwait(false);
+                    })
+                    .BuildConcrete();
+
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsTrue(enricherWasNull, "OtelTagsEnricher should be null when no enricher is configured.");
+            }
+        }
+
+        [TestMethod]
         public async Task SignedAssertionDelegateClientCredential_WithClaims()
         {
             using (var httpManager = new MockHttpManager())

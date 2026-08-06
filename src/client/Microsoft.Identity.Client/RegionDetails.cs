@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using Microsoft.Identity.Client.Region;
 
 namespace Microsoft.Identity.Client
@@ -11,6 +12,11 @@ namespace Microsoft.Identity.Client
     /// <see cref="AuthenticationResultMetadata"/> for additional metadata 
     /// information of the authentication result.
     /// </summary>
+#if NETFRAMEWORK || NETSTANDARD
+    // Serializable alongside AuthenticationResultMetadata (its container) so the graph stored in
+    // Exception.Data is fully serializable on .NET Framework / netstandard (Bug 3696194).
+    [Serializable]
+#endif
     public class RegionDetails
     {
         /// <summary>

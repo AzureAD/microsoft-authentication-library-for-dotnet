@@ -339,3 +339,29 @@ stages:
       parameters:
         BuildConfiguration: 'Release'
         TargetFramework:   'net8.0'
+
+# ──────────────────────────────────────────────
+# Stage 12 — Deploy & Test Managed Identity WebApp (Easy Auth)
+# ──────────────────────────────────────────────
+- stage: DeployAndTestManagedIdentityWebApp
+  displayName: 'Deploy & Test MI WebApp (Easy Auth)'
+  dependsOn: [] # Builds from source — no dependency on Build stage
+  jobs:
+
+  - job: 'DeployAndTestManagedIdentityWebApp'
+    displayName: 'Deploy ManagedIdentityWebApi and verify Easy Auth-protected endpoint'
+    pool:
+        vmImage: 'windows-2022'
+        demands:
+        - msbuild
+        - visualstudio
+    variables:
+        runCodesignValidationInjection: false
+        Codeql.SkipTaskAutoInjection: true
+    condition: and(succeeded(), eq(variables['RunManagedIdentityWebAppDeploy'], 'true'))
+
+    steps:
+    - template: template-deploy-managed-identity-webapp-and-test.yaml
+      parameters:
+        BuildConfiguration: 'Release'
+        TargetFramework:   'net8.0'

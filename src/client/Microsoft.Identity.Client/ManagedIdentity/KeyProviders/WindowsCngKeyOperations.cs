@@ -365,19 +365,24 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
         /// on the cold-start path. Subsequent calls reuse the cached key in
         /// <c>WindowsManagedIdentityKeyProvider</c>, so the probe runs at most once per process.
         /// </para>
+        /// <para>
+        /// The probe uses PSS padding (the approved scheme, consistent with the rest of the
+        /// managed identity / PoP signing code). The produced signature is discarded; only the
+        /// success/failure of the operation matters for liveness detection.
+        /// </para>
         /// </remarks>
         private static bool CanSign(CngKey key, ILoggerAdapter logger)
         {
             try
             {
-                logger?.Verbose(() => "[MI][WinKeyProvider] Liveness probe: attempting RSA-SHA256 sign of 1-byte payload.");
+                logger?.Verbose(() => "[MI][WinKeyProvider] Liveness probe: attempting RSA-SHA256/PSS sign of 1-byte payload.");
 
                 using (var rsa = new RSACng(key))
                 {
                     _ = rsa.SignData(
                         new byte[] { 0 },
                         HashAlgorithmName.SHA256,
-                        RSASignaturePadding.Pkcs1);
+                        RSASignaturePadding.Pss);
                 }
 
                 logger?.Verbose(() => "[MI][WinKeyProvider] Liveness probe: sign succeeded; key material is live.");
