@@ -465,6 +465,180 @@ namespace Microsoft.Identity.Test.Unit.Throttling
         }
         #endregion
 
+        #region Cross-user (app-wide) throttling fix
+
+        /// <summary>
+        /// Verifies that error-class (HTTP 5xx) throttling is scoped per-user.
+        ///
+        /// With ROPC (username/password) the account is not known before the token request. The
+        /// <see cref="HttpStatusProvider"/> keys HTTP 5xx (error-class) throttles per-user, so a
+        /// 5xx failure for one user does NOT throttle a different user that shares the same
+        /// clientId/authority/scope. The failing user itself remains throttled.
+        /// </summary>
+        [TestMethod]
+        public async Task RopcHttp500_DoesNotThrottleDifferentUser_Async()
+        {
+            using (var httpManagerAndBundle = new MockHttpAndServiceBundle())
+            {
+                var httpManager = httpManagerAndBundle.HttpManager;
+
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
+                    .WithHttpManager(httpManager)
+                    .BuildConcrete();
+
+                // Arrange - user A's ROPC call fails with HTTP 500 (a per-user failure surfaced as 5xx).
+                httpManager.AddInstanceDiscoveryMockHandler();
+                AddManagedUserRealmMockHandler(httpManager);
+                // MSAL retries 5xx once, so two identical 500 token responses are consumed.
+                Add500TokenResponse(httpManager);
+                Add500TokenResponse(httpManager);
+
+                // Act - user A
+#pragma warning disable CS0618 // AcquireTokenByUsernamePassword is obsolete
+                var exA = await AssertException.TaskThrowsAsync<MsalServiceException>(
+                    () => app.AcquireTokenByUsernamePassword(TestConstants.s_scope, "userA@id.com", "passwordA")
+                             .ExecuteAsync(),
+                    allowDerived: true).ConfigureAwait(false);
+#pragma warning restore CS0618
+                Assert.AreEqual(500, exA.StatusCode);
+
+                var throttlingManager = (SingletonThrottlingManager)httpManagerAndBundle.ServiceBundle.ThrottlingManager;
+                AssertThrottlingCacheEntryCount(throttlingManager, httpStatusEntryCount: 1);
+
+                // Act - user B: a DIFFERENT user, same clientId/authority/scope. With the fix the 5xx
+                // throttle entry is keyed per-user, so user B is NOT throttled and gets a real token.
+                AddManagedUserRealmMockHandler(httpManager);
+                AddSuccessTokenResponse(httpManager);
+#pragma warning disable CS0618 // AcquireTokenByUsernamePassword is obsolete
+                var resultB = await app.AcquireTokenByUsernamePassword(TestConstants.s_scope, "userB@id.com", "passwordB")
+                                       .ExecuteAsync().ConfigureAwait(false);
+#pragma warning restore CS0618
+
+                // Assert - user B succeeded (not throttled by user A's failure).
+                Assert.IsNotNull(resultB);
+                Assert.AreEqual("some-access-token", resultB.AccessToken);
+
+                // And the originally-failing user A is still throttled (per-user throttle preserved).
+                AddManagedUserRealmMockHandler(httpManager);
+#pragma warning disable CS0618 // AcquireTokenByUsernamePassword is obsolete
+                var exAAgain = await AssertException.TaskThrowsAsync<MsalThrottledServiceException>(
+                    () => app.AcquireTokenByUsernamePassword(TestConstants.s_scope, "userA@id.com", "passwordA")
+                             .ExecuteAsync()).ConfigureAwait(false);
+#pragma warning restore CS0618
+                Assert.AreEqual(500, exAAgain.StatusCode);
+                Assert.AreEqual(0, httpManager.QueueSize,
+                    "User A should be throttled before its token request, so no token mock is consumed.");
+            }
+        }
+
+        /// <summary>
+        /// Verifies the response-type-aware part of the fix: HTTP 429 (service-directed rate limiting)
+        /// still throttles app-wide, so a 429 for one user DOES throttle a different user. Only
+        /// error-class 5xx throttling is scoped per-user (see
+        /// <see cref="RopcHttp500_DoesNotThrottleDifferentUser_Async"/>).
+        /// </summary>
+        [TestMethod]
+        public async Task RopcHttp429_StillThrottlesDifferentUser_AppWide_Async()
+        {
+            using (var httpManagerAndBundle = new MockHttpAndServiceBundle())
+            {
+                var httpManager = httpManagerAndBundle.HttpManager;
+
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
+                    .WithHttpManager(httpManager)
+                    .BuildConcrete();
+
+                // Arrange - user A's ROPC call fails with HTTP 429 (no Retry-After). 429 is not retried.
+                httpManager.AddInstanceDiscoveryMockHandler();
+                AddManagedUserRealmMockHandler(httpManager);
+                Add429TokenResponse(httpManager);
+
+                // Act - user A
+#pragma warning disable CS0618 // AcquireTokenByUsernamePassword is obsolete
+                var exA = await AssertException.TaskThrowsAsync<MsalServiceException>(
+                    () => app.AcquireTokenByUsernamePassword(TestConstants.s_scope, "userA@id.com", "passwordA")
+                             .ExecuteAsync(),
+                    allowDerived: true).ConfigureAwait(false);
+#pragma warning restore CS0618
+                Assert.AreEqual(429, exA.StatusCode);
+
+                var throttlingManager = (SingletonThrottlingManager)httpManagerAndBundle.ServiceBundle.ThrottlingManager;
+                AssertThrottlingCacheEntryCount(throttlingManager, httpStatusEntryCount: 1);
+
+                // Act - user B: 429 is app-wide, so a DIFFERENT user IS throttled (service-directed back-off preserved).
+                AddManagedUserRealmMockHandler(httpManager);
+#pragma warning disable CS0618 // AcquireTokenByUsernamePassword is obsolete
+                var exB = await AssertException.TaskThrowsAsync<MsalThrottledServiceException>(
+                    () => app.AcquireTokenByUsernamePassword(TestConstants.s_scope, "userB@id.com", "passwordB")
+                             .ExecuteAsync()).ConfigureAwait(false);
+#pragma warning restore CS0618
+
+                Assert.AreEqual(429, exB.StatusCode);
+                Assert.AreEqual(0, httpManager.QueueSize,
+                    "User B should be throttled before its token request, so no token mock is consumed.");
+            }
+        }
+
+        private static void AddManagedUserRealmMockHandler(MockHttpManager httpManager)
+        {
+            httpManager.AddMockHandler(
+                new MockHttpMessageHandler
+                {
+                    ExpectedMethod = HttpMethod.Get,
+                    ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                    {
+                        Content = new StringContent(
+                            "{\"ver\":\"1.0\",\"account_type\":\"Managed\",\"domain_name\":\"id.com\"}")
+                    },
+                    ExpectedQueryParams = new Dictionary<string, string>
+                    {
+                        { "api-version", "1.0" }
+                    }
+                });
+        }
+
+        private static void Add500TokenResponse(MockHttpManager httpManager)
+        {
+            httpManager.AddMockHandler(
+                new MockHttpMessageHandler
+                {
+                    ExpectedMethod = HttpMethod.Post,
+                    ResponseMessage = new HttpResponseMessage(HttpStatusCode.InternalServerError)
+                    {
+                        Content = new StringContent(
+                            "{\"error\":\"temporarily_unavailable\",\"error_description\":\"server error\"}")
+                    }
+                });
+        }
+
+        private static void Add429TokenResponse(MockHttpManager httpManager)
+        {
+            httpManager.AddMockHandler(
+                new MockHttpMessageHandler
+                {
+                    ExpectedMethod = HttpMethod.Post,
+                    ResponseMessage = new HttpResponseMessage((HttpStatusCode)429)
+                    {
+                        Content = new StringContent(
+                            "{\"error\":\"temporarily_unavailable\",\"error_description\":\"too many requests\"}")
+                    }
+                });
+        }
+
+        private static void AddSuccessTokenResponse(MockHttpManager httpManager)
+        {
+            httpManager.AddMockHandler(
+                new MockHttpMessageHandler
+                {
+                    ExpectedMethod = HttpMethod.Post,
+                    ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
+                });
+        }
+
+        #endregion
+
         private async Task<PublicClientApplication> SetupAndAcquireOnceAsync(
             MockHttpAndServiceBundle httpManagerAndBundle,
             int httpStatusCode,

@@ -40,9 +40,19 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
                 logger.Info(() => $"[Throttling] HTTP status code {ex.StatusCode} encountered - " +
                     $"throttling for {s_throttleDuration.TotalSeconds} seconds. ");
 
-                var thumbprint = ThrottleCommon.GetRequestStrictThumbprint(bodyParams,
-                    requestParams.AuthorityInfo.CanonicalAuthority.ToString(),
-                    requestParams.Account?.HomeAccountId?.Identifier);
+                string authority = requestParams.AuthorityInfo.CanonicalAuthority.ToString();
+                string homeAccountId = requestParams.Account?.HomeAccountId?.Identifier;
+
+                // HTTP 5xx is a server/credential error that can be specific to a single user
+                // (e.g. a federated STS returning HTTP 500 for one user's bad password). Key it
+                // per-user so it does not throttle other users.
+                // HTTP 429 is service-directed rate limiting for the whole application, so it keeps
+                // the app-wide strict thumbprint.
+                bool isServerError = ex.StatusCode >= 500 && ex.StatusCode < 600;
+                var thumbprint = isServerError
+                    ? ThrottleCommon.GetRequestUserAwareThumbprint(bodyParams, authority, homeAccountId)
+                    : ThrottleCommon.GetRequestStrictThumbprint(bodyParams, authority, homeAccountId);
+
                 var entry = new ThrottlingCacheEntry(ex, s_throttleDuration);
                 ThrottlingCache.AddAndCleanup(thumbprint, entry, logger);
             }
@@ -60,12 +70,28 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
             {
                 var logger = requestParams.RequestContext.Logger;
 
-                string strictThumbprint = ThrottleCommon.GetRequestStrictThumbprint(
-                    bodyParams,
-                    requestParams.AuthorityInfo.CanonicalAuthority.ToString(),
-                    requestParams.Account?.HomeAccountId?.Identifier);
+                string authority = requestParams.AuthorityInfo.CanonicalAuthority.ToString();
+                string homeAccountId = requestParams.Account?.HomeAccountId?.Identifier;
 
-                ThrottleCommon.TryThrowServiceException(strictThumbprint, ThrottlingCache, logger, nameof(HttpStatusProvider));
+                // App-wide key catches service-directed 429 throttles.
+                string appWideThumbprint = ThrottleCommon.GetRequestStrictThumbprint(
+                    bodyParams,
+                    authority,
+                    homeAccountId);
+
+                ThrottleCommon.TryThrowServiceException(appWideThumbprint, ThrottlingCache, logger, nameof(HttpStatusProvider));
+
+                // Per-user key catches error-class (5xx) throttles so one user does not block another.
+                // Only check it when it actually differs from the app-wide key (i.e. there is a user component).
+                string userAwareThumbprint = ThrottleCommon.GetRequestUserAwareThumbprint(
+                    bodyParams,
+                    authority,
+                    homeAccountId);
+
+                if (!string.Equals(userAwareThumbprint, appWideThumbprint, System.StringComparison.Ordinal))
+                {
+                    ThrottleCommon.TryThrowServiceException(userAwareThumbprint, ThrottlingCache, logger, nameof(HttpStatusProvider));
+                }
             }
         }
 

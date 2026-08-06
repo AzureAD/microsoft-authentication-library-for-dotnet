@@ -48,6 +48,40 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
             return sb.ToString();
         }
 
+        /// <summary>
+        /// A user-aware variant of the strict thumbprint. It behaves exactly like
+        /// <see cref="GetRequestStrictThumbprint"/> but, when no account (homeAccountId) is available
+        /// (e.g. ROPC / username-password before an account exists), it falls back to a user
+        /// discriminator taken from the request body (username, then login_hint).
+        /// This is used for error-class throttling (HTTP 5xx) so that one user's failure does not
+        /// throttle a different user that shares the same clientId/authority/scope.
+        /// Service-directed throttling (HTTP 429 / Retry-After) intentionally keeps using the
+        /// app-wide <see cref="GetRequestStrictThumbprint"/> instead.
+        /// </summary>
+        public static string GetRequestUserAwareThumbprint(
+            IReadOnlyDictionary<string, string> bodyParams,
+            string authority,
+            string homeAccountId)
+        {
+            string userComponent = homeAccountId;
+
+            if (string.IsNullOrEmpty(userComponent) &&
+                bodyParams.TryGetValue(OAuth2Parameter.Username, out string username) &&
+                !string.IsNullOrEmpty(username))
+            {
+                userComponent = username;
+            }
+
+            if (string.IsNullOrEmpty(userComponent) &&
+                bodyParams.TryGetValue(OAuth2Parameter.LoginHint, out string loginHint) &&
+                !string.IsNullOrEmpty(loginHint))
+            {
+                userComponent = loginHint;
+            }
+
+            return GetRequestStrictThumbprint(bodyParams, authority, userComponent);
+        }
+
         public static void TryThrowServiceException(string thumbprint, ThrottlingCache cache, ILoggerAdapter logger, string providerName)
         {
             if (cache.TryGetOrRemoveExpired(thumbprint, logger, out var ex))
