@@ -106,8 +106,19 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 return new WindowsManagedIdentityKeyProvider();
             }
 
-            // Non-Windows OS - we will fall back to in-memory implementation.
-            logger?.Info("[MI][KeyProviderFactory] Non-Windows platform (with CNG) - using InMemory provider.");
+#if NET8_0_OR_GREATER
+            if (DesktopOsHelper.IsLinux())
+            {
+                // Linux: source a non-exportable RSA-PSS key from the KMPP/OP-TEE enclave
+                // (KeyGuard-equivalent), falling back to in-memory inside the provider when the
+                // enclave is unavailable.
+                logger?.Info("[MI][KeyProviderFactory] Linux detected - using KMPP/OP-TEE managed identity key provider.");
+                return new LinuxManagedIdentityKeyProvider();
+            }
+#endif
+
+            // Other non-Windows OS (e.g. macOS) - fall back to in-memory implementation.
+            logger?.Info("[MI][KeyProviderFactory] Non-Windows platform - using InMemory provider.");
             return new InMemoryManagedIdentityKeyProvider();
         }
     }

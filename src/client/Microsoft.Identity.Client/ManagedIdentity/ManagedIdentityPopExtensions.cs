@@ -51,7 +51,13 @@ namespace Microsoft.Identity.Client
                 throw new System.ArgumentNullException(nameof(options));
             }
 
-            if (!DesktopOsHelper.IsWindows())
+            // mTLS PoP needs a platform that can source a binding key:
+            // Windows (CNG/KeyGuard) on all TFMs, or Linux (KMPP/OP-TEE enclave) on net8.0+.
+            bool isSupportedOs = DesktopOsHelper.IsWindows();
+#if NET8_0_OR_GREATER
+            isSupportedOs = isSupportedOs || DesktopOsHelper.IsLinux();
+#endif
+            if (!isSupportedOs)
             {
                 throw new MsalClientException(
                     MsalError.MtlsNotSupportedForManagedIdentity,
