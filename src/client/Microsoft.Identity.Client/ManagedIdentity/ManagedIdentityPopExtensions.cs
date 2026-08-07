@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Client
             {
                 throw new MsalClientException(
                     "mtls_pop_and_bearer_exclusive",
-                    "WithMtlsProofOfPossession() and WithBearerOverMtls() are mutually exclusive; call only one on a managed identity request.");
+                    "WithMtlsProofOfPossession() and WithRequestOverMtls() are mutually exclusive; call only one on a managed identity request.");
             }
 
             if (!DesktopOsHelper.IsWindows())
@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="builder">The AcquireTokenForManagedIdentityParameterBuilder instance.</param>
         /// <returns>The builder to chain .With methods.</returns>
-        public static AcquireTokenForManagedIdentityParameterBuilder WithBearerOverMtls(
+        public static AcquireTokenForManagedIdentityParameterBuilder WithRequestOverMtls(
             this AcquireTokenForManagedIdentityParameterBuilder builder)
         {
             if (builder == null)
@@ -99,7 +99,7 @@ namespace Microsoft.Identity.Client
             {
                 throw new MsalClientException(
                     "mtls_pop_and_bearer_exclusive",
-                    "WithMtlsProofOfPossession() and WithBearerOverMtls() are mutually exclusive; call only one on a managed identity request.");
+                    "WithMtlsProofOfPossession() and WithRequestOverMtls() are mutually exclusive; call only one on a managed identity request.");
             }
 
             if (!DesktopOsHelper.IsWindows())

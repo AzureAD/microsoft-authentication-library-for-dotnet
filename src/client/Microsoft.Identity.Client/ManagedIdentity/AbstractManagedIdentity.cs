@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         protected bool _isMtlsPopRequested;
 
         /// <summary>
-        /// True when <see cref="ManagedIdentityPopExtensions.WithBearerOverMtls"/> was called.
+        /// True when <see cref="ManagedIdentityPopExtensions.WithRequestOverMtls"/> was called.
         /// The IMDSv2 attested mTLS flow is used, but <c>token_type=bearer</c> is requested from ESTS.
         /// </summary>
         protected bool _preferMsiV2;
