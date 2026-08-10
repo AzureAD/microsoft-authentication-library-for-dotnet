@@ -82,7 +82,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
                 case AppConfig.ManagedIdentityIdType.ResourceId:
                     _requestContext.Logger.Info("[Managed Identity] Adding user assigned resource id to the request.");
-                    request.QueryParameters[Constants.ManagedIdentityResourceId] = _requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId;
+                    // Azure Arc honors the IMDS "msi_res_id" spelling for the resource-id selector; the
+                    // "mi_res_id" spelling is silently ignored and returns the system-assigned identity.
+                    request.QueryParameters[Constants.ManagedIdentityResourceIdImds] = _requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId;
                     break;
 
                 case AppConfig.ManagedIdentityIdType.ObjectId:
@@ -154,7 +156,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         }
 
         // Azure Arc user-assigned managed identity is a preview capability. A legacy Arc agent
-        // ignores the client_id / object_id / mi_res_id selector and silently returns the machine's
+        // ignores the client_id / object_id / msi_res_id selector and silently returns the machine's
         // system-assigned identity. An agent that honors the request echoes the selected identity
         // back in the token response. When the caller asked for a user-assigned identity but the
         // response does not confirm it, fail closed so the caller never receives a token for a
