@@ -123,6 +123,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         }
 
         public bool IsMtlsPopRequested => _commonParameters.IsMtlsPopRequested;
+        public bool PreferMsiV2 => _commonParameters.PreferMsiV2;
         public MtlsBindingStrength MtlsPopMinStrength => _commonParameters.MtlsPopMinStrength;
         public bool? SendOfflineAccessScope => _commonParameters.SendOfflineAccessScope;
 
@@ -143,12 +144,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 return _commonParameters.Claims;
             }
         }
-
-        /// <summary>
-        /// Client-originated claims set via .WithClaimsFromClient(). These are cached (no bypass) and
-        /// keyed on the raw claims string as passed by the caller.
-        /// </summary>
-        public string ClientClaims => _commonParameters.ClientClaims;
 
         private IAuthenticationOperation _requestOverrideScheme;
 

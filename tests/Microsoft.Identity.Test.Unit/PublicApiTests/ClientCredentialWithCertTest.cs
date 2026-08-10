@@ -10,6 +10,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -24,6 +25,13 @@ using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Identity.Client.Extensibility;
+using Microsoft.Identity.Client.Internal.Logger;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+#if NETFRAMEWORK
+using Microsoft.Identity.Client.Platforms.netdesktop;
+#else
+using Microsoft.Identity.Client.Platforms.netstandard;
+#endif
 
 namespace Microsoft.Identity.Test.Unit
 {
@@ -655,6 +663,127 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(
                     "MIIDQjCCAiqgAwIBAgIQTuexEO9cdYhC0jy1nmS6jTANBgkqhkiG9w0BAQsFADAiMSAwHgYDVQQDDBd0cndhbGtlLm9ubWljcm9zb2Z0LmNvbTAeFw0xNzA4MTExODEzMTBaFw0xODA4MTExODMzMTBaMCIxIDAeBgNVBAMMF3Ryd2Fsa2Uub25taWNyb3NvZnQuY29tMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA5Qe3Ah/E97K0o288gYUNa0H8FO/w8pb1dvls/boQDoZxUD11TpAQrKZwstS6+ulGF6cHmj44AH8MNBKNUbW2L1NTjFG9bltaSXpJXzbIH/cUppF9rxngZ0CM7cHtuoccBPBVEuQiJ86pD7qlqE2EA2BdBmfz3Hd41rybdaWkHMxMcBC7nh6w87/KoyikKXCMLUUyRTJLSivo+gfKJsiYGAjqZ54aJraP5LMiPG2qYTOZR6wMme93mYRp85sqGTvgzRCq37STH2HmcYilUQ9kZFe5SR+1vOki97XLg+H7FuFtkSMM7dEnTWkDv+BJ1ZQvCEj623cJxXlq0fd7hVUxIQIDAQABo3QwcjAOBgNVHQ8BAf8EBAMCBaAwHQYDVR0lBBYwFAYIKwYBBQUHAwIGCCsGAQUFBwMBMCIGA1UdEQQbMBmCF3Ryd2Fsa2Uub25taWNyb3NvZnQuY29tMB0GA1UdDgQWBBSauRo9cNk8J6RTLWMQSyUQnxjQzDANBgkqhkiG9w0BAQsFAAOCAQEAhYl1I8qETtvVt6m/YrGknA90R/FtIePt/ViBae3mxPJWlVoq5fTTriQcuPHXfI5kbjTQJIwCVTT/CRSlKkzRcrSsQUxxHNE7IdpvvDbkf6AMPxQhNACHQd0cIWmsmf+ItKsC70LKQ+93+VgmBsv2j8XwF0JTqwuKoqXnDjCzHvmU67xhPY6CSPA/0XOiVTx1BDWd5cPdsH2bZnAeApsvrzU8W7iPgV/oN9MMfogocvDUXd6T+QGLMAYoInHXsqG6+SEarqRDUPQZOHo5Ax4Mvhsnd2b4u5d5Y/R0z0wUwtOiF0Tu+w79JIqDRYaaJLTKxZ+2DyYOu54u0LGsGhki1g==",
                     decodedToken.Header["x5c"]);
+            }
+        }
+
+        [TestMethod]
+        public async Task AcquireTokenForClientWhenPssSigningFailsSendsRs256AssertionAsync()
+        {
+            // Arrange
+            using (var harness = CreateTestHarness())
+            using (RSA rsa = RSA.Create(2048))
+            using (X509Certificate2 certificate = new CertificateRequest(
+                "CN=PSS Fallback Test",
+                rsa,
+                HashAlgorithmName.SHA256,
+                RSASignaturePadding.Pkcs1).CreateSelfSigned(
+                    DateTimeOffset.UtcNow.AddMinutes(-1),
+                    DateTimeOffset.UtcNow.AddDays(1)))
+            {
+                SetupMocks(harness.HttpManager);
+                var cryptographyManager = new PssFailingCryptographyManager();
+
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                    .WithHttpManager(harness.HttpManager)
+                    .WithPlatformProxy(new PssFailingPlatformProxy(cryptographyManager))
+                    .WithCertificate(certificate)
+                    .BuildConcrete();
+
+                MockHttpMessageHandler handler = CreateTokenResponseHttpHandler(clientCredentialFlow: true);
+                handler.AdditionalRequestValidation = request =>
+                {
+                    string requestContent = request.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                    IDictionary<string, string> formData = CoreHelpers.ParseKeyValueList(
+                        requestContent,
+                        '&',
+                        true,
+                        null);
+
+                    Assert.IsTrue(
+                        formData.TryGetValue(OAuth2Parameter.ClientAssertion, out string encodedAssertion),
+                        "Missing client_assertion from request.");
+
+                    var assertion = new JwtSecurityTokenHandler().ReadJwtToken(encodedAssertion);
+                    AssertClientAssertionHeader(
+                        certificate,
+                        assertion,
+                        sendX5c: true,
+                        useSha2AndPss: false);
+
+                    string[] assertionSegments = encodedAssertion.Split('.');
+                    Assert.HasCount(3, assertionSegments);
+
+                    byte[] signingInput = Encoding.UTF8.GetBytes(
+                        assertionSegments[0] + "." + assertionSegments[1]);
+                    byte[] signature = Base64UrlHelpers.DecodeBytes(assertionSegments[2]);
+
+                    using (RSA publicKey = certificate.GetRSAPublicKey())
+                    {
+                        Assert.IsTrue(
+                            publicKey.VerifyData(
+                                signingInput,
+                                signature,
+                                HashAlgorithmName.SHA256,
+                                RSASignaturePadding.Pkcs1),
+                            "The client_assertion signature should be valid RS256.");
+                    }
+                };
+
+                harness.HttpManager.AddMockHandler(handler);
+
+                // Act
+                AuthenticationResult result = await app
+                    .AcquireTokenForClient(TestConstants.s_scope)
+                    .WithSendX5C(true)
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(1, cryptographyManager.PssSigningAttempts);
+                Assert.AreEqual(1, cryptographyManager.Pkcs1SigningAttempts);
+            }
+        }
+
+#if NETFRAMEWORK
+        private sealed class PssFailingPlatformProxy : NetDesktopPlatformProxy
+#else
+        private sealed class PssFailingPlatformProxy : NetCorePlatformProxy
+#endif
+        {
+            private readonly ICryptographyManager _cryptographyManager;
+
+            public PssFailingPlatformProxy(ICryptographyManager cryptographyManager)
+                : base(new NullLogger())
+            {
+                _cryptographyManager = cryptographyManager;
+            }
+
+            protected override ICryptographyManager InternalGetCryptographyManager()
+                => _cryptographyManager;
+        }
+
+        private sealed class PssFailingCryptographyManager : CommonCryptographyManager
+        {
+            public int PssSigningAttempts { get; private set; }
+
+            public int Pkcs1SigningAttempts { get; private set; }
+
+            public override byte[] SignWithCertificate(
+                string message,
+                X509Certificate2 certificate,
+                RSASignaturePadding signaturePadding)
+            {
+                if (signaturePadding == RSASignaturePadding.Pss)
+                {
+                    PssSigningAttempts++;
+                    throw new CryptographicException("PSS signing is not supported by this key provider.");
+                }
+
+                Pkcs1SigningAttempts++;
+                return base.SignWithCertificate(message, certificate, signaturePadding);
             }
         }
 

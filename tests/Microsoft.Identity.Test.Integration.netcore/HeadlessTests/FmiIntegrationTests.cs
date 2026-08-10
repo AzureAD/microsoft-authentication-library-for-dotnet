@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System.Linq;
@@ -12,7 +12,6 @@ using Microsoft.Identity.Test.Common.Core.Helpers;
 using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Collections.Generic;
-using Microsoft.Identity.Test.Integration.NetFx.Infrastructure;
 using OpenTelemetry.Logs;
 
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
@@ -59,7 +58,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             confidentialApp.AppTokenCache.SetAfterAccess(AfterCacheAccess);
 
             //Recording test data for Asserts
-            string expectedFmiPathHash = "zm2n0E62zwTsnNsozptLsoOoB_C7i-GfpxHYQQINJUw";
+            string expectedFmiPathHash = "cojvFy5tZae3nJPKVceBguvVx5vvMNJ8hPHQRbOgjOI";
             var expectedExternalCacheKey = $"{RmaClientId}_{TenantId}_{expectedFmiPathHash}_AppTokenCache"; // last part is the SHA256 of the fmi path
             var appCacheAccess = confidentialApp.AppTokenCache.RecordAccess(
                 (args) => Assert.AreEqual(expectedExternalCacheKey, args.SuggestedCacheKey));
@@ -98,7 +97,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             confidentialApp.AppTokenCache.SetAfterAccess(AfterCacheAccess);
 
             //Recording test data for Asserts
-            string expectedFmiPathHash = "zm2n0E62zwTsnNsozptLsoOoB_C7i-GfpxHYQQINJUw";
+            string expectedFmiPathHash = "cojvFy5tZae3nJPKVceBguvVx5vvMNJ8hPHQRbOgjOI";
             var expectedExternalCacheKey = $"{RmaClientId}_{TenantId}_{expectedFmiPathHash}_AppTokenCache";
             var appCacheAccess = confidentialApp.AppTokenCache.RecordAccess(
                 (args) => Assert.AreEqual(expectedExternalCacheKey, args.SuggestedCacheKey));
@@ -137,7 +136,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             confidentialApp.AppTokenCache.SetAfterAccess(AfterCacheAccess);
 
             //Recording test data for Asserts
-            string expectedFmiPathHash = "7CX57Q63os7benQ6ER0sxgJPtNQSv7TGb5zexcidFoI";
+            string expectedFmiPathHash = "HaI-Va57U1u3bj1ELRa_dz5BpgHfTDMYv5vUyFoPBQo";
             var expectedExternalCacheKey = $"{clientId}_{TenantId}_{expectedFmiPathHash}_AppTokenCache";
             var appCacheAccess = confidentialApp.AppTokenCache.RecordAccess(
                 (args) => Assert.AreEqual(expectedExternalCacheKey, args.SuggestedCacheKey));
@@ -215,7 +214,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             confidentialApp.AppTokenCache.SetAfterAccess(AfterCacheAccess);
 
             //Recording test data for Asserts
-            string expectedFmiPathHash = "7CX57Q63os7benQ6ER0sxgJPtNQSv7TGb5zexcidFoI";
+            string expectedFmiPathHash = "HaI-Va57U1u3bj1ELRa_dz5BpgHfTDMYv5vUyFoPBQo";
             var expectedExternalCacheKey = $"{clientId}_{TenantId}_{expectedFmiPathHash}_AppTokenCache";
             var appCacheAccess = confidentialApp.AppTokenCache.RecordAccess(
                 (args) => Assert.AreEqual(expectedExternalCacheKey, args.SuggestedCacheKey));
@@ -313,7 +312,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             confidentialApp.AppTokenCache.SetAfterAccess(AfterCacheAccess);
 
             //Recording test data for Asserts
-            string expectedFmiPathHash = "NlReJx-vneHBYB53A1WmQWCgwPobHn98udAu2hCDkJ8";
+            string expectedFmiPathHash = "JbhHuuAJtitdvckF96ZcgCCqBSYW5anMO9-xYkcPKcw";
             var expectedExternalCacheKey = $"{RmaClientId}_{TenantId}_{expectedFmiPathHash}_AppTokenCache";
             var appCacheAccess = confidentialApp.AppTokenCache.RecordAccess(
                 (args) => Assert.AreEqual(expectedExternalCacheKey, args.SuggestedCacheKey));

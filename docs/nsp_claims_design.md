@@ -1,5 +1,12 @@
 # WithClaimsFromClient API Design
 
+> **Implementation status (updated):** `WithClaimsFromClient` ships for **confidential client only**
+> (`AcquireTokenForClientParameterBuilder`, via
+> `AbstractConfidentialClientAcquireTokenParameterBuilderExtension`). **Managed Identity support has been
+> removed:** there is no `WithClaimsFromClient` overload on `AcquireTokenForManagedIdentityParameterBuilder`,
+> and MSAL does not forward client-originated claims to IMDS (MSIv1/MSIv2). The Managed Identity / IMDS
+> sections below are retained for historical design context only and do **not** reflect shipped behavior.
+
 ## Background
 
 Azure Redis Cache operates in a Backing resource VM/VMSS and uses MSAL with Managed Identity credentials to acquire tokens from ESTS. The Redis team has requested that MSAL support sending NSP (Network Security Perimeter) claims to IMDS, so that the resulting tokens contain the NSP claim required to access NSP-protected resources.

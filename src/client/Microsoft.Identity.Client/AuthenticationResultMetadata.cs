@@ -9,6 +9,13 @@ namespace Microsoft.Identity.Client
     /// <summary>
     /// Contains metadata of the authentication result. <see cref="Metrics"/> for additional MSAL-wide metrics.
     /// </summary>
+#if NETFRAMEWORK || NETSTANDARD
+    // Marked [Serializable] only on the frameworks whose Exception.Data (ListDictionaryInternal) rejects
+    // non-serializable values, so downstream providers can read this object off the raw exception's Data bag
+    // (Bug 3696194). .NET (Core) removed that check, so the attribute is unnecessary there. The whole member
+    // graph is serializable (enums, strings, numeric types, and the RegionDetails DTO), so this is honest.
+    [Serializable]
+#endif
     public class AuthenticationResultMetadata
     {
 

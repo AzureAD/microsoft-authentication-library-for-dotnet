@@ -83,31 +83,6 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
-        /// <summary>
-        /// Specifies client-originated claims to include in the token request.
-        /// Unlike <see cref="WithClaims(string)"/> (for server-issued claims challenges), tokens acquired
-        /// with client claims are cached and keyed on the claims value. Different claim values produce
-        /// separate cache entries. Use stable, non-dynamic claim values to avoid cache fragmentation.
-        /// </summary>
-        /// <param name="claimsJson">A JSON string containing the client claims. Must be valid JSON.</param>
-        /// <returns>The builder to chain .With methods.</returns>
-        public AcquireTokenForManagedIdentityParameterBuilder WithClaimsFromClient(string claimsJson)
-        {
-            if (string.IsNullOrWhiteSpace(claimsJson))
-            {
-                return this;
-            }
-
-            ValidateUseOfExperimentalFeature();
-
-            CommonParameters.ClientClaims = claimsJson;
-
-            CommonParameters.CacheKeyComponents ??= new SortedList<string, Func<CancellationToken, Task<string>>>();
-            CommonParameters.CacheKeyComponents["client_claims"] = _ => Task.FromResult(claimsJson);
-
-            return this;
-        }
-
         /// <inheritdoc/>
         internal override Task<AuthenticationResult> ExecuteInternalAsync(CancellationToken cancellationToken)
         {
@@ -131,6 +106,7 @@ namespace Microsoft.Identity.Client
             AcquireTokenForManagedIdentityParameters acquireTokenForManagedIdentityParameters)
         {
             acquireTokenForManagedIdentityParameters.IsMtlsPopRequested = acquireTokenCommonParameters.IsMtlsPopRequested;
+            acquireTokenForManagedIdentityParameters.PreferMsiV2 = acquireTokenCommonParameters.PreferMsiV2;
             acquireTokenForManagedIdentityParameters.MtlsPopMinStrength = acquireTokenCommonParameters.MtlsPopMinStrength;
             acquireTokenForManagedIdentityParameters.AttestationTokenProvider = acquireTokenCommonParameters.AttestationTokenProvider;
 
@@ -157,6 +133,18 @@ namespace Microsoft.Identity.Client
                 {
                     acquireTokenCommonParameters.CacheKeyComponents.Remove(MiMinStrengthCacheKeyComponent);
                 }
+            }
+
+            // mTLS-bearer requests also need a cache key component so they are stored separately from
+            // plain IMDSv1 bearer tokens and from mTLS PoP tokens for the same resource.
+            if (acquireTokenCommonParameters.PreferMsiV2)
+            {
+                acquireTokenCommonParameters.CacheKeyComponents ??=
+                    new SortedList<string, Func<CancellationToken, Task<string>>>();
+
+                const string MtlsBearerKey = "mtls_bearer";
+                acquireTokenCommonParameters.CacheKeyComponents[MtlsBearerKey] =
+                    _ => acquireTokenCommonParameters.AttestationTokenProvider != null ? s_att1 : s_att0;
             }
         }
     }

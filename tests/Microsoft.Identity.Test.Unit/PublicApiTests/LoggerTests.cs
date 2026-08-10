@@ -440,6 +440,86 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             args.IdentityLogger.Log(entry);
         }
+
+        private const string TaggedOpaqueToken = "AQABCQEAAAAdDD7nRXZvU3RzQXJ0aWZhY3RzDQAAAAAAwEvgQ_kqa0hyAA";
+
+        private static string GetPiiLoggedOutput(Action<ILoggerAdapter> logAction)
+        {
+            var testLogger = new TestIdentityLogger();
+            ILoggerAdapter logger = new IdentityLoggerAdapter(testLogger, Guid.Empty, null, null, enablePiiLogging: true);
+            logAction(logger);
+            return testLogger.StringBuilder.ToString();
+        }
+
+        [TestMethod]
+        [Description("Exception messages that carry an ESTS-tagged opaque token must be scrubbed before logging.")]
+        public void ErrorPii_Exception_WithTaggedToken_IsScrubbed()
+        {
+            // Arrange
+            var exception = new MsalServiceException("some_error", "server rejected the request")
+            {
+                ResponseBody = "{\"error\":\"invalid_grant\",\"opaque\":\"" + TaggedOpaqueToken + "\"}"
+            };
+
+            // Act
+            string output = GetPiiLoggedOutput(logger => logger.ErrorPii(exception));
+
+            // Assert
+            Assert.Contains(TokenScrubber.Placeholder, output);
+            Assert.DoesNotContain("RXZvU3RzQXJ0aWZhY3Rz", output);
+            Assert.DoesNotContain(TaggedOpaqueToken, output);
+        }
+
+        [TestMethod]
+        [Description("Info-level exception logging must also scrub ESTS-tagged opaque tokens.")]
+        public void InfoPii_Exception_WithTaggedToken_IsScrubbed()
+        {
+            // Arrange
+            var exception = new MsalServiceException("some_error", "server rejected the request")
+            {
+                ResponseBody = "{\"opaque\":\"" + TaggedOpaqueToken + "\"}"
+            };
+
+            // Act
+            string output = GetPiiLoggedOutput(logger => logger.InfoPii(exception));
+
+            // Assert
+            Assert.Contains(TokenScrubber.Placeholder, output);
+            Assert.DoesNotContain("RXZvU3RzQXJ0aWZhY3Rz", output);
+        }
+
+        [TestMethod]
+        [Description("Warning-level exception logging must also scrub ESTS-tagged opaque tokens.")]
+        public void WarningPii_Exception_WithTaggedToken_IsScrubbed()
+        {
+            // Arrange
+            var exception = new MsalServiceException("some_error", "server rejected the request")
+            {
+                ResponseBody = "{\"opaque\":\"" + TaggedOpaqueToken + "\"}"
+            };
+
+            // Act
+            string output = GetPiiLoggedOutput(logger => logger.WarningPii(exception));
+
+            // Assert
+            Assert.Contains(TokenScrubber.Placeholder, output);
+            Assert.DoesNotContain("RXZvU3RzQXJ0aWZhY3Rz", output);
+        }
+
+        [TestMethod]
+        [Description("Tactical scope: ordinary (non-exception, non-ESTS) log messages are NOT scrubbed.")]
+        public void InfoPii_PlainMessage_WithTaggedToken_IsNotScrubbed()
+        {
+            // Arrange
+            string message = "diagnostic value " + TaggedOpaqueToken;
+
+            // Act
+            string output = GetPiiLoggedOutput(logger => logger.InfoPii(message, string.Empty));
+
+            // Assert
+            Assert.Contains(TaggedOpaqueToken, output);
+            Assert.DoesNotContain(TokenScrubber.Placeholder, output);
+        }
       
     }
 }

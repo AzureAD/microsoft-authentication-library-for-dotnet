@@ -221,20 +221,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
             await ResolveAuthorityAsync().ConfigureAwait(false);
 
             _managedIdentityParameters.IsMtlsPopRequested = AuthenticationRequestParameters.IsMtlsPopRequested;
+            _managedIdentityParameters.PreferMsiV2 = AuthenticationRequestParameters.PreferMsiV2;
 
-            // Propagate client-originated claims to the MI parameters for transport.
-            // Unlike server-issued Claims (which bypass the cache), ClientClaims participate in caching
-            // via CacheKeyComponents set on the builder — tokens are keyed per distinct claims value.
-            if (!string.IsNullOrEmpty(AuthenticationRequestParameters.ClientClaims))
-            {
-                _managedIdentityParameters.ClientClaims = AuthenticationRequestParameters.ClientClaims;
-            }
-
-            // mTLS PoP is served exclusively by IMDSv2. Mint the binding certificate, then delegate the
-            // token leg to MSAL's internal TokenClient exchange (the same path CCA uses) so client-originated
-            // claims, client-capability (CP1) merge, claims-based cache keying, and ESTS error handling are
-            // inherited rather than re-implemented in a bespoke MI token POST.
-            if (AuthenticationRequestParameters.IsMtlsPopRequested)
+            // mTLS PoP and mTLS Bearer are both served exclusively by IMDSv2. Mint the binding certificate, then delegate the
+            // token leg to MSAL's internal TokenClient exchange (the same path CCA uses) so client-capability
+            // (CP1) merge and ESTS error handling are inherited rather than re-implemented in a bespoke MI token POST.
+            if (AuthenticationRequestParameters.IsMtlsPopRequested || AuthenticationRequestParameters.PreferMsiV2)
             {
                 return await SendDelegatedImdsV2TokenRequestAsync(logger, cancellationToken).ConfigureAwait(false);
             }
@@ -297,23 +289,37 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     cancellationToken)
                 .ConfigureAwait(false);
 
-            // Inject the IMDS-minted cert as the request mTLS transport cert and apply the mtls_pop scheme
-            // so TokenClient emits token_type=mtls_pop and the resulting token is bound to the certificate.
+            // Inject the IMDS-minted cert as the request mTLS transport cert.
+            // For PoP: apply the mtls_pop scheme so TokenClient emits token_type=mtls_pop and the
+            // resulting token is bound to the certificate.
+            // For Bearer: inject the cert only for the mTLS channel (no PoP scheme); the resulting
+            // token is a standard bearer token with no binding certificate.
             AuthenticationRequestParameters.MtlsCertificate = binding.Certificate;
-            AuthenticationRequestParameters.AuthenticationScheme =
-                new MtlsPopAuthenticationOperation(binding.Certificate);
+            bool preferMsiV2 = AuthenticationRequestParameters.PreferMsiV2;
+            if (!preferMsiV2)
+            {
+                AuthenticationRequestParameters.AuthenticationScheme =
+                    new MtlsPopAuthenticationOperation(binding.Certificate);
 
-            // Remember the cert so subsequent cache lookups compute the same x5t#S256 cache key.
-            _managedIdentityClient.SetRuntimeMtlsBindingCertificate(binding.Certificate);
+                // Remember the cert so subsequent cache lookups compute the same x5t#S256 cache key.
+                _managedIdentityClient.SetRuntimeMtlsBindingCertificate(binding.Certificate);
+            }
 
             // grant_type is not added by TokenClient; client_id overrides AppConfig.ClientId
-            // (the SAMI placeholder) with the canonical GUID from the binding. Client-originated claims
-            // are emitted automatically by TokenClient via ClaimsAndClientCapabilities.
+            // (the SAMI placeholder) with the canonical GUID from the binding. Server-issued claims and
+            // client capabilities are emitted automatically by TokenClient via ClaimsAndClientCapabilities.
             var bodyParameters = new Dictionary<string, string>
             {
                 [OAuth2Parameter.GrantType] = OAuth2GrantType.ClientCredentials,
                 [OAuth2Parameter.ClientId] = binding.ClientId
             };
+
+            // For mTLS Bearer, explicitly request token_type=bearer so ESTS returns a standard
+            // bearer token (no cnf claim, no binding certificate).
+            if (preferMsiV2)
+            {
+                bodyParameters[OAuth2Parameter.TokenType] = Constants.BearerTokenType;
+            }
 
             string tokenEndpoint = binding.Endpoint.TrimEnd('/') + ImdsV2ManagedIdentitySource.AcquireEntraTokenPath;
             string scopeOverride = resource.TrimEnd('/') + "/.default";
