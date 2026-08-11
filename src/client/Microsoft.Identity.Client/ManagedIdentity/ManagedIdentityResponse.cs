@@ -72,27 +72,19 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         [JsonProperty("object_id")]
         public string ObjectId { get; set; }
 
-        /// <summary>
-        /// The Azure resource id of the user-assigned managed identity that issued the token, if the endpoint echoes it back.
-        /// Read from either "msi_res_id" (IMDS schema) or "mi_res_id" (the spelling MSAL sends on the Azure Arc request),
-        /// so validation works regardless of which one the agent echoes.
-        /// </summary>
-        [JsonIgnore]
-        public string ResourceId { get; set; }
-
         [JsonProperty("msi_res_id")]
-        public string ResourceIdMsi
-        {
-            get => ResourceId;
-            set => ResourceId = value;
-        }
+        public string ResourceIdMsi { get; set; }
 
         [JsonProperty("mi_res_id")]
-        public string ResourceIdMi
-        {
-            get => null;
-            set => ResourceId = value;
-        }
+        public string ResourceIdMi { get; set; }
+
+        /// <summary>
+        /// The Azure resource id of the user-assigned managed identity that issued the token, if the endpoint echoes it back.
+        /// Prefers the "msi_res_id" spelling that Azure Arc returns and falls back to "mi_res_id", so the value is
+        /// deterministic regardless of the order the two fields appear in the JSON response.
+        /// </summary>
+        [JsonIgnore]
+        public string ResourceId => ResourceIdMsi ?? ResourceIdMi;
 
     }
 }
