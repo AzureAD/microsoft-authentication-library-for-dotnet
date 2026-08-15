@@ -462,7 +462,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 }
 
                 httpMessageHandler.ExpectedQueryParams.Add(
-                    managedIdentitySourceType == ManagedIdentitySource.Imds ? 
+                    managedIdentitySourceType == ManagedIdentitySource.Imds ||
+                    managedIdentitySourceType == ManagedIdentitySource.AzureArc ?
                         Constants.ManagedIdentityResourceIdImds : Constants.ManagedIdentityResourceId, 
                     userAssignedId);
             }

@@ -27,6 +27,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         protected bool _isMtlsPopRequested;
 
+        /// <summary>
+        /// True when <see cref="ManagedIdentityPopExtensions.WithRequestOverMtls"/> was called.
+        /// The IMDSv2 attested mTLS flow is used, but <c>token_type=bearer</c> is requested from ESTS.
+        /// </summary>
+        protected bool _preferMsiV2;
+
         internal const string TimeoutError = "[Managed Identity] Authentication unavailable. The request to the managed identity endpoint timed out.";
         internal readonly ManagedIdentitySource _sourceType;
 
@@ -52,6 +58,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             string resource = parameters.Resource;
 
             _isMtlsPopRequested = parameters.IsMtlsPopRequested;
+            _preferMsiV2 = parameters.PreferMsiV2;
 
             ManagedIdentityRequest request = await CreateRequestAsync(resource).ConfigureAwait(false);
 
