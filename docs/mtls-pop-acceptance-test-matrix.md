@@ -49,7 +49,7 @@
 | REG-02 | No region | Do not configure a region. | Use `https://mtlsauth.microsoft.com/{tenant}/oauth2/v2.0/token`. | P0 |
 | REG-03 | Automatic detection succeeds | Mock IMDS to return `eastus`. | Use `https://eastus.mtlsauth.microsoft.com/{tenant}/oauth2/v2.0/token`. | P0 |
 | REG-04 | Automatic detection fails | Make IMDS time out or return an error. | Use the global endpoint without downgrading to a normal token. | P0 |
-| REG-05 | Invalid region | Configure a malformed or unsupported region. | Return an explicit validation or service error without constructing an unsafe hostname. | P1 |
+| REG-05 | Invalid region | Configure a malformed or unsupported region. | Return a service error for non-supported region. | P1 |
 | REG-06 | Regional resource use | Acquire a regional PoP token and call the mTLS resource. | The resource returns HTTP 200. | P0 |
 | REG-07 | Global and regional cache behavior | Acquire globally and then regionally with the same certificate. | Follow the defined cache behavior, retain the correct binding certificate, and do not crash. | P1 |
 
