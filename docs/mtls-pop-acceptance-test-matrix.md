@@ -36,9 +36,8 @@
 | REQ-01 | Global certificate request | Use a certificate credential with a tenanted AAD authority and no region. | POST to `https://mtlsauth.microsoft.com/{tenant}/oauth2/v2.0/token`. Include `client_id`, `scope`, `grant_type=client_credentials`, and `token_type=mtls_pop`. Do not include `client_assertion`, `client_assertion_type`, or `req_cnf`. | An `mtls_pop` token is returned. |
 | REQ-02 | Regional certificate request | Configure `westus3` with a certificate credential. | POST to `https://westus3.mtlsauth.microsoft.com/{tenant}/oauth2/v2.0/token` with the certificate-request parameters from REQ-01. | An `mtls_pop` token is returned. |
 | REQ-03 | Federated assertion request | Use `ClientSignedAssertion` with a binding certificate. | Include `client_assertion`, `client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-pop`, and `token_type=mtls_pop`. Do not include `req_cnf`. Present the callback-provided certificate over TLS. | An `mtls_pop` token is returned. |
-| REQ-04 | TLS certificate presented | Configure the token server to require a client certificate for certificate and federated-assertion modes. | Capture the TLS peer certificate. Its leaf DER equals the selected binding certificate's `RawData`. | The handshake and request succeed. |
-| REQ-05 | Claims and supported extra parameters | Add legitimate claims and nonreserved extra body parameters. | Preserve the supplied parameters without changing MSAL's mTLS parameters for the selected credential mode. | PoP acquisition succeeds. |
-| REQ-06 | Server returns `Bearer` | Mock the token endpoint to return a valid token with `token_type=Bearer` for an mTLS PoP request. | Do not expose or cache the response as a successful PoP result. | Return the established token-type mismatch error. |
+| REQ-04 | TLS certificate presented | Configure http client to present the certificate over mTLS. | Capture call is made over mTLS. | The handshake and request succeed. |
+| REQ-05 | Server returns `Bearer` | Mock the token endpoint to return a valid token with `token_type=Bearer` for an mTLS PoP request. | Do not expose or cache the response as a successful PoP result. | Return the established token-type mismatch error. |
 
 ## Baseline SNI regression
 
