@@ -1,127 +1,128 @@
-# MSAL mTLS PoP Acceptance-Test Matrix
+# MSAL.NET mTLS PoP Acceptance-Test Matrix
 
-## Approval criteria
+## Scope and acceptance criteria
 
-- **P0**: Required in the PR.
-- **P1**: Required before PR merge.
-- Every P0 test must include captured request, response, endpoint, and TLS evidence where applicable.
-- Unit-test success alone is insufficient for tests marked as end-to-end.
+- This matrix defines the acceptance contract for MSAL.NET mTLS Proof-of-Possession support.
+- Every listed test is required unless the row explicitly says it applies only when a platform or cloud is supported.
+- End-to-end tests must capture the request endpoint, relevant request parameters, token response, and TLS client-certificate evidence.
+- Unit-test success alone is insufficient for scenarios marked as end-to-end.
+- Tests should assert externally observable behavior. Certificate-cache, token-cache, synchronization, and HTTP transport implementations remain internal to MSAL.NET.
+
+## Credential modes
+
+| Mode | Credential | Token-endpoint authentication |
+|---|---|---|
+| Certificate | `X509Certificate2` credential | Present the certificate over mTLS. Do not send client-assertion parameters. |
+| Federated assertion | `ClientSignedAssertion` containing an assertion and `TokenBindingCertificate` | Present the binding certificate over mTLS and send the assertion with `client_assertion_type=jwt-pop`. |
+| Managed Identity | Managed Identity with SDK-provided binding certificate | Use the Managed Identity flow and return the SDK-provided binding certificate with the token. |
 
 ## Configuration and credential validation
 
-| ID | Test | Setup and action | Required assertions | Priority |
-|---|---|---|---|---|
-| CFG-01 | Certificate credential | Configure a valid certificate and request mTLS PoP. | The request succeeds. The certificate used for TLS matches the configured leaf certificate. | P0 |
-| CFG-02 | Client secret rejected | Configure a client secret and request mTLS PoP. | Fail before any token request with a clear unsupported-credential error. | P0 |
-| CFG-03 | Assertion credential rejected | Configure a static or dynamic assertion and request pure-certificate mTLS PoP. | Fail before network. Do not fall back to assertion authentication. | P0 |
-| CFG-04 | Missing private key | Provide a public certificate without its private key. | Fail before network with a private-key error. | P0 |
-| CFG-05 | Empty certificate chain | Provide an empty TLS certificate. | See if we handle services errors correctly. | P0 |
-| CFG-06 | Opaque signer | Use a non-exportable `crypto.Signer` implementation. | The TLS handshake succeeds without exporting the key or casting it to a concrete key type. | P1 |
+| ID | Test | Setup and action | Required assertions |
+|---|---|---|---|
+| CFG-01 | Certificate credential | Configure a valid `X509Certificate2` credential and request mTLS PoP. | Acquisition succeeds. The certificate presented over TLS matches the configured leaf certificate. |
+| CFG-02 | Federated assertion with binding certificate | Return a valid `ClientSignedAssertion` containing an assertion and binding certificate. | Acquisition succeeds. The assertion uses `jwt-pop`, and the same binding certificate is presented over TLS. |
+| CFG-03 | Managed Identity credential | Request mTLS PoP through a supported Managed Identity environment. | Acquisition succeeds and returns the SDK-provided binding certificate. |
+| CFG-04 | Client secret rejected | Configure a client secret and request mTLS PoP. | Fail before any token request with `MtlsCertificateNotProvided` or the established unsupported-credential error. |
+| CFG-05 | Assertion without binding certificate rejected | Configure a static assertion, string callback, or `ClientSignedAssertion` without a binding certificate and request mTLS PoP. | Fail before network with a clear missing-binding-certificate error. |
+| CFG-06 | Missing private key | Use a certificate credential or FIC binding certificate without an accessible private key. | Fail before network with a private-key or unusable-certificate error. |
+| CFG-07 | Empty or malformed certificate | Use an empty certificate, malformed certificate data, or unusable certificate chain with certificate and FIC credentials. | Fail before network with a deterministic certificate-validation error. Do not defer the failure to the service or TLS handshake. |
+| CFG-08 | Non-exportable private key | Use an `X509Certificate2` backed by a non-exportable CNG, KSP, HSM, TPM, or KeyGuard key. | Token and resource TLS handshakes succeed without exporting the private key or requiring a concrete exportable key type. |
 
 ## Token-request semantics
 
-| ID | Test | Setup and action | Network assertions | Expected result | Priority |
-|---|---|---|---|---|---|
-| REQ-01 | Global PoP request | Use a tenanted AAD authority without a region. | POST to `https://mtlsauth.microsoft.com/{tenant}/oauth2/v2.0/token`. | An `mtls_pop` token is returned. | P0 |
-| REQ-02 | Regional PoP request | Configure `westus3`. | POST to `https://westus3.mtlsauth.microsoft.com/{tenant}/oauth2/v2.0/token`. | An `mtls_pop` token is returned. | P0 |
-| REQ-03 | TLS certificate presented | Configure the token server to require a client certificate. | Capture the TLS peer certificate. Its leaf DER must equal the configured certificate. | The handshake and request succeed. | P0 |
-| REQ-04 | Required body parameters | Capture the PoP request body. | It contains `client_id`, `scope`, `grant_type=client_credentials`, and `token_type=mtls_pop`. | The request is accepted. | P0 |
-| REQ-05 | No assertion parameters | Capture the PoP request body. | It contains neither `client_assertion` nor `client_assertion_type`. | Authentication occurs through the TLS certificate. | P0 |
-| REQ-06 | No `req_cnf` | Capture the PoP request body. | `req_cnf` is absent. | Binding is performed by the TLS certificate. | P0 |
-| REQ-07 | Reserved extra parameters | Supply `client_assertion`, `client_assertion_type`, `req_cnf`, or a conflicting `token_type` through extra body parameters. | Reject the request before network or safely remove the reserved values. | The pure-certificate contract cannot be overridden. | P0 |
-| REQ-08 | Claims and supported extra parameters | Add legitimate claims and nonreserved extra body parameters. | The supplied parameters are preserved without changing the mTLS parameters. | PoP acquisition succeeds. | P1 |
-| REQ-09 | Server returns `Bearer` | Mock the token endpoint to return a valid token with `token_type=Bearer`. | The token is neither exposed nor cached. | Return a typed token-type mismatch error. | P0 |
+| ID | Test | Setup and action | Network assertions | Expected result |
+|---|---|---|---|---|
+| REQ-01 | Global certificate request | Use a certificate credential with a tenanted AAD authority and no region. | POST to `https://mtlsauth.microsoft.com/{tenant}/oauth2/v2.0/token`. Include `client_id`, `scope`, `grant_type=client_credentials`, and `token_type=mtls_pop`. Do not include `client_assertion`, `client_assertion_type`, or `req_cnf`. | An `mtls_pop` token is returned. |
+| REQ-02 | Regional certificate request | Configure `westus3` with a certificate credential. | POST to `https://westus3.mtlsauth.microsoft.com/{tenant}/oauth2/v2.0/token` with the certificate-request parameters from REQ-01. | An `mtls_pop` token is returned. |
+| REQ-03 | Federated assertion request | Use `ClientSignedAssertion` with a binding certificate. | Include `client_assertion`, `client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-pop`, and `token_type=mtls_pop`. Do not include `req_cnf`. Present the callback-provided certificate over TLS. | An `mtls_pop` token is returned. |
+| REQ-04 | TLS certificate presented | Configure the token server to require a client certificate for certificate and federated-assertion modes. | Capture the TLS peer certificate. Its leaf DER equals the selected binding certificate's `RawData`. | The handshake and request succeed. |
+| REQ-05 | Claims and supported extra parameters | Add legitimate claims and nonreserved extra body parameters. | Preserve the supplied parameters without changing MSAL's mTLS parameters for the selected credential mode. | PoP acquisition succeeds. |
+| REQ-06 | Server returns `Bearer` | Mock the token endpoint to return a valid token with `token_type=Bearer` for an mTLS PoP request. | Do not expose or cache the response as a successful PoP result. | Return the established token-type mismatch error. |
 
 ## Baseline SNI regression
 
-| ID | Test | Setup and action | Required assertions | Priority |
-|---|---|---|---|---|
-| SNI-01 | Existing SNI assertion | Use the same certificate without the PoP option and enable x5c. | Use the regular token endpoint. Send `client_assertion` and x5c. Do not present a TLS client certificate. | P0 |
-| SNI-02 | Normal token result | Complete the SNI assertion flow. | The token type is `Bearer` and the binding certificate is absent. | P0 |
-| SNI-03 | Normal-to-PoP isolation | Request a normal token and then a PoP token for the same app and scope. | The tokens and cache entries differ. The PoP request cannot return the cached normal token. | P0 |
-| SNI-04 | PoP-to-normal isolation | Request a PoP token and then a normal token for the same app and scope. | The normal request cannot return the cached PoP token. | P0 |
+| ID | Test | Setup and action | Required assertions |
+|---|---|---|---|
+| SNI-01 | Existing SNI assertion end-to-end | Use the same certificate without the PoP option and enable x5c. | Use the regular token endpoint. Send a certificate-signed `client_assertion` with x5c. Do not present a TLS client certificate. Return a `Bearer` token with no `BindingCertificate`. |
+| SNI-02 | Normal-to-PoP isolation | Request a normal token and then a PoP token for the same app and scope. | The tokens and cache entries differ. The PoP request cannot return the cached normal token. |
+| SNI-03 | PoP-to-normal isolation | Request a PoP token and then a normal token for the same app and scope. | The normal request cannot return the cached PoP token. |
 
-## Region behavior
+## Endpoint and authority routing
 
-| ID | Test | Setup and action | Expected endpoint or result | Priority |
-|---|---|---|---|---|
-| REG-01 | Explicit region | Configure a known region. | Use `https://{region}.mtlsauth.microsoft.com/{tenant}/oauth2/v2.0/token`. | P0 |
-| REG-02 | No region | Do not configure a region. | Use `https://mtlsauth.microsoft.com/{tenant}/oauth2/v2.0/token`. | P0 |
-| REG-03 | Automatic detection succeeds | Mock IMDS to return `eastus`. | Use `https://eastus.mtlsauth.microsoft.com/{tenant}/oauth2/v2.0/token`. | P0 |
-| REG-04 | Automatic detection fails | Make IMDS time out or return an error. | Use the global endpoint without downgrading to a normal token. | P0 |
-| REG-05 | Invalid region | Configure a malformed or unsupported region. | Return a service error for non-supported region. | P1 |
-| REG-06 | Regional resource use | Acquire a regional PoP token and call the mTLS resource. | The resource returns HTTP 200. | P0 |
-| REG-07 | Global and regional cache behavior | Acquire globally and then regionally with the same certificate. | Follow the defined cache behavior, retain the correct binding certificate, and do not crash. | P1 |
-
-## Authority and cloud routing
-
-| ID | Test | Setup and action | Expected behavior | Priority |
-|---|---|---|---|---|
-| AUTH-01 | Specific tenant | Use a tenant GUID or verified tenant domain. | Token acquisition succeeds. | P0 |
-| AUTH-02 | `/common` | Request PoP using `/common`. | Fail before the token request or credential transmission. | P0 |
-| AUTH-03 | `/organizations` | Request PoP using `/organizations`. | Fail before the token request or credential transmission. | P0 |
-| AUTH-04 | `/consumers` | Request PoP using `/consumers`. | Fail before the token request or credential transmission. | P0 |
-| AUTH-05 | Tenant override | Override the authority with another specific tenant. | The correct tenant appears in the endpoint path and cache key. | P1 |
-| AUTH-06 | Public AAD | Use `login.microsoftonline.com`. | Route to the appropriate global or regional `mtlsauth.microsoft.com` endpoint. | P0 |
-| AUTH-07 | US Government | Use `login.microsoftonline.us`. | Route to `mtlsauth.microsoftonline.us`. | P0 when sovereign support is claimed |
-| AUTH-08 | China | Use `login.partner.microsoftonline.cn`. | Route to `mtlsauth.partner.microsoftonline.cn`. | P0 when sovereign support is claimed |
-| AUTH-09 | Legacy US Government alias | Use `login.usgovcloudapi.net`. | Route to `mtlsauth.microsoftonline.us`. | P0 when sovereign support is claimed |
-| AUTH-10 | Legacy China alias | Use `login.chinacloudapi.cn`. | Route to `mtlsauth.partner.microsoftonline.cn`. | P0 when sovereign support is claimed |
-| AUTH-11 | Non-`login.*` AAD host | Configure an unsupported AAD-shaped hostname. | Fail before sending the certificate to a transformed host. | P0 |
-| AUTH-12 | Malformed authority | Use HTTP, omit the tenant, or provide an invalid URL. | Fail before network. | P0 |
+| ID | Test | Setup and action | Expected endpoint or result |
+|---|---|---|---|
+| ROUTE-01 | Specific tenant | Use a tenant GUID or verified tenant domain. | Token acquisition succeeds against the corresponding mTLS endpoint. |
+| ROUTE-02 | Explicit region | Configure a valid region. | Use `https://{region}.mtlsauth.microsoft.com/{tenant}/oauth2/v2.0/token`. |
+| ROUTE-03 | Automatic detection succeeds | Mock IMDS to return `eastus`. | Use `https://eastus.mtlsauth.microsoft.com/{tenant}/oauth2/v2.0/token`. |
+| ROUTE-04 | Automatic detection fails | Make IMDS time out or return an error. | Use the global mTLS endpoint without downgrading to a normal token. |
+| ROUTE-05 | Invalid region | Configure a malformed region or return one from mocked discovery. | Ignore or reject the invalid value according to the public regional contract. Never incorporate it into the authority hostname. |
+| ROUTE-06 | `/common` rejected | Request PoP using `/common`. | Fail before the token request or credential transmission. |
+| ROUTE-07 | `/organizations` rejected | Request PoP using `/organizations`. | Fail before the token request or credential transmission. |
+| ROUTE-08 | `/consumers` supported | Request PoP using `/consumers`. | Treat `/consumers` as a tenant and continue through normal endpoint and service validation. |
+| ROUTE-09 | Tenant override | Override the authority with another specific tenant. | The selected tenant appears in the endpoint path and cache key. |
+| ROUTE-10 | Public AAD | Use `login.microsoftonline.com`. | Route to the appropriate global or regional `mtlsauth.microsoft.com` endpoint. |
+| ROUTE-11 | US Government | Use `login.microsoftonline.us`. | Route to `mtlsauth.microsoftonline.us` when the cloud is supported. |
+| ROUTE-12 | China | Use `login.partner.microsoftonline.cn`. | Route to `mtlsauth.partner.microsoftonline.cn` when the cloud is supported. |
+| ROUTE-13 | France sovereign cloud | Use `login.sovcloud-identity.fr`. | Route to `mtlsauth.sovcloud-identity.fr` when the cloud is supported. |
+| ROUTE-14 | Germany sovereign cloud | Use `login.sovcloud-identity.de`. | Route to `mtlsauth.sovcloud-identity.de` when the cloud is supported. |
+| ROUTE-15 | Singapore sovereign cloud | Use `login.sovcloud-identity.sg`. | Route to `mtlsauth.sovcloud-identity.sg` when the cloud is supported. |
+| ROUTE-16 | Unsupported legacy aliases | Use `login.usgovcloudapi.net` or `login.chinacloudapi.cn`. | Fail before sending the certificate with `MtlsPopNotSupportedForEnvironment`. |
+| ROUTE-17 | Unsupported non-`login.*` host | Configure an unsupported AAD-shaped hostname. | Fail before sending the certificate to a transformed host. |
+| ROUTE-18 | Malformed authority | Use HTTP, omit the tenant, or provide an invalid URL. | Fail before network. |
 
 ## dSTS and generic identity providers
 
-| ID | Test | Setup and action | Expected behavior | Priority |
-|---|---|---|---|---|
-| IDP-01 | Tenanted dSTS | Configure `https://{host}/dstsv2/{tenant}/`. | Send the request to `https://{host}/dstsv2/{tenant}/oauth2/v2.0/token`; do not apply an AAD `mtlsauth` rewrite or regional routing; verify `token_type=mtls_pop`. | P0 |
-| IDP-02 | dSTS cache reuse | Repeat the identical dSTS mTLS PoP request. | Return the token from cache with token type and binding information preserved. | P0 |
-| IDP-03 | Non-tenanted dSTS | Use dSTS `/common` and `/organizations`. | Reject the request without acquiring a token. | P0 |
+| ID | Test | Setup and action | Expected behavior |
+|---|---|---|---|
+| IDP-01 | Tenanted dSTS | Configure `https://{host}/dstsv2/{tenant}/`. | Send the request to `https://{host}/dstsv2/{tenant}/oauth2/v2.0/token`. Do not apply an AAD `mtlsauth` rewrite or regional routing. Verify `token_type=mtls_pop`. |
+| IDP-02 | dSTS cache reuse | Repeat the identical dSTS mTLS PoP request. | Return the token from cache with token type and binding-certificate information preserved. |
+| IDP-03 | Non-tenanted dSTS | Use dSTS `/common` and `/organizations`. | Reject the request without acquiring a token. |
 
-## Token binding and result validation
+## Token binding and resource validation
 
-| ID | Test | Setup and action | Required assertions | Priority |
-|---|---|---|---|---|
-| BIND-01 | Result certificate | Acquire a PoP token. | The result contains a TLS certificate, parsed leaf, and private key. | P0 |
-| BIND-02 | Thumbprint algorithm | Compute SHA-256 over the complete leaf DER. | Its base64url value equals `BindingCertificateThumbprint()`. | P0 |
-| BIND-03 | Token confirmation claim | Decode the real access token. | `cnf["x5t#S256"]` equals the result certificate thumbprint. | P0 |
-| BIND-04 | Correct authorization scheme | Call the resource using `Authorization: mtls_pop <token>`. | The resource returns HTTP 200. | P0 |
-| BIND-05 | Wrong authorization scheme | Call the resource using `Authorization: Bearer <token>`. | The resource rejects the request. | P0 |
-| BIND-06 | Missing resource certificate | Call the resource without a TLS client certificate. | The resource rejects the request. | P0 |
-| BIND-07 | Wrong resource certificate | Call the resource using another certificate. | The resource rejects the request. | P0 |
-| BIND-08 | Exact returned certificate | Use the result certificate directly without reconstructing it. | The TLS handshake and resource call succeed. | P0 |
+Run BIND-01, BIND-02, BIND-03, and BIND-07 for each supported credential mode: certificate, federated assertion with `X509Certificate2`, and Managed Identity.
+
+| ID | Test | Setup and action | Required assertions |
+|---|---|---|---|
+| BIND-01 | Result certificate | Acquire a PoP token. | `AuthenticationResult.BindingCertificate` is a non-null, usable `X509Certificate2` with an accessible private key. |
+| BIND-02 | Token confirmation claim | Compute SHA-256 over `BindingCertificate.RawData`, base64url-encode it, and decode the access token. | The computed value equals `cnf["x5t#S256"]`. This is a test assertion, not a new public MSAL crypto API. |
+| BIND-03 | Correct authorization scheme | Call the resource using `Authorization: mtls_pop <token>` and `BindingCertificate` on the TLS connection. | The resource returns HTTP 200. |
+| BIND-04 | Wrong authorization scheme | Call the resource using a non-PoP authorization scheme. | The resource rejects the request. |
+| BIND-05 | Missing resource certificate | Call the resource without a TLS client certificate. | The resource rejects the request. |
+| BIND-06 | Wrong resource certificate | Call the resource using another certificate. | The resource rejects the request. |
+| BIND-07 | Exact returned certificate | Use `AuthenticationResult.BindingCertificate` directly without reconstructing it. | The TLS handshake and resource call succeed. |
 
 ## Cache and certificate lifecycle
 
-| ID | Test | Setup and action | Expected behavior | Priority |
-|---|---|---|---|---|
-| CACHE-01 | Same certificate | Repeat an identical PoP request. | Return a cache hit with the same token and complete binding-certificate metadata. | P0 |
-| CACHE-02 | Same key, renewed certificate | Create two certificates with the same key but different DER. | The second certificate causes a token-cache miss. | P0 |
-| CACHE-03 | Different certificates | Use separate certificates for the same app and scope. | Tokens and transports remain isolated. | P0 |
-| CACHE-04 | Certificate-chain change | Keep the leaf unchanged but alter the issuer chain. | Cache behavior follows the documented leaf-DER binding definition. | P1 |
-| CACHE-05 | Failed downgrade | Return a normal token for a PoP request. | Do not write the response to the cache. | P0 |
-| CACHE-06 | Persistent shared cache | Share serialized cache storage between clients using different certificates. | Neither client receives a token bound to the other certificate. | P0 |
-| CACHE-07 | Cached result fields | Return a PoP token from cache. | Preserve token type, binding certificate, leaf, private key, and thumbprint. | P0 |
+| ID | Test | Setup and action | Expected behavior |
+|---|---|---|---|
+| CACHE-01 | Same certificate | Repeat an identical PoP request. | Return a cache hit with the same token and usable binding-certificate metadata. |
+| CACHE-02 | Same key, renewed certificate | Create two certificates with the same key but different leaf DER. | The second certificate causes a token-cache miss. |
+| CACHE-03 | Different certificates | Use separate certificates for the same app and scope. | Tokens, binding metadata, and HTTP transport state remain isolated. |
+| CACHE-04 | Certificate-chain change | Keep the leaf unchanged but alter the issuer chain. | Cache behavior follows the documented leaf-DER binding definition. |
+| CACHE-05 | Failed downgrade | Return a normal token for a PoP request. | Do not write the response to the cache. |
+| CACHE-06 | Persistent shared token cache | Share serialized token-cache storage between clients using different certificates. | Neither client receives a token bound to the other certificate. No shared certificate-cache implementation is required. |
+| CACHE-07 | Cached result fields | Return a PoP token from cache. | Preserve token type and a usable binding certificate. |
 
 ## HTTP transport and concurrency
 
-| ID | Test | Setup and action | Expected behavior | Priority |
-|---|---|---|---|---|
-| HTTP-01 | Default transport | Use the built-in mTLS transport. | Enforce TLS 1.2 minimum while preserving normal proxy and dialing behavior. | P1 |
-| HTTP-02 | Custom mTLS factory | Supply a recording factory. | The factory receives the correct certificate and returns the token-request client. | P0 |
-| HTTP-03 | Nil factory result | Make the factory return `nil`. | Return an explicit error without panicking. | P0 |
-| HTTP-04 | Same-certificate reuse | Perform repeated requests with one certificate. | Reuse one mTLS client and connection pool for the certificate thumbprint. | P1 |
-| HTTP-05 | Certificate rotation | Change the certificate DER. | Create a new mTLS client and do not reuse the old certificate's transport. | P0 |
-| HTTP-06 | Concurrent same certificate | Run many parallel acquisitions under the race detector. | No races, one transport, and consistent results. | P0 |
-| HTTP-07 | Concurrent different certificates | Run parallel clients with different certificates. | No cross-certificate transport or cache leakage. | P0 |
-| HTTP-08 | Cancellation | Cancel before and during the TLS request. | Return promptly and do not cache a partial result. | P0 |
-| HTTP-09 | Timeout | Make the token endpoint stall. | Apply a bounded timeout and return a clear network error. | P1 |
+| ID | Test | Setup and action | Expected behavior |
+|---|---|---|---|
+| HTTP-01 | Default transport | Use MSAL.NET's built-in mTLS transport. | Enforce the supported TLS minimum while preserving normal proxy, handler, and connection behavior. |
+| HTTP-02 | Same-certificate reuse | Perform repeated network requests with one certificate. | Reuse pooled HTTP resources where supported and avoid unbounded transport creation. |
+| HTTP-03 | Certificate rotation | Change the certificate leaf DER. | Use the new certificate for subsequent token requests and never reuse the old certificate for that request. |
+| HTTP-04 | Concurrent same certificate | Run many parallel acquisitions using the same certificate. | Complete without deadlocks, data races, certificate corruption, or inconsistent results. |
+| HTTP-05 | Concurrent different certificates | Run parallel clients with different certificates. | No cross-certificate transport, token, or binding-certificate leakage. |
+| HTTP-06 | Cancellation | Cancel before and during the TLS request. | Return promptly and do not cache a partial result. |
+| HTTP-07 | Timeout | Make the token endpoint stall. | Apply the configured timeout and return a clear network error. |
 
 ## Platform acceptance
 
-| ID | Test | Platform | Expected behavior | Priority |
-|---|---|---|---|---|
-| PLAT-01 | Windows software certificate | Windows | Token acquisition and the resource call succeed. | P0 |
-| PLAT-02 | Linux PEM certificate | Linux | Token acquisition and the resource call succeed. | P0 |
-| PLAT-03 | TLS 1.2 | Windows and Linux | The token and resource TLS handshakes succeed. | P0 |
-| PLAT-04 | Non-exportable signer | A supported hardware or platform key provider | Token and resource handshakes use `crypto.Signer` without exporting the key. | P1 |
+| ID | Test | Platform | Expected behavior |
+|---|---|---|---|
+| PLAT-01 | Windows software certificate | Windows | Token acquisition and the resource call succeed. |
+| PLAT-02 | Linux certificate | Linux | Token acquisition and the resource call succeed. |
+| PLAT-03 | Supported TLS versions | Windows and Linux | Token and resource TLS handshakes meet MSAL.NET's supported TLS requirements. |
+| PLAT-04 | Non-exportable Windows key | Windows CNG, KSP, HSM, TPM, or KeyGuard | Token and resource handshakes succeed without exporting the private key. |
+| PLAT-05 | Managed Identity binding certificate | Supported Trusted Launch or Confidential VM environment | Managed Identity acquisition returns a usable binding certificate and the resource call succeeds. |
