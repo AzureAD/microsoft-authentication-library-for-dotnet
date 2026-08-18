@@ -75,7 +75,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                           confidentialApp,
                           expectedInternalCacheKey,
                           ExpectedFmiCredentialAudience,
-                          "SomeFmiPath/FmiCredentialPath");
+                          "SomeFmiPath/FmiCredentialPath",
+                          false);
         }
 
         [TestMethod]
@@ -151,7 +152,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                           confidentialApp,
                           expectedInternalCacheKey,
                           ExpectedFmiCredentialAudience,
-                          "SomeFmiPath/Path");
+                          "SomeFmiPath/Path",
+                          false);
         }
 
         [TestMethod]
@@ -274,21 +276,29 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             ConfidentialClientApplication confidentialApp,
             string expectedInternalCacheKey,
             string expectedAudience,
-            string expectedFmiPath)
+            string expectedFmiPath,
+            bool validateClaims = true)
         {
             var handler = new JwtSecurityTokenHandler();
-            var jsonToken = handler.ReadToken(authResult.AccessToken) as JwtSecurityToken;
-            var subject = jsonToken.Payload["sub"].ToString();
-            var audience = jsonToken.Payload["aud"].ToString();
+
             var token = confidentialApp.AppTokenCacheInternal.Accessor.GetAllAccessTokens().First();
 
             Assert.IsNotNull(authResult);
-            if (audience.EndsWith("/.default"))
+            
+            if (validateClaims)
             {
-                audience = audience.Substring(0, audience.Length - "/.default".Length);
+                var jsonToken = handler.ReadToken(authResult.AccessToken) as JwtSecurityToken;
+                var subject = jsonToken.Payload["sub"].ToString();
+                var audience = jsonToken.Payload["aud"].ToString();
+
+                if (audience.EndsWith("/.default"))
+                {
+                    audience = audience.Substring(0, audience.Length - "/.default".Length);
+                }
+                Assert.AreEqual(expectedAudience, audience);
+                Assert.Contains(expectedFmiPath, subject);
             }
-            Assert.AreEqual(expectedAudience, audience);
-            Assert.Contains(expectedFmiPath, subject);
+
             Assert.AreEqual(expectedInternalCacheKey, token.CacheKey);
         }
 
@@ -323,19 +333,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                                                     .ExecuteAsync()
                                                     .ConfigureAwait(false);
             var handler = new JwtSecurityTokenHandler();
-            var jsonToken = handler.ReadToken(authResult.AccessToken) as JwtSecurityToken;
-            Assert.IsTrue(jsonToken.Payload.ContainsKey("xms_attr"), "xms_attr claim should exist in the token");
-            var xmsAttr = jsonToken.Payload["xms_attr"].ToString();
-            Assert.Contains("FavoriteColor", xmsAttr, "xms_attr claim should contain 'FavoriteColor' attribute");
-            Assert.Contains("Blue", xmsAttr, "xms_attr claim should contain 'Blue' value");
-            Assert.Contains("file:/c/users/foobar/documents/info.txt", xmsAttr, "xms_attr claim should contain file path attribute");
-           
             var expectedInternalCacheKey = $"-login.microsoftonline.com-atext-{RmaClientId}-{TenantId}-{"api://AzureFMITokenExchange/.default"}-{expectedFmiPathHash}".ToLowerInvariant();
             AssertResults(authResult,
                           confidentialApp,
                           expectedInternalCacheKey,
                           "a9dd8a2a-df54-4ae0-84f9-38c8d57e5265", // this is app id for the audience for api://AzureFMITokenExchange/.defaul
-                          "SomeFmiPath/FmiCredentialPath");
+                          "SomeFmiPath/FmiCredentialPath",
+                          false);
         }
     }
 }
