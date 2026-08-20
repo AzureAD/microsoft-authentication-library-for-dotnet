@@ -1,3 +1,15 @@
+4.88.0
+======
+
+### New Features
+- Added user-assigned managed identity support for Azure Arc, including selecting the identity by client ID and validating the identity returned in the token response. [#6128](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6128)
+- Added `WithRequestOverMtls()` to managed identity token requests, enabling attested bearer-token acquisition over the IMDSv2 mTLS transport. [#6086](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6086)
+
+### Bug Fixes
+- Fixed token-cache key collisions by length-prefixing additional cache-key components before hashing. [#6137](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6137)
+- Populated authentication-result telemetry metadata on proactive background-refresh results. [#6157](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6157)
+- Fixed mTLS PoP authority validation incorrectly rejecting sovereign-cloud aliases such as `login.chinacloudapi.cn` and `login.usgovcloudapi.net`. [#6153](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6153)
+
 4.87.0
 ======
 
