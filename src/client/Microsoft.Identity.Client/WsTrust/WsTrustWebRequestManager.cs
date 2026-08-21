@@ -74,7 +74,8 @@ namespace Microsoft.Identity.Client.WsTrust
                 mtlsCertificate: null,
                 validateServerCertificate: null,
                 cancellationToken: requestContext.UserCancellationToken,
-                retryPolicy: retryPolicy)
+                retryPolicy: retryPolicy,
+                allowAutoRedirect: false)
             .ConfigureAwait(false);
 
             if (IsNonHttpsRedirect(httpResponse, uri) ||

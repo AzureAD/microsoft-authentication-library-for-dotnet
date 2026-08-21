@@ -190,6 +190,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
 
                 // Assert
                 Assert.AreEqual(MsalError.NonHttpsRedirectNotSupported, exception.ErrorCode);
+                Assert.IsFalse(handler.AllowAutoRedirect);
                 Assert.IsNotNull(handler.ActualRequestMessage);
             }
         }
