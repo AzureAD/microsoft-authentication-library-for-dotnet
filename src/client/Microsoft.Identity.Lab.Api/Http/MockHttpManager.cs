@@ -126,6 +126,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <param name="retryPolicy">The retry policy.</param>
         /// <param name="retryCount">The retry count.</param>
+        /// <param name="allowAutoRedirect">Whether the HTTP client can automatically follow redirects.</param>
         public Task<HttpResponse> SendRequestAsync(
             Uri endpoint,
             IDictionary<string, string> headers,
@@ -137,7 +138,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> validateServerCert,
             CancellationToken cancellationToken,
             IRetryPolicy retryPolicy,
-            int retryCount = 0)
+            int retryCount = 0,
+            bool allowAutoRedirect = true)
         {
             return _httpManager.SendRequestAsync(
                 endpoint,
@@ -149,7 +151,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 mtlsCertificate,
                 validateServerCert, cancellationToken,
                 retryPolicy,
-                retryCount);
+                retryCount,
+                allowAutoRedirect);
         }
     }
 
@@ -195,6 +198,13 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         /// <returns></returns>
         protected HttpClient GetHttpClientInternal(X509Certificate2 mtlsBindingCert)
         {
+            return GetHttpClientInternal(mtlsBindingCert, allowAutoRedirect: true);
+        }
+
+        internal HttpClient GetHttpClientInternal(
+            X509Certificate2 mtlsBindingCert,
+            bool allowAutoRedirect)
+        {
             HttpClientHandler messageHandler;
 
             if (MessageHandlerFunc != null)
@@ -215,6 +225,9 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             {
                 messageHandler.ClientCertificates.Add(mtlsBindingCert);
             }
+
+            messageHandler.AllowAutoRedirect = allowAutoRedirect;
+
             var httpClient = new HttpClient(messageHandler)
             {
                 MaxResponseContentBufferSize = HttpClientConfig.MaxResponseContentBufferSizeInBytes
@@ -238,7 +251,11 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
     /// <see cref="System.Net.Http.HttpClient"/> instances backed by <see cref="MockHttpMessageHandler"/>.
     /// Use with WithHttpClientFactory to inject HTTP mocks.
     /// </summary>
-    public class MockHttpClientFactory : MockHttpClientFactoryBase, IMsalMtlsHttpClientFactory, IMsalSFHttpClientFactory
+    public class MockHttpClientFactory :
+        MockHttpClientFactoryBase,
+        IMsalMtlsHttpClientFactory,
+        IMsalSFHttpClientFactory,
+        IHttpClientFactoryWithRedirectControl
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="MockHttpClientFactory"/> class.
@@ -261,6 +278,11 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public HttpClient GetHttpClient()
         {
             return GetHttpClientInternal(null);
+        }
+
+        HttpClient IHttpClientFactoryWithRedirectControl.GetHttpClient(bool allowAutoRedirect)
+        {
+            return GetHttpClientInternal(null, allowAutoRedirect);
         }
 
         /// <summary>
@@ -289,7 +311,10 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
     /// backed by queued <see cref="MockHttpMessageHandler"/> instances.
     /// Use with WithHttpClientFactory to inject HTTP mocks.
     /// </summary>
-    public class MockNonMtlsHttpClientFactory : MockHttpClientFactoryBase, IMsalHttpClientFactory
+    public class MockNonMtlsHttpClientFactory :
+        MockHttpClientFactoryBase,
+        IMsalHttpClientFactory,
+        IHttpClientFactoryWithRedirectControl
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="MockNonMtlsHttpClientFactory"/> class.
@@ -312,6 +337,11 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public HttpClient GetHttpClient()
         {
             return GetHttpClientInternal(null);
+        }
+
+        HttpClient IHttpClientFactoryWithRedirectControl.GetHttpClient(bool allowAutoRedirect)
+        {
+            return GetHttpClientInternal(null, allowAutoRedirect);
         }
     }
 

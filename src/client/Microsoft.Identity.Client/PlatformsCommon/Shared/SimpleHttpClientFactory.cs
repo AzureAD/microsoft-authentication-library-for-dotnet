@@ -18,20 +18,24 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
     /// .NET should use the IHttpClientFactory, but MSAL cannot take a dependency on it.
     /// .NET should use SocketHandler, but UseDefaultCredentials doesn't work with it 
     /// </remarks>
-    internal class SimpleHttpClientFactory : IMsalMtlsHttpClientFactory, IMsalSFHttpClientFactory
+    internal class SimpleHttpClientFactory :
+        IMsalMtlsHttpClientFactory,
+        IMsalSFHttpClientFactory,
+        IHttpClientFactoryWithRedirectControl
     {
         //Please see (https://aka.ms/msal-httpclient-info) for important information regarding the HttpClient.
         private static readonly ConcurrentDictionary<string, HttpClient> s_httpClientPool = new ConcurrentDictionary<string, HttpClient>();
         private static readonly object s_cacheLock = new object();
 
-        private static HttpClient CreateHttpClient()
+        private static HttpClient CreateHttpClient(bool allowAutoRedirect)
         {
             CheckAndManageCache();
 
             var httpClient = new HttpClient(new HttpClientHandler()
             {
                 /* important for IWA */
-                UseDefaultCredentials = true
+                UseDefaultCredentials = true,
+                AllowAutoRedirect = allowAutoRedirect
             });
             HttpClientConfig.ConfigureRequestHeadersAndSize(httpClient);
 
@@ -63,7 +67,20 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         public HttpClient GetHttpClient()
         {
-            return s_httpClientPool.GetOrAdd("non_mtls", CreateHttpClient());
+            return GetHttpClient(allowAutoRedirect: true);
+        }
+
+        HttpClient IHttpClientFactoryWithRedirectControl.GetHttpClient(bool allowAutoRedirect)
+        {
+            return GetHttpClient(allowAutoRedirect);
+        }
+
+        private static HttpClient GetHttpClient(bool allowAutoRedirect)
+        {
+            string key = allowAutoRedirect ? "non_mtls" : "non_mtls_no_redirect";
+            return s_httpClientPool.GetOrAdd(
+                key,
+                _ => CreateHttpClient(allowAutoRedirect));
         }
 
         public HttpClient GetHttpClient(X509Certificate2 x509Certificate2)

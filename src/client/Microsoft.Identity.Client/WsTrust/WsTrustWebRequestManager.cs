@@ -39,13 +39,33 @@ namespace Microsoft.Identity.Client.WsTrust
 
             Dictionary<string, string> msalIdParams = MsalIdHelper.GetMsalIdParameters(requestContext.Logger);
 
-            var uri = new UriBuilder(federationMetadataUrl);
+            if (string.IsNullOrWhiteSpace(federationMetadataUrl))
+            {
+                throw new MsalClientException(
+                    MsalError.MissingFederationMetadataUrl,
+                    MsalErrorMessage.MissingFederationMetadataUrl);
+            }
+
+            if (!Uri.IsWellFormedUriString(federationMetadataUrl, UriKind.Absolute))
+            {
+                throw new MsalClientException(
+                    MsalError.ParsingWsMetadataExchangeFailed,
+                    MsalErrorMessage.WsTrustMetadataEndpointInvalidUri);
+            }
+
+            var uri = new Uri(federationMetadataUrl);
+            if (!IsHttpsUri(uri))
+            {
+                throw new MsalClientException(
+                    MsalError.AccessingWsMetadataExchangeFailed,
+                    MsalErrorMessage.WsTrustMetadataEndpointRequiresHttps);
+            }
 
             IRetryPolicyFactory retryPolicyFactory = requestContext.ServiceBundle.Config.RetryPolicyFactory;
             IRetryPolicy retryPolicy = retryPolicyFactory.GetRetryPolicy(RequestType.STS);
 
             HttpResponse httpResponse = await _httpManager.SendRequestAsync(
-                uri.Uri,
+                uri,
                 msalIdParams,
                 body: null,
                 method: HttpMethod.Get,
@@ -56,6 +76,14 @@ namespace Microsoft.Identity.Client.WsTrust
                 cancellationToken: requestContext.UserCancellationToken,
                 retryPolicy: retryPolicy)
             .ConfigureAwait(false);
+
+            if (IsNonHttpsRedirect(httpResponse, uri) ||
+                !IsHttpsUri(httpResponse.RequestUri ?? uri))
+            {
+                throw new MsalClientException(
+                    MsalError.NonHttpsRedirectNotSupported,
+                    MsalErrorMessage.WsTrustNonHttpsRedirectNotSupported);
+            }
 
             if (httpResponse.StatusCode != System.Net.HttpStatusCode.OK)
             {
@@ -92,6 +120,18 @@ namespace Microsoft.Identity.Client.WsTrust
             string wsTrustRequest,
             RequestContext requestContext)
         {
+            if (wsTrustEndpoint is null)
+            {
+                throw new ArgumentNullException(nameof(wsTrustEndpoint));
+            }
+
+            if (!IsHttpsUri(wsTrustEndpoint.Uri))
+            {
+                throw new MsalClientException(
+                    MsalError.WsTrustEndpointNotFoundInMetadataDocument,
+                    MsalErrorMessage.WsTrustEndpointNotFoundInMetadataDocument);
+            }
+
             var headers = new Dictionary<string, string>
             {
                 { "SOAPAction", (wsTrustEndpoint.Version == WsTrustVersion.WsTrust2005) ? XmlNamespace.Issue2005.ToString() : XmlNamespace.Issue.ToString() }
@@ -113,8 +153,17 @@ namespace Microsoft.Identity.Client.WsTrust
                 mtlsCertificate: null,
                 validateServerCertificate: null,
                 cancellationToken: requestContext.UserCancellationToken,
-                retryPolicy: retryPolicy)
+                retryPolicy: retryPolicy,
+                allowAutoRedirect: false)
             .ConfigureAwait(false);
+
+            if (IsNonHttpsRedirect(resp, wsTrustEndpoint.Uri) ||
+                !IsHttpsUri(resp.RequestUri ?? wsTrustEndpoint.Uri))
+            {
+                throw new MsalClientException(
+                    MsalError.NonHttpsRedirectNotSupported,
+                    MsalErrorMessage.WsTrustNonHttpsRedirectNotSupported);
+            }
 
             if (resp.StatusCode != System.Net.HttpStatusCode.OK)
             {
@@ -217,6 +266,28 @@ namespace Microsoft.Identity.Client.WsTrust
                 MsalError.UserRealmDiscoveryFailed,
                 message,
                 httpResponse);
+        }
+
+        private static bool IsHttpsUri(Uri uri)
+        {
+            return uri is not null &&
+                string.Equals(uri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool IsNonHttpsRedirect(HttpResponse response, Uri requestUri)
+        {
+            if ((int)response.StatusCode < 300 ||
+                (int)response.StatusCode >= 400 ||
+                response.Headers?.Location is not Uri redirectUri)
+            {
+                return false;
+            }
+
+            Uri absoluteRedirectUri = redirectUri.IsAbsoluteUri
+                ? redirectUri
+                : new Uri(requestUri, redirectUri);
+
+            return !IsHttpsUri(absoluteRedirectUri);
         }
     }
 }

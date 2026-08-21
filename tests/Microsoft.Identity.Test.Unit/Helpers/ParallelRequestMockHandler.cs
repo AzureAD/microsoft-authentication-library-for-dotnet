@@ -42,7 +42,8 @@ namespace Microsoft.Identity.Test.Unit.Helpers
             Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> validateServerCert,
             CancellationToken cancellationToken,
             IRetryPolicy retryPolicy,
-            int retryCount = 0)
+            int retryCount = 0,
+            bool allowAutoRedirect = true)
         {
             Interlocked.Increment(ref _requestCount);
 

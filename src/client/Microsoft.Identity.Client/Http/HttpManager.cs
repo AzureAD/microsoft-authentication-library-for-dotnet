@@ -65,7 +65,8 @@ namespace Microsoft.Identity.Client.Http
             Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> validateServerCert,
             CancellationToken cancellationToken,
             IRetryPolicy retryPolicy,
-            int retryCount = 0)
+            int retryCount = 0,
+            bool allowAutoRedirect = true)
         {
             Exception timeoutException = null;
             HttpResponse response = null;
@@ -89,7 +90,8 @@ namespace Microsoft.Identity.Client.Http
                         method,
                         bindingCertificate,
                         validateServerCert, logger,
-                        cancellationToken).ConfigureAwait(false);
+                        cancellationToken,
+                        allowAutoRedirect).ConfigureAwait(false);
                 }
 
                 if (response.StatusCode == HttpStatusCode.OK)
@@ -128,7 +130,8 @@ namespace Microsoft.Identity.Client.Http
                     validateServerCert,
                     cancellationToken,
                     retryPolicy,
-                    retryCount) // Pass the updated retry count
+                    retryCount, // Pass the updated retry count
+                    allowAutoRedirect)
                     .ConfigureAwait(false);
             }
 
@@ -176,11 +179,21 @@ namespace Microsoft.Identity.Client.Http
             return response;
         }
 
-        private HttpClient GetHttpClient(X509Certificate2 x509Certificate2, Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> validateServerCert)
+        private HttpClient GetHttpClient(
+            X509Certificate2 x509Certificate2,
+            Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> validateServerCert,
+            bool allowAutoRedirect)
         {
             if (x509Certificate2 != null && validateServerCert != null)
             {
                 throw new NotImplementedException("Mtls certificate cannot be used with service fabric. A custom http client is used for service fabric managed identity to validate the server certificate.");
+            }
+
+            if (x509Certificate2 is null &&
+                validateServerCert is null &&
+                _httpClientFactory is IHttpClientFactoryWithRedirectControl redirectControlFactory)
+            {
+                return redirectControlFactory.GetHttpClient(allowAutoRedirect);
             }
 
             if (validateServerCert != null)
@@ -239,7 +252,8 @@ namespace Microsoft.Identity.Client.Http
             X509Certificate2 bindingCertificate,
             Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> validateServerCert,
             ILoggerAdapter logger,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken,
+            bool allowAutoRedirect)
         {
             using (HttpRequestMessage requestMessage = CreateRequestMessage(endpoint, headers))
             {
@@ -252,7 +266,10 @@ namespace Microsoft.Identity.Client.Http
 
                 Stopwatch sw = Stopwatch.StartNew();
 
-                HttpClient client = GetHttpClient(bindingCertificate, validateServerCert);
+                HttpClient client = GetHttpClient(
+                    bindingCertificate,
+                    validateServerCert,
+                    allowAutoRedirect);
 
                 try
                 {
@@ -300,7 +317,8 @@ namespace Microsoft.Identity.Client.Http
             {
                 Headers = response.Headers,
                 Body = body,
-                StatusCode = response.StatusCode
+                StatusCode = response.StatusCode,
+                RequestUri = response.RequestMessage?.RequestUri
             };
         }
 
