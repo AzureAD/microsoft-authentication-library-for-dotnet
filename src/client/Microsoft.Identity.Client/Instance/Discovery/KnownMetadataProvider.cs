@@ -43,7 +43,10 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             {
                 var entry = new InstanceDiscoveryMetadataEntry()
                 {
-                    Aliases = cloud.Aliases,
+                    // Defensive copy: InstanceDiscoveryMetadataEntry.Aliases is a mutable array and these
+                    // entries are held in static caches, so share a copy rather than KnownCloudData's own
+                    // array to keep the single source of truth immutable.
+                    Aliases = cloud.Aliases.ToArray(),
                     PreferredNetwork = cloud.PreferredNetwork,
                     PreferredCache = cloud.PreferredCache,
                 };
