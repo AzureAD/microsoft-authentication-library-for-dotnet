@@ -10,7 +10,7 @@ using Microsoft.Identity.Client.Utils;
 namespace Microsoft.Identity.Client.Instance.Discovery
 {
     // Cloud entries here are derived from KnownCloudData (the single source of truth), which
-    // KnownCloudConfiguration also projects from. Add or change clouds in KnownCloudData, not here.
+    // the public KnownCloudMetadata also projects from. Add or change clouds in KnownCloudData, not here.
     internal class KnownMetadataProvider : IKnownMetadataProvider
     {
         // No need to use a ConcurrentDictionary, because the normal Dictionary is thread safe for read operations

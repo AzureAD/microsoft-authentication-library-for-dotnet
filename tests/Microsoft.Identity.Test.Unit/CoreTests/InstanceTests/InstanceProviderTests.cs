@@ -197,12 +197,12 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         }
 
         [TestMethod]
-        public void KnownCloudConfiguration_ReturnsSettingsForAllKnownClouds()
+        public void KnownCloudMetadata_ReturnsMetadataForCloudsWithFic()
         {
-            // Arrange
-            var config = KnownCloudConfiguration.Default;
+            // Arrange — every cloud that ships a FIC audience should resolve to a non-null bag.
+            var metadata = KnownCloudMetadata.Default;
 
-            string[] knownHosts = new[]
+            string[] ficHosts = new[]
             {
                 "login.microsoftonline.com",
                 "login.windows.net",
@@ -210,54 +210,68 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 "sts.windows.net",
                 "login.partner.microsoftonline.cn",
                 "login.chinacloudapi.cn",
-                "login.microsoftonline.de",
                 "login.microsoftonline.us",
                 "login.usgovcloudapi.net",
                 "login-us.microsoftonline.com",
                 "login.windows-ppe.net",
-                "sts.windows-ppe.net",
-                "login.microsoft-ppe.com",
                 "login.sovcloud-identity.fr",
                 "login.sovcloud-identity.de",
                 "login.sovcloud-identity.sg",
             };
 
             // Act & Assert
-            foreach (string host in knownHosts)
+            foreach (string host in ficHosts)
             {
-                CloudSettings settings = config.GetSettingsByAuthorityHost(host);
-                Assert.IsNotNull(settings, $"Expected non-null settings for '{host}'");
+                IReadOnlyDictionary<string, string> values = metadata.GetByAuthorityHost(host);
+                Assert.IsNotNull(values, $"Expected non-null metadata for '{host}'");
+                Assert.IsTrue(
+                    values.ContainsKey(CloudMetadataKeyNames.FederatedCredentialAudience),
+                    $"Expected FIC audience key for '{host}'");
             }
         }
 
         [TestMethod]
-        public void KnownCloudConfiguration_AliasesResolveToSameInstance()
+        [DataRow("login.microsoftonline.de")]
+        public void KnownCloudMetadata_ReturnsNullForCloudsWithoutFic(string host)
         {
-            // Arrange
-            var config = KnownCloudConfiguration.Default;
+            // Arrange — known clouds that ship no FIC audience expose no metadata, so lookup returns null
+            // (the same "no value available" outcome as an unknown host — no KeyNotFound footgun).
+            // login.microsoftonline.de is the decommissioned Microsoft Cloud Germany, which has no
+            // token-exchange application.
+            var metadata = KnownCloudMetadata.Default;
 
-            // Act
-            CloudSettings settings1 = config.GetSettingsByAuthorityHost("login.microsoftonline.com");
-            CloudSettings settings2 = config.GetSettingsByAuthorityHost("login.windows.net");
-            CloudSettings settings3 = config.GetSettingsByAuthorityHost("login.microsoft.com");
-            CloudSettings settings4 = config.GetSettingsByAuthorityHost("sts.windows.net");
-
-            // Assert
-            Assert.AreSame(settings1, settings2);
-            Assert.AreSame(settings2, settings3);
-            Assert.AreSame(settings3, settings4);
+            // Act & Assert
+            Assert.IsNull(metadata.GetByAuthorityHost(host));
         }
 
         [TestMethod]
-        public void KnownCloudConfiguration_CaseInsensitiveLookup()
+        public void KnownCloudMetadata_AliasesResolveToSameInstance()
         {
             // Arrange
-            var config = KnownCloudConfiguration.Default;
+            var metadata = KnownCloudMetadata.Default;
 
             // Act
-            CloudSettings lower = config.GetSettingsByAuthorityHost("login.microsoftonline.com");
-            CloudSettings upper = config.GetSettingsByAuthorityHost("LOGIN.MICROSOFTONLINE.COM");
-            CloudSettings mixed = config.GetSettingsByAuthorityHost("Login.MicrosoftOnline.Com");
+            IReadOnlyDictionary<string, string> values1 = metadata.GetByAuthorityHost("login.microsoftonline.com");
+            IReadOnlyDictionary<string, string> values2 = metadata.GetByAuthorityHost("login.windows.net");
+            IReadOnlyDictionary<string, string> values3 = metadata.GetByAuthorityHost("login.microsoft.com");
+            IReadOnlyDictionary<string, string> values4 = metadata.GetByAuthorityHost("sts.windows.net");
+
+            // Assert
+            Assert.AreSame(values1, values2);
+            Assert.AreSame(values2, values3);
+            Assert.AreSame(values3, values4);
+        }
+
+        [TestMethod]
+        public void KnownCloudMetadata_CaseInsensitiveLookup()
+        {
+            // Arrange
+            var metadata = KnownCloudMetadata.Default;
+
+            // Act
+            IReadOnlyDictionary<string, string> lower = metadata.GetByAuthorityHost("login.microsoftonline.com");
+            IReadOnlyDictionary<string, string> upper = metadata.GetByAuthorityHost("LOGIN.MICROSOFTONLINE.COM");
+            IReadOnlyDictionary<string, string> mixed = metadata.GetByAuthorityHost("Login.MicrosoftOnline.Com");
 
             // Assert
             Assert.AreSame(lower, upper);
@@ -265,15 +279,15 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         }
 
         [TestMethod]
-        public void KnownCloudConfiguration_ReturnsNullForUnknown()
+        public void KnownCloudMetadata_ReturnsNullForUnknownAndEmpty()
         {
             // Arrange
-            var config = KnownCloudConfiguration.Default;
+            var metadata = KnownCloudMetadata.Default;
 
             // Act & Assert
-            Assert.IsNull(config.GetSettingsByAuthorityHost("bogus.example.com"));
-            Assert.IsNull(config.GetSettingsByAuthorityHost(""));
-            Assert.IsNull(config.GetSettingsByAuthorityHost(null));
+            Assert.IsNull(metadata.GetByAuthorityHost("bogus.example.com"));
+            Assert.IsNull(metadata.GetByAuthorityHost(""));
+            Assert.IsNull(metadata.GetByAuthorityHost(null));
         }
 
         [TestMethod]
@@ -284,56 +298,79 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [DataRow("login.usgovcloudapi.net", "api://AzureADTokenExchangeUSGov")]
         [DataRow("login.sovcloud-identity.fr", "api://AzureADTokenExchangeFrance")]
         [DataRow("login.sovcloud-identity.de", "api://AzureADTokenExchangeGermany")]
-        public void KnownCloudConfiguration_TokenExchangeAudience_KnownClouds(
+        [DataRow("login.sovcloud-identity.sg", "api://AzureADTokenExchangeGovSG")]
+        [DataRow("login.windows-ppe.net", "api://AzureADTokenExchangePpe")]
+        [DataRow("login-us.microsoftonline.com", "api://AzureADTokenExchange")]
+        public void KnownCloudMetadata_FederatedCredentialAudience_KnownClouds(
             string host, string expectedAudience)
         {
             // Arrange
-            var config = KnownCloudConfiguration.Default;
+            var metadata = KnownCloudMetadata.Default;
 
             // Act
-            CloudSettings settings = config.GetSettingsByAuthorityHost(host);
+            IReadOnlyDictionary<string, string> values = metadata.GetByAuthorityHost(host);
 
-            // Assert
-            Assert.IsNotNull(settings);
-            Assert.AreEqual(expectedAudience, settings.TokenExchangeAudience());
+            // Assert — the returned bag, when non-null, always contains the FIC key.
+            Assert.IsNotNull(values);
+            Assert.AreEqual(expectedAudience, values[CloudMetadataKeyNames.FederatedCredentialAudience]);
         }
 
         [TestMethod]
-        [DataRow("login.microsoftonline.com", "api://AzureADTokenExchange/.default")]
-        [DataRow("login.partner.microsoftonline.cn", "api://AzureADTokenExchangeChina/.default")]
-        [DataRow("login.microsoftonline.us", "api://AzureADTokenExchangeUSGov/.default")]
-        public void KnownCloudConfiguration_TokenExchangeScope_AppendsDefaultSuffix(
-            string host, string expectedScope)
+        public void KnownCloudMetadata_ReturnedDictionary_IsReadOnly()
         {
             // Arrange
-            var config = KnownCloudConfiguration.Default;
+            var metadata = KnownCloudMetadata.Default;
 
             // Act
-            CloudSettings settings = config.GetSettingsByAuthorityHost(host);
+            IReadOnlyDictionary<string, string> values = metadata.GetByAuthorityHost("login.microsoftonline.com");
 
-            // Assert — the audience is stored bare; the scope is computed with "/.default".
-            Assert.IsNotNull(settings);
-            Assert.IsFalse(settings.TokenExchangeAudience().EndsWith("/.default", System.StringComparison.OrdinalIgnoreCase));
-            Assert.AreEqual(expectedScope, settings.TokenExchangeScope());
+            // Assert — the built-in bag cannot be mutated through the mutable dictionary interface.
+            Assert.IsNotNull(values);
+            var mutable = values as IDictionary<string, string>;
+            Assert.IsNotNull(mutable, "Expected the bag to implement IDictionary for this guard.");
+            AssertException.Throws<System.NotSupportedException>(
+                () => mutable[CloudMetadataKeyNames.FederatedCredentialAudience] = "api://Tampered");
         }
 
         [TestMethod]
-        [DataRow("login.microsoftonline.de")]
-        [DataRow("login-us.microsoftonline.com")]
-        [DataRow("login.windows-ppe.net")]
-        [DataRow("login.sovcloud-identity.sg")]
-        public void KnownCloudConfiguration_TokenExchangeAudience_NullForCloudsWithoutFic(string host)
+        public void KnownCloudMetadata_DefaultIsSingleton()
         {
-            // Arrange
-            var config = KnownCloudConfiguration.Default;
-
             // Act
-            CloudSettings settings = config.GetSettingsByAuthorityHost(host);
+            var instance1 = KnownCloudMetadata.Default;
+            var instance2 = KnownCloudMetadata.Default;
 
             // Assert
-            Assert.IsNotNull(settings);
-            Assert.IsNull(settings.TokenExchangeAudience());
-            Assert.IsNull(settings.TokenExchangeScope());
+            Assert.AreSame(instance1, instance2);
+        }
+
+        [TestMethod]
+        [DataRow("api://AzureADTokenExchange", "api://AzureADTokenExchange/.default")]
+        [DataRow("api://AzureADTokenExchangeChina", "api://AzureADTokenExchangeChina/.default")]
+        [DataRow("api://AzureADTokenExchangeUSGov", "api://AzureADTokenExchangeUSGov/.default")]
+        public void TokenExchangeScope_FromAudience_AppendsDefaultSuffix(string audience, string expectedScope)
+        {
+            // Act & Assert — the audience is stored bare; the scope is computed with "/.default".
+            Assert.AreEqual(expectedScope, TokenExchangeScope.FromAudience(audience));
+        }
+
+        [TestMethod]
+        public void TokenExchangeScope_FromAudience_DoesNotDoubleAppendSuffix()
+        {
+            // Act & Assert — an audience that already carries the suffix is returned unchanged (case-insensitive).
+            Assert.AreEqual(
+                "api://AzureADTokenExchange/.default",
+                TokenExchangeScope.FromAudience("api://AzureADTokenExchange/.default"));
+            Assert.AreEqual(
+                "api://AzureADTokenExchange/.DEFAULT",
+                TokenExchangeScope.FromAudience("api://AzureADTokenExchange/.DEFAULT"));
+        }
+
+        [TestMethod]
+        public void TokenExchangeScope_FromAudience_NullOrEmpty_ReturnsNull()
+        {
+            // Act & Assert
+            Assert.IsNull(TokenExchangeScope.FromAudience(null));
+            Assert.IsNull(TokenExchangeScope.FromAudience(""));
         }
 
         [TestMethod]
@@ -341,8 +378,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         {
             // Arrange — KnownMetadataProvider projects its alias sets from KnownCloudData, the single
             // source of truth. This guards against drift between the internal metadata table and the data.
-            // (The public KnownCloudConfiguration projects from the same data; preferred hosts are
-            // deliberately not exposed on the public CloudSettings bag.)
+            // (The public KnownCloudMetadata projects from the same data; preferred hosts are deliberately
+            // not exposed on the public bag.)
             var knownMetadata = new KnownMetadataProvider();
 
             string[] primaryHosts = new[]
@@ -369,225 +406,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 Assert.IsNotNull(metadata, $"KnownMetadata missing for '{host}'");
                 CollectionAssert.AreEquivalent(source.Aliases, metadata.Aliases, $"Aliases mismatch for '{host}'");
             }
-        }
-
-        [TestMethod]
-        public void KnownCloudConfiguration_DefaultIsSingleton()
-        {
-            // Act
-            var instance1 = KnownCloudConfiguration.Default;
-            var instance2 = KnownCloudConfiguration.Default;
-
-            // Assert
-            Assert.AreSame(instance1, instance2);
-        }
-
-        [TestMethod]
-        public void InMemoryCloudConfiguration_InjectsNewCloud_AndFallsBackToDefault()
-        {
-            // Arrange — register a brand-new cloud MSAL doesn't ship, layered over the built-in defaults.
-            var provider = new InMemoryCloudConfiguration(fallback: KnownCloudConfiguration.Default)
-                .AddOrUpdate("login.mynewcloud.example", new Dictionary<string, string>
-                {
-                    [MsalCloudKeys.TokenExchangeAudience] = "api://AzureADTokenExchangeMyCloud",
-                });
-
-            // Act
-            CloudSettings injected = provider.GetSettingsByAuthorityHost("login.mynewcloud.example");
-            CloudSettings known = provider.GetSettingsByAuthorityHost("login.microsoftonline.com");
-            CloudSettings unknown = provider.GetSettingsByAuthorityHost("bogus.example.com");
-
-            // Assert — the new cloud resolves, and the fallback still supplies MSAL's known clouds.
-            Assert.IsNotNull(injected);
-            Assert.AreEqual("api://AzureADTokenExchangeMyCloud", injected.TokenExchangeAudience());
-            Assert.AreEqual("api://AzureADTokenExchangeMyCloud/.default", injected.TokenExchangeScope());
-            Assert.IsNotNull(known);
-            Assert.AreEqual("api://AzureADTokenExchange", known.TokenExchangeAudience());
-            Assert.IsNull(unknown);
-        }
-
-        [TestMethod]
-        public void InMemoryCloudConfiguration_AdjustsExistingCloud_OverrideWins()
-        {
-            // Arrange — override an existing (public) cloud's audience.
-            var provider = new InMemoryCloudConfiguration(fallback: KnownCloudConfiguration.Default)
-                .AddOrUpdate("login.microsoftonline.us", new Dictionary<string, string>
-                {
-                    [MsalCloudKeys.TokenExchangeAudience] = "api://AzureADTokenExchangeUSGovCustom",
-                });
-
-            // Act
-            CloudSettings overridden = provider.GetSettingsByAuthorityHost("login.microsoftonline.us");
-
-            // Assert — the registered value wins over the shipped USGov value.
-            Assert.IsNotNull(overridden);
-            Assert.AreEqual("api://AzureADTokenExchangeUSGovCustom", overridden.TokenExchangeAudience());
-        }
-
-        [TestMethod]
-        public void InMemoryCloudConfiguration_NoFallback_ReturnsNullForUnregisteredHost()
-        {
-            // Arrange
-            var provider = new InMemoryCloudConfiguration()
-                .AddOrUpdate("login.mynewcloud.example", new Dictionary<string, string>
-                {
-                    [MsalCloudKeys.TokenExchangeAudience] = "api://AzureADTokenExchangeMyCloud",
-                });
-
-            // Act & Assert
-            Assert.IsNotNull(provider.GetSettingsByAuthorityHost("login.mynewcloud.example"));
-            Assert.IsNull(provider.GetSettingsByAuthorityHost("login.microsoftonline.com"));
-        }
-
-        [TestMethod]
-        public void InMemoryCloudConfiguration_PerKeyOverride_KnownCloud_Wins()
-        {
-            // Adjust a single value of a cloud MSAL ships, via the per-key overload.
-            var provider = new InMemoryCloudConfiguration(fallback: KnownCloudConfiguration.Default)
-                .AddOrUpdate("login.microsoftonline.us", MsalCloudKeys.TokenExchangeAudience, "api://Custom");
-
-            CloudSettings s = provider.GetSettingsByAuthorityHost("login.microsoftonline.us");
-
-            Assert.IsNotNull(s);
-            Assert.AreEqual("api://Custom", s.TokenExchangeAudience());
-        }
-
-        [TestMethod]
-        public void InMemoryCloudConfiguration_PerKeyAdd_KnownCloud_KeepsFallbackValues()
-        {
-            // Add a brand-new key to a known cloud; the fallback's existing keys still resolve.
-            var provider = new InMemoryCloudConfiguration(fallback: KnownCloudConfiguration.Default)
-                .AddOrUpdate("login.microsoftonline.com", "future_key", "future_value");
-
-            CloudSettings s = provider.GetSettingsByAuthorityHost("login.microsoftonline.com");
-
-            Assert.IsNotNull(s);
-            Assert.AreEqual("api://AzureADTokenExchange", s.TokenExchangeAudience()); // fallback preserved
-            Assert.AreEqual("future_value", s.GetValueOrDefault("future_key"));       // new key added
-        }
-
-        [TestMethod]
-        public void InMemoryCloudConfiguration_PerKey_MergesWithPriorValues_ForSameHost()
-        {
-            // A later per-key override wins; sibling keys registered earlier are preserved.
-            var provider = new InMemoryCloudConfiguration()
-                .AddOrUpdate("login.mynewcloud.example", new Dictionary<string, string>
-                {
-                    [MsalCloudKeys.TokenExchangeAudience] = "api://A",
-                    ["other_key"] = "keep",
-                })
-                .AddOrUpdate("login.mynewcloud.example", MsalCloudKeys.TokenExchangeAudience, "api://B");
-
-            CloudSettings s = provider.GetSettingsByAuthorityHost("login.mynewcloud.example");
-
-            Assert.IsNotNull(s);
-            Assert.AreEqual("api://B", s.TokenExchangeAudience());      // overridden
-            Assert.AreEqual("keep", s.GetValueOrDefault("other_key")); // sibling preserved
-        }
-
-        [TestMethod]
-        public void CloudSettings_Accessors_PresentMissingAndNullKey()
-        {
-            var settings = new CloudSettings(new Dictionary<string, string>
-            {
-                [MsalCloudKeys.TokenExchangeAudience] = "api://Present",
-            });
-
-            // Present key.
-            Assert.IsTrue(settings.TryGetValue(MsalCloudKeys.TokenExchangeAudience, out string present));
-            Assert.AreEqual("api://Present", present);
-            Assert.AreEqual("api://Present", settings.GetValueOrDefault(MsalCloudKeys.TokenExchangeAudience));
-
-            // Missing key → false / null, no throw.
-            Assert.IsFalse(settings.TryGetValue("missing_key", out string missing));
-            Assert.IsNull(missing);
-            Assert.IsNull(settings.GetValueOrDefault("missing_key"));
-
-            // Null key → false / null, no throw.
-            Assert.IsFalse(settings.TryGetValue(null, out string nullKey));
-            Assert.IsNull(nullKey);
-            Assert.IsNull(settings.GetValueOrDefault(null));
-        }
-
-        [TestMethod]
-        public void CloudSettings_NullValues_TreatedAsEmpty()
-        {
-            var settings = new CloudSettings(null);
-
-            Assert.IsNotNull(settings.Values);
-            Assert.IsEmpty(settings.Values);
-            Assert.IsNull(settings.GetValueOrDefault(MsalCloudKeys.TokenExchangeAudience));
-        }
-
-        [TestMethod]
-        public void InMemoryCloudConfiguration_AddOrUpdate_ValidatesArguments()
-        {
-            var provider = new InMemoryCloudConfiguration();
-
-            // Per-cloud overload. Host is rejected for null/empty/whitespace (ArgumentException); a null
-            // values bag is an ArgumentNullException. Kept consistent with the Abstractions and MISE twins.
-            AssertException.Throws<System.ArgumentException>(
-                () => provider.AddOrUpdate(null, new Dictionary<string, string>()));
-            AssertException.Throws<System.ArgumentException>(
-                () => provider.AddOrUpdate("", new Dictionary<string, string>()));
-            AssertException.Throws<System.ArgumentException>(
-                () => provider.AddOrUpdate("   ", new Dictionary<string, string>()));
-            AssertException.Throws<System.ArgumentNullException>(
-                () => provider.AddOrUpdate("login.example.com", (IReadOnlyDictionary<string, string>)null));
-
-            // Per-key overload. Host and key are rejected for null/empty/whitespace (ArgumentException); a
-            // null value is an ArgumentNullException.
-            AssertException.Throws<System.ArgumentException>(
-                () => provider.AddOrUpdate(null, MsalCloudKeys.TokenExchangeAudience, "api://X"));
-            AssertException.Throws<System.ArgumentException>(
-                () => provider.AddOrUpdate("", MsalCloudKeys.TokenExchangeAudience, "api://X"));
-            AssertException.Throws<System.ArgumentException>(
-                () => provider.AddOrUpdate("   ", MsalCloudKeys.TokenExchangeAudience, "api://X"));
-            AssertException.Throws<System.ArgumentException>(
-                () => provider.AddOrUpdate("login.example.com", null, "api://X"));
-            AssertException.Throws<System.ArgumentException>(
-                () => provider.AddOrUpdate("login.example.com", "", "api://X"));
-            AssertException.Throws<System.ArgumentException>(
-                () => provider.AddOrUpdate("login.example.com", "   ", "api://X"));
-            AssertException.Throws<System.ArgumentNullException>(
-                () => provider.AddOrUpdate("login.example.com", MsalCloudKeys.TokenExchangeAudience, null));
-        }
-
-        [TestMethod]
-        public void InMemoryCloudConfiguration_PerKey_GrowsFromNullFallback_ForNoFicCloud()
-        {
-            // login.microsoftonline.de is a known cloud that ships no FIC audience (null). Adding the
-            // audience via the per-key overload makes the computed scope resolve where it was null before.
-            const string noFicHost = "login.microsoftonline.de";
-            Assert.IsNull(
-                KnownCloudConfiguration.Default.GetSettingsByAuthorityHost(noFicHost).TokenExchangeAudience(),
-                "precondition: the known cloud should ship no FIC audience.");
-
-            var provider = new InMemoryCloudConfiguration(fallback: KnownCloudConfiguration.Default)
-                .AddOrUpdate(noFicHost, MsalCloudKeys.TokenExchangeAudience, "api://AzureADTokenExchangeGrown");
-
-            CloudSettings s = provider.GetSettingsByAuthorityHost(noFicHost);
-
-            Assert.IsNotNull(s);
-            Assert.AreEqual("api://AzureADTokenExchangeGrown", s.TokenExchangeAudience());
-            Assert.AreEqual("api://AzureADTokenExchangeGrown/.default", s.TokenExchangeScope());
-        }
-
-        [TestMethod]
-        public void InMemoryCloudConfiguration_PerKeyOnly_NoFallback_BuildsCloudIncrementally()
-        {
-            // Build a cloud entirely from per-key calls with no fallback, then confirm it resolves and
-            // unregistered hosts stay null.
-            var provider = new InMemoryCloudConfiguration()
-                .AddOrUpdate("login.mynewcloud.example", MsalCloudKeys.TokenExchangeAudience, "api://Built")
-                .AddOrUpdate("login.mynewcloud.example", "other_key", "value");
-
-            CloudSettings s = provider.GetSettingsByAuthorityHost("login.mynewcloud.example");
-
-            Assert.IsNotNull(s);
-            Assert.AreEqual("api://Built", s.TokenExchangeAudience());
-            Assert.AreEqual("value", s.GetValueOrDefault("other_key"));
-            Assert.IsNull(provider.GetSettingsByAuthorityHost("login.microsoftonline.com"));
         }
     }
 }

@@ -15,14 +15,14 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
     /// Cross-cloud token-exchange (FIC) integration tests at the MSAL layer.
     ///
     /// MSAL is the store of publicly-known, cloud-specific FIC token-exchange magic strings
-    /// (<see cref="KnownCloudData"/>) and the single owner of the audience→scope ("/.default") rule
-    /// (<see cref="CloudSettingsExtensions.TokenExchangeScope(CloudSettings)"/>). A consumer (ID Web, or a
-    /// direct MSAL caller) resolves the cloud-specific exchange scope from the cloud configuration and then
-    /// acquires the FIC assertion token for it.
+    /// (<see cref="KnownCloudData"/>, surfaced by <see cref="KnownCloudMetadata"/>) and the single owner of
+    /// the audience→scope ("/.default") rule (<see cref="TokenExchangeScope"/>). A consumer (ID Web, or a
+    /// direct MSAL caller) resolves the cloud-specific exchange audience and then acquires the FIC assertion
+    /// token for the computed scope.
     ///
-    /// These tests exercise that end-to-end within MSAL: resolve the scope from the cloud config
-    /// (built-in <see cref="KnownCloudConfiguration"/> for auto-resolve, or an
-    /// <see cref="InMemoryCloudConfiguration"/> override to adjust/replace it), acquire a token for that
+    /// These tests exercise that end-to-end within MSAL: obtain the cloud-specific audience (auto-resolved
+    /// from the built-in <see cref="KnownCloudMetadata"/>, or supplied directly by the caller as an override),
+    /// compute the scope with <see cref="TokenExchangeScope.FromAudience(string)"/>, acquire a token for that
     /// scope via a real <see cref="IConfidentialClientApplication"/>, and mock ONLY the outbound HTTP —
     /// asserting the token request MSAL actually put on the wire carried the correct cloud-specific scope.
     /// The two cases cover the two axes: auto-resolve from the built-in defaults, and a caller override.
@@ -31,7 +31,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
     public class CrossCloudTokenExchangeTests : TestBase
     {
         private const string PublicHost = "login.microsoftonline.com";
-        private const string UsGovHost = "login.microsoftonline.us";
 
         private const string PublicAuthority = "https://login.microsoftonline.com/" + TestConstants.TenantId + "/";
         private const string UsGovAuthority = "https://login.microsoftonline.us/" + TestConstants.TenantId + "/";
@@ -40,49 +39,47 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         [TestMethod]
         public Task PublicCloud_DefaultEndpoint_SendsPublicExchangeScopeAsync()
-            => RunCrossCloudExchangeScenarioAsync(
-                scenario: "Public cloud, default endpoint (auto-resolve from MSAL KnownCloudConfiguration)",
+        {
+            // Auto-resolve the audience from MSAL's built-in known cloud metadata, keyed by authority host.
+            IReadOnlyDictionary<string, string> values = KnownCloudMetadata.Default.GetByAuthorityHost(PublicHost);
+            Assert.IsNotNull(values, "expected built-in metadata for the public cloud host.");
+            string audience = values[CloudMetadataKeyNames.FederatedCredentialAudience];
+
+            return RunCrossCloudExchangeScenarioAsync(
+                scenario: "Public cloud, default endpoint (auto-resolve from MSAL KnownCloudMetadata)",
                 authority: PublicAuthority,
-                host: PublicHost,
-                cloudConfig: KnownCloudConfiguration.Default,
+                exchangeAudience: audience,
                 expectedExchangeScope: "api://AzureADTokenExchange/.default");
+        }
 
         [TestMethod]
         public Task UsGovCloud_CustomEndpoint_OverrideWinsAsync()
+            // A raw-MSAL caller can override by supplying its own audience string directly; MSAL does not
+            // self-consume the metadata key, so the caller owns "adjust/replace" at this layer.
             => RunCrossCloudExchangeScenarioAsync(
-                scenario: "US Gov cloud, caller override (InMemoryCloudConfiguration replaces the shipped USGov audience)",
+                scenario: "US Gov cloud, caller override (custom audience supplied directly by the caller)",
                 authority: UsGovAuthority,
-                host: UsGovHost,
-                cloudConfig: new InMemoryCloudConfiguration(fallback: KnownCloudConfiguration.Default)
-                    .AddOrUpdate(UsGovHost, new Dictionary<string, string>
-                    {
-                        [MsalCloudKeys.TokenExchangeAudience] = CustomExchangeAudience,
-                    }),
+                exchangeAudience: CustomExchangeAudience,
                 expectedExchangeScope: CustomExchangeAudience + "/.default");
 
         /// <summary>
-        /// Resolves the cloud-specific FIC token-exchange scope from <paramref name="cloudConfig"/>, acquires
-        /// a token for it via a real confidential client on <paramref name="authority"/>, and asserts (via the
-        /// mock HTTP handler's <c>ExpectedPostData</c>) that the outgoing token request carried
+        /// Computes the FIC token-exchange scope from <paramref name="exchangeAudience"/>, acquires a token
+        /// for it via a real confidential client on <paramref name="authority"/>, and asserts (via the mock
+        /// HTTP handler's <c>ExpectedPostData</c>) that the outgoing token request carried
         /// <paramref name="expectedExchangeScope"/> as its <c>scope</c>.
         /// </summary>
         private async Task RunCrossCloudExchangeScenarioAsync(
             string scenario,
             string authority,
-            string host,
-            ICloudConfiguration cloudConfig,
+            string exchangeAudience,
             string expectedExchangeScope)
         {
-            // 1. Resolve the exchange scope the same way a consumer would: from MSAL's cloud configuration,
-            //    keyed by the request's authority host. MSAL owns the "/.default" suffix computation.
-            CloudSettings settings = cloudConfig.GetSettingsByAuthorityHost(host);
-            Assert.IsNotNull(settings, $"[{scenario}] expected cloud settings for host '{host}'.");
-
-            string exchangeScope = settings.TokenExchangeScope();
+            // Compute the exchange scope the same way a consumer would: MSAL owns the "/.default" rule.
+            string exchangeScope = TokenExchangeScope.FromAudience(exchangeAudience);
             Assert.AreEqual(
                 expectedExchangeScope,
                 exchangeScope,
-                $"[{scenario}] resolved exchange scope from the cloud configuration did not match.");
+                $"[{scenario}] resolved exchange scope did not match.");
 
             using (var httpManager = new MockHttpManager())
             {
