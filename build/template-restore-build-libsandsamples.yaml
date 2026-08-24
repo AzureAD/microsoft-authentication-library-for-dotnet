@@ -36,19 +36,29 @@ steps:
     script: |
       dotnet workload install android ios macos maui --source https://api.nuget.org/v3/index.json
 
-- task: VSBuild@1
+- task: DotNetCoreCLI@2
   displayName: 'NuGet restore ${{ parameters.Solution }}'
   inputs:
-    solution: ${{ parameters.Solution }}
-    msbuildArgs: '/t:restore'
-    platform: ${{ parameters.BuildPlatform }}
-    configuration: ${{ parameters.BuildConfiguration }}
+    command: 'custom'
+    custom: 'msbuild'
+    arguments: >
+      ${{ parameters.Solution }}
+      /t:restore
+      /p:Platform="${{ parameters.BuildPlatform }}"
+      /p:Configuration="${{ parameters.BuildConfiguration }}"
 
-- task: VSBuild@1
+- task: DotNetCoreCLI@2
   displayName: 'Build solution ${{ parameters.Solution }}'
   inputs:
-    solution: ${{ parameters.Solution }}
-    msbuildArgs: '/p:RunCodeAnalysis=false /p:MicrosoftIdentityClientVersion=${{ parameters.MicrosoftIdentityClientVersion }} /p:LabApiVersion=${{ parameters.LabApiVersion }} /p:SourceLinkCreate=true /p:ContinousIntegrationBuild=true'
-    platform: ${{ parameters.BuildPlatform }}
-    configuration: ${{ parameters.BuildConfiguration }}
-    maximumCpuCount: true
+    command: 'custom'
+    custom: 'msbuild'
+    arguments: >
+      ${{ parameters.Solution }}
+      /m
+      /p:Platform="${{ parameters.BuildPlatform }}"
+      /p:Configuration="${{ parameters.BuildConfiguration }}"
+      /p:RunCodeAnalysis=false
+      /p:MicrosoftIdentityClientVersion=${{ parameters.MicrosoftIdentityClientVersion }}
+      /p:LabApiVersion=${{ parameters.LabApiVersion }}
+      /p:SourceLinkCreate=true
+      /p:ContinousIntegrationBuild=true

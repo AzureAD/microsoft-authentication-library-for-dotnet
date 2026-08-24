@@ -42,3 +42,14 @@ steps:
     failOnMinTestsNotRun: true
     minimumExpectedTests: '1'
     runSettingsFile: '$(MsalSourceDir)build\CodeCoverage.runsettings'
+
+- task: VSTest@2
+  displayName: 'Run unit tests .NET 10 (all pipelines)'
+  inputs:
+    testSelector: 'testAssemblies'
+    testAssemblyVer2: '**\Microsoft.Identity.Test.Unit\bin\**\net10.0\Microsoft.Identity.Test.Unit.dll'
+    searchFolder: '$(System.DefaultWorkingDirectory)'
+    runInParallel: true
+    codeCoverageEnabled: false
+    failOnMinTestsNotRun: true
+    minimumExpectedTests: '1'

@@ -3,11 +3,12 @@
   <!-- ─── Target frameworks ─────────────────────────────────────────────── -->
   <PropertyGroup>
     <TargetFrameworkNetStandard>netstandard2.0</TargetFrameworkNetStandard>
-    <TargetFrameworkNet>net8.0</TargetFrameworkNet>
+    <TargetFrameworkNet8>net8.0</TargetFrameworkNet8>
+    <TargetFrameworkNet10>net10.0</TargetFrameworkNet10>
     <PlatformTarget>AnyCPU</PlatformTarget>
 
     <TargetFrameworks>
-      $(TargetFrameworkNetStandard);$(TargetFrameworkNet)
+      $(TargetFrameworkNetStandard);$(TargetFrameworkNet8);$(TargetFrameworkNet10)
     </TargetFrameworks>
 
     <Configurations>Debug;Release</Configurations>

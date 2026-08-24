@@ -22,6 +22,11 @@ steps:
   inputs:
     version: 8.x
 
+- task: UseDotNet@2
+  displayName: 'Use the latest .NET 10'
+  inputs:
+    version: 10.x
+
 - task: Bash@3
   displayName: Install MAUI
   inputs:
@@ -30,13 +35,16 @@ steps:
       dotnet nuget locals all --clear 
       dotnet workload install android ios macos maui --source "https://pkgs.dev.azure.com/IdentityDivision/_packaging/IDDP_PublicPackages/nuget/v3/index.json"
     
-- task: VSBuild@1
+- task: DotNetCoreCLI@2
   displayName: 'NuGet restore'
   inputs:
-    solution: 'LibsAndSamples.sln'
-    msbuildArgs: '/t:restore'
-    platform: 'any cpu'
-    configuration: 'Release'
+    command: 'custom'
+    custom: 'msbuild'
+    arguments: >
+      LibsAndSamples.sln
+      /t:restore
+      /p:Platform="any cpu"
+      /p:Configuration=Release
 
 # Run Post-build code analysis (e.g. Roslyn)
 - template: template-postbuild-code-analysis.yaml

@@ -151,6 +151,38 @@ stages:
         baseBranchRef: 'main'
 
 # ──────────────────────────────────────────────
+# Unit Tests (.NET 10)
+# ──────────────────────────────────────────────
+- stage: UnitTestsNet10
+  displayName: 'Unit Tests .NET 10'
+  dependsOn: Build
+  jobs:
+
+  - job: 'RunUnitTestsNet10'
+    pool:
+        vmImage: 'windows-2022'
+        demands:
+        - msbuild
+        - visualstudio
+    variables:
+        runCodesignValidationInjection: false
+        Codeql.SkipTaskAutoInjection: true
+
+    steps:
+    - template: template-desktop-test-setup.yaml
+
+    - task: VSTest@2
+      displayName: 'Run unit tests .NET 10'
+      inputs:
+        testSelector: 'testAssemblies'
+        testAssemblyVer2: '**\Microsoft.Identity.Test.Unit\bin\**\net10.0\Microsoft.Identity.Test.Unit.dll'
+        searchFolder: '$(System.DefaultWorkingDirectory)'
+        runInParallel: true
+        codeCoverageEnabled: false
+        failOnMinTestsNotRun: true
+        minimumExpectedTests: '1'
+
+# ──────────────────────────────────────────────
 # Stage 5 — Cache Compat Tests
 # ──────────────────────────────────────────────
 - stage: CacheCompatTests
@@ -250,7 +282,7 @@ stages:
       displayName: 'Run integration tests .NET 8'
       inputs:
         testSelector: 'testAssemblies'
-        testAssemblyVer2: '**\Microsoft.Identity.Test.Integration.netcore\bin\**\Microsoft.Identity.Test.Integration.NetCore.dll'
+        testAssemblyVer2: '**\Microsoft.Identity.Test.Integration.netcore\bin\**\net8.0\Microsoft.Identity.Test.Integration.NetCore.dll'
         searchFolder: '$(System.DefaultWorkingDirectory)'
         rerunFailedTests: true
         rerunMaxAttempts: '3'
@@ -259,6 +291,40 @@ stages:
         failOnMinTestsNotRun: true
         minimumExpectedTests: '1'
         runSettingsFile: '$(MsalSourceDir)build\CodeCoverage.runsettings'
+
+# ──────────────────────────────────────────────
+# Desktop Integration Tests .NET 10 (Windows)
+# ──────────────────────────────────────────────
+- stage: IntegrationTestsNet10
+  displayName: 'Integration Tests .NET 10'
+  dependsOn: Build
+  jobs:
+
+  - job: 'RunIntegrationTestsNet10'
+    pool:
+        vmImage: 'windows-2022'
+        demands:
+        - msbuild
+        - visualstudio
+    variables:
+        runCodesignValidationInjection: false
+        Codeql.SkipTaskAutoInjection: true
+
+    steps:
+    - template: template-desktop-test-setup.yaml
+
+    - task: VSTest@2
+      displayName: 'Run integration tests .NET 10'
+      inputs:
+        testSelector: 'testAssemblies'
+        testAssemblyVer2: '**\Microsoft.Identity.Test.Integration.netcore\bin\**\net10.0\Microsoft.Identity.Test.Integration.NetCore.dll'
+        searchFolder: '$(System.DefaultWorkingDirectory)'
+        rerunFailedTests: true
+        rerunMaxAttempts: '3'
+        runInParallel: false
+        codeCoverageEnabled: false
+        failOnMinTestsNotRun: true
+        minimumExpectedTests: '1'
 
 # ──────────────────────────────────────────────
 # Stage 8 — Linux Integration Tests

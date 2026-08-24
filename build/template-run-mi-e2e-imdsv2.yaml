@@ -13,6 +13,14 @@ steps:
     includePreviewVersions: false
     performMultiLevelLookup: true
 
+- task: UseDotNet@2
+  displayName: 'Install .NET 10 SDK'
+  inputs:
+    packageType: 'sdk'
+    version: '10.0.x'
+    includePreviewVersions: false
+    performMultiLevelLookup: true
+
 # Restore 
 - task: DotNetCoreCLI@2
   displayName: Restore E2E project

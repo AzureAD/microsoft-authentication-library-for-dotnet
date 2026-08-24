@@ -126,6 +126,11 @@ steps:
   inputs:
     version: 8.x
 
+- task: UseDotNet@2
+  displayName: 'Use the latest .NET 10'
+  inputs:
+    version: 10.x
+
 - task: CmdLine@2
   displayName: 'Clear local NuGet cache'
   inputs:
