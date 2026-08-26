@@ -1,18 +1,10 @@
 parameters:
   BuildConfiguration: 'Release'
-  TargetFramework:   'net8.0'
+  TargetFramework:   'net10.0'
 
 steps:
 
-# Ensure the exact SDK is available on the agent
-- task: UseDotNet@2
-  displayName: 'Install .NET SDK 8.0.418'
-  inputs:
-    packageType: 'sdk'
-    version: '8.0.418'
-    includePreviewVersions: false
-    performMultiLevelLookup: true
-
+# Ensure the SDK is available on the agent
 - task: UseDotNet@2
   displayName: 'Install .NET 10 SDK'
   inputs:
@@ -28,7 +20,7 @@ steps:
     command: restore
     projects: tests/Microsoft.Identity.Test.E2E/Microsoft.Identity.Test.E2E.MSI.csproj
     restoreArguments: >
-      /p:RestoreTargetFrameworks=net8.0
+      /p:RestoreTargetFrameworks=net10.0
       /p:INCLUDE_MOBILE_AND_LEGACY_TFM=
 
 # Build 
@@ -39,7 +31,7 @@ steps:
     projects: tests/Microsoft.Identity.Test.E2E/Microsoft.Identity.Test.E2E.MSI.csproj
     arguments: >
       --configuration $(BuildConfiguration)
-      --framework net8.0
+      --framework net10.0
       /p:INCLUDE_MOBILE_AND_LEGACY_TFM=
 
 # Test

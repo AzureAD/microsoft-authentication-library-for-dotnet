@@ -48,7 +48,7 @@ Works anywhere with certificate access (local dev, Azure, on-premises).
   dotnet add package Microsoft.Identity.Client --version 4.82.1
   dotnet add package Microsoft.Identity.Client.KeyAttestation
   ```
-- **Target Framework**: net8.0 recommended
+- **Target Framework**: net10.0 recommended
 - **Namespaces**:
   ```csharp
   using Microsoft.Identity.Client;

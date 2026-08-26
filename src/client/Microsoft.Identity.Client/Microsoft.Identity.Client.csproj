@@ -4,15 +4,14 @@
     <TargetFrameworkNetDesktop462>net462</TargetFrameworkNetDesktop462>
     <TargetFrameworkNetDesktop472>net472</TargetFrameworkNetDesktop472>
     <TargetFrameworkNetStandard>netstandard2.0</TargetFrameworkNetStandard>
-    <TargetFrameworkNet8>net8.0</TargetFrameworkNet8>
-    <TargetFrameworkNet10>net10.0</TargetFrameworkNet10>
+    <TargetFrameworkNet>net10.0</TargetFrameworkNet>
     <Configurations>Debug;Release;Debug + MobileApps</Configurations>
   </PropertyGroup>
 
   <!-- Mobile targets are disabled by default to speed up dev box -->
   <PropertyGroup Condition="'$(INCLUDE_MOBILE_AND_LEGACY_TFM)' != ''">
-    <TargetFrameworkNetAndroid>net8.0-android</TargetFrameworkNetAndroid>
-    <TargetFrameworkNetIos>net8.0-ios</TargetFrameworkNetIos>
+    <TargetFrameworkNetAndroid>net10.0-android</TargetFrameworkNetAndroid>
+    <TargetFrameworkNetIos>net10.0-ios</TargetFrameworkNetIos>
   </PropertyGroup>
 
   <!-- mobile SDK constraints -->
@@ -22,9 +21,9 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworkNetDesktop462);$(TargetFrameworkNetDesktop472);$(TargetFrameworkNetStandard);$(TargetFrameworkNetIos);$(TargetFrameworkNetAndroid);$(TargetFrameworkNet8);$(TargetFrameworkNet10);</TargetFrameworks>
-    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('OSX'))">$(TargetFrameworkNetStandard);$(TargetFrameworkNetIos);$(TargetFrameworkNetAndroid);$(TargetFrameworkNet8);$(TargetFrameworkNet10)</TargetFrameworks>
-    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Linux')) Or '$(NetCoreOnly)' !='' ">$(TargetFrameworkNetStandard);$(TargetFrameworkNet8);$(TargetFrameworkNet10)</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworkNetDesktop462);$(TargetFrameworkNetDesktop472);$(TargetFrameworkNetStandard);$(TargetFrameworkNetIos);$(TargetFrameworkNetAndroid);$(TargetFrameworkNet);</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('OSX'))">$(TargetFrameworkNetStandard);$(TargetFrameworkNetIos);$(TargetFrameworkNetAndroid);$(TargetFrameworkNet)</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Linux')) Or '$(NetCoreOnly)' !='' ">$(TargetFrameworkNetStandard);$(TargetFrameworkNet)</TargetFrameworks>
   </PropertyGroup>
 
   <PropertyGroup Label="NuGet and AssemblyInfo metadata">
@@ -88,7 +87,7 @@
     <PackageReference Include="System.Text.Json" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet8)' or '$(TargetFramework)' == '$(TargetFrameworkNet10)'">
+  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet)'">
     <Compile Include="$(PathToMsalSources)\Platforms\netstandard\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DefaultOSBrowser\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DesktopOS\**\*.cs" />

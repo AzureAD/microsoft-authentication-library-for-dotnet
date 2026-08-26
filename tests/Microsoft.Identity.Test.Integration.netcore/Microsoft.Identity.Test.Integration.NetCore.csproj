@@ -2,7 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <TargetFramework>net10.0</TargetFramework>
     <IsPackable>false</IsPackable>
     <DefineConstants>$(DefineConstants);NET_CORE</DefineConstants>
     <Configurations>Debug;Release;Debug + MobileApps</Configurations>
@@ -25,7 +25,6 @@
     <PackageReference Include="Selenium.Support" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" />
     <PackageReference Include="Selenium.WebDriver" />
-    <PackageReference Include="System.Security.Cryptography.Cng" />
     <PackageReference Include="coverlet.collector" />
     <!-- Workaround for hitting exception invoking executor 'executor://nunit3testexecutor/': Could not load type 'System.Runtime.Remoting.Channels.IChannel'-->
     <PackageReference Include="NUnit" />

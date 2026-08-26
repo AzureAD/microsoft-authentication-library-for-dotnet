@@ -1,2 +1,0 @@
-Microsoft.Identity.Client.KeyAttestation.ManagedIdentityAttestationExtensions
-static Microsoft.Identity.Client.KeyAttestation.ManagedIdentityAttestationExtensions.WithAttestationSupport(this Microsoft.Identity.Client.AcquireTokenForManagedIdentityParameterBuilder builder) -> Microsoft.Identity.Client.AcquireTokenForManagedIdentityParameterBuilder

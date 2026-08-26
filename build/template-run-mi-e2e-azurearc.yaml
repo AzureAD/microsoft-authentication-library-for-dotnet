@@ -1,14 +1,8 @@
 parameters:
   BuildConfiguration: 'Release'
-  TargetFramework: 'net8.0'
+  TargetFramework: 'net10.0'
 
 steps:
-- task: UseDotNet@2
-  displayName: 'Install .NET 8 SDK'
-  inputs:
-    packageType: 'sdk'
-    version: '8.0.x'
-
 - task: UseDotNet@2
   displayName: 'Install .NET 10 SDK'
   inputs:
@@ -22,7 +16,7 @@ steps:
     command: restore
     projects: tests/Microsoft.Identity.Test.E2E/Microsoft.Identity.Test.E2E.MSI.csproj
     restoreArguments: >
-      /p:RestoreTargetFrameworks=net8.0
+      /p:RestoreTargetFrameworks=net10.0
       /p:INCLUDE_MOBILE_AND_LEGACY_TFM=
 
 # Build
@@ -33,7 +27,7 @@ steps:
     projects: tests/Microsoft.Identity.Test.E2E/Microsoft.Identity.Test.E2E.MSI.csproj
     arguments: >
       --configuration $(BuildConfiguration)
-      --framework net8.0
+      --framework net10.0
       /p:INCLUDE_MOBILE_AND_LEGACY_TFM=
 
 - task: VSTest@2
