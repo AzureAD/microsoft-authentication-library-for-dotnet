@@ -17,7 +17,7 @@ steps:
     BuildConfiguration: '$(BuildConfiguration)'
     MicrosoftIdentityClientVersion: $(MicrosoftIdentityClientVersion)
     LabApiVersion: $(LabApiVersion)
-    Solution: 'LibsAndSamples.sln'    
+    Solution: 'LibsAndSamples.sdk.slnf'
 
 - task: CopyFiles@2
   displayName: 'Stage MSAL src'
@@ -84,13 +84,7 @@ steps:
                       'runtimes\win-arm64\native\msalruntime_arm64.dll');
 
         #dev apps to check
-        $AppsToCheck = @('MSIX\WPF\bin\Release\', 
-                         'MSIX\WPF.Package\bin\AnyCPU\Release\WPF\', 
-                         'NetCoreWinFormsWam\bin\Release\net10.0-windows10.0.17763.0\',
-                         'NetDesktopWpf\bin\Release\', 
-                         'NetFrameworkWam\bin\Release\',                        
-                         'WAMClassLibrary\bin\Release\',
-                         'WAMCallsIntoClassLibrary\bin\Release\');
+        $AppsToCheck = @('NetCoreWinFormsWam\bin\Release\net10.0-windows10.0.17763.0\');
 
         #Check if runtime files for each arch exist in the Dev Apps for any CPU 
         $errors = '';
