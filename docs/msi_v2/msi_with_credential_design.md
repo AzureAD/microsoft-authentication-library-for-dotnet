@@ -10,7 +10,7 @@ The primary objective is to enable seamless token acquisition in MSI V2 for VM/V
 
 - Define the **MSI V2 token acquisition process**.
 - Describe how MSAL interacts with the `/issuecredential` and the ESTS regional token endpoint.
-- Ensure compatibility with **Windows and Linux** VMs and VMSS.
+- Support the Windows flow and define the planned Linux KMPP integration.
 
 ## Token Acquisition Process
 
@@ -51,18 +51,14 @@ sequenceDiagram
     MSAL ->> IMDS: GET /metadata/identity/getPlatformMetadata
     IMDS -->> MSAL: client_id, tenant_id, cuid, maa_endpoint
     
-    alt Attestable CU
-        MSAL ->> MAA: POST /attest/keyguard (attestation info)
-        MAA  -->> MSAL: attestation_token
-    else Unattestable CU
-        Note over MSAL: Skip attestation
-    end
+    MSAL ->> MAA: POST key attestation info
+    MAA  -->> MSAL: attestation_token
 
-    MSAL ->> IMDS: POST /metadata/identity/issuecredential (CSR + attestation_token?)
+    MSAL ->> IMDS: POST /metadata/identity/issuecredential (CSR + attestation_token)
     IMDS -->> MSAL: client_credential (x509), regional_token_url
 
     MSAL ->> ESTS: POST /oauth2/v2.0/token (mTLS)
-    ESTS -->> MSAL: access_token (bearer|mtls_pop **for attested CUs**, bearer **only** for unattested CUs)
+    ESTS -->> MSAL: access_token (mtls_pop)
     MSAL -->> App : AuthenticationResult (access_token + mtls_certificate)
 ```
 
@@ -70,9 +66,11 @@ sequenceDiagram
 
 - MSAL needs to create a CSR (Certificate Signing Request) with a sourced key.
 - Azure RP will add a new `PlatformMetadata` endpoint which will provide the info needed to create the CSR.
-- MSAL will source a key from CredentialGuard (where available) or in-memory to form the CSR
-- For keys from CredentialGuard, MSAL will perform a key attestation with MAA (Microsoft Attestation Service) - POP only
-- MSAL will then send the CSR and the attestation token (where applicable) to the MIRP 
+- On Windows, MSAL sources a non-exportable key from the KeyGuard KSP.
+- The planned Linux implementation sources a non-exportable RSA-PSS key from KMPP through `libkmpp.so`.
+- MSAL builds the CSR using the platform-backed key.
+- MSAL obtains key attestation evidence from MAA and sends the CSR and attestation token to the MIRP.
+- Linux KMPP key creation and CSR generation are currently a proof of concept; Linux attestation and the complete token flow are not yet implemented.
 
 ### Certificate Retrieval from `/issuecredential` Endpoint
 
@@ -86,7 +84,7 @@ sequenceDiagram
 - The client (MSAL) presents the **certificate** to **ESTS** over **MTLS**.
 - ESTS validates the certificate and issues an **access token**.
 - The access token is then used to authenticate with Azure services.
-- The access token can be bearer / pop depending upon the key that was sourced.
+- ESTS issues an mTLS PoP access token bound to the certificate.
 - MSAL will then return the access token and the certificate obtained from MIRP back to the caller.
 - The caller will need to use the access token to call the target resource over mTLS using the cert. 
 
@@ -151,11 +149,10 @@ Response supplies the UAID/client_id, tenant_id, CUID, and (for attestable VMs) 
 
 MSAL will load a pre-exisitng key, if none available MSAL will try creating one in KSP (Key Storage Provider) 
 
-| OS                     | Key Store        | Persistence       |
-|------------------------|------------------|-------------------|
-| Windows (attested)     | KeyGuard KSP     | Durable           |
-| Windows (unattested)   | Software KSP     | Durable           |
-| Linux                  | In-memory → KMPP (future) | Process-lifetime |
+| OS | Key provider | Key properties | Status |
+|---|---|---|---|
+| Windows | KeyGuard KSP | Non-exportable, hardware-backed RSA key | Implemented |
+| Linux | KMPP/KeyIso through `libkmpp.so` | Non-exportable RSA-PSS key held in an OP-TEE/TrustZone enclave | POC: key creation and CSR generation only |
 
 #### CSR requirements
 
@@ -163,9 +160,10 @@ MSAL will load a pre-exisitng key, if none available MSAL will try creating one 
 - **Attribute OID 1.2.840.113549.1.9.7:** `PrintableString = {CUID}`
 - **Signed with:** new key `RSA 2048`
 
-#### (Optionally) Attest Key
+#### Attest Key
 
-If they Key is from KeyGuard, MSAL will then get an attestation token for this key. 
+MSAL obtains an attestation token for the platform-backed key. Windows KeyGuard
+attestation is implemented. Linux KMPP attestation remains future work.
 
 #### Request Certificate
 
@@ -175,7 +173,7 @@ Content-Type: application/json
 
 {
   "csr": "<Base64 CSR>",
-  "attestation_token": "<jwt>" // Optional on unattested compute units
+  "attestation_token": "<jwt>"
 }
 ```
 
@@ -189,7 +187,7 @@ MSAL will then call ESTS-R to get an access token
 grant_type=client_credentials
 client_id=<UAID>
 scope=https://management.azure.com/.default
-token_type=mtls_pop   // **Only valid for attested CUs**; omit (default bearer) for unattested
+token_type=mtls_pop
 ```
 Response identical to AAD v2 but may include token_type":"mtls_pop".
 
@@ -211,7 +209,6 @@ Response identical to AAD v2 but may include token_type":"mtls_pop".
 
 .PARAMETERS
     -Scope        Resource scope (default: ARM).
-    -Unattested   Skip attestation token; forces bearer token.
     -Mock         Use mocked responses (auto‑fallback if IMDS is not reachable).
 
 .NOTES
@@ -220,7 +217,6 @@ Response identical to AAD v2 but may include token_type":"mtls_pop".
 
 param(
     [string]$Scope = "https://management.azure.com/.default",
-    [switch]$Unattested,
     [switch]$Mock
 )
 
@@ -255,7 +251,7 @@ if ($Mock) {
         client_id            = [guid]::NewGuid().Guid
         tenant_id            = [guid]::NewGuid().Guid
         CUID                 = [guid]::NewGuid().Guid
-        attestation_endpoint = if ($Unattested) { $null } else { "https://mock.maa.contoso.com" }
+        attestation_endpoint = "https://mock.maa.contoso.com"
     }
     Info "Generated mock platform metadata."
 }
@@ -299,15 +295,13 @@ Info "CSR ready (len=$($csrBytes.Length))"
 # 4. Attestation token (mock or real)
 # ------------------------------------------------------------
 $attToken = $null
-if (-not $Unattested) {
-    if ($Mock) {
-        $attToken = "eyMock.Token"; Info "Mock attestation token generated."
-    } elseif ($maaEp) {
-        Info "Requesting attestation token from $maaEp …"
-        $maaResp = Invoke-WebRequest -Uri "$maaEp/attest/keyguard?api-version=2023-04-01-preview" -Method POST -Body (@{ AttestationInfo = '<bin>' } | ConvertTo-Json -Compress) -ContentType 'application/json'
-        Throw-IfError $maaResp 'attest/keyguard'
-        $attToken = ($maaResp.Content | ConvertFrom-Json).token
-    }
+if ($Mock) {
+    $attToken = "eyMock.Token"; Info "Mock attestation token generated."
+} elseif ($maaEp) {
+    Info "Requesting attestation token from $maaEp …"
+    $maaResp = Invoke-WebRequest -Uri "$maaEp/attest/keyguard?api-version=2023-04-01-preview" -Method POST -Body (@{ AttestationInfo = '<bin>' } | ConvertTo-Json -Compress) -ContentType 'application/json'
+    Throw-IfError $maaResp 'attest/keyguard'
+    $attToken = ($maaResp.Content | ConvertFrom-Json).token
 }
 
 # ------------------------------------------------------------
@@ -320,7 +314,7 @@ if ($Mock) {
 } else {
     $issueUri  = "http://169.254.169.254/metadata/identity/issuecredential?api-version=2025-05-01&cid=$cuid&uaid=$clientId"
     $issueHdr  = @{ Metadata = 'true'; 'X-ms-Client-Request-id' = [guid]::NewGuid() }
-    $bodyObj   = @{ csr = $csrBase64 }; if ($attToken) { $bodyObj.attestation_token = $attToken }
+    $bodyObj   = @{ csr = $csrBase64; attestation_token = $attToken }
     $issueResp = Invoke-WebRequest -Uri $issueUri -Method POST -Headers $issueHdr -Body ($bodyObj | ConvertTo-Json -Compress) -ContentType 'application/json'
     Throw-IfError $issueResp 'issuecredential'
     $cred      = $issueResp.Content | ConvertFrom-Json
@@ -343,15 +337,13 @@ if ($Mock) {
     Info "Mock access token generated."
 } else {
     $regional = "$regionalTokenUrl/$tenantId/oauth2/v2.0/token"
-    $bodyStr  = "grant_type=client_credentials&scope=$([Uri]::EscapeDataString($Scope))&client_id=$clientId"
-    if (-not $Unattested) { $bodyStr += "&token_type=mtls_pop" }
+    $bodyStr  = "grant_type=client_credentials&scope=$([Uri]::EscapeDataString($Scope))&client_id=$clientId&token_type=mtls_pop"
     $tokResp  = Invoke-WebRequest -Uri $regional -Method POST -Body $bodyStr -Headers @{ 'Accept'='application/json'; 'Content-Type'='application/x-www-form-urlencoded' } -Certificate $miCert
     Throw-IfError $tokResp 'token'
     $tokenJson = $tokResp.Content | ConvertFrom-Json
 }
 
-$kind = if ($Unattested) { 'Bearer' } else { 'mTLS-PoP' }
-Info "$kind token acquired – expires_in = $($tokenJson.expires_in)s"
+Info "mTLS-PoP token acquired – expires_in = $($tokenJson.expires_in)s"
 ```
 
 ## Summary of New APIs on Managed Identity Builder
