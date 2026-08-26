@@ -227,6 +227,99 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
         }
 
         [TestMethod]
+        [DeploymentItem(@"Resources\TestMex2005.xml")]
+        public async Task MexHttpsRedirectIsFollowedTestAsync()
+        {
+            // Arrange
+            const string mexAddress = "https://somehost/adfs/services/trust/mex";
+            const string redirectedMexAddress = "https://redirected.somehost/adfs/services/trust/mex";
+            var redirectResponse = new HttpResponseMessage(HttpStatusCode.TemporaryRedirect);
+            redirectResponse.Headers.Location = new Uri(redirectedMexAddress);
+
+            using (var harness = CreateTestHarness())
+            {
+                MockHttpMessageHandler redirectHandler = harness.HttpManager.AddMockHandler(
+                    new MockHttpMessageHandler
+                    {
+                        ExpectedUrl = mexAddress,
+                        ExpectedMethod = HttpMethod.Get,
+                        ResponseMessage = redirectResponse
+                    });
+                MockHttpMessageHandler responseHandler = harness.HttpManager.AddMockHandler(
+                    new MockHttpMessageHandler
+                    {
+                        ExpectedUrl = redirectedMexAddress,
+                        ExpectedMethod = HttpMethod.Get,
+                        ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                        {
+                            Content = new StringContent(
+                                File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("TestMex2005.xml")))
+                        }
+                    });
+
+                // Act
+                MexDocument mexDocument = await harness.ServiceBundle.WsTrustWebRequestManager.GetMexDocumentAsync(
+                    mexAddress,
+                    new RequestContext(harness.ServiceBundle, Guid.NewGuid(), null))
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.IsNotNull(mexDocument.GetWsTrustUsernamePasswordEndpoint());
+                Assert.IsFalse(redirectHandler.AllowAutoRedirect);
+                Assert.IsFalse(responseHandler.AllowAutoRedirect);
+                Assert.IsNotNull(redirectHandler.ActualRequestMessage);
+                Assert.IsNotNull(responseHandler.ActualRequestMessage);
+            }
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"Resources\TestMex2005.xml")]
+        public async Task MexRelativeHttpsRedirectUsesEffectiveResponseUriTestAsync()
+        {
+            // Arrange
+            const string mexAddress = "https://somehost/adfs/services/trust/mex";
+            const string effectiveMexAddress = "https://effective.somehost/adfs/services/trust/mex";
+            const string redirectedMexAddress = "https://effective.somehost/adfs/services/redirected/mex";
+            var redirectResponse = new HttpResponseMessage(HttpStatusCode.TemporaryRedirect)
+            {
+                RequestMessage = new HttpRequestMessage(HttpMethod.Get, effectiveMexAddress)
+            };
+            redirectResponse.Headers.Location = new Uri("../redirected/mex", UriKind.Relative);
+
+            using (var harness = CreateTestHarness())
+            {
+                harness.HttpManager.AddMockHandler(
+                    new MockHttpMessageHandler
+                    {
+                        ExpectedUrl = mexAddress,
+                        ExpectedMethod = HttpMethod.Get,
+                        ResponseMessage = redirectResponse
+                    });
+                MockHttpMessageHandler responseHandler = harness.HttpManager.AddMockHandler(
+                    new MockHttpMessageHandler
+                    {
+                        ExpectedUrl = redirectedMexAddress,
+                        ExpectedMethod = HttpMethod.Get,
+                        ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                        {
+                            Content = new StringContent(
+                                File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("TestMex2005.xml")))
+                        }
+                    });
+
+                // Act
+                MexDocument mexDocument = await harness.ServiceBundle.WsTrustWebRequestManager.GetMexDocumentAsync(
+                    mexAddress,
+                    new RequestContext(harness.ServiceBundle, Guid.NewGuid(), null))
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.IsNotNull(mexDocument.GetWsTrustUsernamePasswordEndpoint());
+                Assert.IsNotNull(responseHandler.ActualRequestMessage);
+            }
+        }
+
+        [TestMethod]
         public async Task MexMissingEndpointIsReportedSeparatelyTestAsync()
         {
             // Arrange
