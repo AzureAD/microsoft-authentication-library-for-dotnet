@@ -17,13 +17,10 @@
     <PackageReference Include="MSTest.TestFramework" />
 
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" />
-    <PackageReference Include="System.Net.Http" />
-    <PackageReference Include="System.Text.Json" />
     <PackageReference Include="coverlet.collector" />
     <PackageReference Include="NUnit" />
     <PackageReference Include="NUnit3TestAdapter" />
     <PackageReference Include="StrongNamer" />
-    <PackageReference Include="System.Formats.Asn1" />
   </ItemGroup>
 
 </Project>
