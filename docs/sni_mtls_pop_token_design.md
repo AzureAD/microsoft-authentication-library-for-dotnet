@@ -66,12 +66,6 @@ For sovereign clouds, the base endpoint is adjusted for the cloud-specific envir
 - Azure Government: `https://{region}.mtlsauth.microsoftonline.us/{tenant_id}`
 - Azure China: `https://{region}.mtlsauth.partner.microsoftonline.cn/{tenant_id}`
 
-#### DSTS Cloud
-
-DSTS does not use regions. The standard DSTS endpoint format is:
-
-Azure DSTS: https://dsts.core.azure-test.net/{tenant_id}
-
 #### Non-Standard Clouds
 
 For non-standard clouds, the endpoint is formed by adding `{region}.mtlsauth` to the authority URL
@@ -187,14 +181,14 @@ built-in transport.
 
 - Test with a valid tenanted authority URL (e.g., `https://login.microsoftonline.com/tenant_id`).
 - Ensure an exception (`MsalError.MissingTenantedAuthority`) is thrown for `/common` or `/organizations` authority usage.
-- Flow is applicable only to AAD and DSTS authorities. Verify that unsupported authority types (e.g., B2C) throw `MsalError.InvalidAuthorityType`.
+- Flow is applicable only to AAD and *STS authorities. Verify that unsupported authority types (e.g., B2C) throw `MsalError.InvalidAuthorityType`.
 
 ### Region Validation Tests
 
 - Ensure a **no-region** `WithMtlsProofOfPossession()` request succeeds against the **global** `mtlsauth.microsoft.com` endpoint (region is optional; there is no "region required" failure).
 - Validate successful token acquisition with a specified region.
 - Test auto-detected region functionality and confirm the expected region is used.
-- Region is not required if the authority is DSTS.
+- Region is not required if the authority is *STS.
 
 ### Grant Type Validation
 
