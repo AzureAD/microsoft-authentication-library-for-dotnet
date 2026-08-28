@@ -66,12 +66,6 @@ For sovereign clouds, the base endpoint is adjusted for the cloud-specific envir
 - Azure Government: `https://{region}.mtlsauth.microsoftonline.us/{tenant_id}`
 - Azure China: `https://{region}.mtlsauth.partner.microsoftonline.cn/{tenant_id}`
 
-#### DSTS Cloud
-
-DSTS does not use regions. The standard DSTS endpoint format is:
-
-Azure DSTS: https://dsts.core.azure-test.net/{tenant_id}
-
 #### Non-Standard Clouds
 
 For non-standard clouds, the endpoint is formed by adding `{region}.mtlsauth` to the authority URL
