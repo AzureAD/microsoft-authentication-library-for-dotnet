@@ -181,7 +181,7 @@ built-in transport.
 
 - Test with a valid tenanted authority URL (e.g., `https://login.microsoftonline.com/tenant_id`).
 - Ensure an exception (`MsalError.MissingTenantedAuthority`) is thrown for `/common` or `/organizations` authority usage.
-- Flow is applicable only to AAD and *STS authorities. Verify that unsupported authority types (e.g., B2C) throw `MsalError.InvalidAuthorityType`.
+- Flow is applicable only to AAD and STS authorities. Verify that unsupported authority types (e.g., B2C) throw `MsalError.InvalidAuthorityType`.
 
 ### Region Validation Tests
 
