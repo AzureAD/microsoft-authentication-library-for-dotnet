@@ -582,7 +582,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// The cloud (authority URL host) defined at the application level cannot be different than the cloud at the request level.
         /// <para>What happens?</para>You did not define an authority at the application level, so it defaults to the public cloud (login.microsoft.com), but the authority at the request level is for a different cloud. Only the tenant can be changed at the request level.
-        /// <para>Mitigation</para>Add .WithAuthority("https://login.windows-ppe.net/common) at the application level and specify the tenant at the request level: .WithAuthority("https://login.windows-ppe.net/1234-567-890-12345678). 
+        /// <para>Mitigation</para>Configure the same authority host at the application and request levels. Only the tenant can differ.
         /// </summary>
         public const string AuthorityHostMismatch = "authority_host_mismatch";
 
