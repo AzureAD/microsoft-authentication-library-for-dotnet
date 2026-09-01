@@ -3,7 +3,10 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.ComponentModel;
 using System.IO;
+using System.Net.Http;
+using System.Security.Authentication;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
@@ -564,6 +567,194 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.IsNotNull(result.BindingCertificate);
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
             }
+        }
+
+        /// <summary>
+        /// Regression test for the delegated TokenClient path losing SCHANNEL recovery.
+        /// The mTLS handshake fails locally in SCHANNEL (the binding cert's private key is unusable),
+        /// so the transport throws a raw HttpRequestException chain and no request reaches ESTS-R.
+        /// MSAL must still evict the binding, re-mint it, and retry once.
+        /// </summary>
+        [TestMethod]
+        public async Task mTLSPop_TokenLeg_RawSchannelFailure_ReMintsBindingAndRetriesOnceAsync()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                // Arrange
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
+
+                var managedIdentityApp = await CreateManagedIdentityAsync(
+                    httpManager,
+                    managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
+
+                // First attempt: full mint, then the local mTLS handshake fails inside SCHANNEL.
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
+                httpManager.AddMockHandler(MockHelpers.MockCertificateRequestResponse(certificate: TestConstants.ValidRawCertificate));
+                var failingTokenHandler = MockHelpers.MockImdsV2EntraTokenRequestResponse(_identityLoggerAdapter);
+                failingTokenHandler.ExceptionToThrow = CreateSchannelTransportException();
+                httpManager.AddMockHandler(failingTokenHandler);
+
+                // Retry: binding is re-minted (RemoveBadCert → fresh CSR + issuecredential), then token succeeds.
+                AddMocksToGetEntraToken(httpManager);
+
+                // Act
+                var result = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession()
+                    .WithAttestationSupport()
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                // Assert
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(MTLSPoP, result.TokenType);
+                Assert.IsNotNull(result.BindingCertificate);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+
+                // Both the failed attempt and the re-minted retry ran: every queued mock was consumed.
+                Assert.AreEqual(0, httpManager.QueueSize, "Expected exactly one re-mint and one retry.");
+            }
+        }
+
+        /// <summary>
+        /// The re-mint retry is bounded to a single additional attempt. When the freshly minted binding
+        /// also fails in SCHANNEL, the exception propagates instead of looping.
+        /// </summary>
+        [TestMethod]
+        public async Task mTLSPop_TokenLeg_RepeatedSchannelFailure_RetriesOnceThenPropagatesAsync()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                // Arrange - two full mint+token cycles, both failing in SCHANNEL.
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
+
+                var managedIdentityApp = await CreateManagedIdentityAsync(
+                    httpManager,
+                    managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
+
+                for (int attempt = 0; attempt < 2; attempt++)
+                {
+                    httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
+                    httpManager.AddMockHandler(MockHelpers.MockCertificateRequestResponse(certificate: TestConstants.ValidRawCertificate));
+                    var handler = MockHelpers.MockImdsV2EntraTokenRequestResponse(_identityLoggerAdapter);
+                    handler.ExceptionToThrow = CreateSchannelTransportException();
+                    httpManager.AddMockHandler(handler);
+                }
+
+                // Act
+                var ex = await Assert.ThrowsAsync<MsalServiceException>(async () =>
+                    await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                        .WithMtlsProofOfPossession()
+                        .WithAttestationSupport()
+                        .ExecuteAsync().ConfigureAwait(false)
+                ).ConfigureAwait(false);
+
+                // Assert - the second failure surfaces, normalized but with the SCHANNEL chain intact.
+                Assert.AreEqual(MsalError.ManagedIdentityUnreachableNetwork, ex.ErrorCode);
+                Assert.IsTrue(ImdsV2ManagedIdentitySource.IsSchannelFailure(ex), "Expected the SCHANNEL chain to be preserved.");
+
+                // Exactly two attempts were made - no third mint/token cycle was queued or needed.
+                Assert.AreEqual(0, httpManager.QueueSize, "Expected exactly two attempts (initial + one retry).");
+            }
+        }
+
+        /// <summary>
+        /// An unrelated transport failure (no SCHANNEL signature) must not trigger a certificate re-mint,
+        /// and must surface as an MsalServiceException rather than a raw HttpRequestException.
+        /// </summary>
+        [TestMethod]
+        public async Task mTLSPop_TokenLeg_UnrelatedNetworkFailure_IsNotRetriedAndIsWrappedAsync()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                // Arrange - only ONE mint+token cycle is queued. A re-mint would exhaust the queue and fail.
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
+
+                var managedIdentityApp = await CreateManagedIdentityAsync(
+                    httpManager,
+                    managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
+
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
+                httpManager.AddMockHandler(MockHelpers.MockCertificateRequestResponse(certificate: TestConstants.ValidRawCertificate));
+                var handler = MockHelpers.MockImdsV2EntraTokenRequestResponse(_identityLoggerAdapter);
+                handler.ExceptionToThrow = new HttpRequestException(
+                    "No such host is known.",
+                    new IOException("The remote name could not be resolved."));
+                httpManager.AddMockHandler(handler);
+
+                // Act
+                var ex = await Assert.ThrowsAsync<MsalServiceException>(async () =>
+                    await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                        .WithMtlsProofOfPossession()
+                        .WithAttestationSupport()
+                        .ExecuteAsync().ConfigureAwait(false)
+                ).ConfigureAwait(false);
+
+                // Assert - normalized to the managed identity contract, and NOT classified as SCHANNEL.
+                Assert.AreEqual(MsalError.ManagedIdentityUnreachableNetwork, ex.ErrorCode);
+                Assert.IsInstanceOfType<HttpRequestException>(ex.InnerException);
+                Assert.IsFalse(ImdsV2ManagedIdentitySource.IsSchannelFailure(ex), "Unrelated failures must not look like SCHANNEL failures.");
+
+                // No re-mint was attempted: the single queued cycle covered the whole request.
+                Assert.AreEqual(0, httpManager.QueueSize, "An unrelated network failure must not trigger a re-mint.");
+            }
+        }
+
+        /// <summary>
+        /// A non-transport failure that MSAL does not already own (anything other than HttpRequestException)
+        /// must still be normalized, but onto managed_identity_request_failed rather than the unreachable-network
+        /// code. Covers the second arm of the normalization introduced for this fix.
+        /// </summary>
+        [TestMethod]
+        public async Task mTLSPop_TokenLeg_NonHttpFailure_IsWrappedAsRequestFailedAsync()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                // Arrange - only ONE mint+token cycle is queued; a re-mint would exhaust the queue.
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
+
+                var managedIdentityApp = await CreateManagedIdentityAsync(
+                    httpManager,
+                    managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
+
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
+                httpManager.AddMockHandler(MockHelpers.MockCertificateRequestResponse(certificate: TestConstants.ValidRawCertificate));
+                var handler = MockHelpers.MockImdsV2EntraTokenRequestResponse(_identityLoggerAdapter);
+                handler.ExceptionToThrow = new InvalidOperationException("Unexpected failure in the token exchange path.");
+                httpManager.AddMockHandler(handler);
+
+                // Act
+                var ex = await Assert.ThrowsAsync<MsalServiceException>(async () =>
+                    await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                        .WithMtlsProofOfPossession()
+                        .WithAttestationSupport()
+                        .ExecuteAsync().ConfigureAwait(false)
+                ).ConfigureAwait(false);
+
+                // Assert - normalized onto the non-network managed identity error code, original preserved.
+                Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
+                Assert.IsInstanceOfType<InvalidOperationException>(ex.InnerException);
+                Assert.IsFalse(ImdsV2ManagedIdentitySource.IsSchannelFailure(ex), "A non-SCHANNEL failure must not be classified as one.");
+
+                // No re-mint was attempted.
+                Assert.AreEqual(0, httpManager.QueueSize, "A non-SCHANNEL failure must not trigger a re-mint.");
+            }
+        }
+
+        /// <summary>
+        /// Builds the exception chain Windows produces when SCHANNEL cannot acquire credentials for the
+        /// IMDSv2 binding certificate (stale or inaccessible CNG/KeyGuard private key). The handshake
+        /// fails locally, so this is what the delegated TokenClient transport surfaces.
+        /// </summary>
+        private static HttpRequestException CreateSchannelTransportException()
+        {
+            // SEC_E_UNKNOWN_CREDENTIALS - "The credentials supplied to the package were not recognized"
+            var win32 = new Win32Exception(unchecked((int)0x8009030D), "The credentials supplied to the package were not recognized");
+            var authentication = new AuthenticationException("Authentication failed.", win32);
+            return new HttpRequestException("The SSL connection could not be established.", authentication);
         }
         #endregion Acceptance Tests
 
