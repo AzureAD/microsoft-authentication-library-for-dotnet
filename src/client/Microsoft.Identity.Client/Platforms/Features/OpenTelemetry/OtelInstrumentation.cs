@@ -474,11 +474,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                 new(TelemetryConstants.ApiId, apiId),
                 new(TelemetryConstants.CallerSdkId, callerSdkId ?? string.Empty + "," + callerSdkVersion ?? string.Empty),
                 new(TelemetryConstants.CacheRefreshReason, cacheRefreshReason),
-                new(TelemetryConstants.TokenType, tokenType)
+                new(TelemetryConstants.TokenType, tokenType),
+                new(TelemetryConstants.RawStsErrorCode, rawStsErrorCode ?? string.Empty)
             };
-
-            if (!string.IsNullOrEmpty(rawStsErrorCode))
-                baseTags.Add(new(TelemetryConstants.RawStsErrorCode, rawStsErrorCode));
 
             var tags = BuildTagList(MsalMetricsCatalog.FailureCounterName, extraTags, baseTags.ToArray());
 
