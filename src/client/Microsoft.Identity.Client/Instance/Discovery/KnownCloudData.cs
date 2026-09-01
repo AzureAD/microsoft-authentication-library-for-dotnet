@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                 Aliases = new[] { "login.microsoftonline.de" },
                 PreferredNetwork = "login.microsoftonline.de",
                 PreferredCache = "login.microsoftonline.de",
-                FederatedCredentialAudience = null, // Microsoft Cloud Germany (decommissioned 2021); no token-exchange application exists.
+                FederatedCredentialAudience = null, // Intentionally null, cloud decommissioned in 2021
             },
             new KnownCloudEntry
             {
@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                 Aliases = new[] { "login-us.microsoftonline.com" },
                 PreferredNetwork = "login-us.microsoftonline.com",
                 PreferredCache = "login-us.microsoftonline.com",
-                FederatedCredentialAudience = "api://AzureADTokenExchange", // Public-cloud alternate host; uses the public token-exchange audience.
+                FederatedCredentialAudience = "api://AzureADTokenExchange",
             },
             new KnownCloudEntry
             {
@@ -107,7 +107,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                 Aliases = new[] { "login.sovcloud-identity.sg" },
                 PreferredNetwork = "login.sovcloud-identity.sg",
                 PreferredCache = "login.sovcloud-identity.sg",
-                FederatedCredentialAudience = "api://AzureADTokenExchangeGovSG", // Singapore sovereign cloud is registered under its "GovSG" codename, not "Singapore".
+                FederatedCredentialAudience = "api://AzureADTokenExchangeGovSG",
             },
         };
     }
