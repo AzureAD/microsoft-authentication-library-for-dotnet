@@ -797,6 +797,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         {
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
+            using (var cts = new CancellationTokenSource())
             {
                 // Arrange - only ONE mint+token cycle is queued; a re-mint would exhaust the queue.
                 SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
@@ -807,22 +808,35 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
                 httpManager.AddMockHandler(MockHelpers.MockCertificateRequestResponse(certificate: TestConstants.ValidRawCertificate));
+
+                // Cancel while the token leg is in flight. The mock validates the request first, then calls
+                // ThrowIfCancellationRequested, so the token leg is provably reached and cancellation is raised
+                // with the caller's token genuinely canceled. That last part is what makes this deterministic:
+                // HttpManager only rethrows a cancellation when the token is actually canceled, otherwise it
+                // classifies it as a timeout and converts it into MsalServiceException(request_timeout).
                 var handler = MockHelpers.MockImdsV2EntraTokenRequestResponse(_identityLoggerAdapter);
-                handler.ExceptionToThrow = new OperationCanceledException("The operation was canceled.");
+                handler.AdditionalRequestValidation = _ => cts.Cancel();
                 httpManager.AddMockHandler(handler);
 
                 // Act
-                var ex = await Assert.ThrowsAsync<OperationCanceledException>(async () =>
+                Exception caught = null;
+                try
+                {
                     await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                         .WithMtlsProofOfPossession()
                         .WithAttestationSupport()
-                        .ExecuteAsync().ConfigureAwait(false)
-                ).ConfigureAwait(false);
+                        .ExecuteAsync(cts.Token).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    caught = ex;
+                }
 
                 // Assert - propagated as-is, never converted into an MSAL exception.
-                Assert.IsNotInstanceOfType<MsalException>(ex, "Cancellation must not be normalized into an MSAL exception.");
+                Assert.IsInstanceOfType(caught, typeof(OperationCanceledException), "Cancellation must propagate unchanged.");
+                Assert.IsNotInstanceOfType(caught, typeof(MsalException), "Cancellation must not be normalized into an MSAL exception.");
 
-                // No re-mint was attempted.
+                // The token leg was reached and no re-mint was attempted.
                 Assert.AreEqual(0, httpManager.QueueSize, "Cancellation must not trigger a re-mint.");
             }
         }
