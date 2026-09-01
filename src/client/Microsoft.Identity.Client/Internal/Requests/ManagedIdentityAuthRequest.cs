@@ -280,9 +280,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
         // failure where SCHANNEL cannot use the cert's private key. The latter can surface either as an
         // MsalServiceException (bespoke MI path, or the delegated path after transport normalization) or as a
         // raw transport exception, so the whole chain is inspected rather than just the outermost type.
-        // Failures from the mint step itself are intentionally in scope: minting talks to the IMDS endpoint over
-        // TLS, so a handshake failure there is just as recoverable by re-minting. The retry is bounded to a
-        // single additional attempt either way. Cancellation is never retried.
+        // Failures from the mint step itself fall in scope because the whole delegated leg is guarded, but the
+        // mint endpoints are plain HTTP and present no binding certificate, so a SCHANNEL failure cannot
+        // originate there. A mint-step failure that did match this filter would simply get one more bounded
+        // attempt, which is harmless. Cancellation is never retried.
         private static bool ShouldRemintImdsV2Binding(Exception ex)
         {
             if (ex is OperationCanceledException)
@@ -370,10 +371,20 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 // whole call is guarded: body/header construction, client credential and certificate handling,
                 // throttling, the request itself, and response deserialization. That matches the surface
                 // HandleException used to normalize.
+                // The error-code mapping mirrors HandleException: an unreachable endpoint keeps
+                // ManagedIdentityUnreachableNetwork, and a malformed endpoint keeps InvalidManagedIdentityEndpoint.
+                // The latter is reachable here because the token endpoint is built from binding.Endpoint, a value
+                // supplied by IMDS, so a malformed value throws UriFormatException (a FormatException) rather than
+                // a generic failure. Everything else falls back to the generic request-failed code.
+                string errorCode = ex switch
+                {
+                    HttpRequestException => MsalError.ManagedIdentityUnreachableNetwork,
+                    FormatException => MsalError.InvalidManagedIdentityEndpoint,
+                    _ => MsalError.ManagedIdentityRequestFailed
+                };
+
                 throw MsalServiceExceptionFactory.CreateManagedIdentityException(
-                    ex is HttpRequestException
-                        ? MsalError.ManagedIdentityUnreachableNetwork
-                        : MsalError.ManagedIdentityRequestFailed,
+                    errorCode,
                     ex.Message,
                     ex,
                     ManagedIdentitySource.Imds,
@@ -384,6 +395,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
         // Identifies failures from the delegated token leg that the bespoke MI path used to normalize into
         // MsalServiceException. Exceptions MSAL already owns are passed through untouched so service errors
         // (for example invalid_client) keep their error codes, and cancellation is never converted.
+        // This gate is deliberately broader than HandleException's, which only skipped MsalServiceException and
+        // therefore rewrapped MsalClientException as managed_identity_request_failed. Preserving the more
+        // specific client-side error code is strictly more diagnosable, so that one case is not restored.
         private static bool IsUnwrappedNonMsalFailure(Exception ex)
         {
             return ex is not MsalException && ex is not OperationCanceledException;

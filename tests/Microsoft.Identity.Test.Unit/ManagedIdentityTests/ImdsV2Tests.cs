@@ -745,6 +745,49 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         /// <summary>
+        /// AbstractManagedIdentity.HandleException mapped FormatException onto invalid_managed_identity_endpoint
+        /// rather than the generic request-failed code, and the delegated path must preserve that contract. This
+        /// arm is reachable in practice because the token endpoint is built from binding.Endpoint - a value IMDS
+        /// supplies - so a malformed value surfaces as UriFormatException (a FormatException). Fails against the
+        /// pre-fix mapping, which returned managed_identity_request_failed for this case.
+        /// </summary>
+        [TestMethod]
+        public async Task mTLSPop_TokenLeg_FormatFailure_IsWrappedAsInvalidEndpointAsync()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                // Arrange - only ONE mint+token cycle is queued; a re-mint would exhaust the queue.
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
+
+                var managedIdentityApp = await CreateManagedIdentityAsync(
+                    httpManager,
+                    managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
+
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
+                httpManager.AddMockHandler(MockHelpers.MockCertificateRequestResponse(certificate: TestConstants.ValidRawCertificate));
+                var handler = MockHelpers.MockImdsV2EntraTokenRequestResponse(_identityLoggerAdapter);
+                handler.ExceptionToThrow = new UriFormatException("The token endpoint is not a well-formed URI.");
+                httpManager.AddMockHandler(handler);
+
+                // Act
+                var ex = await Assert.ThrowsAsync<MsalServiceException>(async () =>
+                    await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                        .WithMtlsProofOfPossession()
+                        .WithAttestationSupport()
+                        .ExecuteAsync().ConfigureAwait(false)
+                ).ConfigureAwait(false);
+
+                // Assert - the endpoint-specific error code is preserved, not flattened onto the generic one.
+                Assert.AreEqual(MsalError.InvalidManagedIdentityEndpoint, ex.ErrorCode);
+                Assert.IsInstanceOfType<UriFormatException>(ex.InnerException);
+
+                // No re-mint was attempted.
+                Assert.AreEqual(0, httpManager.QueueSize, "A malformed-endpoint failure must not trigger a re-mint.");
+            }
+        }
+
+        /// <summary>
         /// Acceptance criterion from #6172: "Retry behavior is identical for mTLS PoP and bearer-over-mTLS."
         /// WithRequestOverMtls() shares SendDelegatedImdsV2TokenRequestAsync with the PoP path, so a SCHANNEL
         /// failure must drive the same evict/re-mint/retry-once behavior. Both attempts fail here, which proves
