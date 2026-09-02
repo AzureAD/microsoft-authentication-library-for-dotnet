@@ -25,16 +25,43 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         // Non-null only after the explicit discovery API (GetManagedIdentityCapabilitiesAsync) runs.
         // Allows caching "NoneFound" (Source=None) without confusing it with "not discovered yet".
-        private static ManagedIdentityDiscoveryResult s_cachedSourceResult = null;
+        //
+        // The result and the kill switch state it was computed under are stored together in a single
+        // immutable snapshot, published and read through one volatile reference. Keeping them in two
+        // separate fields would let a reader observe a fresh result paired with a stale flag (or the
+        // reverse) and misjudge whether the cached value describes the host or merely describes the
+        // switch, so the pair is made untearable by construction rather than by argument.
+        private static CachedDiscovery s_cachedDiscovery;
 
-        // The state of the IMDSv2 kill switch when s_cachedSourceResult was computed. A result
-        // produced while the switch was set never probed IMDSv2, so it records the switch's effect
-        // rather than the host's capability and must be discarded once the switch clears. The
-        // reverse transition needs no re-probe: a result captured with the switch off holds the true
-        // capability and is masked on read. Tracking the state keeps discovery O(1) in both modes,
-        // which matters because consumers such as Azure.Identity call discovery on every
-        // authentication and rely on this cache to make that free.
-        private static bool s_cachedUnderImdsV2Disabled;
+        /// <summary>
+        /// A discovery result together with the state of the IMDSv2 kill switch when it was computed.
+        /// </summary>
+        /// <remarks>
+        /// A result produced while the switch was set never probed IMDSv2, so it records the switch's
+        /// effect rather than the host's capability and must be discarded once the switch clears. The
+        /// reverse transition needs no re-probe: a result captured with the switch off holds the true
+        /// capability and is masked on read. Tracking the state keeps discovery O(1) in both modes,
+        /// which matters because consumers such as Azure.Identity call discovery on every
+        /// authentication and rely on this cache to make that free.
+        /// </remarks>
+        private sealed class CachedDiscovery
+        {
+            internal CachedDiscovery(ManagedIdentityDiscoveryResult result, bool capturedWhileImdsV2Disabled)
+            {
+                Result = result;
+                CapturedWhileImdsV2Disabled = capturedWhileImdsV2Disabled;
+            }
+
+            internal ManagedIdentityDiscoveryResult Result { get; }
+
+            internal bool CapturedWhileImdsV2Disabled { get; }
+
+            /// <summary>
+            /// True when this snapshot cannot answer for the host under the supplied switch state,
+            /// which happens only when the switch has been cleared since the result was computed.
+            /// </summary>
+            internal bool IsStaleUnder(bool imdsV2Disabled) => CapturedWhileImdsV2Disabled && !imdsV2Disabled;
+        }
 
         // Set once the "variable is set to an unrecognized value" warning has been emitted, so a
         // misconfiguration is reported without repeating on every discovery call.
@@ -50,8 +77,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         internal static void ResetSourceForTest()
         {
-            s_cachedSourceResult = null;
-            s_cachedUnderImdsV2Disabled = false;
+            Volatile.Write(ref s_cachedDiscovery, null);
             s_unrecognizedImdsV2DisableValueLogged = 0;
 
             // Clear cert caches so each test starts fresh
@@ -159,7 +185,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 ManagedIdentitySource.CloudShell => CloudShellManagedIdentitySource.Create(requestContext),
                 ManagedIdentitySource.AzureArc => AzureArcManagedIdentitySource.Create(requestContext),
                 ManagedIdentitySource.Imds => ImdsManagedIdentitySource.Create(requestContext),
-                _ => throw CreateManagedIdentityUnavailableException(s_cachedSourceResult)
+                _ => throw CreateManagedIdentityUnavailableException(Volatile.Read(ref s_cachedDiscovery)?.Result)
             });
         }
 
@@ -174,7 +200,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             using (requestContext.Logger.LogMethodDuration())
             {
                 requestContext.Logger.Info($"[Managed Identity] Selecting managed identity source. " + 
-                    $"Discovery cached: {s_cachedSourceResult != null}");
+                    $"Discovery cached: {Volatile.Read(ref s_cachedDiscovery) != null}");
 
                 // Fail fast if cancellation was requested, before performing expensive network probes
                 cancellationToken.ThrowIfCancellationRequested();
@@ -191,9 +217,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 // A discovery result captured while the switch was set says "IMDSv1, no binding"
                 // because the IMDSv2 probe was skipped, not because the host is incapable. Once the
                 // switch clears, treat it as absent so routing re-derives the source instead of
-                // latching the mitigation's effect past its lifetime.
+                // latching the mitigation's effect past its lifetime. One volatile read gives a
+                // consistent result/switch-state pair.
+                CachedDiscovery snapshot = Volatile.Read(ref s_cachedDiscovery);
                 ManagedIdentityDiscoveryResult cachedResult =
-                    (s_cachedUnderImdsV2Disabled && !imdsV2Disabled) ? null : s_cachedSourceResult;
+                    (snapshot is null || snapshot.IsStaleUnder(imdsV2Disabled)) ? null : snapshot.Result;
 
                 if (cachedResult != null)
                 {
@@ -286,8 +314,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             ManagedIdentityDiscoveryResult result,
             bool imdsV2Disabled)
         {
-            s_cachedUnderImdsV2Disabled = imdsV2Disabled;
-            s_cachedSourceResult = result;
+            // Single volatile publication of an immutable pair, so no reader can see the result
+            // without also seeing the switch state it was computed under.
+            Volatile.Write(ref s_cachedDiscovery, new CachedDiscovery(result, imdsV2Disabled));
             return result;
         }
 
@@ -324,15 +353,15 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             RequestContext requestContext,
             out ManagedIdentityDiscoveryResult result)
         {
-            ManagedIdentityDiscoveryResult cached = s_cachedSourceResult;
+            CachedDiscovery snapshot = Volatile.Read(ref s_cachedDiscovery);
 
-            if (cached is null || (s_cachedUnderImdsV2Disabled && !imdsV2Disabled))
+            if (snapshot is null || snapshot.IsStaleUnder(imdsV2Disabled))
             {
                 result = null;
                 return false;
             }
 
-            result = ApplyImdsV2KillSwitch(cached, imdsV2Disabled, requestContext);
+            result = ApplyImdsV2KillSwitch(snapshot.Result, imdsV2Disabled, requestContext);
             return true;
         }
 
