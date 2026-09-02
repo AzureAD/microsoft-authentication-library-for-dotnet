@@ -1,0 +1,1 @@
+const Microsoft.Identity.Client.MsalError.ImdsV2Disabled = "imds_v2_disabled" -> string

@@ -66,6 +66,26 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             bool forceRemint,
             CancellationToken cancellationToken)
         {
+            // Kill switch gate. This must run before anything else in this method: the min-strength
+            // check below calls explicit discovery, which probes IMDS and can provision a binding key,
+            // and the binding acquisition further down can mint or reuse a cached certificate. Failing
+            // here guarantees no IMDSv2 HTTP, CSR, certificate, or key-provisioning work happens while
+            // the switch is set, including when a warm certificate cache would otherwise skip the probes.
+            //
+            // Scoped to hosts that would actually route to IMDS: on an environment-detected source
+            // (App Service, Service Fabric, Cloud Shell, Azure Arc, Machine Learning) IMDSv2 is never
+            // involved, so those hosts keep their existing, more precise MtlsPopNotSupportedForEnvironment
+            // error rather than being told IMDSv2 is disabled.
+            if (EnvironmentVariables.IsImdsV2Disabled &&
+                GetManagedIdentitySourceNoImds(requestContext.Logger) == ManagedIdentitySource.None)
+            {
+                requestContext.Logger.Warning(
+                    "[Managed Identity] IMDSv2 is disabled via the " + EnvironmentVariables.DisableImdsV2EnvVar +
+                    " environment variable; blocking the mTLS binding request before any certificate or key operation.");
+
+                throw new MsalClientException(MsalError.ImdsV2Disabled, MsalErrorMessage.ImdsV2Disabled);
+            }
+
             // Enforce a minimum binding strength floor when requested via PoPOptions.MinStrength.
             // The mTLS PoP token leg is delegated to the internal TokenClient exchange and never probes
             // for binding strength on its own, so explicitly run discovery to learn the host's maximum
@@ -144,6 +164,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 // Fail fast if cancellation was requested, before performing expensive network probes
                 cancellationToken.ThrowIfCancellationRequested();
 
+                // Read the kill switch once per selection. It is deliberately evaluated here, at the
+                // routing decision, rather than only during discovery: discovery results are cached in a
+                // process-wide static that never expires, so a process that cached "IMDSv2" before the
+                // switch was set would otherwise route straight past the switch.
+                bool imdsV2Disabled = EnvironmentVariables.IsImdsV2Disabled;
+
                 ManagedIdentitySource source;
                 bool isImdsV2 = false;
 
@@ -164,6 +190,15 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                         // No environment-based source found; default to IMDS based on mTLS PoP flag
                         if (isMtlsPopRequested)
                         {
+                            if (imdsV2Disabled)
+                            {
+                                requestContext.Logger.Warning(
+                                    "[Managed Identity] IMDSv2 is disabled via the " + EnvironmentVariables.DisableImdsV2EnvVar +
+                                    " environment variable; an mTLS request cannot be served over IMDSv1.");
+
+                                throw new MsalClientException(MsalError.ImdsV2Disabled, MsalErrorMessage.ImdsV2Disabled);
+                            }
+
                             // Route mTLS PoP requests directly to IMDSv2 (no probing)
                             requestContext.Logger.Info("[Managed Identity] mTLS PoP requested, routing to IMDSv2 directly without probing.");
                             return (ManagedIdentitySource.Imds, true);
@@ -181,6 +216,19 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     throw CreateManagedIdentityUnavailableException(s_cachedSourceResult);
                 }
 
+                // Kill switch: a cached IMDSv2 discovery result must not survive the switch being set.
+                // Downgrade to IMDSv1 for routing purposes without mutating s_cachedSourceResult, so the
+                // cached discovery stays valid if the switch is later cleared. Bearer requests continue
+                // over IMDSv1; mTLS requests fall through to the guard below and fail fast.
+                if (imdsV2Disabled && isImdsV2)
+                {
+                    requestContext.Logger.Info(
+                        "[Managed Identity] IMDSv2 was detected but is disabled via the " + EnvironmentVariables.DisableImdsV2EnvVar +
+                        " environment variable; routing this request over IMDSv1.");
+
+                    isImdsV2 = false;
+                }
+
                 // Per-request fallback: if ImdsV2 is cached but mTLS PoP not requested, use ImdsV1 for this request only.
                 // We do NOT latch this state; future PoP requests can still leverage the cached ImdsV2 discovery.
                 if (isImdsV2 && !isMtlsPopRequested)
@@ -193,9 +241,16 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 }
 
                 // If the source is determined to be ImdsV1 and mTLS PoP was requested,
-                // throw an exception since ImdsV1 does not support mTLS PoP
+                // throw an exception since ImdsV1 does not support mTLS PoP. When the kill switch is
+                // what forced IMDSv1, report that instead: "the operator disabled IMDSv2" is a different
+                // and more actionable problem than "this host cannot do IMDSv2".
                 if (source == ManagedIdentitySource.Imds && !isImdsV2 && isMtlsPopRequested)
                 {
+                    if (imdsV2Disabled)
+                    {
+                        throw new MsalClientException(MsalError.ImdsV2Disabled, MsalErrorMessage.ImdsV2Disabled);
+                    }
+
                     throw new MsalClientException(
                         MsalError.MtlsPopTokenNotSupportedinImdsV1,
                         MsalErrorMessage.MtlsPopTokenNotSupportedinImdsV1);
@@ -211,6 +266,62 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             return result;
         }
 
+        /// <summary>
+        /// Caches a discovery result unless the IMDSv2 kill switch influenced it.
+        /// </summary>
+        /// <remarks>
+        /// While the switch is set the IMDSv2 probe never runs, so a "v1-only, no binding" outcome is
+        /// an artifact of the switch rather than a fact about the host. Caching it in the process-wide
+        /// static would outlive the switch and keep reporting no binding capability after an operator
+        /// cleared the variable, forcing a process restart to recover. Skipping the cache costs a
+        /// repeat IMDSv1 probe per discovery call for the duration of the mitigation, which is the
+        /// right trade for a switch that must be reversible in place.
+        /// </remarks>
+        private static ManagedIdentityDiscoveryResult CacheUnlessImdsV2Disabled(
+            ManagedIdentityDiscoveryResult result,
+            bool imdsV2Disabled)
+        {
+            return imdsV2Disabled ? result : CacheDiscoveryResult(result);
+        }
+
+        /// <summary>
+        /// Projects a discovery result through the IMDSv2 kill switch.
+        /// </summary>
+        /// <remarks>
+        /// Applied on every read rather than baked into the cached value. The cached result records
+        /// what the host is actually capable of; the switch is an operator override layered on top at
+        /// the point of use. Masking on read means clearing the switch restores the true capability
+        /// immediately, with no re-probe and no process restart, and it closes the window where a
+        /// process that cached "IMDSv2 / KeyGuard" before the switch was set would keep advertising
+        /// PoP support that MSAL will now refuse to honor.
+        /// </remarks>
+        private static ManagedIdentityDiscoveryResult ApplyImdsV2KillSwitch(
+            ManagedIdentityDiscoveryResult result,
+            bool imdsV2Disabled,
+            RequestContext requestContext)
+        {
+            // Only the IMDS path can involve IMDSv2. Environment-detected sources (App Service,
+            // Service Fabric, Cloud Shell, Azure Arc, Machine Learning) are reported unchanged.
+            if (!imdsV2Disabled ||
+                result.Source != ManagedIdentitySource.Imds ||
+                (result.DetectedImdsVersion != ImdsVersion.V2 &&
+                 result.MaxSupportedBindingStrength == MtlsBindingStrength.None))
+            {
+                return result;
+            }
+
+            requestContext.Logger.Info(
+                "[Managed Identity] Reporting no mTLS binding capability because IMDSv2 is disabled via the " +
+                EnvironmentVariables.DisableImdsV2EnvVar + " environment variable.");
+
+            return new ManagedIdentityDiscoveryResult(
+                ManagedIdentitySource.Imds,
+                ImdsVersion.V1,
+                MtlsBindingStrength.None,
+                imdsV1FailureReason: result.ImdsV1FailureReason,
+                imdsV2FailureReason: MsalErrorMessage.ImdsV2DisabledDiscoveryReason);
+        }
+
         // Detect managed identity source by probing IMDS endpoints.
         // This method is called only by the explicit discovery path (GetManagedIdentityCapabilitiesAsync in ManagedIdentityApplication.cs).
         // It probes IMDS v2 first, then v1 if v2 fails, and caches the result.
@@ -218,10 +329,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             RequestContext requestContext,
             CancellationToken cancellationToken)
         {
+            bool imdsV2Disabled = EnvironmentVariables.IsImdsV2Disabled;
+
             // Fast path: explicit discovery already completed.
             if (s_cachedSourceResult != null)
             {
-                return s_cachedSourceResult;
+                return ApplyImdsV2KillSwitch(s_cachedSourceResult, imdsV2Disabled, requestContext);
             }
 
             // Single-flight: ensure only one caller probes IMDS / provisions a binding key at a
@@ -241,7 +354,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 // Re-check under the lock in case another caller completed discovery while we waited.
                 if (s_cachedSourceResult != null)
                 {
-                    return s_cachedSourceResult;
+                    return ApplyImdsV2KillSwitch(s_cachedSourceResult, imdsV2Disabled, requestContext);
                 }
 
                 // First check env vars to avoid the probe if possible
@@ -255,28 +368,44 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 string imdsV1FailureReason = null;
                 string imdsV2FailureReason = null;
 
-                // Probe IMDS v2 first. The v2 path (CSR metadata endpoint) only exists on hosts that
-                // actually support IMDSv2; on v1-only hosts it returns 404. Probing v2 first avoids
-                // the v1 success-on-400 contract masking a v2-capable host (see issue #6024).
-                var (imdsV2Success, imdsV2Failure) = await ImdsManagedIdentitySource.ProbeImdsEndpointAsync(requestContext, ImdsVersion.V2, cancellationToken).ConfigureAwait(false);
-                if (imdsV2Success)
+                // Kill switch: skip the IMDSv2 probe entirely and go straight to IMDSv1, so no IMDSv2
+                // HTTP request or key provisioning happens while the switch is set. The reason is
+                // recorded so it surfaces on ManagedIdentityCapabilities.ErrorReason and explains why
+                // the reported binding strength is None. Read once at the top of this method so a
+                // single discovery pass cannot observe the switch changing halfway through.
+                if (imdsV2Disabled)
                 {
-                    requestContext.Logger.Info("[Managed Identity] ImdsV2 detected.");
+                    requestContext.Logger.Info(
+                        "[Managed Identity] IMDSv2 is disabled via the " + EnvironmentVariables.DisableImdsV2EnvVar +
+                        " environment variable; skipping the IMDSv2 probe and probing IMDSv1 only.");
 
-                    // A successful IMDSv2 probe proves the host speaks the key-bound CSR (PoP) protocol,
-                    // so it can bind at least at Software strength. Probe the platform key provider to see
-                    // whether it can produce a VBS-isolated KeyGuard key and thus advertise the stronger,
-                    // attested KeyGuard tier. The v2 PoP token flow itself requires a KeyGuard key, so this
-                    // mirrors what an actual PoP request would obtain.
-                    MtlsBindingStrength v2Strength = await DetermineImdsV2BindingStrengthAsync(requestContext, cancellationToken).ConfigureAwait(false);
-                    requestContext.Logger.Info($"[Managed Identity] Host max supported binding strength: {v2Strength}.");
-
-                    return CacheDiscoveryResult(new ManagedIdentityDiscoveryResult(
-                        ManagedIdentitySource.Imds,
-                        ImdsVersion.V2,
-                        v2Strength));
+                    imdsV2FailureReason = MsalErrorMessage.ImdsV2DisabledDiscoveryReason;
                 }
-                imdsV2FailureReason = imdsV2Failure;
+                else
+                {
+                    // Probe IMDS v2 first. The v2 path (CSR metadata endpoint) only exists on hosts that
+                    // actually support IMDSv2; on v1-only hosts it returns 404. Probing v2 first avoids
+                    // the v1 success-on-400 contract masking a v2-capable host (see issue #6024).
+                    var (imdsV2Success, imdsV2Failure) = await ImdsManagedIdentitySource.ProbeImdsEndpointAsync(requestContext, ImdsVersion.V2, cancellationToken).ConfigureAwait(false);
+                    if (imdsV2Success)
+                    {
+                        requestContext.Logger.Info("[Managed Identity] ImdsV2 detected.");
+
+                        // A successful IMDSv2 probe proves the host speaks the key-bound CSR (PoP) protocol,
+                        // so it can bind at least at Software strength. Probe the platform key provider to see
+                        // whether it can produce a VBS-isolated KeyGuard key and thus advertise the stronger,
+                        // attested KeyGuard tier. The v2 PoP token flow itself requires a KeyGuard key, so this
+                        // mirrors what an actual PoP request would obtain.
+                        MtlsBindingStrength v2Strength = await DetermineImdsV2BindingStrengthAsync(requestContext, cancellationToken).ConfigureAwait(false);
+                        requestContext.Logger.Info($"[Managed Identity] Host max supported binding strength: {v2Strength}.");
+
+                        return CacheDiscoveryResult(new ManagedIdentityDiscoveryResult(
+                            ManagedIdentitySource.Imds,
+                            ImdsVersion.V2,
+                            v2Strength));
+                    }
+                    imdsV2FailureReason = imdsV2Failure;
+                }
 
                 // If v2 fails, fall back to probing IMDS v1.
                 var (imdsV1Success, imdsV1Failure) = await ImdsManagedIdentitySource.ProbeImdsEndpointAsync(requestContext, ImdsVersion.V1, cancellationToken).ConfigureAwait(false);
@@ -284,21 +413,29 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 {
                     requestContext.Logger.Info("[Managed Identity] ImdsV1 detected.");
 
-                    MtlsBindingStrength strength = await DetermineImdsV1BindingStrengthAsync(requestContext, cancellationToken).ConfigureAwait(false);
+                    // While IMDSv2 is disabled no request can be bound to a key, so report None rather
+                    // than the host's theoretical capability. Advertising a binding strength MSAL will
+                    // refuse to honor would send credential chains (such as DefaultAzureCredential) down
+                    // a PoP path that is guaranteed to fail. Determining the strength is skipped
+                    // entirely, since the answer is fixed.
+                    MtlsBindingStrength strength = imdsV2Disabled
+                        ? MtlsBindingStrength.None
+                        : await DetermineImdsV1BindingStrengthAsync(requestContext, cancellationToken).ConfigureAwait(false);
                     requestContext.Logger.Info($"[Managed Identity] Host max supported binding strength: {strength}.");
 
-                    return CacheDiscoveryResult(new ManagedIdentityDiscoveryResult(
+                    return CacheUnlessImdsV2Disabled(new ManagedIdentityDiscoveryResult(
                         ManagedIdentitySource.Imds,
                         ImdsVersion.V1,
-                        strength));
+                        strength,
+                        imdsV2FailureReason: imdsV2Disabled ? imdsV2FailureReason : null), imdsV2Disabled);
                 }
                 imdsV1FailureReason = imdsV1Failure;
 
                 requestContext.Logger.Info($"[Managed Identity] {MsalErrorMessage.ManagedIdentityAllSourcesUnavailable}");
-                return CacheDiscoveryResult(new ManagedIdentityDiscoveryResult(
+                return CacheUnlessImdsV2Disabled(new ManagedIdentityDiscoveryResult(
                     ManagedIdentitySource.None,
                     imdsV1FailureReason: imdsV1FailureReason,
-                    imdsV2FailureReason: imdsV2FailureReason));
+                    imdsV2FailureReason: imdsV2FailureReason), imdsV2Disabled);
             }
             finally
             {

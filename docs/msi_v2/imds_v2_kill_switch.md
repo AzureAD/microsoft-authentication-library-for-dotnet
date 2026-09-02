@@ -1,0 +1,152 @@
+# IMDSv2 Kill Switch (`MSAL_MI_DISABLE_IMDS_V2`)
+
+## Purpose
+
+`MSAL_MI_DISABLE_IMDS_V2` is an **emergency mitigation**, not a supported configuration knob.
+
+It exists so that a host, image, or fleet owner can turn IMDSv2 off without shipping a new
+build of MSAL.NET or of the application, in the event of a regression in the IMDSv2 path.
+IMDSv2 is **enabled by default** and should stay that way.
+
+Because it is a mitigation rather than a feature, it is deliberately environment-variable
+driven (settable by whoever owns the machine or container) rather than exposed on the
+`ManagedIdentityApplicationBuilder` API surface (settable only by whoever ships the app).
+
+## Accepted values
+
+| Value | Effect |
+|-------|--------|
+| `true` / `TRUE` / `True` | IMDSv2 disabled |
+| `1` | IMDSv2 disabled |
+| unset | IMDSv2 enabled (default) |
+| empty string | IMDSv2 enabled |
+| anything else (e.g. `yes`, `on`, `false`, `0`) | IMDSv2 enabled |
+
+Comparison is ordinal and case-insensitive. Any unrecognized value is a **no-op that leaves
+IMDSv2 enabled** — the switch never fails closed on a typo, so a mistyped value cannot
+silently degrade a fleet.
+
+The variable is read **live on every check**, not cached at startup. Flipping it takes effect
+on the next token request without restarting the process. This mirrors the existing
+`MSAL_MI_DISABLE_PERSISTENT_CERT_CACHE` switch.
+
+## Behavior when the switch is on
+
+### Plain bearer tokens — fall back silently
+
+`AcquireTokenForManagedIdentity(...)` with no mTLS option continues to work. MSAL routes the
+request over IMDSv1 and returns a normal bearer token. Nothing is thrown, because nothing the
+caller asked for was taken away.
+
+### mTLS requests — fail fast
+
+Both mTLS request shapes are served *exclusively* by IMDSv2 and have **no IMDSv1 equivalent**:
+
+| API | Result |
+|-----|--------|
+| `.WithMtlsProofOfPossession()` | throws `MsalClientException` / `MsalError.ImdsV2Disabled` |
+| `.WithRequestOverMtls()` | throws `MsalClientException` / `MsalError.ImdsV2Disabled` |
+
+These throw rather than downgrade. Downgrading would hand back a weaker, unbound token to a
+caller who explicitly opted into a bound one — a security property the caller would have no way
+to notice they had lost. Failing loudly is the safer default, and it is consistent with what
+MSAL already does when these APIs are used on a host that genuinely has no IMDSv2 support
+(`MsalError.MtlsPopTokenNotSupportedinImdsV1`).
+
+The two error codes are deliberately distinct so operators can tell the cases apart:
+
+- `MsalError.ImdsV2Disabled` — the host *could* do IMDSv2, but it was administratively turned off.
+- `MsalError.MtlsPopTokenNotSupportedinImdsV1` — the host is genuinely incapable.
+
+### Capability discovery — reports no binding support
+
+`ManagedIdentityApplication.GetManagedIdentityCapabilitiesAsync()` reports the host as having
+no binding capability while the switch is on:
+
+| Property | Value |
+|----------|-------|
+| `Source` | the detected source (unchanged, e.g. `Imds`) |
+| `MaxSupportedBindingStrength` | `MtlsBindingStrength.None` |
+| `IsMtlsPopSupportedByHost` | `false` |
+| `ErrorReason` | `"IMDSv2 is disabled by the MSAL_MI_DISABLE_IMDS_V2 environment variable."` |
+
+This is a **behavior change on a public API** (the signature is unchanged), and it is
+intentional. This API exists so credential chains such as `DefaultAzureCredential` can decide
+up front whether to request a PoP token. If it kept advertising PoP support while the switch
+was on, those callers would confidently select the PoP path and then take an exception on
+every token request. Reporting `None` lets them pick the bearer path and keep working.
+
+This holds even if the process already discovered IMDSv2 before the switch was set — the
+cached result is masked on read rather than trusted. See
+[The discovery cache is masked, not overwritten](#the-discovery-cache-is-masked-not-overwritten).
+
+`ErrorReason` is populated even though `Source` is a real detected source, so a caller that
+sees an unexpected `None` strength can find out why without guessing.
+
+While the switch is on, MSAL **does not issue the IMDSv2 probe request at all** during
+discovery — the switch removes network traffic rather than merely ignoring its result.
+
+## Where the switch is enforced
+
+The switch is checked at **three** points rather than once at startup. This is the subtle part
+of the design and the reason a naive implementation is incorrect.
+
+MSAL caches "this machine supports IMDSv2" in a **process-wide static** after the first
+successful discovery, and separately caches the **binding certificate**. A check performed only
+during discovery would therefore be bypassed by any process that had already probed
+successfully before the variable was set — exactly the situation during an incident, when the
+switch gets flipped on a process that is already running and already warm.
+
+| Gate | Location | Prevents |
+|------|----------|----------|
+| 1 | `GetManagedIdentityCapabilitiesAsync` discovery | Probing IMDSv2 endpoints; advertising PoP support |
+| 2 | `SelectManagedIdentitySourceType` routing | A **cached** "IMDSv2 supported" result routing past the switch |
+| 3 | `AcquireImdsV2MtlsBindingAsync` entry | A **warm certificate cache** serving an mTLS request with no probe at all; also ensures a `PoPOptions.MinStrength` request reports `ImdsV2Disabled` rather than a misleading `MinStrengthNotMet` |
+
+### The discovery cache is masked, not overwritten
+
+The switch is applied to the discovery result **on every read**, and a result computed while the
+switch is on is **never written to the cache**. Both halves are required, and they solve opposite
+problems:
+
+- **Masking on read** stops a process that cached "IMDSv2 / KeyGuard" *before* the switch was set
+  from continuing to advertise PoP support afterwards.
+- **Not caching while disabled** stops the reverse: a "v1-only, no binding" result observed *while*
+  the switch was on is an artifact of the switch, not a fact about the host. Caching it would
+  outlive the mitigation and keep reporting no binding capability after an operator cleared the
+  variable — turning a reversible switch into a one-way door that needs a process restart.
+
+Gate 2 follows the same principle: it downgrades routing for the current request without mutating
+`s_cachedSourceResult`.
+
+The net effect is that the switch is **fully reversible in place, in both directions**, with no
+process restart. The cost while the mitigation is active is one repeat IMDSv1 probe per discovery
+call, which is the right trade for an emergency switch.
+
+Gates 2 and 3 only ever fire on the IMDS path. Gate 3 checks the detected source explicitly;
+gate 2 is scoped structurally (its branches sit inside the "no environment source found" and
+`source == Imds` paths). Either way, sources such as App Service and Cloud Shell keep their
+existing `MtlsPopNotSupportedForEnvironment` error, which is a more accurate diagnosis for
+those hosts — IMDSv2 was never involved there, so "IMDSv2 is disabled" would be misleading.
+
+## Logging
+
+MSAL logs that IMDSv2 was disabled and names the environment variable, but **never logs the
+variable's value**. Naming the variable is what makes the condition diagnosable from a log;
+echoing the value adds nothing and is avoided on principle.
+
+## Testing
+
+See the `IMDSv2 Kill Switch Tests` region in
+`tests/Microsoft.Identity.Test.Unit/ManagedIdentityTests/ImdsV2Tests.cs`.
+
+The suite deliberately covers the cache-bypass scenarios described above, since those are the
+cases a discovery-only implementation would get wrong:
+
+- `KillSwitch_SetAfterImdsV2Discovered_StillBlocksMtlsPop`
+- `KillSwitch_SetAfterImdsV2Discovered_CapabilitiesStopAdvertisingPop`
+- `KillSwitch_WithWarmCertificateCache_StillBlocksMtlsPop`
+- `KillSwitch_Cleared_RestoresPopWithoutProcessRestart`
+
+Each gate has at least one test that fails if that gate is removed. This was verified by
+disabling each gate in turn and confirming the expected tests — and only those tests — failed.
