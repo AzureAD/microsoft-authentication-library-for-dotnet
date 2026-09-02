@@ -28,11 +28,22 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         public ManagedIdentitySource Source { get; }
 
         /// <summary>
-        /// Gets the reason detection failed, if any.
+        /// Gets the reason detection failed or returned reduced capability, if any.
         /// </summary>
         /// <value>
-        /// A single string describing why managed identity detection failed, or <c>null</c> when
-        /// a source was detected.
+        /// A single string describing why managed identity detection failed, or why the reported
+        /// <see cref="MaxSupportedBindingStrength"/> is lower than the host could otherwise offer;
+        /// <c>null</c> when neither applies.
+        /// <para>
+        /// A non-null value does <b>not</b> by itself mean managed identity is unavailable. When
+        /// <see cref="Source"/> is anything other than <see cref="ManagedIdentitySource.None"/>, a
+        /// source was detected and token acquisition can still succeed - for example when IMDSv2 has
+        /// been turned off by the <c>MSAL_MI_DISABLE_IMDS_V2</c> environment variable, bearer tokens
+        /// continue to work while binding is reported as
+        /// <see cref="MtlsBindingStrength.None"/>. Branch on <see cref="Source"/> to decide whether
+        /// managed identity is available, and on <see cref="MaxSupportedBindingStrength"/> to decide
+        /// whether to request a bound token; treat this property as diagnostic text.
+        /// </para>
         /// </value>
         public string ErrorReason { get; }
 
@@ -62,7 +73,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         /// </summary>
         /// <param name="source">The detected managed identity source.</param>
         /// <param name="maxSupportedBindingStrength">The highest binding strength the host supports.</param>
-        /// <param name="errorReason">The reason detection failed, or <c>null</c> on success.</param>
+        /// <param name="errorReason">
+        /// The reason detection failed, or the reason the reported binding strength is reduced;
+        /// <c>null</c> when neither applies.
+        /// </param>
         internal ManagedIdentityCapabilities(
             ManagedIdentitySource source,
             MtlsBindingStrength maxSupportedBindingStrength,

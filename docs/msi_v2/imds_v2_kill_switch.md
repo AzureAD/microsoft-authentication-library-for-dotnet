@@ -55,8 +55,26 @@ MSAL already does when these APIs are used on a host that genuinely has no IMDSv
 
 The two error codes are deliberately distinct so operators can tell the cases apart:
 
-- `MsalError.ImdsV2Disabled` — the host *could* do IMDSv2, but it was administratively turned off.
+- `MsalError.ImdsV2Disabled` — IMDSv2 was administratively turned off.
 - `MsalError.MtlsPopTokenNotSupportedinImdsV1` — the host is genuinely incapable.
+
+Administrative disablement **takes precedence and does not imply host capability**. On a host that
+only ever supported IMDSv1, an mTLS request made while the switch is on reports `ImdsV2Disabled`,
+not `MtlsPopTokenNotSupportedinImdsV1` — the switch is checked first, and it is the condition the
+operator can act on. `MtlsPopTokenNotSupportedinImdsV1` is therefore only reachable while the
+switch is off.
+
+On `net462`/`net472`, `WithMtlsProofOfPossession()` and `WithRequestOverMtls()` throw
+`MsalError.MtlsNotSupportedForManagedIdentity` at build time regardless of this switch, so the
+behavior above applies to `net8.0`/`netstandard2.0` hosts.
+
+### Already-cached tokens are not revoked
+
+The switch governs **token acquisition**, not tokens already in MSAL's cache. A process holding an
+unexpired mTLS PoP or mTLS bearer token continues to serve it from cache until it expires; the
+throw above happens on the next acquisition that actually reaches the network. This is standard
+MSAL cache behavior and is not a downgrade — the cached token is still genuinely key-bound. If a
+mitigation must take effect immediately, restart the process or use `WithForceRefresh(true)`.
 
 ### Capability discovery — reports no binding support
 
@@ -103,25 +121,30 @@ switch gets flipped on a process that is already running and already warm.
 | 2 | `SelectManagedIdentitySourceType` routing | A **cached** "IMDSv2 supported" result routing past the switch |
 | 3 | `AcquireImdsV2MtlsBindingAsync` entry | A **warm certificate cache** serving an mTLS request with no probe at all; also ensures a `PoPOptions.MinStrength` request reports `ImdsV2Disabled` rather than a misleading `MinStrengthNotMet` |
 
-### The discovery cache is masked, not overwritten
+### The discovery cache tracks the switch state
 
-The switch is applied to the discovery result **on every read**, and a result computed while the
-switch is on is **never written to the cache**. Both halves are required, and they solve opposite
-problems:
+The switch is applied to the discovery result **on every read**, and the cache records **which
+switch state produced it**. Together these keep the mitigation reversible in both directions
+without giving up caching:
 
 - **Masking on read** stops a process that cached "IMDSv2 / KeyGuard" *before* the switch was set
-  from continuing to advertise PoP support afterwards.
-- **Not caching while disabled** stops the reverse: a "v1-only, no binding" result observed *while*
-  the switch was on is an artifact of the switch, not a fact about the host. Caching it would
-  outlive the mitigation and keep reporting no binding capability after an operator cleared the
-  variable — turning a reversible switch into a one-way door that needs a process restart.
+  from continuing to advertise PoP support afterwards. No re-probe is needed — the cached value
+  holds the host's true capability, and the switch is layered over it at the point of use.
+- **Recording the switch state** stops the reverse: a "v1-only, no binding" result observed *while*
+  the switch was on is an artifact of the switch, not a fact about the host, because the IMDSv2
+  probe never ran. That result is discarded as soon as the switch clears, so the mitigation cannot
+  outlive itself and become a one-way door needing a process restart.
 
 Gate 2 follows the same principle: it downgrades routing for the current request without mutating
-`s_cachedSourceResult`.
+`s_cachedSourceResult`, and it ignores a cached result captured under a switch state that no longer
+applies.
 
 The net effect is that the switch is **fully reversible in place, in both directions**, with no
-process restart. The cost while the mitigation is active is one repeat IMDSv1 probe per discovery
-call, which is the right trade for an emergency switch.
+process restart. Discovery stays O(1) in both modes: only the switch-off transition costs one
+re-probe. This matters because consumers such as Azure Identity call
+`GetManagedIdentityCapabilitiesAsync` on **every authentication** and depend on this cache — an
+implementation that skipped caching while the switch was on would add an IMDS round trip to every
+token request during an incident, exactly when IMDS is least able to absorb it.
 
 Gates 2 and 3 only ever fire on the IMDS path. Gate 3 checks the detected source explicitly;
 gate 2 is scoped structurally (its branches sit inside the "no environment source found" and
@@ -148,5 +171,9 @@ cases a discovery-only implementation would get wrong:
 - `KillSwitch_WithWarmCertificateCache_StillBlocksMtlsPop`
 - `KillSwitch_Cleared_RestoresPopWithoutProcessRestart`
 
-Each gate has at least one test that fails if that gate is removed. This was verified by
-disabling each gate in turn and confirming the expected tests — and only those tests — failed.
+Gate 1 has direct test coverage. Gate 3 is proven by
+`KillSwitch_MtlsPopWithMinStrengthFloor_ReportsDisabledNotMinStrengthNotMet`, which fails if that
+gate is removed. Gate 2's switch-specific branches are **defense in depth**: gate 3 pre-empts the
+mTLS conditions that would otherwise reach them, so removing gate 2 alone does not fail a test
+today. They are kept so the switch still fails closed if gate 3 is moved or a new caller of
+`SelectManagedIdentitySourceType` is introduced.

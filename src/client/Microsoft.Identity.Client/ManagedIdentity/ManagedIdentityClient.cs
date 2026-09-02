@@ -27,6 +27,19 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         // Allows caching "NoneFound" (Source=None) without confusing it with "not discovered yet".
         private static ManagedIdentityDiscoveryResult s_cachedSourceResult = null;
 
+        // The state of the IMDSv2 kill switch when s_cachedSourceResult was computed. A result
+        // produced while the switch was set never probed IMDSv2, so it records the switch's effect
+        // rather than the host's capability and must be discarded once the switch clears. The
+        // reverse transition needs no re-probe: a result captured with the switch off holds the true
+        // capability and is masked on read. Tracking the state keeps discovery O(1) in both modes,
+        // which matters because consumers such as Azure.Identity call discovery on every
+        // authentication and rely on this cache to make that free.
+        private static bool s_cachedUnderImdsV2Disabled;
+
+        // Set once the "variable is set to an unrecognized value" warning has been emitted, so a
+        // misconfiguration is reported without repeating on every discovery call.
+        private static int s_unrecognizedImdsV2DisableValueLogged;
+
         // Serializes explicit capability discovery so concurrent callers at process startup do not
         // issue redundant IMDS probes or provision the binding key more than once.
         private static readonly SemaphoreSlim s_discoveryLock = new SemaphoreSlim(1, 1);
@@ -38,6 +51,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         internal static void ResetSourceForTest()
         {
             s_cachedSourceResult = null;
+            s_cachedUnderImdsV2Disabled = false;
+            s_unrecognizedImdsV2DisableValueLogged = 0;
 
             // Clear cert caches so each test starts fresh
             ImdsV2ManagedIdentitySource.ResetCertCacheForTest();
@@ -173,11 +188,18 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 ManagedIdentitySource source;
                 bool isImdsV2 = false;
 
-                if (s_cachedSourceResult != null)
+                // A discovery result captured while the switch was set says "IMDSv1, no binding"
+                // because the IMDSv2 probe was skipped, not because the host is incapable. Once the
+                // switch clears, treat it as absent so routing re-derives the source instead of
+                // latching the mitigation's effect past its lifetime.
+                ManagedIdentityDiscoveryResult cachedResult =
+                    (s_cachedUnderImdsV2Disabled && !imdsV2Disabled) ? null : s_cachedSourceResult;
+
+                if (cachedResult != null)
                 {
                     // Use the cached explicit discovery result (including NoneFound)
-                    source = s_cachedSourceResult.Source;
-                    isImdsV2 = s_cachedSourceResult.DetectedImdsVersion == ImdsVersion.V2;
+                    source = cachedResult.Source;
+                    isImdsV2 = cachedResult.DetectedImdsVersion == ImdsVersion.V2;
                     requestContext.Logger.Info($"[Managed Identity] Using cached discovery result: {source}");
                 }
                 else
@@ -213,7 +235,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 // Handle NoneFound from cached discovery
                 if (source == ManagedIdentitySource.None)
                 {
-                    throw CreateManagedIdentityUnavailableException(s_cachedSourceResult);
+                    throw CreateManagedIdentityUnavailableException(cachedResult);
                 }
 
                 // Kill switch: a cached IMDSv2 discovery result must not survive the switch being set.
@@ -260,28 +282,58 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
         }
 
-        private static ManagedIdentityDiscoveryResult CacheDiscoveryResult(ManagedIdentityDiscoveryResult result)
+        private static ManagedIdentityDiscoveryResult CacheDiscoveryResult(
+            ManagedIdentityDiscoveryResult result,
+            bool imdsV2Disabled)
         {
+            s_cachedUnderImdsV2Disabled = imdsV2Disabled;
             s_cachedSourceResult = result;
             return result;
         }
 
         /// <summary>
-        /// Caches a discovery result unless the IMDSv2 kill switch influenced it.
+        /// Logs once per process when the kill switch variable is set to a value MSAL does not
+        /// recognize, so an operator is not left believing an inactive mitigation is active.
+        /// </summary>
+        private static void WarnOnceIfImdsV2DisableValueUnrecognized(RequestContext requestContext)
+        {
+            if (!EnvironmentVariables.HasUnrecognizedImdsV2DisableValue ||
+                Interlocked.Exchange(ref s_unrecognizedImdsV2DisableValueLogged, 1) != 0)
+            {
+                return;
+            }
+
+            requestContext.Logger.Warning(
+                "[Managed Identity] The " + EnvironmentVariables.DisableImdsV2EnvVar +
+                " environment variable is set to an unrecognized value and is being ignored; " +
+                "IMDSv2 remains enabled. Set it to exactly \"true\" or \"1\" to disable IMDSv2.");
+        }
+
+        /// <summary>
+        /// Returns the cached discovery result if it is still usable under the current kill switch
+        /// state, projected through <see cref="ApplyImdsV2KillSwitch"/>.
         /// </summary>
         /// <remarks>
-        /// While the switch is set the IMDSv2 probe never runs, so a "v1-only, no binding" outcome is
-        /// an artifact of the switch rather than a fact about the host. Caching it in the process-wide
-        /// static would outlive the switch and keep reporting no binding capability after an operator
-        /// cleared the variable, forcing a process restart to recover. Skipping the cache costs a
-        /// repeat IMDSv1 probe per discovery call for the duration of the mitigation, which is the
-        /// right trade for a switch that must be reversible in place.
+        /// A result cached while the switch was set never ran the IMDSv2 probe, so it cannot tell us
+        /// what the host is capable of once the switch clears; that direction must re-probe, which is
+        /// what keeps the mitigation reversible in place. Every other combination is served from the
+        /// cache, so an active mitigation does not turn each discovery call into an IMDS round trip.
         /// </remarks>
-        private static ManagedIdentityDiscoveryResult CacheUnlessImdsV2Disabled(
-            ManagedIdentityDiscoveryResult result,
-            bool imdsV2Disabled)
+        private static bool TryGetUsableCachedResult(
+            bool imdsV2Disabled,
+            RequestContext requestContext,
+            out ManagedIdentityDiscoveryResult result)
         {
-            return imdsV2Disabled ? result : CacheDiscoveryResult(result);
+            ManagedIdentityDiscoveryResult cached = s_cachedSourceResult;
+
+            if (cached is null || (s_cachedUnderImdsV2Disabled && !imdsV2Disabled))
+            {
+                result = null;
+                return false;
+            }
+
+            result = ApplyImdsV2KillSwitch(cached, imdsV2Disabled, requestContext);
+            return true;
         }
 
         /// <summary>
@@ -331,10 +383,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         {
             bool imdsV2Disabled = EnvironmentVariables.IsImdsV2Disabled;
 
+            WarnOnceIfImdsV2DisableValueUnrecognized(requestContext);
+
             // Fast path: explicit discovery already completed.
-            if (s_cachedSourceResult != null)
+            if (TryGetUsableCachedResult(imdsV2Disabled, requestContext, out ManagedIdentityDiscoveryResult cached))
             {
-                return ApplyImdsV2KillSwitch(s_cachedSourceResult, imdsV2Disabled, requestContext);
+                return cached;
             }
 
             // Single-flight: ensure only one caller probes IMDS / provisions a binding key at a
@@ -352,9 +406,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             try
             {
                 // Re-check under the lock in case another caller completed discovery while we waited.
-                if (s_cachedSourceResult != null)
+                if (TryGetUsableCachedResult(imdsV2Disabled, requestContext, out ManagedIdentityDiscoveryResult cachedUnderLock))
                 {
-                    return ApplyImdsV2KillSwitch(s_cachedSourceResult, imdsV2Disabled, requestContext);
+                    return cachedUnderLock;
                 }
 
                 // First check env vars to avoid the probe if possible
@@ -362,7 +416,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
                 if (source != ManagedIdentitySource.None)
                 {
-                    return CacheDiscoveryResult(new ManagedIdentityDiscoveryResult(source));
+                    return CacheDiscoveryResult(new ManagedIdentityDiscoveryResult(source), imdsV2Disabled);
                 }
 
                 string imdsV1FailureReason = null;
@@ -402,7 +456,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                         return CacheDiscoveryResult(new ManagedIdentityDiscoveryResult(
                             ManagedIdentitySource.Imds,
                             ImdsVersion.V2,
-                            v2Strength));
+                            v2Strength), imdsV2Disabled);
                     }
                     imdsV2FailureReason = imdsV2Failure;
                 }
@@ -423,7 +477,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                         : await DetermineImdsV1BindingStrengthAsync(requestContext, cancellationToken).ConfigureAwait(false);
                     requestContext.Logger.Info($"[Managed Identity] Host max supported binding strength: {strength}.");
 
-                    return CacheUnlessImdsV2Disabled(new ManagedIdentityDiscoveryResult(
+                    return CacheDiscoveryResult(new ManagedIdentityDiscoveryResult(
                         ManagedIdentitySource.Imds,
                         ImdsVersion.V1,
                         strength,
@@ -432,7 +486,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 imdsV1FailureReason = imdsV1Failure;
 
                 requestContext.Logger.Info($"[Managed Identity] {MsalErrorMessage.ManagedIdentityAllSourcesUnavailable}");
-                return CacheUnlessImdsV2Disabled(new ManagedIdentityDiscoveryResult(
+                return CacheDiscoveryResult(new ManagedIdentityDiscoveryResult(
                     ManagedIdentitySource.None,
                     imdsV1FailureReason: imdsV1FailureReason,
                     imdsV2FailureReason: imdsV2FailureReason), imdsV2Disabled);

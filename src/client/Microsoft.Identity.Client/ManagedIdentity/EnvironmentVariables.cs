@@ -43,5 +43,25 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                         value.Equals("true", StringComparison.OrdinalIgnoreCase));
             }
         }
+
+        /// <summary>
+        /// True when <c>MSAL_MI_DISABLE_IMDS_V2</c> is set to a non-empty value that is not
+        /// recognized, and IMDSv2 therefore remains enabled.
+        /// </summary>
+        /// <remarks>
+        /// Unrecognized values are ignored by design so a typo can never silently weaken token
+        /// binding. The failure mode that leaves behind is an operator who believes an emergency
+        /// mitigation is active when it is not, so the condition is surfaced in the logs. Values
+        /// are matched exactly - <c>"true "</c> with trailing whitespace is unrecognized.
+        /// </remarks>
+        public static bool HasUnrecognizedImdsV2DisableValue
+        {
+            get
+            {
+                string value = Environment.GetEnvironmentVariable(DisableImdsV2EnvVar);
+
+                return !string.IsNullOrEmpty(value) && !IsImdsV2Disabled;
+            }
+        }
     }
 }
