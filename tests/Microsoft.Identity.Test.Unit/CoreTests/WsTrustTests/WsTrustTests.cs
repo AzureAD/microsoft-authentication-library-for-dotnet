@@ -168,7 +168,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
                 Assert.IsFalse(redirectHandler.AllowAutoRedirect);
                 Assert.IsFalse(responseHandler.AllowAutoRedirect);
                 Assert.IsTrue(redirectHandler.UseDefaultCredentials);
-                Assert.IsFalse(responseHandler.UseDefaultCredentials);
+                Assert.IsTrue(responseHandler.UseDefaultCredentials);
                 Assert.IsNotNull(redirectHandler.ActualRequestMessage);
                 Assert.IsNotNull(responseHandler.ActualRequestMessage);
             }

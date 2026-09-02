@@ -318,7 +318,9 @@ namespace Microsoft.Identity.Client.WsTrust
                     requestUri = redirectUri;
                     requestMethod = redirectMethod;
                     requestBody = redirectBody;
-                    useDefaultCredentials = false;
+                    useDefaultCredentials =
+                        useDefaultCredentials &&
+                        IsSameOrigin(initialUri, redirectUri);
                     redirectCount++;
                 }
             }
