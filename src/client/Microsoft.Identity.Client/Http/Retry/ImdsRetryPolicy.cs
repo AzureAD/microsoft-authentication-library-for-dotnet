@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Client.Http.Retry
             ILoggerAdapter logger,
             CancellationToken cancellationToken)
         {
-            int httpStatusCode = (int)response.StatusCode;
+            int httpStatusCode = response is null ? 0 : (int)response.StatusCode;
 
             if (retryCount == 0)
             {
