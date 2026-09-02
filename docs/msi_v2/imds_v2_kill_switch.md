@@ -12,15 +12,15 @@ fast with a clear error when the request requires IMDSv2.
 The following is the reasoning behind the design, not a requirement stated in the originating
 task ([#6174](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/6174)).
 
-It is treated as an emergency mitigation rather than a supported configuration knob. That framing
-drives three choices:
+It is designed as a switch for turning IMDSv2 off quickly, rather than as a supported configuration
+knob. That drives three choices:
 
 - **Environment variable, not a `ManagedIdentityApplicationBuilder` API.** An environment variable
   is settable by whoever controls the process environment; a builder API is settable only by
-  whoever ships and redeploys the application. A mitigation is worth little if using it requires
-  the same release that a code fix would.
+  whoever ships and redeploys the application. A switch is worth little if using it requires the
+  same release that a code fix would.
 - **Read live on every check, not cached at startup.** Setting and clearing the variable both take
-  effect on the next token request, so the mitigation is reversible in place.
+  effect on the next token request, so the change is reversible in place.
 - **Unrecognized values leave IMDSv2 enabled.** The switch never fails closed on a typo. A
   mistyped value is a no-op, logged once per process so the misconfiguration is visible.
 
@@ -65,16 +65,16 @@ to notice they had lost. Failing loudly is the safer default, and it is consiste
 MSAL already does when these APIs are used on a host that genuinely has no IMDSv2 support
 (`MsalError.MtlsPopTokenNotSupportedinImdsV1`).
 
-The two error codes are deliberately distinct so operators can tell the cases apart:
+The two error codes are deliberately distinct so the two cases can be told apart:
 
-- `MsalError.ImdsV2Disabled` — IMDSv2 was administratively turned off.
+- `MsalError.ImdsV2Disabled` — the switch is set.
 - `MsalError.MtlsPopTokenNotSupportedinImdsV1` — the host is genuinely incapable.
 
-Administrative disablement **takes precedence and does not imply host capability**. On a host that
-only ever supported IMDSv1, an mTLS request made while the switch is on reports `ImdsV2Disabled`,
-not `MtlsPopTokenNotSupportedinImdsV1` — the switch is checked first, and it is the condition the
-operator can act on. `MtlsPopTokenNotSupportedinImdsV1` is therefore only reachable while the
-switch is off.
+The switch **takes precedence and does not imply host capability**. On a host that only ever
+supported IMDSv1, an mTLS request made while the switch is on reports `ImdsV2Disabled`, not
+`MtlsPopTokenNotSupportedinImdsV1` — the switch is checked first, and it is the condition that can
+be acted on. `MtlsPopTokenNotSupportedinImdsV1` is therefore only reachable while the switch is
+off.
 
 On `net462`/`net472`, `WithMtlsProofOfPossession()` and `WithRequestOverMtls()` throw
 `MsalError.MtlsNotSupportedForManagedIdentity` at build time regardless of this switch, so the
@@ -85,8 +85,8 @@ behavior above applies to `net8.0`/`netstandard2.0` hosts.
 The switch governs **token acquisition**, not tokens already in MSAL's cache. A process holding an
 unexpired mTLS PoP or mTLS bearer token continues to serve it from cache until it expires; the
 throw above happens on the next acquisition that actually reaches the network. This is standard
-MSAL cache behavior and is not a downgrade — the cached token is still genuinely key-bound. If a
-mitigation must take effect immediately, restart the process or use `WithForceRefresh(true)`.
+MSAL cache behavior and is not a downgrade — the cached token is still genuinely key-bound. If the
+switch must take effect immediately, restart the process or use `WithForceRefresh(true)`.
 
 ### Capability discovery — reports no binding support
 
@@ -123,9 +123,9 @@ of the design and the reason a naive implementation is incorrect.
 
 MSAL caches "this machine supports IMDSv2" in a **process-wide static** after the first
 successful discovery, and separately caches the **binding certificate**. A check performed only
-during discovery would therefore be bypassed by any process that had already probed
-successfully before the variable was set — exactly the situation during an incident, when the
-switch gets flipped on a process that is already running and already warm.
+during discovery would therefore be bypassed by any process that had already probed successfully
+before the variable was set. Since the switch is read live so it stays reversible without a
+restart, already-warm processes are the normal case, not an edge case.
 
 | Gate | Location | Prevents |
 |------|----------|----------|
@@ -136,27 +136,27 @@ switch gets flipped on a process that is already running and already warm.
 ### The discovery cache tracks the switch state
 
 The switch is applied to the discovery result **on every read**, and the cache records **which
-switch state produced it**. Together these keep the mitigation reversible in both directions
-without giving up caching:
+switch state produced it**. Together these keep the switch reversible in both directions without
+giving up caching:
 
 - **Masking on read** stops a process that cached "IMDSv2 / KeyGuard" *before* the switch was set
   from continuing to advertise PoP support afterwards. No re-probe is needed — the cached value
   holds the host's true capability, and the switch is layered over it at the point of use.
 - **Recording the switch state** stops the reverse: a "v1-only, no binding" result observed *while*
   the switch was on is an artifact of the switch, not a fact about the host, because the IMDSv2
-  probe never ran. That result is discarded as soon as the switch clears, so the mitigation cannot
-  outlive itself and become a one-way door needing a process restart.
+  probe never ran. That result is discarded as soon as the switch clears, so setting the switch
+  once cannot permanently latch its effect and require a process restart to undo.
 
 Gate 2 follows the same principle: it downgrades routing for the current request without mutating
-`s_cachedSourceResult`, and it ignores a cached result captured under a switch state that no longer
+`s_cachedDiscovery`, and it ignores a cached result captured under a switch state that no longer
 applies.
 
 The net effect is that the switch is **fully reversible in place, in both directions**, with no
 process restart. Discovery stays O(1) in both modes: only the switch-off transition costs one
 re-probe. This matters because consumers such as Azure Identity call
-`GetManagedIdentityCapabilitiesAsync` on **every authentication** and depend on this cache — an
+`GetManagedIdentityCapabilitiesAsync` on **every authentication** and cache nothing themselves — an
 implementation that skipped caching while the switch was on would add an IMDS round trip to every
-token request during an incident, exactly when IMDS is least able to absorb it.
+token request for as long as the switch stayed set.
 
 Gates 2 and 3 only ever fire on the IMDS path. Gate 3 checks the detected source explicitly;
 gate 2 is scoped structurally (its branches sit inside the "no environment source found" and

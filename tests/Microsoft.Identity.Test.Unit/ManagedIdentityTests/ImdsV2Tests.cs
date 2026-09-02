@@ -2848,11 +2848,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         /// <summary>
-        /// With the switch set, discovery must not probe IMDSv2 at all and must not run the IMDSv1
-        /// binding-strength check. Only the IMDSv1 probe is mocked here: if MSAL attempted either the
-        /// IMDSv2 probe or the compute-metadata call, there would be no handler to serve it.
-        /// The reported strength must be None so credential chains do not select a PoP path that
-        /// MSAL will refuse to serve.
+        /// With the switch set, discovery must not probe IMDSv2 nor run the IMDSv1 binding-strength
+        /// check. Only the IMDSv1 probe is mocked, so either extra call would find no handler. The
+        /// reported strength must be None so credential chains do not select a PoP path MSAL refuses.
         /// </summary>
         [TestMethod]
         public async Task KillSwitch_Discovery_SkipsImdsV2ProbeAndReportsNoBinding()
@@ -3116,10 +3114,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         /// <summary>
-        /// While the switch is set the IMDSv2 probe never runs, so a "v1-only" discovery outcome is an
-        /// artifact of the switch and must not be written to the process-wide discovery cache. Caching
-        /// it would outlive the mitigation and keep reporting no binding capability after an operator
-        /// cleared the variable, forcing a process restart to recover.
+        /// While the switch is set the IMDSv2 probe never runs, so a "v1-only" outcome describes the
+        /// switch rather than the host. Caching it unqualified would keep reporting no binding
+        /// capability after the variable was cleared, forcing a process restart to recover.
         /// </summary>
         [TestMethod]
         public async Task KillSwitch_Cleared_RestoresPopWithoutProcessRestart()
@@ -3211,8 +3208,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
         /// <summary>
         /// The switch must not change the error reported on a host that genuinely cannot do IMDSv2.
-        /// "The operator disabled IMDSv2" and "this host does not support IMDSv2" are different
-        /// problems with different fixes, so they must keep distinct error codes.
+        /// "The switch is set" and "this host does not support IMDSv2" are different problems with
+        /// different fixes, so they must keep distinct error codes.
         /// </summary>
         [TestMethod]
         public async Task KillSwitch_Absent_OnImdsV1Host_KeepsHostCapabilityError()
@@ -3273,11 +3270,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
         /// <summary>
         /// Discovery must stay cached while the switch is set. Consumers such as Azure Identity call
-        /// GetManagedIdentityCapabilitiesAsync on every authentication and rely on the process-wide
-        /// cache to make that free. An implementation that refused to cache a switch-influenced result
-        /// would add a serialized IMDS round trip to every token request for the duration of the
-        /// mitigation - exactly when IMDS is least able to absorb it. Only one IMDSv1 probe is queued,
-        /// so any repeat probe fails the test.
+        /// GetManagedIdentityCapabilitiesAsync on every authentication and cache nothing themselves,
+        /// so refusing to cache a switch-influenced result would add a serialized IMDS round trip to
+        /// every token request. Only one IMDSv1 probe is queued, so any repeat probe fails the test.
         /// </summary>
         [TestMethod]
         public async Task KillSwitch_RepeatedDiscovery_ProbesOnceAndServesFromCache()
@@ -3418,10 +3413,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         /// <summary>
-        /// The "unrecognized value" warning must reach a process that only ever acquires bearer
-        /// tokens. Such a process never calls capability discovery, and it is precisely the process
-        /// most likely to be running during an IMDSv2 incident - so warning only from discovery
-        /// would hide an inert mitigation from the operator who most needs to know about it.
+        /// The "unrecognized value" warning must reach a process that only acquires bearer tokens.
+        /// Such a process never calls capability discovery, so warning only from discovery would hide
+        /// an inert switch from exactly the process whose behavior it was meant to change.
         /// </summary>
         [TestMethod]
         public async Task KillSwitch_UnrecognizedValue_WarnsOnBearerOnlyPathWithoutDiscovery()

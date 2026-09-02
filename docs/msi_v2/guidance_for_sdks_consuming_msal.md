@@ -30,11 +30,10 @@ SDKs customizing the httpclient factory will continue to use the old `IMsalHttpC
 
 ## Capability discovery and the IMDSv2 kill switch
 
-SDKs that branch on `GetManagedIdentityCapabilitiesAsync()` should be aware that a host owner
-can disable IMDSv2 with the `MSAL_MI_DISABLE_IMDS_V2` environment variable as an emergency
-mitigation. While it is set, the capabilities API reports
-`MaxSupportedBindingStrength = None` and `IsMtlsPopSupportedByHost = false`, with the reason
-in `ErrorReason`.
+SDKs that branch on `GetManagedIdentityCapabilitiesAsync()` should be aware that IMDSv2 can be
+disabled process-wide with the `MSAL_MI_DISABLE_IMDS_V2` environment variable. While it is set,
+the capabilities API reports `MaxSupportedBindingStrength = None` and
+`IsMtlsPopSupportedByHost = false`, with the reason in `ErrorReason`.
 
 This is intentional: it lets credential chains such as `DefaultAzureCredential` fall back to
 the bearer path instead of selecting a PoP path that would throw on every token request. No

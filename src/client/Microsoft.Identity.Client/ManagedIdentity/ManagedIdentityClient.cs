@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -25,24 +25,20 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         // Non-null only after the explicit discovery API (GetManagedIdentityCapabilitiesAsync) runs.
         // Allows caching "NoneFound" (Source=None) without confusing it with "not discovered yet".
-        //
-        // The result and the kill switch state it was computed under are stored together in a single
-        // immutable snapshot, published and read through one volatile reference. Keeping them in two
-        // separate fields would let a reader observe a fresh result paired with a stale flag (or the
-        // reverse) and misjudge whether the cached value describes the host or merely describes the
-        // switch, so the pair is made untearable by construction rather than by argument.
         private static CachedDiscovery s_cachedDiscovery;
 
         /// <summary>
         /// A discovery result together with the state of the IMDSv2 kill switch when it was computed.
         /// </summary>
         /// <remarks>
-        /// A result produced while the switch was set never probed IMDSv2, so it records the switch's
-        /// effect rather than the host's capability and must be discarded once the switch clears. The
-        /// reverse transition needs no re-probe: a result captured with the switch off holds the true
-        /// capability and is masked on read. Tracking the state keeps discovery O(1) in both modes,
-        /// which matters because consumers such as Azure.Identity call discovery on every
-        /// authentication and rely on this cache to make that free.
+        /// The pair is one immutable object behind one volatile reference because a reader that saw a
+        /// fresh result with a stale flag would misjudge whether the cached value describes the host or
+        /// merely describes the switch.
+        /// <para>
+        /// Recording the state is what keeps discovery O(1) while the switch is set. Consumers such as
+        /// Azure.Identity call discovery on every authentication and cache nothing themselves, so
+        /// declining to cache here would add an IMDS round trip to every token request.
+        /// </para>
         /// </remarks>
         private sealed class CachedDiscovery
         {
@@ -57,14 +53,14 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             internal bool CapturedWhileImdsV2Disabled { get; }
 
             /// <summary>
-            /// True when this snapshot cannot answer for the host under the supplied switch state,
-            /// which happens only when the switch has been cleared since the result was computed.
+            /// Stale only when the switch has cleared since the result was computed: that result never
+            /// ran the IMDSv2 probe, so it cannot speak for the host.
             /// </summary>
             internal bool IsStaleUnder(bool imdsV2Disabled) => CapturedWhileImdsV2Disabled && !imdsV2Disabled;
         }
 
-        // Set once the "variable is set to an unrecognized value" warning has been emitted, so a
-        // misconfiguration is reported without repeating on every discovery call.
+        // Guards the unrecognized-value warning so a misconfiguration is reported without repeating on
+        // every request.
         private static int s_unrecognizedImdsV2DisableValueLogged;
 
         // Serializes explicit capability discovery so concurrent callers at process startup do not
@@ -107,16 +103,14 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             bool forceRemint,
             CancellationToken cancellationToken)
         {
-            // Kill switch gate. This must run before anything else in this method: the min-strength
-            // check below calls explicit discovery, which probes IMDS and can provision a binding key,
-            // and the binding acquisition further down can mint or reuse a cached certificate. Failing
-            // here guarantees no IMDSv2 HTTP, CSR, certificate, or key-provisioning work happens while
-            // the switch is set, including when a warm certificate cache would otherwise skip the probes.
+            // Must run before anything else here: the min-strength check below calls discovery, which
+            // probes IMDS and can provision a binding key, and the binding acquisition further down can
+            // mint or reuse a cached certificate. A warm certificate cache would otherwise satisfy an
+            // mTLS request with no probe at all, bypassing every other gate.
             //
-            // Scoped to hosts that would actually route to IMDS: on an environment-detected source
+            // Scoped to hosts that would actually route to IMDS. On an environment-detected source
             // (App Service, Service Fabric, Cloud Shell, Azure Arc, Machine Learning) IMDSv2 is never
-            // involved, so those hosts keep their existing, more precise MtlsPopNotSupportedForEnvironment
-            // error rather than being told IMDSv2 is disabled.
+            // involved, so those keep their more precise MtlsPopNotSupportedForEnvironment error.
             if (EnvironmentVariables.IsImdsV2Disabled &&
                 GetManagedIdentitySourceNoImds(requestContext.Logger) == ManagedIdentitySource.None)
             {
@@ -205,26 +199,21 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 // Fail fast if cancellation was requested, before performing expensive network probes
                 cancellationToken.ThrowIfCancellationRequested();
 
-                // Read the kill switch once per selection. It is deliberately evaluated here, at the
-                // routing decision, rather than only during discovery: discovery results are cached in a
-                // process-wide static that never expires, so a process that cached "IMDSv2" before the
-                // switch was set would otherwise route straight past the switch.
+                // Evaluated here at the routing decision, not only in discovery: discovery results are
+                // cached in a process-wide static that never expires, so a process that cached "IMDSv2"
+                // before the switch was set would otherwise route straight past it.
                 bool imdsV2Disabled = EnvironmentVariables.IsImdsV2Disabled;
 
-                // Also warn here, not only in discovery. A process that only ever calls
-                // AcquireTokenForManagedIdentity for bearer tokens never runs capability discovery,
-                // and that is exactly the process most likely to be running during an IMDSv2
-                // incident - so it is the one that most needs to be told its mitigation is inert.
+                // Warned here too, because a process that only acquires bearer tokens never runs
+                // capability discovery and would otherwise never learn its switch value is inert.
                 WarnOnceIfImdsV2DisableValueUnrecognized(requestContext);
 
                 ManagedIdentitySource source;
                 bool isImdsV2 = false;
 
-                // A discovery result captured while the switch was set says "IMDSv1, no binding"
-                // because the IMDSv2 probe was skipped, not because the host is incapable. Once the
-                // switch clears, treat it as absent so routing re-derives the source instead of
-                // latching the mitigation's effect past its lifetime. One volatile read gives a
-                // consistent result/switch-state pair.
+                // A result captured while the switch was set says "IMDSv1, no binding" because the probe
+                // was skipped, not because the host is incapable. Once the switch clears, treat it as
+                // absent so routing re-derives the source rather than latching that answer permanently.
                 CachedDiscovery snapshot = Volatile.Read(ref s_cachedDiscovery);
                 ManagedIdentityDiscoveryResult cachedResult =
                     (snapshot is null || snapshot.IsStaleUnder(imdsV2Disabled)) ? null : snapshot.Result;
@@ -272,10 +261,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     throw CreateManagedIdentityUnavailableException(cachedResult);
                 }
 
-                // Kill switch: a cached IMDSv2 discovery result must not survive the switch being set.
-                // Downgrade to IMDSv1 for routing purposes without mutating s_cachedSourceResult, so the
-                // cached discovery stays valid if the switch is later cleared. Bearer requests continue
-                // over IMDSv1; mTLS requests fall through to the guard below and fail fast.
+                // A cached IMDSv2 result must not survive the switch being set. Downgraded for routing
+                // only, leaving s_cachedDiscovery intact so the host's real capability returns when the
+                // switch clears.
                 if (imdsV2Disabled && isImdsV2)
                 {
                     requestContext.Logger.Info(
@@ -291,15 +279,15 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 {
                     requestContext.Logger.Info("[Managed Identity] ImdsV2 detected, but neither mTLS PoP nor mTLS Bearer requested. Using IMDSv1 for this request only. Please use the \"WithMtlsProofOfPossession\" or \"WithRequestOverMtls\" API to request a token via ImdsV2.");
 
-                    // Do NOT modify s_cachedSourceResult; keep cached ImdsV2 so future PoP
+                    // Do NOT modify s_cachedDiscovery; keep cached ImdsV2 so future PoP
                     // requests can leverage it. Route this request through IMDSv1 only.
                     isImdsV2 = false;
                 }
 
                 // If the source is determined to be ImdsV1 and mTLS PoP was requested,
-                // throw an exception since ImdsV1 does not support mTLS PoP. When the kill switch is
-                // what forced IMDSv1, report that instead: "the operator disabled IMDSv2" is a different
-                // and more actionable problem than "this host cannot do IMDSv2".
+                // throw an exception since ImdsV1 does not support mTLS PoP. When the switch is what
+                // forced IMDSv1, report that instead - it is a different and more actionable problem
+                // than the host being incapable.
                 if (source == ManagedIdentitySource.Imds && !isImdsV2 && isMtlsPopRequested)
                 {
                     if (imdsV2Disabled)
@@ -327,8 +315,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         }
 
         /// <summary>
-        /// Logs once per process when the kill switch variable is set to a value MSAL does not
-        /// recognize, so an operator is not left believing an inactive mitigation is active.
+        /// Logs once per process when the kill switch variable is set to an unrecognized value, so a
+        /// typo does not leave the switch silently inert.
         /// </summary>
         private static void WarnOnceIfImdsV2DisableValueUnrecognized(RequestContext requestContext)
         {
@@ -345,14 +333,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         }
 
         /// <summary>
-        /// Returns the cached discovery result if it is still usable under the current kill switch
-        /// state, projected through <see cref="ApplyImdsV2KillSwitch"/>.
+        /// Returns the cached discovery result if it is still usable under the current switch state.
         /// </summary>
         /// <remarks>
-        /// A result cached while the switch was set never ran the IMDSv2 probe, so it cannot tell us
-        /// what the host is capable of once the switch clears; that direction must re-probe, which is
-        /// what keeps the mitigation reversible in place. Every other combination is served from the
-        /// cache, so an active mitigation does not turn each discovery call into an IMDS round trip.
+        /// Only the switch-set-then-cleared direction re-probes, because that cached result never ran
+        /// the IMDSv2 probe and cannot speak for the host. Every other combination is served from the
+        /// cache, so a set switch does not turn each discovery call into an IMDS round trip.
         /// </remarks>
         private static bool TryGetUsableCachedResult(
             bool imdsV2Disabled,
@@ -375,12 +361,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         /// Projects a discovery result through the IMDSv2 kill switch.
         /// </summary>
         /// <remarks>
-        /// Applied on every read rather than baked into the cached value. The cached result records
-        /// what the host is actually capable of; the switch is an operator override layered on top at
-        /// the point of use. Masking on read means clearing the switch restores the true capability
-        /// immediately, with no re-probe and no process restart, and it closes the window where a
-        /// process that cached "IMDSv2 / KeyGuard" before the switch was set would keep advertising
-        /// PoP support that MSAL will now refuse to honor.
+        /// Masked on read rather than baked into the cached value, so clearing the switch restores the
+        /// host's real capability immediately with no re-probe and no process restart. This is also what
+        /// stops a process that cached "IMDSv2 / KeyGuard" beforehand from advertising PoP support that
+        /// MSAL will now refuse to honor.
         /// </remarks>
         private static ManagedIdentityDiscoveryResult ApplyImdsV2KillSwitch(
             ManagedIdentityDiscoveryResult result,
@@ -457,11 +441,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 string imdsV1FailureReason = null;
                 string imdsV2FailureReason = null;
 
-                // Kill switch: skip the IMDSv2 probe entirely and go straight to IMDSv1, so no IMDSv2
-                // HTTP request or key provisioning happens while the switch is set. The reason is
-                // recorded so it surfaces on ManagedIdentityCapabilities.ErrorReason and explains why
-                // the reported binding strength is None. Read once at the top of this method so a
-                // single discovery pass cannot observe the switch changing halfway through.
+                // Skipping the probe is what guarantees no IMDSv2 HTTP request or key provisioning while
+                // the switch is set. The reason is recorded so it surfaces on
+                // ManagedIdentityCapabilities.ErrorReason and explains the reported strength of None.
+                // imdsV2Disabled was read once at the top so one discovery pass cannot see it change.
                 if (imdsV2Disabled)
                 {
                     requestContext.Logger.Info(
@@ -502,11 +485,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 {
                     requestContext.Logger.Info("[Managed Identity] ImdsV1 detected.");
 
-                    // While IMDSv2 is disabled no request can be bound to a key, so report None rather
-                    // than the host's theoretical capability. Advertising a binding strength MSAL will
-                    // refuse to honor would send credential chains (such as DefaultAzureCredential) down
-                    // a PoP path that is guaranteed to fail. Determining the strength is skipped
-                    // entirely, since the answer is fixed.
+                    // Advertising a binding strength MSAL will refuse to honor would send credential
+                    // chains such as DefaultAzureCredential down a PoP path guaranteed to fail, so the
+                    // switch reports None rather than the host's theoretical capability.
                     MtlsBindingStrength strength = imdsV2Disabled
                         ? MtlsBindingStrength.None
                         : await DetermineImdsV1BindingStrengthAsync(requestContext, cancellationToken).ConfigureAwait(false);
