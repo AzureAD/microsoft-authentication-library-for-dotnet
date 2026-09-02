@@ -9,6 +9,8 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Instance.Discovery
 {
+    // Cloud entries here are derived from KnownCloudData (the single source of truth), which
+    // the public KnownCloudMetadata also projects from. Add or change clouds in KnownCloudData, not here.
     internal class KnownMetadataProvider : IKnownMetadataProvider
     {
         // No need to use a ConcurrentDictionary, because the normal Dictionary is thread safe for read operations
@@ -37,79 +39,25 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                 }
             }
 
-            InstanceDiscoveryMetadataEntry publicCloudEntry = new InstanceDiscoveryMetadataEntry()
+            foreach (KnownCloudEntry cloud in KnownCloudData.Entries)
             {
-                Aliases = new[] { "login.microsoftonline.com", "login.windows.net", "login.microsoft.com", "sts.windows.net" },
-                PreferredNetwork = "login.microsoftonline.com",
-                PreferredCache = "login.windows.net"
-            };
+                var entry = new InstanceDiscoveryMetadataEntry()
+                {
+                    // Defensive copy: InstanceDiscoveryMetadataEntry.Aliases is a mutable array and these
+                    // entries are held in static caches, so share a copy rather than KnownCloudData's own
+                    // array to keep the single source of truth immutable.
+                    Aliases = cloud.Aliases.ToArray(),
+                    PreferredNetwork = cloud.PreferredNetwork,
+                    PreferredCache = cloud.PreferredCache,
+                };
 
-            InstanceDiscoveryMetadataEntry cloudEntryChina = new InstanceDiscoveryMetadataEntry()
-            {
-                Aliases = new[] { "login.partner.microsoftonline.cn", "login.chinacloudapi.cn" },
-                PreferredNetwork = "login.partner.microsoftonline.cn",
-                PreferredCache = "login.partner.microsoftonline.cn"
-            };
+                AddToKnownCache(entry);
 
-            InstanceDiscoveryMetadataEntry cloudEntryLegacyGermany = new InstanceDiscoveryMetadataEntry()
-            {
-                Aliases = new[] { "login.microsoftonline.de" },
-                PreferredNetwork = "login.microsoftonline.de",
-                PreferredCache = "login.microsoftonline.de"
-            };
-
-            InstanceDiscoveryMetadataEntry usGovCloudEntry = new InstanceDiscoveryMetadataEntry()
-            {
-                Aliases = new[] { "login.microsoftonline.us", "login.usgovcloudapi.net" },
-                PreferredNetwork = "login.microsoftonline.us",
-                PreferredCache = "login.microsoftonline.us"
-            };
-
-            InstanceDiscoveryMetadataEntry usCloudEntry = new InstanceDiscoveryMetadataEntry()
-            {
-                Aliases = new[] { "login-us.microsoftonline.com" },
-                PreferredNetwork = "login-us.microsoftonline.com",
-                PreferredCache = "login-us.microsoftonline.com"
-            };
-
-            InstanceDiscoveryMetadataEntry ppeCloudEntry = new InstanceDiscoveryMetadataEntry()
-            {
-                Aliases = new[] { "login.windows-ppe.net", "sts.windows-ppe.net", "login.microsoft-ppe.com" },
-                PreferredNetwork = "login.windows-ppe.net",
-                PreferredCache = "login.windows-ppe.net"
-            };
-
-            InstanceDiscoveryMetadataEntry bleuCloudEntry = new InstanceDiscoveryMetadataEntry()
-            {
-                Aliases = new[] { "login.sovcloud-identity.fr" },
-                PreferredNetwork = "login.sovcloud-identity.fr",
-                PreferredCache = "login.sovcloud-identity.fr"
-            };
-
-            InstanceDiscoveryMetadataEntry delosCloudEntry = new InstanceDiscoveryMetadataEntry()
-            {
-                Aliases = new[] { "login.sovcloud-identity.de" },
-                PreferredNetwork = "login.sovcloud-identity.de",
-                PreferredCache = "login.sovcloud-identity.de"
-            };
-
-            InstanceDiscoveryMetadataEntry govSGCloudEntry = new InstanceDiscoveryMetadataEntry()
-            {
-                Aliases = new[] { "login.sovcloud-identity.sg" },
-                PreferredNetwork = "login.sovcloud-identity.sg",
-                PreferredCache = "login.sovcloud-identity.sg"
-            };
-
-            AddToKnownCache(publicCloudEntry);
-            AddToKnownCache(cloudEntryChina);
-            AddToKnownCache(cloudEntryLegacyGermany);
-            AddToKnownCache(usGovCloudEntry);
-            AddToKnownCache(usCloudEntry);
-            AddToKnownCache(ppeCloudEntry);
-            AddToKnownCache(bleuCloudEntry);
-            AddToKnownCache(delosCloudEntry);
-            AddToKnownCache(govSGCloudEntry);
-            AddToPublicEnvironment(publicCloudEntry);
+                if (cloud.IsPublic)
+                {
+                    AddToPublicEnvironment(entry);
+                }
+            }
         }
 
         public static bool IsPublicEnvironment(string environment)
