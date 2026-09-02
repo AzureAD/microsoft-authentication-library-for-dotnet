@@ -127,6 +127,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         /// <param name="retryPolicy">The retry policy.</param>
         /// <param name="retryCount">The retry count.</param>
         /// <param name="allowAutoRedirect">Whether the HTTP client can automatically follow redirects.</param>
+        /// <param name="useDefaultCredentials">Whether the HTTP client can use the current user's credentials.</param>
+        /// <param name="operationContext">State shared across all requests in one logical HTTP operation.</param>
         public Task<HttpResponse> SendRequestAsync(
             Uri endpoint,
             IDictionary<string, string> headers,
@@ -139,7 +141,9 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             CancellationToken cancellationToken,
             IRetryPolicy retryPolicy,
             int retryCount = 0,
-            bool allowAutoRedirect = true)
+            bool allowAutoRedirect = true,
+            bool useDefaultCredentials = true,
+            HttpRequestOperationContext operationContext = null)
         {
             return _httpManager.SendRequestAsync(
                 endpoint,
@@ -152,7 +156,9 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 validateServerCert, cancellationToken,
                 retryPolicy,
                 retryCount,
-                allowAutoRedirect);
+                allowAutoRedirect,
+                useDefaultCredentials,
+                operationContext);
         }
     }
 
@@ -198,12 +204,16 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         /// <returns></returns>
         protected HttpClient GetHttpClientInternal(X509Certificate2 mtlsBindingCert)
         {
-            return GetHttpClientInternal(mtlsBindingCert, allowAutoRedirect: true);
+            return GetHttpClientInternal(
+                mtlsBindingCert,
+                allowAutoRedirect: true,
+                useDefaultCredentials: true);
         }
 
         internal HttpClient GetHttpClientInternal(
             X509Certificate2 mtlsBindingCert,
-            bool allowAutoRedirect)
+            bool allowAutoRedirect,
+            bool useDefaultCredentials)
         {
             HttpClientHandler messageHandler;
 
@@ -227,6 +237,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             }
 
             messageHandler.AllowAutoRedirect = allowAutoRedirect;
+            messageHandler.UseDefaultCredentials = useDefaultCredentials;
 
             var httpClient = new HttpClient(messageHandler)
             {
@@ -280,9 +291,14 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return GetHttpClientInternal(null);
         }
 
-        HttpClient IHttpClientFactoryWithRedirectControl.GetHttpClient(bool allowAutoRedirect)
+        HttpClient IHttpClientFactoryWithRedirectControl.GetHttpClient(
+            bool allowAutoRedirect,
+            bool useDefaultCredentials)
         {
-            return GetHttpClientInternal(null, allowAutoRedirect);
+            return GetHttpClientInternal(
+                null,
+                allowAutoRedirect,
+                useDefaultCredentials);
         }
 
         /// <summary>
@@ -339,9 +355,14 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return GetHttpClientInternal(null);
         }
 
-        HttpClient IHttpClientFactoryWithRedirectControl.GetHttpClient(bool allowAutoRedirect)
+        HttpClient IHttpClientFactoryWithRedirectControl.GetHttpClient(
+            bool allowAutoRedirect,
+            bool useDefaultCredentials)
         {
-            return GetHttpClientInternal(null, allowAutoRedirect);
+            return GetHttpClientInternal(
+                null,
+                allowAutoRedirect,
+                useDefaultCredentials);
         }
     }
 

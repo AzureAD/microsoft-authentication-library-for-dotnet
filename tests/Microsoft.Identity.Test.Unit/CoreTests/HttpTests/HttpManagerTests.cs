@@ -12,6 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Http.Retry;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Test.Common;
@@ -27,6 +28,117 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
     public class HttpManagerTests : TestBase
     {
         private readonly TestDefaultRetryPolicy _stsRetryPolicy = new TestDefaultRetryPolicy(RequestType.STS);
+
+        [TestMethod]
+        public async Task HttpRequestOperationContextUsesFirstClientTimeoutAsync()
+        {
+            // Arrange
+            using var operationContext = new HttpRequestOperationContext(CancellationToken.None);
+            Task operationCancellation = Task.Delay(
+                Timeout.InfiniteTimeSpan,
+                operationContext.CancellationToken);
+
+            // Act
+            operationContext.InitializeTimeout(TimeSpan.FromMilliseconds(10));
+            operationContext.InitializeTimeout(TimeSpan.FromMinutes(5));
+            Task completedTask = await Task.WhenAny(
+                operationCancellation,
+                Task.Delay(TimeSpan.FromSeconds(1))).ConfigureAwait(false);
+
+            // Assert
+            Assert.AreSame(operationCancellation, completedTask);
+            await Assert.ThrowsAsync<TaskCanceledException>(
+                async () => await operationCancellation.ConfigureAwait(false)).ConfigureAwait(false);
+            Assert.IsTrue(operationContext.IsTimedOut);
+        }
+
+        [TestMethod]
+        public void HttpRequestOperationContextDoesNotClassifyCallerCancellationAsTimeout()
+        {
+            // Arrange
+            using var callerCancellation = new CancellationTokenSource();
+            using var operationContext = new HttpRequestOperationContext(callerCancellation.Token);
+            operationContext.InitializeTimeout(Timeout.InfiniteTimeSpan);
+
+            // Act
+            callerCancellation.Cancel();
+
+            // Assert
+            Assert.IsTrue(operationContext.CancellationToken.IsCancellationRequested);
+            Assert.IsFalse(operationContext.IsTimedOut);
+        }
+
+        [TestMethod]
+        public async Task HttpManagerInitializesOperationTimeoutAsync()
+        {
+            // Arrange
+            var handler = new CapturingHandler();
+            using var factory = new TimeoutHttpClientFactory(
+                handler,
+                TimeSpan.FromMilliseconds(10));
+            var httpManager = new HttpManager(factory, disableInternalRetries: true);
+            using var operationContext = new HttpRequestOperationContext(CancellationToken.None);
+
+            // Act
+            HttpResponse response = await httpManager.SendRequestAsync(
+                new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
+                headers: null,
+                body: null,
+                method: HttpMethod.Get,
+                logger: Substitute.For<ILoggerAdapter>(),
+                doNotThrow: false,
+                bindingCertificate: null,
+                validateServerCert: null,
+                cancellationToken: CancellationToken.None,
+                retryPolicy: _stsRetryPolicy,
+                operationContext: operationContext).ConfigureAwait(false);
+            Task operationCancellation = Task.Delay(
+                Timeout.InfiniteTimeSpan,
+                operationContext.CancellationToken);
+            Task completedTask = await Task.WhenAny(
+                operationCancellation,
+                Task.Delay(TimeSpan.FromSeconds(1))).ConfigureAwait(false);
+
+            // Assert
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+            Assert.AreSame(operationCancellation, completedTask);
+            Assert.IsTrue(operationContext.IsTimedOut);
+        }
+
+        [TestMethod]
+        public async Task HttpManagerUsesOperationCancellationTokenAsync()
+        {
+            // Arrange
+            using var factory = new TimeoutHttpClientFactory(
+                new BlockingHandler(),
+                Timeout.InfiniteTimeSpan);
+            var httpManager = new HttpManager(factory, disableInternalRetries: true);
+            using var operationContext = new HttpRequestOperationContext(CancellationToken.None);
+            operationContext.InitializeTimeout(TimeSpan.FromMilliseconds(10));
+
+            // Act
+            Task<HttpResponse> requestTask = httpManager.SendRequestAsync(
+                new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
+                headers: null,
+                body: null,
+                method: HttpMethod.Get,
+                logger: Substitute.For<ILoggerAdapter>(),
+                doNotThrow: false,
+                bindingCertificate: null,
+                validateServerCert: null,
+                cancellationToken: CancellationToken.None,
+                retryPolicy: _stsRetryPolicy,
+                operationContext: operationContext);
+            Task completedTask = await Task.WhenAny(
+                requestTask,
+                Task.Delay(TimeSpan.FromSeconds(1))).ConfigureAwait(false);
+
+            // Assert
+            Assert.AreSame(requestTask, completedTask);
+            MsalServiceException exception = await Assert.ThrowsAsync<MsalServiceException>(
+                async () => await requestTask.ConfigureAwait(false)).ConfigureAwait(false);
+            Assert.AreEqual(MsalError.RequestTimeout, exception.ErrorCode);
+        }
 
         [TestMethod]
         public async Task MtlsCertAsync()
@@ -661,10 +773,55 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
         private class CapturingHandler : HttpMessageHandler
         {
             public HttpRequestMessage CapturedRequest { get; private set; }
+
             protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
             {
                 CapturedRequest = request;
                 return Task.FromResult(new HttpResponseMessage(System.Net.HttpStatusCode.OK));
+            }
+        }
+
+        private sealed class BlockingHandler : HttpMessageHandler
+        {
+            protected override async Task<HttpResponseMessage> SendAsync(
+                HttpRequestMessage request,
+                CancellationToken cancellationToken)
+            {
+                await Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken).ConfigureAwait(false);
+                return new HttpResponseMessage(HttpStatusCode.OK);
+            }
+        }
+
+        private sealed class TimeoutHttpClientFactory :
+            IMsalHttpClientFactory,
+            IHttpClientFactoryWithRedirectControl,
+            IDisposable
+        {
+            private readonly HttpClient _httpClient;
+
+            public TimeoutHttpClientFactory(HttpMessageHandler handler, TimeSpan timeout)
+            {
+                _httpClient = new HttpClient(handler)
+                {
+                    Timeout = timeout
+                };
+            }
+
+            public HttpClient GetHttpClient()
+            {
+                return _httpClient;
+            }
+
+            HttpClient IHttpClientFactoryWithRedirectControl.GetHttpClient(
+                bool allowAutoRedirect,
+                bool useDefaultCredentials)
+            {
+                return _httpClient;
+            }
+
+            public void Dispose()
+            {
+                _httpClient.Dispose();
             }
         }
     }

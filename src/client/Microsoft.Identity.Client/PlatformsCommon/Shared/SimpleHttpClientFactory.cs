@@ -27,14 +27,16 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         private static readonly ConcurrentDictionary<string, HttpClient> s_httpClientPool = new ConcurrentDictionary<string, HttpClient>();
         private static readonly object s_cacheLock = new object();
 
-        private static HttpClient CreateHttpClient(bool allowAutoRedirect)
+        private static HttpClient CreateHttpClient(
+            bool allowAutoRedirect,
+            bool useDefaultCredentials)
         {
             CheckAndManageCache();
 
             var httpClient = new HttpClient(new HttpClientHandler()
             {
                 /* important for IWA */
-                UseDefaultCredentials = true,
+                UseDefaultCredentials = useDefaultCredentials,
                 AllowAutoRedirect = allowAutoRedirect
             });
             HttpClientConfig.ConfigureRequestHeadersAndSize(httpClient);
@@ -67,20 +69,36 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         public HttpClient GetHttpClient()
         {
-            return GetHttpClient(allowAutoRedirect: true);
+            return GetHttpClient(
+                allowAutoRedirect: true,
+                useDefaultCredentials: true);
         }
 
-        HttpClient IHttpClientFactoryWithRedirectControl.GetHttpClient(bool allowAutoRedirect)
+        HttpClient IHttpClientFactoryWithRedirectControl.GetHttpClient(
+            bool allowAutoRedirect,
+            bool useDefaultCredentials)
         {
-            return GetHttpClient(allowAutoRedirect);
+            return GetHttpClient(
+                allowAutoRedirect,
+                useDefaultCredentials);
         }
 
-        private static HttpClient GetHttpClient(bool allowAutoRedirect)
+        private static HttpClient GetHttpClient(
+            bool allowAutoRedirect,
+            bool useDefaultCredentials)
         {
-            string key = allowAutoRedirect ? "non_mtls" : "non_mtls_no_redirect";
+            string key = useDefaultCredentials
+                ? allowAutoRedirect
+                    ? "non_mtls"
+                    : "non_mtls_no_redirect"
+                : allowAutoRedirect
+                    ? "non_mtls_no_default_credentials"
+                    : "non_mtls_no_redirect_no_default_credentials";
             return s_httpClientPool.GetOrAdd(
                 key,
-                _ => CreateHttpClient(allowAutoRedirect));
+                _ => CreateHttpClient(
+                    allowAutoRedirect,
+                    useDefaultCredentials));
         }
 
         public HttpClient GetHttpClient(X509Certificate2 x509Certificate2)

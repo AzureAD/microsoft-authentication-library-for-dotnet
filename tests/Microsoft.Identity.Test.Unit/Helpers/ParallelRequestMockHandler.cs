@@ -43,7 +43,9 @@ namespace Microsoft.Identity.Test.Unit.Helpers
             CancellationToken cancellationToken,
             IRetryPolicy retryPolicy,
             int retryCount = 0,
-            bool allowAutoRedirect = true)
+            bool allowAutoRedirect = true,
+            bool useDefaultCredentials = true,
+            HttpRequestOperationContext operationContext = null)
         {
             Interlocked.Increment(ref _requestCount);
 

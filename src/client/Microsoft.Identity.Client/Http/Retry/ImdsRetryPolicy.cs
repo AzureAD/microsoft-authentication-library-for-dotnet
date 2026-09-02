@@ -3,6 +3,7 @@
 
 using System;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 
@@ -28,9 +29,9 @@ namespace Microsoft.Identity.Client.Http.Retry
             ImdsRetryPolicy.ExponentialDeltaBackoffMs
         );
 
-        internal virtual Task DelayAsync(int milliseconds)
+        internal virtual Task DelayAsync(int milliseconds, CancellationToken cancellationToken)
         {
-            return Task.Delay(milliseconds);
+            return Task.Delay(milliseconds, cancellationToken);
         }
 
         protected virtual bool ShouldRetry(HttpResponse response, Exception exception)
@@ -38,7 +39,12 @@ namespace Microsoft.Identity.Client.Http.Retry
             return HttpRetryConditions.Imds(response, exception);
         }
 
-        public async Task<bool> PauseForRetryAsync(HttpResponse response, Exception exception, int retryCount, ILoggerAdapter logger)
+        public async Task<bool> PauseForRetryAsync(
+            HttpResponse response,
+            Exception exception,
+            int retryCount,
+            ILoggerAdapter logger,
+            CancellationToken cancellationToken)
         {
             int httpStatusCode = (int)response.StatusCode;
 
@@ -61,7 +67,7 @@ namespace Microsoft.Identity.Client.Http.Retry
                 logger.Warning($"Retrying request in {retryAfterDelay}ms (retry attempt: {retryCount + 1})");
 
                 // Pause execution for the calculated delay
-                await DelayAsync(retryAfterDelay).ConfigureAwait(false);
+                await DelayAsync(retryAfterDelay, cancellationToken).ConfigureAwait(false);
 
                 return true;
             }

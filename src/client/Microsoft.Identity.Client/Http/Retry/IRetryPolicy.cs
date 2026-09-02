@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 
@@ -19,7 +20,13 @@ namespace Microsoft.Identity.Client.Http.Retry
         /// <param name="exception">The exception encountered during the request.</param>
         /// <param name="retryCount">The current retry attempt count.</param>
         /// <param name="logger">The logger used for diagnostic and informational messages.</param>
+        /// <param name="cancellationToken">The cancellation token for the complete HTTP operation.</param>
         /// <returns>A task that returns true if a retry should be performed; otherwise, false.</returns>
-        Task<bool> PauseForRetryAsync(HttpResponse response, Exception exception, int retryCount, ILoggerAdapter logger);
+        Task<bool> PauseForRetryAsync(
+            HttpResponse response,
+            Exception exception,
+            int retryCount,
+            ILoggerAdapter logger,
+            CancellationToken cancellationToken);
     }
 }

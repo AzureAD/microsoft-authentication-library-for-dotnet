@@ -1,0 +1,2 @@
+const Microsoft.Identity.Client.MsalError.TooManyRedirects = "too_many_redirects" -> string
+const Microsoft.Identity.Client.MsalError.WsTrustCrossOriginRedirectNotSupported = "wstrust_cross_origin_redirect_failed" -> string

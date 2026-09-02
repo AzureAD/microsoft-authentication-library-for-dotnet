@@ -66,10 +66,13 @@ namespace Microsoft.Identity.Client.Http
             CancellationToken cancellationToken,
             IRetryPolicy retryPolicy,
             int retryCount = 0,
-            bool allowAutoRedirect = true)
+            bool allowAutoRedirect = true,
+            bool useDefaultCredentials = true,
+            HttpRequestOperationContext operationContext = null)
         {
             Exception timeoutException = null;
             HttpResponse response = null;
+            int currentRetryCount = operationContext?.RetryCount ?? retryCount;
 
             try
             {
@@ -91,7 +94,9 @@ namespace Microsoft.Identity.Client.Http
                         bindingCertificate,
                         validateServerCert, logger,
                         cancellationToken,
-                        allowAutoRedirect).ConfigureAwait(false);
+                        allowAutoRedirect,
+                        useDefaultCredentials,
+                        operationContext).ConfigureAwait(false);
                 }
 
                 if (response.StatusCode == HttpStatusCode.OK)
@@ -114,10 +119,43 @@ namespace Microsoft.Identity.Client.Http
                 logger.Error("The HTTP request failed. " + exception.Message);
                 timeoutException = exception;
             }
-            
-            while (!_disableInternalRetries && await retryPolicy.PauseForRetryAsync(response, timeoutException, retryCount, logger).ConfigureAwait(false))
+
+            if (operationContext?.IsTimedOut == true && timeoutException is null)
             {
-                retryCount++;
+                timeoutException = new TaskCanceledException(MsalErrorMessage.RequestTimeOut);
+            }
+
+            bool shouldRetry = false;
+            if (!_disableInternalRetries && operationContext?.IsTimedOut != true)
+            {
+                try
+                {
+                    shouldRetry = await retryPolicy.PauseForRetryAsync(
+                        response,
+                        timeoutException,
+                        currentRetryCount,
+                        logger,
+                        operationContext?.CancellationToken ?? cancellationToken).ConfigureAwait(false);
+                }
+                catch (TaskCanceledException exception)
+                {
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        logger.Info("The HTTP request was canceled. ");
+                        throw;
+                    }
+
+                    timeoutException = exception;
+                }
+            }
+
+            if (shouldRetry)
+            {
+                currentRetryCount++;
+                if (operationContext is not null)
+                {
+                    operationContext.RetryCount = currentRetryCount;
+                }
 
                 return await SendRequestAsync(
                     endpoint,
@@ -130,8 +168,10 @@ namespace Microsoft.Identity.Client.Http
                     validateServerCert,
                     cancellationToken,
                     retryPolicy,
-                    retryCount, // Pass the updated retry count
-                    allowAutoRedirect)
+                    currentRetryCount,
+                    allowAutoRedirect,
+                    useDefaultCredentials,
+                    operationContext)
                     .ConfigureAwait(false);
             }
 
@@ -182,7 +222,9 @@ namespace Microsoft.Identity.Client.Http
         private HttpClient GetHttpClient(
             X509Certificate2 x509Certificate2,
             Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> validateServerCert,
-            bool allowAutoRedirect)
+            bool allowAutoRedirect,
+            bool useDefaultCredentials,
+            ILoggerAdapter logger)
         {
             if (x509Certificate2 != null && validateServerCert != null)
             {
@@ -193,7 +235,14 @@ namespace Microsoft.Identity.Client.Http
                 validateServerCert is null &&
                 _httpClientFactory is IHttpClientFactoryWithRedirectControl redirectControlFactory)
             {
-                return redirectControlFactory.GetHttpClient(allowAutoRedirect);
+                return redirectControlFactory.GetHttpClient(
+                    allowAutoRedirect,
+                    useDefaultCredentials);
+            }
+
+            if (!allowAutoRedirect || !useDefaultCredentials)
+            {
+                logger.Warning(MsalErrorMessage.CustomHttpClientFactoryRedirectControlUnavailable);
             }
 
             if (validateServerCert != null)
@@ -253,7 +302,9 @@ namespace Microsoft.Identity.Client.Http
             Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> validateServerCert,
             ILoggerAdapter logger,
             CancellationToken cancellationToken,
-            bool allowAutoRedirect)
+            bool allowAutoRedirect,
+            bool useDefaultCredentials,
+            HttpRequestOperationContext operationContext)
         {
             using (HttpRequestMessage requestMessage = CreateRequestMessage(endpoint, headers))
             {
@@ -269,12 +320,21 @@ namespace Microsoft.Identity.Client.Http
                 HttpClient client = GetHttpClient(
                     bindingCertificate,
                     validateServerCert,
-                    allowAutoRedirect);
+                    allowAutoRedirect,
+                    useDefaultCredentials,
+                    logger);
+
+                CancellationToken effectiveCancellationToken = cancellationToken;
+                if (operationContext is not null)
+                {
+                    operationContext.InitializeTimeout(client.Timeout);
+                    effectiveCancellationToken = operationContext.CancellationToken;
+                }
 
                 try
                 {
                     using (HttpResponseMessage responseMessage =
-                        await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false))
+                        await client.SendAsync(requestMessage, effectiveCancellationToken).ConfigureAwait(false))
                     {
                         logger.Verbose(() => $"[HttpManager] Received response. Status code: {responseMessage.StatusCode}. ");
 

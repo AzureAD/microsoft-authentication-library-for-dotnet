@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client.WsTrust
 {
     internal class WsTrustWebRequestManager : IWsTrustWebRequestManager
     {
-        private const int MaxRedirects = 50;
+        internal const int MaxRedirects = 50;
         private readonly IHttpManager _httpManager;
 
         public WsTrustWebRequestManager(IHttpManager httpManager)
@@ -65,37 +65,14 @@ namespace Microsoft.Identity.Client.WsTrust
             IRetryPolicyFactory retryPolicyFactory = requestContext.ServiceBundle.Config.RetryPolicyFactory;
             IRetryPolicy retryPolicy = retryPolicyFactory.GetRetryPolicy(RequestType.STS);
 
-            Uri requestUri = uri;
-            HttpResponse httpResponse;
-            int redirectCount = 0;
-
-            while (true)
-            {
-                httpResponse = await _httpManager.SendRequestAsync(
-                    requestUri,
-                    msalIdParams,
-                    body: null,
-                    method: HttpMethod.Get,
-                    logger: requestContext.Logger,
-                    doNotThrow: false,
-                    mtlsCertificate: null,
-                    validateServerCertificate: null,
-                    cancellationToken: requestContext.UserCancellationToken,
-                    retryPolicy: retryPolicy,
-                    allowAutoRedirect: false)
-                .ConfigureAwait(false);
-
-                ThrowIfNonHttpsResponse(httpResponse, requestUri);
-
-                if (!TryGetSecureRedirectUri(httpResponse, requestUri, out Uri redirectUri) ||
-                    redirectCount >= MaxRedirects)
-                {
-                    break;
-                }
-
-                requestUri = redirectUri;
-                redirectCount++;
-            }
+            HttpResponse httpResponse = await SendWithSecureRedirectsAsync(
+                uri,
+                msalIdParams,
+                body: null,
+                method: HttpMethod.Get,
+                doNotThrow: false,
+                requestContext,
+                retryPolicy).ConfigureAwait(false);
 
             if (httpResponse.StatusCode != System.Net.HttpStatusCode.OK)
             {
@@ -155,45 +132,14 @@ namespace Microsoft.Identity.Client.WsTrust
             IRetryPolicyFactory retryPolicyFactory = requestContext.ServiceBundle.Config.RetryPolicyFactory;
             IRetryPolicy retryPolicy = retryPolicyFactory.GetRetryPolicy(RequestType.STS);
 
-            Uri requestUri = wsTrustEndpoint.Uri;
-            HttpMethod requestMethod = HttpMethod.Post;
-            HttpContent requestBody = body;
-            HttpResponse resp;
-            int redirectCount = 0;
-
-            while (true)
-            {
-                resp = await _httpManager.SendRequestAsync(
-                    requestUri,
-                    headers,
-                    body: requestBody,
-                    method: requestMethod,
-                    logger: requestContext.Logger,
-                    doNotThrow: true,
-                    mtlsCertificate: null,
-                    validateServerCertificate: null,
-                    cancellationToken: requestContext.UserCancellationToken,
-                    retryPolicy: retryPolicy,
-                    allowAutoRedirect: false)
-                .ConfigureAwait(false);
-
-                ThrowIfNonHttpsResponse(resp, requestUri);
-
-                if (!TryGetSecureRedirectUri(resp, requestUri, out Uri redirectUri) ||
-                    redirectCount >= MaxRedirects)
-                {
-                    break;
-                }
-
-                if (RedirectChangesMethodToGet(resp.StatusCode, requestMethod))
-                {
-                    requestMethod = HttpMethod.Get;
-                    requestBody = null;
-                }
-
-                requestUri = redirectUri;
-                redirectCount++;
-            }
+            HttpResponse resp = await SendWithSecureRedirectsAsync(
+                wsTrustEndpoint.Uri,
+                headers,
+                body,
+                HttpMethod.Post,
+                doNotThrow: true,
+                requestContext,
+                retryPolicy).ConfigureAwait(false);
 
             if (resp.StatusCode != System.Net.HttpStatusCode.OK)
             {
@@ -304,6 +250,80 @@ namespace Microsoft.Identity.Client.WsTrust
                 string.Equals(uri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase);
         }
 
+        private async Task<HttpResponse> SendWithSecureRedirectsAsync(
+            Uri initialUri,
+            IDictionary<string, string> headers,
+            HttpContent body,
+            HttpMethod method,
+            bool doNotThrow,
+            RequestContext requestContext,
+            IRetryPolicy retryPolicy)
+        {
+            Uri requestUri = initialUri;
+            HttpMethod requestMethod = method;
+            HttpContent requestBody = body;
+            bool useDefaultCredentials = true;
+            int redirectCount = 0;
+
+            using (var operationContext = new HttpRequestOperationContext(requestContext.UserCancellationToken))
+            {
+                while (true)
+                {
+                    HttpResponse response = await _httpManager.SendRequestAsync(
+                        requestUri,
+                        headers,
+                        body: requestBody,
+                        method: requestMethod,
+                        logger: requestContext.Logger,
+                        doNotThrow: doNotThrow,
+                        mtlsCertificate: null,
+                        validateServerCertificate: null,
+                        cancellationToken: requestContext.UserCancellationToken,
+                        retryPolicy: retryPolicy,
+                        allowAutoRedirect: false,
+                        useDefaultCredentials: useDefaultCredentials,
+                        operationContext: operationContext)
+                    .ConfigureAwait(false);
+
+                    ThrowIfNonHttpsResponse(response, requestUri);
+
+                    if (!TryGetSecureRedirectUri(response, requestUri, out Uri redirectUri))
+                    {
+                        return response;
+                    }
+
+                    if (redirectCount >= MaxRedirects)
+                    {
+                        throw new MsalClientException(
+                            MsalError.TooManyRedirects,
+                            MsalErrorMessage.TooManyRedirects);
+                    }
+
+                    HttpMethod redirectMethod = requestMethod;
+                    HttpContent redirectBody = requestBody;
+                    if (RedirectChangesMethodToGet(response.StatusCode, requestMethod))
+                    {
+                        redirectMethod = HttpMethod.Get;
+                        redirectBody = null;
+                    }
+
+                    if (redirectBody is not null &&
+                        !IsSameOrigin(initialUri, redirectUri))
+                    {
+                        throw new MsalClientException(
+                            MsalError.WsTrustCrossOriginRedirectNotSupported,
+                            MsalErrorMessage.WsTrustCrossOriginRedirectNotSupported);
+                    }
+
+                    requestUri = redirectUri;
+                    requestMethod = redirectMethod;
+                    requestBody = redirectBody;
+                    useDefaultCredentials = false;
+                    redirectCount++;
+                }
+            }
+        }
+
         private static void ThrowIfNonHttpsResponse(HttpResponse response, Uri requestUri)
         {
             if (!IsHttpsUri(response.RequestUri ?? requestUri))
@@ -340,6 +360,19 @@ namespace Microsoft.Identity.Client.WsTrust
             }
 
             return true;
+        }
+
+        private static bool IsSameOrigin(Uri firstUri, Uri secondUri)
+        {
+            return string.Equals(
+                       firstUri.Scheme,
+                       secondUri.Scheme,
+                       StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(
+                    firstUri.IdnHost,
+                    secondUri.IdnHost,
+                    StringComparison.OrdinalIgnoreCase) &&
+                firstUri.Port == secondUri.Port;
         }
 
         private static bool IsRedirectStatusCode(System.Net.HttpStatusCode statusCode)

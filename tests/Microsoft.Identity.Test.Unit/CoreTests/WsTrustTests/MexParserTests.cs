@@ -13,6 +13,7 @@ using Microsoft.Identity.Client.WsTrust;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
+using Microsoft.Identity.Test.Unit.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
@@ -267,6 +268,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
                 Assert.IsNotNull(mexDocument.GetWsTrustUsernamePasswordEndpoint());
                 Assert.IsFalse(redirectHandler.AllowAutoRedirect);
                 Assert.IsFalse(responseHandler.AllowAutoRedirect);
+                Assert.IsTrue(redirectHandler.UseDefaultCredentials);
+                Assert.IsFalse(responseHandler.UseDefaultCredentials);
                 Assert.IsNotNull(redirectHandler.ActualRequestMessage);
                 Assert.IsNotNull(responseHandler.ActualRequestMessage);
             }
@@ -315,7 +318,145 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
 
                 // Assert
                 Assert.IsNotNull(mexDocument.GetWsTrustUsernamePasswordEndpoint());
+                Assert.IsFalse(responseHandler.UseDefaultCredentials);
                 Assert.IsNotNull(responseHandler.ActualRequestMessage);
+            }
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"Resources\TestMex2005.xml")]
+        public async Task MexMaximumHttpsRedirectsAreFollowedTestAsync()
+        {
+            // Arrange
+            const string mexAddress = "https://somehost/adfs/services/trust/mex";
+
+            using (var harness = CreateTestHarness())
+            {
+                string currentAddress = mexAddress;
+                for (int i = 0; i < WsTrustWebRequestManager.MaxRedirects; i++)
+                {
+                    string redirectAddress = $"https://somehost/adfs/services/trust/mex/{i}";
+                    var redirectResponse = new HttpResponseMessage(HttpStatusCode.TemporaryRedirect);
+                    redirectResponse.Headers.Location = new Uri(redirectAddress);
+
+                    harness.HttpManager.AddMockHandler(
+                        new MockHttpMessageHandler
+                        {
+                            ExpectedUrl = currentAddress,
+                            ExpectedMethod = HttpMethod.Get,
+                            ResponseMessage = redirectResponse
+                        });
+
+                    currentAddress = redirectAddress;
+                }
+
+                harness.HttpManager.AddMockHandler(
+                    new MockHttpMessageHandler
+                    {
+                        ExpectedUrl = currentAddress,
+                        ExpectedMethod = HttpMethod.Get,
+                        ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                        {
+                            Content = new StringContent(
+                                File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("TestMex2005.xml")))
+                        }
+                    });
+
+                // Act
+                MexDocument mexDocument = await harness.ServiceBundle.WsTrustWebRequestManager.GetMexDocumentAsync(
+                    mexAddress,
+                    new RequestContext(harness.ServiceBundle, Guid.NewGuid(), null))
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.IsNotNull(mexDocument.GetWsTrustUsernamePasswordEndpoint());
+                Assert.AreEqual(0, harness.HttpManager.QueueSize);
+            }
+        }
+
+        [TestMethod]
+        public async Task MexRedirectLimitExceededTestAsync()
+        {
+            // Arrange
+            const string mexAddress = "https://somehost/adfs/services/trust/mex";
+
+            using (var harness = CreateTestHarness())
+            {
+                string currentAddress = mexAddress;
+                for (int i = 0; i <= WsTrustWebRequestManager.MaxRedirects; i++)
+                {
+                    string redirectAddress = $"https://somehost/adfs/services/trust/mex/{i}";
+                    var redirectResponse = new HttpResponseMessage(HttpStatusCode.TemporaryRedirect);
+                    redirectResponse.Headers.Location = new Uri(redirectAddress);
+
+                    harness.HttpManager.AddMockHandler(
+                        new MockHttpMessageHandler
+                        {
+                            ExpectedUrl = currentAddress,
+                            ExpectedMethod = HttpMethod.Get,
+                            ResponseMessage = redirectResponse
+                        });
+
+                    currentAddress = redirectAddress;
+                }
+
+                // Act
+                MsalClientException exception = await AssertException.TaskThrowsAsync<MsalClientException>(
+                    () => harness.ServiceBundle.WsTrustWebRequestManager.GetMexDocumentAsync(
+                        mexAddress,
+                        new RequestContext(harness.ServiceBundle, Guid.NewGuid(), null)))
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual(MsalError.TooManyRedirects, exception.ErrorCode);
+                Assert.AreEqual(0, harness.HttpManager.QueueSize);
+            }
+        }
+
+        [TestMethod]
+        public async Task MexRedirectChainSharesRetryBudgetTestAsync()
+        {
+            // Arrange
+            const string mexAddress = "https://somehost/adfs/services/trust/mex";
+            const string redirectedMexAddress = "https://somehost/adfs/services/trust/redirected/mex";
+            var redirectResponse = new HttpResponseMessage(HttpStatusCode.TemporaryRedirect);
+            redirectResponse.Headers.Location = new Uri(redirectedMexAddress);
+
+            using (var harness = CreateTestHarness())
+            {
+                harness.ServiceBundle.Config.RetryPolicyFactory = new TestRetryPolicyFactory();
+                harness.HttpManager.AddMockHandler(
+                    new MockHttpMessageHandler
+                    {
+                        ExpectedUrl = mexAddress,
+                        ExpectedMethod = HttpMethod.Get,
+                        ResponseMessage = new HttpResponseMessage(HttpStatusCode.InternalServerError)
+                    });
+                harness.HttpManager.AddMockHandler(
+                    new MockHttpMessageHandler
+                    {
+                        ExpectedUrl = mexAddress,
+                        ExpectedMethod = HttpMethod.Get,
+                        ResponseMessage = redirectResponse
+                    });
+                harness.HttpManager.AddMockHandler(
+                    new MockHttpMessageHandler
+                    {
+                        ExpectedUrl = redirectedMexAddress,
+                        ExpectedMethod = HttpMethod.Get,
+                        ResponseMessage = new HttpResponseMessage(HttpStatusCode.InternalServerError)
+                    });
+
+                // Act
+                MsalServiceException exception = await AssertException.TaskThrowsAsync<MsalServiceException>(
+                    () => harness.ServiceBundle.WsTrustWebRequestManager.GetMexDocumentAsync(
+                        mexAddress,
+                        new RequestContext(harness.ServiceBundle, Guid.NewGuid(), null)))
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual(MsalError.ServiceNotAvailable, exception.ErrorCode);
+                Assert.AreEqual(0, harness.HttpManager.QueueSize);
             }
         }
 

@@ -7,6 +7,6 @@ namespace Microsoft.Identity.Client.Http
 {
     internal interface IHttpClientFactoryWithRedirectControl
     {
-        HttpClient GetHttpClient(bool allowAutoRedirect);
+        HttpClient GetHttpClient(bool allowAutoRedirect, bool useDefaultCredentials);
     }
 }

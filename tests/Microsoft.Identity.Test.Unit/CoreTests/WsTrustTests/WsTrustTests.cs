@@ -113,7 +113,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
         {
             // Arrange
             const string wsTrustAddress = "https://some/address/usernamemixed";
-            const string redirectedWsTrustAddress = "https://redirected.some/address/usernamemixed";
+            const string redirectedWsTrustAddress = "https://some/redirected/usernamemixed";
             var endpoint = new WsTrustEndpoint(new Uri(wsTrustAddress), WsTrustVersion.WsTrust13);
             var redirectResponse = new HttpResponseMessage(HttpStatusCode.TemporaryRedirect);
             redirectResponse.Headers.Location = new Uri(redirectedWsTrustAddress);
@@ -167,8 +167,50 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
                 Assert.IsNotNull(wsTrustResponse.Token);
                 Assert.IsFalse(redirectHandler.AllowAutoRedirect);
                 Assert.IsFalse(responseHandler.AllowAutoRedirect);
+                Assert.IsTrue(redirectHandler.UseDefaultCredentials);
+                Assert.IsFalse(responseHandler.UseDefaultCredentials);
                 Assert.IsNotNull(redirectHandler.ActualRequestMessage);
                 Assert.IsNotNull(responseHandler.ActualRequestMessage);
+            }
+        }
+
+        [TestMethod]
+        public async Task WsTrustCrossOriginCredentialRedirectIsRejectedTestAsync()
+        {
+            // Arrange
+            const string wsTrustAddress = "https://some/address/usernamemixed";
+            var endpoint = new WsTrustEndpoint(new Uri(wsTrustAddress), WsTrustVersion.WsTrust13);
+            var redirectResponse = new HttpResponseMessage(HttpStatusCode.TemporaryRedirect);
+            redirectResponse.Headers.Location = new Uri("https://different.example/usernamemixed");
+
+            using (var harness = CreateTestHarness())
+            {
+                MockHttpMessageHandler handler = harness.HttpManager.AddMockHandler(
+                    new MockHttpMessageHandler
+                    {
+                        ExpectedUrl = wsTrustAddress,
+                        ExpectedMethod = HttpMethod.Post,
+                        ResponseMessage = redirectResponse
+                    });
+
+                var requestContext = new RequestContext(harness.ServiceBundle, Guid.NewGuid(), null);
+                string wsTrustRequest = endpoint.BuildTokenRequestMessageUsernamePassword(
+                    "urn:federation:SomeAudience",
+                    "username",
+                    "password");
+
+                // Act
+                MsalClientException exception = await AssertException.TaskThrowsAsync<MsalClientException>(
+                    () => harness.ServiceBundle.WsTrustWebRequestManager.GetWsTrustResponseAsync(
+                        endpoint,
+                        wsTrustRequest,
+                        requestContext))
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual(MsalError.WsTrustCrossOriginRedirectNotSupported, exception.ErrorCode);
+                Assert.IsNotNull(handler.ActualRequestMessage);
+                Assert.AreEqual(0, harness.HttpManager.QueueSize);
             }
         }
 
@@ -220,6 +262,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
 
                 // Assert
                 Assert.IsNotNull(wsTrustResponse.Token);
+                Assert.IsFalse(responseHandler.UseDefaultCredentials);
                 Assert.IsNotNull(responseHandler.ActualRequestMessage);
             }
         }

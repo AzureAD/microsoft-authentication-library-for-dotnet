@@ -52,12 +52,20 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
 
             // Act
             HttpClient defaultClient = factory.GetHttpClient();
-            HttpClient noRedirectClient = redirectControlFactory.GetHttpClient(allowAutoRedirect: false);
-            HttpClient secondNoRedirectClient = redirectControlFactory.GetHttpClient(allowAutoRedirect: false);
+            HttpClient noRedirectClient = redirectControlFactory.GetHttpClient(
+                allowAutoRedirect: false,
+                useDefaultCredentials: true);
+            HttpClient secondNoRedirectClient = redirectControlFactory.GetHttpClient(
+                allowAutoRedirect: false,
+                useDefaultCredentials: true);
+            HttpClient noRedirectNoCredentialsClient = redirectControlFactory.GetHttpClient(
+                allowAutoRedirect: false,
+                useDefaultCredentials: false);
 
             // Assert
             Assert.AreNotSame(defaultClient, noRedirectClient);
             Assert.AreSame(noRedirectClient, secondNoRedirectClient);
+            Assert.AreNotSame(noRedirectClient, noRedirectNoCredentialsClient);
         }
 
         [TestMethod]
