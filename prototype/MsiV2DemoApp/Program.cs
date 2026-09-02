@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 // Managed Identity + mTLS PoP + mTLS resource call (Console Demo)
-// .NET 8 
+// .NET 10
 //
 // Menu:
 //   Acquire Tokens
@@ -961,4 +961,3 @@ internal class Program
         });
     }
 }
-

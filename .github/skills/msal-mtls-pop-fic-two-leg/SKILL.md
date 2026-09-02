@@ -57,7 +57,7 @@ This skill covers Federated Identity Credential (FIC) token exchange using asser
   dotnet add package Microsoft.Identity.Client --version 4.82.1
   dotnet add package Microsoft.Identity.Client.KeyAttestation
   ```
-- **Target Framework**: net8.0 recommended
+- **Target Framework**: net10.0 recommended
 - **Namespaces**:
   ```csharp
   using Microsoft.Identity.Client;

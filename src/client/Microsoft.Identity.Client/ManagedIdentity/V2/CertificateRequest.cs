@@ -15,7 +15,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
     /// Downlevel polyfill for System.Security.Cryptography.X509Certificates.CertificateRequest
     /// that provides OtherRequestAttributes support for frameworks prior to .NET 7.0.
     /// This file is conditionally included only for net462, net472, and netstandard2.0.
-    /// For .NET 8.0+, the built-in CertificateRequest class is used instead.
+    /// For .NET 10.0+, the built-in CertificateRequest class is used instead.
     /// </summary>
     internal class CertificateRequest
     {

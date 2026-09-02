@@ -161,7 +161,7 @@ Add `using Microsoft.Identity.Client.Extensibility;` only when you use extensibi
 ## Version Requirements
 
 - **MSAL.NET**: 4.82.1 minimum (earlier versions lack PoP + attestation APIs)
-- **Target Framework**: net8.0 recommended (LTS, best performance)
+- **Target Framework**: net10.0 recommended (LTS, best performance)
 - **NuGet Packages**:
   ```bash
   dotnet add package Microsoft.Identity.Client --version 4.82.1

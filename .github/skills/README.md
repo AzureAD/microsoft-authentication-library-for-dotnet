@@ -169,7 +169,7 @@ Specialized skills for mTLS PoP authentication with Managed Identity and Confide
 **mTLS PoP Skills:**
 - MSAL.NET 4.82.1 or later (for `WithMtlsProofOfPossession()`, `WithAttestationSupport()`)
 - Microsoft.Identity.Client.KeyAttestation NuGet package
-- .NET 8.0 recommended
+- .NET 10.0 recommended
 - Azure environment for MSI (SAMI/UAMI) or certificate for local/on-premises
 
 ## Using These Skills

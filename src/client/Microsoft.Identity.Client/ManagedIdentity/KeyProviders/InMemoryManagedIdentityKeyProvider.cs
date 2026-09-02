@@ -102,7 +102,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
         /// </remarks>
         public static RSA CreateRsaKeyPair()
         {
-#if NET462 || NET472 || NET8_0
+#if NET462 || NET472 || NET8_0_OR_GREATER
             // Windows-only TFMs (Framework or -windows TFMs): compile CNG path
             return CreateWindowsPersistedRsa();
 

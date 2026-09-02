@@ -25,7 +25,7 @@ parameters:
   default: 'Release'
 - name: TargetFramework
   type: string
-  default: 'net8.0'
+  default: 'net10.0'
 - name: WebAppName
   type: string
   default: 'msal-webapp-ci-auth-913a8e'
@@ -56,10 +56,10 @@ parameters:
 
 steps:
 - task: UseDotNet@2
-  displayName: 'Install .NET 8 SDK'
+  displayName: 'Install .NET 10 SDK'
   inputs:
     packageType: 'sdk'
-    version: '8.0.x'
+    version: '10.0.x'
 
 # Reuse the shared template to fetch LabAuth from Key Vault and install the client certificate.
 # It publishes the PFX path as the output variable $(generateLabCert.certDir).
@@ -73,8 +73,8 @@ steps:
     KeyVaultName: '${{ parameters.KeyVaultName }}'
     SecretsFilter: '${{ parameters.PublishProfileSecretName }}'
 
-# NetCoreOnly restricts the referenced Microsoft.Identity.Client project to netstandard2.0 + net8.0,
-# avoiding the mobile (net8.0-ios / net8.0-android) target frameworks that require MAUI workloads
+# NetCoreOnly restricts the referenced Microsoft.Identity.Client project to netstandard2.0 + supported modern .NET TFMs,
+# avoiding the mobile (net10.0-ios / net10.0-android) target frameworks that require MAUI workloads
 # which are not installed on the hosted Windows agent.
 - powershell: dotnet restore -p:NetCoreOnly=true
   displayName: 'Restore ManagedIdentityWebApi'

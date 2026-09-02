@@ -2,7 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworkNetDesktop48>net48</TargetFrameworkNetDesktop48>
-    <TargetFrameworkNet>net8.0</TargetFrameworkNet>
+    <TargetFrameworkNet>net10.0</TargetFrameworkNet>
 
     <TargetFrameworks>$(TargetFrameworkNetDesktop48);$(TargetFrameworkNet)</TargetFrameworks>
     <IsPackable>false</IsPackable>
@@ -73,6 +73,11 @@
   </ItemGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet)'">
     <DefineConstants>$(DefineConstants);NET_CORE</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet)'">
+    <!-- Existing compatibility tests intentionally exercise legacy certificate-loading
+         and ServicePointManager APIs that are obsolete in .NET 10. -->
+    <NoWarn>$(NoWarn);SYSLIB0014;SYSLIB0057</NoWarn>
   </PropertyGroup>
 
 </Project>

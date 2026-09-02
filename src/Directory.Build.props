@@ -28,8 +28,8 @@
     
   </PropertyGroup>
 
-  <!-- AOT compatibility for .NET 8+ -->
-  <PropertyGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">
+  <!-- AOT compatibility for .NET 10+ -->
+  <PropertyGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net10.0'))">
     <IsAotCompatible>true</IsAotCompatible>
   </PropertyGroup>
 
