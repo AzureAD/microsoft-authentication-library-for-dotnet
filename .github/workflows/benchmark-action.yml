@@ -26,7 +26,10 @@ jobs:
       - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
+          # .NET 10 is required by global.json; .NET 8 is required to build and run the net8.0 benchmarks.
+          dotnet-version: |
+            8.0.x
+            10.0.x
       - name: Restore NuGet packages
         run: dotnet restore tests/Microsoft.Identity.Test.Performance
       - name: Run benchmark
