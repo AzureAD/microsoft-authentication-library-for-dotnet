@@ -746,18 +746,19 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
         /// <summary>
         /// AbstractManagedIdentity.HandleException mapped FormatException onto invalid_managed_identity_endpoint
-        /// rather than the generic request-failed code, and the delegated path must preserve that contract. This
-        /// arm is reachable in practice because the token endpoint is built from binding.Endpoint - a value IMDS
-        /// supplies - so a malformed value surfaces as UriFormatException (a FormatException). Fails against the
-        /// pre-fix mapping, which returned managed_identity_request_failed for this case.
+        /// rather than the generic request-failed code, and the delegated path must preserve that contract.
+        /// Drives the real scenario rather than injecting the exception: IMDS returns a malformed
+        /// mtls_authentication_endpoint (only checked for null/empty during the mint step), which flows into
+        /// binding.Endpoint and throws UriFormatException inside the token leg when OAuth2Client parses it.
+        /// Fails against the pre-fix mapping, which returned managed_identity_request_failed for this case.
         /// </summary>
         [TestMethod]
-        public async Task mTLSPop_TokenLeg_FormatFailure_IsWrappedAsInvalidEndpointAsync()
+        public async Task mTLSPop_TokenLeg_MalformedEndpoint_IsWrappedAsInvalidEndpointAsync()
         {
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
-                // Arrange - only ONE mint+token cycle is queued; a re-mint would exhaust the queue.
+                // Arrange - the mint succeeds but hands back an endpoint that cannot be parsed as a URI.
                 SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
 
                 var managedIdentityApp = await CreateManagedIdentityAsync(
@@ -765,10 +766,10 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
 
                 httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
-                httpManager.AddMockHandler(MockHelpers.MockCertificateRequestResponse(certificate: TestConstants.ValidRawCertificate));
-                var handler = MockHelpers.MockImdsV2EntraTokenRequestResponse(_identityLoggerAdapter);
-                handler.ExceptionToThrow = new UriFormatException("The token endpoint is not a well-formed URI.");
-                httpManager.AddMockHandler(handler);
+                httpManager.AddMockHandler(MockHelpers.MockCertificateRequestResponse(
+                    certificate: TestConstants.ValidRawCertificate,
+                    mtlsEndpointOverride: "http://[invalid"));
+                httpManager.AddMockHandler(MockHelpers.MockImdsV2EntraTokenRequestResponse(_identityLoggerAdapter));
 
                 // Act
                 var ex = await Assert.ThrowsAsync<MsalServiceException>(async () =>
@@ -782,8 +783,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.AreEqual(MsalError.InvalidManagedIdentityEndpoint, ex.ErrorCode);
                 Assert.IsInstanceOfType<UriFormatException>(ex.InnerException);
 
-                // No re-mint was attempted.
-                Assert.AreEqual(0, httpManager.QueueSize, "A malformed-endpoint failure must not trigger a re-mint.");
+                // No re-mint was attempted. The URI is rejected before any token request goes out, so the token
+                // handler is still queued; a re-mint would have consumed it against the mint URL and failed the
+                // handler's ExpectedUrl assertion.
+                Assert.AreEqual(1, httpManager.QueueSize, "A malformed-endpoint failure must not trigger a re-mint.");
+
+                // The deliberately unconsumed handler above would otherwise trip the dispose-time queue check.
+                httpManager.ClearQueue();
             }
         }
 
