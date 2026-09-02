@@ -588,15 +588,19 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     httpManager,
                     managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
 
-                // First attempt: full mint, then the local mTLS handshake fails inside SCHANNEL.
+                // First attempt mints cert A, then the local mTLS handshake fails inside SCHANNEL.
+                string certA = CreateRawCertFromXml("CN=imdsv2-bad-binding", DateTimeOffset.UtcNow.AddDays(30));
+                string certB = CreateRawCertFromXml("CN=imdsv2-fresh-binding", DateTimeOffset.UtcNow.AddDays(30));
+
                 httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
-                httpManager.AddMockHandler(MockHelpers.MockCertificateRequestResponse(certificate: TestConstants.ValidRawCertificate));
+                httpManager.AddMockHandler(MockHelpers.MockCertificateRequestResponse(certificate: certA));
                 var failingTokenHandler = MockHelpers.MockImdsV2EntraTokenRequestResponse(_identityLoggerAdapter);
                 failingTokenHandler.ExceptionToThrow = CreateSchannelTransportException();
                 httpManager.AddMockHandler(failingTokenHandler);
 
-                // Retry: binding is re-minted (RemoveBadCert → fresh CSR + issuecredential), then token succeeds.
-                AddMocksToGetEntraToken(httpManager);
+                // Retry: binding is re-minted (RemoveBadCert → fresh CSR + issuecredential) and IMDS issues
+                // cert B, then token succeeds.
+                AddMocksToGetEntraToken(httpManager, certificateRequestCertificate: certB);
 
                 // Act
                 var result = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
@@ -608,8 +612,17 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.IsNotNull(result);
                 Assert.IsNotNull(result.AccessToken);
                 Assert.AreEqual(MTLSPoP, result.TokenType);
-                Assert.IsNotNull(result.BindingCertificate);
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+
+                // The rejected cert A was evicted and the token is bound to the freshly minted cert B.
+                // This is the assertion that distinguishes a real re-mint from a cache reuse.
+                using var expectedFreshCert = new X509Certificate2(Convert.FromBase64String(certB));
+                using var rejectedCert = new X509Certificate2(Convert.FromBase64String(certA));
+                Assert.IsNotNull(result.BindingCertificate);
+                Assert.AreEqual(expectedFreshCert.Thumbprint, result.BindingCertificate.Thumbprint,
+                    "Token must be bound to the re-minted certificate, not the rejected one.");
+                Assert.AreNotEqual(rejectedCert.Thumbprint, result.BindingCertificate.Thumbprint,
+                    "The SCHANNEL-rejected certificate must have been evicted.");
 
                 // Both the failed attempt and the re-minted retry ran: every queued mock was consumed.
                 Assert.AreEqual(0, httpManager.QueueSize, "Expected exactly one re-mint and one retry.");
@@ -907,15 +920,18 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     httpManager,
                     managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
 
-                // First attempt: full mint, then the local mTLS handshake fails inside SCHANNEL.
+                // First attempt mints cert A, then the local mTLS handshake fails inside SCHANNEL.
+                string certA = CreateRawCertFromXml("CN=imdsv2-unattested-bad", DateTimeOffset.UtcNow.AddDays(30));
+                string certB = CreateRawCertFromXml("CN=imdsv2-unattested-fresh", DateTimeOffset.UtcNow.AddDays(30));
+
                 httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
-                httpManager.AddMockHandler(MockHelpers.MockCertificateRequestResponse(certificate: TestConstants.ValidRawCertificate));
+                httpManager.AddMockHandler(MockHelpers.MockCertificateRequestResponse(certificate: certA));
                 var failingTokenHandler = MockHelpers.MockImdsV2EntraTokenRequestResponse(_identityLoggerAdapter);
                 failingTokenHandler.ExceptionToThrow = CreateSchannelTransportException();
                 httpManager.AddMockHandler(failingTokenHandler);
 
-                // Retry: binding is re-minted, then the token succeeds.
-                AddMocksToGetEntraToken(httpManager);
+                // Retry: binding is re-minted and IMDS issues cert B, then the token succeeds.
+                AddMocksToGetEntraToken(httpManager, certificateRequestCertificate: certB);
 
                 // Act - no attestation.
                 var result = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
@@ -927,6 +943,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.AreEqual(MTLSPoP, result.TokenType);
                 Assert.IsNotNull(result.BindingCertificate);
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+
+                // Bound to the re-minted cert B, not the SCHANNEL-rejected cert A.
+                using var expectedFreshCert = new X509Certificate2(Convert.FromBase64String(certB));
+                Assert.AreEqual(expectedFreshCert.Thumbprint, result.BindingCertificate.Thumbprint,
+                    "Token must be bound to the re-minted certificate, not the rejected one.");
+
                 Assert.AreEqual(0, httpManager.QueueSize, "Expected exactly one re-mint and one retry.");
             }
         }
