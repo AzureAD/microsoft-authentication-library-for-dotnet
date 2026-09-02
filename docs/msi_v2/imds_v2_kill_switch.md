@@ -2,15 +2,27 @@
 
 ## Purpose
 
-`MSAL_MI_DISABLE_IMDS_V2` is an **emergency mitigation**, not a supported configuration knob.
+`MSAL_MI_DISABLE_IMDS_V2` is a process-wide environment variable that disables IMDSv2. IMDSv2 is
+**enabled by default** and should stay that way. When the variable is set, MSAL skips all IMDSv2
+capability probes and execution paths, falls back to IMDSv1 for bearer-token requests, and fails
+fast with a clear error when the request requires IMDSv2.
 
-It exists so that a host, image, or fleet owner can turn IMDSv2 off without shipping a new
-build of MSAL.NET or of the application, in the event of a regression in the IMDSv2 path.
-IMDSv2 is **enabled by default** and should stay that way.
+### Design rationale
 
-Because it is a mitigation rather than a feature, it is deliberately environment-variable
-driven (settable by whoever owns the machine or container) rather than exposed on the
-`ManagedIdentityApplicationBuilder` API surface (settable only by whoever ships the app).
+The following is the reasoning behind the design, not a requirement stated in the originating
+task ([#6174](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/6174)).
+
+It is treated as an emergency mitigation rather than a supported configuration knob. That framing
+drives three choices:
+
+- **Environment variable, not a `ManagedIdentityApplicationBuilder` API.** An environment variable
+  is settable by whoever controls the process environment; a builder API is settable only by
+  whoever ships and redeploys the application. A mitigation is worth little if using it requires
+  the same release that a code fix would.
+- **Read live on every check, not cached at startup.** Setting and clearing the variable both take
+  effect on the next token request, so the mitigation is reversible in place.
+- **Unrecognized values leave IMDSv2 enabled.** The switch never fails closed on a typo. A
+  mistyped value is a no-op, logged once per process so the misconfiguration is visible.
 
 ## Accepted values
 
@@ -23,8 +35,8 @@ driven (settable by whoever owns the machine or container) rather than exposed o
 | anything else (e.g. `yes`, `on`, `false`, `0`) | IMDSv2 enabled |
 
 Comparison is ordinal and case-insensitive. Any unrecognized value is a **no-op that leaves
-IMDSv2 enabled** — the switch never fails closed on a typo, so a mistyped value cannot
-silently degrade a fleet.
+IMDSv2 enabled** — the switch never fails closed on a typo, so a mistyped value cannot silently
+weaken token binding across the machines it was deployed to.
 
 The variable is read **live on every check**, not cached at startup. Flipping it takes effect
 on the next token request without restarting the process. This mirrors the existing

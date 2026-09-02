@@ -211,6 +211,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 // switch was set would otherwise route straight past the switch.
                 bool imdsV2Disabled = EnvironmentVariables.IsImdsV2Disabled;
 
+                // Also warn here, not only in discovery. A process that only ever calls
+                // AcquireTokenForManagedIdentity for bearer tokens never runs capability discovery,
+                // and that is exactly the process most likely to be running during an IMDSv2
+                // incident - so it is the one that most needs to be told its mitigation is inert.
+                WarnOnceIfImdsV2DisableValueUnrecognized(requestContext);
+
                 ManagedIdentitySource source;
                 bool isImdsV2 = false;
 

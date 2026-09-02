@@ -3417,6 +3417,57 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
+        /// <summary>
+        /// The "unrecognized value" warning must reach a process that only ever acquires bearer
+        /// tokens. Such a process never calls capability discovery, and it is precisely the process
+        /// most likely to be running during an IMDSv2 incident - so warning only from discovery
+        /// would hide an inert mitigation from the operator who most needs to know about it.
+        /// </summary>
+        [TestMethod]
+        public async Task KillSwitch_UnrecognizedValue_WarnsOnBearerOnlyPathWithoutDiscovery()
+        {
+            bool warned = false;
+
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                // Arrange
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
+                Environment.SetEnvironmentVariable(DisableImdsV2, "yes");
+
+                var managedIdentityApp = ManagedIdentityApplicationBuilder
+                    .Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpManager(httpManager)
+                    .WithRetryPolicyFactory(_testRetryPolicyFactory)
+                    .WithLogging(LocalLogCallback)
+                    .Build();
+
+                httpManager.AddManagedIdentityMockHandler(
+                    ManagedIdentityTests.ImdsEndpoint,
+                    ManagedIdentityTests.Resource,
+                    MockHelpers.GetMsiSuccessfulResponse(),
+                    ManagedIdentitySource.Imds);
+
+                // Act: a plain bearer request, which never runs capability discovery.
+                var result = await managedIdentityApp
+                    .AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                // Assert
+                Assert.IsNotNull(result.AccessToken);
+                Assert.IsTrue(warned,
+                    "A bearer-only process must still be told that the kill switch value is unrecognized.");
+            }
+
+            void LocalLogCallback(LogLevel level, string message, bool containsPii)
+            {
+                if (level == LogLevel.Warning && message.Contains("unrecognized value"))
+                {
+                    warned = true;
+                }
+            }
+        }
+
         #endregion IMDSv2 Kill Switch Tests
     }
 }

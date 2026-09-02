@@ -32,15 +32,37 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         /// Read live on every call rather than cached, so flipping the variable takes effect without
         /// restarting the process. This mirrors <c>MSAL_MI_DISABLE_PERSISTENT_CERT_CACHE</c>.
         /// </remarks>
+        /// <summary>
+        /// Classifies a single read of <c>MSAL_MI_DISABLE_IMDS_V2</c>.
+        /// </summary>
+        /// <remarks>
+        /// Both public properties derive from one read so the variable cannot change between an
+        /// "is it set?" check and an "is it recognized?" check, which would otherwise let a flip
+        /// land between the two and produce a self-contradictory answer.
+        /// </remarks>
+        private static void ReadImdsV2DisableState(out bool disabled, out bool unrecognized)
+        {
+            string value = Environment.GetEnvironmentVariable(DisableImdsV2EnvVar);
+
+            if (string.IsNullOrEmpty(value))
+            {
+                disabled = false;
+                unrecognized = false;
+                return;
+            }
+
+            disabled = value.Equals("1", StringComparison.OrdinalIgnoreCase) ||
+                       value.Equals("true", StringComparison.OrdinalIgnoreCase);
+
+            unrecognized = !disabled;
+        }
+
         public static bool IsImdsV2Disabled
         {
             get
             {
-                string value = Environment.GetEnvironmentVariable(DisableImdsV2EnvVar);
-
-                return !string.IsNullOrEmpty(value) &&
-                       (value.Equals("1", StringComparison.OrdinalIgnoreCase) ||
-                        value.Equals("true", StringComparison.OrdinalIgnoreCase));
+                ReadImdsV2DisableState(out bool disabled, out _);
+                return disabled;
             }
         }
 
@@ -58,9 +80,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         {
             get
             {
-                string value = Environment.GetEnvironmentVariable(DisableImdsV2EnvVar);
-
-                return !string.IsNullOrEmpty(value) && !IsImdsV2Disabled;
+                ReadImdsV2DisableState(out _, out bool unrecognized);
+                return unrecognized;
             }
         }
     }
