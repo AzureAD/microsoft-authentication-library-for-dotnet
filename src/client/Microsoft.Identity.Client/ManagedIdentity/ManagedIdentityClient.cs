@@ -199,14 +199,15 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 // Fail fast if cancellation was requested, before performing expensive network probes
                 cancellationToken.ThrowIfCancellationRequested();
 
-                // Evaluated here at the routing decision, not only in discovery: discovery results are
-                // cached in a process-wide static that never expires, so a process that cached "IMDSv2"
-                // before the switch was set would otherwise route straight past it.
-                bool imdsV2Disabled = EnvironmentVariables.IsImdsV2Disabled;
+                // One read for both decisions. Evaluated here at the routing decision, not only in
+                // discovery: discovery results are cached in a process-wide static that never expires,
+                // so a process that cached "IMDSv2" before the switch was set would otherwise route
+                // straight past it.
+                EnvironmentVariables.ReadImdsV2DisableState(out bool imdsV2Disabled, out bool unrecognizedDisableValue);
 
                 // Warned here too, because a process that only acquires bearer tokens never runs
                 // capability discovery and would otherwise never learn its switch value is inert.
-                WarnOnceIfImdsV2DisableValueUnrecognized(requestContext);
+                WarnOnceIfImdsV2DisableValueUnrecognized(requestContext, unrecognizedDisableValue);
 
                 ManagedIdentitySource source;
                 bool isImdsV2 = false;
@@ -318,9 +319,13 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         /// Logs once per process when the kill switch variable is set to an unrecognized value, so a
         /// typo does not leave the switch silently inert.
         /// </summary>
-        private static void WarnOnceIfImdsV2DisableValueUnrecognized(RequestContext requestContext)
+        /// <remarks>
+        /// Takes the classification rather than re-reading the variable, so the warning can never
+        /// describe a different read than the one that decided the request.
+        /// </remarks>
+        private static void WarnOnceIfImdsV2DisableValueUnrecognized(RequestContext requestContext, bool unrecognized)
         {
-            if (!EnvironmentVariables.HasUnrecognizedImdsV2DisableValue ||
+            if (!unrecognized ||
                 Interlocked.Exchange(ref s_unrecognizedImdsV2DisableValueLogged, 1) != 0)
             {
                 return;
@@ -400,9 +405,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             RequestContext requestContext,
             CancellationToken cancellationToken)
         {
-            bool imdsV2Disabled = EnvironmentVariables.IsImdsV2Disabled;
+            EnvironmentVariables.ReadImdsV2DisableState(out bool imdsV2Disabled, out bool unrecognizedDisableValue);
 
-            WarnOnceIfImdsV2DisableValueUnrecognized(requestContext);
+            WarnOnceIfImdsV2DisableValueUnrecognized(requestContext, unrecognizedDisableValue);
 
             // Fast path: explicit discovery already completed.
             if (TryGetUsableCachedResult(imdsV2Disabled, requestContext, out ManagedIdentityDiscoveryResult cached))

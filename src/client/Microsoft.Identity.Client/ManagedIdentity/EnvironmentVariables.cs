@@ -23,13 +23,14 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         public static string MachineLearningDefaultClientId => Environment.GetEnvironmentVariable("DEFAULT_IDENTITY_CLIENT_ID");
 
         /// <summary>
-        /// Classifies a single read of <c>MSAL_MI_DISABLE_IMDS_V2</c>.
+        /// Classifies a single read of <c>MSAL_MI_DISABLE_IMDS_V2</c> into both states at once.
         /// </summary>
         /// <remarks>
-        /// Both properties below derive from one read so the variable cannot change between an
-        /// "is it set?" check and an "is it recognized?" check and produce a self-contradictory answer.
+        /// Preferred over the two properties below whenever a caller needs both, because the switch is
+        /// read live: two separate reads can straddle a change and pair an enforcement decision with a
+        /// log line that contradicts it.
         /// </remarks>
-        private static void ReadImdsV2DisableState(out bool disabled, out bool unrecognized)
+        internal static void ReadImdsV2DisableState(out bool disabled, out bool unrecognized)
         {
             string value = Environment.GetEnvironmentVariable(DisableImdsV2EnvVar);
 
@@ -51,8 +52,14 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         /// (case-insensitive). Absent, empty, and unrecognized values leave IMDSv2 enabled.
         /// </summary>
         /// <remarks>
+        /// Unrecognized values are ignored so a typo can never silently weaken token binding; matching
+        /// is exact, so <c>"true "</c> with trailing whitespace does not disable IMDSv2. Use
+        /// <see cref="ReadImdsV2DisableState"/> instead when the caller also needs to know whether the
+        /// value was unrecognized.
+        /// <para>
         /// Read live rather than cached, so changing the variable takes effect without restarting the
         /// process. Mirrors <c>MSAL_MI_DISABLE_PERSISTENT_CERT_CACHE</c>.
+        /// </para>
         /// </remarks>
         public static bool IsImdsV2Disabled
         {
@@ -60,25 +67,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             {
                 ReadImdsV2DisableState(out bool disabled, out _);
                 return disabled;
-            }
-        }
-
-        /// <summary>
-        /// True when <c>MSAL_MI_DISABLE_IMDS_V2</c> is set to a non-empty value that is not
-        /// recognized, and IMDSv2 therefore remains enabled.
-        /// </summary>
-        /// <remarks>
-        /// Unrecognized values are ignored so a typo can never silently weaken token binding. The
-        /// failure mode that leaves is a switch believed to be set while IMDSv2 keeps running, so the
-        /// condition is surfaced in the logs. Matching is exact: <c>"true "</c> with trailing
-        /// whitespace is unrecognized.
-        /// </remarks>
-        public static bool HasUnrecognizedImdsV2DisableValue
-        {
-            get
-            {
-                ReadImdsV2DisableState(out _, out bool unrecognized);
-                return unrecognized;
             }
         }
     }
