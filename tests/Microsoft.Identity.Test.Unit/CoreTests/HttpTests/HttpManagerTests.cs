@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                 operationContext.CancellationToken);
 
             // Act
-            operationContext.InitializeTimeout(TimeSpan.FromMilliseconds(10));
+            operationContext.InitializeTimeout(TimeSpan.Zero);
             operationContext.InitializeTimeout(TimeSpan.FromMinutes(5));
             Task completedTask = await Task.WhenAny(
                 operationCancellation,
@@ -114,7 +114,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                 Timeout.InfiniteTimeSpan);
             var httpManager = new HttpManager(factory, disableInternalRetries: true);
             using var operationContext = new HttpRequestOperationContext(CancellationToken.None);
-            operationContext.InitializeTimeout(TimeSpan.FromMilliseconds(10));
+            operationContext.InitializeTimeout(TimeSpan.Zero);
 
             // Act
             Task<HttpResponse> requestTask = httpManager.SendRequestAsync(
