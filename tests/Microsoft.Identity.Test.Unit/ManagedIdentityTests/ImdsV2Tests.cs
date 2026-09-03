@@ -1453,6 +1453,54 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.AreEqual(MsalError.MtlsPopTokenNotSupportedinImdsV1, ex.ErrorCode);
             }
         }
+
+        [TestMethod]
+        public async Task ImdsV2KillSwitch_MtlsRequestWithMinStrength_ThrowsMinStrengthNotMet()
+        {
+            // Arrange
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                ManagedIdentityClient.ResetSourceForTest();
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
+                Environment.SetEnvironmentVariable(EnvironmentVariables.DisableImdsV2EnvVar, "true");
+
+                // The in-memory key provider would grade this host at the Software tier, so the floor
+                // below is only unmet because the switch forces the reported strength to None. Without
+                // it the test would pass whether or not the switch worked.
+                var managedIdentityApp = await CreateManagedIdentityAsync(
+                    httpManager,
+                    addProbeMock: false,
+                    addSourceCheck: false).ConfigureAwait(false);
+
+                // A strength floor is the one mTLS shape that does run discovery, so it is rejected by
+                // a different guard than the other two. Only the IMDSv1 probe is queued: discovery must
+                // reach v1 without probing v2 and without grading the host.
+                httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V1));
+
+                // Pins the error-code contract for the floor shape: a MinStrength request under the
+                // switch fails the floor check rather than returning a token or raising the IMDSv1 PoP
+                // error. It does not prove the switch caused the None, and cannot: the switch makes a
+                // v2-capable host indistinguishable from a v1-only one, which is the intent. The
+                // switch's own effect on discovery is pinned by
+                // ImdsV2KillSwitch_SupportedValue_DiscoveryReportsImdsV1AndNoBinding.
+                var capabilities = await (managedIdentityApp as ManagedIdentityApplication)
+                    .GetManagedIdentityCapabilitiesAsync(ManagedIdentityTests.ImdsProbesCancellationToken)
+                    .ConfigureAwait(false);
+                Assert.AreEqual(MtlsBindingStrength.None, capabilities.MaxSupportedBindingStrength);
+
+                // Act
+                var ex = await Assert.ThrowsAsync<MsalClientException>(async () =>
+                    await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                        .WithMtlsProofOfPossession(new PoPOptions { MinStrength = MtlsBindingStrength.Software })
+                        .ExecuteAsync().ConfigureAwait(false)
+                ).ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual(MsalError.MinStrengthNotMet, ex.ErrorCode);
+                Assert.AreEqual(0, httpManager.QueueSize);
+            }
+        }
         #endregion
 
         #region CSR Metadata Tests

@@ -47,13 +47,25 @@ IMDSv1. Nothing is thrown, because nothing the caller asked for was taken away.
 ### mTLS requests fail fast
 
 `WithMtlsProofOfPossession()` and `WithRequestOverMtls()` are served exclusively by IMDSv2 and have
-no IMDSv1 equivalent. Both throw `MsalClientException` with
-`MsalError.MtlsPopTokenNotSupportedinImdsV1`.
+no IMDSv1 equivalent, so both throw rather than return a token. Which error you get depends on how
+the request was built:
 
-They throw rather than fall back because a caller who explicitly opted into a bound token has no
-way to notice that an unbound one came back instead. Reusing the error MSAL already raises on a
-host with no IMDSv2 support is deliberate: the caller's situation is identical either way — mTLS is
-unavailable here — and the distinction that actually matters for debugging is in the log.
+| Request | Error |
+|---|---|
+| `WithMtlsProofOfPossession()` | `MtlsPopTokenNotSupportedinImdsV1` |
+| `WithRequestOverMtls()` | `MtlsPopTokenNotSupportedinImdsV1` |
+| `WithMtlsProofOfPossession(...)` with a `MinStrength` floor | `MinStrengthNotMet`, from the existing floor check measured against the reported `None` |
+
+They throw rather than fall back because the caller opted into something IMDSv1 cannot provide and
+has no way to notice that a weaker result came back instead. The two APIs ask for different things —
+`WithMtlsProofOfPossession()` for a certificate-bound token, `WithRequestOverMtls()` for a bearer
+token issued over an mTLS connection — and neither is reachable without IMDSv2.
+
+Reusing the error MSAL already raises on a host with no IMDSv2 support is deliberate: the caller's
+situation is identical either way — mTLS is unavailable here — and the distinction that actually
+matters for debugging is in the log. Note that the existing message attributes the failure to the VM
+image, which is accurate for a genuinely v1-only host but not when the switch is the cause; the log
+line named above is what separates the two.
 
 ### Capability discovery reports no binding support
 
@@ -70,6 +82,12 @@ to ask for a bound token. Reporting what the hardware could do while the switch 
 them confidently pick the PoP path and then fail on every token request. Reporting `None` keeps the
 advertised capability equal to what the caller can actually obtain, so they select the bearer path
 and keep working.
+
+This makes the reported value effective availability rather than raw hardware capability, which is a
+deliberate narrowing of the `MaxSupportedBindingStrength` doc comment. The two already diverge
+without the switch: on a v1-only host MSAL grades the platform key provider even though no IMDSv1
+request can produce a bound token. The switch widens that gap on purpose, because a consumer
+branching on `IsMtlsPopSupportedByHost` needs the answer it can act on.
 
 For the same reason MSAL skips the IMDSv1 binding-strength probe entirely: with no route to a bound
 token, there is nothing to grade, and the check would only cost an HTTP call.
