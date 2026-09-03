@@ -1,15 +1,6 @@
 ---
 name: msal-obo-flow
 description: On-Behalf-Of (OBO) Flow for web APIs to call downstream APIs while preserving user identity in MSAL.NET
-tags:
-  - msal
-  - obo
-  - on-behalf-of
-  - token-exchange
-  - confidential-client
-  - multi-tier
-  - downstream-api
-  - user-assertion
 ---
 
 # On-Behalf-Of (OBO) Flow Skill
@@ -108,4 +99,3 @@ Refer to [Troubleshooting Guide](../msal-shared/patterns/troubleshooting.md)
 **Avoid if:**
 - Direct client-to-API communication (use Auth Code Flow)
 - Service-to-service with no user context (use Client Credentials)
-

@@ -13,6 +13,10 @@ GitHub Copilot Agent Skills are specialized knowledge modules that help Copilot 
 
 ## Available Skills
 
+### Repository-Wide Pull Request Review
+
+- **[MSAL.NET Code Review](msal-code-review/SKILL.md)** - Use before reviewing every pull request. It compares base and head behavior, classifies compatibility evidence, applies relevant review lenses, and loads scenario-specific skills only when needed.
+
 ### 1. Confidential Client Authentication
 
 Three individual skills for confidential client authentication patterns in MSAL.NET, with reusable credential setup patterns in `msal-shared/`.
@@ -252,15 +256,8 @@ Each SKILL.md begins with YAML frontmatter for Copilot integration:
 
 ```yaml
 ---
-skill_name: unique-skill-identifier
-version: 1.0
+name: unique-skill-identifier
 description: Brief description of what this skill covers
-applies_to:
-  - Area/Feature this skill applies to
-tags:
-  - Relevant
-  - Search
-  - Keywords
 ---
 ```
 
