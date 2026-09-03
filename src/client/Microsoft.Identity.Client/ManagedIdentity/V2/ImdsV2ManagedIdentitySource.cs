@@ -186,12 +186,14 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         }
 
         /// <summary>
-        /// Detects if the exception was caused by a SCHANNEL failure during mTLS authentication, 
-        /// which can occur if the client certificate becomes invalid.
+        /// Detects if the exception was caused by a SCHANNEL failure during mTLS authentication,
+        /// which can occur if the client certificate becomes invalid. The whole inner-exception chain is
+        /// inspected because the failure can arrive either wrapped in an <see cref="MsalServiceException"/>
+        /// or as a raw transport exception from the delegated TokenClient path.
         /// </summary>
-        /// <param name="ex"></param>
-        /// <returns></returns>
-        internal static bool IsSchanelFailure(MsalServiceException ex)
+        /// <param name="ex">The exception to inspect, including its inner exception chain.</param>
+        /// <returns><see langword="true"/> if the chain indicates a SCHANNEL mTLS failure.</returns>
+        internal static bool IsSchannelFailure(Exception ex)
         {
             for (Exception e = ex; e != null; e = e.InnerException)
             {
