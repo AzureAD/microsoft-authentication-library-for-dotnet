@@ -2,14 +2,23 @@
 
 These rules apply to Copilot code review. Read all rules before commenting.
 
+## Mandatory repository-wide review skill
+
+- Before reviewing any pull request, use the `msal-code-review` skill.
+- Apply only the review lenses relevant to the diff.
+- Load authentication-flow and feature skills only when their domain context is required.
+- Treat missing tests as `Unknown`, never as evidence that behavior is unsupported.
+- Establish base and released behavior before accepting changed guards, defaults, mappings, cache identity, transports, retries, exceptions, public outputs, platform behavior, or package contents.
+- Use only public repository evidence and repository-approved public sources. Never access, quote, infer, or reference private repositories, incidents, telemetry, service configurations, documents, local files outside this repository, or private tool data.
+
 ## Review scope
 
 - Only comment on lines added or modified in the PR diff
 - Do not comment on pre-existing code unless the PR directly introduces the issue
 - Do not comment on style, formatting, or indentation
-- Focus exclusively on: bugs, security issues, logic errors, API contract violations
-- If unsure whether something is a bug, do not comment
-- Prefer no comment over a speculative comment
+- Focus exclusively on concrete correctness, security, privacy, compatibility, reliability, platform, packaging, performance, and test defects
+- Do not state an unverified concern as a confirmed bug
+- Prefer no comment over a speculative comment. When a proven observable behavior change remains `Unknown` after investigation, ask at most one narrowly scoped compatibility question
 - Do not re-post a comment already made on an earlier commit in the same PR
 
 ## Repo-specific patterns — do NOT flag these
@@ -59,8 +68,7 @@ These patterns are correct in this repo. Do not suggest changes:
 
 ---
 
-<!-- Everything below this line is for Copilot Chat and Copilot Agent only. -->
-<!-- Copilot code review reads only the first 4,000 characters of this file. -->
+<!-- Keep mandatory code-review instructions above this point and concise. Content below primarily provides interactive Copilot and agent guidance. -->
 
 Carefully review all markdown documents in the ../.clinerules folder. Those are your custom instructions.
 
@@ -102,14 +110,14 @@ This repository defines **Copilot Agent Skills** under `.github/skills/`.
 - If tests intentionally exercise a newly obsolete API, add a narrow warning suppression around that assertion/test instead of suppressing broadly.
 
 ## Downstream compatibility checks
-- Before obsoleting, hiding, or changing request-builder authority APIs, telemetry parameters, or query-parameter/cache-key behavior, check known downstream consumers.
+
+- For GitHub pull-request code review, use only public downstream evidence.
+- For non-review interactive Copilot Chat, CLI, or agent workflows, a local downstream checkout may be searched only when the user explicitly provides or authorizes that checkout.
+- Never infer local checkout paths or use local downstream files as evidence for `msal-code-review`.
+- Before obsoleting, hiding, or changing request-builder authority APIs, telemetry parameters, or query-parameter/cache-key behavior, check known public downstream consumers using public repository evidence.
 - Treat soft-obsolete changes as downstream-breaking when consumers build with warnings-as-errors. Adding `[Obsolete]` with `error: false`, `[EditorBrowsable]`, or analyzer-facing warnings can still break `Microsoft.Identity.Web` package-bump PRs.
-- `Microsoft.Identity.Web` is commonly available as a sibling checkout at `D:\source\microsoft-identity-web`; search it for production usages before deciding whether a change is safe.
-- Use targeted searches for the exact public API/member names, for example:
-  - `rg "WithB2CAuthority|AffectedApiName" D:\source\microsoft-identity-web\src`
-  - `rg "Microsoft.Identity.Client" D:\source\microsoft-identity-web\Directory.Packages.props D:\source\microsoft-identity-web\src`
 - If `Microsoft.Identity.Web` uses the affected API, do not obsolete, hide, remove, or change it unless the PR also provides a safe migration plan. Prefer updating Identity.Web first or coordinating a staged change.
-- Mention the Identity.Web impact check in the PR summary, including whether the sibling checkout was present and what API names were searched.
+- Mention the public downstream impact evidence and searched API names in the PR summary.
 
 ## Regression tests for cache and pooling changes
 - Regression tests must prove the changed side effect, not only final success or returned object identity.
@@ -140,10 +148,11 @@ Copilot will automatically reference and describe:
 
 ## 📚 Available Skills Overview
 
-This repository contains **six GitHub Agent Skills** for MSAL.NET authentication:
+This repository contains **one repository-wide review skill plus six authentication and domain skills**:
 
 | Skill | Purpose | Best For |
 |-------|---------|----------|
+| **@msal-code-review** | Repository-wide correctness, compatibility, security, and engineering review | Reviewing every pull request |
 | **@msal-mtls-pop-guidance** | Foundational concepts, terminology, decision frameworks | Learning the fundamentals, comparing approaches |
 | **@msal-mtls-pop-vanilla** | Direct single-step token acquisition with complete code | Quick implementation with MSI or Confidential Client |
 | **@msal-mtls-pop-fic-two-leg** | Two-step token exchange patterns | Complex scenarios requiring token exchange |
@@ -423,6 +432,6 @@ Code
 
 ## ❓ Still Have Questions?
 
-Use the **Question Bank** above to discover answers. Most questions are already covered in one of the three skills!
+Use the **Question Bank** above to discover answers. Most questions are already covered by one of the available skills.
 
 **Happy exploring!** 🚀

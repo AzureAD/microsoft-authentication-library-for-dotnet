@@ -1,19 +1,6 @@
 ---
-skill_name: msal-mtls-pop-guidance
-version: 1.0
+name: msal-mtls-pop-guidance
 description: Shared terminology, conventions, and patterns for mTLS Proof-of-Possession (PoP) flows in MSAL.NET
-applies_to:
-  - MSAL.NET/mTLS-PoP
-  - MSAL.NET/Managed-Identity
-  - MSAL.NET/Confidential-Client
-tags:
-  - msal
-  - mtls
-  - pop
-  - proof-of-possession
-  - terminology
-  - conventions
-  - sni
 ---
 
 # MSAL.NET mTLS PoP Guidance - Shared Terminology & Conventions
