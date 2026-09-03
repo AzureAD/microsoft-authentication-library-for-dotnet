@@ -26,5 +26,23 @@ SDKs customizing the httpclient factory will continue to use the old `IMsalHttpC
 | `IsPopSupported()`                   | Helper method to check if POP is supported.                                        |
 | `ResetInternalStaticCachesForTest()` | Helper method to reset internal static caches.                                     |
 
+---
+
+## Capability discovery and the IMDSv2 kill switch
+
+IMDSv2 can be disabled for a process by setting the `MSAL_MI_DISABLE_IMDS_V2` environment
+variable. While it is set, `GetManagedIdentityCapabilitiesAsync()` reports
+`MaxSupportedBindingStrength = None` and `IsMtlsPopSupportedByHost = false`, and mTLS requests
+throw rather than returning an unbound token.
+
+No SDK change is required. The existing guidance to branch on capability rather than on the source
+label already produces the correct behavior: the capabilities API reports what the caller can
+actually obtain, so a chain such as `DefaultAzureCredential` selects the bearer path instead of a
+PoP path that would fail on every request.
+
+The variable is read from the process environment, which no external actor can modify while the
+process runs, so the reported capability is stable for the lifetime of the process and does not need
+to be re-checked. See [IMDSv2 Kill Switch](./imds_v2_kill_switch.md) for details.
+
 
 
