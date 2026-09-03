@@ -886,7 +886,7 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        public async Task MsalFailure_ClientException_RawStsErrorCodeTag_NotIncludedAsync()
+        public async Task MsalFailure_ClientException_RawStsErrorCodeTag_IncludedWithEmptyValueAsync()
         {
             using (_harness = CreateTestHarness())
             {
@@ -907,8 +907,10 @@ namespace Microsoft.Identity.Test.Unit
                 foreach (var metricPoint in failureMetric.GetMetricPoints())
                 {
                     var tags = GetTagDictionary(metricPoint.Tags);
-                    Assert.IsFalse(tags.ContainsKey(TelemetryConstants.RawStsErrorCode),
-                        "RawStsErrorCode tag should not be present for non-service exceptions.");
+                    Assert.IsTrue(tags.ContainsKey(TelemetryConstants.RawStsErrorCode),
+                        "RawStsErrorCode tag should always be present on MsalFailure.");
+                    Assert.AreEqual(string.Empty, tags[TelemetryConstants.RawStsErrorCode],
+                        "RawStsErrorCode should be empty when the failure has no STS error code.");
                 }
             }
         }
@@ -1495,15 +1497,13 @@ namespace Microsoft.Identity.Test.Unit
                         expectedTags.Add(TelemetryConstants.CallerSdkId);
                         expectedTags.Add(TelemetryConstants.CacheRefreshReason);
                         expectedTags.Add(TelemetryConstants.TokenType);
+                        expectedTags.Add(TelemetryConstants.RawStsErrorCode);
 
                         long totalFailedRequests = 0;
                         foreach (var metricPoint in exportedItem.GetMetricPoints())
                         {
                             totalFailedRequests += metricPoint.GetSumLong();
-                            var pointExpectedTags = new List<string>(expectedTags);
-                            if (GetTagDictionary(metricPoint.Tags).ContainsKey(TelemetryConstants.RawStsErrorCode))
-                                pointExpectedTags.Add(TelemetryConstants.RawStsErrorCode);
-                            AssertTags(metricPoint.Tags, pointExpectedTags, true);
+                            AssertTags(metricPoint.Tags, expectedTags, true);
                         }
 
                         Assert.AreEqual(expectedFailedRequests, totalFailedRequests);
