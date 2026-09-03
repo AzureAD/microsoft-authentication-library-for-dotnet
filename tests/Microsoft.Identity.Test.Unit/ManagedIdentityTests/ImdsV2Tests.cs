@@ -1259,8 +1259,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         #endregion
 
         #region IMDSv2 Kill Switch Tests
-        // MSAL_MI_DISABLE_IMDS_V2 is read from the process environment, which a process cannot change
-        // after it starts, so these tests set it before any discovery runs to match how a host sees it.
+        // MSAL_MI_DISABLE_IMDS_V2 is read from the process environment, which nothing outside the
+        // process can modify, so a real host always has the value settled before the first call.
+        // These tests set it on themselves before any discovery runs to reproduce that state.
         // MockHttpManager fails on an unmatched request and on unconsumed mocks, so queueing only
         // IMDSv1 mocks is what proves no IMDSv2 probe, CSR, or certificate call was issued.
 

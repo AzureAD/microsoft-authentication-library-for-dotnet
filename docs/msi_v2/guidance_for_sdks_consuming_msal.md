@@ -40,9 +40,9 @@ label already produces the correct behavior: the capabilities API reports what t
 actually obtain, so a chain such as `DefaultAzureCredential` selects the bearer path instead of a
 PoP path that would fail on every request.
 
-The variable is read from the process environment and therefore cannot change while the process
-runs, so the reported capability is stable for the lifetime of the process and does not need to be
-re-checked. See [IMDSv2 Kill Switch](./imds_v2_kill_switch.md) for details.
+The variable is read from the process environment, which no external actor can modify while the
+process runs, so the reported capability is stable for the lifetime of the process and does not need
+to be re-checked. See [IMDSv2 Kill Switch](./imds_v2_kill_switch.md) for details.
 
 
 

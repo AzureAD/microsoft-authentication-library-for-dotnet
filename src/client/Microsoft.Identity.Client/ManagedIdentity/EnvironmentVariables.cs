@@ -24,8 +24,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         /// <remarks>
         /// Only these two values disable IMDSv2. Anything else, including an unset or empty value, is
         /// ignored so that a typo cannot silently downgrade a host that supports IMDSv2. The value is
-        /// read from the process environment, which is fixed when the process starts, so a change to
-        /// the variable requires a restart or recycle to take effect.
+        /// read from the process environment, which nothing outside the process can modify, so an
+        /// operator's edit requires a restart or recycle to take effect.
         /// </remarks>
         public static bool IsImdsV2Disabled
         {

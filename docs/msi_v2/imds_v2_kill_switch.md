@@ -23,16 +23,19 @@ typo cannot quietly downgrade token binding across every host it was deployed to
 
 ## A restart is required
 
-The variable is read from the **process** environment, which is fixed when the process starts. A
-running process cannot observe an edit made after it launched, so setting or clearing the variable
-takes effect only after the process is restarted or recycled.
+The variable is read from the **process** environment. Nothing outside the process can modify that
+block: Windows exposes no supported API for it, and `/proc/<pid>/environ` is read-only on Linux. An
+edit made at the machine, service, or container level is therefore invisible to an already-running
+process, so setting or clearing the variable takes effect only after a restart or recycle.
 
 This is mechanics, not policy, and it is not a limitation in practice: the deployment mechanisms
 that would set the variable (app restart, container replacement, VM reimage) all restart the
 process anyway.
 
-It also means the value cannot change mid-process, so MSAL has no warm-cache state to reconcile —
-whatever discovery cached was necessarily computed under the switch state still in force.
+A process can still change its own block through `Environment.SetEnvironmentVariable`, which is how
+the tests exercise both states, but MSAL exposes no way to do that and no deployment mechanism does
+it. In any real host the value is settled before the first call, so MSAL has no warm-cache state to
+reconcile — whatever discovery cached was computed under the switch state still in force.
 
 ## Behavior when the switch is on
 
