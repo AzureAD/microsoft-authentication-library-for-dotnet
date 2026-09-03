@@ -16,13 +16,10 @@ namespace Microsoft.Identity.Client.Extensibility
     /// </summary>
     /// <remarks>
     /// <para>
-    /// The tag names listed for a metric are the canonical base tags MSAL emits for it (some are conditional). They do not
+    /// The tag names listed for a metric are the canonical base tags MSAL emits for it. They do not
     /// include any extra tags supplied through
     /// <see cref="AbstractConfidentialClientAcquireTokenParameterBuilderExtension.WithOtelTagsEnricher{T}"/>,
-    /// which are caller-defined and therefore not part of this catalog. Some canonical tags are emitted only
-    /// under certain conditions (for example the raw STS error-code tag is present on the failure counter only
-    /// when the STS returns a sub-error); they are listed here because they are part of the metric's canonical
-    /// schema.
+    /// which are caller-defined and therefore not part of this catalog.
     /// </para>
     /// <para>
     /// Both the metric names (the dictionary keys) and the tag names (the dictionary values) are plain strings

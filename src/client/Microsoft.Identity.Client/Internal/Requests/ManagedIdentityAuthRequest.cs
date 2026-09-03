@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
@@ -260,9 +261,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 msalTokenResponse = await DelegateImdsV2TokenLegAsync(resource, forceRemint: false, cancellationToken)
                     .ConfigureAwait(false);
             }
-            catch (MsalServiceException ex) when (
-                string.Equals(ex.ErrorCode, MsalError.InvalidClient, StringComparison.OrdinalIgnoreCase) ||
-                ImdsV2ManagedIdentitySource.IsSchanelFailure(ex))
+            catch (Exception ex) when (ShouldRemintImdsV2Binding(ex))
             {
                 logger.Info("[ManagedIdentityRequest] mTLS binding rejected (invalid_client/SCHANNEL); re-minting binding certificate and retrying once.");
                 msalTokenResponse = await DelegateImdsV2TokenLegAsync(resource, forceRemint: true, cancellationToken)
@@ -274,6 +273,25 @@ namespace Microsoft.Identity.Client.Internal.Requests
             msalTokenResponse.Scope = AuthenticationRequestParameters.Scope.AsSingleString();
 
             return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse, cancellationToken).ConfigureAwait(false);
+        }
+
+        // A SCHANNEL handshake failure means the cached binding cert is unusable (its KeyGuard key was
+        // re-minted underneath it), so the cert must be evicted rather than retried as-is. It can arrive
+        // wrapped or raw depending on the path, hence the chain walk in IsSchannelFailure.
+        private static bool ShouldRemintImdsV2Binding(Exception ex)
+        {
+            if (ex is OperationCanceledException)
+            {
+                return false;
+            }
+
+            if (ex is MsalServiceException serviceException &&
+                string.Equals(serviceException.ErrorCode, MsalError.InvalidClient, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            return ImdsV2ManagedIdentitySource.IsSchannelFailure(ex);
         }
 
         private async Task<MsalTokenResponse> DelegateImdsV2TokenLegAsync(
@@ -326,12 +344,45 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             var tokenClient = new TokenClient(AuthenticationRequestParameters);
 
-            return await tokenClient.SendTokenRequestAsync(
-                bodyParameters,
-                scopeOverride: scopeOverride,
-                tokenEndpointOverride: tokenEndpoint,
-                cancellationToken: cancellationToken)
-                .ConfigureAwait(false);
+            try
+            {
+                return await tokenClient.SendTokenRequestAsync(
+                    bodyParameters,
+                    scopeOverride: scopeOverride,
+                    tokenEndpointOverride: tokenEndpoint,
+                    cancellationToken: cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            catch (Exception ex) when (IsUnwrappedNonMsalFailure(ex))
+            {
+                // The bespoke MI token path normalized transport failures via
+                // AbstractManagedIdentity.HandleException; TokenClient does not. Without this, callers stop
+                // receiving MsalServiceException and the re-mint filter above no longer matches (issue #6172).
+                // Error codes mirror HandleException. The original exception is preserved as the inner one so
+                // SCHANNEL detection can still walk the chain.
+                string errorCode = ex switch
+                {
+                    HttpRequestException => MsalError.ManagedIdentityUnreachableNetwork,
+                    FormatException => MsalError.InvalidManagedIdentityEndpoint,
+                    _ => MsalError.ManagedIdentityRequestFailed
+                };
+
+                throw MsalServiceExceptionFactory.CreateManagedIdentityException(
+                    errorCode,
+                    ex.Message,
+                    ex,
+                    ManagedIdentitySource.Imds,
+                    null);
+            }
+        }
+
+        // Exceptions MSAL already owns pass through untouched so service errors (for example invalid_client)
+        // keep their error codes, and cancellation is never converted. Deliberately broader than
+        // HandleException's gate, which rewrapped MsalClientException as the generic managed_identity_request_failed;
+        // keeping the more specific client-side code is strictly more diagnosable.
+        private static bool IsUnwrappedNonMsalFailure(Exception ex)
+        {
+            return ex is not MsalException && ex is not OperationCanceledException;
         }
 
         private async Task<MsalAccessTokenCacheItem> GetCachedAccessTokenAsync()
