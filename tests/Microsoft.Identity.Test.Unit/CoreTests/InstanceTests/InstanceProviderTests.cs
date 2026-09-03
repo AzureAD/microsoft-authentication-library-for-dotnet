@@ -1,6 +1,7 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.Identity.Client;
@@ -8,6 +9,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal.Logger;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
@@ -192,6 +194,218 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             Assert.AreEqual(host, result.PreferredNetwork);
             Assert.AreEqual(host, result.PreferredCache);
             CollectionAssert.Contains(result.Aliases, host);
+        }
+
+        [TestMethod]
+        public void KnownCloudMetadata_ReturnsMetadataForCloudsWithFic()
+        {
+            // Arrange — every cloud that ships a FIC audience should resolve to a non-null bag.
+            var metadata = KnownCloudMetadata.Default;
+
+            string[] ficHosts = new[]
+            {
+                "login.microsoftonline.com",
+                "login.windows.net",
+                "login.microsoft.com",
+                "sts.windows.net",
+                "login.partner.microsoftonline.cn",
+                "login.chinacloudapi.cn",
+                "login.microsoftonline.us",
+                "login.usgovcloudapi.net",
+                "login-us.microsoftonline.com",
+                "login.windows-ppe.net",
+                "login.sovcloud-identity.fr",
+                "login.sovcloud-identity.de",
+                "login.sovcloud-identity.sg",
+            };
+
+            // Act & Assert
+            foreach (string host in ficHosts)
+            {
+                IReadOnlyDictionary<string, string> values = metadata.GetByAuthorityHost(host);
+                Assert.IsNotNull(values, $"Expected non-null metadata for '{host}'");
+                Assert.IsTrue(
+                    values.ContainsKey(CloudMetadataKeyNames.FederatedCredentialAudience),
+                    $"Expected FIC audience key for '{host}'");
+            }
+        }
+
+        [TestMethod]
+        [DataRow("login.microsoftonline.de")]
+        public void KnownCloudMetadata_ReturnsNullForCloudsWithoutFic(string host)
+        {
+            // Arrange — known clouds that ship no FIC audience expose no metadata, so lookup returns null
+            // (the same "no value available" outcome as an unknown host — no KeyNotFound footgun).
+            // login.microsoftonline.de is the decommissioned Microsoft Cloud Germany, which has no
+            // token-exchange application.
+            var metadata = KnownCloudMetadata.Default;
+
+            // Act & Assert
+            Assert.IsNull(metadata.GetByAuthorityHost(host));
+        }
+
+        [TestMethod]
+        public void KnownCloudMetadata_AliasesResolveToSameInstance()
+        {
+            // Arrange
+            var metadata = KnownCloudMetadata.Default;
+
+            // Act
+            IReadOnlyDictionary<string, string> values1 = metadata.GetByAuthorityHost("login.microsoftonline.com");
+            IReadOnlyDictionary<string, string> values2 = metadata.GetByAuthorityHost("login.windows.net");
+            IReadOnlyDictionary<string, string> values3 = metadata.GetByAuthorityHost("login.microsoft.com");
+            IReadOnlyDictionary<string, string> values4 = metadata.GetByAuthorityHost("sts.windows.net");
+
+            // Assert
+            Assert.AreSame(values1, values2);
+            Assert.AreSame(values2, values3);
+            Assert.AreSame(values3, values4);
+        }
+
+        [TestMethod]
+        public void KnownCloudMetadata_CaseInsensitiveLookup()
+        {
+            // Arrange
+            var metadata = KnownCloudMetadata.Default;
+
+            // Act
+            IReadOnlyDictionary<string, string> lower = metadata.GetByAuthorityHost("login.microsoftonline.com");
+            IReadOnlyDictionary<string, string> upper = metadata.GetByAuthorityHost("LOGIN.MICROSOFTONLINE.COM");
+            IReadOnlyDictionary<string, string> mixed = metadata.GetByAuthorityHost("Login.MicrosoftOnline.Com");
+
+            // Assert
+            Assert.AreSame(lower, upper);
+            Assert.AreSame(upper, mixed);
+        }
+
+        [TestMethod]
+        public void KnownCloudMetadata_ReturnsNullForUnknownAndEmpty()
+        {
+            // Arrange
+            var metadata = KnownCloudMetadata.Default;
+
+            // Act & Assert
+            Assert.IsNull(metadata.GetByAuthorityHost("bogus.example.com"));
+            Assert.IsNull(metadata.GetByAuthorityHost(""));
+            Assert.IsNull(metadata.GetByAuthorityHost(null));
+        }
+
+        [TestMethod]
+        [DataRow("login.microsoftonline.com", "api://AzureADTokenExchange")]
+        [DataRow("login.windows.net", "api://AzureADTokenExchange")]
+        [DataRow("login.partner.microsoftonline.cn", "api://AzureADTokenExchangeChina")]
+        [DataRow("login.microsoftonline.us", "api://AzureADTokenExchangeUSGov")]
+        [DataRow("login.usgovcloudapi.net", "api://AzureADTokenExchangeUSGov")]
+        [DataRow("login.sovcloud-identity.fr", "api://AzureADTokenExchangeFrance")]
+        [DataRow("login.sovcloud-identity.de", "api://AzureADTokenExchangeGermany")]
+        [DataRow("login.sovcloud-identity.sg", "api://AzureADTokenExchangeGovSG")]
+        [DataRow("login.windows-ppe.net", "api://AzureADTokenExchangePpe")]
+        [DataRow("login-us.microsoftonline.com", "api://AzureADTokenExchange")]
+        public void KnownCloudMetadata_FederatedCredentialAudience_KnownClouds(
+            string host, string expectedAudience)
+        {
+            // Arrange
+            var metadata = KnownCloudMetadata.Default;
+
+            // Act
+            IReadOnlyDictionary<string, string> values = metadata.GetByAuthorityHost(host);
+
+            // Assert — the returned bag, when non-null, always contains the FIC key.
+            Assert.IsNotNull(values);
+            Assert.AreEqual(expectedAudience, values[CloudMetadataKeyNames.FederatedCredentialAudience]);
+        }
+
+        [TestMethod]
+        public void KnownCloudMetadata_ReturnedDictionary_IsReadOnly()
+        {
+            // Arrange
+            var metadata = KnownCloudMetadata.Default;
+
+            // Act
+            IReadOnlyDictionary<string, string> values = metadata.GetByAuthorityHost("login.microsoftonline.com");
+
+            // Assert — the built-in bag cannot be mutated through the mutable dictionary interface.
+            Assert.IsNotNull(values);
+            var mutable = values as IDictionary<string, string>;
+            Assert.IsNotNull(mutable, "Expected the bag to implement IDictionary for this guard.");
+            AssertException.Throws<System.NotSupportedException>(
+                () => mutable[CloudMetadataKeyNames.FederatedCredentialAudience] = "api://Tampered");
+        }
+
+        [TestMethod]
+        public void KnownCloudMetadata_DefaultIsSingleton()
+        {
+            // Act
+            var instance1 = KnownCloudMetadata.Default;
+            var instance2 = KnownCloudMetadata.Default;
+
+            // Assert
+            Assert.AreSame(instance1, instance2);
+        }
+
+        [TestMethod]
+        [DataRow("api://AzureADTokenExchange", "api://AzureADTokenExchange/.default")]
+        [DataRow("api://AzureADTokenExchangeChina", "api://AzureADTokenExchangeChina/.default")]
+        [DataRow("api://AzureADTokenExchangeUSGov", "api://AzureADTokenExchangeUSGov/.default")]
+        public void TokenExchangeScope_FromAudience_AppendsDefaultSuffix(string audience, string expectedScope)
+        {
+            // Act & Assert — the audience is stored bare; the scope is computed with "/.default".
+            Assert.AreEqual(expectedScope, TokenExchangeScope.FromAudience(audience));
+        }
+
+        [TestMethod]
+        public void TokenExchangeScope_FromAudience_DoesNotDoubleAppendSuffix()
+        {
+            // Act & Assert — an audience that already carries the suffix is returned unchanged (case-insensitive).
+            Assert.AreEqual(
+                "api://AzureADTokenExchange/.default",
+                TokenExchangeScope.FromAudience("api://AzureADTokenExchange/.default"));
+            Assert.AreEqual(
+                "api://AzureADTokenExchange/.DEFAULT",
+                TokenExchangeScope.FromAudience("api://AzureADTokenExchange/.DEFAULT"));
+        }
+
+        [TestMethod]
+        public void TokenExchangeScope_FromAudience_NullOrEmpty_ReturnsNull()
+        {
+            // Act & Assert
+            Assert.IsNull(TokenExchangeScope.FromAudience(null));
+            Assert.IsNull(TokenExchangeScope.FromAudience(""));
+        }
+
+        [TestMethod]
+        public void KnownMetadataProvider_Aliases_MatchKnownCloudData()
+        {
+            // Arrange — KnownMetadataProvider projects its alias sets from KnownCloudData, the single
+            // source of truth. This guards against drift between the internal metadata table and the data.
+            // (The public KnownCloudMetadata projects from the same data; preferred hosts are deliberately
+            // not exposed on the public bag.)
+            var knownMetadata = new KnownMetadataProvider();
+
+            string[] primaryHosts = new[]
+            {
+                "login.microsoftonline.com",
+                "login.partner.microsoftonline.cn",
+                "login.microsoftonline.de",
+                "login.microsoftonline.us",
+                "login-us.microsoftonline.com",
+                "login.windows-ppe.net",
+                "login.sovcloud-identity.fr",
+                "login.sovcloud-identity.de",
+                "login.sovcloud-identity.sg",
+            };
+
+            foreach (string host in primaryHosts)
+            {
+                // Act
+                InstanceDiscoveryMetadataEntry metadata = knownMetadata.GetMetadata(host, null, _logger);
+                KnownCloudEntry source = KnownCloudData.Entries.Single(
+                    e => e.Aliases.Contains(host, System.StringComparer.OrdinalIgnoreCase));
+
+                // Assert
+                Assert.IsNotNull(metadata, $"KnownMetadata missing for '{host}'");
+                CollectionAssert.AreEquivalent(source.Aliases, metadata.Aliases, $"Aliases mismatch for '{host}'");
+            }
         }
     }
 }
