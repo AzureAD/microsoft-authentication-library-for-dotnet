@@ -1,3 +1,5 @@
+const Microsoft.Identity.Client.MsalError.TooManyRedirects = "too_many_redirects" -> string
+const Microsoft.Identity.Client.MsalError.WsTrustCrossOriginRedirectNotSupported = "wstrust_cross_origin_redirect_failed" -> string
 Microsoft.Identity.Client.Instance.Discovery.CloudMetadataKeyNames
 Microsoft.Identity.Client.Instance.Discovery.KnownCloudMetadata
 Microsoft.Identity.Client.Instance.Discovery.KnownCloudMetadata.GetByAuthorityHost(string authorityHost) -> System.Collections.Generic.IReadOnlyDictionary<string, string>

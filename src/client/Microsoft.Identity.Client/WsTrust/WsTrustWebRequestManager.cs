@@ -18,6 +18,7 @@ namespace Microsoft.Identity.Client.WsTrust
 {
     internal class WsTrustWebRequestManager : IWsTrustWebRequestManager
     {
+        internal const int MaxRedirects = 50;
         private readonly IHttpManager _httpManager;
 
         public WsTrustWebRequestManager(IHttpManager httpManager)
@@ -39,23 +40,39 @@ namespace Microsoft.Identity.Client.WsTrust
 
             Dictionary<string, string> msalIdParams = MsalIdHelper.GetMsalIdParameters(requestContext.Logger);
 
-            var uri = new UriBuilder(federationMetadataUrl);
+            if (string.IsNullOrWhiteSpace(federationMetadataUrl))
+            {
+                throw new MsalClientException(
+                    MsalError.MissingFederationMetadataUrl,
+                    MsalErrorMessage.MissingFederationMetadataUrl);
+            }
+
+            if (!Uri.IsWellFormedUriString(federationMetadataUrl, UriKind.Absolute))
+            {
+                throw new MsalClientException(
+                    MsalError.ParsingWsMetadataExchangeFailed,
+                    MsalErrorMessage.WsTrustMetadataEndpointInvalidUri);
+            }
+
+            var uri = new Uri(federationMetadataUrl);
+            if (!IsHttpsUri(uri))
+            {
+                throw new MsalClientException(
+                    MsalError.AccessingWsMetadataExchangeFailed,
+                    MsalErrorMessage.WsTrustMetadataEndpointRequiresHttps);
+            }
 
             IRetryPolicyFactory retryPolicyFactory = requestContext.ServiceBundle.Config.RetryPolicyFactory;
             IRetryPolicy retryPolicy = retryPolicyFactory.GetRetryPolicy(RequestType.STS);
 
-            HttpResponse httpResponse = await _httpManager.SendRequestAsync(
-                uri.Uri,
+            HttpResponse httpResponse = await SendWithSecureRedirectsAsync(
+                uri,
                 msalIdParams,
                 body: null,
                 method: HttpMethod.Get,
-                logger: requestContext.Logger,
                 doNotThrow: false,
-                mtlsCertificate: null,
-                validateServerCertificate: null,
-                cancellationToken: requestContext.UserCancellationToken,
-                retryPolicy: retryPolicy)
-            .ConfigureAwait(false);
+                requestContext,
+                retryPolicy).ConfigureAwait(false);
 
             if (httpResponse.StatusCode != System.Net.HttpStatusCode.OK)
             {
@@ -92,6 +109,18 @@ namespace Microsoft.Identity.Client.WsTrust
             string wsTrustRequest,
             RequestContext requestContext)
         {
+            if (wsTrustEndpoint is null)
+            {
+                throw new ArgumentNullException(nameof(wsTrustEndpoint));
+            }
+
+            if (!IsHttpsUri(wsTrustEndpoint.Uri))
+            {
+                throw new MsalClientException(
+                    MsalError.WsTrustEndpointNotFoundInMetadataDocument,
+                    MsalErrorMessage.WsTrustEndpointNotFoundInMetadataDocument);
+            }
+
             var headers = new Dictionary<string, string>
             {
                 { "SOAPAction", (wsTrustEndpoint.Version == WsTrustVersion.WsTrust2005) ? XmlNamespace.Issue2005.ToString() : XmlNamespace.Issue.ToString() }
@@ -103,18 +132,14 @@ namespace Microsoft.Identity.Client.WsTrust
             IRetryPolicyFactory retryPolicyFactory = requestContext.ServiceBundle.Config.RetryPolicyFactory;
             IRetryPolicy retryPolicy = retryPolicyFactory.GetRetryPolicy(RequestType.STS);
 
-            HttpResponse resp = await _httpManager.SendRequestAsync(
+            HttpResponse resp = await SendWithSecureRedirectsAsync(
                 wsTrustEndpoint.Uri,
                 headers,
-                body: body,
-                method: HttpMethod.Post,
-                logger: requestContext.Logger,
+                body,
+                HttpMethod.Post,
                 doNotThrow: true,
-                mtlsCertificate: null,
-                validateServerCertificate: null,
-                cancellationToken: requestContext.UserCancellationToken,
-                retryPolicy: retryPolicy)
-            .ConfigureAwait(false);
+                requestContext,
+                retryPolicy).ConfigureAwait(false);
 
             if (resp.StatusCode != System.Net.HttpStatusCode.OK)
             {
@@ -217,6 +242,170 @@ namespace Microsoft.Identity.Client.WsTrust
                 MsalError.UserRealmDiscoveryFailed,
                 message,
                 httpResponse);
+        }
+
+        private static bool IsHttpsUri(Uri uri)
+        {
+            return uri is not null &&
+                string.Equals(uri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private async Task<HttpResponse> SendWithSecureRedirectsAsync(
+            Uri initialUri,
+            IDictionary<string, string> headers,
+            HttpContent body,
+            HttpMethod method,
+            bool doNotThrow,
+            RequestContext requestContext,
+            IRetryPolicy retryPolicy)
+        {
+            Uri requestUri = initialUri;
+            HttpMethod requestMethod = method;
+            HttpContent requestBody = body;
+            bool useDefaultCredentials = true;
+            int redirectCount = 0;
+
+            using (var operationContext = new HttpRequestOperationContext(requestContext.UserCancellationToken))
+            {
+                while (true)
+                {
+                    HttpResponse response = await _httpManager.SendRequestAsync(
+                        requestUri,
+                        headers,
+                        body: requestBody,
+                        method: requestMethod,
+                        logger: requestContext.Logger,
+                        doNotThrow: doNotThrow,
+                        mtlsCertificate: null,
+                        validateServerCertificate: null,
+                        cancellationToken: requestContext.UserCancellationToken,
+                        retryPolicy: retryPolicy,
+                        allowAutoRedirect: false,
+                        useDefaultCredentials: useDefaultCredentials,
+                        operationContext: operationContext)
+                    .ConfigureAwait(false);
+
+                    ThrowIfNonHttpsResponse(response, requestUri);
+
+                    if (!TryGetSecureRedirectUri(response, requestUri, out Uri redirectUri))
+                    {
+                        return response;
+                    }
+
+                    if (redirectCount >= MaxRedirects)
+                    {
+                        throw new MsalClientException(
+                            MsalError.TooManyRedirects,
+                            MsalErrorMessage.TooManyRedirects);
+                    }
+
+                    HttpMethod redirectMethod = requestMethod;
+                    HttpContent redirectBody = requestBody;
+                    if (RedirectChangesMethodToGet(response.StatusCode, requestMethod))
+                    {
+                        redirectMethod = HttpMethod.Get;
+                        redirectBody = null;
+                    }
+
+                    if (redirectBody is not null &&
+                        !IsSameOrigin(initialUri, redirectUri))
+                    {
+                        throw new MsalClientException(
+                            MsalError.WsTrustCrossOriginRedirectNotSupported,
+                            MsalErrorMessage.WsTrustCrossOriginRedirectNotSupported);
+                    }
+
+                    requestUri = redirectUri;
+                    requestMethod = redirectMethod;
+                    requestBody = redirectBody;
+                    useDefaultCredentials =
+                        useDefaultCredentials &&
+                        IsSameOrigin(initialUri, redirectUri);
+                    redirectCount++;
+                }
+            }
+        }
+
+        private static void ThrowIfNonHttpsResponse(HttpResponse response, Uri requestUri)
+        {
+            if (!IsHttpsUri(response.RequestUri ?? requestUri))
+            {
+                throw new MsalClientException(
+                    MsalError.NonHttpsRedirectNotSupported,
+                    MsalErrorMessage.WsTrustNonHttpsRedirectNotSupported);
+            }
+        }
+
+        private static bool TryGetSecureRedirectUri(
+            HttpResponse response,
+            Uri requestUri,
+            out Uri redirectUri)
+        {
+            redirectUri = null;
+
+            if (!IsRedirectStatusCode(response.StatusCode) ||
+                response.Headers?.Location is not Uri location)
+            {
+                return false;
+            }
+
+            Uri responseUri = response.RequestUri ?? requestUri;
+            redirectUri = location.IsAbsoluteUri
+                ? location
+                : new Uri(responseUri, location);
+
+            if (!IsHttpsUri(redirectUri))
+            {
+                throw new MsalClientException(
+                    MsalError.NonHttpsRedirectNotSupported,
+                    MsalErrorMessage.WsTrustNonHttpsRedirectNotSupported);
+            }
+
+            return true;
+        }
+
+        private static bool IsSameOrigin(Uri firstUri, Uri secondUri)
+        {
+            return string.Equals(
+                       firstUri.Scheme,
+                       secondUri.Scheme,
+                       StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(
+                    firstUri.IdnHost,
+                    secondUri.IdnHost,
+                    StringComparison.OrdinalIgnoreCase) &&
+                firstUri.Port == secondUri.Port;
+        }
+
+        private static bool IsRedirectStatusCode(System.Net.HttpStatusCode statusCode)
+        {
+            switch ((int)statusCode)
+            {
+                case 300:
+                case 301:
+                case 302:
+                case 303:
+                case 307:
+                case 308:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        private static bool RedirectChangesMethodToGet(
+            System.Net.HttpStatusCode statusCode,
+            HttpMethod requestMethod)
+        {
+            int statusCodeValue = (int)statusCode;
+
+            return ((statusCodeValue == 300 ||
+                     statusCodeValue == 301 ||
+                     statusCodeValue == 302) &&
+                    requestMethod == HttpMethod.Post) ||
+                (statusCodeValue == 303 &&
+                 requestMethod != HttpMethod.Get &&
+                 requestMethod != HttpMethod.Head);
         }
     }
 }

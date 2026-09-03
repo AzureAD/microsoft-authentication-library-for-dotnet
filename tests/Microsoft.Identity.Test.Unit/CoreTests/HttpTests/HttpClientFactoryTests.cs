@@ -5,6 +5,7 @@ using System;
 using System.Net.Http;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
@@ -40,6 +41,31 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
 
             // Assert
             Assert.IsNotNull(client);
+        }
+
+        [TestMethod]
+        public void RedirectConfigurationUsesSeparateHttpClientPool()
+        {
+            // Arrange
+            var factory = new SimpleHttpClientFactory();
+            var redirectControlFactory = (IHttpClientFactoryWithRedirectControl)factory;
+
+            // Act
+            HttpClient defaultClient = factory.GetHttpClient();
+            HttpClient noRedirectClient = redirectControlFactory.GetHttpClient(
+                allowAutoRedirect: false,
+                useDefaultCredentials: true);
+            HttpClient secondNoRedirectClient = redirectControlFactory.GetHttpClient(
+                allowAutoRedirect: false,
+                useDefaultCredentials: true);
+            HttpClient noRedirectNoCredentialsClient = redirectControlFactory.GetHttpClient(
+                allowAutoRedirect: false,
+                useDefaultCredentials: false);
+
+            // Assert
+            Assert.AreNotSame(defaultClient, noRedirectClient);
+            Assert.AreSame(noRedirectClient, secondNoRedirectClient);
+            Assert.AreNotSame(noRedirectClient, noRedirectNoCredentialsClient);
         }
 
         [TestMethod]

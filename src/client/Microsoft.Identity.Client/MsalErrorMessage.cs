@@ -105,7 +105,26 @@ namespace Microsoft.Identity.Client
         public const string RopcDoesNotSupportMsaAccounts = "ROPC does not support MSA accounts. See https://aka.ms/msal-net-ropc for details. ";
 
         public const string WsTrustEndpointNotFoundInMetadataDocument =
-            "WS-Trust endpoint not found in metadata document. ";
+            "A secure HTTPS WS-Trust endpoint was not found in the metadata document. ";
+
+        public const string WsTrustMetadataEndpointRequiresHttps =
+            "The WS-Trust metadata endpoint must use HTTPS. ";
+
+        public const string WsTrustMetadataEndpointInvalidUri =
+            "The WS-Trust metadata endpoint must be a well-formed absolute URI. ";
+
+        public const string WsTrustNonHttpsRedirectNotSupported =
+            "A non-HTTPS redirect is not supported for WS-Trust requests. ";
+
+        public const string WsTrustCrossOriginRedirectNotSupported =
+            "A WS-Trust redirect that preserves credentials must remain on the original HTTPS origin. ";
+
+        public const string TooManyRedirects =
+            "The HTTP request exceeded the maximum number of redirects. ";
+
+        public const string CustomHttpClientFactoryRedirectControlUnavailable =
+            "MSAL cannot control redirects or default credentials for the configured custom HTTP client factory. " +
+            "The custom factory is responsible for enforcing equivalent redirect and credential-target policies in WS-Trust scenarios. ";
 
         public const string GetUserNameFailed = "Failed to get user name. ";
 

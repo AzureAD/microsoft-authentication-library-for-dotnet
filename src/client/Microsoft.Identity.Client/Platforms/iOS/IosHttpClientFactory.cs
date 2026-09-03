@@ -7,20 +7,40 @@ using UIKit;
 
 namespace Microsoft.Identity.Client.Platforms.iOS
 {
-    internal class IosHttpClientFactory : IMsalHttpClientFactory
+    internal class IosHttpClientFactory :
+        IMsalHttpClientFactory,
+        IHttpClientFactoryWithRedirectControl
     {
         public HttpClient GetHttpClient()
+        {
+            return GetHttpClient(allowAutoRedirect: true);
+        }
+
+        HttpClient IHttpClientFactoryWithRedirectControl.GetHttpClient(
+            bool allowAutoRedirect,
+            bool useDefaultCredentials)
+        {
+            return GetHttpClient(allowAutoRedirect);
+        }
+
+        private static HttpClient GetHttpClient(bool allowAutoRedirect)
         {
             HttpClient httpClient;
             if (UIDevice.CurrentDevice.CheckSystemVersion(7, 0))
             {
-                var handler = new NSUrlSessionHandler();
+                var handler = new NSUrlSessionHandler
+                {
+                    AllowAutoRedirect = allowAutoRedirect
+                };
                 httpClient = new HttpClient(handler);
                
             }
             else
             {
-                httpClient = new HttpClient();
+                httpClient = new HttpClient(new HttpClientHandler
+                {
+                    AllowAutoRedirect = allowAutoRedirect
+                });
             }
 
             HttpClientConfig.ConfigureRequestHeadersAndSize(httpClient);
@@ -28,4 +48,3 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         }
     }
 }
-

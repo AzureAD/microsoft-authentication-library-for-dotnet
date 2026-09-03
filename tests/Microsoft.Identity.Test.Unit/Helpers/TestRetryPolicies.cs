@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Http.Retry;
@@ -11,7 +12,7 @@ namespace Microsoft.Identity.Test.Unit.Helpers
     {
         public TestDefaultRetryPolicy(RequestType requestType) : base(requestType) { }
 
-        internal override Task DelayAsync(int milliseconds)
+        internal override Task DelayAsync(int milliseconds, CancellationToken cancellationToken)
         {
             // No delay for tests
             return Task.CompletedTask;
@@ -22,7 +23,7 @@ namespace Microsoft.Identity.Test.Unit.Helpers
     {
         public TestImdsRetryPolicy() : base() { }
 
-        internal override Task DelayAsync(int milliseconds)
+        internal override Task DelayAsync(int milliseconds, CancellationToken cancellationToken)
         {
             // No delay for tests
             return Task.CompletedTask;
@@ -33,7 +34,7 @@ namespace Microsoft.Identity.Test.Unit.Helpers
     {
         public TestRegionDiscoveryRetryPolicy() : base() { }
 
-        internal override Task DelayAsync(int milliseconds)
+        internal override Task DelayAsync(int milliseconds, CancellationToken cancellationToken)
         {
             // No delay for tests
             return Task.CompletedTask;
@@ -44,7 +45,7 @@ namespace Microsoft.Identity.Test.Unit.Helpers
     {
         public TestImdsProbeRetryPolicy() : base() { }
 
-        internal override Task DelayAsync(int milliseconds)
+        internal override Task DelayAsync(int milliseconds, CancellationToken cancellationToken)
         {
             // No delay for tests
             return Task.CompletedTask;
