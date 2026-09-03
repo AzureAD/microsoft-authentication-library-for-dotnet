@@ -1247,22 +1247,6 @@ namespace Microsoft.Identity.Client
         public const string MtlsPopTokenNotSupportedinImdsV1 = "mtls_pop_token_not_supported_in_imds_v1";
 
         /// <summary>
-        /// <para>What happened?</para> The request requires IMDSv2, but IMDSv2 has been disabled on
-        /// this machine by the <c>MSAL_MI_DISABLE_IMDS_V2</c> environment variable. Requests that
-        /// require IMDSv2 - mTLS Proof-of-Possession
-        /// (<c>WithMtlsProofOfPossession()</c>) and mTLS-bound bearer tokens
-        /// (<c>WithRequestOverMtls()</c>) - cannot be served while the switch is set. Plain bearer
-        /// token requests continue to work over IMDSv1.
-        /// <para>Mitigation:</para> Clear or unset the <c>MSAL_MI_DISABLE_IMDS_V2</c> environment
-        /// variable to re-enable IMDSv2, or remove the mTLS request option and acquire a plain
-        /// bearer token instead. This error indicates a deliberate machine-level configuration
-        /// choice, not a host capability limit - contrast with
-        /// <see cref="MtlsPopTokenNotSupportedinImdsV1"/>, which means the host itself cannot
-        /// support IMDSv2.
-        /// </summary>
-        public const string ImdsV2Disabled = "imds_v2_disabled";
-
-        /// <summary>
         /// <para>What happened?</para> A minimum mTLS binding strength was requested via
         /// <c>PoPOptions.MinStrength</c>, but the current host cannot produce a key binding that
         /// meets the required floor.

@@ -30,16 +30,19 @@ SDKs customizing the httpclient factory will continue to use the old `IMsalHttpC
 
 ## Capability discovery and the IMDSv2 kill switch
 
-SDKs that branch on `GetManagedIdentityCapabilitiesAsync()` should be aware that IMDSv2 can be
-disabled process-wide with the `MSAL_MI_DISABLE_IMDS_V2` environment variable. While it is set,
-the capabilities API reports `MaxSupportedBindingStrength = None` and
-`IsMtlsPopSupportedByHost = false`, with the reason in `ErrorReason`.
+IMDSv2 can be disabled for a process by setting the `MSAL_MI_DISABLE_IMDS_V2` environment
+variable. While it is set, `GetManagedIdentityCapabilitiesAsync()` reports
+`MaxSupportedBindingStrength = None` and `IsMtlsPopSupportedByHost = false`, and mTLS requests
+throw rather than returning an unbound token.
 
-This is intentional: it lets credential chains such as `DefaultAzureCredential` fall back to
-the bearer path instead of selecting a PoP path that would throw on every token request. No
-SDK change is required — the existing "branch on capability, not on source label" guidance
-already produces the correct behavior. See
-[IMDSv2 Kill Switch](./imds_v2_kill_switch.md) for details.
+No SDK change is required. The existing guidance to branch on capability rather than on the source
+label already produces the correct behavior: the capabilities API reports what the caller can
+actually obtain, so a chain such as `DefaultAzureCredential` selects the bearer path instead of a
+PoP path that would fail on every request.
+
+The variable is read from the process environment and therefore cannot change while the process
+runs, so the reported capability is stable for the lifetime of the process and does not need to be
+re-checked. See [IMDSv2 Kill Switch](./imds_v2_kill_switch.md) for details.
 
 
 

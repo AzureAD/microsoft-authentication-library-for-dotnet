@@ -457,17 +457,6 @@ namespace Microsoft.Identity.Client
         public const string CannotSwitchBetweenImdsVersionsForPreview = "ImdsV2 is currently experimental - A Bearer token has already been received; Please restart the application to receive a mTLS PoP token.";
         public const string MtlsPopTokenNotSupportedinImdsV1 = "mTLS Proof of Possession with managed identity is currently in private preview and is not supported on this VM. Ensure you're running on a supported VM image.";
 
-        public const string ImdsV2Disabled =
-            "IMDSv2 is disabled on this machine by the MSAL_MI_DISABLE_IMDS_V2 environment variable, " +
-            "but this request requires IMDSv2. mTLS Proof-of-Possession (WithMtlsProofOfPossession) and " +
-            "mTLS-bound bearer tokens (WithRequestOverMtls) are served exclusively by IMDSv2 and cannot be " +
-            "downgraded to IMDSv1 without silently weakening the token binding you requested. " +
-            "Either unset MSAL_MI_DISABLE_IMDS_V2 to re-enable IMDSv2, or drop the mTLS request option to " +
-            "acquire a plain bearer token over IMDSv1.";
-
-        public const string ImdsV2DisabledDiscoveryReason =
-            "IMDSv2 is disabled by the MSAL_MI_DISABLE_IMDS_V2 environment variable.";
-
         public static string MinStrengthNotMet(object actualStrength, object requiredStrength) =>
             $"The host's maximum mTLS binding strength '{actualStrength}' does not meet the required minimum binding strength '{requiredStrength}' specified via PoPOptions.MinStrength.";
         public const string ManagedIdentityAllSourcesUnavailable = "All Managed Identity sources are unavailable.";

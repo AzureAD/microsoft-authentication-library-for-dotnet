@@ -3,6 +3,5 @@ Microsoft.Identity.Client.Instance.Discovery.KnownCloudMetadata
 Microsoft.Identity.Client.Instance.Discovery.KnownCloudMetadata.GetByAuthorityHost(string authorityHost) -> System.Collections.Generic.IReadOnlyDictionary<string, string>
 Microsoft.Identity.Client.Instance.Discovery.TokenExchangeScope
 const Microsoft.Identity.Client.Instance.Discovery.CloudMetadataKeyNames.FederatedCredentialAudience = "federated_credential_audience" -> string
-const Microsoft.Identity.Client.MsalError.ImdsV2Disabled = "imds_v2_disabled" -> string
 static Microsoft.Identity.Client.Instance.Discovery.KnownCloudMetadata.Default.get -> Microsoft.Identity.Client.Instance.Discovery.KnownCloudMetadata
 static Microsoft.Identity.Client.Instance.Discovery.TokenExchangeScope.FromAudience(string audience) -> string

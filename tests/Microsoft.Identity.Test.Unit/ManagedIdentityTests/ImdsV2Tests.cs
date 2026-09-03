@@ -1258,6 +1258,202 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
         #endregion
 
+        #region IMDSv2 Kill Switch Tests
+        // MSAL_MI_DISABLE_IMDS_V2 is read from the process environment, which a process cannot change
+        // after it starts, so these tests set it before any discovery runs to match how a host sees it.
+        // MockHttpManager fails on an unmatched request and on unconsumed mocks, so queueing only
+        // IMDSv1 mocks is what proves no IMDSv2 probe, CSR, or certificate call was issued.
+
+        [TestMethod]
+        [DataRow(null)] // unset
+        [DataRow("")]
+        [DataRow("false")]
+        [DataRow("yes")]
+        public async Task ImdsV2KillSwitch_UnsetOrUnrecognizedValue_LeavesImdsV2Enabled(string switchValue)
+        {
+            // Arrange
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                ManagedIdentityClient.ResetSourceForTest();
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
+                Environment.SetEnvironmentVariable(EnvironmentVariables.DisableImdsV2EnvVar, switchValue);
+
+                var managedIdentityApp = await CreateManagedIdentityAsync(
+                    httpManager,
+                    managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
+
+                AddMocksToGetEntraToken(httpManager);
+
+                // Act
+                var result = await managedIdentityApp
+                    .AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession()
+                    .WithAttestationSupport()
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual(MTLSPoP, result.TokenType);
+                Assert.IsNotNull(result.BindingCertificate);
+            }
+        }
+
+        [TestMethod]
+        [DataRow("true")]
+        [DataRow("True")]
+        [DataRow("1")]
+        public async Task ImdsV2KillSwitch_SupportedValue_DiscoveryReportsImdsV1AndNoBinding(string switchValue)
+        {
+            // Arrange
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                ManagedIdentityClient.ResetSourceForTest();
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
+                Environment.SetEnvironmentVariable(EnvironmentVariables.DisableImdsV2EnvVar, switchValue);
+
+                var managedIdentityApp = ManagedIdentityApplicationBuilder
+                    .Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpManager(httpManager)
+                    .WithRetryPolicyFactory(_testRetryPolicyFactory)
+                    .Build();
+
+                // Only the IMDSv1 probe is queued. The compute metadata call that grades IMDSv1
+                // binding strength is deliberately absent: with no route to a bound token there is
+                // nothing to grade, so an unconsumed mock here would mean the call still fired.
+                httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V1));
+
+                // Act
+                var capabilities = await (managedIdentityApp as ManagedIdentityApplication)
+                    .GetManagedIdentityCapabilitiesAsync(ManagedIdentityTests.ImdsProbesCancellationToken)
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual(ManagedIdentitySource.Imds, capabilities.Source);
+                Assert.AreEqual(MtlsBindingStrength.None, capabilities.MaxSupportedBindingStrength);
+                Assert.IsFalse(capabilities.IsMtlsPopSupportedByHost);
+                Assert.AreEqual(0, httpManager.QueueSize);
+            }
+        }
+
+        [TestMethod]
+        public async Task ImdsV2KillSwitch_RepeatedDiscovery_KeepsImdsV1Result()
+        {
+            // Arrange
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                ManagedIdentityClient.ResetSourceForTest();
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
+                Environment.SetEnvironmentVariable(EnvironmentVariables.DisableImdsV2EnvVar, "true");
+
+                var managedIdentityApp = ManagedIdentityApplicationBuilder
+                    .Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpManager(httpManager)
+                    .WithRetryPolicyFactory(_testRetryPolicyFactory)
+                    .Build();
+
+                httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V1));
+
+                // Act
+                var first = await (managedIdentityApp as ManagedIdentityApplication)
+                    .GetManagedIdentityCapabilitiesAsync(ManagedIdentityTests.ImdsProbesCancellationToken)
+                    .ConfigureAwait(false);
+
+                // The cached result is reused, so no further HTTP is issued. Because the switch is set
+                // before the first call, an IMDSv2 result can never reach the cache to be replayed.
+                var second = await (managedIdentityApp as ManagedIdentityApplication)
+                    .GetManagedIdentityCapabilitiesAsync(ManagedIdentityTests.ImdsProbesCancellationToken)
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual(ManagedIdentitySource.Imds, first.Source);
+                Assert.AreEqual(ManagedIdentitySource.Imds, second.Source);
+                Assert.AreEqual(0, httpManager.QueueSize);
+            }
+        }
+
+        [TestMethod]
+        public async Task ImdsV2KillSwitch_BearerTokenStillAcquiredOverImdsV1()
+        {
+            // Arrange
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                ManagedIdentityClient.ResetSourceForTest();
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
+                Environment.SetEnvironmentVariable(EnvironmentVariables.DisableImdsV2EnvVar, "true");
+
+                var managedIdentityApp = ManagedIdentityApplicationBuilder
+                    .Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpManager(httpManager)
+                    .WithRetryPolicyFactory(_testRetryPolicyFactory)
+                    .Build();
+
+                // Discovery runs first so the bearer token is served by a host that was resolved
+                // through the switch, not by the no-discovery IMDSv1 default.
+                httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V1));
+
+                await (managedIdentityApp as ManagedIdentityApplication)
+                    .GetManagedIdentityCapabilitiesAsync(ManagedIdentityTests.ImdsProbesCancellationToken)
+                    .ConfigureAwait(false);
+
+                httpManager.AddManagedIdentityMockHandler(
+                    ManagedIdentityTests.ImdsEndpoint,
+                    ManagedIdentityTests.Resource,
+                    MockHelpers.GetMsiSuccessfulResponse(),
+                    ManagedIdentitySource.Imds);
+
+                // Act
+                var result = await managedIdentityApp
+                    .AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual(Bearer, result.TokenType);
+                Assert.IsNull(result.BindingCertificate);
+            }
+        }
+
+        [TestMethod]
+        [DataRow(true)]  // WithMtlsProofOfPossession
+        [DataRow(false)] // WithRequestOverMtls
+        public async Task ImdsV2KillSwitch_MtlsRequest_ThrowsInsteadOfDowngradingToBearer(bool useProofOfPossession)
+        {
+            // Arrange
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                ManagedIdentityClient.ResetSourceForTest();
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
+                Environment.SetEnvironmentVariable(EnvironmentVariables.DisableImdsV2EnvVar, "true");
+
+                // No discovery is run, so this exercises the direct-to-IMDSv2 routing path that an
+                // mTLS request would otherwise take without probing. Both mTLS shapes are served
+                // only by IMDSv2, so neither may fall back to an unbound token.
+                var managedIdentityApp = ManagedIdentityApplicationBuilder
+                    .Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpManager(httpManager)
+                    .WithRetryPolicyFactory(_testRetryPolicyFactory)
+                    .WithCsrFactory(_testCsrFactory)
+                    .Build();
+
+                var builder = managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource);
+                builder = useProofOfPossession
+                    ? builder.WithMtlsProofOfPossession()
+                    : builder.WithRequestOverMtls();
+
+                // Act
+                var ex = await Assert.ThrowsAsync<MsalClientException>(async () =>
+                    await builder.ExecuteAsync().ConfigureAwait(false)
+                ).ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual(MsalError.MtlsPopTokenNotSupportedinImdsV1, ex.ErrorCode);
+            }
+        }
+        #endregion
+
         #region CSR Metadata Tests
         [TestMethod]
         public async Task GetCsrMetadataAsyncFailsWithMissingServerHeader()
@@ -3210,659 +3406,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         #endregion
-
-        #region IMDSv2 Kill Switch Tests (MSAL_MI_DISABLE_IMDS_V2)
-
-        private const string DisableImdsV2 = "MSAL_MI_DISABLE_IMDS_V2";
-
-        /// <summary>
-        /// Only "true" and "1" (case-insensitive) disable IMDSv2. Everything else - absent, empty,
-        /// whitespace, "false", "0", and unrecognized values - must leave IMDSv2 enabled so a typo
-        /// in the variable can never silently weaken token binding.
-        /// </summary>
-        [TestMethod]
-        [DataRow(null, false, DisplayName = "absent")]
-        [DataRow("", false, DisplayName = "empty")]
-        [DataRow("   ", false, DisplayName = "whitespace")]
-        [DataRow("false", false, DisplayName = "false")]
-        [DataRow("0", false, DisplayName = "0")]
-        [DataRow("yes", false, DisplayName = "yes (unsupported)")]
-        [DataRow("disable", false, DisplayName = "disable (unsupported)")]
-        [DataRow("true", true, DisplayName = "true")]
-        [DataRow("TRUE", true, DisplayName = "TRUE")]
-        [DataRow("True", true, DisplayName = "True")]
-        [DataRow("1", true, DisplayName = "1")]
-        public void KillSwitch_ParsesOnlySupportedValues(string value, bool expectedDisabled)
-        {
-            using (new EnvVariableContext())
-            {
-                // Arrange
-                Environment.SetEnvironmentVariable(DisableImdsV2, value);
-
-                // Act
-                bool actual = EnvironmentVariables.IsImdsV2Disabled;
-
-                // Assert
-                Assert.AreEqual(expectedDisabled, actual);
-            }
-        }
-
-        /// <summary>
-        /// With the switch set, discovery must not probe IMDSv2 nor run the IMDSv1 binding-strength
-        /// check. Only the IMDSv1 probe is mocked, so either extra call would find no handler. The
-        /// reported strength must be None so credential chains do not select a PoP path MSAL refuses.
-        /// </summary>
-        [TestMethod]
-        public async Task KillSwitch_Discovery_SkipsImdsV2ProbeAndReportsNoBinding()
-        {
-            using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager())
-            {
-                // Arrange
-                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
-                Environment.SetEnvironmentVariable(DisableImdsV2, "true");
-
-                var managedIdentityApp = ManagedIdentityApplicationBuilder
-                    .Create(ManagedIdentityId.SystemAssigned)
-                    .WithHttpManager(httpManager)
-                    .WithRetryPolicyFactory(_testRetryPolicyFactory)
-                    .Build();
-
-                // Only the IMDSv1 probe is expected. No IMDSv2 probe, no compute-metadata call.
-                httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V1));
-
-                // Act
-                var capabilities = await (managedIdentityApp as ManagedIdentityApplication)
-                    .GetManagedIdentityCapabilitiesAsync(ManagedIdentityTests.ImdsProbesCancellationToken)
-                    .ConfigureAwait(false);
-
-                // Assert
-                Assert.AreEqual(ManagedIdentitySource.Imds, capabilities.Source);
-                Assert.AreEqual(MtlsBindingStrength.None, capabilities.MaxSupportedBindingStrength);
-                Assert.IsFalse(capabilities.IsMtlsPopSupportedByHost);
-                Assert.IsNotNull(capabilities.ErrorReason);
-                Assert.Contains(DisableImdsV2, capabilities.ErrorReason);
-                Assert.AreEqual(0, httpManager.QueueSize, "The IMDSv1 probe should be the only HTTP call.");
-            }
-        }
-
-        /// <summary>
-        /// Regression guard for the cached-discovery bypass. Discovery results live in a process-wide
-        /// static that never expires, so a process that cached "IMDSv2" before the switch was set must
-        /// still honor the switch afterwards. An implementation that only checks the switch during
-        /// discovery passes every other test in this region but fails this one.
-        /// </summary>
-        [TestMethod]
-        public async Task KillSwitch_SetAfterImdsV2Discovered_StillBlocksMtlsPop()
-        {
-            using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager())
-            {
-                // Arrange: switch OFF, run discovery, and confirm IMDSv2 is cached.
-                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
-
-                var managedIdentityApp = await CreateManagedIdentityAsync(
-                    httpManager,
-                    managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
-
-                var before = await (managedIdentityApp as ManagedIdentityApplication)
-                    .GetManagedIdentityCapabilitiesAsync(ManagedIdentityTests.ImdsProbesCancellationToken)
-                    .ConfigureAwait(false);
-
-                Assert.IsTrue(before.IsMtlsPopSupportedByHost, "Precondition: IMDSv2 must be cached as supported.");
-                Assert.AreEqual(0, httpManager.QueueSize);
-
-                // Act: flip the switch on for an already-warm process.
-                Environment.SetEnvironmentVariable(DisableImdsV2, "true");
-
-                var ex = await Assert.ThrowsAsync<MsalClientException>(async () =>
-                    await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                        .WithMtlsProofOfPossession()
-                        .ExecuteAsync().ConfigureAwait(false)
-                ).ConfigureAwait(false);
-
-                // Assert
-                Assert.AreEqual(MsalError.ImdsV2Disabled, ex.ErrorCode);
-                Assert.AreEqual(0, httpManager.QueueSize, "No IMDSv2 HTTP call should have been attempted.");
-            }
-        }
-
-        /// <summary>
-        /// A plain bearer request must keep working over IMDSv1 while the switch is set, even when
-        /// IMDSv2 was already discovered and cached.
-        /// </summary>
-        [TestMethod]
-        public async Task KillSwitch_BearerRequest_FallsBackToImdsV1()
-        {
-            using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager())
-            {
-                // Arrange: discover IMDSv2 first, then set the switch.
-                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
-
-                var managedIdentityApp = await CreateManagedIdentityAsync(
-                    httpManager,
-                    managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
-
-                Environment.SetEnvironmentVariable(DisableImdsV2, "true");
-
-                // An IMDSv1 token response is the only thing mocked; the IMDSv2 CSR and
-                // certificate-request endpoints would have no handler.
-                httpManager.AddManagedIdentityMockHandler(
-                    ManagedIdentityTests.ImdsEndpoint,
-                    ManagedIdentityTests.Resource,
-                    MockHelpers.GetMsiSuccessfulResponse(),
-                    ManagedIdentitySource.Imds);
-
-                // Act
-                var result = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                    .ExecuteAsync().ConfigureAwait(false);
-
-                // Assert
-                Assert.IsNotNull(result.AccessToken);
-                Assert.AreEqual(Bearer, result.TokenType);
-                Assert.IsNull(result.BindingCertificate);
-                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-                Assert.AreEqual(0, httpManager.QueueSize);
-            }
-        }
-
-        /// <summary>
-        /// WithRequestOverMtls returns a bearer token, but the mTLS channel binding it provides is
-        /// served exclusively by IMDSv2. Silently downgrading it to a plain IMDSv1 bearer token would
-        /// remove a protection the caller explicitly opted into without any way for them to detect it,
-        /// so it must fail fast alongside mTLS PoP.
-        /// </summary>
-        [TestMethod]
-        public async Task KillSwitch_RequestOverMtls_ThrowsInsteadOfSilentlyDowngrading()
-        {
-            using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager())
-            {
-                // Arrange
-                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
-
-                var managedIdentityApp = await CreateManagedIdentityAsync(
-                    httpManager,
-                    managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
-
-                Environment.SetEnvironmentVariable(DisableImdsV2, "true");
-
-                // Act
-                var ex = await Assert.ThrowsAsync<MsalClientException>(async () =>
-                    await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                        .WithRequestOverMtls()
-                        .ExecuteAsync().ConfigureAwait(false)
-                ).ConfigureAwait(false);
-
-                // Assert
-                Assert.AreEqual(MsalError.ImdsV2Disabled, ex.ErrorCode);
-                Assert.AreEqual(0, httpManager.QueueSize, "No IMDSv2 HTTP call should have been attempted.");
-            }
-        }
-
-        /// <summary>
-        /// mTLS PoP normally routes straight to IMDSv2 without probing when no discovery has run.
-        /// That direct-routing shortcut must also honor the switch.
-        /// </summary>
-        [TestMethod]
-        public async Task KillSwitch_DirectMtlsPopRoutingWithoutDiscovery_Throws()
-        {
-            using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager())
-            {
-                // Arrange: no discovery is run, so nothing is cached.
-                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
-                Environment.SetEnvironmentVariable(DisableImdsV2, "true");
-
-                var managedIdentityApp = ManagedIdentityApplicationBuilder
-                    .Create(ManagedIdentityId.SystemAssigned)
-                    .WithHttpManager(httpManager)
-                    .WithRetryPolicyFactory(_testRetryPolicyFactory)
-                    .WithCsrFactory(_testCsrFactory)
-                    .Build();
-
-                // Act
-                var ex = await Assert.ThrowsAsync<MsalClientException>(async () =>
-                    await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                        .WithMtlsProofOfPossession()
-                        .ExecuteAsync().ConfigureAwait(false)
-                ).ConfigureAwait(false);
-
-                // Assert
-                Assert.AreEqual(MsalError.ImdsV2Disabled, ex.ErrorCode);
-                Assert.AreEqual(0, httpManager.QueueSize, "No IMDSv2 HTTP call should have been attempted.");
-            }
-        }
-
-        /// <summary>
-        /// A PoP request that carries a <see cref="PoPOptions.MinStrength"/> floor consults host discovery
-        /// before it reaches source routing. Without an explicit check at the top of the mTLS binding path,
-        /// the disabled switch would surface as a misleading <see cref="MsalError.MinStrengthNotMet"/>
-        /// ("your host is too weak") instead of the truthful "IMDSv2 was turned off here".
-        /// </summary>
-        [TestMethod]
-        public async Task KillSwitch_MtlsPopWithMinStrengthFloor_ReportsDisabledNotMinStrengthNotMet()
-        {
-            using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager())
-            {
-                // Arrange: a KeyGuard host that would normally satisfy a KeyGuard floor.
-                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
-                Environment.SetEnvironmentVariable(DisableImdsV2, "true");
-
-                var managedIdentityApp = ManagedIdentityApplicationBuilder
-                    .Create(ManagedIdentityId.SystemAssigned)
-                    .WithHttpManager(httpManager)
-                    .WithRetryPolicyFactory(_testRetryPolicyFactory)
-                    .WithCsrFactory(_testCsrFactory)
-                    .Build();
-
-                // Act
-                var ex = await Assert.ThrowsAsync<MsalClientException>(async () =>
-                    await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                        .WithMtlsProofOfPossession(new PoPOptions { MinStrength = MtlsBindingStrength.KeyGuard })
-                        .WithAttestationSupport()
-                        .ExecuteAsync().ConfigureAwait(false)
-                ).ConfigureAwait(false);
-
-                // Assert: the caller learns the switch is on, not that the host was too weak.
-                Assert.AreEqual(MsalError.ImdsV2Disabled, ex.ErrorCode);
-                Assert.AreNotEqual(MsalError.MinStrengthNotMet, ex.ErrorCode);
-                Assert.AreEqual(0, httpManager.QueueSize, "No IMDSv2 HTTP call should have been attempted.");
-            }
-        }
-
-        /// <summary>
-        /// The discovery result is cached in a process-wide static. A process that discovered IMDSv2
-        /// before the switch was set must not keep advertising PoP support afterwards, or a credential
-        /// chain would confidently select a PoP path that MSAL now refuses to serve.
-        /// </summary>
-        [TestMethod]
-        public async Task KillSwitch_SetAfterImdsV2Discovered_CapabilitiesStopAdvertisingPop()
-        {
-            using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager())
-            {
-                // Arrange: discover IMDSv2 with the switch off, so a V2 result is cached.
-                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
-
-                var managedIdentityApp = await CreateManagedIdentityAsync(
-                    httpManager,
-                    managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
-
-                var before = await (managedIdentityApp as ManagedIdentityApplication)
-                    .GetManagedIdentityCapabilitiesAsync(ManagedIdentityTests.ImdsProbesCancellationToken)
-                    .ConfigureAwait(false);
-
-                Assert.IsTrue(before.IsMtlsPopSupportedByHost, "Precondition: IMDSv2 must be cached as supported.");
-
-                // Act: flip the switch on an already-warm process and ask again.
-                Environment.SetEnvironmentVariable(DisableImdsV2, "true");
-
-                var after = await (managedIdentityApp as ManagedIdentityApplication)
-                    .GetManagedIdentityCapabilitiesAsync(ManagedIdentityTests.ImdsProbesCancellationToken)
-                    .ConfigureAwait(false);
-
-                // Assert: the cached V2 result is masked, not trusted.
-                Assert.IsFalse(after.IsMtlsPopSupportedByHost);
-                Assert.AreEqual(MtlsBindingStrength.None, after.MaxSupportedBindingStrength);
-                Assert.AreEqual(ManagedIdentitySource.Imds, after.Source);
-                Assert.Contains(DisableImdsV2, after.ErrorReason);
-                Assert.AreEqual(0, httpManager.QueueSize, "No IMDSv2 HTTP call should have been attempted.");
-            }
-        }
-
-        /// <summary>
-        /// While the switch is set the IMDSv2 probe never runs, so a "v1-only" outcome describes the
-        /// switch rather than the host. Caching it unqualified would keep reporting no binding
-        /// capability after the variable was cleared, forcing a process restart to recover.
-        /// </summary>
-        [TestMethod]
-        public async Task KillSwitch_Cleared_RestoresPopWithoutProcessRestart()
-        {
-            using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager())
-            {
-                // Arrange: run discovery while the switch is on. Only the IMDSv1 probe is expected.
-                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
-                Environment.SetEnvironmentVariable(DisableImdsV2, "true");
-
-                var managedIdentityApp = await CreateManagedIdentityAsync(
-                    httpManager,
-                    addProbeMock: false,
-                    addSourceCheck: false,
-                    managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
-
-                httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V1));
-
-                var disabled = await (managedIdentityApp as ManagedIdentityApplication)
-                    .GetManagedIdentityCapabilitiesAsync(ManagedIdentityTests.ImdsProbesCancellationToken)
-                    .ConfigureAwait(false);
-
-                Assert.IsFalse(disabled.IsMtlsPopSupportedByHost, "Precondition: the switch must suppress PoP.");
-                Assert.AreEqual(0, httpManager.QueueSize, "The IMDSv1 probe should be the only HTTP call.");
-
-                // Act: clear the switch in the same process and re-run discovery.
-                Environment.SetEnvironmentVariable(DisableImdsV2, null);
-
-                httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V2));
-
-                var restored = await (managedIdentityApp as ManagedIdentityApplication)
-                    .GetManagedIdentityCapabilitiesAsync(ManagedIdentityTests.ImdsProbesCancellationToken)
-                    .ConfigureAwait(false);
-
-                // Assert: a switch-influenced result is discarded once the switch clears, so
-                // IMDSv2 is rediscovered rather than the mitigation latching past its lifetime.
-                Assert.IsTrue(restored.IsMtlsPopSupportedByHost,
-                    "Clearing the switch must restore PoP without a process restart.");
-                Assert.IsNull(restored.ErrorReason);
-                Assert.AreEqual(0, httpManager.QueueSize);
-            }
-        }
-
-        /// <summary>
-        /// A warm certificate cache lets an mTLS request proceed without any probe or CSR, which is a
-        /// second way to bypass a switch that is only enforced during discovery. After a successful PoP
-        /// acquisition primes the cache, the switch must still block the next request outright.
-        /// </summary>
-        [TestMethod]
-        public async Task KillSwitch_WithWarmCertificateCache_StillBlocksMtlsPop()
-        {
-            using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager())
-            {
-                // Arrange: acquire a PoP token so the binding certificate is cached.
-                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
-
-                var managedIdentityApp = await CreateManagedIdentityAsync(
-                    httpManager,
-                    managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
-
-                AddMocksToGetEntraToken(httpManager);
-
-                var popResult = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                    .WithMtlsProofOfPossession()
-                    .WithAttestationSupport()
-                    .ExecuteAsync().ConfigureAwait(false);
-
-                Assert.AreEqual(MTLSPoP, popResult.TokenType, "Precondition: the certificate cache must be warm.");
-                Assert.AreEqual(0, httpManager.QueueSize);
-
-                // Act: flip the switch and force a fresh token so the cached access token is bypassed.
-                Environment.SetEnvironmentVariable(DisableImdsV2, "true");
-
-                var ex = await Assert.ThrowsAsync<MsalClientException>(async () =>
-                    await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                        .WithMtlsProofOfPossession()
-                        .WithAttestationSupport()
-                        .WithForceRefresh(true)
-                        .ExecuteAsync().ConfigureAwait(false)
-                ).ConfigureAwait(false);
-
-                // Assert
-                Assert.AreEqual(MsalError.ImdsV2Disabled, ex.ErrorCode);
-                Assert.AreEqual(0, httpManager.QueueSize, "The cached certificate must not be reused while disabled.");
-            }
-        }
-
-        /// <summary>
-        /// The switch must not change the error reported on a host that genuinely cannot do IMDSv2.
-        /// "The switch is set" and "this host does not support IMDSv2" are different problems with
-        /// different fixes, so they must keep distinct error codes.
-        /// </summary>
-        [TestMethod]
-        public async Task KillSwitch_Absent_OnImdsV1Host_KeepsHostCapabilityError()
-        {
-            using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager())
-            {
-                // Arrange
-                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
-
-                var managedIdentityApp = await CreateManagedIdentityAsync(
-                    httpManager, imdsVersion: ImdsVersion.V1).ConfigureAwait(false);
-
-                // Act
-                var ex = await Assert.ThrowsAsync<MsalClientException>(async () =>
-                    await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                        .WithMtlsProofOfPossession()
-                        .ExecuteAsync().ConfigureAwait(false)
-                ).ConfigureAwait(false);
-
-                // Assert
-                Assert.AreEqual(MsalError.MtlsPopTokenNotSupportedinImdsV1, ex.ErrorCode);
-            }
-        }
-
-        /// <summary>
-        /// An unsupported value must behave exactly as if the variable were absent, all the way
-        /// through a real token acquisition rather than only at the parsing layer.
-        /// </summary>
-        [TestMethod]
-        public async Task KillSwitch_UnsupportedValue_LeavesMtlsPopWorking()
-        {
-            using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager())
-            {
-                // Arrange
-                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
-                Environment.SetEnvironmentVariable(DisableImdsV2, "false");
-
-                var managedIdentityApp = await CreateManagedIdentityAsync(
-                    httpManager,
-                    managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
-
-                AddMocksToGetEntraToken(httpManager);
-
-                // Act
-                var result = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                    .WithMtlsProofOfPossession()
-                    .WithAttestationSupport()
-                    .ExecuteAsync().ConfigureAwait(false);
-
-                // Assert
-                Assert.AreEqual(MTLSPoP, result.TokenType);
-                Assert.IsNotNull(result.BindingCertificate);
-                Assert.AreEqual(0, httpManager.QueueSize);
-            }
-        }
-
-        /// <summary>
-        /// Discovery must stay cached while the switch is set. Consumers such as Azure Identity call
-        /// GetManagedIdentityCapabilitiesAsync on every authentication and cache nothing themselves,
-        /// so refusing to cache a switch-influenced result would add a serialized IMDS round trip to
-        /// every token request. Only one IMDSv1 probe is queued, so any repeat probe fails the test.
-        /// </summary>
-        [TestMethod]
-        public async Task KillSwitch_RepeatedDiscovery_ProbesOnceAndServesFromCache()
-        {
-            using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager())
-            {
-                // Arrange
-                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
-                Environment.SetEnvironmentVariable(DisableImdsV2, "true");
-
-                var managedIdentityApp = ManagedIdentityApplicationBuilder
-                    .Create(ManagedIdentityId.SystemAssigned)
-                    .WithHttpManager(httpManager)
-                    .WithRetryPolicyFactory(_testRetryPolicyFactory)
-                    .Build();
-
-                // Exactly one IMDSv1 probe for three discovery calls.
-                httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V1));
-
-                // Act
-                for (int i = 0; i < 3; i++)
-                {
-                    var capabilities = await (managedIdentityApp as ManagedIdentityApplication)
-                        .GetManagedIdentityCapabilitiesAsync(ManagedIdentityTests.ImdsProbesCancellationToken)
-                        .ConfigureAwait(false);
-
-                    // Assert
-                    Assert.AreEqual(ManagedIdentitySource.Imds, capabilities.Source);
-                    Assert.AreEqual(MtlsBindingStrength.None, capabilities.MaxSupportedBindingStrength);
-                    Assert.IsNotNull(capabilities.ErrorReason);
-                }
-
-                Assert.AreEqual(0, httpManager.QueueSize,
-                    "Discovery must probe once and serve later calls from the cache while the switch is set.");
-            }
-        }
-
-        /// <summary>
-        /// An "all sources unavailable" verdict must still be cached while the switch is set. If it were
-        /// dropped, the next token request would find an empty cache, fall through to the "default to
-        /// IMDSv1 without probing" path, and surface a raw HTTP failure instead of the actionable
-        /// ManagedIdentityAllSourcesUnavailable client error.
-        /// </summary>
-        [TestMethod]
-        public async Task KillSwitch_AllSourcesUnavailable_KeepsUnavailableErrorOnNextRequest()
-        {
-            using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager())
-            {
-                // Arrange: the IMDSv1 probe fails, so no source is available.
-                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
-                Environment.SetEnvironmentVariable(DisableImdsV2, "true");
-
-                var managedIdentityApp = ManagedIdentityApplicationBuilder
-                    .Create(ManagedIdentityId.SystemAssigned)
-                    .WithHttpManager(httpManager)
-                    .WithRetryPolicyFactory(_testRetryPolicyFactory)
-                    .Build();
-
-                httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V1));
-
-                var capabilities = await (managedIdentityApp as ManagedIdentityApplication)
-                    .GetManagedIdentityCapabilitiesAsync(ManagedIdentityTests.ImdsProbesCancellationToken)
-                    .ConfigureAwait(false);
-
-                Assert.AreEqual(ManagedIdentitySource.None, capabilities.Source);
-
-                // Act: a token request afterwards must reuse the cached "unavailable" verdict.
-                MsalClientException ex = await Assert.ThrowsExactlyAsync<MsalClientException>(
-                    async () => await managedIdentityApp
-                        .AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                        .ExecuteAsync()
-                        .ConfigureAwait(false)).ConfigureAwait(false);
-
-                // Assert
-                Assert.AreEqual(MsalError.ManagedIdentityAllSourcesUnavailable, ex.ErrorCode);
-                Assert.AreEqual(0, httpManager.QueueSize, "No further probe should be issued.");
-            }
-        }
-
-        /// <summary>
-        /// The switch governs token acquisition, not tokens already in MSAL's cache. A process holding
-        /// an unexpired PoP token keeps serving it until expiry; the throw happens on the next
-        /// acquisition that actually reaches the network. This is not a downgrade - the cached token is
-        /// still genuinely key-bound - but it is a documented carve-out, pinned here so the behavior
-        /// cannot change silently.
-        /// </summary>
-        [TestMethod]
-        public async Task KillSwitch_CachedPopToken_IsStillServedFromTokenCache()
-        {
-            using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager())
-            {
-                // Arrange: acquire and cache a PoP token with the switch off.
-                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
-
-                var managedIdentityApp = await CreateManagedIdentityAsync(
-                    httpManager,
-                    managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
-
-                AddMocksToGetEntraToken(httpManager);
-
-                var first = await managedIdentityApp
-                    .AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                    .WithMtlsProofOfPossession()
-                    .ExecuteAsync()
-                    .ConfigureAwait(false);
-
-                Assert.AreEqual(MTLSPoP, first.TokenType);
-                Assert.AreEqual(TokenSource.IdentityProvider, first.AuthenticationResultMetadata.TokenSource);
-
-                // Act: set the switch and request the same token without forcing a refresh.
-                Environment.SetEnvironmentVariable(DisableImdsV2, "true");
-
-                var second = await managedIdentityApp
-                    .AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                    .WithMtlsProofOfPossession()
-                    .ExecuteAsync()
-                    .ConfigureAwait(false);
-
-                // Assert: served from cache, still a genuinely bound token, no network call.
-                Assert.AreEqual(MTLSPoP, second.TokenType);
-                Assert.AreEqual(TokenSource.Cache, second.AuthenticationResultMetadata.TokenSource);
-                Assert.AreEqual(0, httpManager.QueueSize);
-
-                // A forced refresh does reach the gate and fails fast.
-                MsalClientException ex = await Assert.ThrowsExactlyAsync<MsalClientException>(
-                    async () => await managedIdentityApp
-                        .AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                        .WithMtlsProofOfPossession()
-                        .WithForceRefresh(true)
-                        .ExecuteAsync()
-                        .ConfigureAwait(false)).ConfigureAwait(false);
-
-                Assert.AreEqual(MsalError.ImdsV2Disabled, ex.ErrorCode);
-            }
-        }
-
-        /// <summary>
-        /// The "unrecognized value" warning must reach a process that only acquires bearer tokens.
-        /// Such a process never calls capability discovery, so warning only from discovery would hide
-        /// an inert switch from exactly the process whose behavior it was meant to change.
-        /// </summary>
-        [TestMethod]
-        public async Task KillSwitch_UnrecognizedValue_WarnsOnBearerOnlyPathWithoutDiscovery()
-        {
-            bool warned = false;
-
-            using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager())
-            {
-                // Arrange
-                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
-                Environment.SetEnvironmentVariable(DisableImdsV2, "yes");
-
-                var managedIdentityApp = ManagedIdentityApplicationBuilder
-                    .Create(ManagedIdentityId.SystemAssigned)
-                    .WithHttpManager(httpManager)
-                    .WithRetryPolicyFactory(_testRetryPolicyFactory)
-                    .WithLogging(LocalLogCallback)
-                    .Build();
-
-                httpManager.AddManagedIdentityMockHandler(
-                    ManagedIdentityTests.ImdsEndpoint,
-                    ManagedIdentityTests.Resource,
-                    MockHelpers.GetMsiSuccessfulResponse(),
-                    ManagedIdentitySource.Imds);
-
-                // Act: a plain bearer request, which never runs capability discovery.
-                var result = await managedIdentityApp
-                    .AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                    .ExecuteAsync().ConfigureAwait(false);
-
-                // Assert
-                Assert.IsNotNull(result.AccessToken);
-                Assert.IsTrue(warned,
-                    "A bearer-only process must still be told that the kill switch value is unrecognized.");
-            }
-
-            void LocalLogCallback(LogLevel level, string message, bool containsPii)
-            {
-                if (level == LogLevel.Warning && message.Contains("unrecognized value"))
-                {
-                    warned = true;
-                }
-            }
-        }
-
-        #endregion IMDSv2 Kill Switch Tests
     }
 }
 
