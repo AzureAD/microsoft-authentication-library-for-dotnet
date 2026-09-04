@@ -113,7 +113,13 @@ namespace Microsoft.Identity.Client.Http
                 timeoutException = exception;
             }
             
-            while (!_disableInternalRetries && await retryPolicy.PauseForRetryAsync(response, timeoutException, retryCount, logger).ConfigureAwait(false))
+            while (!_disableInternalRetries &&
+                await retryPolicy.PauseForRetryAsync(
+                    response,
+                    timeoutException,
+                    retryCount,
+                    logger,
+                    cancellationToken).ConfigureAwait(false))
             {
                 retryCount++;
 

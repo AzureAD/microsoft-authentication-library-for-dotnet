@@ -10,7 +10,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity
     /// detected source and the strength with which tokens can be bound to a key.
     /// </summary>
     /// <remarks>
-    /// This type is returned by <see cref="ManagedIdentityApplication.GetManagedIdentityCapabilitiesAsync"/>.
+    /// This type is returned by
+    /// <see cref="ManagedIdentityApplication.GetManagedIdentityCapabilitiesAsync(System.Threading.CancellationToken)"/> and
+    /// <see cref="ManagedIdentityApplication.GetManagedIdentityCapabilitiesAsync(ManagedIdentityCapabilitiesOptions, System.Threading.CancellationToken)"/>.
     /// It is useful for credential chains such as <c>DefaultAzureCredential</c> to decide whether
     /// managed identity is available and what binding strength the host supports.
     /// </remarks>

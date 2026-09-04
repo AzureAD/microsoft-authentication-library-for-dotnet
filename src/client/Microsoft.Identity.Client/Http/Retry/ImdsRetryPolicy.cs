@@ -3,6 +3,7 @@
 
 using System;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 
@@ -28,9 +29,9 @@ namespace Microsoft.Identity.Client.Http.Retry
             ImdsRetryPolicy.ExponentialDeltaBackoffMs
         );
 
-        internal virtual Task DelayAsync(int milliseconds)
+        internal virtual Task DelayAsync(int milliseconds, CancellationToken cancellationToken)
         {
-            return Task.Delay(milliseconds);
+            return Task.Delay(milliseconds, cancellationToken);
         }
 
         protected virtual bool ShouldRetry(HttpResponse response, Exception exception)
@@ -38,30 +39,46 @@ namespace Microsoft.Identity.Client.Http.Retry
             return HttpRetryConditions.Imds(response, exception);
         }
 
-        public async Task<bool> PauseForRetryAsync(HttpResponse response, Exception exception, int retryCount, ILoggerAdapter logger)
+        public async Task<bool> PauseForRetryAsync(
+            HttpResponse response,
+            Exception exception,
+            int retryCount,
+            ILoggerAdapter logger,
+            CancellationToken cancellationToken)
         {
-            int httpStatusCode = (int)response.StatusCode;
+            if (!ShouldRetry(response, exception))
+            {
+                return false;
+            }
+
+            // A transport timeout already consumed the HTTP client's request timeout.
+            // Preserve the existing single-attempt behavior when no response was received.
+            if (response is null)
+            {
+                return false;
+            }
+
+            bool isGone = response.StatusCode == HttpStatusCode.Gone;
 
             if (retryCount == 0)
             {
                 // Calculate the maxRetries based on the status code, once per request
-                _maxRetries = httpStatusCode == (int)HttpStatusCode.Gone
+                _maxRetries = isGone
                     ? LinearStrategyNumRetries
                     : ExponentialStrategyNumRetries;
             }
 
             // Check if the status code is retriable and if the current retry count is less than max retries
-            if (ShouldRetry(response, exception) &&
-                retryCount < _maxRetries)
+            if (retryCount < _maxRetries)
             {
-                int retryAfterDelay = httpStatusCode == (int)HttpStatusCode.Gone
+                int retryAfterDelay = isGone
                     ? HttpStatusGoneRetryAfterMs
                     : _exponentialRetryStrategy.CalculateDelay(retryCount);
 
                 logger.Warning($"Retrying request in {retryAfterDelay}ms (retry attempt: {retryCount + 1})");
 
                 // Pause execution for the calculated delay
-                await DelayAsync(retryAfterDelay).ConfigureAwait(false);
+                await DelayAsync(retryAfterDelay, cancellationToken).ConfigureAwait(false);
 
                 return true;
             }

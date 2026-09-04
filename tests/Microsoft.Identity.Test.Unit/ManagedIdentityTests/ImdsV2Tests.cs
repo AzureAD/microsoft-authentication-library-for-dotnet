@@ -1164,11 +1164,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        public async Task ImdsProbeEndpointAsync_TimeOutThrowsOperationCanceledException()
+        public async Task GetManagedIdentityCapabilities_PreCanceledToken_ThrowsBeforeDiscoveryAsync()
         {
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
+                // Arrange
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned);
 
                 miBuilder
@@ -1177,14 +1178,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var managedIdentityApp = miBuilder.Build();
 
-                // Discovery order: V2 is probed first
-                httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V2));
-
                 var cts = new CancellationTokenSource();
                 cts.Cancel();
                 var imdsProbesCancellationToken = cts.Token;
 
-                await Assert.ThrowsAsync<TaskCanceledException>(async () =>
+                // Act / Assert
+                await Assert.ThrowsAsync<OperationCanceledException>(async () =>
                     await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentityCapabilitiesAsync(imdsProbesCancellationToken)
                     .ConfigureAwait(false))
                 .ConfigureAwait(false);
@@ -3457,4 +3456,3 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         #endregion
     }
 }
-

@@ -217,8 +217,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
         }
 
-        private static ManagedIdentityDiscoveryResult CacheDiscoveryResult(ManagedIdentityDiscoveryResult result)
+        private static ManagedIdentityDiscoveryResult CacheDiscoveryResult(
+            ManagedIdentityDiscoveryResult result,
+            CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             s_cachedSourceResult = result;
             return result;
         }
@@ -236,11 +239,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 return s_cachedSourceResult;
             }
 
+            cancellationToken.ThrowIfCancellationRequested();
+
             // Single-flight: ensure only one caller probes IMDS / provisions a binding key at a
             // time. Concurrent callers at process startup wait here and then observe the cached
-            // result instead of issuing redundant probes. Try a non-blocking acquire first so an
-            // uncontended caller keeps the existing cancellation point (the HTTP probe); only a
-            // contended caller waits, and that wait is cancelable.
+            // result instead of issuing redundant probes. Try a non-blocking acquire first to avoid
+            // an asynchronous wait when uncontended; both paths check cancellation after acquiring.
             bool lockTaken = s_discoveryLock.Wait(0);
             if (!lockTaken)
             {
@@ -250,6 +254,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             try
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 // Re-check under the lock in case another caller completed discovery while we waited.
                 if (s_cachedSourceResult != null)
                 {
@@ -261,7 +267,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
                 if (source != ManagedIdentitySource.None)
                 {
-                    return CacheDiscoveryResult(new ManagedIdentityDiscoveryResult(source));
+                    return CacheDiscoveryResult(new ManagedIdentityDiscoveryResult(source), cancellationToken);
                 }
 
                 string imdsV1FailureReason = null;
@@ -299,7 +305,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                         return CacheDiscoveryResult(new ManagedIdentityDiscoveryResult(
                             ManagedIdentitySource.Imds,
                             ImdsVersion.V2,
-                            v2Strength));
+                            v2Strength),
+                            cancellationToken);
                     }
                     imdsV2FailureReason = imdsV2Failure;
                 }
@@ -323,7 +330,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     return CacheDiscoveryResult(new ManagedIdentityDiscoveryResult(
                         ManagedIdentitySource.Imds,
                         ImdsVersion.V1,
-                        strength));
+                        strength),
+                        cancellationToken);
                 }
                 imdsV1FailureReason = imdsV1Failure;
 
@@ -331,7 +339,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 return CacheDiscoveryResult(new ManagedIdentityDiscoveryResult(
                     ManagedIdentitySource.None,
                     imdsV1FailureReason: imdsV1FailureReason,
-                    imdsV2FailureReason: imdsV2FailureReason));
+                    imdsV2FailureReason: imdsV2FailureReason),
+                    cancellationToken);
             }
             finally
             {
