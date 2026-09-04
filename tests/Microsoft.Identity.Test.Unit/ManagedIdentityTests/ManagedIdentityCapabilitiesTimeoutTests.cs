@@ -494,9 +494,15 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             internal override async Task DelayAsync(int milliseconds, CancellationToken cancellationToken)
             {
                 _delayStarted.TrySetResult(true);
-                using (cancellationToken.Register(() => _cancellationObserved.TrySetResult(true)))
+
+                try
                 {
                     await _delayRelease.WaitAsync(cancellationToken).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+                {
+                    _cancellationObserved.TrySetResult(true);
+                    throw;
                 }
             }
         }
@@ -551,9 +557,15 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 CancellationToken cancellationToken)
             {
                 _requestStarted.TrySetResult(true);
-                using (cancellationToken.Register(() => _cancellationObserved.TrySetResult(true)))
+
+                try
                 {
                     await Task.Delay(Timeout.Infinite, cancellationToken).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+                {
+                    _cancellationObserved.TrySetResult(true);
+                    throw;
                 }
 
                 return new HttpResponseMessage(HttpStatusCode.OK);
