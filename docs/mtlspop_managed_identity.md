@@ -273,6 +273,30 @@ When attestation is configured:
 - The MAA JWT is embedded in the `/issuecredential` request body as `attestation_token`
 - The token cache partitions attested vs non-attested tokens (`att=1` vs `att=0`) — they are not interchangeable
 
+## Bounding capability discovery
+
+Credential chains can bound uncached managed identity capability discovery by supplying
+`ManagedIdentityCapabilitiesOptions.ImdsProbeTimeout`:
+
+```csharp
+var options = new ManagedIdentityCapabilitiesOptions
+{
+    ImdsProbeTimeout = TimeSpan.FromSeconds(2)
+};
+
+ManagedIdentityCapabilities capabilities =
+    await managedIdentityApplication.GetManagedIdentityCapabilitiesAsync(
+        options,
+        CancellationToken.None);
+```
+
+The timeout is a total discovery budget covering lock contention, IMDSv2 probing and
+retries, IMDSv1 fallback, compute metadata retrieval, and binding-strength detection.
+Omitting the timeout preserves the existing unlimited behavior. Caller cancellation
+continues to surface as cancellation, while expiration of the discovery budget throws
+`MsalServiceException` with error code `request_timeout`. A timed-out discovery result
+is not cached, so a later call can retry.
+
 ---
 
 ## Constraints

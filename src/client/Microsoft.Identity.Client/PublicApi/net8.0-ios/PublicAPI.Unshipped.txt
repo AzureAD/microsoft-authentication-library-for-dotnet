@@ -5,3 +5,8 @@ Microsoft.Identity.Client.Instance.Discovery.TokenExchangeScope
 const Microsoft.Identity.Client.Instance.Discovery.CloudMetadataKeyNames.FederatedCredentialAudience = "federated_credential_audience" -> string
 static Microsoft.Identity.Client.Instance.Discovery.KnownCloudMetadata.Default.get -> Microsoft.Identity.Client.Instance.Discovery.KnownCloudMetadata
 static Microsoft.Identity.Client.Instance.Discovery.TokenExchangeScope.FromAudience(string audience) -> string
+Microsoft.Identity.Client.ManagedIdentity.ManagedIdentityCapabilitiesOptions
+Microsoft.Identity.Client.ManagedIdentity.ManagedIdentityCapabilitiesOptions.ImdsProbeTimeout.get -> System.TimeSpan?
+Microsoft.Identity.Client.ManagedIdentity.ManagedIdentityCapabilitiesOptions.ImdsProbeTimeout.set -> void
+Microsoft.Identity.Client.ManagedIdentity.ManagedIdentityCapabilitiesOptions.ManagedIdentityCapabilitiesOptions() -> void
+Microsoft.Identity.Client.ManagedIdentityApplication.GetManagedIdentityCapabilitiesAsync(Microsoft.Identity.Client.ManagedIdentity.ManagedIdentityCapabilitiesOptions options, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.Identity.Client.ManagedIdentity.ManagedIdentityCapabilities>

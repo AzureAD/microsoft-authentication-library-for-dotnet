@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Client.Http.Retry
             }
 
             // If Imds would retry but the status code is 404, don't retry
-            return (int)response.StatusCode is not 404;
+            return response is not null && (int)response.StatusCode is not 404;
         }
 
         /// <summary>
@@ -74,7 +74,7 @@ namespace Microsoft.Identity.Client.Http.Retry
             }
 
             // If Imds would retry but the status code is 404 or 408, don't retry
-            return (int)response.StatusCode is not (404 or 408);
+            return response is not null && (int)response.StatusCode is not (404 or 408);
         }
 
         /// <summary>

@@ -142,7 +142,12 @@ namespace Microsoft.Identity.Client.Instance.Discovery
 
         private sealed class InstanceDiscoveryRetryPolicy : IRetryPolicy
         {
-            public Task<bool> PauseForRetryAsync(HttpResponse response, Exception exception, int retryCount, ILoggerAdapter logger)
+            public Task<bool> PauseForRetryAsync(
+                HttpResponse response,
+                Exception exception,
+                int retryCount,
+                ILoggerAdapter logger,
+                CancellationToken cancellationToken)
             {
                 return Task.FromResult(false);
             }
