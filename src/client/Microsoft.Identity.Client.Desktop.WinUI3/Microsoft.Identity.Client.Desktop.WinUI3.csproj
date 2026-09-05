@@ -1,10 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0-windows10.0.17763.0</TargetFramework>
+    <TargetFrameworks>net8.0-windows10.0.17763.0;net10.0-windows10.0.17763.0</TargetFrameworks>
     <UseWinUI>true</UseWinUI>
-    <EnableMsixTooling>true</EnableMsixTooling>
     <DefineConstants>$(DefineConstants);WINUI3</DefineConstants>
+
+    <!-- Disable runtime marshalling (CsWinRT doesn't rely on it anymore) -->
+    <DisableRuntimeMarshalling Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net10.0'))">true</DisableRuntimeMarshalling>
+
+    <!-- Ensure the CsWinRT AOT analyzer is enabled (it should be the default, but it doesn't seem to be running
+         in this project without explicitly setting these properties. Can be removed in the future once fixed.
+         For now, leaving these in doesn't cause any issues anyway, these are the same as the default values. -->
+    <CsWinRTAotOptimizerEnabled>true</CsWinRTAotOptimizerEnabled>
+    <CsWinRTAotWarningLevel>2</CsWinRTAotWarningLevel>
     
     <PathToMsalSources>$(MSBuildThisFileDirectory)../Microsoft.Identity.Client/</PathToMsalSources>
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -42,8 +50,7 @@
 
   <!-- WinUI3 and Windows App SDK dependencies -->
   <ItemGroup>
-    <PackageReference Include="Microsoft.WindowsAppSDK" />
-    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" />
+    <PackageReference Include="Microsoft.WindowsAppSDK.WinUI" />
   </ItemGroup>
   
   <!-- Project references -->
