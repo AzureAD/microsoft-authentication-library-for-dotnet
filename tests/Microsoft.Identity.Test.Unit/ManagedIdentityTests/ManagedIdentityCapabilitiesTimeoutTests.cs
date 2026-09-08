@@ -604,9 +604,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         public async Task DefaultAndRegionRetryPolicies_IgnoreCancellationDuringDelayAsync()
         {
             // Arrange
-            IRetryPolicy stsRetryPolicy = new DefaultRetryPolicy(RequestType.STS);
-            IRetryPolicy managedIdentityRetryPolicy = new DefaultRetryPolicy(RequestType.ManagedIdentityDefault);
-            IRetryPolicy regionDiscoveryRetryPolicy = new RegionDiscoveryRetryPolicy();
+            IRetryPolicy stsRetryPolicy = new TestDefaultRetryPolicy(RequestType.STS);
+            IRetryPolicy managedIdentityRetryPolicy = new TestDefaultRetryPolicy(RequestType.ManagedIdentityDefault);
+            IRetryPolicy regionDiscoveryRetryPolicy = new TestRegionDiscoveryRetryPolicy();
             ILoggerAdapter logger = Substitute.For<ILoggerAdapter>();
             var response = new HttpResponse { StatusCode = HttpStatusCode.InternalServerError };
             using (var cancellationSource = new CancellationTokenSource())
