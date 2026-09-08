@@ -16,17 +16,17 @@ namespace Microsoft.Identity.Client.Http.Retry
         /// Determines whether a retry should be attempted for a given HTTP response or exception,
         /// and performs any necessary pause or delay logic before the next retry attempt.
         /// </summary>
-        /// <param name="response">The HTTP response received from the request, or null when no response was received.</param>
-        /// <param name="exception">The exception encountered during the request, or null when a response was received.</param>
+        /// <param name="response">The HTTP response received from the request.</param>
+        /// <param name="exception">The exception encountered during the request.</param>
         /// <param name="retryCount">The current retry attempt count.</param>
         /// <param name="logger">The logger used for diagnostic and informational messages.</param>
-        /// <param name="cancellationToken">The cancellation token to observe while waiting to retry.</param>
+        /// <param name="retryDelayCancellationToken">The cancellation token to observe while waiting to retry.</param>
         /// <returns>A task that returns true if a retry should be performed; otherwise, false.</returns>
         Task<bool> PauseForRetryAsync(
             HttpResponse response,
             Exception exception,
             int retryCount,
             ILoggerAdapter logger,
-            CancellationToken cancellationToken);
+            CancellationToken retryDelayCancellationToken);
     }
 }

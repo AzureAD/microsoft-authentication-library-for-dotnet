@@ -1164,7 +1164,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        public async Task GetManagedIdentityCapabilities_PreCanceledToken_ThrowsBeforeDiscoveryAsync()
+        public async Task GetManagedIdentityCapabilities_PreCanceledTokenWithoutTimeout_ThrowsFromProbeAsync()
         {
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
@@ -1178,12 +1178,16 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var managedIdentityApp = miBuilder.Build();
 
+                // Preserve the original no-timeout behavior: environment detection runs first,
+                // then the canceled token is observed by the IMDS probe.
+                httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V2));
+
                 var cts = new CancellationTokenSource();
                 cts.Cancel();
                 var imdsProbesCancellationToken = cts.Token;
 
                 // Act / Assert
-                await Assert.ThrowsAsync<OperationCanceledException>(async () =>
+                await Assert.ThrowsAsync<TaskCanceledException>(async () =>
                     await (managedIdentityApp as ManagedIdentityApplication).GetManagedIdentityCapabilitiesAsync(imdsProbesCancellationToken)
                     .ConfigureAwait(false))
                 .ConfigureAwait(false);

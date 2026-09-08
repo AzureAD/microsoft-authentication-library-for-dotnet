@@ -31,6 +31,7 @@ namespace Microsoft.Identity.Client.Http
         /// <param name="cancellationToken"></param>
         /// <param name="retryPolicy">Retry policy to be used for the request.</param>
         /// <param name="retryCount">Number of retries to be attempted in case of retriable status codes.</param>
+        /// <param name="retryDelayCancellationToken">Cancellation token observed only while waiting between retries.</param>
         /// <returns></returns>
         Task<HttpResponse> SendRequestAsync(
            Uri endpoint,
@@ -43,6 +44,7 @@ namespace Microsoft.Identity.Client.Http
            Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> validateServerCertificate,
            CancellationToken cancellationToken,
            IRetryPolicy retryPolicy,
-           int retryCount = 0);
+           int retryCount = 0,
+           CancellationToken retryDelayCancellationToken = default);
     }
 }

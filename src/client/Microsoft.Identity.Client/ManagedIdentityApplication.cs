@@ -82,12 +82,15 @@ namespace Microsoft.Identity.Client
         /// <returns>A <see cref="ManagedIdentityCapabilities"/> describing the detected source and host capabilities.</returns>
         /// <exception cref="ArgumentNullException">Thrown when <paramref name="options"/> is null.</exception>
         /// <exception cref="ArgumentOutOfRangeException">
-        /// Thrown when <see cref="ManagedIdentityCapabilitiesOptions.ImdsProbeTimeout"/> is not positive
+        /// Thrown when <see cref="ManagedIdentityCapabilitiesOptions.CapabilityDiscoveryTimeout"/> is not positive
         /// or exceeds the maximum timeout supported across MSAL target frameworks.
+        /// </exception>
+        /// <exception cref="OperationCanceledException">
+        /// Thrown when <paramref name="cancellationToken"/> is canceled before or during uncached discovery.
         /// </exception>
         /// <exception cref="MsalServiceException">
         /// Thrown with error code <see cref="MsalError.RequestTimeout"/> when capability discovery
-        /// exceeds <see cref="ManagedIdentityCapabilitiesOptions.ImdsProbeTimeout"/>.
+        /// exceeds <see cref="ManagedIdentityCapabilitiesOptions.CapabilityDiscoveryTimeout"/>.
         /// </exception>
         public Task<ManagedIdentityCapabilities> GetManagedIdentityCapabilitiesAsync(
             ManagedIdentityCapabilitiesOptions options,
@@ -98,12 +101,12 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(options));
             }
 
-            TimeSpan? timeout = options.ImdsProbeTimeout;
+            TimeSpan? timeout = options.CapabilityDiscoveryTimeout;
             if (timeout.HasValue &&
                 (timeout.Value <= TimeSpan.Zero ||
                  timeout.Value > TimeSpan.FromMilliseconds(int.MaxValue)))
             {
-                throw new ArgumentOutOfRangeException(nameof(options.ImdsProbeTimeout));
+                throw new ArgumentOutOfRangeException(nameof(options.CapabilityDiscoveryTimeout));
             }
 
             return GetManagedIdentityCapabilitiesCoreAsync(timeout, cancellationToken);
@@ -129,7 +132,10 @@ namespace Microsoft.Identity.Client
                 var requestContext = new RequestContext(this.ServiceBundle, Guid.NewGuid(), null, effectiveToken);
 
                 ManagedIdentityDiscoveryResult discoveryResult = await ManagedIdentityClient
-                    .GetManagedIdentityCapabilitiesAsync(requestContext, effectiveToken)
+                    .GetManagedIdentityCapabilitiesAsync(
+                        requestContext,
+                        effectiveToken,
+                        isCapabilityDiscoveryTimeoutConfigured: timeout.HasValue)
                     .ConfigureAwait(false);
 
                 return new ManagedIdentityCapabilities(
@@ -144,7 +150,7 @@ namespace Microsoft.Identity.Client
             {
                 throw new MsalServiceException(
                     MsalError.RequestTimeout,
-                    MsalErrorMessage.RequestTimeOut,
+                    MsalErrorMessage.ManagedIdentityCapabilityDiscoveryTimeout,
                     exception);
             }
             finally

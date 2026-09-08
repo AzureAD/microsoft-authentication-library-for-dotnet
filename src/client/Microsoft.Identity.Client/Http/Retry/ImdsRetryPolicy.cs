@@ -44,41 +44,30 @@ namespace Microsoft.Identity.Client.Http.Retry
             Exception exception,
             int retryCount,
             ILoggerAdapter logger,
-            CancellationToken cancellationToken)
+            CancellationToken retryDelayCancellationToken)
         {
-            if (!ShouldRetry(response, exception))
-            {
-                return false;
-            }
-
-            // A transport timeout already consumed the HTTP client's request timeout.
-            // Preserve the existing single-attempt behavior when no response was received.
-            if (response is null)
-            {
-                return false;
-            }
-
-            bool isGone = response.StatusCode == HttpStatusCode.Gone;
+            int httpStatusCode = (int)response.StatusCode;
 
             if (retryCount == 0)
             {
                 // Calculate the maxRetries based on the status code, once per request
-                _maxRetries = isGone
+                _maxRetries = httpStatusCode == (int)HttpStatusCode.Gone
                     ? LinearStrategyNumRetries
                     : ExponentialStrategyNumRetries;
             }
 
             // Check if the status code is retriable and if the current retry count is less than max retries
-            if (retryCount < _maxRetries)
+            if (ShouldRetry(response, exception) &&
+                retryCount < _maxRetries)
             {
-                int retryAfterDelay = isGone
+                int retryAfterDelay = httpStatusCode == (int)HttpStatusCode.Gone
                     ? HttpStatusGoneRetryAfterMs
                     : _exponentialRetryStrategy.CalculateDelay(retryCount);
 
                 logger.Warning($"Retrying request in {retryAfterDelay}ms (retry attempt: {retryCount + 1})");
 
                 // Pause execution for the calculated delay
-                await DelayAsync(retryAfterDelay, cancellationToken).ConfigureAwait(false);
+                await DelayAsync(retryAfterDelay, retryDelayCancellationToken).ConfigureAwait(false);
 
                 return true;
             }

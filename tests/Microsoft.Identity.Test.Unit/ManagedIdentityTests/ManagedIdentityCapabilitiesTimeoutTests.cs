@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
@@ -46,19 +47,19 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Assert.ThrowsExactly<ArgumentOutOfRangeException>(
                     () => application.GetManagedIdentityCapabilitiesAsync(
-                        new ManagedIdentityCapabilitiesOptions { ImdsProbeTimeout = TimeSpan.Zero },
+                        new ManagedIdentityCapabilitiesOptions { CapabilityDiscoveryTimeout = TimeSpan.Zero },
                         CancellationToken.None));
 
                 Assert.ThrowsExactly<ArgumentOutOfRangeException>(
                     () => application.GetManagedIdentityCapabilitiesAsync(
-                        new ManagedIdentityCapabilitiesOptions { ImdsProbeTimeout = TimeSpan.FromMilliseconds(-1) },
+                        new ManagedIdentityCapabilitiesOptions { CapabilityDiscoveryTimeout = TimeSpan.FromMilliseconds(-1) },
                         CancellationToken.None));
 
                 Assert.ThrowsExactly<ArgumentOutOfRangeException>(
                     () => application.GetManagedIdentityCapabilitiesAsync(
                         new ManagedIdentityCapabilitiesOptions
                         {
-                            ImdsProbeTimeout = TimeSpan.FromMilliseconds((double)int.MaxValue + 1)
+                            CapabilityDiscoveryTimeout = TimeSpan.FromMilliseconds((double)int.MaxValue + 1)
                         },
                         CancellationToken.None));
             }
@@ -81,7 +82,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 // Act / Assert
                 Assert.ThrowsExactly<ArgumentOutOfRangeException>(
                     () => application.GetManagedIdentityCapabilitiesAsync(
-                        new ManagedIdentityCapabilitiesOptions { ImdsProbeTimeout = TimeSpan.Zero },
+                        new ManagedIdentityCapabilitiesOptions { CapabilityDiscoveryTimeout = TimeSpan.Zero },
                         CancellationToken.None));
             }
         }
@@ -106,12 +107,63 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 // Act
                 ManagedIdentityCapabilities capabilities = await application
                     .GetManagedIdentityCapabilitiesAsync(
-                        new ManagedIdentityCapabilitiesOptions { ImdsProbeTimeout = TimeSpan.FromSeconds(5) },
+                        new ManagedIdentityCapabilitiesOptions { CapabilityDiscoveryTimeout = TimeSpan.FromSeconds(5) },
                         callerCancellationSource.Token)
                     .ConfigureAwait(false);
 
                 // Assert
                 Assert.AreEqual(ManagedIdentitySource.AppService, capabilities.Source);
+            }
+        }
+
+        [TestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task GetManagedIdentityCapabilities_PreCanceledTokenWithoutTimeout_DetectsEnvironmentAsync(
+            bool useOptionsOverload)
+        {
+            // Arrange
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            using (var callerCancellationSource = new CancellationTokenSource())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.AppService, ManagedIdentityTests.AppServiceEndpoint);
+                ManagedIdentityApplication application = CreateApplication(httpManager);
+                callerCancellationSource.Cancel();
+
+                // Act
+                ManagedIdentityCapabilities capabilities = useOptionsOverload
+                    ? await application.GetManagedIdentityCapabilitiesAsync(
+                        new ManagedIdentityCapabilitiesOptions { CapabilityDiscoveryTimeout = null },
+                        callerCancellationSource.Token).ConfigureAwait(false)
+                    : await application.GetManagedIdentityCapabilitiesAsync(
+                        callerCancellationSource.Token).ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual(ManagedIdentitySource.AppService, capabilities.Source);
+            }
+        }
+
+        [TestMethod]
+        public async Task GetManagedIdentityCapabilities_PreCanceledTokenWithTimeout_ThrowsBeforeEnvironmentDetectionAsync()
+        {
+            // Arrange
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            using (var callerCancellationSource = new CancellationTokenSource())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.AppService, ManagedIdentityTests.AppServiceEndpoint);
+                ManagedIdentityApplication application = CreateApplication(httpManager);
+                callerCancellationSource.Cancel();
+
+                // Act / Assert
+                await Assert.ThrowsExactlyAsync<OperationCanceledException>(
+                    async () => await application.GetManagedIdentityCapabilitiesAsync(
+                        new ManagedIdentityCapabilitiesOptions
+                        {
+                            CapabilityDiscoveryTimeout = TimeSpan.FromSeconds(5)
+                        },
+                        callerCancellationSource.Token).ConfigureAwait(false)).ConfigureAwait(false);
             }
         }
 
@@ -155,7 +207,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V2));
 
                 Task<ManagedIdentityCapabilities> discoveryTask = application.GetManagedIdentityCapabilitiesAsync(
-                    new ManagedIdentityCapabilitiesOptions { ImdsProbeTimeout = null },
+                    new ManagedIdentityCapabilitiesOptions { CapabilityDiscoveryTimeout = null },
                     CancellationToken.None);
 
                 await retryPolicy.DelayStarted.ConfigureAwait(false);
@@ -168,6 +220,58 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 // Assert
                 Assert.AreEqual(ManagedIdentitySource.Imds, capabilities.Source);
                 Assert.AreEqual(MtlsBindingStrength.Software, capabilities.MaxSupportedBindingStrength);
+            }
+        }
+
+        [TestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        [Timeout(10000, CooperativeCancellation = true)]
+        public async Task GetManagedIdentityCapabilities_CallerCancellationDuringRetryDelayWithoutTimeout_PreservesDelayAsync(
+            bool useOptionsOverload)
+        {
+            // Arrange
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            using (var callerCancellationSource = new CancellationTokenSource())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, ManagedIdentityTests.ImdsEndpoint);
+
+                var retryPolicy = new GatedImdsProbeRetryPolicy();
+                ManagedIdentityApplication application = CreateApplication(
+                    httpManager,
+                    new GatedImdsProbeRetryPolicyFactory(retryPolicy),
+                    new InMemoryManagedIdentityKeyProvider());
+
+                httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V2, retry: true));
+                httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V2));
+
+                Task<ManagedIdentityCapabilities> discoveryTask = useOptionsOverload
+                    ? application.GetManagedIdentityCapabilitiesAsync(
+                        new ManagedIdentityCapabilitiesOptions { CapabilityDiscoveryTimeout = null },
+                        callerCancellationSource.Token)
+                    : application.GetManagedIdentityCapabilitiesAsync(callerCancellationSource.Token);
+
+                await retryPolicy.DelayStarted.ConfigureAwait(false);
+
+                // Act
+                callerCancellationSource.Cancel();
+                retryPolicy.ReleaseDelay();
+
+                Exception exception = null;
+                try
+                {
+                    await discoveryTask.ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    exception = ex;
+                }
+
+                // Assert
+                Assert.IsInstanceOfType<OperationCanceledException>(exception);
+                Assert.IsFalse(retryPolicy.CancellationObserved.IsCompleted);
+                Assert.AreEqual(0, httpManager.QueueSize);
             }
         }
 
@@ -186,7 +290,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 ManagedIdentityApplication application = CreateApplication(httpManager);
 
                 Task<ManagedIdentityCapabilities> discoveryTask = application.GetManagedIdentityCapabilitiesAsync(
-                    new ManagedIdentityCapabilitiesOptions { ImdsProbeTimeout = s_testTimeout },
+                    new ManagedIdentityCapabilitiesOptions { CapabilityDiscoveryTimeout = s_testTimeout },
                     CancellationToken.None);
 
                 await handler.RequestStarted.ConfigureAwait(false);
@@ -198,6 +302,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 // Assert
                 Assert.AreEqual(MsalError.RequestTimeout, exception.ErrorCode);
+                Assert.AreEqual(MsalErrorMessage.ManagedIdentityCapabilityDiscoveryTimeout, exception.Message);
             }
         }
 
@@ -219,7 +324,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V2, retry: true));
 
                 Task<ManagedIdentityCapabilities> discoveryTask = application.GetManagedIdentityCapabilitiesAsync(
-                    new ManagedIdentityCapabilitiesOptions { ImdsProbeTimeout = s_testTimeout },
+                    new ManagedIdentityCapabilitiesOptions { CapabilityDiscoveryTimeout = s_testTimeout },
                     CancellationToken.None);
 
                 await retryPolicy.DelayStarted.ConfigureAwait(false);
@@ -231,6 +336,50 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 // Assert
                 Assert.AreEqual(MsalError.RequestTimeout, exception.ErrorCode);
+                Assert.AreEqual(MsalErrorMessage.ManagedIdentityCapabilityDiscoveryTimeout, exception.Message);
+            }
+        }
+
+        [TestMethod]
+        [Timeout(12000, CooperativeCancellation = true)]
+        public async Task GetManagedIdentityCapabilities_V2DelayLeavesOnlyRemainingBudgetForV1Async()
+        {
+            // Arrange
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, ManagedIdentityTests.ImdsEndpoint);
+                ManagedIdentityApplication application = CreateApplication(httpManager);
+                var v2Handler = new GatedResponseMockHttpMessageHandler(HttpStatusCode.NotFound);
+                var v1Handler = new BlockingMockHttpMessageHandler();
+                httpManager.AddMockHandler(v2Handler);
+                httpManager.AddMockHandler(v1Handler);
+
+                Task<ManagedIdentityCapabilities> discoveryTask = application
+                    .GetManagedIdentityCapabilitiesAsync(
+                        new ManagedIdentityCapabilitiesOptions
+                        {
+                            CapabilityDiscoveryTimeout = TimeSpan.FromSeconds(4)
+                        },
+                        CancellationToken.None);
+
+                await v2Handler.RequestStarted.ConfigureAwait(false);
+                await Task.Delay(TimeSpan.FromSeconds(2)).ConfigureAwait(false);
+                v2Handler.Release();
+                await v1Handler.RequestStarted.ConfigureAwait(false);
+                var remainingBudgetStopwatch = Stopwatch.StartNew();
+
+                // Act
+                MsalServiceException exception = await Assert.ThrowsExactlyAsync<MsalServiceException>(
+                    async () => await discoveryTask.ConfigureAwait(false)).ConfigureAwait(false);
+                remainingBudgetStopwatch.Stop();
+
+                // Assert
+                Assert.AreEqual(MsalError.RequestTimeout, exception.ErrorCode);
+                Assert.AreEqual(MsalErrorMessage.ManagedIdentityCapabilityDiscoveryTimeout, exception.Message);
+                Assert.IsTrue(
+                    remainingBudgetStopwatch.Elapsed < TimeSpan.FromSeconds(3),
+                    $"IMDSv1 received a fresh timeout instead of the remaining budget. Elapsed: {remainingBudgetStopwatch.Elapsed}.");
             }
         }
 
@@ -253,7 +402,10 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 // Act
                 ManagedIdentityCapabilities capabilities = await application
                     .GetManagedIdentityCapabilitiesAsync(
-                        new ManagedIdentityCapabilitiesOptions { ImdsProbeTimeout = TimeSpan.FromSeconds(5) },
+                        new ManagedIdentityCapabilitiesOptions
+                        {
+                            CapabilityDiscoveryTimeout = TimeSpan.FromSeconds(5)
+                        },
                         CancellationToken.None)
                     .ConfigureAwait(false);
 
@@ -284,7 +436,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 try
                 {
                     await application.GetManagedIdentityCapabilitiesAsync(
-                        new ManagedIdentityCapabilitiesOptions { ImdsProbeTimeout = TimeSpan.FromSeconds(30) },
+                        new ManagedIdentityCapabilitiesOptions { CapabilityDiscoveryTimeout = TimeSpan.FromSeconds(30) },
                         callerCancellationSource.Token).ConfigureAwait(false);
                 }
                 catch (Exception ex)
@@ -295,6 +447,56 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 // Assert
                 Assert.IsInstanceOfType<OperationCanceledException>(exception);
                 Assert.IsNotInstanceOfType<MsalException>(exception);
+            }
+        }
+
+        [TestMethod]
+        [Timeout(10000, CooperativeCancellation = true)]
+        public async Task GetManagedIdentityCapabilities_TimeoutDuringComputeMetadata_DoesNotCacheResultAsync()
+        {
+            // Arrange
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, ManagedIdentityTests.ImdsEndpoint);
+                ManagedIdentityApplication application = CreateApplication(
+                    httpManager,
+                    new TestRetryPolicyFactory());
+                var metadataHandler = new BlockingMockHttpMessageHandler();
+
+                httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V2));
+                httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V1));
+                httpManager.AddMockHandler(metadataHandler);
+
+                Task<ManagedIdentityCapabilities> firstDiscovery = application
+                    .GetManagedIdentityCapabilitiesAsync(
+                        new ManagedIdentityCapabilitiesOptions
+                        {
+                            CapabilityDiscoveryTimeout = s_testTimeout
+                        },
+                        CancellationToken.None);
+
+                await metadataHandler.RequestStarted.ConfigureAwait(false);
+                await metadataHandler.CancellationObserved.ConfigureAwait(false);
+
+                MsalServiceException timeoutException = await Assert.ThrowsExactlyAsync<MsalServiceException>(
+                    async () => await firstDiscovery.ConfigureAwait(false)).ConfigureAwait(false);
+
+                httpManager.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V2));
+                httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V1));
+                httpManager.AddMockHandler(MockHelpers.MockImdsComputeMetadata());
+
+                // Act
+                ManagedIdentityCapabilities capabilities = await application
+                    .GetManagedIdentityCapabilitiesAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual(MsalError.RequestTimeout, timeoutException.ErrorCode);
+                Assert.AreEqual(MsalErrorMessage.ManagedIdentityCapabilityDiscoveryTimeout, timeoutException.Message);
+                Assert.AreEqual(ManagedIdentitySource.Imds, capabilities.Source);
+                Assert.AreEqual(MtlsBindingStrength.Software, capabilities.MaxSupportedBindingStrength);
+                Assert.AreEqual(0, httpManager.QueueSize);
             }
         }
 
@@ -317,7 +519,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V2));
 
                 Task<ManagedIdentityCapabilities> firstDiscovery = application.GetManagedIdentityCapabilitiesAsync(
-                    new ManagedIdentityCapabilitiesOptions { ImdsProbeTimeout = s_testTimeout },
+                    new ManagedIdentityCapabilitiesOptions { CapabilityDiscoveryTimeout = s_testTimeout },
                     CancellationToken.None);
 
                 await keyProvider.Entered.ConfigureAwait(false);
@@ -336,6 +538,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 // Assert
                 Assert.AreEqual(MsalError.RequestTimeout, timeoutException.ErrorCode);
+                Assert.AreEqual(MsalErrorMessage.ManagedIdentityCapabilityDiscoveryTimeout, timeoutException.Message);
                 Assert.AreEqual(ManagedIdentitySource.Imds, capabilities.Source);
                 Assert.AreEqual(MtlsBindingStrength.Software, capabilities.MaxSupportedBindingStrength);
                 Assert.AreEqual(0, httpManager.QueueSize);
@@ -369,7 +572,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Task<ManagedIdentityCapabilities> waiterTask = waiter.GetManagedIdentityCapabilitiesAsync(
                     new ManagedIdentityCapabilitiesOptions
                     {
-                        ImdsProbeTimeout = TimeSpan.FromMilliseconds(200)
+                        CapabilityDiscoveryTimeout = TimeSpan.FromMilliseconds(200)
                     },
                     CancellationToken.None);
 
@@ -397,39 +600,48 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        public async Task RetryPolicies_NoResponseException_DoNotRetryAsync()
+        [Timeout(5000, CooperativeCancellation = true)]
+        public async Task DefaultAndRegionRetryPolicies_IgnoreCancellationDuringDelayAsync()
         {
             // Arrange
-            IRetryPolicy imdsRetryPolicy = new TestImdsRetryPolicy();
-            IRetryPolicy imdsProbeRetryPolicy = new TestImdsProbeRetryPolicy();
-            IRetryPolicy regionDiscoveryRetryPolicy = new TestRegionDiscoveryRetryPolicy();
+            IRetryPolicy stsRetryPolicy = new DefaultRetryPolicy(RequestType.STS);
+            IRetryPolicy managedIdentityRetryPolicy = new DefaultRetryPolicy(RequestType.ManagedIdentityDefault);
+            IRetryPolicy regionDiscoveryRetryPolicy = new RegionDiscoveryRetryPolicy();
             ILoggerAdapter logger = Substitute.For<ILoggerAdapter>();
-            var timeoutException = new TaskCanceledException();
+            var response = new HttpResponse { StatusCode = HttpStatusCode.InternalServerError };
+            using (var cancellationSource = new CancellationTokenSource())
+            {
+                cancellationSource.Cancel();
 
-            // Act
-            bool retryImds = await imdsRetryPolicy.PauseForRetryAsync(
-                response: null,
-                timeoutException,
-                retryCount: 0,
-                logger,
-                CancellationToken.None).ConfigureAwait(false);
-            bool retryImdsProbe = await imdsProbeRetryPolicy.PauseForRetryAsync(
-                response: null,
-                timeoutException,
-                retryCount: 0,
-                logger,
-                CancellationToken.None).ConfigureAwait(false);
-            bool retryRegionDiscovery = await regionDiscoveryRetryPolicy.PauseForRetryAsync(
-                response: null,
-                timeoutException,
-                retryCount: 0,
-                logger,
-                CancellationToken.None).ConfigureAwait(false);
+                // Act
+                Task<bool> retryStsTask = stsRetryPolicy.PauseForRetryAsync(
+                    response,
+                    exception: null,
+                    retryCount: 0,
+                    logger,
+                    cancellationSource.Token);
+                Task<bool> retryManagedIdentityTask = managedIdentityRetryPolicy.PauseForRetryAsync(
+                    response,
+                    exception: null,
+                    retryCount: 0,
+                    logger,
+                    cancellationSource.Token);
+                Task<bool> retryRegionDiscoveryTask = regionDiscoveryRetryPolicy.PauseForRetryAsync(
+                    response,
+                    exception: null,
+                    retryCount: 0,
+                    logger,
+                    cancellationSource.Token);
+                bool[] retryResults = await Task.WhenAll(
+                    retryStsTask,
+                    retryManagedIdentityTask,
+                    retryRegionDiscoveryTask).ConfigureAwait(false);
 
-            // Assert
-            Assert.IsFalse(retryImds);
-            Assert.IsFalse(retryImdsProbe);
-            Assert.IsFalse(retryRegionDiscovery);
+                // Assert
+                Assert.IsTrue(retryResults[0]);
+                Assert.IsTrue(retryResults[1]);
+                Assert.IsTrue(retryResults[2]);
+            }
         }
 
         private static ManagedIdentityApplication CreateApplication(
@@ -539,6 +751,37 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 return await _innerProvider
                     .GetOrCreateKeyAsync(logger, CancellationToken.None)
                     .ConfigureAwait(false);
+            }
+        }
+
+        private sealed class GatedResponseMockHttpMessageHandler : MockHttpMessageHandler
+        {
+            private readonly HttpStatusCode _statusCode;
+            private readonly TaskCompletionSource<bool> _requestStarted =
+                new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+            private readonly TaskCompletionSource<bool> _release =
+                new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+            internal GatedResponseMockHttpMessageHandler(HttpStatusCode statusCode)
+            {
+                _statusCode = statusCode;
+            }
+
+            internal Task RequestStarted => _requestStarted.Task;
+
+            internal void Release()
+            {
+                _release.TrySetResult(true);
+            }
+
+            protected override async Task<HttpResponseMessage> SendAsync(
+                HttpRequestMessage request,
+                CancellationToken cancellationToken)
+            {
+                _requestStarted.TrySetResult(true);
+                await _release.Task.ConfigureAwait(false);
+                cancellationToken.ThrowIfCancellationRequested();
+                return new HttpResponseMessage(_statusCode);
             }
         }
 

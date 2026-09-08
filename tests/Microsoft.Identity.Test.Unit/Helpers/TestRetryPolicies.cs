@@ -12,7 +12,7 @@ namespace Microsoft.Identity.Test.Unit.Helpers
     {
         public TestDefaultRetryPolicy(RequestType requestType) : base(requestType) { }
 
-        internal override Task DelayAsync(int milliseconds, CancellationToken cancellationToken)
+        internal override Task DelayAsync(int milliseconds)
         {
             // No delay for tests
             return Task.CompletedTask;
@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Test.Unit.Helpers
     {
         public TestRegionDiscoveryRetryPolicy() : base() { }
 
-        internal override Task DelayAsync(int milliseconds, CancellationToken cancellationToken)
+        internal override Task DelayAsync(int milliseconds)
         {
             // No delay for tests
             return Task.CompletedTask;

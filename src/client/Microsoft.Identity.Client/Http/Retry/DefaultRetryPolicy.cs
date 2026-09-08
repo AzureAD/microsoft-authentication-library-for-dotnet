@@ -41,9 +41,9 @@ namespace Microsoft.Identity.Client.Http.Retry
             }
         }
 
-        internal virtual Task DelayAsync(int milliseconds, CancellationToken cancellationToken)
+        internal virtual Task DelayAsync(int milliseconds)
         {
-            return Task.Delay(milliseconds, cancellationToken);
+            return Task.Delay(milliseconds);
         }
 
         public async Task<bool> PauseForRetryAsync(
@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Client.Http.Retry
             Exception exception,
             int retryCount,
             ILoggerAdapter logger,
-            CancellationToken cancellationToken)
+            CancellationToken retryDelayCancellationToken)
         {
             // Check if the status code is retriable and if the current retry count is less than max retries
             if (_retryCondition(response, exception) &&
@@ -69,7 +69,7 @@ namespace Microsoft.Identity.Client.Http.Retry
                 logger.Warning($"Retrying request in {retryAfterDelay}ms (retry attempt: {retryCount + 1})");
 
                 // Pause execution for the calculated delay
-                await DelayAsync(retryAfterDelay, cancellationToken).ConfigureAwait(false);
+                await DelayAsync(retryAfterDelay).ConfigureAwait(false);
 
                 return true;
             }
