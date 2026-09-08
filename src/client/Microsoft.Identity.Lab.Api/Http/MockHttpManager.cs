@@ -126,6 +126,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <param name="retryPolicy">The retry policy.</param>
         /// <param name="retryCount">The retry count.</param>
+        /// <param name="retryDelayCancellationToken">The cancellation token for retry delays.</param>
         public Task<HttpResponse> SendRequestAsync(
             Uri endpoint,
             IDictionary<string, string> headers,
@@ -137,7 +138,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> validateServerCert,
             CancellationToken cancellationToken,
             IRetryPolicy retryPolicy,
-            int retryCount = 0)
+            int retryCount = 0,
+            CancellationToken retryDelayCancellationToken = default)
         {
             return _httpManager.SendRequestAsync(
                 endpoint,
@@ -149,7 +151,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 mtlsCertificate,
                 validateServerCert, cancellationToken,
                 retryPolicy,
-                retryCount);
+                retryCount,
+                retryDelayCancellationToken);
         }
     }
 

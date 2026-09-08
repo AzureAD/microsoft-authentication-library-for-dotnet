@@ -65,7 +65,8 @@ namespace Microsoft.Identity.Client.Http
             Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> validateServerCert,
             CancellationToken cancellationToken,
             IRetryPolicy retryPolicy,
-            int retryCount = 0)
+            int retryCount = 0,
+            CancellationToken retryDelayCancellationToken = default)
         {
             Exception timeoutException = null;
             HttpResponse response = null;
@@ -113,7 +114,13 @@ namespace Microsoft.Identity.Client.Http
                 timeoutException = exception;
             }
             
-            while (!_disableInternalRetries && await retryPolicy.PauseForRetryAsync(response, timeoutException, retryCount, logger).ConfigureAwait(false))
+            while (!_disableInternalRetries &&
+                await retryPolicy.PauseForRetryAsync(
+                    response,
+                    timeoutException,
+                    retryCount,
+                    logger,
+                    retryDelayCancellationToken).ConfigureAwait(false))
             {
                 retryCount++;
 
@@ -128,7 +135,8 @@ namespace Microsoft.Identity.Client.Http
                     validateServerCert,
                     cancellationToken,
                     retryPolicy,
-                    retryCount) // Pass the updated retry count
+                    retryCount,
+                    retryDelayCancellationToken) // Pass the updated retry count and delay budget
                     .ConfigureAwait(false);
             }
 

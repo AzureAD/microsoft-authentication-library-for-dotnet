@@ -68,19 +68,95 @@ namespace Microsoft.Identity.Client
         /// </remarks>
         /// <param name="cancellationToken">A cancellation token to observe while waiting for the detection to complete.</param>
         /// <returns>A <see cref="ManagedIdentityCapabilities"/> describing the detected source and host capabilities.</returns>
-        public async Task<ManagedIdentityCapabilities> GetManagedIdentityCapabilitiesAsync(CancellationToken cancellationToken)
+        public Task<ManagedIdentityCapabilities> GetManagedIdentityCapabilitiesAsync(CancellationToken cancellationToken)
         {
-            // Create a temporary RequestContext for the logger and the IMDS probe request.
-            var requestContext = new RequestContext(this.ServiceBundle, Guid.NewGuid(), null, cancellationToken);
+            return GetManagedIdentityCapabilitiesCoreAsync(timeout: null, cancellationToken);
+        }
 
-            ManagedIdentityDiscoveryResult discoveryResult = await ManagedIdentityClient
-                .GetManagedIdentityCapabilitiesAsync(requestContext, cancellationToken)
-                .ConfigureAwait(false);
+        /// <summary>
+        /// Detects the managed identity source available on the host and the strongest mTLS
+        /// binding the host can produce, using the supplied discovery options.
+        /// </summary>
+        /// <param name="options">Options that control managed identity capability discovery.</param>
+        /// <param name="cancellationToken">A cancellation token to observe while waiting for the detection to complete.</param>
+        /// <returns>A <see cref="ManagedIdentityCapabilities"/> describing the detected source and host capabilities.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="options"/> is null.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// Thrown when <see cref="ManagedIdentityCapabilitiesOptions.CapabilityDiscoveryTimeout"/> is not positive
+        /// or exceeds the maximum timeout supported across MSAL target frameworks.
+        /// </exception>
+        /// <exception cref="OperationCanceledException">
+        /// Thrown when <paramref name="cancellationToken"/> is canceled before or during uncached discovery.
+        /// </exception>
+        /// <exception cref="MsalServiceException">
+        /// Thrown with error code <see cref="MsalError.RequestTimeout"/> when capability discovery
+        /// exceeds <see cref="ManagedIdentityCapabilitiesOptions.CapabilityDiscoveryTimeout"/>.
+        /// </exception>
+        public Task<ManagedIdentityCapabilities> GetManagedIdentityCapabilitiesAsync(
+            ManagedIdentityCapabilitiesOptions options,
+            CancellationToken cancellationToken)
+        {
+            if (options is null)
+            {
+                throw new ArgumentNullException(nameof(options));
+            }
 
-            return new ManagedIdentityCapabilities(
-                discoveryResult.Source,
-                discoveryResult.MaxSupportedBindingStrength,
-                discoveryResult.GetCombinedErrorReason());
+            TimeSpan? timeout = options.CapabilityDiscoveryTimeout;
+            if (timeout.HasValue &&
+                (timeout.Value <= TimeSpan.Zero ||
+                 timeout.Value > TimeSpan.FromMilliseconds(int.MaxValue)))
+            {
+                throw new ArgumentOutOfRangeException(nameof(options.CapabilityDiscoveryTimeout));
+            }
+
+            return GetManagedIdentityCapabilitiesCoreAsync(timeout, cancellationToken);
+        }
+
+        private async Task<ManagedIdentityCapabilities> GetManagedIdentityCapabilitiesCoreAsync(
+            TimeSpan? timeout,
+            CancellationToken callerCancellationToken)
+        {
+            CancellationTokenSource effectiveTokenSource = null;
+            CancellationToken effectiveToken = callerCancellationToken;
+
+            try
+            {
+                if (timeout.HasValue)
+                {
+                    effectiveTokenSource = CancellationTokenSource.CreateLinkedTokenSource(callerCancellationToken);
+                    effectiveTokenSource.CancelAfter(timeout.Value);
+                    effectiveToken = effectiveTokenSource.Token;
+                }
+
+                // Create a temporary RequestContext for the logger and the IMDS probe request.
+                var requestContext = new RequestContext(this.ServiceBundle, Guid.NewGuid(), null, effectiveToken);
+
+                ManagedIdentityDiscoveryResult discoveryResult = await ManagedIdentityClient
+                    .GetManagedIdentityCapabilitiesAsync(
+                        requestContext,
+                        effectiveToken,
+                        isCapabilityDiscoveryTimeoutConfigured: timeout.HasValue)
+                    .ConfigureAwait(false);
+
+                return new ManagedIdentityCapabilities(
+                    discoveryResult.Source,
+                    discoveryResult.MaxSupportedBindingStrength,
+                    discoveryResult.GetCombinedErrorReason());
+            }
+            catch (OperationCanceledException exception) when (
+                timeout.HasValue &&
+                !callerCancellationToken.IsCancellationRequested &&
+                effectiveTokenSource?.IsCancellationRequested == true)
+            {
+                throw new MsalServiceException(
+                    MsalError.RequestTimeout,
+                    MsalErrorMessage.ManagedIdentityCapabilityDiscoveryTimeout,
+                    exception);
+            }
+            finally
+            {
+                effectiveTokenSource?.Dispose();
+            }
         }
 
         /// <summary>

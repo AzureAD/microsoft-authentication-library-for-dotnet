@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 
@@ -27,7 +28,12 @@ namespace Microsoft.Identity.Client.Http.Retry
             return Task.Delay(milliseconds);
         }
 
-        public async Task<bool> PauseForRetryAsync(HttpResponse response, Exception exception, int retryCount, ILoggerAdapter logger)
+        public async Task<bool> PauseForRetryAsync(
+            HttpResponse response,
+            Exception exception,
+            int retryCount,
+            ILoggerAdapter logger,
+            CancellationToken retryDelayCancellationToken)
         {
             // Check if the status code is retriable and if the current retry count is less than max retries
             if (HttpRetryConditions.RegionDiscovery(response, exception) &&

@@ -26,7 +26,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         internal static async Task<ComputeMetadataResponse> GetComputeMetadataAsync(
             IHttpManager httpManager,
             ILoggerAdapter logger,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            CancellationToken retryDelayCancellationToken)
         {
             var headers = new Dictionary<string, string>
             {
@@ -53,7 +54,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     mtlsCertificate: null,
                     validateServerCertificate: null,
                     cancellationToken: cancellationToken,
-                    retryPolicy: new ImdsRetryPolicy())
+                    retryPolicy: new ImdsRetryPolicy(),
+                    retryDelayCancellationToken: retryDelayCancellationToken)
                     .ConfigureAwait(false);
 
                 if (response is null || response.StatusCode != HttpStatusCode.OK)

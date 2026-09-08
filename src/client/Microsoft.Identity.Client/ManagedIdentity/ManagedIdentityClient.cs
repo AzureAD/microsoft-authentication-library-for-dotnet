@@ -73,7 +73,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             if (parameters.MtlsPopMinStrength > MtlsBindingStrength.None)
             {
                 ManagedIdentityDiscoveryResult discovery =
-                    await GetManagedIdentityCapabilitiesAsync(requestContext, cancellationToken).ConfigureAwait(false);
+                    await GetManagedIdentityCapabilitiesAsync(
+                        requestContext,
+                        cancellationToken,
+                        isCapabilityDiscoveryTimeoutConfigured: false).ConfigureAwait(false);
 
                 if (discovery.MaxSupportedBindingStrength < parameters.MtlsPopMinStrength)
                 {
@@ -217,8 +220,16 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
         }
 
-        private static ManagedIdentityDiscoveryResult CacheDiscoveryResult(ManagedIdentityDiscoveryResult result)
+        private static ManagedIdentityDiscoveryResult CacheDiscoveryResult(
+            ManagedIdentityDiscoveryResult result,
+            CancellationToken cancellationToken,
+            bool isCapabilityDiscoveryTimeoutConfigured)
         {
+            if (isCapabilityDiscoveryTimeoutConfigured)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+            }
+
             s_cachedSourceResult = result;
             return result;
         }
@@ -228,7 +239,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         // It probes IMDS v2 first, then v1 if v2 fails, and caches the result.
         internal async Task<ManagedIdentityDiscoveryResult> GetManagedIdentityCapabilitiesAsync(
             RequestContext requestContext,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            bool isCapabilityDiscoveryTimeoutConfigured)
         {
             // Fast path: explicit discovery already completed.
             if (s_cachedSourceResult != null)
@@ -236,11 +248,16 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 return s_cachedSourceResult;
             }
 
+            if (isCapabilityDiscoveryTimeoutConfigured)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+            }
+
             // Single-flight: ensure only one caller probes IMDS / provisions a binding key at a
             // time. Concurrent callers at process startup wait here and then observe the cached
-            // result instead of issuing redundant probes. Try a non-blocking acquire first so an
-            // uncontended caller keeps the existing cancellation point (the HTTP probe); only a
-            // contended caller waits, and that wait is cancelable.
+            // result instead of issuing redundant probes. Try a non-blocking acquire first to avoid
+            // an asynchronous wait when uncontended. A configured discovery timeout is checked after
+            // either acquisition path without changing the existing no-timeout cancellation ordering.
             bool lockTaken = s_discoveryLock.Wait(0);
             if (!lockTaken)
             {
@@ -250,6 +267,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             try
             {
+                if (isCapabilityDiscoveryTimeoutConfigured)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                }
+
                 // Re-check under the lock in case another caller completed discovery while we waited.
                 if (s_cachedSourceResult != null)
                 {
@@ -261,7 +283,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
                 if (source != ManagedIdentitySource.None)
                 {
-                    return CacheDiscoveryResult(new ManagedIdentityDiscoveryResult(source));
+                    return CacheDiscoveryResult(
+                        new ManagedIdentityDiscoveryResult(source),
+                        cancellationToken,
+                        isCapabilityDiscoveryTimeoutConfigured);
                 }
 
                 string imdsV1FailureReason = null;
@@ -269,6 +294,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
                 // Read the kill switch once so every decision in this discovery pass agrees.
                 bool imdsV2Disabled = EnvironmentVariables.IsImdsV2Disabled;
+                CancellationToken retryDelayCancellationToken = isCapabilityDiscoveryTimeoutConfigured
+                    ? cancellationToken
+                    : CancellationToken.None;
 
                 // Probe IMDS v2 first. The v2 path (CSR metadata endpoint) only exists on hosts that
                 // actually support IMDSv2; on v1-only hosts it returns 404. Probing v2 first avoids
@@ -283,7 +311,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 }
                 else
                 {
-                    var (imdsV2Success, imdsV2Failure) = await ImdsManagedIdentitySource.ProbeImdsEndpointAsync(requestContext, ImdsVersion.V2, cancellationToken).ConfigureAwait(false);
+                    var (imdsV2Success, imdsV2Failure) = await ImdsManagedIdentitySource.ProbeImdsEndpointAsync(
+                        requestContext,
+                        ImdsVersion.V2,
+                        cancellationToken,
+                        retryDelayCancellationToken).ConfigureAwait(false);
                     if (imdsV2Success)
                     {
                         requestContext.Logger.Info("[Managed Identity] ImdsV2 detected.");
@@ -299,13 +331,19 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                         return CacheDiscoveryResult(new ManagedIdentityDiscoveryResult(
                             ManagedIdentitySource.Imds,
                             ImdsVersion.V2,
-                            v2Strength));
+                            v2Strength),
+                            cancellationToken,
+                            isCapabilityDiscoveryTimeoutConfigured);
                     }
                     imdsV2FailureReason = imdsV2Failure;
                 }
 
                 // If v2 fails, fall back to probing IMDS v1.
-                var (imdsV1Success, imdsV1Failure) = await ImdsManagedIdentitySource.ProbeImdsEndpointAsync(requestContext, ImdsVersion.V1, cancellationToken).ConfigureAwait(false);
+                var (imdsV1Success, imdsV1Failure) = await ImdsManagedIdentitySource.ProbeImdsEndpointAsync(
+                    requestContext,
+                    ImdsVersion.V1,
+                    cancellationToken,
+                    retryDelayCancellationToken).ConfigureAwait(false);
                 if (imdsV1Success)
                 {
                     requestContext.Logger.Info("[Managed Identity] ImdsV1 detected.");
@@ -316,14 +354,19 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     // while every PoP request throws.
                     MtlsBindingStrength strength = imdsV2Disabled
                         ? MtlsBindingStrength.None
-                        : await DetermineImdsV1BindingStrengthAsync(requestContext, cancellationToken).ConfigureAwait(false);
+                        : await DetermineImdsV1BindingStrengthAsync(
+                            requestContext,
+                            cancellationToken,
+                            retryDelayCancellationToken).ConfigureAwait(false);
 
                     requestContext.Logger.Info($"[Managed Identity] Host max supported binding strength: {strength}.");
 
                     return CacheDiscoveryResult(new ManagedIdentityDiscoveryResult(
                         ManagedIdentitySource.Imds,
                         ImdsVersion.V1,
-                        strength));
+                        strength),
+                        cancellationToken,
+                        isCapabilityDiscoveryTimeoutConfigured);
                 }
                 imdsV1FailureReason = imdsV1Failure;
 
@@ -331,7 +374,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 return CacheDiscoveryResult(new ManagedIdentityDiscoveryResult(
                     ManagedIdentitySource.None,
                     imdsV1FailureReason: imdsV1FailureReason,
-                    imdsV2FailureReason: imdsV2FailureReason));
+                    imdsV2FailureReason: imdsV2FailureReason),
+                    cancellationToken,
+                    isCapabilityDiscoveryTimeoutConfigured);
             }
             finally
             {
@@ -347,24 +392,30 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         // Framework 4.6.2, so the host is reported as None there.
         private static Task<MtlsBindingStrength> DetermineImdsV1BindingStrengthAsync(
             RequestContext requestContext,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            CancellationToken retryDelayCancellationToken)
         {
 #if NET462
             return Task.FromResult(MtlsBindingStrength.None);
 #else
-            return DetermineImdsV1BindingStrengthCoreAsync(requestContext, cancellationToken);
+            return DetermineImdsV1BindingStrengthCoreAsync(
+                requestContext,
+                cancellationToken,
+                retryDelayCancellationToken);
 #endif
         }
 
 #if !NET462
         private static async Task<MtlsBindingStrength> DetermineImdsV1BindingStrengthCoreAsync(
             RequestContext requestContext,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            CancellationToken retryDelayCancellationToken)
         {
             ComputeMetadataResponse computeMetadata = await ImdsComputeMetadataManager.GetComputeMetadataAsync(
                 requestContext.ServiceBundle.HttpManager,
                 requestContext.Logger,
-                cancellationToken).ConfigureAwait(false);
+                cancellationToken,
+                retryDelayCancellationToken).ConfigureAwait(false);
 
             // A Windows TVM/CVM security profile indicates key-binding capability. We report
             // Software (binding available) rather than KeyGuard: the security profile alone does
