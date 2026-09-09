@@ -1,5 +1,5 @@
 4.88.0
-======
+=======
 
 ### New Features
 - Added user-assigned managed identity support for Azure Arc, including selecting the identity by client ID and validating the identity returned in the token response. [#6128](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6128)
