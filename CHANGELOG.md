@@ -2,7 +2,7 @@
 ======
 
 ### New Features
-- Added a read-only known-cloud metadata lookup and token-exchange scope helper so higher-level SDKs can resolve cloud-specific federated-credential audiences for public and sovereign clouds. [#6104](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6104)
+- Added a read-only known-cloud metadata lookup and token-exchange scope helper, so higher-level SDKs can resolve cloud-specific federated-credential audiences for public and sovereign clouds. [#6104](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6104)
 - Added the `MSAL_MI_DISABLE_IMDS_V2` process-level kill switch, allowing managed identity callers to disable IMDSv2 and fall back to IMDSv1 for bearer-token requests. [#6178](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6178)
 - Added a configurable timeout for managed identity capability discovery, covering probes, retries, fallback, compute metadata, and binding-strength detection under one deadline. [#6181](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6181)
 
