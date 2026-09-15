@@ -115,6 +115,28 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         }
 
         [TestMethod]
+        public async Task NetworkMetadataProvider_DropsCustomPort_WhenDiscoveryEndpointIsNotSetAndAuthorityIsUnknown_Async()
+        {
+            // Arrange
+            const string authority = "https://localhost:5215/common/";
+            const string expectedDiscoveryEndpoint = "https://login.microsoftonline.com/common/discovery/instance";
+            var networkMetadataProvider = new NetworkMetadataProvider(
+                _harness.HttpManager,
+                _networkCacheMetadataProvider);
+            var handler = _harness.HttpManager.AddInstanceDiscoveryMockHandler(authority);
+
+            // Act
+            await networkMetadataProvider.GetMetadataAsync(new Uri(authority), _testRequestContext)
+                .ConfigureAwait(false);
+
+            // Assert
+            Assert.IsNotNull(handler.ActualRequestMessage);
+            Assert.AreEqual("login.microsoftonline.com", handler.ActualRequestMessage.RequestUri.Host);
+            Assert.AreEqual(443, handler.ActualRequestMessage.RequestUri.Port);
+            Assert.AreEqual(expectedDiscoveryEndpoint, handler.ActualRequestMessage.RequestUri.GetLeftPart(UriPartial.Path));
+        }
+
+        [TestMethod]
         public async Task NetworkCacheProvider_IsUsedFirst_Async()
         {
             // Arrange
