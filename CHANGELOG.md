@@ -1,8 +1,6 @@
 4.89.0
 ======
 
-Released September 15, 2026.
-
 ### Changes
 - Updated the KeyGuardAttestation package version to 1.1.7. [#6189](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6189)
 
