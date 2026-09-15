@@ -1,3 +1,9 @@
+4.90.0
+======
+
+### Changes
+- Updated the KeyGuardAttestation package version to 1.1.7. [#6189](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6189)
+  
 4.89.0
 ======
 
