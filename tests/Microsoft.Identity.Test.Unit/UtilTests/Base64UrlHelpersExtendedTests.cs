@@ -120,5 +120,27 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
             byte[] decoded = Base64UrlHelpers.DecodeBytes(encoded);
             CollectionAssert.AreEqual(data, decoded);
         }
+
+        [TestMethod]
+        public void Decode_LongStringWithUrlSafeCharsAndPadding_RoundTrips()
+        {
+            // Regression test for a decode path that needs both character replacement
+            // (+ / -> - _) and padding, similar in shape to a real client_info payload
+            // (e.g. {"uid":"...","utid":"..."} base64url-encoded).
+            for (int len = 1; len < 200; len++)
+            {
+                byte[] data = new byte[len];
+                for (int i = 0; i < len; i++)
+                {
+                    // Deterministic bytes that are guaranteed to produce '+' (0x3E) and
+                    // '/' (0x3F) sextets in standard base64, i.e. '-'/'_' in base64url.
+                    data[i] = (byte)(i * 37 + 251);
+                }
+
+                string encoded = Base64UrlHelpers.Encode(data);
+                byte[] decoded = Base64UrlHelpers.DecodeBytes(encoded);
+                CollectionAssert.AreEqual(data, decoded, $"Round-trip failed for length {len}");
+            }
+        }
     }
 }

@@ -160,7 +160,7 @@ namespace Microsoft.Identity.Client.Utils
             return UnsafeDecode(str);
         }
 
-        private unsafe static byte[] UnsafeDecode(string str)
+        private static byte[] UnsafeDecode(string str)
         {
             int mod = str.Length % 4;
             if (mod == 1)
@@ -178,49 +178,32 @@ namespace Microsoft.Identity.Client.Utils
                 }
             }
 
-            if (needReplace)
+            if (!needReplace && decodedLength == str.Length)
             {
-                string decodedString = new string(char.MinValue, decodedLength);
-                fixed (char* dest = decodedString)
-                {
-                    int i = 0;
-                    for (; i < str.Length; i++)
-                    {
-                        if (str[i] == base64UrlCharacter62)
-                            dest[i] = base64Character62;
-                        else if (str[i] == base64UrlCharacter63)
-                            dest[i] = base64Character63;
-                        else
-                            dest[i] = str[i];
-                    }
-
-                    for (; i < decodedLength; i++)
-                        dest[i] = base64PadCharacter;
-                }
-
-                return Convert.FromBase64String(decodedString);
+                return Convert.FromBase64String(str);
             }
-            else
+
+            // Note: strings are immutable in .NET. Building the decoded value in a char[] buffer
+            // and using Convert.FromBase64CharArray (instead of mutating a pre-allocated string
+            // in place via unsafe pointers) avoids relying on undefined behavior that can break
+            // depending on runtime/JIT implementation details (e.g. string interning/deduplication).
+            char[] chars = new char[decodedLength];
+            int j = 0;
+            for (; j < str.Length; j++)
             {
-                if (decodedLength == str.Length)
-                {
-                    return Convert.FromBase64String(str);
-                }
+                char c = str[j];
+                if (c == base64UrlCharacter62)
+                    chars[j] = base64Character62;
+                else if (c == base64UrlCharacter63)
+                    chars[j] = base64Character63;
                 else
-                {
-                    string decodedString = new string(char.MinValue, decodedLength);
-                    fixed (char* src = str)
-                    fixed (char* dest = decodedString)
-                    {
-                        Buffer.MemoryCopy(src, dest, str.Length * 2, str.Length * 2);
-                        dest[str.Length] = base64PadCharacter;
-                        if (str.Length + 2 == decodedLength)
-                            dest[str.Length + 1] = base64PadCharacter;
-                    }
-
-                    return Convert.FromBase64String(decodedString);
-                }
+                    chars[j] = c;
             }
+
+            for (; j < decodedLength; j++)
+                chars[j] = base64PadCharacter;
+
+            return Convert.FromBase64CharArray(chars, 0, decodedLength);
         }
 
         /// <summary>
