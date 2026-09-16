@@ -21,7 +21,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
     internal class SimpleHttpClientFactory :
         IMsalMtlsHttpClientFactory,
         IMsalSFHttpClientFactory,
-        IHttpClientFactoryWithRedirectControl
+        IMsalWsTrustHttpClientFactory
     {
         //Please see (https://aka.ms/msal-httpclient-info) for important information regarding the HttpClient.
         private static readonly ConcurrentDictionary<string, HttpClient> s_httpClientPool = new ConcurrentDictionary<string, HttpClient>();
@@ -74,12 +74,10 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
                 useDefaultCredentials: true);
         }
 
-        HttpClient IHttpClientFactoryWithRedirectControl.GetHttpClient(
-            bool allowAutoRedirect,
-            bool useDefaultCredentials)
+        HttpClient IMsalWsTrustHttpClientFactory.GetHttpClient(bool useDefaultCredentials)
         {
             return GetHttpClient(
-                allowAutoRedirect,
+                allowAutoRedirect: false,
                 useDefaultCredentials);
         }
 

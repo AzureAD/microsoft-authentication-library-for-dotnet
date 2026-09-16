@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using Microsoft.Identity.Client.Http;
@@ -8,19 +9,20 @@ using Microsoft.Identity.Client.Http;
 namespace Microsoft.Identity.Client.Platforms.Android
 {
     class AndroidHttpClientFactory :
-        IMsalHttpClientFactory,
-        IHttpClientFactoryWithRedirectControl
+        IMsalWsTrustHttpClientFactory
     {
+        private readonly Lazy<HttpClient> _wsTrustHttpClient =
+            new Lazy<HttpClient>(() => GetHttpClient(allowAutoRedirect: false));
+
         public HttpClient GetHttpClient()
         {
             return GetHttpClient(allowAutoRedirect: true);
         }
 
-        HttpClient IHttpClientFactoryWithRedirectControl.GetHttpClient(
-            bool allowAutoRedirect,
-            bool useDefaultCredentials)
+        HttpClient IMsalWsTrustHttpClientFactory.GetHttpClient(bool useDefaultCredentials)
         {
-            return GetHttpClient(allowAutoRedirect);
+            // Android does not use Windows default credentials.
+            return _wsTrustHttpClient.Value;
         }
 
         private static HttpClient GetHttpClient(bool allowAutoRedirect)

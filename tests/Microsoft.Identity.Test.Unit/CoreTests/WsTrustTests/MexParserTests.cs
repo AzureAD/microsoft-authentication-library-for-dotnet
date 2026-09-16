@@ -15,6 +15,7 @@ using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Unit.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NSubstitute;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
 {
@@ -328,6 +329,68 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
                 Assert.IsFalse(crossOriginHandler.UseDefaultCredentials);
                 Assert.IsFalse(returnedHandler.UseDefaultCredentials);
             }
+        }
+
+        [TestMethod]
+        public async Task MexRedirectsUseCustomWsTrustFactoryWithPerHopCredentialPolicyAsync()
+        {
+            // Arrange
+            const string initialAddress = "https://somehost/adfs/services/trust/mex";
+            const string crossOriginAddress = "https://otherhost/adfs/services/trust/mex";
+            const string returnAddress = "https://somehost/adfs/services/trust/returned/mex";
+            using var initialHandler = new MockHttpMessageHandler
+            {
+                ExpectedUrl = initialAddress,
+                ExpectedMethod = HttpMethod.Get,
+                AllowAutoRedirect = false,
+                UseDefaultCredentials = true,
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.TemporaryRedirect)
+            };
+            initialHandler.ResponseMessage.Headers.Location = new Uri(crossOriginAddress);
+            using var crossOriginHandler = new MockHttpMessageHandler
+            {
+                ExpectedUrl = crossOriginAddress,
+                ExpectedMethod = HttpMethod.Get,
+                AllowAutoRedirect = false,
+                UseDefaultCredentials = false,
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.TemporaryRedirect)
+            };
+            crossOriginHandler.ResponseMessage.Headers.Location = new Uri(returnAddress);
+            using var returnHandler = new MockHttpMessageHandler
+            {
+                ExpectedUrl = returnAddress,
+                ExpectedMethod = HttpMethod.Get,
+                AllowAutoRedirect = false,
+                UseDefaultCredentials = false,
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(File.ReadAllText(
+                        ResourceHelper.GetTestResourceRelativePath("TestMex2005.xml")))
+                }
+            };
+            using var initialClient = new HttpClient(initialHandler);
+            using var crossOriginClient = new HttpClient(crossOriginHandler);
+            using var returnClient = new HttpClient(returnHandler);
+            var factory = Substitute.For<IMsalWsTrustHttpClientFactory>();
+            factory.GetHttpClient(true).Returns(initialClient);
+            factory.GetHttpClient(false).Returns(crossOriginClient, returnClient);
+            var app = (PublicClientApplication)PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                .WithHttpClientFactory(factory)
+                .Build();
+
+            // Act
+            MexDocument document = await app.ServiceBundle.WsTrustWebRequestManager.GetMexDocumentAsync(
+                initialAddress,
+                new RequestContext(app.ServiceBundle, Guid.NewGuid(), null)).ConfigureAwait(false);
+
+            // Assert
+            Assert.IsNotNull(document.GetWsTrustUsernamePasswordEndpoint());
+            factory.Received(1).GetHttpClient(true);
+            factory.Received(2).GetHttpClient(false);
+            factory.DidNotReceive().GetHttpClient();
+            Assert.IsNotNull(initialHandler.ActualRequestMessage);
+            Assert.IsNotNull(crossOriginHandler.ActualRequestMessage);
+            Assert.IsNotNull(returnHandler.ActualRequestMessage);
         }
 
         [TestMethod]

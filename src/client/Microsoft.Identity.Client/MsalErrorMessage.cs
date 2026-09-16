@@ -122,9 +122,11 @@ namespace Microsoft.Identity.Client
         public const string TooManyRedirects =
             "The HTTP request exceeded the maximum number of redirects. ";
 
-        public const string CustomHttpClientFactoryRedirectControlUnavailable =
-            "MSAL cannot control redirects or default credentials for the configured custom HTTP client factory. " +
-            "The custom factory is responsible for enforcing equivalent redirect and credential-target policies in WS-Trust scenarios. ";
+        public const string CustomHttpClientFactoryWsTrustFallback =
+            "The configured HTTP client factory does not implement " + nameof(IMsalWsTrustHttpClientFactory) + ". " +
+            "MSAL is using a cached platform-default client for this MEX or WS-Trust request. " +
+            "Custom proxy, certificate, handler, and timeout settings are not applied. " +
+            "Implement " + nameof(IMsalWsTrustHttpClientFactory) + " to customize these requests. ";
 
         public const string GetUserNameFailed = "Failed to get user name. ";
 

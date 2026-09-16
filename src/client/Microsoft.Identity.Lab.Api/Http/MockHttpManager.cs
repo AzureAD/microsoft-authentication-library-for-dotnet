@@ -266,7 +266,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         MockHttpClientFactoryBase,
         IMsalMtlsHttpClientFactory,
         IMsalSFHttpClientFactory,
-        IHttpClientFactoryWithRedirectControl
+        IMsalWsTrustHttpClientFactory
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="MockHttpClientFactory"/> class.
@@ -291,13 +291,11 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return GetHttpClientInternal(null);
         }
 
-        HttpClient IHttpClientFactoryWithRedirectControl.GetHttpClient(
-            bool allowAutoRedirect,
-            bool useDefaultCredentials)
+        HttpClient IMsalWsTrustHttpClientFactory.GetHttpClient(bool useDefaultCredentials)
         {
             return GetHttpClientInternal(
                 null,
-                allowAutoRedirect,
+                allowAutoRedirect: false,
                 useDefaultCredentials);
         }
 
@@ -329,8 +327,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
     /// </summary>
     public class MockNonMtlsHttpClientFactory :
         MockHttpClientFactoryBase,
-        IMsalHttpClientFactory,
-        IHttpClientFactoryWithRedirectControl
+        IMsalWsTrustHttpClientFactory
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="MockNonMtlsHttpClientFactory"/> class.
@@ -355,13 +352,11 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return GetHttpClientInternal(null);
         }
 
-        HttpClient IHttpClientFactoryWithRedirectControl.GetHttpClient(
-            bool allowAutoRedirect,
-            bool useDefaultCredentials)
+        HttpClient IMsalWsTrustHttpClientFactory.GetHttpClient(bool useDefaultCredentials)
         {
             return GetHttpClientInternal(
                 null,
-                allowAutoRedirect,
+                allowAutoRedirect: false,
                 useDefaultCredentials);
         }
     }

@@ -13,9 +13,9 @@ namespace Microsoft.Identity.Client
     /// Implementations must be thread safe. 
     /// Do not create a new HttpClient for each call to <see cref="GetHttpClient"/> - this leads to socket exhaustion.
     /// If your app uses Integrated Windows Authentication, ensure <see cref="HttpClientHandler.UseDefaultCredentials"/> is set to true.
-    /// Custom factories own their HTTP transport behavior. For WS-Trust scenarios, they must enforce equivalent
-    /// redirect and credential-target policies that prevent credentials from being sent to insecure or untrusted
-    /// redirect targets.
+    /// For federation metadata (MEX) and WS-Trust requests, implement <see cref="IMsalWsTrustHttpClientFactory"/>
+    /// as well. Otherwise, MSAL uses cached platform-default clients for these requests, without the supplied
+    /// factory's custom proxy, certificates, handlers, or timeout settings. Other requests are unaffected.
     /// </remarks>
     public interface IMsalHttpClientFactory
     {

@@ -793,8 +793,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
         }
 
         private sealed class TimeoutHttpClientFactory :
-            IMsalHttpClientFactory,
-            IHttpClientFactoryWithRedirectControl,
+            IMsalWsTrustHttpClientFactory,
             IDisposable
         {
             private readonly HttpClient _httpClient;
@@ -812,9 +811,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                 return _httpClient;
             }
 
-            HttpClient IHttpClientFactoryWithRedirectControl.GetHttpClient(
-                bool allowAutoRedirect,
-                bool useDefaultCredentials)
+            HttpClient IMsalWsTrustHttpClientFactory.GetHttpClient(bool useDefaultCredentials)
             {
                 return _httpClient;
             }
