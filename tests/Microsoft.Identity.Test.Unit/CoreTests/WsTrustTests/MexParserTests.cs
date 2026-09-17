@@ -532,7 +532,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
         }
 
         [TestMethod]
-        public async Task MexRedirectChainSharesRetryBudgetTestAsync()
+        [DataRow(HttpStatusCode.OK)]
+        [DataRow(HttpStatusCode.InternalServerError)]
+        public async Task MexRedirectChainUsesBoundedRetryBudgetPerHopTestAsync(HttpStatusCode finalStatus)
         {
             // Arrange
             const string mexAddress = "https://somehost/adfs/services/trust/mex";
@@ -565,15 +567,36 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
                         ResponseMessage = new HttpResponseMessage(HttpStatusCode.InternalServerError)
                     });
 
+                harness.HttpManager.AddMockHandler(
+                    new MockHttpMessageHandler
+                    {
+                        ExpectedUrl = redirectedMexAddress,
+                        ExpectedMethod = HttpMethod.Get,
+                        ResponseMessage = new HttpResponseMessage(finalStatus)
+                        {
+                            Content = new StringContent(File.ReadAllText(
+                                ResourceHelper.GetTestResourceRelativePath("TestMex2005.xml")))
+                        }
+                    });
+
                 // Act
-                MsalServiceException exception = await AssertException.TaskThrowsAsync<MsalServiceException>(
-                    () => harness.ServiceBundle.WsTrustWebRequestManager.GetMexDocumentAsync(
-                        mexAddress,
-                        new RequestContext(harness.ServiceBundle, Guid.NewGuid(), null)))
-                    .ConfigureAwait(false);
+                Task<MexDocument> request = harness.ServiceBundle.WsTrustWebRequestManager.GetMexDocumentAsync(
+                    mexAddress,
+                    new RequestContext(harness.ServiceBundle, Guid.NewGuid(), null));
 
                 // Assert
-                Assert.AreEqual(MsalError.ServiceNotAvailable, exception.ErrorCode);
+                if (finalStatus == HttpStatusCode.OK)
+                {
+                    MexDocument document = await request.ConfigureAwait(false);
+                    Assert.IsNotNull(document.GetWsTrustUsernamePasswordEndpoint());
+                }
+                else
+                {
+                    MsalServiceException exception = await AssertException.TaskThrowsAsync<MsalServiceException>(
+                        () => request).ConfigureAwait(false);
+                    Assert.AreEqual(MsalError.ServiceNotAvailable, exception.ErrorCode);
+                }
+
                 Assert.AreEqual(0, harness.HttpManager.QueueSize);
             }
         }

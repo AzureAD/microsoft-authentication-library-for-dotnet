@@ -128,7 +128,6 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         /// <param name="retryCount">The retry count.</param>
         /// <param name="allowAutoRedirect">Whether the HTTP client can automatically follow redirects.</param>
         /// <param name="useDefaultCredentials">Whether the HTTP client can use the current user's credentials.</param>
-        /// <param name="operationContext">State shared across all requests in one logical HTTP operation.</param>
         /// <param name="retryDelayCancellationToken">The cancellation token for retry delays.</param>
         public Task<HttpResponse> SendRequestAsync(
             Uri endpoint,
@@ -144,7 +143,6 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             int retryCount = 0,
             bool allowAutoRedirect = true,
             bool useDefaultCredentials = true,
-            HttpRequestOperationContext operationContext = null,
             CancellationToken retryDelayCancellationToken = default)
         {
             return _httpManager.SendRequestAsync(
@@ -160,7 +158,6 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 retryCount,
                 allowAutoRedirect,
                 useDefaultCredentials,
-                operationContext,
                 retryDelayCancellationToken);
         }
     }

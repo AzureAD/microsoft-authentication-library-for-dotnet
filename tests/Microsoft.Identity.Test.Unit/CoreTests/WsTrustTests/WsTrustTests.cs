@@ -15,6 +15,7 @@ using System.Globalization;
 using Microsoft.Identity.Client.Internal;
 using System.Linq;
 using Microsoft.Identity.Test.Common.Core.Helpers;
+using Microsoft.Identity.Test.Unit.Helpers;
 using NSubstitute.Extensions;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
@@ -109,7 +110,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
         }
 
         [TestMethod]
-        public async Task WsTrustHttpsRedirectIsFollowedTestAsync()
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task WsTrustHttpsRedirectIsFollowedTestAsync(bool retryEachHop)
         {
             // Arrange
             const string wsTrustAddress = "https://some/address/usernamemixed";
@@ -124,6 +127,17 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
 
             using (var harness = CreateTestHarness())
             {
+                harness.ServiceBundle.Config.RetryPolicyFactory = new TestRetryPolicyFactory();
+                if (retryEachHop)
+                {
+                    harness.HttpManager.AddMockHandler(new MockHttpMessageHandler
+                    {
+                        ExpectedUrl = wsTrustAddress,
+                        ExpectedMethod = HttpMethod.Post,
+                        ResponseMessage = new HttpResponseMessage(HttpStatusCode.InternalServerError)
+                    });
+                }
+
                 MockHttpMessageHandler redirectHandler = harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
@@ -131,6 +145,16 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
                         ExpectedMethod = HttpMethod.Post,
                         ResponseMessage = redirectResponse
                     });
+                if (retryEachHop)
+                {
+                    harness.HttpManager.AddMockHandler(new MockHttpMessageHandler
+                    {
+                        ExpectedUrl = redirectedWsTrustAddress,
+                        ExpectedMethod = HttpMethod.Post,
+                        ResponseMessage = new HttpResponseMessage(HttpStatusCode.InternalServerError)
+                    });
+                }
+
                 MockHttpMessageHandler responseHandler = harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
@@ -171,6 +195,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
                 Assert.IsTrue(responseHandler.UseDefaultCredentials);
                 Assert.IsNotNull(redirectHandler.ActualRequestMessage);
                 Assert.IsNotNull(responseHandler.ActualRequestMessage);
+                Assert.AreEqual(0, harness.HttpManager.QueueSize);
             }
         }
 

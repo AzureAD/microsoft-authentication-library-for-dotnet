@@ -15,6 +15,8 @@ namespace Microsoft.Identity.Client
     /// Implementations must be thread-safe and reuse clients, keeping different credential configurations
     /// isolated. Configure handlers before their first request; do not modify shared clients or handlers
     /// when this method is called. MSAL does not dispose the returned clients.
+    /// The client's <see cref="HttpClient.Timeout"/> applies to each HTTP attempt, and MSAL's retry
+    /// budget restarts for each redirect hop. There is no additional timeout for the entire redirect chain.
     /// </remarks>
     public interface IMsalWsTrustHttpClientFactory : IMsalHttpClientFactory
     {

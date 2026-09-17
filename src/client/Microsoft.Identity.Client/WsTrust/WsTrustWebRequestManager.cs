@@ -265,64 +265,60 @@ namespace Microsoft.Identity.Client.WsTrust
             bool useDefaultCredentials = true;
             int redirectCount = 0;
 
-            using (var operationContext = new HttpRequestOperationContext(requestContext.UserCancellationToken))
+            while (true)
             {
-                while (true)
+                HttpResponse response = await _httpManager.SendRequestAsync(
+                    requestUri,
+                    headers,
+                    body: requestBody,
+                    method: requestMethod,
+                    logger: requestContext.Logger,
+                    doNotThrow: doNotThrow,
+                    mtlsCertificate: null,
+                    validateServerCertificate: null,
+                    cancellationToken: requestContext.UserCancellationToken,
+                    retryPolicy: retryPolicy,
+                    allowAutoRedirect: false,
+                    useDefaultCredentials: useDefaultCredentials)
+                .ConfigureAwait(false);
+
+                ThrowIfNonHttpsResponse(response, requestUri);
+
+                if (!TryGetSecureRedirectUri(response, requestUri, out Uri redirectUri))
                 {
-                    HttpResponse response = await _httpManager.SendRequestAsync(
-                        requestUri,
-                        headers,
-                        body: requestBody,
-                        method: requestMethod,
-                        logger: requestContext.Logger,
-                        doNotThrow: doNotThrow,
-                        mtlsCertificate: null,
-                        validateServerCertificate: null,
-                        cancellationToken: requestContext.UserCancellationToken,
-                        retryPolicy: retryPolicy,
-                        allowAutoRedirect: false,
-                        useDefaultCredentials: useDefaultCredentials,
-                        operationContext: operationContext)
-                    .ConfigureAwait(false);
-
-                    ThrowIfNonHttpsResponse(response, requestUri);
-
-                    if (!TryGetSecureRedirectUri(response, requestUri, out Uri redirectUri))
-                    {
-                        return response;
-                    }
-
-                    if (redirectCount >= MaxRedirects)
-                    {
-                        throw new MsalClientException(
-                            MsalError.TooManyRedirects,
-                            MsalErrorMessage.TooManyRedirects);
-                    }
-
-                    HttpMethod redirectMethod = requestMethod;
-                    HttpContent redirectBody = requestBody;
-                    if (RedirectChangesMethodToGet(response.StatusCode, requestMethod))
-                    {
-                        redirectMethod = HttpMethod.Get;
-                        redirectBody = null;
-                    }
-
-                    if (redirectBody is not null &&
-                        !IsSameOrigin(initialUri, redirectUri))
-                    {
-                        throw new MsalClientException(
-                            MsalError.WsTrustCrossOriginRedirectNotSupported,
-                            MsalErrorMessage.WsTrustCrossOriginRedirectNotSupported);
-                    }
-
-                    requestUri = redirectUri;
-                    requestMethod = redirectMethod;
-                    requestBody = redirectBody;
-                    useDefaultCredentials =
-                        useDefaultCredentials &&
-                        IsSameOrigin(initialUri, redirectUri);
-                    redirectCount++;
+                    return response;
                 }
+
+                if (redirectCount >= MaxRedirects)
+                {
+                    throw new MsalClientException(
+                        MsalError.TooManyRedirects,
+                        MsalErrorMessage.TooManyRedirects);
+                }
+
+                HttpMethod redirectMethod = requestMethod;
+                HttpContent redirectBody = requestBody;
+                if (RedirectChangesMethodToGet(response.StatusCode, requestMethod))
+                {
+                    redirectMethod = HttpMethod.Get;
+                    redirectBody = null;
+                }
+
+                if (redirectBody is not null &&
+                    !IsSameOrigin(initialUri, redirectUri))
+                {
+                    throw new MsalClientException(
+                        MsalError.WsTrustCrossOriginRedirectNotSupported,
+                        MsalErrorMessage.WsTrustCrossOriginRedirectNotSupported);
+                }
+
+                requestUri = redirectUri;
+                requestMethod = redirectMethod;
+                requestBody = redirectBody;
+                useDefaultCredentials =
+                    useDefaultCredentials &&
+                    IsSameOrigin(initialUri, redirectUri);
+                redirectCount++;
             }
         }
 

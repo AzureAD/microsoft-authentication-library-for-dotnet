@@ -30,117 +30,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
         private readonly TestDefaultRetryPolicy _stsRetryPolicy = new TestDefaultRetryPolicy(RequestType.STS);
 
         [TestMethod]
-        public async Task HttpRequestOperationContextUsesFirstClientTimeoutAsync()
-        {
-            // Arrange
-            using var operationContext = new HttpRequestOperationContext(CancellationToken.None);
-            Task operationCancellation = Task.Delay(
-                Timeout.InfiniteTimeSpan,
-                operationContext.CancellationToken);
-
-            // Act
-            operationContext.InitializeTimeout(TimeSpan.Zero);
-            operationContext.InitializeTimeout(TimeSpan.FromMinutes(5));
-            Task completedTask = await Task.WhenAny(
-                operationCancellation,
-                Task.Delay(TimeSpan.FromSeconds(1))).ConfigureAwait(false);
-
-            // Assert
-            Assert.AreSame(operationCancellation, completedTask);
-            await Assert.ThrowsAsync<TaskCanceledException>(
-                async () => await operationCancellation.ConfigureAwait(false)).ConfigureAwait(false);
-            Assert.IsTrue(operationContext.IsTimedOut);
-        }
-
-        [TestMethod]
-        public void HttpRequestOperationContextDoesNotClassifyCallerCancellationAsTimeout()
-        {
-            // Arrange
-            using var callerCancellation = new CancellationTokenSource();
-            using var operationContext = new HttpRequestOperationContext(callerCancellation.Token);
-            operationContext.InitializeTimeout(Timeout.InfiniteTimeSpan);
-
-            // Act
-            callerCancellation.Cancel();
-
-            // Assert
-            Assert.IsTrue(operationContext.CancellationToken.IsCancellationRequested);
-            Assert.IsFalse(operationContext.IsTimedOut);
-        }
-
-        [TestMethod]
-        public async Task HttpManagerInitializesOperationTimeoutAsync()
-        {
-            // Arrange
-            var handler = new BlockingHandler();
-            using var factory = new TimeoutHttpClientFactory(
-                handler,
-                TimeSpan.FromMilliseconds(10));
-            var httpManager = new HttpManager(factory, disableInternalRetries: true);
-            using var operationContext = new HttpRequestOperationContext(CancellationToken.None);
-
-            // Act
-            MsalServiceException exception = await Assert.ThrowsAsync<MsalServiceException>(() => httpManager.SendRequestAsync(
-                new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
-                headers: null,
-                body: null,
-                method: HttpMethod.Get,
-                logger: Substitute.For<ILoggerAdapter>(),
-                doNotThrow: false,
-                bindingCertificate: null,
-                validateServerCert: null,
-                cancellationToken: CancellationToken.None,
-                retryPolicy: _stsRetryPolicy,
-                operationContext: operationContext)).ConfigureAwait(false);
-            Task operationCancellation = Task.Delay(
-                Timeout.InfiniteTimeSpan,
-                operationContext.CancellationToken);
-            Task completedTask = await Task.WhenAny(
-                operationCancellation,
-                Task.Delay(TimeSpan.FromSeconds(1))).ConfigureAwait(false);
-
-            // Assert
-            Assert.AreEqual(MsalError.RequestTimeout, exception.ErrorCode);
-            Assert.AreSame(operationCancellation, completedTask);
-            Assert.IsTrue(operationContext.IsTimedOut);
-        }
-
-        [TestMethod]
-        public async Task HttpManagerUsesOperationCancellationTokenAsync()
-        {
-            // Arrange
-            using var factory = new TimeoutHttpClientFactory(
-                new BlockingHandler(),
-                Timeout.InfiniteTimeSpan);
-            var httpManager = new HttpManager(factory, disableInternalRetries: true);
-            using var operationContext = new HttpRequestOperationContext(CancellationToken.None);
-            operationContext.InitializeTimeout(TimeSpan.Zero);
-
-            // Act
-            Task<HttpResponse> requestTask = httpManager.SendRequestAsync(
-                new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
-                headers: null,
-                body: null,
-                method: HttpMethod.Get,
-                logger: Substitute.For<ILoggerAdapter>(),
-                doNotThrow: false,
-                bindingCertificate: null,
-                validateServerCert: null,
-                cancellationToken: CancellationToken.None,
-                retryPolicy: _stsRetryPolicy,
-                operationContext: operationContext);
-            Task completedTask = await Task.WhenAny(
-                requestTask,
-                Task.Delay(TimeSpan.FromSeconds(1))).ConfigureAwait(false);
-
-            // Assert
-            Assert.AreSame(requestTask, completedTask);
-            MsalServiceException exception = await Assert.ThrowsAsync<MsalServiceException>(
-                async () => await requestTask.ConfigureAwait(false)).ConfigureAwait(false);
-            Assert.AreEqual(MsalError.RequestTimeout, exception.ErrorCode);
-        }
-
-        [TestMethod]
         public async Task HttpManagerPreservesRetryDelayCancellationAcrossRetriesAsync()
         {
             // Arrange
@@ -200,13 +89,10 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
         [TestMethod]
         [DataRow(false)]
         [DataRow(true)]
-        public async Task HttpManagerUsesOperationTokenOnlyForWsTrustRetriesAsync(bool useOperationContext)
+        public async Task HttpManagerDoesNotUseRequestTokenForRetryDelaysAsync(bool allowAutoRedirect)
         {
             // Arrange
             using var callerCancellation = new CancellationTokenSource();
-            using var operationContext = useOperationContext
-                ? new HttpRequestOperationContext(callerCancellation.Token)
-                : null;
             using var httpManager = new MockHttpManager();
             var retryPolicy = Substitute.For<IRetryPolicy>();
             httpManager.AddMockHandler(new MockHttpMessageHandler
@@ -227,8 +113,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                 validateServerCert: null,
                 cancellationToken: callerCancellation.Token,
                 retryPolicy: retryPolicy,
-                allowAutoRedirect: !useOperationContext,
-                operationContext: operationContext).ConfigureAwait(false);
+                allowAutoRedirect: allowAutoRedirect).ConfigureAwait(false);
 
             // Assert
             await retryPolicy.Received(1).PauseForRetryAsync(
@@ -236,7 +121,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                 Arg.Any<Exception>(),
                 0,
                 Arg.Any<ILoggerAdapter>(),
-                operationContext?.CancellationToken ?? CancellationToken.None).ConfigureAwait(false);
+                CancellationToken.None).ConfigureAwait(false);
             Assert.AreEqual(0, httpManager.QueueSize);
         }
 
@@ -881,45 +766,5 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
             }
         }
 
-        private sealed class BlockingHandler : HttpMessageHandler
-        {
-            protected override async Task<HttpResponseMessage> SendAsync(
-                HttpRequestMessage request,
-                CancellationToken cancellationToken)
-            {
-                await Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken).ConfigureAwait(false);
-                return new HttpResponseMessage(HttpStatusCode.OK);
-            }
-        }
-
-        private sealed class TimeoutHttpClientFactory :
-            IMsalWsTrustHttpClientFactory,
-            IDisposable
-        {
-            private readonly HttpClient _httpClient;
-
-            public TimeoutHttpClientFactory(HttpMessageHandler handler, TimeSpan timeout)
-            {
-                _httpClient = new HttpClient(handler)
-                {
-                    Timeout = timeout
-                };
-            }
-
-            public HttpClient GetHttpClient()
-            {
-                return _httpClient;
-            }
-
-            HttpClient IMsalWsTrustHttpClientFactory.GetHttpClient(bool useDefaultCredentials)
-            {
-                return _httpClient;
-            }
-
-            public void Dispose()
-            {
-                _httpClient.Dispose();
-            }
-        }
     }
 }

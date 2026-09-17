@@ -72,12 +72,10 @@ namespace Microsoft.Identity.Client.Http
             int retryCount = 0,
             bool allowAutoRedirect = true,
             bool useDefaultCredentials = true,
-            HttpRequestOperationContext operationContext = null,
             CancellationToken retryDelayCancellationToken = default)
         {
             Exception timeoutException = null;
             HttpResponse response = null;
-            int currentRetryCount = operationContext?.RetryCount ?? retryCount;
 
             try
             {
@@ -100,8 +98,7 @@ namespace Microsoft.Identity.Client.Http
                         validateServerCert, logger,
                         cancellationToken,
                         allowAutoRedirect,
-                        useDefaultCredentials,
-                        operationContext).ConfigureAwait(false);
+                        useDefaultCredentials).ConfigureAwait(false);
                 }
 
                 if (response.StatusCode == HttpStatusCode.OK)
@@ -125,43 +122,15 @@ namespace Microsoft.Identity.Client.Http
                 timeoutException = exception;
             }
 
-            if (operationContext?.IsTimedOut == true && timeoutException is null)
+            while (!_disableInternalRetries &&
+                await retryPolicy.PauseForRetryAsync(
+                    response,
+                    timeoutException,
+                    retryCount,
+                    logger,
+                    retryDelayCancellationToken).ConfigureAwait(false))
             {
-                timeoutException = new TaskCanceledException(MsalErrorMessage.RequestTimeOut);
-            }
-
-            bool shouldRetry = false;
-            if (!_disableInternalRetries && operationContext?.IsTimedOut != true)
-            {
-                try
-                {
-                    shouldRetry = await retryPolicy.PauseForRetryAsync(
-                        response,
-                        timeoutException,
-                        currentRetryCount,
-                        logger,
-                        operationContext?.CancellationToken ?? retryDelayCancellationToken).ConfigureAwait(false);
-                }
-                catch (TaskCanceledException exception)
-                {
-                    if (cancellationToken.IsCancellationRequested ||
-                        retryDelayCancellationToken.IsCancellationRequested)
-                    {
-                        logger.Info("The HTTP request or retry delay was canceled. ");
-                        throw;
-                    }
-
-                    timeoutException = exception;
-                }
-            }
-
-            if (shouldRetry)
-            {
-                currentRetryCount++;
-                if (operationContext is not null)
-                {
-                    operationContext.RetryCount = currentRetryCount;
-                }
+                retryCount++;
 
                 return await SendRequestAsync(
                     endpoint,
@@ -174,10 +143,9 @@ namespace Microsoft.Identity.Client.Http
                     validateServerCert,
                     cancellationToken,
                     retryPolicy,
-                    currentRetryCount,
+                    retryCount,
                     allowAutoRedirect,
                     useDefaultCredentials,
-                    operationContext,
                     retryDelayCancellationToken)
                     .ConfigureAwait(false);
             }
@@ -309,8 +277,7 @@ namespace Microsoft.Identity.Client.Http
             ILoggerAdapter logger,
             CancellationToken cancellationToken,
             bool allowAutoRedirect,
-            bool useDefaultCredentials,
-            HttpRequestOperationContext operationContext)
+            bool useDefaultCredentials)
         {
             using (HttpRequestMessage requestMessage = CreateRequestMessage(endpoint, headers))
             {
@@ -330,17 +297,10 @@ namespace Microsoft.Identity.Client.Http
                     useDefaultCredentials,
                     logger);
 
-                CancellationToken effectiveCancellationToken = cancellationToken;
-                if (operationContext is not null)
-                {
-                    operationContext.InitializeTimeout(client.Timeout);
-                    effectiveCancellationToken = operationContext.CancellationToken;
-                }
-
                 try
                 {
                     using (HttpResponseMessage responseMessage =
-                        await client.SendAsync(requestMessage, effectiveCancellationToken).ConfigureAwait(false))
+                        await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false))
                     {
                         logger.Verbose(() => $"[HttpManager] Received response. Status code: {responseMessage.StatusCode}. ");
 

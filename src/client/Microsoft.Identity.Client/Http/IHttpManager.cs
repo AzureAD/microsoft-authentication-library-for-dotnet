@@ -33,7 +33,6 @@ namespace Microsoft.Identity.Client.Http
         /// <param name="retryCount">Number of retries to be attempted in case of retriable status codes.</param>
         /// <param name="allowAutoRedirect">Whether the HTTP client can automatically follow redirects.</param>
         /// <param name="useDefaultCredentials">Whether the HTTP client can use the current user's credentials.</param>
-        /// <param name="operationContext">State shared across all requests in one logical HTTP operation.</param>
         /// <param name="retryDelayCancellationToken">Cancellation token observed only while waiting between retries.</param>
         /// <returns></returns>
         Task<HttpResponse> SendRequestAsync(
@@ -50,7 +49,6 @@ namespace Microsoft.Identity.Client.Http
            int retryCount = 0,
            bool allowAutoRedirect = true,
            bool useDefaultCredentials = true,
-           HttpRequestOperationContext operationContext = null,
            CancellationToken retryDelayCancellationToken = default);
     }
 }
