@@ -126,6 +126,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <param name="retryPolicy">The retry policy.</param>
         /// <param name="retryCount">The retry count.</param>
+        /// <param name="allowAutoRedirect">Whether the HTTP client can automatically follow redirects.</param>
+        /// <param name="useDefaultCredentials">Whether the HTTP client can use the current user's credentials.</param>
         /// <param name="retryDelayCancellationToken">The cancellation token for retry delays.</param>
         public Task<HttpResponse> SendRequestAsync(
             Uri endpoint,
@@ -139,6 +141,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             CancellationToken cancellationToken,
             IRetryPolicy retryPolicy,
             int retryCount = 0,
+            bool allowAutoRedirect = true,
+            bool useDefaultCredentials = true,
             CancellationToken retryDelayCancellationToken = default)
         {
             return _httpManager.SendRequestAsync(
@@ -152,6 +156,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 validateServerCert, cancellationToken,
                 retryPolicy,
                 retryCount,
+                allowAutoRedirect,
+                useDefaultCredentials,
                 retryDelayCancellationToken);
         }
     }
@@ -198,6 +204,17 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         /// <returns></returns>
         protected HttpClient GetHttpClientInternal(X509Certificate2 mtlsBindingCert)
         {
+            return GetHttpClientInternal(
+                mtlsBindingCert,
+                allowAutoRedirect: true,
+                useDefaultCredentials: true);
+        }
+
+        internal HttpClient GetHttpClientInternal(
+            X509Certificate2 mtlsBindingCert,
+            bool allowAutoRedirect,
+            bool useDefaultCredentials)
+        {
             HttpClientHandler messageHandler;
 
             if (MessageHandlerFunc != null)
@@ -218,6 +235,10 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             {
                 messageHandler.ClientCertificates.Add(mtlsBindingCert);
             }
+
+            messageHandler.AllowAutoRedirect = allowAutoRedirect;
+            messageHandler.UseDefaultCredentials = useDefaultCredentials;
+
             var httpClient = new HttpClient(messageHandler)
             {
                 MaxResponseContentBufferSize = HttpClientConfig.MaxResponseContentBufferSizeInBytes
@@ -241,7 +262,11 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
     /// <see cref="System.Net.Http.HttpClient"/> instances backed by <see cref="MockHttpMessageHandler"/>.
     /// Use with WithHttpClientFactory to inject HTTP mocks.
     /// </summary>
-    public class MockHttpClientFactory : MockHttpClientFactoryBase, IMsalMtlsHttpClientFactory, IMsalSFHttpClientFactory
+    public class MockHttpClientFactory :
+        MockHttpClientFactoryBase,
+        IMsalMtlsHttpClientFactory,
+        IMsalSFHttpClientFactory,
+        IMsalWsTrustHttpClientFactory
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="MockHttpClientFactory"/> class.
@@ -264,6 +289,14 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public HttpClient GetHttpClient()
         {
             return GetHttpClientInternal(null);
+        }
+
+        HttpClient IMsalWsTrustHttpClientFactory.GetHttpClient(bool useDefaultCredentials)
+        {
+            return GetHttpClientInternal(
+                null,
+                allowAutoRedirect: false,
+                useDefaultCredentials);
         }
 
         /// <summary>
@@ -292,7 +325,9 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
     /// backed by queued <see cref="MockHttpMessageHandler"/> instances.
     /// Use with WithHttpClientFactory to inject HTTP mocks.
     /// </summary>
-    public class MockNonMtlsHttpClientFactory : MockHttpClientFactoryBase, IMsalHttpClientFactory
+    public class MockNonMtlsHttpClientFactory :
+        MockHttpClientFactoryBase,
+        IMsalWsTrustHttpClientFactory
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="MockNonMtlsHttpClientFactory"/> class.
@@ -315,6 +350,14 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public HttpClient GetHttpClient()
         {
             return GetHttpClientInternal(null);
+        }
+
+        HttpClient IMsalWsTrustHttpClientFactory.GetHttpClient(bool useDefaultCredentials)
+        {
+            return GetHttpClientInternal(
+                null,
+                allowAutoRedirect: false,
+                useDefaultCredentials);
         }
     }
 
