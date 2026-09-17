@@ -147,7 +147,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                 Exception exception,
                 int retryCount,
                 ILoggerAdapter logger,
-                CancellationToken cancellationToken)
+                CancellationToken retryDelayCancellationToken)
             {
                 return Task.FromResult(false);
             }

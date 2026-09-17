@@ -20,13 +20,13 @@ namespace Microsoft.Identity.Client.Http.Retry
         /// <param name="exception">The exception encountered during the request.</param>
         /// <param name="retryCount">The current retry attempt count.</param>
         /// <param name="logger">The logger used for diagnostic and informational messages.</param>
-        /// <param name="cancellationToken">The cancellation token for the complete HTTP operation.</param>
+        /// <param name="retryDelayCancellationToken">The cancellation token to observe while waiting to retry.</param>
         /// <returns>A task that returns true if a retry should be performed; otherwise, false.</returns>
         Task<bool> PauseForRetryAsync(
             HttpResponse response,
             Exception exception,
             int retryCount,
             ILoggerAdapter logger,
-            CancellationToken cancellationToken);
+            CancellationToken retryDelayCancellationToken);
     }
 }

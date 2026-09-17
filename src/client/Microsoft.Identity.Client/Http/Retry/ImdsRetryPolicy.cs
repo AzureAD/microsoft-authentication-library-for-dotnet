@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client.Http.Retry
             Exception exception,
             int retryCount,
             ILoggerAdapter logger,
-            CancellationToken cancellationToken)
+            CancellationToken retryDelayCancellationToken)
         {
             int httpStatusCode = response is null ? 0 : (int)response.StatusCode;
 
@@ -67,7 +67,7 @@ namespace Microsoft.Identity.Client.Http.Retry
                 logger.Warning($"Retrying request in {retryAfterDelay}ms (retry attempt: {retryCount + 1})");
 
                 // Pause execution for the calculated delay
-                await DelayAsync(retryAfterDelay, cancellationToken).ConfigureAwait(false);
+                await DelayAsync(retryAfterDelay, retryDelayCancellationToken).ConfigureAwait(false);
 
                 return true;
             }

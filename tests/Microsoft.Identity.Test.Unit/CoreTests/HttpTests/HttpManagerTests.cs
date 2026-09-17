@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
         public async Task HttpManagerInitializesOperationTimeoutAsync()
         {
             // Arrange
-            var handler = new CapturingHandler();
+            var handler = new BlockingHandler();
             using var factory = new TimeoutHttpClientFactory(
                 handler,
                 TimeSpan.FromMilliseconds(10));
@@ -80,7 +80,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
             using var operationContext = new HttpRequestOperationContext(CancellationToken.None);
 
             // Act
-            HttpResponse response = await httpManager.SendRequestAsync(
+            MsalServiceException exception = await Assert.ThrowsAsync<MsalServiceException>(() => httpManager.SendRequestAsync(
                 new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
                 headers: null,
                 body: null,
@@ -91,7 +91,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                 validateServerCert: null,
                 cancellationToken: CancellationToken.None,
                 retryPolicy: _stsRetryPolicy,
-                operationContext: operationContext).ConfigureAwait(false);
+                operationContext: operationContext)).ConfigureAwait(false);
             Task operationCancellation = Task.Delay(
                 Timeout.InfiniteTimeSpan,
                 operationContext.CancellationToken);
@@ -100,7 +100,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                 Task.Delay(TimeSpan.FromSeconds(1))).ConfigureAwait(false);
 
             // Assert
-            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+            Assert.AreEqual(MsalError.RequestTimeout, exception.ErrorCode);
             Assert.AreSame(operationCancellation, completedTask);
             Assert.IsTrue(operationContext.IsTimedOut);
         }
@@ -138,6 +138,106 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
             MsalServiceException exception = await Assert.ThrowsAsync<MsalServiceException>(
                 async () => await requestTask.ConfigureAwait(false)).ConfigureAwait(false);
             Assert.AreEqual(MsalError.RequestTimeout, exception.ErrorCode);
+        }
+
+        [TestMethod]
+        public async Task HttpManagerPreservesRetryDelayCancellationAcrossRetriesAsync()
+        {
+            // Arrange
+            using var retryDelayCancellation = new CancellationTokenSource();
+            using var httpManager = new MockHttpManager();
+            var retryPolicy = Substitute.For<IRetryPolicy>();
+            retryPolicy.PauseForRetryAsync(
+                Arg.Any<HttpResponse>(),
+                Arg.Any<Exception>(),
+                Arg.Any<int>(),
+                Arg.Any<ILoggerAdapter>(),
+                Arg.Any<CancellationToken>()).Returns(call =>
+                {
+                    if (call.ArgAt<int>(2) == 0)
+                    {
+                        return Task.FromResult(true);
+                    }
+
+                    retryDelayCancellation.Cancel();
+                    return Task.FromCanceled<bool>(call.ArgAt<CancellationToken>(4));
+                });
+            for (int i = 0; i < 2; i++)
+            {
+                httpManager.AddMockHandler(new MockHttpMessageHandler
+                {
+                    ExpectedMethod = HttpMethod.Get,
+                    ResponseMessage = new HttpResponseMessage(HttpStatusCode.InternalServerError)
+                });
+            }
+
+            // Act
+            TaskCanceledException exception = await Assert.ThrowsAsync<TaskCanceledException>(() =>
+                httpManager.SendRequestAsync(
+                    new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
+                    headers: null,
+                    body: null,
+                    method: HttpMethod.Get,
+                    logger: Substitute.For<ILoggerAdapter>(),
+                    doNotThrow: false,
+                    mtlsCertificate: null,
+                    validateServerCert: null,
+                    cancellationToken: CancellationToken.None,
+                    retryPolicy: retryPolicy,
+                    retryDelayCancellationToken: retryDelayCancellation.Token)).ConfigureAwait(false);
+
+            // Assert
+            Assert.AreEqual(retryDelayCancellation.Token, exception.CancellationToken);
+            await retryPolicy.Received(2).PauseForRetryAsync(
+                Arg.Any<HttpResponse>(),
+                Arg.Any<Exception>(),
+                Arg.Any<int>(),
+                Arg.Any<ILoggerAdapter>(),
+                retryDelayCancellation.Token).ConfigureAwait(false);
+            Assert.AreEqual(0, httpManager.QueueSize);
+        }
+
+        [TestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task HttpManagerUsesOperationTokenOnlyForWsTrustRetriesAsync(bool useOperationContext)
+        {
+            // Arrange
+            using var callerCancellation = new CancellationTokenSource();
+            using var operationContext = useOperationContext
+                ? new HttpRequestOperationContext(callerCancellation.Token)
+                : null;
+            using var httpManager = new MockHttpManager();
+            var retryPolicy = Substitute.For<IRetryPolicy>();
+            httpManager.AddMockHandler(new MockHttpMessageHandler
+            {
+                ExpectedMethod = HttpMethod.Get,
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.InternalServerError)
+            });
+
+            // Act
+            await httpManager.SendRequestAsync(
+                new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
+                headers: null,
+                body: null,
+                method: HttpMethod.Get,
+                logger: Substitute.For<ILoggerAdapter>(),
+                doNotThrow: true,
+                mtlsCertificate: null,
+                validateServerCert: null,
+                cancellationToken: callerCancellation.Token,
+                retryPolicy: retryPolicy,
+                allowAutoRedirect: !useOperationContext,
+                operationContext: operationContext).ConfigureAwait(false);
+
+            // Assert
+            await retryPolicy.Received(1).PauseForRetryAsync(
+                Arg.Any<HttpResponse>(),
+                Arg.Any<Exception>(),
+                0,
+                Arg.Any<ILoggerAdapter>(),
+                operationContext?.CancellationToken ?? CancellationToken.None).ConfigureAwait(false);
+            Assert.AreEqual(0, httpManager.QueueSize);
         }
 
         [TestMethod]

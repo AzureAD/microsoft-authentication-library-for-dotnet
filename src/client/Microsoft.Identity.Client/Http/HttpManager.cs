@@ -72,7 +72,8 @@ namespace Microsoft.Identity.Client.Http
             int retryCount = 0,
             bool allowAutoRedirect = true,
             bool useDefaultCredentials = true,
-            HttpRequestOperationContext operationContext = null)
+            HttpRequestOperationContext operationContext = null,
+            CancellationToken retryDelayCancellationToken = default)
         {
             Exception timeoutException = null;
             HttpResponse response = null;
@@ -139,13 +140,14 @@ namespace Microsoft.Identity.Client.Http
                         timeoutException,
                         currentRetryCount,
                         logger,
-                        operationContext?.CancellationToken ?? cancellationToken).ConfigureAwait(false);
+                        operationContext?.CancellationToken ?? retryDelayCancellationToken).ConfigureAwait(false);
                 }
                 catch (TaskCanceledException exception)
                 {
-                    if (cancellationToken.IsCancellationRequested)
+                    if (cancellationToken.IsCancellationRequested ||
+                        retryDelayCancellationToken.IsCancellationRequested)
                     {
-                        logger.Info("The HTTP request was canceled. ");
+                        logger.Info("The HTTP request or retry delay was canceled. ");
                         throw;
                     }
 
@@ -175,7 +177,8 @@ namespace Microsoft.Identity.Client.Http
                     currentRetryCount,
                     allowAutoRedirect,
                     useDefaultCredentials,
-                    operationContext)
+                    operationContext,
+                    retryDelayCancellationToken)
                     .ConfigureAwait(false);
             }
 
