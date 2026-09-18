@@ -12,17 +12,19 @@
   <PropertyGroup Condition="'$(INCLUDE_MOBILE_AND_LEGACY_TFM)' != ''">
     <TargetFrameworkNetAndroid>net8.0-android</TargetFrameworkNetAndroid>
     <TargetFrameworkNetIos>net8.0-ios</TargetFrameworkNetIos>
+    <TargetFrameworkNetMacCatalyst>net8.0-maccatalyst</TargetFrameworkNetMacCatalyst>
   </PropertyGroup>
 
   <!-- mobile SDK constraints -->
-  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetIos)' or '$(TargetFramework)' == '$(TargetFrameworkNetAndroid)'">
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetIos)' or '$(TargetFramework)' == '$(TargetFrameworkNetAndroid)' or '$(TargetFramework)' == '$(TargetFrameworkNetMacCatalyst)'">
     <SupportedOSPlatformVersion Condition="'$(TargetFramework)' == '$(TargetFrameworkNetIos)'">14.2</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="'$(TargetFramework)' == '$(TargetFrameworkNetAndroid)'">21.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="'$(TargetFramework)' == '$(TargetFrameworkNetMacCatalyst)'">14.0</SupportedOSPlatformVersion>
   </PropertyGroup>
 
   <PropertyGroup>
-    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworkNetDesktop462);$(TargetFrameworkNetDesktop472);$(TargetFrameworkNetStandard);$(TargetFrameworkNetIos);$(TargetFrameworkNetAndroid);$(TargetFrameworkNet);</TargetFrameworks>
-    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('OSX'))">$(TargetFrameworkNetStandard);$(TargetFrameworkNetIos);$(TargetFrameworkNetAndroid);$(TargetFrameworkNet)</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworkNetDesktop462);$(TargetFrameworkNetDesktop472);$(TargetFrameworkNetStandard);$(TargetFrameworkNetIos);$(TargetFrameworkNetMacCatalyst);$(TargetFrameworkNetAndroid);$(TargetFrameworkNet);</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('OSX'))">$(TargetFrameworkNetStandard);$(TargetFrameworkNetIos);$(TargetFrameworkNetMacCatalyst);$(TargetFrameworkNetAndroid);$(TargetFrameworkNet)</TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Linux')) Or '$(NetCoreOnly)' !='' ">$(TargetFrameworkNetStandard);$(TargetFrameworkNet)</TargetFrameworks>
   </PropertyGroup>
 
@@ -132,7 +134,7 @@
     <PackageReference Update="System.Security.SecureString" />
     <PackageReference Include="Xamarin.AndroidX.Browser" PrivateAssets="All" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetIos)'">
+  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetIos)' or '$(TargetFramework)' == '$(TargetFrameworkNetMacCatalyst)'">
     <Compile Include="$(PathToMsalSources)\Platforms\iOS\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\PlatformsCommon\PlatformNotSupported\ApiConfig\SystemWebViewOptions.cs" />
     <PackageReference Update="System.Security.SecureString" />
