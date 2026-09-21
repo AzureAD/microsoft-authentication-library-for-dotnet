@@ -297,12 +297,14 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
         [TestMethod]
         //Test for bug #1292 (https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1292)
-        public void AuthorityCustomPortTest()
+        public void AuthorityCustomPortIsPreservedAndNotUsedForGlobalInstanceDiscoveryTest()
         {
             const string customPortAuthority = "https://localhost:5215/common/";
 
             using var harness = CreateTestHarness();
-            harness.HttpManager.AddInstanceDiscoveryMockHandler(customPortAuthority);
+            harness.HttpManager.AddInstanceDiscoveryMockHandler(
+                customPortAuthority,
+                new Uri("https://login.microsoftonline.com/common/discovery/instance"));
 
             PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                                         .WithAuthority(new Uri(customPortAuthority), false)

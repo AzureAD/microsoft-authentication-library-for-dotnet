@@ -1,3 +1,21 @@
+4.90.0
+======
+
+### Changes
+- Updated the KeyGuardAttestation package version to 1.1.7. [#6189](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6189)
+  
+4.89.0
+======
+
+### New Features
+- Added a read-only known-cloud metadata lookup and token-exchange scope helper, so higher-level SDKs can resolve cloud-specific metadata for public and sovereign clouds. [#6104](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6104)
+- Added the `MSAL_MI_DISABLE_IMDS_V2` process-level kill switch, allowing managed identity callers to disable IMDSv2 and fall back to IMDSv1 for bearer-token requests. [#6178](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6178)
+- Added a configurable timeout for managed identity capability discovery, covering probes, retries, fallback, compute metadata, and binding-strength detection under one deadline. [#6181](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6181)
+
+### Bug Fixes
+- Restored certificate re-mint and retry when IMDSv2 mTLS token requests encounter raw Schannel credential failures, while preserving the managed identity exception contract. [#6173](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6173)
+- Fixed `MsalFailure` metrics to always emit the `RawStsErrorCode` dimension, using an empty value when no STS error code is available so the metric schema remains stable. [#6175](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6175)
+
 4.88.0
 ======
 

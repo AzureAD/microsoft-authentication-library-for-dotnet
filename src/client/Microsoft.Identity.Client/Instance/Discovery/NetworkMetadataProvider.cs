@@ -118,9 +118,13 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                 authority.Host :
                 AadAuthority.DefaultTrustedHost;
 
-            string instanceDiscoveryEndpoint = UriBuilderExtensions.GetHttpsUriWithOptionalPort(
-                $"https://{discoveryHost}/common/discovery/instance",
-                authority.Port);
+            string instanceDiscoveryEndpoint = $"https://{discoveryHost}/common/discovery/instance";
+            if (string.Equals(discoveryHost, authority.Host, StringComparison.OrdinalIgnoreCase))
+            {
+                instanceDiscoveryEndpoint = UriBuilderExtensions.GetHttpsUriWithOptionalPort(
+                    instanceDiscoveryEndpoint,
+                    authority.Port);
+            }
 
             requestContext.Logger.InfoPii(
                 () => $"Fetching instance discovery from the network from host {discoveryHost}. Endpoint {instanceDiscoveryEndpoint}. ",
@@ -142,7 +146,12 @@ namespace Microsoft.Identity.Client.Instance.Discovery
 
         private sealed class InstanceDiscoveryRetryPolicy : IRetryPolicy
         {
-            public Task<bool> PauseForRetryAsync(HttpResponse response, Exception exception, int retryCount, ILoggerAdapter logger)
+            public Task<bool> PauseForRetryAsync(
+                HttpResponse response,
+                Exception exception,
+                int retryCount,
+                ILoggerAdapter logger,
+                CancellationToken retryDelayCancellationToken)
             {
                 return Task.FromResult(false);
             }

@@ -105,7 +105,28 @@ namespace Microsoft.Identity.Client
         public const string RopcDoesNotSupportMsaAccounts = "ROPC does not support MSA accounts. See https://aka.ms/msal-net-ropc for details. ";
 
         public const string WsTrustEndpointNotFoundInMetadataDocument =
-            "WS-Trust endpoint not found in metadata document. ";
+            "A secure HTTPS WS-Trust endpoint was not found in the metadata document. ";
+
+        public const string WsTrustMetadataEndpointRequiresHttps =
+            "The WS-Trust metadata endpoint must use HTTPS. ";
+
+        public const string WsTrustMetadataEndpointInvalidUri =
+            "The WS-Trust metadata endpoint must be a well-formed absolute URI. ";
+
+        public const string WsTrustNonHttpsRedirectNotSupported =
+            "A non-HTTPS redirect is not supported for WS-Trust requests. ";
+
+        public const string WsTrustCrossOriginRedirectNotSupported =
+            "A WS-Trust redirect that preserves credentials must remain on the original HTTPS origin. ";
+
+        public const string TooManyRedirects =
+            "The HTTP request exceeded the maximum number of redirects. ";
+
+        public const string CustomHttpClientFactoryWsTrustFallback =
+            "The configured HTTP client factory does not implement " + nameof(IMsalWsTrustHttpClientFactory) + ". " +
+            "MSAL is using a cached platform-default client for this MEX or WS-Trust request. " +
+            "Custom proxy, certificate, handler, and timeout settings are not applied. " +
+            "Implement " + nameof(IMsalWsTrustHttpClientFactory) + " to customize these requests. ";
 
         public const string GetUserNameFailed = "Failed to get user name. ";
 
@@ -419,6 +440,7 @@ namespace Microsoft.Identity.Client
 
         public const string ManagedIdentityNoResponseReceived = "[Managed Identity] Authentication unavailable. No response received from the managed identity endpoint.";
         public const string ManagedIdentityInvalidResponse = "[Managed Identity] Invalid response, the authentication response received did not contain the expected fields.";
+        public const string ManagedIdentityCapabilityDiscoveryTimeout = "[Managed Identity] Capability discovery timed out.";
         public const string ManagedIdentityInvalidIdType = "Only {0} supported for user-assigned managed identity in {1}";
         public const string ManagedIdentityJsonParseFailure = "[Managed Identity] MSI returned 200 OK, but the response could not be parsed.";
         public const string ManagedIdentityUnexpectedResponse = "[Managed Identity] Unexpected exception occurred when parsing the response. See the inner exception for details.";
