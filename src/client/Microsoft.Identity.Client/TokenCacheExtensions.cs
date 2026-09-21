@@ -49,6 +49,50 @@ namespace Microsoft.Identity.Client
             cache.Accessor = proxy.CreateTokenCacheAccessor(options, tokenCacheInternal.IsApplicationCache);
         }
 
+        /// <summary>
+        /// Enables or disables optimized reads from the application token cache.
+        /// </summary>
+        /// <param name="tokenCache">The application token cache returned by <see cref="IConfidentialClientApplication.AppTokenCache"/>.</param>
+        /// <param name="enabled">
+        /// When <see langword="true"/>, <c>AcquireTokenForClient</c> first checks MSAL's existing
+        /// in-memory cache before invoking external cache serialization callbacks. Concurrent
+        /// equivalent external cache hits are coalesced so only one callback transaction enters
+        /// the token-cache semaphore. External cache misses retain the existing acquisition
+        /// behavior.
+        /// </param>
+        /// <remarks>
+        /// This option is disabled by default. Enable it only when the external cache provider
+        /// does not require its callbacks to run once per token request and accepts MSAL's
+        /// in-memory application-token cache as a process-local cache layer.
+        /// Final authentication-result formatting still runs independently for every request.
+        /// Changes made only in the external cache are not observed while a matching, unexpired
+        /// token remains in MSAL's in-memory cache. Disable the optimization when immediate
+        /// external-cache revalidation is required.
+        /// </remarks>
+#if !SUPPORTS_CUSTOM_CACHE
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+#endif
+        public static void SetAppTokenCacheReadOptimization(
+            this ITokenCache tokenCache,
+            bool enabled)
+        {
+            ValidatePlatform();
+
+            if (tokenCache is null)
+            {
+                throw new System.ArgumentNullException(nameof(tokenCache));
+            }
+
+            TokenCache cache = (TokenCache)tokenCache;
+            if (!cache.IsAppTokenCache)
+            {
+                throw new System.InvalidOperationException(
+                    "App token cache read optimization can only be configured on IConfidentialClientApplication.AppTokenCache.");
+            }
+
+            cache.IsAppTokenCacheReadOptimizationEnabled = enabled;
+        }
+
         private static void ValidatePlatform()
         {
 #if !SUPPORTS_CUSTOM_CACHE 

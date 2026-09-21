@@ -51,6 +51,15 @@ namespace Microsoft.Identity.Client
         private readonly OptionalSemaphoreSlim _semaphoreSlim;
         OptionalSemaphoreSlim ITokenCacheInternal.Semaphore => _semaphoreSlim;
 
+        private readonly AppTokenCacheRequestCoordinator _appTokenCacheRequestCoordinator =
+            new AppTokenCacheRequestCoordinator();
+        AppTokenCacheRequestCoordinator ITokenCacheInternal.AppTokenCacheRequestCoordinator =>
+            _appTokenCacheRequestCoordinator;
+
+        internal bool IsAppTokenCacheReadOptimizationEnabled { get; set; }
+        bool ITokenCacheInternal.IsAppTokenCacheReadOptimizationEnabled =>
+            IsAppTokenCacheReadOptimizationEnabled;
+
         /// <summary>
         /// Constructor of a token cache. This constructor is left for compatibility with MSAL 2.x.
         /// The recommended way to get a cache is by using <see cref="IClientApplicationBase.UserTokenCache"/>
