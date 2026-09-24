@@ -31,10 +31,11 @@ namespace Microsoft.Identity.Client.KeyAttestation
         //               ephemeral keys. Callers always supply a non-empty keyId; null/empty is
         //               treated as a defensive fallback that bypasses the cache.
         //
-        //   clientId  – intentionally NOT included. MAA attests the CNG key itself; clientId is
-        //               forwarded to the service as metadata but does not change which attestation
-        //               token is valid for a given key. Different managed identities (SAMI vs UAMI)
-        //               sharing the same CNG key at the same endpoint correctly share the cached token.
+        //   clientIdMetadata – intentionally NOT included. MAA attests the CNG key itself; the
+        //               client_id value is forwarded to the service as metadata but does not change
+        //               which attestation token is valid for a given key. Different managed identities
+        //               (SAMI vs UAMI) sharing the same CNG key at the same endpoint correctly share
+        //               the cached token.
         //
         //   Why a dictionary and not a single field?
         //               A process could theoretically use multiple MAA endpoints (e.g. in multi-region
@@ -96,7 +97,7 @@ namespace Microsoft.Identity.Client.KeyAttestation
         /// </summary>
         /// <param name="endpoint">Attestation service endpoint (required).</param>
         /// <param name="keyHandle">Valid SafeNCryptKeyHandle (must remain valid for duration of call).</param>
-        /// <param name="clientId">Optional client identifier (may be null/empty).</param>
+        /// <param name="clientIdMetadata">Optional value forwarded as MAA <c>client_id</c> metadata (may be null/empty).</param>
         /// <param name="keyId">CNG key identifier scoping the cache entry. Callers should pass the
         /// CNG key's <see cref="System.Security.Cryptography.CngKey.KeyName"/> when available, or a
         /// stable derived identifier (e.g. SHA-256 fingerprint of the RSA public key) for ephemeral keys.
@@ -106,7 +107,7 @@ namespace Microsoft.Identity.Client.KeyAttestation
         public static async Task<AttestationResult> AttestCredentialGuardAsync(
             string endpoint,
             SafeHandle keyHandle,
-            string clientId,
+            string clientIdMetadata,
             string keyId = null,
             ILoggerAdapter logger = null,
             CancellationToken cancellationToken = default)
@@ -133,13 +134,13 @@ namespace Microsoft.Identity.Client.KeyAttestation
                 logger?.Verbose(() => $"[PopKeyAttestor] Bypassing MAA token cache — no keyId supplied (endpoint '{Mask(endpoint)}').");
 
                 Task<AttestationResult> nonCachedAttestTask = s_testAttestationProvider != null
-                    ? s_testAttestationProvider(endpoint, keyHandle, clientId, keyId, cancellationToken)
+                    ? s_testAttestationProvider(endpoint, keyHandle, clientIdMetadata, keyId, cancellationToken)
                     : Task.Run(() =>
                     {
                         try
                         {
                             using var client = new AttestationClient(logger);
-                            return client.Attest(endpoint, safeNCryptKeyHandle, clientId ?? string.Empty);
+                            return client.Attest(endpoint, safeNCryptKeyHandle, clientIdMetadata ?? string.Empty);
                         }
                         catch (Exception ex)
                         {
@@ -178,13 +179,13 @@ namespace Microsoft.Identity.Client.KeyAttestation
 
                 // Check for test provider to avoid loading native DLL in unit tests.
                 Task<AttestationResult> attestTask = s_testAttestationProvider != null
-                    ? s_testAttestationProvider(endpoint, keyHandle, clientId, keyId, cancellationToken)
+                    ? s_testAttestationProvider(endpoint, keyHandle, clientIdMetadata, keyId, cancellationToken)
                     : Task.Run(() =>
                     {
                         try
                         {
                             using var client = new AttestationClient(logger);
-                            return client.Attest(endpoint, safeNCryptKeyHandle, clientId ?? string.Empty);
+                            return client.Attest(endpoint, safeNCryptKeyHandle, clientIdMetadata ?? string.Empty);
                         }
                         catch (Exception ex)
                         {
