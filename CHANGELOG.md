@@ -1,3 +1,17 @@
+4.90.1
+======
+
+### New Features
+- Added `IMsalWsTrustHttpClientFactory`, allowing custom HTTP client factories to provide redirect-disabled, credential-policy-aware clients for federation metadata (MEX) and WS-Trust requests. Added `MsalError.TooManyRedirects` and `MsalError.WsTrustCrossOriginRedirectNotSupported` for redirect failures. [#6165](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6165)
+
+### Bug Fixes
+- Hardened federation metadata and WS-Trust requests by requiring HTTPS, securely validating redirects, rejecting credential-bearing cross-origin redirects, and limiting redirect chains. [#6165](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6165)
+- Fixed instance discovery so a custom authority port is not forwarded to the global discovery host, while preserving the port when discovery uses the authority host. [#6155](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6155)
+- Fixed KeyGuard attestation to send the tenant ID as the MAA `client_id` metadata value without changing managed-identity client-ID handling or attestation-cache partitioning. [#6200](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6200)
+
+### Changes
+- Updated `Microsoft.Azure.Security.KeyGuardAttestation` from version 1.1.7 to 1.1.8. [#6202](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6202)
+
 4.90.0
 ======
 
