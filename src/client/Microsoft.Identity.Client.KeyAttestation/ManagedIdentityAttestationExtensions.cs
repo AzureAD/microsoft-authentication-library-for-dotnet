@@ -32,12 +32,12 @@ namespace Microsoft.Identity.Client.KeyAttestation
                 throw new ArgumentNullException(nameof(builder));
             }
 
-            builder.CommonParameters.AttestationTokenProvider = async (endpoint, keyHandle, clientId, keyId, logger, ct) =>
+            builder.CommonParameters.AttestationTokenProvider = async (endpoint, keyHandle, clientIdMetadata, keyId, logger, ct) =>
             {
                 AttestationResult result = await PopKeyAttestor.AttestCredentialGuardAsync(
                     endpoint,
                     keyHandle,
-                    clientId,
+                    clientIdMetadata,
                     keyId,
                     logger,
                     ct).ConfigureAwait(false);

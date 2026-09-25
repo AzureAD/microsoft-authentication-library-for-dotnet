@@ -12,6 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Http.Retry;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Test.Common;
@@ -27,6 +28,102 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
     public class HttpManagerTests : TestBase
     {
         private readonly TestDefaultRetryPolicy _stsRetryPolicy = new TestDefaultRetryPolicy(RequestType.STS);
+
+        [TestMethod]
+        public async Task HttpManagerPreservesRetryDelayCancellationAcrossRetriesAsync()
+        {
+            // Arrange
+            using var retryDelayCancellation = new CancellationTokenSource();
+            using var httpManager = new MockHttpManager();
+            var retryPolicy = Substitute.For<IRetryPolicy>();
+            retryPolicy.PauseForRetryAsync(
+                Arg.Any<HttpResponse>(),
+                Arg.Any<Exception>(),
+                Arg.Any<int>(),
+                Arg.Any<ILoggerAdapter>(),
+                Arg.Any<CancellationToken>()).Returns(call =>
+                {
+                    if (call.ArgAt<int>(2) == 0)
+                    {
+                        return Task.FromResult(true);
+                    }
+
+                    retryDelayCancellation.Cancel();
+                    return Task.FromCanceled<bool>(call.ArgAt<CancellationToken>(4));
+                });
+            for (int i = 0; i < 2; i++)
+            {
+                httpManager.AddMockHandler(new MockHttpMessageHandler
+                {
+                    ExpectedMethod = HttpMethod.Get,
+                    ResponseMessage = new HttpResponseMessage(HttpStatusCode.InternalServerError)
+                });
+            }
+
+            // Act
+            TaskCanceledException exception = await Assert.ThrowsAsync<TaskCanceledException>(() =>
+                httpManager.SendRequestAsync(
+                    new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
+                    headers: null,
+                    body: null,
+                    method: HttpMethod.Get,
+                    logger: Substitute.For<ILoggerAdapter>(),
+                    doNotThrow: false,
+                    mtlsCertificate: null,
+                    validateServerCert: null,
+                    cancellationToken: CancellationToken.None,
+                    retryPolicy: retryPolicy,
+                    retryDelayCancellationToken: retryDelayCancellation.Token)).ConfigureAwait(false);
+
+            // Assert
+            Assert.AreEqual(retryDelayCancellation.Token, exception.CancellationToken);
+            await retryPolicy.Received(2).PauseForRetryAsync(
+                Arg.Any<HttpResponse>(),
+                Arg.Any<Exception>(),
+                Arg.Any<int>(),
+                Arg.Any<ILoggerAdapter>(),
+                retryDelayCancellation.Token).ConfigureAwait(false);
+            Assert.AreEqual(0, httpManager.QueueSize);
+        }
+
+        [TestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task HttpManagerDoesNotUseRequestTokenForRetryDelaysAsync(bool allowAutoRedirect)
+        {
+            // Arrange
+            using var callerCancellation = new CancellationTokenSource();
+            using var httpManager = new MockHttpManager();
+            var retryPolicy = Substitute.For<IRetryPolicy>();
+            httpManager.AddMockHandler(new MockHttpMessageHandler
+            {
+                ExpectedMethod = HttpMethod.Get,
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.InternalServerError)
+            });
+
+            // Act
+            await httpManager.SendRequestAsync(
+                new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
+                headers: null,
+                body: null,
+                method: HttpMethod.Get,
+                logger: Substitute.For<ILoggerAdapter>(),
+                doNotThrow: true,
+                mtlsCertificate: null,
+                validateServerCert: null,
+                cancellationToken: callerCancellation.Token,
+                retryPolicy: retryPolicy,
+                allowAutoRedirect: allowAutoRedirect).ConfigureAwait(false);
+
+            // Assert
+            await retryPolicy.Received(1).PauseForRetryAsync(
+                Arg.Any<HttpResponse>(),
+                Arg.Any<Exception>(),
+                0,
+                Arg.Any<ILoggerAdapter>(),
+                CancellationToken.None).ConfigureAwait(false);
+            Assert.AreEqual(0, httpManager.QueueSize);
+        }
 
         [TestMethod]
         public async Task MtlsCertAsync()
@@ -661,11 +758,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
         private class CapturingHandler : HttpMessageHandler
         {
             public HttpRequestMessage CapturedRequest { get; private set; }
+
             protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
             {
                 CapturedRequest = request;
                 return Task.FromResult(new HttpResponseMessage(System.Net.HttpStatusCode.OK));
             }
         }
+
     }
 }
