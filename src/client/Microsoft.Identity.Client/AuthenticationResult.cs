@@ -6,11 +6,13 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.Security.Claims;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 using System.Security.Cryptography.X509Certificates;
@@ -218,9 +220,9 @@ namespace Microsoft.Identity.Client
             }
 
             UniqueId = msalIdTokenCacheItem?.IdToken?.GetUniqueId();
-            // For client credentials flow, ID token is not available, so fall back to access token's tenant
+            // For client credentials flow, ID token is not available, so fall back to access token's tenant.
             // See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5743
-            TenantId = msalIdTokenCacheItem?.IdToken?.TenantId ?? msalAccessTokenCacheItem?.TenantId;
+            TenantId = GetTenantId(msalIdTokenCacheItem, msalAccessTokenCacheItem);
             IdToken = msalIdTokenCacheItem?.Secret;
             SpaAuthCode = spaAuthCode;
             _authenticationScheme = authenticationScheme;
@@ -251,6 +253,66 @@ namespace Microsoft.Identity.Client
 
                 AccessToken = msalAccessTokenCacheItem.Secret;
             }
+        }
+
+        private static string GetTenantId(MsalIdTokenCacheItem msalIdTokenCacheItem, MsalAccessTokenCacheItem msalAccessTokenCacheItem)
+        {
+            string idTokenTenantId = msalIdTokenCacheItem?.IdToken?.TenantId;
+            if (!string.IsNullOrEmpty(idTokenTenantId))
+            {
+                return idTokenTenantId;
+            }
+
+            string accessTokenTenantId = GetTenantIdFromAccessToken(msalAccessTokenCacheItem?.Secret);
+            if (!string.IsNullOrEmpty(accessTokenTenantId))
+            {
+                return accessTokenTenantId;
+            }
+
+            string cacheTenantId = msalAccessTokenCacheItem?.TenantId;
+            return IsDomainTenant(cacheTenantId) ? null : cacheTenantId;
+        }
+
+        private static string GetTenantIdFromAccessToken(string accessToken)
+        {
+            if (string.IsNullOrEmpty(accessToken))
+            {
+                return null;
+            }
+
+            string[] accessTokenSegments = accessToken.Split(new[] { '.' });
+            if (accessTokenSegments.Length < 2)
+            {
+                return null;
+            }
+
+            try
+            {
+                string payload = Base64UrlHelpers.Decode(accessTokenSegments[1]);
+                using JsonDocument accessTokenClaims = JsonDocument.Parse(payload);
+
+                return accessTokenClaims.RootElement.TryGetProperty(IdTokenClaim.TenantId, out JsonElement tenantId) &&
+                       tenantId.ValueKind == JsonValueKind.String ?
+                       tenantId.GetString() :
+                       null;
+            }
+            catch (JsonException)
+            {
+                return null;
+            }
+            catch (FormatException)
+            {
+                return null;
+            }
+            catch (ArgumentException)
+            {
+                return null;
+            }
+        }
+
+        private static bool IsDomainTenant(string tenantId)
+        {
+            return !string.IsNullOrEmpty(tenantId) && tenantId.Contains(".");
         }
 
         /// <summary>
