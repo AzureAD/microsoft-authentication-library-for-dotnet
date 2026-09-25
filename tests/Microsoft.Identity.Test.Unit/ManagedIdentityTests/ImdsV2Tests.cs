@@ -2262,6 +2262,44 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
+        public async Task AttestationProvider_ReceivesTenantIdAsClientIdMetadata()
+        {
+            // Arrange
+            string capturedClientIdMetadata = null;
+            PopKeyAttestor.s_testAttestationProvider = (endpoint, keyHandle, clientIdMetadata, keyId, ct) =>
+            {
+                capturedClientIdMetadata = clientIdMetadata;
+                const string fakeJwt = "fake.jwt.token";
+                var token = new AttestationToken(fakeJwt, DateTimeOffset.UtcNow.AddHours(1));
+                return Task.FromResult(new AttestationResult(AttestationStatus.Success, token, fakeJwt, 0, string.Empty));
+            };
+
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                ManagedIdentityClient.ResetSourceForTest();
+                ImdsV2ManagedIdentitySource.ResetCertCacheForTest();
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
+
+                var managedIdentityApp = await CreateManagedIdentityAsync(
+                    httpManager,
+                    managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
+
+                AddMocksToGetEntraToken(httpManager);
+
+                // Act
+                await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession()
+                    .WithAttestationSupport()
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual(TestConstants.TenantId, capturedClientIdMetadata);
+                Assert.AreNotEqual(TestConstants.ClientId, capturedClientIdMetadata);
+            }
+        }
+
+        [TestMethod]
         public async Task MaaTokenCache_Hit_DoesNotCallAttestationProviderAgain()
         {
             // Validates the MAA token cache itself: after a first acquire populates the cache,
@@ -2328,6 +2366,53 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.AreEqual(1, providerCallCount,
                     "MAA attestation provider must NOT be called again — the MAA token cache should have been hit.");
             }
+        }
+
+        [TestMethod]
+        public async Task MaaTokenCache_DifferentClientIdMetadata_SharesCacheEntry()
+        {
+            // Arrange
+            int providerCallCount = 0;
+            string providerClientIdMetadata = null;
+            PopKeyAttestor.s_testAttestationProvider = (endpoint, keyHandle, clientIdMetadata, keyId, ct) =>
+            {
+                Interlocked.Increment(ref providerCallCount);
+                providerClientIdMetadata = clientIdMetadata;
+                const string fakeJwt = "fake.jwt.token";
+                var token = new AttestationToken(fakeJwt, DateTimeOffset.UtcNow.AddHours(1));
+                return Task.FromResult(new AttestationResult(AttestationStatus.Success, token, fakeJwt, 0, string.Empty));
+            };
+
+            const string endpoint = "https://eastus.attestation.azure.net";
+            const string keyId = "TestKeyClientIdMetadata";
+            const string managedIdentityClientId = "11111111-1111-1111-1111-111111111111";
+            const string tenantId = "22222222-2222-2222-2222-222222222222";
+
+            using var rsa = new RSACng(2048);
+            var keyHandle = rsa.Key.Handle;
+
+            // Act
+            AttestationResult firstResult = await PopKeyAttestor.AttestCredentialGuardAsync(
+                endpoint,
+                keyHandle,
+                managedIdentityClientId,
+                keyId,
+                cancellationToken: CancellationToken.None).ConfigureAwait(false);
+
+            Assert.AreEqual(1, providerCallCount);
+            Assert.AreEqual(managedIdentityClientId, providerClientIdMetadata);
+
+            AttestationResult secondResult = await PopKeyAttestor.AttestCredentialGuardAsync(
+                endpoint,
+                keyHandle,
+                tenantId,
+                keyId,
+                cancellationToken: CancellationToken.None).ConfigureAwait(false);
+
+            // Assert
+            Assert.AreEqual(1, providerCallCount, "Changing client_id metadata must not create a second MAA cache entry.");
+            Assert.AreEqual(managedIdentityClientId, providerClientIdMetadata, "The provider must not be called on the cache hit.");
+            Assert.AreEqual(firstResult.Jwt, secondResult.Jwt);
         }
 
         [TestMethod]
