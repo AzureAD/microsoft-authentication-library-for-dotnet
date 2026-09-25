@@ -261,7 +261,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // Act & Assert
                 // Ensure that the token is returned even when no extra body parameters are provided
                 var authResult = await confidentialApp.AcquireTokenForClient(new[] { _scope })
-                    .WithExtraBodyParameters(null)
+                    .WithExtraBodyParameters((Dictionary<string, Func<CancellationToken, Task<string>>>)null)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -269,7 +269,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
 
                 authResult = await confidentialApp.AcquireTokenForClient(new[] { _scope })
-                    .WithExtraBodyParameters(null)
+                    .WithExtraBodyParameters((Dictionary<string, Func<CancellationToken, Task<string>>>)null)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -283,6 +283,78 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ConfigureAwait(false);
 
                 Assert.IsNotNull(authResult);
+                Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+
+        [TestMethod]
+        public async Task ValidateSynchronousExtraBodyParametersAndCacheKey()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                // Arrange
+                var confidentialApp = ConfidentialClientApplicationBuilder
+                    .Create(_clientId)
+                    .WithAuthority("https://login.microsoftonline.com/", _tenantId)
+                    .WithClientSecret("ClientSecret")
+                    .WithHttpManager(httpManager)
+                    .WithExperimentalFeatures(true)
+                    .BuildConcrete();
+
+                var firstParameters = new Dictionary<string, string>
+                {
+                    { "attributetoken", "AttributeToken" }
+                };
+                var secondParameters = new Dictionary<string, string>
+                {
+                    { "attributetoken", "DifferentAttributeToken" }
+                };
+
+                httpManager.AddInstanceDiscoveryMockHandler();
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(
+                    expectedPostData: new Dictionary<string, string>
+                    {
+                        { "attributetoken", "AttributeToken" }
+                    });
+
+                var builder = confidentialApp.AcquireTokenForClient(new[] { _scope })
+                    .WithExtraBodyParameters(firstParameters);
+
+                Assert.IsNull(builder.CommonParameters.OnBeforeTokenRequestHandler);
+                Assert.AreEqual("AttributeToken", builder.CommonParameters.SyncCacheKeyComponents["attributetoken"]);
+
+                // Act and Assert
+                var authResult = await builder
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
+
+                authResult = await confidentialApp.AcquireTokenForClient(new[] { _scope })
+                    .WithExtraBodyParameters(firstParameters)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource);
+
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(
+                    expectedPostData: new Dictionary<string, string>
+                    {
+                        { "attributetoken", "DifferentAttributeToken" }
+                    });
+
+                authResult = await confidentialApp.AcquireTokenForClient(new[] { _scope })
+                    .WithExtraBodyParameters(secondParameters)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
+
+                authResult = await confidentialApp.AcquireTokenForClient(new[] { _scope })
+                    .WithExtraBodyParameters(firstParameters)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
                 Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource);
             }
         }
