@@ -1,4 +1,0 @@
-const Microsoft.Identity.Client.MsalError.TooManyRedirects = "too_many_redirects" -> string
-Microsoft.Identity.Client.IMsalWsTrustHttpClientFactory
-Microsoft.Identity.Client.IMsalWsTrustHttpClientFactory.GetHttpClient(bool useDefaultCredentials) -> System.Net.Http.HttpClient
-const Microsoft.Identity.Client.MsalError.WsTrustCrossOriginRedirectNotSupported = "wstrust_cross_origin_redirect_failed" -> string
