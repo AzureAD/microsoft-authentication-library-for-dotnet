@@ -54,7 +54,11 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
         protected override  string InternalGetProductName()
         {
+#if MACCATALYST
+            return "MSAL.MacCatalyst";
+#else
             return "MSAL.Xamarin.iOS";
+#endif
         }
 
         /// <summary>
