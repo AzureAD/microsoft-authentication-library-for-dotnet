@@ -1,21 +1,6 @@
 ---
-skill_name: msal-mtls-pop-fic-two-leg
-version: 1.0
+name: msal-mtls-pop-fic-two-leg
 description: FIC token exchange pattern using assertions for mTLS PoP with MSI and Confidential Client support
-applies_to:
-  - MSAL.NET/mTLS-PoP
-  - MSAL.NET/Managed-Identity
-  - MSAL.NET/Confidential-Client
-  - MSAL.NET/FIC
-tags:
-  - msal
-  - mtls
-  - pop
-  - proof-of-possession
-  - fic
-  - token-exchange
-  - two-leg
-  - workload-identity
 ---
 
 # MSAL.NET mTLS PoP - FIC Two-Leg Flow (Token Exchange)
