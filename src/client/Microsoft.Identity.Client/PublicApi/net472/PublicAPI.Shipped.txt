@@ -1199,3 +1199,8 @@ virtual Microsoft.Identity.Client.MsalServiceException.UpdateIsRetryable() -> vo
 virtual Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi.WindowsFormsWebAuthenticationDialogBase.OnAuthenticate(System.Threading.CancellationToken cancellationToken) -> void
 virtual Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi.WindowsFormsWebAuthenticationDialogBase.WebBrowserBeforeNavigateHandler(object sender, Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi.WebBrowserBeforeNavigateEventArgs e) -> void
 virtual Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi.WindowsFormsWebAuthenticationDialogBase.WebBrowserNavigateErrorHandler(object sender, Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi.WebBrowserNavigateErrorEventArgs e) -> void
+
+const Microsoft.Identity.Client.MsalError.TooManyRedirects = "too_many_redirects" -> string
+Microsoft.Identity.Client.IMsalWsTrustHttpClientFactory
+Microsoft.Identity.Client.IMsalWsTrustHttpClientFactory.GetHttpClient(bool useDefaultCredentials) -> System.Net.Http.HttpClient
+const Microsoft.Identity.Client.MsalError.WsTrustCrossOriginRedirectNotSupported = "wstrust_cross_origin_redirect_failed" -> string
