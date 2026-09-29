@@ -213,7 +213,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         }
 
         private async Task<CertificateRequestResponse> ExecuteCertificateRequestAsync(
-            string clientId,
+            string tenantId,
             string attestationEndpoint,
             string csr,
             ManagedIdentityKeyInfo managedIdentityKeyInfo)
@@ -236,7 +236,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             if (managedIdentityKeyInfo.Type == ManagedIdentityKeyType.KeyGuard)
             {
                 attestationJwt = await GetAttestationJwtAsync(
-                    clientId,
+                    tenantId,
                     attestationUri,
                     managedIdentityKeyInfo,
                     _requestContext.UserCancellationToken).ConfigureAwait(false);
@@ -362,7 +362,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                     var privateKey = csrAndKey.privateKey;
 
                     var certificateRequestResponse = await ExecuteCertificateRequestAsync(
-                        csrMetadata.ClientId,
+                        csrMetadata.TenantId,
                         csrMetadata.AttestationEndpoint,
                         csr,
                         keyInfo).ConfigureAwait(false);
@@ -431,13 +431,13 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         /// Obtains an attestation JWT for the Credential Guard/CSR payload using the configured
         /// attestation token provider delegate.
         /// </summary>
-        /// <param name="clientId">Client ID to be sent to the attestation provider.</param>
+        /// <param name="tenantId">Tenant ID sent as the MAA <c>client_id</c> telemetry metadata.</param>
         /// <param name="attestationEndpoint">The attestation endpoint.</param>
         /// <param name="keyInfo">The key information.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>JWT string suitable for the IMDSv2 attested PoP flow, or null for non-attested flow.</returns>
         private async Task<string> GetAttestationJwtAsync(
-            string clientId,
+            string tenantId,
             Uri attestationEndpoint,
             ManagedIdentityKeyInfo keyInfo,
             CancellationToken cancellationToken)
@@ -468,7 +468,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 string attestationJwt = await _attestationTokenProvider(
                     attestationEndpoint.AbsoluteUri,
                     rsaCng.Key.Handle,
-                    clientId,
+                    tenantId,
                     keyId,
                     _requestContext.Logger,
                     cancellationToken).ConfigureAwait(false);
