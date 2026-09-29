@@ -105,7 +105,7 @@ namespace Microsoft.Identity.Client.Extensibility
         /// <exception cref="ArgumentException">Thrown when any token contains embedded whitespace.</exception>
         /// <exception cref="MsalClientException">
         /// Thrown when the application was not configured to allow experimental features
-        /// (this method transitively calls <see cref="WithExtraBodyParameters{T}"/>, which requires
+        /// (this method transitively calls <c>WithExtraBodyParameters</c>, which requires
         /// experimental features to be enabled via <c>WithExperimentalFeatures()</c> on the application builder).
         /// </exception>
         public static T WithAttributeTokens<T>(
@@ -165,9 +165,42 @@ namespace Microsoft.Identity.Client.Extensibility
         }
 
         /// <summary>
-        /// Add extra body parameters to the token request. These parameters are added to the cache key
+        /// Add synchronous extra body parameters to the token request. These parameters are added to the cache key
         /// to associate these parameters with the acquired token. Works for confidential client flows
         /// (AcquireTokenForClient, AcquireTokenOnBehalfOf, AcquireTokenByAuthorizationCode).
+        /// </summary>
+        /// <typeparam name="T">The concrete confidential client builder type.</typeparam>
+        /// <param name="builder">The builder to chain options to.</param>
+        /// <param name="extraBodyParams">List of additional body parameters.</param>
+        /// <returns>The concrete builder to chain method calls.</returns>
+        public static T WithExtraBodyParameters<T>(
+            this AbstractConfidentialClientAcquireTokenParameterBuilder<T> builder,
+            Dictionary<string, string> extraBodyParams)
+            where T : AbstractConfidentialClientAcquireTokenParameterBuilder<T>
+        {
+            builder.ValidateUseOfExperimentalFeature();
+
+            if (extraBodyParams == null || extraBodyParams.Count == 0)
+            {
+                return (T)builder;
+            }
+
+            builder.CommonParameters.ExtraBodyParameters ??= new Dictionary<string, string>();
+            builder.CommonParameters.SyncCacheKeyComponents ??= new SortedList<string, string>();
+
+            foreach (var param in extraBodyParams)
+            {
+                builder.CommonParameters.ExtraBodyParameters.Add(param.Key, param.Value);
+                builder.CommonParameters.SyncCacheKeyComponents.Add(param.Key, param.Value);
+            }
+
+            return (T)builder;
+        }
+
+        /// <summary>
+        /// Add extra body parameters to the token request using asynchronous value providers.
+        /// These parameters are added to the cache key to associate them with the acquired token.
+        /// Works for confidential client flows.
         /// </summary>
         /// <typeparam name="T">The concrete confidential client builder type.</typeparam>
         /// <param name="builder">The builder to chain options to.</param>

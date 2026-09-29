@@ -64,6 +64,15 @@ namespace Microsoft.Identity.Client
 
             var cacheKeyComponents = await InitializeCacheKeyComponentsAsync(commonParameters.CacheKeyComponents, cancellationToken).ConfigureAwait(false);
 
+            if (commonParameters.SyncCacheKeyComponents != null && commonParameters.SyncCacheKeyComponents.Count > 0)
+            {
+                cacheKeyComponents ??= new SortedList<string, string>();
+                foreach (var kvp in commonParameters.SyncCacheKeyComponents)
+                {
+                    cacheKeyComponents.Add(kvp.Key, kvp.Value);
+                }
+            }
+
             // Merge any app-level cache key components (e.g. set via application-builder
             // WithExtraQueryParameters when IncludeInCacheKey is true) so they participate
             // in token cache key computation alongside the per-request components.

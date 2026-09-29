@@ -228,7 +228,8 @@ namespace Microsoft.Identity.Client.OAuth2
                 MsalTokenResponse msalTokenResponse =
                     await _oAuth2Client
                         .GetTokenAsync(tokenEndpointWithQueryParams,
-                            _requestParams.RequestContext, true, _requestParams.OnBeforeTokenRequestHandler)
+                            _requestParams.RequestContext, true, _requestParams.OnBeforeTokenRequestHandler,
+                            _requestParams.ExtraBodyParameters)
                         .ConfigureAwait(false);
 
                 return msalTokenResponse;
@@ -249,7 +250,8 @@ namespace Microsoft.Identity.Client.OAuth2
                         return await _oAuth2Client.GetTokenAsync(
                             tokenEndpointWithQueryParams,
                             _requestParams.RequestContext,
-                            false, _requestParams.OnBeforeTokenRequestHandler).ConfigureAwait(false);
+                            false, _requestParams.OnBeforeTokenRequestHandler,
+                            _requestParams.ExtraBodyParameters).ConfigureAwait(false);
                     }
                 }
 

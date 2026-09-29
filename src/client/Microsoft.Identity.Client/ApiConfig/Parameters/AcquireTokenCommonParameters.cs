@@ -30,6 +30,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public bool UseCorrelationIdFromUser { get; set; }
         public IEnumerable<string> Scopes { get; set; }
         public IDictionary<string, string> ExtraQueryParameters { get; set; }
+        public IDictionary<string, string> ExtraBodyParameters { get; internal set; }
         public string Claims { get; set; }
         public string ClientClaims { get; internal set; }
         public AuthorityInfo AuthorityOverride { get; set; }
@@ -40,6 +41,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public X509Certificate2 MtlsCertificate { get; internal set; }
         public List<string> AdditionalCacheParameters { get; set; }
         public SortedList<string, Func<CancellationToken, Task<string>>> CacheKeyComponents { get; internal set; }
+        public SortedList<string, string> SyncCacheKeyComponents { get; internal set; }
         public bool PartitionRefreshToken { get; internal set; }
         public bool? SendOfflineAccessScope { get; set; }
         public string FmiPathSuffix { get; internal set; }

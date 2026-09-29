@@ -100,8 +100,17 @@ namespace Microsoft.Identity.Client.OAuth2
             Uri endPoint,
             RequestContext requestContext,
             bool addCommonHeaders,
-            IList<Func<OnBeforeTokenRequestData, Task>> onBeforePostRequestHandler)
+            IList<Func<OnBeforeTokenRequestData, Task>> onBeforePostRequestHandler,
+            IDictionary<string, string> extraBodyParameters)
         {
+            if (extraBodyParameters != null)
+            {
+                foreach (var parameter in extraBodyParameters)
+                {
+                    _bodyParameters[parameter.Key] = parameter.Value;
+                }
+            }
+
             return ExecuteRequestAsync<MsalTokenResponse>(
                 endPoint,
                 HttpMethod.Post,
