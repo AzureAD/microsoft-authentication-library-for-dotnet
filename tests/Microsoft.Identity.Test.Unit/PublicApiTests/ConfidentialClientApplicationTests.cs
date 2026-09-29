@@ -151,7 +151,66 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 appCacheAccess.AssertAccessCounts(1, 1);
                 userCacheAccess.AssertAccessCounts(0, 0);
             }
-        }        
+        }
+
+        [TestMethod]
+        [TestCategory(TestCategories.Regression)]
+        [WorkItem(6093)] // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/6093
+        public async Task ClientCreds_WithDomainAuthority_ReturnsTenantIdFromAccessToken_Async()
+        {
+            const string tenantDomain = "contoso.onmicrosoft.com";
+            string authority = $"https://login.microsoftonline.com/{tenantDomain}/";
+            string accessToken = CreateAccessTokenWithTenantId(TestConstants.AadTenantId);
+
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler(authority);
+
+                ConfidentialClientApplication app =
+                    ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                              .WithAuthority(authority)
+                                                              .WithClientSecret(TestConstants.ClientSecret)
+                                                              .WithHttpManager(httpManager)
+                                                              .BuildConcrete();
+
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(token: accessToken);
+
+                AuthenticationResult result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                    .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+
+                Assert.AreEqual(TestConstants.AadTenantId, result.TenantId);
+                Assert.AreEqual(tenantDomain, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().TenantId);
+            }
+        }
+
+        [TestMethod]
+        [TestCategory(TestCategories.Regression)]
+        [WorkItem(6093)] // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/6093
+        public async Task ClientCreds_WithDomainAuthority_AndOpaqueAccessToken_DoesNotReturnDomainAsTenantId_Async()
+        {
+            const string tenantDomain = "contoso.onmicrosoft.com";
+            string authority = $"https://login.microsoftonline.com/{tenantDomain}/";
+
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler(authority);
+
+                ConfidentialClientApplication app =
+                    ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                              .WithAuthority(authority)
+                                                              .WithClientSecret(TestConstants.ClientSecret)
+                                                              .WithHttpManager(httpManager)
+                                                              .BuildConcrete();
+
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(token: "opaque-access-token");
+
+                AuthenticationResult result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                    .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+
+                Assert.IsNull(result.TenantId);
+                Assert.AreEqual(tenantDomain, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().TenantId);
+            }
+        }
 
         [TestMethod]
         [TestCategory(TestCategories.Regression)]
@@ -2433,6 +2492,14 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             var cryptoMgr = new CommonCryptographyManager();
             return cryptoMgr.CreateSha256HashHex(token);
+        }
+
+        private static string CreateAccessTokenWithTenantId(string tenantId)
+        {
+            string header = Base64UrlHelpers.Encode("{\"alg\":\"none\"}");
+            string payload = Base64UrlHelpers.Encode($"{{\"tid\":\"{tenantId}\"}}");
+
+            return $"{header}.{payload}.signature";
         }
     }
 }
