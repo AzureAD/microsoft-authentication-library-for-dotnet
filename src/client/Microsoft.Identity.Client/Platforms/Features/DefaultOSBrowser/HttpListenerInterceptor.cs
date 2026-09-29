@@ -3,16 +3,22 @@
 
 using System;
 using System.Net;
+using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 
 namespace Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser
 {
     internal class HttpListenerInterceptor : IUriInterceptor
     {
+        private const string AllowPortForwardingEnvVariable = "MSAL_ALLOW_SYSTEM_BROWSER_PORT_FORWARDING";
+
         private ILoggerAdapter _logger;
+        private readonly bool _allowPortForwarding;
+        private readonly Func<bool> _localhostResolvesToIpv6;
 
         #region Test Hooks 
         public Action TestBeforeTopLevelCall { get; set; }
@@ -21,8 +27,26 @@ namespace Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser
         #endregion
 
         public HttpListenerInterceptor(ILoggerAdapter logger)
+            : this(logger, ReadAllowPortForwardingEnvVariable())
+        {
+        }
+
+        internal HttpListenerInterceptor(
+            ILoggerAdapter logger,
+            bool allowPortForwarding,
+            Func<bool> localhostResolvesToIpv6 = null)
         {
             _logger = logger;
+            _allowPortForwarding = allowPortForwarding;
+            _localhostResolvesToIpv6 = localhostResolvesToIpv6 ??
+                (() => Dns.GetHostAddresses("localhost")[0].AddressFamily == AddressFamily.InterNetworkV6);
+        }
+
+        private static bool ReadAllowPortForwardingEnvVariable()
+        {
+            string value = Environment.GetEnvironmentVariable(AllowPortForwardingEnvVariable);
+            return string.Equals(value, "true", StringComparison.OrdinalIgnoreCase) ||
+                   string.Equals(value, "1", StringComparison.Ordinal);
         }
 
         public async Task<AuthorizationResponse> ListenToSingleRequestAndRespondAsync(
@@ -54,13 +78,29 @@ namespace Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser
                     urlToListenTo += "/";
                 }
 
-                httpListener = new HttpListener();
-                httpListener.Prefixes.Add(urlToListenTo);
+                bool usePortForwarding = _allowPortForwarding && DesktopOsHelper.IsLinux();
+                // Linux wildcard prefixes bind IPv4 only. Keep IPv6 localhost, but avoid overlapping IPv4 sockets.
+                bool preserveLocalhostListener = !usePortForwarding || _localhostResolvesToIpv6();
 
-                TestBeforeStart?.Invoke(urlToListenTo);
+                httpListener = new HttpListener();
+                if (preserveLocalhostListener)
+                {
+                    httpListener.Prefixes.Add(urlToListenTo);
+                    TestBeforeStart?.Invoke(urlToListenTo);
+                }
+
+                if (usePortForwarding)
+                {
+                    string portForwardingUrl = "http://*:" + port + path.TrimEnd('/') + "/";
+                    httpListener.Prefixes.Add(portForwardingUrl);
+                    TestBeforeStart?.Invoke(portForwardingUrl);
+                    _logger.Warning(
+                        "System browser port forwarding is enabled. The authorization response listener will accept " +
+                        "requests on all IPv4 network interfaces. Restrict the forwarded host port to loopback.");
+                }
 
                 httpListener.Start();
-                _logger.Info(() => "Listening for authorization code on " + urlToListenTo);
+                _logger.Info(() => "Listening for authorization code on " + string.Join(", ", httpListener.Prefixes));
 
                 using (cancellationToken.Register(() =>
                 {
