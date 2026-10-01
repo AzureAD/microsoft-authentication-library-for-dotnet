@@ -1,0 +1,1 @@
+static Microsoft.Identity.Client.TokenCacheExtensions.SetAppTokenCacheReadOptimization(this Microsoft.Identity.Client.ITokenCache tokenCache, bool enabled) -> void

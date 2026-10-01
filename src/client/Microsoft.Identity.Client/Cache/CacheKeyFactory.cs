@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Identity.Client.Cache.Items;
@@ -39,6 +40,35 @@ namespace Microsoft.Identity.Client.Cache
             }
 
             return null;
+        }
+
+        internal static string GetAppTokenCacheReadKey(AuthenticationRequestParameters requestParameters)
+        {
+            var components = new SortedList<string, string>(StringComparer.Ordinal)
+            {
+                ["authority"] = requestParameters.AuthorityManager.OriginalAuthority.AuthorityInfo.CanonicalAuthority.AbsoluteUri,
+                ["partition"] = GetKeyFromRequest(requestParameters),
+                ["scopes"] = ScopeHelper.OrderScopesAlphabetically(requestParameters.Scope.AsSingleString()),
+                ["token_type"] = requestParameters.AuthenticationScheme.AccessTokenType ?? string.Empty
+            };
+
+            return CoreHelpers.ComputeAccessTokenExtCacheKey(components);
+        }
+
+        internal static string GetAppTokenProactiveRefreshKey(
+            MsalAccessTokenCacheItem accessTokenCacheItem)
+        {
+            var components = new SortedList<string, string>(StringComparer.Ordinal)
+            {
+                ["cache_item"] = accessTokenCacheItem.CacheKey,
+                ["partition"] = GetAppTokenCacheItemKey(
+                    accessTokenCacheItem.ClientId,
+                    accessTokenCacheItem.TenantId,
+                    accessTokenCacheItem.KeyId,
+                    accessTokenCacheItem.AdditionalCacheKeyComponents)
+            };
+
+            return CoreHelpers.ComputeAccessTokenExtCacheKey(components);
         }
 
         public static string GetExternalCacheKeyFromResponse(
