@@ -1,6 +1,8 @@
-# Test file review rules
+---
+applyTo: "tests/**/*.cs"
+---
 
-Applies to: tests/**/*.cs
+# Test file review rules
 
 These rules apply when reviewing test files in this repository.
 

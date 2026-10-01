@@ -1,6 +1,8 @@
-# Source code review rules
+---
+applyTo: "src/**/*.cs"
+---
 
-Applies to: src/**/*.cs
+# Source code review rules
 
 These rules apply when reviewing production source code in this repository.
 
