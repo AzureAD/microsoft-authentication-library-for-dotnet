@@ -40,17 +40,17 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [DataRow(null, false, false)]
-        [DataRow("", false, false)]
+        [DataRow(null, true, false)]
+        [DataRow("", true, false)]
         [DataRow("false", false, false)]
         [DataRow("FALSE", false, false)]
         [DataRow("0", false, false)]
         [DataRow("true", true, false)]
         [DataRow("TrUe", true, false)]
         [DataRow("1", true, false)]
-        [DataRow("invalid-value", false, true)]
-        [DataRow(" true ", false, true)]
-        public void EnvironmentSettingDefaultsToFalse(string value, bool expectedEnabled, bool expectedWarning)
+        [DataRow("invalid-value", true, true)]
+        [DataRow(" true ", true, true)]
+        public void EnvironmentSettingDefaultsToTrue(string value, bool expectedEnabled, bool expectedWarning)
         {
             // Arrange
             Environment.SetEnvironmentVariable(LoggerHelper.ReducedLoggingEnvironmentVariable, value);
@@ -74,44 +74,66 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [DataRow(false)]
-        [DataRow(true)]
-        public void EnvironmentSettingIsCapturedPerApplicationEvenWhenBuilderIsReused(bool callback)
+        [DataRow(false, false)]
+        [DataRow(false, true)]
+        [DataRow(true, false)]
+        [DataRow(true, true)]
+        public async Task AddingLoggerAfterBuildPreservesOriginalApplicationSettingAsync(bool callback, bool reduced)
         {
             // Arrange
+            Environment.SetEnvironmentVariable(LoggerHelper.ReducedLoggingEnvironmentVariable, reduced ? null : "false");
             var entries = new List<LogEntry>();
-            var builder = CreateBuilder(callback, LogLevel.Info, false, entries);
-            var originalApp = builder.BuildConcrete();
+            using (var httpManager = new MockHttpManager())
+            {
+                var builder = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithAuthority(TestConstants.AuthorityTestTenant)
+                    .WithClientSecret("secret")
+                    .WithHttpManager(httpManager);
+                var originalApp = builder.BuildConcrete();
+                httpManager.AddInstanceDiscoveryMockHandler();
+                httpManager.AddMockHandler(new MockHttpMessageHandler
+                {
+                    ExpectedMethod = HttpMethod.Post,
+                    ResponseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage()
+                });
+                var firstResult = await originalApp.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync().ConfigureAwait(false);
+                Environment.SetEnvironmentVariable(LoggerHelper.ReducedLoggingEnvironmentVariable, (!reduced).ToString());
+                int producerCalls = 0;
 
-            // Act
-            Environment.SetEnvironmentVariable(LoggerHelper.ReducedLoggingEnvironmentVariable, "true");
-            var reducedApp = builder.BuildConcrete();
-            Environment.SetEnvironmentVariable(LoggerHelper.ReducedLoggingEnvironmentVariable, "false");
-            var originalContext = new RequestContext(originalApp.ServiceBundle, Guid.NewGuid(), null);
-            var reducedContext = new RequestContext(reducedApp.ServiceBundle, Guid.NewGuid(), null);
+                // Act
+                originalApp.ServiceBundle.ApplicationLogger.InfoOrVerbose(() =>
+                {
+                    producerCalls++;
+                    return "unused diagnostic";
+                });
+                var laterApp = ConfigureLogging(builder, callback, LogLevel.Info, false, entries).BuildConcrete();
+                entries.Clear();
+                var cachedResult = await originalApp.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync().ConfigureAwait(false);
 
-            // Assert
-            Assert.IsFalse(originalApp.ServiceBundle.ApplicationLogger.IsReducedLoggingEnabled);
-            Assert.IsFalse(originalContext.Logger.IsReducedLoggingEnabled);
-            Assert.IsTrue(reducedApp.ServiceBundle.ApplicationLogger.IsReducedLoggingEnabled);
-            Assert.IsTrue(reducedContext.Logger.IsReducedLoggingEnabled);
+                // Assert
+                Assert.AreEqual(0, producerCalls);
+                Assert.AreEqual(reduced, originalApp.ServiceBundle.ApplicationLogger.IsReducedLoggingEnabled);
+                Assert.AreEqual(!reduced, laterApp.ServiceBundle.ApplicationLogger.IsReducedLoggingEnabled);
+                Assert.AreEqual(TokenSource.Cache, cachedResult.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(firstResult.AccessToken, cachedResult.AccessToken);
+                Assert.HasCount(reduced ? 2 : 8, entries.Where(e => e.EventLogLevel == EventLogLevel.Informational).ToList());
+                Assert.HasCount(reduced ? 0 : 1, entries.Where(e => e.Message.Contains("with assembly version")).ToList());
+                Assert.IsTrue(entries.Any(e => e.EventLogLevel == EventLogLevel.Informational && e.Message.Contains("started:")));
+                Assert.IsTrue(entries.Any(e => e.EventLogLevel == EventLogLevel.Informational && e.Message.Contains("source: Cache")));
+            }
         }
 
         [TestMethod]
-        [DataRow(false, false, LogLevel.Info)]
-        [DataRow(true, false, LogLevel.Info)]
-        [DataRow(false, true, LogLevel.Info)]
-        [DataRow(true, true, LogLevel.Info)]
-        [DataRow(false, true, LogLevel.Verbose)]
-        [DataRow(true, true, LogLevel.Verbose)]
-        [DataRow(false, false, LogLevel.Warning)]
-        [DataRow(true, true, LogLevel.Warning)]
-        public void DiagnosticFormattingIsSkippedAtTheEffectiveLevel(bool callback, bool reduced, LogLevel threshold)
+        [DataRow(false, LogLevel.Info)]
+        [DataRow(true, LogLevel.Info)]
+        [DataRow(true, LogLevel.Verbose)]
+        [DataRow(false, LogLevel.Warning)]
+        public void DiagnosticFormattingIsSkippedAtTheEffectiveLevel(bool reduced, LogLevel threshold)
         {
             // Arrange
             Environment.SetEnvironmentVariable(LoggerHelper.ReducedLoggingEnvironmentVariable, reduced.ToString());
             var entries = new List<LogEntry>();
-            var logger = CreateBuilder(callback, threshold, false, entries).BuildConcrete().ServiceBundle.ApplicationLogger;
+            var logger = CreateBuilder(false, threshold, false, entries).BuildConcrete().ServiceBundle.ApplicationLogger;
             entries.Clear();
             int producerCalls = 0;
             int scopeEnumerations = 0;
@@ -143,18 +165,15 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [DataRow(false, false, LogLevel.Info)]
-        [DataRow(true, false, LogLevel.Info)]
-        [DataRow(false, true, LogLevel.Info)]
-        [DataRow(true, true, LogLevel.Info)]
-        [DataRow(false, true, LogLevel.Verbose)]
-        [DataRow(true, true, LogLevel.Verbose)]
-        public void ParameterDumpsUseTheEffectiveLevelAcrossFlows(bool callback, bool reduced, LogLevel threshold)
+        [DataRow(false, LogLevel.Info)]
+        [DataRow(true, LogLevel.Info)]
+        [DataRow(true, LogLevel.Verbose)]
+        public void ParameterDumpsUseTheEffectiveLevelAcrossFlows(bool reduced, LogLevel threshold)
         {
             // Arrange
             Environment.SetEnvironmentVariable(LoggerHelper.ReducedLoggingEnvironmentVariable, reduced.ToString());
             var entries = new List<LogEntry>();
-            var logger = CreateBuilder(callback, threshold, false, entries).BuildConcrete().ServiceBundle.ApplicationLogger;
+            var logger = CreateBuilder(false, threshold, false, entries).BuildConcrete().ServiceBundle.ApplicationLogger;
             var cases = new (IAcquireTokenParameters Parameters, int Count)[]
             {
                 (new AcquireTokenForClientParameters(), 1),
@@ -180,16 +199,14 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [DataRow(false, false)]
-        [DataRow(false, true)]
-        [DataRow(true, false)]
-        [DataRow(true, true)]
-        public void ReducedLoggingPreservesPiiSelectionAndOtherLevels(bool callback, bool pii)
+        [DataRow(false)]
+        [DataRow(true)]
+        public void ReducedLoggingPreservesPiiSelectionAndOtherLevels(bool pii)
         {
             // Arrange
             Environment.SetEnvironmentVariable(LoggerHelper.ReducedLoggingEnvironmentVariable, "true");
             var entries = new List<LogEntry>();
-            var logger = CreateBuilder(callback, LogLevel.Verbose, pii, entries).BuildConcrete().ServiceBundle.ApplicationLogger;
+            var logger = CreateBuilder(false, LogLevel.Verbose, pii, entries).BuildConcrete().ServiceBundle.ApplicationLogger;
             entries.Clear();
 
             // Act
@@ -270,26 +287,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        public void NoLoggerStillSkipsDiagnosticProducer()
-        {
-            // Arrange
-            Environment.SetEnvironmentVariable(LoggerHelper.ReducedLoggingEnvironmentVariable, "true");
-            var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId).WithClientSecret("secret").BuildConcrete();
-            int producerCalls = 0;
-
-            // Act
-            app.ServiceBundle.ApplicationLogger.InfoOrVerbose(() =>
-            {
-                producerCalls++;
-                return "unused diagnostic";
-            });
-
-            // Assert
-            Assert.AreEqual(0, producerCalls);
-            Assert.AreSame(LoggerHelper.NullLogger, app.ServiceBundle.ApplicationLogger);
-        }
-
-        [TestMethod]
         public async Task DemotedSuccessHeadingDoesNotRequireInfoToBeEnabledAsync()
         {
             // Arrange
@@ -329,6 +326,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             var builder = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                 .WithAuthority(TestConstants.AuthorityTestTenant)
                 .WithClientSecret("secret");
+            return ConfigureLogging(builder, callback, threshold, pii, entries);
+        }
+
+        private static ConfidentialClientApplicationBuilder ConfigureLogging(ConfidentialClientApplicationBuilder builder, bool callback, LogLevel threshold, bool pii, List<LogEntry> entries)
+        {
             if (callback)
             {
                 return builder.WithLogging(

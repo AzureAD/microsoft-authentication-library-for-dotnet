@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
             bool enablePiiLogging,
             bool isDefaultPlatformLoggingEnabled,
             LogCallback loggingCallback,
-            bool isReducedLoggingEnabled = false)
+            bool isReducedLoggingEnabled = true)
         {
             ClientName = clientName;
             ClientVersion = clientVersion;
@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
             Guid correlationId,
             ApplicationConfiguration config,
             bool isDefaultPlatformLoggingEnabled = false,
-            bool isReducedLoggingEnabled = false)
+            bool isReducedLoggingEnabled = true)
         {
             return new CallbackIdentityLoggerAdapter(
                 correlationId,

@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
 
         public bool PiiLoggingEnabled => true;
 
-        public bool IsReducedLoggingEnabled => false;
+        public bool IsReducedLoggingEnabled => true;
 
         public bool IsDefaultPlatformLoggingEnabled => false;
 
