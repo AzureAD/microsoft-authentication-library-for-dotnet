@@ -17,6 +17,8 @@ namespace Microsoft.Identity.Client.Internal.Logger
 
         public bool PiiLoggingEnabled { get; } = false;
 
+        public bool IsReducedLoggingEnabled => false;
+
         public string ClientInformation { get; } = string.Empty;
 
         public bool IsDefaultPlatformLoggingEnabled { get; } = false;

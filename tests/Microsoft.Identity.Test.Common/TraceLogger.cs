@@ -28,6 +28,8 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
 
         public bool PiiLoggingEnabled => true;
 
+        public bool IsReducedLoggingEnabled => false;
+
         public bool IsDefaultPlatformLoggingEnabled => false;
 
         public IIdentityLogger CacheLogger => null;

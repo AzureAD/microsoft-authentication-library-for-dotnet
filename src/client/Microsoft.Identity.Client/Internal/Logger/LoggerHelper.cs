@@ -17,6 +17,8 @@ namespace Microsoft.Identity.Client.Internal.Logger
 {
     internal class LoggerHelper
     {
+        internal const string ReducedLoggingEnvironmentVariable = "MSAL_REDUCED_LOGGING";
+
         private static Lazy<string> s_msalVersionLazy = new Lazy<string>(MsalIdHelper.GetMsalVersion);
         private static Lazy<string> s_runtimeVersionLazy = new Lazy<string>(() => PlatformProxyFactory.CreatePlatformProxy(null).GetRuntimeVersion());
         private static readonly Lazy<ILoggerAdapter> s_nullLogger = new Lazy<ILoggerAdapter>(() => new NullLogger());
@@ -37,9 +39,28 @@ namespace Microsoft.Identity.Client.Internal.Logger
             return string.Empty;
         }
 
+        public static ILoggerAdapter CreateApplicationLogger(ApplicationConfiguration config)
+        {
+            // Snapshot once per application, not per request or message.
+            string value = Environment.GetEnvironmentVariable(ReducedLoggingEnvironmentVariable);
+            bool enabled = string.Equals(value, "true", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(value, "1", StringComparison.Ordinal);
+            var logger = CreateLogger(Guid.Empty, config, enabled);
+
+            if (!enabled && !string.IsNullOrEmpty(value) &&
+                !string.Equals(value, "false", StringComparison.OrdinalIgnoreCase) &&
+                !string.Equals(value, "0", StringComparison.Ordinal))
+            {
+                logger.Warning("Invalid MSAL_REDUCED_LOGGING value. Expected true, false, 1 or 0. Reduced logging is disabled.");
+            }
+
+            return logger;
+        }
+
         public static ILoggerAdapter CreateLogger(
             Guid correlationId,
-            ApplicationConfiguration config)
+            ApplicationConfiguration config,
+            bool isReducedLoggingEnabled = false)
         {
             if (config.IdentityLogger == null)
             {
@@ -48,10 +69,10 @@ namespace Microsoft.Identity.Client.Internal.Logger
                     return s_nullLogger.Value;
                 }
 
-                return CallbackIdentityLoggerAdapter.Create(correlationId, config);
+                return CallbackIdentityLoggerAdapter.Create(correlationId, config, isReducedLoggingEnabled: isReducedLoggingEnabled);
             }
 
-            return IdentityLoggerAdapter.Create(correlationId, config);
+            return IdentityLoggerAdapter.Create(correlationId, config, isReducedLoggingEnabled);
         }
 
         public static ILoggerAdapter NullLogger => s_nullLogger.Value;
