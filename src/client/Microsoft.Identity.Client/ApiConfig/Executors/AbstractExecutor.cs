@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
         {
             var requestContext = new RequestContext(ServiceBundle, correlationId, mtlsCertificate, userCancellationToken);
 
-            requestContext.Logger.Info(
+            requestContext.Logger.InfoOrVerbose(
                 () => string.Format(
                     CultureInfo.InvariantCulture,
                     "MSAL {0} with assembly version '{1}'. CorrelationId({2})",

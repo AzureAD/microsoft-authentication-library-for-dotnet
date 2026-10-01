@@ -89,6 +89,39 @@ namespace Microsoft.Identity.Client.Core
         }
 
         /// <summary>
+        /// Routine diagnostics retain Info by default and move to Verbose only in reduced logging mode.
+        /// Check this before constructing expensive diagnostic messages.
+        /// </summary>
+        public static bool IsInfoOrVerboseEnabled(this ILoggerAdapter logger)
+        {
+            return logger.IsLoggingEnabled(GetInfoOrVerboseLevel(logger));
+        }
+
+        public static void InfoOrVerbose(this ILoggerAdapter logger, string message)
+        {
+            logger.Log(GetInfoOrVerboseLevel(logger), string.Empty, message);
+        }
+
+        public static void InfoOrVerbose(this ILoggerAdapter logger, Func<string> messageProducer)
+        {
+            LogLevel level = GetInfoOrVerboseLevel(logger);
+            if (logger.IsLoggingEnabled(level))
+            {
+                logger.Log(level, string.Empty, messageProducer());
+            }
+        }
+
+        public static void InfoOrVerbosePii(this ILoggerAdapter logger, string messageWithPii, string messageScrubbed)
+        {
+            logger.Log(GetInfoOrVerboseLevel(logger), messageWithPii, messageScrubbed);
+        }
+
+        private static LogLevel GetInfoOrVerboseLevel(ILoggerAdapter logger)
+        {
+            return logger.IsReducedLoggingEnabled ? LogLevel.Verbose : LogLevel.Info;
+        }
+
+        /// <summary>
         /// This method is used to avoid string concatenation when the log level is not enabled.
         /// </summary>
         public static void Info(this ILoggerAdapter logger, Func<string> messageProducer)

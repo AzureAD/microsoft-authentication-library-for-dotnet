@@ -227,7 +227,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             var logger = RequestContext.Logger;
 
-            if (logger.IsLoggingEnabled(LogLevel.Info))
+            if (logger.IsInfoOrVerboseEnabled())
             {
 
                 // Create PII enabled string builder
@@ -275,7 +275,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 builder.AppendLine("FMI Path: " + FmiPathSuffix);
                 builder.AppendLine("Credential FMI Path: " + ClientAssertionFmiPath);
 
-                logger.InfoPii(messageWithPii, builder.ToString());
+                logger.InfoOrVerbosePii(messageWithPii, builder.ToString());
             }
         }
     }
