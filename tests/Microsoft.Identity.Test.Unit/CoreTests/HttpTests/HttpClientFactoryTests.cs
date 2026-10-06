@@ -7,6 +7,8 @@ using System.Net.Http;
 using System.Net.Security;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
@@ -224,7 +226,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
             // Arrange
             var factory = new SimpleHttpClientFactory();
             var cert = CertHelper.GetOrCreateTestCert();
-            var customHandler = new HttpClientHandler();
 
             // Act
             HttpClient mtlsClient = factory.GetHttpClient(cert);
@@ -234,6 +235,72 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
             Assert.IsNotNull(mtlsClient);
             Assert.IsNotNull(handlerClient);
             Assert.AreNotSame(mtlsClient, handlerClient); // Should be different instances
+        }
+
+        [TestMethod]
+        public void TestMtlsHttpClientIsReusedForSameCertificateInstance()
+        {
+            // Arrange
+            var factory = new SimpleHttpClientFactory();
+            var certificate = CertHelper.GetOrCreateTestCert();
+
+            // Act
+            HttpClient firstClient = factory.GetHttpClient(certificate);
+            HttpClient secondClient = factory.GetHttpClient(certificate);
+
+            // Assert
+            Assert.AreSame(firstClient, secondClient);
+        }
+
+        [TestMethod]
+        public void TestMtlsHttpClientIsNotReusedForDifferentCertificateInstancesWithSameThumbprint()
+        {
+            // Arrange
+            var factory = new SimpleHttpClientFactory();
+            var firstCertificate = CertHelper.GetOrCreateTestCert();
+            using var secondCertificate = new X509Certificate2(firstCertificate.Export(X509ContentType.Cert));
+            Assert.AreEqual(firstCertificate.Thumbprint, secondCertificate.Thumbprint);
+
+            // Act
+            HttpClient firstClient = factory.GetHttpClient(firstCertificate);
+            HttpClient secondClient = factory.GetHttpClient(secondCertificate);
+
+            // Assert
+            Assert.AreNotSame(firstClient, secondClient);
+            Assert.AreSame(firstClient, factory.GetHttpClient(firstCertificate));
+            Assert.AreSame(secondClient, factory.GetHttpClient(secondCertificate));
+        }
+
+        [TestMethod]
+        public void TestMtlsHttpClientIsCreatedOnceForConcurrentAccess()
+        {
+            // Arrange
+            var certificate = CertHelper.GetOrCreateTestCert();
+            using var creationStarted = new ManualResetEventSlim();
+            using var releaseCreation = new ManualResetEventSlim();
+            int creationCount = 0;
+
+            var cache = new MtlsHttpClientCache(cert =>
+            {
+                Interlocked.Increment(ref creationCount);
+                creationStarted.Set();
+                releaseCreation.Wait();
+                return new HttpClient();
+            });
+
+            Task<HttpClient>[] clientTasks = Enumerable.Range(0, 20)
+                .Select(_ => Task.Run(() => cache.GetOrCreate(certificate)))
+                .ToArray();
+
+            // Act
+            Assert.IsTrue(creationStarted.Wait(TimeSpan.FromSeconds(5)));
+            releaseCreation.Set();
+            Task.WaitAll(clientTasks);
+            using HttpClient sharedClient = clientTasks[0].Result;
+
+            // Assert
+            Assert.AreEqual(1, creationCount);
+            Assert.IsTrue(clientTasks.All(task => ReferenceEquals(sharedClient, task.Result)));
         }
 
     }

@@ -5,6 +5,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Net.Http;
 using System.Net.Security;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.ManagedIdentity;
@@ -25,6 +26,12 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
     {
         //Please see (https://aka.ms/msal-httpclient-info) for important information regarding the HttpClient.
         private static readonly ConcurrentDictionary<string, HttpClient> s_httpClientPool = new ConcurrentDictionary<string, HttpClient>();
+
+        // The handler retains the supplied certificate instance, so equivalent certificate bytes
+        // must not cause a client bound to a different instance to be returned. Weak keys allow
+        // both the certificate and its client to be collected when the caller releases the certificate.
+        private static readonly MtlsHttpClientCache s_mtlsHttpClientPool =
+            new MtlsHttpClientCache(CreateMtlsHttpClient);
         private static readonly object s_cacheLock = new object();
 
         private static HttpClient CreateHttpClient(
@@ -101,13 +108,12 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         public HttpClient GetHttpClient(X509Certificate2 x509Certificate2)
         {
-            if (x509Certificate2 == null)
+            if (x509Certificate2 is null)
             {
                 return GetHttpClient();
             }
 
-            string key = x509Certificate2.Thumbprint;
-            return s_httpClientPool.GetOrAdd(key, CreateMtlsHttpClient(x509Certificate2));
+            return s_mtlsHttpClientPool.GetOrCreate(x509Certificate2);
         }
 
         private static void CheckAndManageCache()
@@ -145,6 +151,25 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 #else
             return GetHttpClient();
 #endif
+        }
+    }
+
+    internal sealed class MtlsHttpClientCache
+    {
+        private readonly ConditionalWeakTable<X509Certificate2, Lazy<HttpClient>> _httpClients =
+            new ConditionalWeakTable<X509Certificate2, Lazy<HttpClient>>();
+        private readonly Func<X509Certificate2, HttpClient> _createHttpClient;
+
+        internal MtlsHttpClientCache(Func<X509Certificate2, HttpClient> createHttpClient)
+        {
+            _createHttpClient = createHttpClient ?? throw new ArgumentNullException(nameof(createHttpClient));
+        }
+
+        internal HttpClient GetOrCreate(X509Certificate2 certificate)
+        {
+            return _httpClients.GetValue(
+                certificate,
+                key => new Lazy<HttpClient>(() => _createHttpClient(key), isThreadSafe: true)).Value;
         }
     }
 }
