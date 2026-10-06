@@ -303,5 +303,33 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
             Assert.IsTrue(clientTasks.All(task => ReferenceEquals(sharedClient, task.Result)));
         }
 
+        [TestMethod]
+        public void TestMtlsHttpClientCreationFailureIsCachedPerCertificateInstance()
+        {
+            // Arrange
+            var firstCertificate = CertHelper.GetOrCreateTestCert();
+            using var secondCertificate = new X509Certificate2(firstCertificate.Export(X509ContentType.Cert));
+            int creationCount = 0;
+            var cache = new MtlsHttpClientCache(cert =>
+            {
+                Interlocked.Increment(ref creationCount);
+                throw new InvalidOperationException("Test client creation failure.");
+            });
+
+            // Act
+            InvalidOperationException firstException = Assert.Throws<InvalidOperationException>(
+                () => cache.GetOrCreate(firstCertificate));
+            InvalidOperationException repeatedException = Assert.Throws<InvalidOperationException>(
+                () => cache.GetOrCreate(firstCertificate));
+            InvalidOperationException secondCertificateException = Assert.Throws<InvalidOperationException>(
+                () => cache.GetOrCreate(secondCertificate));
+
+            // Assert
+            Assert.AreEqual("Test client creation failure.", firstException.Message);
+            Assert.AreEqual(firstException.Message, repeatedException.Message);
+            Assert.AreEqual(firstException.Message, secondCertificateException.Message);
+            Assert.AreEqual(2, creationCount);
+        }
+
     }
 }

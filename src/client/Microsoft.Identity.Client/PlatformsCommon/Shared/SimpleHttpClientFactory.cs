@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         // The handler retains the supplied certificate instance, so equivalent certificate bytes
         // must not cause a client bound to a different instance to be returned. Weak keys allow
-        // both the certificate and its client to be collected when the caller releases the certificate.
+        // both the certificate and its client to be collected when the caller releases both objects.
         private static readonly MtlsHttpClientCache s_mtlsHttpClientPool =
             new MtlsHttpClientCache(CreateMtlsHttpClient);
         private static readonly object s_cacheLock = new object();
@@ -167,6 +167,8 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         internal HttpClient GetOrCreate(X509Certificate2 certificate)
         {
+            // ExecutionAndPublication prevents duplicate handlers and caches construction failures
+            // for this certificate instance. A different certificate instance gets a new cache entry.
             return _httpClients.GetValue(
                 certificate,
                 key => new Lazy<HttpClient>(() => _createHttpClient(key), isThreadSafe: true)).Value;
