@@ -27,6 +27,30 @@ The following table lists MSAL.NET versions currently supported and receiving se
 
 View some of the historical performance benchmark results in [our dashboard](https://azuread.github.io/microsoft-authentication-library-for-dotnet/benchmarks/).
 
+### Reduced logging (enabled by default)
+
+MSAL moves selected routine Information messages to Verbose (Debug in
+Microsoft.Extensions.Logging) by default. This includes per-request
+version banners, parameter dumps, regional-authority selection, valid cache-hit
+details, and the redundant acquisition-success heading. Acquisition-start and
+result summaries remain at Information; warnings, errors, and Always logs are
+unchanged. PII logging settings still apply.
+
+To restore the previous Information-level diagnostics, set the process
+environment variable `MSAL_REDUCED_LOGGING=false` (or `0`) before building MSAL
+applications. The default is **true**: an unset, empty, `true`, or `1` value
+enables reduced logging. Boolean values are case-insensitive. Unrecognized values
+leave reduced logging enabled and generate a warning through the configured logger.
+The setting is captured once per MSAL application at construction, including for
+its subsequent requests and background refreshes. Existing applications do not
+change when the variable changes; restart the host after changing deployment
+configuration.
+
+This requires only an MSAL upgrade, including when MSAL is
+used through Microsoft.Identity.Web or MISE. It applies to MSAL applications in
+the process, not just one consuming SDK, and does not change logs emitted by
+those other libraries. Enable Verbose/Debug to see the demoted diagnostics.
+
 ## Support SLA
 
 MSAL.NET became Generally Available with MSAL.NET 3.0.8. Since MSAL.NET moved to version 4:
