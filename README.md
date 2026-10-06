@@ -27,7 +27,7 @@ The following table lists MSAL.NET versions currently supported and receiving se
 
 View some of the historical performance benchmark results in [our dashboard](https://azuread.github.io/microsoft-authentication-library-for-dotnet/benchmarks/).
 
-### Reduced logging
+### Reduced logging (enabled by default)
 
 MSAL moves selected routine Information messages to Verbose (Debug in
 Microsoft.Extensions.Logging) by default. This includes per-request
