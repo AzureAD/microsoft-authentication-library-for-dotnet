@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Extensibility;
+using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -248,7 +249,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     }, _certificateOptions)
                     .Build();
 
-                harness.HttpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+                MockHttpMessageHandler handler =
+                    harness.HttpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
 
                 // Act
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope)
@@ -258,6 +260,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // Assert
                 Assert.IsTrue(providerInvoked, "ClientCertificate provider should have been invoked");
                 Assert.IsNotNull(capturedOptions);
+                Assert.AreEqual(
+                    OAuth2AssertionType.JwtBearer,
+                    handler.ActualRequestPostData[OAuth2Parameter.ClientAssertionType]);
+                Assert.IsFalse(
+                    string.IsNullOrWhiteSpace(handler.ActualRequestPostData[OAuth2Parameter.ClientAssertion]),
+                    "The certificate returned by the provider should be used to create the client assertion.");
                 Assert.IsNotNull(result.AccessToken);
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
             }
