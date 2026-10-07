@@ -3,14 +3,25 @@
 
 #if !ANDROID && !iOS
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Extensibility;
+using Microsoft.Identity.Client.Internal.Logger;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+#if NETFRAMEWORK
+using Microsoft.Identity.Client.Platforms.netdesktop;
+#else
+using Microsoft.Identity.Client.Platforms.netstandard;
+#endif
 
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {
@@ -725,7 +736,106 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
+        [TestMethod]
+        [Description("Dynamic certificate provider reloads a same-thumbprint certificate for the next client assertion")]
+        public async Task DynamicCertificateProvider_SameThumbprintReload_UsesNewInstanceForNextAssertionAsync()
+        {
+            // Arrange
+            using (var harness = CreateTestHarness())
+            {
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+
+                X509Certificate2 certA = CertHelper.GetOrCreateTestCert(regenerateCert: true);
+                using var certB = new X509Certificate2(certA);
+                Assert.AreEqual(certA.Thumbprint, certB.Thumbprint);
+                Assert.AreNotSame(certA, certB);
+
+                X509Certificate2 currentCertificate = certA;
+                int providerCallCount = 0;
+                var cryptographyManager = new TrackingCryptographyManager();
+
+                IConfidentialClientApplication app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithExperimentalFeatures()
+                    .WithAuthority(TestConstants.AuthorityCommonTenant)
+                    .WithHttpManager(harness.HttpManager)
+                    .WithPlatformProxy(new TrackingPlatformProxy(cryptographyManager))
+                    .WithCertificate(
+                        _ =>
+                        {
+                            providerCallCount++;
+                            return Task.FromResult(currentCertificate);
+                        },
+                        _certificateOptions)
+                    .Build();
+
+                MockHttpMessageHandler firstHandler =
+                    harness.HttpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(
+                        token: "first.token");
+                MockHttpMessageHandler secondHandler =
+                    harness.HttpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(
+                        token: "second.token");
+
+                // Act
+                AuthenticationResult firstResult = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                currentCertificate = certB;
+
+                AuthenticationResult secondResult = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithForceRefresh(true)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual(2, providerCallCount);
+                Assert.HasCount(2, cryptographyManager.SigningCertificates);
+                Assert.AreSame(certA, cryptographyManager.SigningCertificates[0]);
+                Assert.AreSame(certB, cryptographyManager.SigningCertificates[1]);
+                Assert.IsFalse(string.IsNullOrWhiteSpace(
+                    firstHandler.ActualRequestPostData["client_assertion"]));
+                Assert.IsFalse(string.IsNullOrWhiteSpace(
+                    secondHandler.ActualRequestPostData["client_assertion"]));
+                Assert.AreEqual("first.token", firstResult.AccessToken);
+                Assert.AreEqual("second.token", secondResult.AccessToken);
+            }
+        }
+
         #endregion
+
+#if NETFRAMEWORK
+        private sealed class TrackingPlatformProxy : NetDesktopPlatformProxy
+#else
+        private sealed class TrackingPlatformProxy : NetCorePlatformProxy
+#endif
+        {
+            private readonly ICryptographyManager _cryptographyManager;
+
+            public TrackingPlatformProxy(ICryptographyManager cryptographyManager)
+                : base(new NullLogger())
+            {
+                _cryptographyManager = cryptographyManager;
+            }
+
+            protected override ICryptographyManager InternalGetCryptographyManager()
+                => _cryptographyManager;
+        }
+
+        private sealed class TrackingCryptographyManager : CommonCryptographyManager
+        {
+            public IList<X509Certificate2> SigningCertificates { get; } =
+                new List<X509Certificate2>();
+
+            public override byte[] SignWithCertificate(
+                string message,
+                X509Certificate2 certificate,
+                RSASignaturePadding signaturePadding)
+            {
+                SigningCertificates.Add(certificate);
+                return base.SignWithCertificate(message, certificate, signaturePadding);
+            }
+        }
     }
 }
 #endif

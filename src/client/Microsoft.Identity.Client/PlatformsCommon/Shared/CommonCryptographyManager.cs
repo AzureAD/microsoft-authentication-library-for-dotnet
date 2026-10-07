@@ -2,10 +2,11 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Concurrent;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Threading;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
@@ -17,8 +18,8 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
     [Preserve(AllMembers = true)]
     internal class CommonCryptographyManager : ICryptographyManager
     {
-        private static readonly ConcurrentDictionary<string, RSA> s_certificateToRsaMap = new ConcurrentDictionary<string, RSA>();
-        private static readonly int s_maximumMapSize = 1000;
+        private static readonly ConditionalWeakTable<X509Certificate2, Lazy<RSA>> s_certificateToRsaMap =
+            new ConditionalWeakTable<X509Certificate2, Lazy<RSA>>();
 
         protected ILoggerAdapter Logger { get; }
 
@@ -74,17 +75,17 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         {
             // MSAL used to check min key size by looking at certificate.GetRSAPublicKey().KeySize
             // but this causes sporadic failures in the crypto stack. Rely on AAD to perform key size validations.
-            if (!s_certificateToRsaMap.TryGetValue(certificate.Thumbprint, out RSA rsa))
-            {
-                if (s_certificateToRsaMap.Count >= s_maximumMapSize)
-                    s_certificateToRsaMap.Clear();
-
-                rsa = certificate.GetRSAPrivateKey();
-            }
+            Lazy<RSA> rsaHolder = s_certificateToRsaMap.GetValue(
+                certificate,
+                cert => new Lazy<RSA>(
+                    cert.GetRSAPrivateKey,
+                    LazyThreadSafetyMode.ExecutionAndPublication));
+            RSA rsa = rsaHolder.Value;
 
             //Ensure certificate is of type RSA.
             if (rsa == null)
             {
+                s_certificateToRsaMap.Remove(certificate);
                 throw new MsalClientException(MsalError.CertificateNotRsa, MsalErrorMessage.CertMustBeRsa(certificate.PublicKey?.Oid?.FriendlyName));
             }
 
@@ -96,6 +97,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             {
                 Logger?.Warning($"Exception occurred when signing data with a certificate. {ex}");
 
+                s_certificateToRsaMap.Remove(certificate);
                 rsa = certificate.GetRSAPrivateKey();
 
                 return SignDataAndCacheProvider(message);
@@ -106,8 +108,12 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
                 // CodeQL [SM03799] PKCS1 padding is for Identity Providers not supporting PSS (older ADFS, dSTS)
                 var signedData = rsa.SignData(Encoding.UTF8.GetBytes(message), HashAlgorithmName.SHA256, signaturePadding);
 
-                // Cache only valid RSA crypto providers, which are able to sign data successfully
-                s_certificateToRsaMap[certificate.Thumbprint] = rsa;
+                // Cache only valid RSA crypto providers, which are able to sign data successfully.
+                s_certificateToRsaMap.GetValue(
+                    certificate,
+                    _ => new Lazy<RSA>(
+                        () => rsa,
+                        LazyThreadSafetyMode.ExecutionAndPublication));
                 return signedData;
             }
         }

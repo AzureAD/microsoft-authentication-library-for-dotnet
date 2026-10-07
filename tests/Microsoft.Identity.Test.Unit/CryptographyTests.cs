@@ -3,8 +3,11 @@
 
 using System.Security.Cryptography;
 using System;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
@@ -50,6 +53,35 @@ namespace Microsoft.Identity.Test.Unit
 
             Assert.AreEqual(MsalError.CertificateNotRsa, ex.ErrorCode);
             Assert.AreEqual(ex.Message, MsalErrorMessage.CertMustBeRsa(cert.PublicKey.Oid.FriendlyName));
+        }
+
+        [TestMethod]
+        [TestCategory("CryptographyTests")]
+        public void SignWithCertificate_SameThumbprintInstances_AreCachedSeparately()
+        {
+            // Arrange
+            var serviceBundle = TestCommon.CreateDefaultServiceBundle();
+            X509Certificate2 certA = CertHelper.GetOrCreateTestCert(regenerateCert: true);
+            using var certB = new X509Certificate2(certA);
+            Assert.AreEqual(certA.Thumbprint, certB.Thumbprint);
+            Assert.AreNotSame(certA, certB);
+
+            var crypto = serviceBundle.PlatformProxy.CryptographyManager;
+
+            // Act
+            crypto.SignWithCertificate("first", certA, RSASignaturePadding.Pkcs1);
+            crypto.SignWithCertificate("second", certB, RSASignaturePadding.Pkcs1);
+
+            // Assert
+            FieldInfo cacheField = typeof(CommonCryptographyManager).GetField(
+                "s_certificateToRsaMap",
+                BindingFlags.NonPublic | BindingFlags.Static);
+            var cache =
+                (ConditionalWeakTable<X509Certificate2, Lazy<RSA>>)cacheField.GetValue(null);
+
+            Assert.IsTrue(cache.TryGetValue(certA, out Lazy<RSA> certARsa));
+            Assert.IsTrue(cache.TryGetValue(certB, out Lazy<RSA> certBRsa));
+            Assert.AreNotSame(certARsa, certBRsa);
         }
     }
 }
