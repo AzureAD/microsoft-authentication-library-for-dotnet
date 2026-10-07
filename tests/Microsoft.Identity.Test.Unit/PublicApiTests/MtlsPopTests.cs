@@ -1444,6 +1444,112 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
+        public async Task MtlsPop_S2sFic_ClientAssertionProviderRefreshesCertificateAcrossAcquisitionsAsync()
+        {
+            // Arrange
+            const string firstAssertion = "eyLeg1.first.assertion";
+            const string secondAssertion = "eyLeg1.second.assertion";
+            const string authorityUrl = "https://login.microsoftonline.com/123456-1234-2345-1234561234";
+            string tokenEndpoint =
+                $"https://{EastUsRegion}.mtlsauth.microsoft.com/123456-1234-2345-1234561234/oauth2/v2.0/token";
+
+            var firstCertificate = CertHelper.GetOrCreateTestCert(regenerateCert: true);
+            using var secondCertificate = new X509Certificate2(firstCertificate);
+            Assert.AreEqual(firstCertificate.Thumbprint, secondCertificate.Thumbprint);
+            Assert.AreNotSame(firstCertificate, secondCertificate);
+
+            int providerCallCount = 0;
+            string currentAssertion = firstAssertion;
+            X509Certificate2 currentCertificate = firstCertificate;
+
+            using (var envContext = new EnvVariableContext())
+            {
+                Environment.SetEnvironmentVariable("REGION_NAME", EastUsRegion);
+
+                using (var harness = new MockHttpAndServiceBundle())
+                {
+                    var firstHandler = new MockHttpMessageHandler
+                    {
+                        ExpectedUrl = tokenEndpoint,
+                        ExpectedMethod = HttpMethod.Post,
+                        ResponseMessage = CreateResponse(tokenType: "mtls_pop", token: "first.token"),
+                        ExpectedMtlsBindingCertificate = firstCertificate,
+                        ExpectedPostData = new Dictionary<string, string>
+                        {
+                            { OAuth2Parameter.ClientId, TestConstants.ClientId },
+                            { OAuth2Parameter.GrantType, OAuth2GrantType.ClientCredentials },
+                            { "token_type", "mtls_pop" },
+                            { "client_assertion", firstAssertion },
+                            { "client_assertion_type", OAuth2AssertionType.JwtPop }
+                        }
+                    };
+
+                    var secondHandler = new MockHttpMessageHandler
+                    {
+                        ExpectedUrl = tokenEndpoint,
+                        ExpectedMethod = HttpMethod.Post,
+                        ResponseMessage = CreateResponse(tokenType: "mtls_pop", token: "second.token"),
+                        ExpectedMtlsBindingCertificate = secondCertificate,
+                        ExpectedPostData = new Dictionary<string, string>
+                        {
+                            { OAuth2Parameter.ClientId, TestConstants.ClientId },
+                            { OAuth2Parameter.GrantType, OAuth2GrantType.ClientCredentials },
+                            { "token_type", "mtls_pop" },
+                            { "client_assertion", secondAssertion },
+                            { "client_assertion_type", OAuth2AssertionType.JwtPop }
+                        }
+                    };
+
+                    harness.HttpManager.AddMockHandler(firstHandler);
+                    harness.HttpManager.AddMockHandler(secondHandler);
+
+                    var app = ConfidentialClientApplicationBuilder
+                        .Create(TestConstants.ClientId)
+                        .WithAuthority(authorityUrl)
+                        .WithHttpManager(harness.HttpManager)
+                        .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
+                        .WithClientAssertion((AssertionRequestOptions _, CancellationToken _) =>
+                        {
+                            Interlocked.Increment(ref providerCallCount);
+
+                            return Task.FromResult(new ClientSignedAssertion
+                            {
+                                Assertion = currentAssertion,
+                                TokenBindingCertificate = currentCertificate
+                            });
+                        })
+                        .Build();
+
+                    // Act
+                    AuthenticationResult firstResult = await app.AcquireTokenForClient(TestConstants.s_scope)
+                        .WithMtlsProofOfPossession()
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
+
+                    int firstAcquisitionProviderCallCount = providerCallCount;
+                    currentAssertion = secondAssertion;
+                    currentCertificate = secondCertificate;
+
+                    AuthenticationResult secondResult = await app.AcquireTokenForClient(TestConstants.s_scope)
+                        .WithMtlsProofOfPossession()
+                        .WithForceRefresh(true)
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
+
+                    // Assert
+                    Assert.IsGreaterThan(0, firstAcquisitionProviderCallCount);
+                    Assert.IsGreaterThan(firstAcquisitionProviderCallCount, providerCallCount);
+                    Assert.AreEqual("first.token", firstResult.AccessToken);
+                    Assert.AreEqual("second.token", secondResult.AccessToken);
+                    Assert.AreSame(firstCertificate, firstHandler.ClientCertificates[0]);
+                    Assert.AreSame(secondCertificate, secondHandler.ClientCertificates[0]);
+                    Assert.AreSame(firstCertificate, firstResult.BindingCertificate);
+                    Assert.AreSame(secondCertificate, secondResult.BindingCertificate);
+                }
+            }
+        }
+
+        [TestMethod]
         public void MtlsPop_DefaultHttpClientFactory_IsMtlsCapable_TransportOwnedByMsal()
         {
             // mTLS requires MSAL to own the transport handler so it can attach the client certificate.
