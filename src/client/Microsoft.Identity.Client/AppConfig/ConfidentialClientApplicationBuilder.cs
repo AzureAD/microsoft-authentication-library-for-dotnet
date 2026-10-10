@@ -95,10 +95,10 @@ namespace Microsoft.Identity.Client
         /// <remarks>
         /// You should use certificates with a private key size of at least 2048 bytes. Future versions of this library might reject certificates with smaller keys.
         /// Does not send the certificate (as x5c parameter) with the request by default.
-        /// This overload captures a single certificate when the application is built. When the certificate or private-key handle
+        /// This overload captures the supplied certificate when this method is called. When the certificate or private-key handle
         /// is managed externally and may rotate or become invalid, use
         /// <see cref="Extensibility.ConfidentialClientApplicationBuilderExtensions.WithCertificate(ConfidentialClientApplicationBuilder, Func{AssertionRequestOptions, Task{X509Certificate2}}, CertificateOptions)"/>
-        /// to resolve the current certificate before each token request.
+        /// to resolve the current certificate before each network token request.
         /// </remarks>
         public ConfidentialClientApplicationBuilder WithCertificate(X509Certificate2 certificate)
         {
