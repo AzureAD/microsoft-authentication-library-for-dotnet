@@ -119,10 +119,10 @@ namespace Microsoft.Identity.Client
         /// <param name="sendX5C">To send X5C with every request or not. The default is <c>false</c></param>
         /// <remarks>
         /// You should use certificates with a private key size of at least 2048 bytes. Future versions of this library might reject certificates with smaller keys.
-        /// This overload captures a single certificate when the application is built. When the certificate or private-key handle
+        /// This overload captures the supplied certificate when this method is called. When the certificate or private-key handle
         /// is managed externally and may rotate or become invalid, use
         /// <see cref="Extensibility.ConfidentialClientApplicationBuilderExtensions.WithCertificate(ConfidentialClientApplicationBuilder, Func{AssertionRequestOptions, Task{X509Certificate2}}, CertificateOptions)"/>
-        /// to resolve the current certificate before each token request.
+        /// to resolve the current certificate before each network token request.
         /// </remarks>
         public ConfidentialClientApplicationBuilder WithCertificate(X509Certificate2 certificate, bool sendX5C)
         {
@@ -155,10 +155,10 @@ namespace Microsoft.Identity.Client
         /// <param name="certificateOptions">Configuration options for certificate handling. See <see cref="CertificateOptions"/> for more information.</param>
         /// <remarks>
         /// You should use certificates with a private key size of at least 2048 bytes. Future versions of this library might reject certificates with smaller keys.
-        /// This overload captures a single certificate when the application is built. When the certificate or private-key handle
+        /// This overload captures the supplied certificate when this method is called. When the certificate or private-key handle
         /// is managed externally and may rotate or become invalid, use
         /// <see cref="Extensibility.ConfidentialClientApplicationBuilderExtensions.WithCertificate(ConfidentialClientApplicationBuilder, Func{AssertionRequestOptions, Task{X509Certificate2}}, CertificateOptions)"/>
-        /// to resolve the current certificate before each token request.
+        /// to resolve the current certificate before each network token request.
         /// </remarks>
         public ConfidentialClientApplicationBuilder WithCertificate(X509Certificate2 certificate, CertificateOptions certificateOptions)
         {
