@@ -52,11 +52,12 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Specifies if the client application should ignore access tokens when reading the token cache. 
+        /// Specifies if the client application should ignore access tokens when reading the token cache.
         /// New tokens will still be written to the application token cache.
+        /// For MSI v2 mTLS requests, this also bypasses the cached binding certificate and mints a new certificate.
         /// By default the token is taken from the application token cache (forceRefresh=false)
         /// </summary>
-        /// <param name="forceRefresh">If <c>true</c>, the request will ignore cached access tokens on read, but will still write them to the cache once obtained from the Identity Provider. The default is <c>false</c>
+        /// <param name="forceRefresh">If <c>true</c>, the request will ignore cached access tokens on read, but will still write them to the cache once obtained from the Identity Provider. For MSI v2 mTLS requests, the cached binding certificate is also bypassed. The default is <c>false</c>
         /// </param>
         /// <remarks>
         /// Do not use this flag except in well understood cases. Identity Providers will throttle clients that issue too many similar token requests.
