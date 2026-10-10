@@ -53,6 +53,9 @@ namespace Microsoft.Identity.Client.Extensibility
         /// <remarks>
         /// <para>This method cannot be used together with <see cref="ConfidentialClientApplicationBuilder.WithCertificate(X509Certificate2)"/>.</para>
         /// <para>The callback is not invoked when tokens are retrieved from cache, only for network calls.</para>
+        /// <para>For mTLS transport, return the same certificate object instance while its private-key handle remains usable.
+        /// After reacquiring the private-key handle, return a new certificate object instance even when the certificate
+        /// thumbprint is unchanged. This allows MSAL to create a new transport handler for the refreshed handle.</para>
         /// <para>The certificate returned by the callback will be used to sign the client assertion (JWT) for that token request.</para>
         /// <para>The callback can perform async operations such as fetching certificates from Azure Key Vault or other secret management systems.</para>
         /// <para>See https://aka.ms/msal-net-client-credentials for more details on client credentials.</para>
