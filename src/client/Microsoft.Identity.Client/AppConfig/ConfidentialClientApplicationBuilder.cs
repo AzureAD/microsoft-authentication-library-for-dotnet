@@ -95,6 +95,10 @@ namespace Microsoft.Identity.Client
         /// <remarks>
         /// You should use certificates with a private key size of at least 2048 bytes. Future versions of this library might reject certificates with smaller keys.
         /// Does not send the certificate (as x5c parameter) with the request by default.
+        /// This overload captures a single certificate when the application is built. When the certificate or private-key handle
+        /// is managed externally and may rotate or become invalid, use
+        /// <see cref="Extensibility.ConfidentialClientApplicationBuilderExtensions.WithCertificate(ConfidentialClientApplicationBuilder, Func{AssertionRequestOptions, Task{X509Certificate2}}, CertificateOptions)"/>
+        /// to resolve the current certificate before each token request.
         /// </remarks>
         public ConfidentialClientApplicationBuilder WithCertificate(X509Certificate2 certificate)
         {
@@ -113,7 +117,13 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="certificate">The X509 certificate used as credentials to prove the identity of the application to Azure AD.</param>
         /// <param name="sendX5C">To send X5C with every request or not. The default is <c>false</c></param>
-        /// <remarks>You should use certificates with a private key size of at least 2048 bytes. Future versions of this library might reject certificates with smaller keys. </remarks>
+        /// <remarks>
+        /// You should use certificates with a private key size of at least 2048 bytes. Future versions of this library might reject certificates with smaller keys.
+        /// This overload captures a single certificate when the application is built. When the certificate or private-key handle
+        /// is managed externally and may rotate or become invalid, use
+        /// <see cref="Extensibility.ConfidentialClientApplicationBuilderExtensions.WithCertificate(ConfidentialClientApplicationBuilder, Func{AssertionRequestOptions, Task{X509Certificate2}}, CertificateOptions)"/>
+        /// to resolve the current certificate before each token request.
+        /// </remarks>
         public ConfidentialClientApplicationBuilder WithCertificate(X509Certificate2 certificate, bool sendX5C)
         {
             if (certificate == null)
@@ -143,7 +153,13 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="certificate">The X509 certificate used as credentials to prove the identity of the application to Azure AD.</param>
         /// <param name="certificateOptions">Configuration options for certificate handling. See <see cref="CertificateOptions"/> for more information.</param>
-        /// <remarks>You should use certificates with a private key size of at least 2048 bytes. Future versions of this library might reject certificates with smaller keys. </remarks>
+        /// <remarks>
+        /// You should use certificates with a private key size of at least 2048 bytes. Future versions of this library might reject certificates with smaller keys.
+        /// This overload captures a single certificate when the application is built. When the certificate or private-key handle
+        /// is managed externally and may rotate or become invalid, use
+        /// <see cref="Extensibility.ConfidentialClientApplicationBuilderExtensions.WithCertificate(ConfidentialClientApplicationBuilder, Func{AssertionRequestOptions, Task{X509Certificate2}}, CertificateOptions)"/>
+        /// to resolve the current certificate before each token request.
+        /// </remarks>
         public ConfidentialClientApplicationBuilder WithCertificate(X509Certificate2 certificate, CertificateOptions certificateOptions)
         {
             if (certificate == null)
