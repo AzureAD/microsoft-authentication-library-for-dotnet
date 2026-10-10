@@ -62,8 +62,6 @@ namespace Microsoft.Identity.Client.Extensibility
             Func<AssertionRequestOptions, Task<X509Certificate2>> certificateProvider, 
             CertificateOptions certificateOptions)
         {
-            builder.ValidateUseOfExperimentalFeature();
-
             if (certificateProvider == null)
             {
                 throw new ArgumentNullException(nameof(certificateProvider));
@@ -125,8 +123,6 @@ namespace Microsoft.Identity.Client.Extensibility
             this ConfidentialClientApplicationBuilder builder,
             Func<AssertionRequestOptions, ExecutionResult, Task<bool>> onMsalServiceFailure)
         {
-            builder.ValidateUseOfExperimentalFeature();
-
             if (onMsalServiceFailure == null)
                 throw new ArgumentNullException(nameof(onMsalServiceFailure));
 
@@ -179,8 +175,6 @@ namespace Microsoft.Identity.Client.Extensibility
             this ConfidentialClientApplicationBuilder builder,
             Func<AssertionRequestOptions, ExecutionResult, Task> onCompletion)
         {
-            builder.ValidateUseOfExperimentalFeature();
-
             if (onCompletion == null)
             {
                 throw new ArgumentNullException(nameof(onCompletion));
@@ -212,8 +206,6 @@ namespace Microsoft.Identity.Client.Extensibility
             this ConfidentialClientApplicationBuilder builder,
             Func<ExecutionResult, Task> onBackgroundTokenRefreshCompleted)
         {
-            builder.ValidateUseOfExperimentalFeature();
-
             if (onBackgroundTokenRefreshCompleted == null)
             {
                 throw new ArgumentNullException(nameof(onBackgroundTokenRefreshCompleted));
