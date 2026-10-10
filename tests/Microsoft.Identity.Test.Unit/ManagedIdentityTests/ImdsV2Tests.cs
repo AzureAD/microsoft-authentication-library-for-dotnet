@@ -2676,34 +2676,45 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
         #region Cached certificate tests
         [TestMethod]
-        public async Task mTLSPop_ForceRefresh_RemintsCachedCert_PostsCanonicalClientId_AndRefreshesAttestation()
+        public async Task mTLSPop_ForceRefresh_RemintsCachedCert_PostsCanonicalClientId_AndReusesCachedAttestation()
         {
+            int providerCallCount = 0;
+            PopKeyAttestor.s_testAttestationProvider = (endpoint, keyHandle, clientId, keyId, ct) =>
+            {
+                Interlocked.Increment(ref providerCallCount);
+                var fakeJwt = "******";
+                var token = new AttestationToken(fakeJwt, DateTimeOffset.UtcNow.AddHours(1));
+                return Task.FromResult(new AttestationResult(AttestationStatus.Success, token, fakeJwt, 0, string.Empty));
+            };
+
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
                 // Arrange
                 SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
 
-                var mi = await CreateManagedIdentityAsync(httpManager, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
+                var sharedKeyProvider = new TestKeyGuardManagedIdentityKeyProvider();
+                var mi = await CreateManagedIdentityAsync(
+                    httpManager,
+                    managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard,
+                    keyProvider: sharedKeyProvider).ConfigureAwait(false);
                 string certA = CreateRawCertFromXml("CN=force-refresh-original", DateTimeOffset.UtcNow.AddDays(30));
                 string certB = CreateRawCertFromXml("CN=force-refresh-reminted", DateTimeOffset.UtcNow.AddDays(30));
 
                 // First acquire: full flow (CSR + issuecredential + token)
                 AddMocksToGetEntraToken(httpManager, certificateRequestCertificate: certA);
 
-                var countingProvider = TestAttestationProviders.CreateCountingProvider();
-
                 // Act
                 var result1 = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .WithMtlsProofOfPossession()
-                    .WithAttestationProviderForTests(countingProvider.GetDelegate())
+                    .WithAttestationSupport()
                     .ExecuteAsync().ConfigureAwait(false);
 
                 // Assert
                 Assert.AreEqual(ImdsV2Tests.MTLSPoP, result1.TokenType);
                 Assert.IsNotNull(result1.BindingCertificate);
                 Assert.AreEqual(TokenSource.IdentityProvider, result1.AuthenticationResultMetadata.TokenSource);
-                Assert.AreEqual(1, countingProvider.CallCount, "Attestation must be called exactly once on first mint.");
+                Assert.AreEqual(1, providerCallCount, "Attestation must be called exactly once on first mint.");
 
                 // Arrange
                 httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
@@ -2718,7 +2729,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var result2 = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .WithForceRefresh(true)
                     .WithMtlsProofOfPossession()
-                    .WithAttestationProviderForTests(countingProvider.GetDelegate())
+                    .WithAttestationSupport()
                     .ExecuteAsync().ConfigureAwait(false);
 
                 // Assert
@@ -2731,8 +2742,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     "Force refresh must bind the token to the newly minted certificate.");
                 Assert.AreNotEqual(originalCert.Thumbprint, result2.BindingCertificate.Thumbprint,
                     "Force refresh must not reuse the cached binding certificate.");
-                Assert.AreEqual(2, countingProvider.CallCount,
-                    "Force refresh must attest the new key used to re-mint the binding certificate.");
+                Assert.AreEqual(1, providerCallCount,
+                    "Force refresh must reuse the valid cached attestation JWT because the binding certificate uses the current key.");
                 Assert.AreEqual(0, httpManager.QueueSize, "Force refresh must call /issuecredential before the token endpoint.");
             }
         }
