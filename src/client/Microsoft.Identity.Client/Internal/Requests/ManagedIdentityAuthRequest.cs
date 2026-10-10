@@ -244,9 +244,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
         }
 
         // Mints the IMDSv2 binding cert, then delegates the token request to MSAL's internal TokenClient
-        // (the same exchange path CCA uses). Re-mints the binding and retries once when ESTS-R rejects the
-        // bound cert (invalid_client) or the local mTLS handshake fails (SCHANNEL). The minted cert is
-        // injected as the mTLS transport cert and the mtls_pop scheme is applied so the result is cert-bound.
+        // (the same exchange path CCA uses). Force refresh re-mints the binding before the token request.
+        // The request also re-mints and retries once when ESTS-R rejects the bound cert (invalid_client)
+        // or the local mTLS handshake fails (SCHANNEL). The minted cert is injected as the mTLS transport
+        // cert and the mtls_pop scheme is applied so the result is cert-bound.
         private async Task<AuthenticationResult> SendDelegatedImdsV2TokenRequestAsync(
             ILoggerAdapter logger,
             CancellationToken cancellationToken)
@@ -258,7 +259,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             try
             {
-                msalTokenResponse = await DelegateImdsV2TokenLegAsync(resource, forceRemint: false, cancellationToken)
+                msalTokenResponse = await DelegateImdsV2TokenLegAsync(
+                    resource,
+                    forceRemint: _managedIdentityParameters.ForceRefresh,
+                    cancellationToken)
                     .ConfigureAwait(false);
             }
             catch (Exception ex) when (ShouldRemintImdsV2Binding(ex))
