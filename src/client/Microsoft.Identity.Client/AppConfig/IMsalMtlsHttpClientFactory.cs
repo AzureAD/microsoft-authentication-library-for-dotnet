@@ -15,6 +15,10 @@ namespace Microsoft.Identity.Client
     /// Implementations of this interface must be thread-safe.
     /// It is important to reuse HttpClient instances to avoid socket exhaustion.
     /// Do not create a new HttpClient for each call to <see cref="GetHttpClient(X509Certificate2)"/>.
+    /// Reuse the HttpClient when the same <see cref="X509Certificate2"/> object instance is supplied.
+    /// A different certificate object instance must receive a different HttpClient, even when its thumbprint
+    /// is unchanged, because it may carry a newly acquired private-key handle.
+    /// Do not cache mTLS HttpClient instances by certificate thumbprint alone.
     /// If your application requires Integrated Windows Authentication, set <see cref="HttpClientHandler.UseDefaultCredentials"/> to true.
     /// This interface is designed to support mTLS scenarios.
     /// </remarks>
