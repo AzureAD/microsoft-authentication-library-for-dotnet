@@ -30,10 +30,10 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
 
         public void LogParameters(ILoggerAdapter logger)
         {
-            if (logger.IsLoggingEnabled(LogLevel.Info))
+            if (logger.IsInfoOrVerboseEnabled())
             {
                 UiParent.SystemWebViewOptions?.LogParameters(logger);
-                logger.Info(
+                logger.InfoOrVerbose(
                     $"""
                      === InteractiveParameters Data ===
                      LoginHint provided: {!string.IsNullOrEmpty(LoginHint)}
