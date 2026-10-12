@@ -112,7 +112,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public IDictionary<string, string> ExtraQueryParameters { get; }
 
-        public IDictionary<string, string> ExtraBodyParameters => _commonParameters.ExtraBodyParameters;
+        public IDictionary<string, string> ExtraBodyParametersSync => _commonParameters.ExtraBodyParametersSync;
 
         public string ClaimsAndClientCapabilities => _claimsAndClientCapabilities.Value;
 

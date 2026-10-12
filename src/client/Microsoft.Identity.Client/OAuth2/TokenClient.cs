@@ -182,6 +182,14 @@ namespace Microsoft.Identity.Client.OAuth2
                 _oAuth2Client.AddBodyParameter(OAuth2Parameter.FmiPath, _requestParams.FmiPathSuffix);
             }
 
+            if (_requestParams.ExtraBodyParametersSync != null)
+            {
+                foreach (var parameter in _requestParams.ExtraBodyParametersSync)
+                {
+                    _oAuth2Client.AddBodyParameter(parameter);
+                }
+            }
+
             _oAuth2Client.AddHeader(
                 TelemetryConstants.XClientCurrentTelemetry,
                 _serviceBundle.HttpTelemetryManager.GetCurrentRequestHeader(
@@ -228,8 +236,7 @@ namespace Microsoft.Identity.Client.OAuth2
                 MsalTokenResponse msalTokenResponse =
                     await _oAuth2Client
                         .GetTokenAsync(tokenEndpointWithQueryParams,
-                            _requestParams.RequestContext, true, _requestParams.OnBeforeTokenRequestHandler,
-                            _requestParams.ExtraBodyParameters)
+                            _requestParams.RequestContext, true, _requestParams.OnBeforeTokenRequestHandler)
                         .ConfigureAwait(false);
 
                 return msalTokenResponse;
@@ -250,8 +257,7 @@ namespace Microsoft.Identity.Client.OAuth2
                         return await _oAuth2Client.GetTokenAsync(
                             tokenEndpointWithQueryParams,
                             _requestParams.RequestContext,
-                            false, _requestParams.OnBeforeTokenRequestHandler,
-                            _requestParams.ExtraBodyParameters).ConfigureAwait(false);
+                            false, _requestParams.OnBeforeTokenRequestHandler).ConfigureAwait(false);
                     }
                 }
 

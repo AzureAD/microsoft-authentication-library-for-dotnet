@@ -284,6 +284,24 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 Assert.IsNotNull(authResult);
                 Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource);
+
+                // Synchronous overload with explicit typed null
+                authResult = await confidentialApp.AcquireTokenForClient(new[] { _scope })
+                    .WithExtraBodyParameters((Dictionary<string, string>)null)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(authResult);
+                Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource);
+
+                // Synchronous overload with empty dictionary
+                authResult = await confidentialApp.AcquireTokenForClient(new[] { _scope })
+                    .WithExtraBodyParameters(new Dictionary<string, string>())
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(authResult);
+                Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource);
             }
         }
 
@@ -356,6 +374,132 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ConfigureAwait(false);
 
                 Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+
+        [TestMethod]
+        public async Task WithExtraBodyParameters_ReservedParameterCollision_ThrowsArgumentException()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                // Arrange
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                var confidentialApp = ConfidentialClientApplicationBuilder
+                    .Create(_clientId)
+                    .WithAuthority("https://login.microsoftonline.com/", _tenantId)
+                    .WithClientSecret("ClientSecret")
+                    .WithHttpManager(httpManager)
+                    .WithExperimentalFeatures(true)
+                    .BuildConcrete();
+
+                var collidingParameters = new Dictionary<string, string>
+                {
+                    { "client_id", "colliding_client_id" }
+                };
+
+                // Act & Assert
+                var ex = await AssertException.TaskThrowsAsync<ArgumentException>(() =>
+                    confidentialApp.AcquireTokenForClient(new[] { _scope })
+                        .WithExtraBodyParameters(collidingParameters)
+                        .ExecuteAsync()).ConfigureAwait(false);
+
+                Assert.IsNotNull(ex);
+            }
+        }
+
+        [TestMethod]
+        public async Task WithExtraBodyParameters_EmptyValueIsIncludedInRequest()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                // Arrange
+                httpManager.AddInstanceDiscoveryMockHandler();
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(
+                    expectedPostData: new Dictionary<string, string>
+                    {
+                        { "optional_parameter", string.Empty }
+                    });
+
+                var confidentialApp = ConfidentialClientApplicationBuilder
+                    .Create(_clientId)
+                    .WithAuthority("https://login.microsoftonline.com/", _tenantId)
+                    .WithClientSecret("ClientSecret")
+                    .WithHttpManager(httpManager)
+                    .WithExperimentalFeatures(true)
+                    .BuildConcrete();
+
+                // Act
+                var authResult = await confidentialApp.AcquireTokenForClient(new[] { _scope })
+                    .WithExtraBodyParameters(new Dictionary<string, string>
+                    {
+                        { "optional_parameter", string.Empty }
+                    })
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+
+        [TestMethod]
+        public async Task ValidateSynchronousExtraBodyParameters_CacheSerializationRoundTrip()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                // Arrange
+                var confidentialApp1 = ConfidentialClientApplicationBuilder
+                    .Create(_clientId)
+                    .WithAuthority("https://login.microsoftonline.com/", _tenantId)
+                    .WithClientSecret("ClientSecret")
+                    .WithHttpManager(httpManager)
+                    .WithExperimentalFeatures(true)
+                    .BuildConcrete();
+
+                var parameters = new Dictionary<string, string>
+                {
+                    { "a_b", "valueUnderscore" },
+                    { "a-b", "valueHyphen" }
+                };
+
+                httpManager.AddInstanceDiscoveryMockHandler();
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(
+                    expectedPostData: new Dictionary<string, string>
+                    {
+                        { "a-b", "valueHyphen" },
+                        { "a_b", "valueUnderscore" }
+                    });
+
+                var authResult = await confidentialApp1.AcquireTokenForClient(new[] { _scope })
+                    .WithExtraBodyParameters(parameters)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
+
+                // Serialize the cache state from app 1
+                byte[] serializedCache = ((ITokenCacheSerializer)confidentialApp1.AppTokenCache).SerializeMsalV3();
+
+                // Create app 2 and deserialize the cache state into it
+                var confidentialApp2 = ConfidentialClientApplicationBuilder
+                    .Create(_clientId)
+                    .WithAuthority("https://login.microsoftonline.com/", _tenantId)
+                    .WithClientSecret("ClientSecret")
+                    .WithHttpManager(httpManager)
+                    .WithExperimentalFeatures(true)
+                    .BuildConcrete();
+
+                ((ITokenCacheSerializer)confidentialApp2.AppTokenCache).DeserializeMsalV3(serializedCache);
+
+                // Act - Acquire token using app 2 with the same parameters
+                var cachedResult = await confidentialApp2.AcquireTokenForClient(new[] { _scope })
+                    .WithExtraBodyParameters(parameters)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert - Must be a cache hit even after deserialization
+                Assert.AreEqual(TokenSource.Cache, cachedResult.AuthenticationResultMetadata.TokenSource);
             }
         }
 

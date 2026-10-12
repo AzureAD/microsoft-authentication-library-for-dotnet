@@ -185,12 +185,12 @@ namespace Microsoft.Identity.Client.Extensibility
                 return (T)builder;
             }
 
-            builder.CommonParameters.ExtraBodyParameters ??= new Dictionary<string, string>();
+            builder.CommonParameters.ExtraBodyParametersSync ??= new Dictionary<string, string>(StringComparer.Ordinal);
             builder.CommonParameters.SyncCacheKeyComponents ??= new SortedList<string, string>();
 
             foreach (var param in extraBodyParams)
             {
-                builder.CommonParameters.ExtraBodyParameters.Add(param.Key, param.Value);
+                builder.CommonParameters.ExtraBodyParametersSync.Add(param.Key, param.Value);
                 builder.CommonParameters.SyncCacheKeyComponents.Add(param.Key, param.Value);
             }
 

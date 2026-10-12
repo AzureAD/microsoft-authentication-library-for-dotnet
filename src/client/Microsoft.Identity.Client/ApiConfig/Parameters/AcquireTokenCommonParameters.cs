@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public bool UseCorrelationIdFromUser { get; set; }
         public IEnumerable<string> Scopes { get; set; }
         public IDictionary<string, string> ExtraQueryParameters { get; set; }
-        public IDictionary<string, string> ExtraBodyParameters { get; internal set; }
+        public IDictionary<string, string> ExtraBodyParametersSync { get; internal set; }
         public string Claims { get; set; }
         public string ClientClaims { get; internal set; }
         public AuthorityInfo AuthorityOverride { get; set; }

@@ -66,11 +66,21 @@ namespace Microsoft.Identity.Client
 
             if (commonParameters.SyncCacheKeyComponents != null && commonParameters.SyncCacheKeyComponents.Count > 0)
             {
-                cacheKeyComponents ??= new SortedList<string, string>();
+                var cacheKeyComponentsWithSyncValues = new SortedList<string, string>();
+                if (cacheKeyComponents != null)
+                {
+                    foreach (var kvp in cacheKeyComponents)
+                    {
+                        cacheKeyComponentsWithSyncValues.Add(kvp.Key, kvp.Value);
+                    }
+                }
+
                 foreach (var kvp in commonParameters.SyncCacheKeyComponents)
                 {
-                    cacheKeyComponents.Add(kvp.Key, kvp.Value);
+                    cacheKeyComponentsWithSyncValues.Add(kvp.Key, kvp.Value);
                 }
+
+                cacheKeyComponents = cacheKeyComponentsWithSyncValues;
             }
 
             // Merge any app-level cache key components (e.g. set via application-builder
