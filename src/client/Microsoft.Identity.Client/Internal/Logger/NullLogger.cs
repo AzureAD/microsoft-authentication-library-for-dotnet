@@ -10,12 +10,19 @@ namespace Microsoft.Identity.Client.Internal.Logger
 {
     internal class NullLogger : ILoggerAdapter
     {
+        internal NullLogger(bool isReducedLoggingEnabled = true)
+        {
+            IsReducedLoggingEnabled = isReducedLoggingEnabled;
+        }
+
         public string ClientName { get; } = string.Empty;
         public string ClientVersion { get; } = string.Empty;
 
         public Guid CorrelationId { get; } = Guid.Empty;
 
         public bool PiiLoggingEnabled { get; } = false;
+
+        public bool IsReducedLoggingEnabled { get; }
 
         public string ClientInformation { get; } = string.Empty;
 
