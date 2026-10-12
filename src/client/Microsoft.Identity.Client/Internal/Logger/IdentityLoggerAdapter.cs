@@ -14,6 +14,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
     {
         private string _correlationId;
         public bool PiiLoggingEnabled { get; }
+        public bool IsReducedLoggingEnabled { get; }
         public bool IsDefaultPlatformLoggingEnabled { get; } = false;
         public string ClientName { get; }
         public string ClientVersion { get; }
@@ -24,7 +25,8 @@ namespace Microsoft.Identity.Client.Internal.Logger
             Guid correlationId,
             string clientName,
             string clientVersion,
-            bool enablePiiLogging)
+            bool enablePiiLogging,
+            bool isReducedLoggingEnabled = true)
         {
             ClientName = clientName;
             ClientVersion = clientVersion;
@@ -34,18 +36,21 @@ namespace Microsoft.Identity.Client.Internal.Logger
                     : " - " + correlationId;
             
             PiiLoggingEnabled = enablePiiLogging;
+            IsReducedLoggingEnabled = isReducedLoggingEnabled;
         }
 
         public static ILoggerAdapter Create(
             Guid correlationId,
-            ApplicationConfiguration config)
+            ApplicationConfiguration config,
+            bool isReducedLoggingEnabled = true)
         {
             return new IdentityLoggerAdapter(
                 config?.IdentityLogger,
                 correlationId,
                 config?.ClientName ?? string.Empty,
                 config?.ClientVersion ?? string.Empty,
-                config?.EnablePiiLogging ?? false);
+                config?.EnablePiiLogging ?? false,
+                isReducedLoggingEnabled);
         }
 
         public void Log(LogLevel logLevel, string messageWithPii, string messageScrubbed)

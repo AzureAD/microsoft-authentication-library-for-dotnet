@@ -14,6 +14,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
         private string _correlationId;
 
         public bool PiiLoggingEnabled { get; }
+        public bool IsReducedLoggingEnabled { get; }
         public bool IsDefaultPlatformLoggingEnabled { get; }
         public string ClientName { get; }
         public string ClientVersion { get; }
@@ -31,7 +32,8 @@ namespace Microsoft.Identity.Client.Internal.Logger
             LogLevel logLevel,
             bool enablePiiLogging,
             bool isDefaultPlatformLoggingEnabled,
-            LogCallback loggingCallback)
+            LogCallback loggingCallback,
+            bool isReducedLoggingEnabled = true)
         {
             ClientName = clientName;
             ClientVersion = clientVersion;
@@ -40,6 +42,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
                     : " - " + correlationId;
 
             PiiLoggingEnabled = enablePiiLogging;
+            IsReducedLoggingEnabled = isReducedLoggingEnabled;
             IsDefaultPlatformLoggingEnabled = isDefaultPlatformLoggingEnabled;
             IdentityLogger = new CallbackIdentityLogger(loggingCallback, _correlationId, clientName, clientVersion, enablePiiLogging, logLevel);
         }
@@ -61,7 +64,8 @@ namespace Microsoft.Identity.Client.Internal.Logger
         public static ILoggerAdapter Create(
             Guid correlationId,
             ApplicationConfiguration config,
-            bool isDefaultPlatformLoggingEnabled = false)
+            bool isDefaultPlatformLoggingEnabled = false,
+            bool isReducedLoggingEnabled = true)
         {
             return new CallbackIdentityLoggerAdapter(
                 correlationId,
@@ -70,7 +74,8 @@ namespace Microsoft.Identity.Client.Internal.Logger
                 config?.LogLevel ?? LogLevel.Verbose,
                 config?.EnablePiiLogging ?? false,
                 config?.IsDefaultPlatformLoggingEnabled ?? isDefaultPlatformLoggingEnabled,
-                config?.LoggingCallback);
+                config?.LoggingCallback,
+                isReducedLoggingEnabled);
         }
 
         public DurationLogHelper LogBlockDuration(string measuredBlockName, LogLevel logLevel = LogLevel.Verbose)

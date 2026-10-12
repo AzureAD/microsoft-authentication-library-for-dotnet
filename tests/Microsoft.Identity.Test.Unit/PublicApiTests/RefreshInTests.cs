@@ -549,7 +549,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithAuthority(AzureCloudInstance.AzurePublic, TestConstants.Utid)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(harness.HttpManager)
-                    .WithExperimentalFeatures()
                     .OnBackgroundTokenRefreshCompleted(r => { capturedResult = r; return Task.CompletedTask; })
                     .BuildConcrete();
                 TokenCacheHelper.PopulateCache(app.AppTokenCacheInternal.Accessor, addSecondAt: false);
@@ -587,7 +586,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithAuthority(AzureCloudInstance.AzurePublic, TestConstants.Utid)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(harness.HttpManager)
-                    .WithExperimentalFeatures()
                     .OnBackgroundTokenRefreshCompleted(r => { capturedResult = r; return Task.CompletedTask; })
                     .BuildConcrete();
                 TokenCacheHelper.PopulateCache(app.AppTokenCacheInternal.Accessor, addSecondAt: false);
@@ -622,7 +620,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 .WithAuthority(AzureCloudInstance.AzurePublic, TestConstants.Utid)
                 .WithClientSecret(TestConstants.ClientSecret)
                 .WithHttpManager(harness.HttpManager)
-                .WithExperimentalFeatures()
                 .WithLogging(LocalLogCallback)
                 .OnBackgroundTokenRefreshCompleted(r => { capturedResult = r; return Task.CompletedTask; })
                 .BuildConcrete();

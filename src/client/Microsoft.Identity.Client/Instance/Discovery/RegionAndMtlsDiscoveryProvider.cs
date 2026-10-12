@@ -73,11 +73,11 @@ namespace Microsoft.Identity.Client.Region
                 {
                     // Region is not available — use the global mTLS endpoint
                     string globalMtlsEnv = GetGlobalMtlsEnvironment(authority, requestContext);
-                    requestContext.Logger.Info($"[Region discovery] Region not available. Using global mTLS environment: {globalMtlsEnv}");
+                    requestContext.Logger.InfoOrVerbose(() => $"[Region discovery] Region not available. Using global mTLS environment: {globalMtlsEnv}");
                     return CreateEntry(authority.Host, globalMtlsEnv);
                 }
 
-                requestContext.Logger.Info("[Region discovery] Not using a regional authority. ");
+                requestContext.Logger.InfoOrVerbose("[Region discovery] Not using a regional authority. ");
                 return null;
             }
 
@@ -132,12 +132,12 @@ namespace Microsoft.Identity.Client.Region
             {
                 if (requestContext.IsMtlsRequested)
                 {
-                    requestContext.Logger.Info(() => $"[Region discovery] Using MTLS regional environment: {region}.{PublicEnvForRegionalMtlsAuth}");
+                    requestContext.Logger.InfoOrVerbose(() => $"[Region discovery] Using MTLS regional environment: {region}.{PublicEnvForRegionalMtlsAuth}");
                     return $"{region}.{PublicEnvForRegionalMtlsAuth}";
                 }
                 else
                 {
-                    requestContext.Logger.Info(() => $"[Region discovery] Regionalized Environment is : {region}.{PublicEnvForRegional}. ");
+                    requestContext.Logger.InfoOrVerbose(() => $"[Region discovery] Regionalized Environment is : {region}.{PublicEnvForRegional}. ");
                     return $"{region}.{PublicEnvForRegional}";
                 }
             }
@@ -158,7 +158,7 @@ namespace Microsoft.Identity.Client.Region
                 }
             }
 
-            requestContext.Logger.Info(() => $"[Region discovery] Regionalized Environment is : {region}.{host}. ");
+            requestContext.Logger.InfoOrVerbose(() => $"[Region discovery] Regionalized Environment is : {region}.{host}. ");
             return $"{region}.{host}";
         }
     }

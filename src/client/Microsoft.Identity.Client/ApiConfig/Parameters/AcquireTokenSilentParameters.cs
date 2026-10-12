@@ -15,14 +15,14 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         /// <inheritdoc/>
         public void LogParameters(ILoggerAdapter logger)
         {
-            if (logger.IsLoggingEnabled(LogLevel.Info))
+            if (logger.IsInfoOrVerboseEnabled())
             {
-                logger.Info("=== AcquireTokenSilent Parameters ===");
-                logger.Info("LoginHint provided: " + !string.IsNullOrEmpty(LoginHint));
-                logger.InfoPii(
+                logger.InfoOrVerbose("=== AcquireTokenSilent Parameters ===");
+                logger.InfoOrVerbose("LoginHint provided: " + !string.IsNullOrEmpty(LoginHint));
+                logger.InfoOrVerbosePii(
                     "Account provided: " + ((Account != null) ? Account.ToString() : "false"),
                     "Account provided: " + (Account != null));
-                logger.Info("ForceRefresh: " + ForceRefresh);
+                logger.InfoOrVerbose("ForceRefresh: " + ForceRefresh);
             }
         }
     }

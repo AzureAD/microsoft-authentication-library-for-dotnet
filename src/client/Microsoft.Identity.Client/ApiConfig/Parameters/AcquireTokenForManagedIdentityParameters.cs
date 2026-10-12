@@ -51,9 +51,9 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
 
         public void LogParameters(ILoggerAdapter logger)
         {
-            if (logger.IsLoggingEnabled(LogLevel.Info))
+            if (logger.IsInfoOrVerboseEnabled())
             {
-                logger.Info(
+                logger.InfoOrVerbose(
                     $"""
                      === AcquireTokenForManagedIdentityParameters ===
                      ForceRefresh: {ForceRefresh}
