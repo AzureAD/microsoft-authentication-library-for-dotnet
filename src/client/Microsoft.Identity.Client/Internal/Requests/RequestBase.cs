@@ -518,7 +518,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 account,
                 msalTokenResponse.SpaAuthCode,
                 msalTokenResponse.CreateExtensionDataStringMap(),
-                cancellationToken).ConfigureAwait(false);
+                cancellationToken,
+                resolvedTenantId: AuthenticationRequestParameters.ResolvedTenantId).ConfigureAwait(false);
 
             authResult.RefreshToken = AuthenticationRequestParameters.AppConfig.IsConfidentialClient
                 ? msalTokenResponse.RefreshToken

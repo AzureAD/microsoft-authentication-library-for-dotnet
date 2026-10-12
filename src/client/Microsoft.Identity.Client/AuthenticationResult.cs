@@ -6,13 +6,11 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.Security.Claims;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 using System.Security.Cryptography.X509Certificates;
@@ -143,7 +141,8 @@ namespace Microsoft.Identity.Client
             Account account,
             string spaAuthCode,
             IReadOnlyDictionary<string, string> additionalResponseParameters,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken = default,
+            string resolvedTenantId = null)
         {
             if (authenticationScheme == null)
             {
@@ -160,6 +159,7 @@ namespace Microsoft.Identity.Client
                 account,
                 spaAuthCode,
                 additionalResponseParameters,
+                resolvedTenantId,
                 authenticationScheme);
 
             // Apply token formatting (async if supported, sync otherwise)
@@ -197,6 +197,7 @@ namespace Microsoft.Identity.Client
             Account account,
             string spaAuthCode,
             IReadOnlyDictionary<string, string> additionalResponseParameters,
+            string resolvedTenantId,
             IAuthenticationOperation authenticationScheme)
         {
             string homeAccountId =
@@ -220,9 +221,9 @@ namespace Microsoft.Identity.Client
             }
 
             UniqueId = msalIdTokenCacheItem?.IdToken?.GetUniqueId();
-            // For client credentials flow, ID token is not available, so fall back to access token's tenant.
+            // For client credentials, use resolved authority metadata when the cache realm is a tenant domain.
             // See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5743
-            TenantId = GetTenantId(msalIdTokenCacheItem, msalAccessTokenCacheItem);
+            TenantId = GetTenantId(msalIdTokenCacheItem, msalAccessTokenCacheItem, resolvedTenantId);
             IdToken = msalIdTokenCacheItem?.Secret;
             SpaAuthCode = spaAuthCode;
             _authenticationScheme = authenticationScheme;
@@ -255,7 +256,10 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        private static string GetTenantId(MsalIdTokenCacheItem msalIdTokenCacheItem, MsalAccessTokenCacheItem msalAccessTokenCacheItem)
+        private static string GetTenantId(
+            MsalIdTokenCacheItem msalIdTokenCacheItem,
+            MsalAccessTokenCacheItem msalAccessTokenCacheItem,
+            string resolvedTenantId)
         {
             string idTokenTenantId = msalIdTokenCacheItem?.IdToken?.TenantId;
             if (!string.IsNullOrEmpty(idTokenTenantId))
@@ -263,51 +267,13 @@ namespace Microsoft.Identity.Client
                 return idTokenTenantId;
             }
 
-            string accessTokenTenantId = GetTenantIdFromAccessToken(msalAccessTokenCacheItem?.Secret);
-            if (!string.IsNullOrEmpty(accessTokenTenantId))
+            if (!string.IsNullOrEmpty(resolvedTenantId))
             {
-                return accessTokenTenantId;
+                return resolvedTenantId;
             }
 
             string cacheTenantId = msalAccessTokenCacheItem?.TenantId;
             return IsDomainTenant(cacheTenantId) ? null : cacheTenantId;
-        }
-
-        private static string GetTenantIdFromAccessToken(string accessToken)
-        {
-            if (string.IsNullOrEmpty(accessToken))
-            {
-                return null;
-            }
-
-            string[] accessTokenSegments = accessToken.Split(new[] { '.' });
-            if (accessTokenSegments.Length < 2)
-            {
-                return null;
-            }
-
-            try
-            {
-                string payload = Base64UrlHelpers.Decode(accessTokenSegments[1]);
-                using JsonDocument accessTokenClaims = JsonDocument.Parse(payload);
-
-                return accessTokenClaims.RootElement.TryGetProperty(IdTokenClaim.TenantId, out JsonElement tenantId) &&
-                       tenantId.ValueKind == JsonValueKind.String ?
-                       tenantId.GetString() :
-                       null;
-            }
-            catch (JsonException)
-            {
-                return null;
-            }
-            catch (FormatException)
-            {
-                return null;
-            }
-            catch (ArgumentException)
-            {
-                return null;
-            }
         }
 
         private static bool IsDomainTenant(string tenantId)
