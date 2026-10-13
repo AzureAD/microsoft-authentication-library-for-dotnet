@@ -112,6 +112,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public IDictionary<string, string> ExtraQueryParameters { get; }
 
+        public IDictionary<string, string> ExtraBodyParametersSync => _commonParameters.ExtraBodyParametersSync;
+
         public string ClaimsAndClientCapabilities => _claimsAndClientCapabilities.Value;
 
         public Guid CorrelationId => _commonParameters.CorrelationId;
