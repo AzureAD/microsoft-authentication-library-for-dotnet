@@ -7,6 +7,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Extensibility;
@@ -19,8 +20,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 {
     internal class ClientCredentialRequest : RequestBase
     {
-        private readonly AcquireTokenForClientParameters _clientParameters;
         private static readonly SemaphoreSlim s_semaphoreSlim = new SemaphoreSlim(1, 1);
+        private readonly AcquireTokenForClientParameters _clientParameters;
         private readonly ICryptographyManager _cryptoManager;
         
         public ClientCredentialRequest(
@@ -77,9 +78,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             MsalAccessTokenCacheItem cachedAccessTokenItem = await GetCachedAccessTokenAsync().ConfigureAwait(false);
 
-            cachedAccessTokenItem = await ValidateCachedAccessTokenAsync(
-                AuthenticationRequestParameters, cachedAccessTokenItem, nameof(ClientCredentialRequest)).ConfigureAwait(false);
-
             // No access token or cached access token needs to be refreshed 
             if (cachedAccessTokenItem != null)
             {
@@ -94,20 +92,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     {
                         AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.ProactivelyRefreshed;
 
-                        SilentRequestHelper.ProcessFetchInBackground(
-                        cachedAccessTokenItem,
-                        async () =>
-                        {
-                            // Use a linked token source, in case the original cancellation token source is disposed before this background task completes.
-                            // IMPORTANT: The lambda must be async and await the inner call. Without async/await, `using var` disposes the linked CTS
-                            // before the async operation completes, breaking cancellation propagation and causing unbounded SemaphoreSlim convoy.
-                            // See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/6053
-                            using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-                            return await GetAccessTokenAsync(tokenSource.Token, logger).ConfigureAwait(false);
-                        }, logger, ServiceBundle, AuthenticationRequestParameters.RequestContext.ApiEvent,
-                        AuthenticationRequestParameters.RequestContext.ApiEvent.CallerSdkApiId,
-                        AuthenticationRequestParameters.RequestContext.ApiEvent.CallerSdkVersion,
-                        AuthenticationRequestParameters.OtelTagsEnricher);
+                        StartProactiveRefresh(cachedAccessTokenItem, cancellationToken, logger);
                     }
                 }
                 catch (MsalServiceException e)
@@ -131,7 +116,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private async Task<AuthenticationResult> GetAccessTokenAsync(
             CancellationToken cancellationToken, 
-            ILoggerAdapter logger)
+            ILoggerAdapter logger,
+            Action onAccessTokenCached = null)
         {
             await ResolveAuthorityAsync().ConfigureAwait(false);
 
@@ -148,12 +134,18 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     {
                         logger.Verbose(() => "[ClientCredentialRequest] Sending token request to AAD.");
                         MsalTokenResponse msalTokenResponse = await SendTokenRequestAsync(GetBodyParameters(), cancellationToken).ConfigureAwait(false);
-                        authResult = await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse, cancellationToken).ConfigureAwait(false);
+                        authResult = await CacheTokenResponseAndCreateAuthenticationResultAsync(
+                            msalTokenResponse,
+                            cancellationToken,
+                            onAccessTokenCached).ConfigureAwait(false);
                     }
                     else
                     {
                         // Get a token from the app provider delegate
-                        authResult = await GetAccessTokenFromAppProviderAsync(cancellationToken, logger)
+                        authResult = await GetAccessTokenFromAppProviderAsync(
+                            cancellationToken,
+                            logger,
+                            onAccessTokenCached)
                             .ConfigureAwait(false);
                     }
 
@@ -199,7 +191,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private async Task<AuthenticationResult> GetAccessTokenFromAppProviderAsync(
             CancellationToken cancellationToken,
-            ILoggerAdapter logger)
+            ILoggerAdapter logger,
+            Action onAccessTokenCached = null)
         {
             // Get a token from the app provider delegate
             AuthenticationResult authResult;
@@ -220,7 +213,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo == CacheRefreshReason.ProactivelyRefreshed ||
                     !string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
                 {
-                    authResult = await SendTokenRequestToAppTokenProviderAsync(logger, cancellationToken).ConfigureAwait(false);
+                    authResult = await SendTokenRequestToAppTokenProviderAsync(
+                        logger,
+                        cancellationToken,
+                        onAccessTokenCached).ConfigureAwait(false);
                 }
                 else
                 {
@@ -229,7 +225,16 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                     if (cachedAccessTokenItem == null)
                     {
-                        authResult = await SendTokenRequestToAppTokenProviderAsync(logger, cancellationToken).ConfigureAwait(false);
+                        if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo != CacheRefreshReason.Expired)
+                        {
+                            AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo =
+                                CacheRefreshReason.NoCachedAccessToken;
+                        }
+
+                        authResult = await SendTokenRequestToAppTokenProviderAsync(
+                            logger,
+                            cancellationToken,
+                            onAccessTokenCached).ConfigureAwait(false);
                     }
                     else
                     {
@@ -337,7 +342,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
         }
 
         private async Task<AuthenticationResult> SendTokenRequestToAppTokenProviderAsync(ILoggerAdapter logger, 
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            Action onAccessTokenCached = null)
         {
             logger.Info("[ClientCredentialRequest] Acquiring a token from the token provider.");
             AppTokenProviderParameters appTokenProviderParameters = new AppTokenProviderParameters
@@ -355,7 +361,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
             tokenResponse.Scope = appTokenProviderParameters.Scopes.AsSingleString();
             tokenResponse.CorrelationId = appTokenProviderParameters.CorrelationId;
 
-            AuthenticationResult authResult = await CacheTokenResponseAndCreateAuthenticationResultAsync(tokenResponse, cancellationToken)
+            AuthenticationResult authResult = await CacheTokenResponseAndCreateAuthenticationResultAsync(
+                tokenResponse,
+                cancellationToken,
+                onAccessTokenCached)
                 .ConfigureAwait(false);
 
             return authResult;
@@ -367,12 +376,34 @@ namespace Microsoft.Identity.Client.Internal.Requests
         /// <returns></returns>
         private async Task<MsalAccessTokenCacheItem> GetCachedAccessTokenAsync()
         {
-            // Fetch the cache item (could be null if none found).
+            if (CacheManager.IsAppTokenCacheReadOptimizationEnabled)
+            {
+                AppTokenCacheRequestCoordinator coordinator =
+                    CacheManager.TokenCacheInternal.AppTokenCacheRequestCoordinator;
+
+                if (coordinator.TryBeginInMemoryRead(out long readGeneration))
+                {
+                    MsalAccessTokenCacheItem inMemoryCacheItem =
+                        await CacheManager.FindAccessTokenInMemoryAsync().ConfigureAwait(false);
+
+                    if (coordinator.IsInMemoryReadStable(readGeneration))
+                    {
+                        inMemoryCacheItem = await ValidateCachedAccessTokenCandidateAsync(inMemoryCacheItem).ConfigureAwait(false);
+
+                        if (inMemoryCacheItem is not null)
+                        {
+                            MarkAccessTokenAsCacheHit();
+                            return inMemoryCacheItem;
+                        }
+                    }
+                }
+            }
+
             MsalAccessTokenCacheItem cacheItem =
                 await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
+            cacheItem = await ValidateCachedAccessTokenCandidateAsync(cacheItem).ConfigureAwait(false);
 
-            // If the item fails any checks (null, or hash mismatch),
-            if (!ShouldUseCachedToken(cacheItem))
+            if (cacheItem is null)
             {
                 return null;
             }
@@ -380,6 +411,110 @@ namespace Microsoft.Identity.Client.Internal.Requests
             // Otherwise, record a successful cache hit and return the token.
             MarkAccessTokenAsCacheHit();
             return cacheItem;
+        }
+
+        private async Task<MsalAccessTokenCacheItem> ValidateCachedAccessTokenCandidateAsync(
+            MsalAccessTokenCacheItem cacheItem)
+        {
+            if (!ShouldUseCachedToken(cacheItem))
+            {
+                return null;
+            }
+
+            return await ValidateCachedAccessTokenAsync(
+                AuthenticationRequestParameters,
+                cacheItem,
+                nameof(ClientCredentialRequest)).ConfigureAwait(false);
+        }
+
+        private void StartProactiveRefresh(
+            MsalAccessTokenCacheItem cachedAccessTokenItem,
+            CancellationToken cancellationToken,
+            ILoggerAdapter logger)
+        {
+            AppTokenCacheRequestCoordinator coordinator =
+                CacheManager.TokenCacheInternal.AppTokenCacheRequestCoordinator;
+            object refreshOwner = null;
+            string refreshKey = CacheKeyFactory.GetAppTokenProactiveRefreshKey(
+                cachedAccessTokenItem);
+            bool coordinateRefresh =
+                CacheManager.TokenCacheInternal.IsAppTokenCacheReadOptimizationEnabled;
+
+            if (coordinateRefresh &&
+                cancellationToken.IsCancellationRequested)
+            {
+                logger.Verbose(() =>
+                    "[ClientCredentialRequest] Skipping coordinated proactive refresh because the initiating caller is canceled.");
+                return;
+            }
+
+            if (coordinateRefresh &&
+                !coordinator.TryStartProactiveRefresh(
+                    refreshKey,
+                    out refreshOwner))
+            {
+                logger.Verbose(() =>
+                    "[ClientCredentialRequest] Proactive refresh is already running for this app token cache key.");
+                return;
+            }
+
+            if (coordinateRefresh &&
+                !IsCurrentAccessTokenCacheItem(cachedAccessTokenItem))
+            {
+                coordinator.CompleteProactiveRefresh(refreshKey, refreshOwner);
+                logger.Verbose(() =>
+                    "[ClientCredentialRequest] Skipping proactive refresh because the cached app token has already been replaced.");
+                return;
+            }
+
+            Action completeRefresh = refreshOwner is null
+                ? null
+                : () => coordinator.CompleteProactiveRefresh(
+                    refreshKey,
+                    refreshOwner);
+
+            SilentRequestHelper.ProcessFetchInBackground(
+                cachedAccessTokenItem,
+                async () =>
+                {
+                    // Async/await keeps the linked CTS alive until acquisition finishes.
+                    // See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/6053.
+                    using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                    return await GetAccessTokenAsync(
+                        tokenSource.Token,
+                        logger,
+                        completeRefresh).ConfigureAwait(false);
+                },
+                logger,
+                ServiceBundle,
+                AuthenticationRequestParameters.RequestContext.ApiEvent,
+                AuthenticationRequestParameters.RequestContext.ApiEvent.CallerSdkApiId,
+                AuthenticationRequestParameters.RequestContext.ApiEvent.CallerSdkVersion,
+                AuthenticationRequestParameters.OtelTagsEnricher,
+                completeRefresh);
+        }
+
+        private bool IsCurrentAccessTokenCacheItem(
+            MsalAccessTokenCacheItem cachedAccessTokenItem)
+        {
+            string partitionKey = CacheKeyFactory.GetAppTokenCacheItemKey(
+                cachedAccessTokenItem.ClientId,
+                cachedAccessTokenItem.TenantId,
+                cachedAccessTokenItem.KeyId,
+                cachedAccessTokenItem.AdditionalCacheKeyComponents);
+
+            foreach (MsalAccessTokenCacheItem currentItem in
+                     CacheManager.TokenCacheInternal.Accessor.GetAllAccessTokens(
+                         partitionKey,
+                         AuthenticationRequestParameters.RequestContext.Logger))
+            {
+                if (ReferenceEquals(currentItem, cachedAccessTokenItem))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>

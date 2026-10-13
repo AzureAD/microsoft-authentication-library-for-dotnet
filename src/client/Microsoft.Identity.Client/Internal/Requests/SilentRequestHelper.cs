@@ -92,14 +92,24 @@ namespace Microsoft.Identity.Client.Internal
             ApiEvent apiEvent,
             string callerSdkId,
             string callerSdkVersion,
-            Action<ExecutionResult, IList<KeyValuePair<string, object>>> tagsEnricher = null)
+            Action<ExecutionResult, IList<KeyValuePair<string, object>>> tagsEnricher = null,
+            Action onCompleted = null)
         {
             _ = Task.Run(async () =>
             {
                 try
                 {
                     var stopwatch = Stopwatch.StartNew();
-                    var authResult = await fetchAction().ConfigureAwait(false);
+                    AuthenticationResult authResult;
+                    try
+                    {
+                        authResult = await fetchAction().ConfigureAwait(false);
+                    }
+                    finally
+                    {
+                        onCompleted?.Invoke();
+                    }
+
                     stopwatch.Stop();
 
                     // Proactive refresh runs outside RequestBase.RunAsync, so backfill the result's telemetry
