@@ -16,12 +16,13 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 {
     internal class BrokerRequest : BrokerRequestMetadata
     {
+        private Uri _redirectUri;
         public Uri RedirectUri
         {
-            get;
+            get => _redirectUri;
             set
             {
-                field = value;
+                _redirectUri = value;
                 UrlEncodedRedirectUri = GetEncodedRedirectUri(value);
             }
         }
