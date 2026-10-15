@@ -9,6 +9,7 @@ using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Instance.Oidc;
 using Microsoft.Identity.Client.Instance.Validation;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Kerberos;
 using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.ManagedIdentity.V2;
@@ -46,6 +47,7 @@ namespace Microsoft.Identity.Client.Platforms.net
     [JsonSerializable(typeof(ComputeMetadataResponse))]
     [JsonSerializable(typeof(ComputeSecurityProfile))]
     [JsonSerializable(typeof(Dictionary<string, object>))]
+    [JsonSerializable(typeof(BrokerRequestMetadata))]
     [JsonSourceGenerationOptions]
     internal partial class MsalJsonSerializerContext : JsonSerializerContext
     {
