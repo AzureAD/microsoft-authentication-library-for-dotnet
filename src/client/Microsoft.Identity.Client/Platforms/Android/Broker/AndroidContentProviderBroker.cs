@@ -171,7 +171,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             _brokerHelper.ValidateBrokerRedirectUri(brokerRequest);
 
             Bundle bundle = new Bundle();
-            string brokerRequestJson = JsonHelper.SerializeToJson(brokerRequest);
+            string brokerRequestJson = JsonHelper.SerializeToJson((BrokerRequestMetadata)brokerRequest);
             bundle.PutString(BrokerConstants.BrokerRequestV2, brokerRequestJson);
             bundle.PutInt(BrokerConstants.CallerInfoUID, Binder.CallingUid);
             _logger.InfoPii(
