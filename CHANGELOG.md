@@ -1,3 +1,10 @@
+4.91.1
+======
+
+### Changes
+
+- Reduced token-acquisition logging overhead by moving selected routine Information-level diagnostics to Verbose by default, while preserving acquisition summaries, warnings, and errors. Set `MSAL_REDUCED_LOGGING=false` (or `0`) before application construction to restore the previous diagnostics. [#6208](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6208)
+
 4.91.0
 ======
 
