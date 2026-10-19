@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Logger;
@@ -40,17 +41,17 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [DataRow(null, true, false)]
-        [DataRow("", true, false)]
+        [DataRow(null, false, false)]
+        [DataRow("", false, false)]
         [DataRow("false", false, false)]
         [DataRow("FALSE", false, false)]
         [DataRow("0", false, false)]
         [DataRow("true", true, false)]
         [DataRow("TrUe", true, false)]
         [DataRow("1", true, false)]
-        [DataRow("invalid-value", true, true)]
-        [DataRow(" true ", true, true)]
-        public void EnvironmentSettingDefaultsToTrue(string value, bool expectedEnabled, bool expectedWarning)
+        [DataRow("invalid-value", false, true)]
+        [DataRow(" true ", false, true)]
+        public void EnvironmentSettingDefaultsToFalse(string value, bool expectedEnabled, bool expectedWarning)
         {
             // Arrange
             Environment.SetEnvironmentVariable(LoggerHelper.ReducedLoggingEnvironmentVariable, value);
@@ -70,7 +71,31 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             {
                 Assert.AreEqual(EventLogLevel.Warning, warnings[0].EventLogLevel);
                 Assert.DoesNotContain(value, warnings[0].Message);
+                Assert.Contains("Reduced logging is disabled.", warnings[0].Message);
             }
+        }
+
+        [TestMethod]
+        public void LoggerDefaultsPreserveFullLogging()
+        {
+            // Arrange
+            var config = new ApplicationConfiguration(MsalClientType.ConfidentialClient);
+            var identityLogger = Substitute.For<IIdentityLogger>();
+
+            // Act
+            ILoggerAdapter[] loggers =
+            {
+                new NullLogger(),
+                LoggerHelper.NullLogger,
+                LoggerHelper.CreateLogger(Guid.Empty, config),
+                new IdentityLoggerAdapter(identityLogger, Guid.Empty, null, null, false),
+                IdentityLoggerAdapter.Create(Guid.Empty, config),
+                new CallbackIdentityLoggerAdapter(Guid.Empty, null, null, LogLevel.Info, false, false, null),
+                CallbackIdentityLoggerAdapter.Create(Guid.Empty, config)
+            };
+
+            // Assert
+            Assert.IsTrue(loggers.All(logger => !logger.IsReducedLoggingEnabled));
         }
 
         [TestMethod]
@@ -81,7 +106,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         public async Task AddingLoggerAfterBuildPreservesOriginalApplicationSettingAsync(bool callback, bool reduced)
         {
             // Arrange
-            Environment.SetEnvironmentVariable(LoggerHelper.ReducedLoggingEnvironmentVariable, reduced ? null : "false");
+            Environment.SetEnvironmentVariable(LoggerHelper.ReducedLoggingEnvironmentVariable, reduced ? "true" : null);
             var entries = new List<LogEntry>();
             using (var httpManager = new MockHttpManager())
             {
@@ -229,16 +254,20 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [DataRow(false, false, LogLevel.Info)]
-        [DataRow(true, false, LogLevel.Info)]
-        [DataRow(false, true, LogLevel.Info)]
-        [DataRow(true, true, LogLevel.Info)]
-        [DataRow(false, true, LogLevel.Verbose)]
-        [DataRow(true, true, LogLevel.Verbose)]
-        public async Task CacheHitRetainsSummariesAndDemotesSixRoutineEventsAsync(bool callback, bool reduced, LogLevel threshold)
+        [DataRow(false, null, false, LogLevel.Info)]
+        [DataRow(true, null, false, LogLevel.Info)]
+        [DataRow(false, "", false, LogLevel.Info)]
+        [DataRow(true, "", false, LogLevel.Info)]
+        [DataRow(false, "false", false, LogLevel.Info)]
+        [DataRow(true, "false", false, LogLevel.Info)]
+        [DataRow(false, "true", true, LogLevel.Info)]
+        [DataRow(true, "true", true, LogLevel.Info)]
+        [DataRow(false, "true", true, LogLevel.Verbose)]
+        [DataRow(true, "true", true, LogLevel.Verbose)]
+        public async Task CacheHitRetainsSummariesAndDemotesSixRoutineEventsAsync(bool callback, string value, bool reduced, LogLevel threshold)
         {
             // Arrange
-            Environment.SetEnvironmentVariable(LoggerHelper.ReducedLoggingEnvironmentVariable, reduced.ToString());
+            Environment.SetEnvironmentVariable(LoggerHelper.ReducedLoggingEnvironmentVariable, value);
             var entries = new List<LogEntry>();
             using (var httpManager = new MockHttpManager())
             {
