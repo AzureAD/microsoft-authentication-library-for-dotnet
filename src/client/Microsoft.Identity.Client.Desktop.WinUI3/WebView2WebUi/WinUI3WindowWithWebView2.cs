@@ -19,7 +19,7 @@ using System.Diagnostics;
 
 namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
 {
-    internal sealed class WinUI3WindowWithWebView2 : Window, IDisposable
+    internal sealed partial class WinUI3WindowWithWebView2 : Window, IDisposable
     {
         private const int UIWidth = 566;
         private readonly EmbeddedWebViewOptions _embeddedWebViewOptions;
