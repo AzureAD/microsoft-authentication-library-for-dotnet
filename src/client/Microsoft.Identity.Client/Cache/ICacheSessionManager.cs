@@ -17,7 +17,9 @@ namespace Microsoft.Identity.Client.Cache
     {
         RequestContext RequestContext { get; }
         ITokenCacheInternal TokenCacheInternal { get; }
+        bool IsAppTokenCacheReadOptimizationEnabled { get; }
         Task<MsalAccessTokenCacheItem> FindAccessTokenAsync();
+        Task<MsalAccessTokenCacheItem> FindAccessTokenInMemoryAsync();
         Task<Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem, Account>> SaveTokenResponseAsync(MsalTokenResponse tokenResponse);
         Task<MsalIdTokenCacheItem> GetIdTokenCacheItemAsync(MsalAccessTokenCacheItem accessTokenCacheItem);
         Task<MsalRefreshTokenCacheItem> FindRefreshTokenAsync();

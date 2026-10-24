@@ -481,7 +481,20 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return AssertionType.None;
         }
 
-        protected async Task<AuthenticationResult> CacheTokenResponseAndCreateAuthenticationResultAsync(MsalTokenResponse msalTokenResponse, CancellationToken cancellationToken = default)
+        protected Task<AuthenticationResult> CacheTokenResponseAndCreateAuthenticationResultAsync(
+            MsalTokenResponse msalTokenResponse,
+            CancellationToken cancellationToken = default)
+        {
+            return CacheTokenResponseAndCreateAuthenticationResultAsync(
+                msalTokenResponse,
+                cancellationToken,
+                onAccessTokenCached: null);
+        }
+
+        protected async Task<AuthenticationResult> CacheTokenResponseAndCreateAuthenticationResultAsync(
+            MsalTokenResponse msalTokenResponse,
+            CancellationToken cancellationToken,
+            Action onAccessTokenCached)
         {
             // developer passed in user object.
             AuthenticationRequestParameters.RequestContext.Logger.Info("Checking client info returned from the server..");
@@ -508,6 +521,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 #if !MOBILE
             atItem?.AddAdditionalCacheParameters(clientInfoFromServer?.AdditionalResponseParameters);
 #endif
+            onAccessTokenCached?.Invoke();
+
             var authResult = await AuthenticationResult.CreateAsync(
                 atItem,
                 idtItem,

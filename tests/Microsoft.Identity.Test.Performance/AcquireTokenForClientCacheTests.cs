@@ -46,6 +46,10 @@ namespace Microsoft.Identity.Test.Performance
 
         [ParamsAllValues]
         public bool EnableCacheSerialization { get; set; }
+
+        [ParamsAllValues]
+        public bool EnableAppTokenCacheReadOptimization { get; set; }
+
         //[Params(false)]
         public bool UseMicrosoftIdentityWebCache { get; set; }
 
@@ -72,6 +76,9 @@ namespace Microsoft.Identity.Test.Performance
                     _serializationCache = new InMemoryCache(_cca.AppTokenCache);
                 }
             }
+
+            _cca.AppTokenCache.SetAppTokenCacheReadOptimization(
+                EnableAppTokenCacheReadOptimization);
 
             await PopulateAppCacheAsync(_cca, CacheSize.TotalTenants, CacheSize.TokensPerTenant, EnableCacheSerialization).ConfigureAwait(false);
 

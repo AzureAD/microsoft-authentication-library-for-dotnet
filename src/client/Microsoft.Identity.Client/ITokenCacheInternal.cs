@@ -17,6 +17,8 @@ namespace Microsoft.Identity.Client
         OptionalSemaphoreSlim Semaphore { get; }
         ILegacyCachePersistence LegacyPersistence { get; }
         ITokenCacheAccessor Accessor { get; }
+        AppTokenCacheRequestCoordinator AppTokenCacheRequestCoordinator { get; }
+        bool IsAppTokenCacheReadOptimizationEnabled { get; }
 
         #region High-Level cache operations
         Task RemoveAccountAsync(IAccount account, AuthenticationRequestParameters requestParameters);

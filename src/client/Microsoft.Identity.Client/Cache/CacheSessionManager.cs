@@ -41,6 +41,11 @@ namespace Microsoft.Identity.Client.Cache
         #region ICacheSessionManager implementation
         public ITokenCacheInternal TokenCacheInternal { get; }
 
+        public bool IsAppTokenCacheReadOptimizationEnabled =>
+            TokenCacheInternal.IsApplicationCache &&
+            TokenCacheInternal.IsAppTokenCacheReadOptimizationEnabled &&
+            TokenCacheInternal.IsAppSubscribedToSerializationEvents();
+
         private bool IsInternalCacheDisabled =>
             CacheOptions.IsDisabledFor(_requestParams.RequestContext.ServiceBundle.Config.AccessorOptions);
 
@@ -66,12 +71,54 @@ namespace Microsoft.Identity.Client.Cache
 
         public async Task<MsalAccessTokenCacheItem> FindAccessTokenAsync()
         {
-            await RefreshCacheForReadOperationsIfEnabledAsync("access token lookup").ConfigureAwait(false);
-            if (IsInternalCacheDisabled)
+            if (!IsAppTokenCacheReadOptimizationEnabled)
+            {
+                return (await RefreshAndFindAccessTokenAsync().ConfigureAwait(false)).CacheItem;
+            }
+
+            string key = CacheKeyFactory.GetAppTokenCacheReadKey(_requestParams);
+            AppTokenCacheReadResponse response =
+                await TokenCacheInternal.AppTokenCacheRequestCoordinator.RunCacheReadAsync(
+                    key,
+                    RefreshAndFindAccessTokenAsync,
+                    _requestParams.RequestContext.UserCancellationToken).ConfigureAwait(false);
+
+            if (!response.IsLeader &&
+                (response.Result.ShouldRetryIndependently ||
+                 response.Result.CacheItem is null))
+            {
+                // Preserve the existing cold-miss behavior instead of releasing every
+                // follower directly to the token endpoint at the same time.
+                AppTokenCacheReadResult independentResult =
+                    await TokenCacheInternal.AppTokenCacheRequestCoordinator
+                        .RunIndependentCacheReadAsync(
+                            RefreshAndFindAccessTokenAsync).ConfigureAwait(false);
+                return independentResult.CacheItem;
+            }
+
+            if (!response.IsLeader)
+            {
+                _cacheRefreshedForRead = true;
+                ApplyReadResult(response.Result);
+            }
+
+            return response.Result.CacheItem;
+        }
+
+        public async Task<MsalAccessTokenCacheItem> FindAccessTokenInMemoryAsync()
+        {
+            if (ShouldSkipInternalCacheRead("in-memory access token lookup"))
             {
                 return null;
             }
-            return await TokenCacheInternal.FindAccessTokenAsync(_requestParams).ConfigureAwait(false);
+
+            RequestContext.ApiEvent.CacheLevel = CacheLevel.L1Cache;
+            MsalAccessTokenCacheItem cacheItem =
+                await TokenCacheInternal.FindAccessTokenAsync(_requestParams).ConfigureAwait(false);
+            RequestContext.ApiEvent.CachedAccessTokenCount =
+                GetInternalCacheEntryCountForTelemetry();
+
+            return cacheItem;
         }
 
         public async Task<Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem, Account>> SaveTokenResponseAsync(MsalTokenResponse tokenResponse)
@@ -148,6 +195,32 @@ namespace Microsoft.Identity.Client.Cache
         }
 
         #endregion
+
+        private async Task<AppTokenCacheReadResult> RefreshAndFindAccessTokenAsync()
+        {
+            await RefreshCacheForReadOperationsIfEnabledAsync("access token lookup").ConfigureAwait(false);
+
+            MsalAccessTokenCacheItem cacheItem = null;
+            if (!IsInternalCacheDisabled)
+            {
+                cacheItem = await TokenCacheInternal.FindAccessTokenAsync(_requestParams).ConfigureAwait(false);
+            }
+
+            return new AppTokenCacheReadResult(
+                cacheItem,
+                RequestContext.ApiEvent.CacheLevel,
+                RequestContext.ApiEvent.CacheInfo,
+                GetInternalCacheEntryCountForTelemetry(),
+                RequestContext.ApiEvent.DurationInCacheInMs);
+        }
+
+        private void ApplyReadResult(AppTokenCacheReadResult result)
+        {
+            RequestContext.ApiEvent.CacheLevel = result.CacheLevel;
+            RequestContext.ApiEvent.CacheInfo = result.CacheInfo;
+            RequestContext.ApiEvent.CachedAccessTokenCount = result.CachedAccessTokenCount;
+            RequestContext.ApiEvent.DurationInCacheInMs = result.DurationInCacheInMs;
+        }
 
         /// <remarks>
         /// Possibly refreshes the internal cache by calling OnBeforeAccessAsync and OnAfterAccessAsync delegates.
