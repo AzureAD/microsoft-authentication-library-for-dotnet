@@ -1,3 +1,23 @@
+4.91.1
+======
+
+### Changes
+
+- Added opt-in reduced token-acquisition logging: set `MSAL_REDUCED_LOGGING=true` (or `1`) before application construction to move selected routine Information-level diagnostics to Verbose. Existing logging behavior is unchanged by default; acquisition summaries, warnings, and errors remain unchanged. [#6208](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6208) [#6224](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6224)
+
+4.91.0
+======
+
+### New Features
+
+- Made the dynamic certificate provider and confidential-client callbacks (`OnMsalServiceFailure`, `OnCompletion`, and `OnBackgroundTokenRefreshCompleted`) generally available, removing the experimental feature opt-in requirement. [#6216](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6216)
+
+### Bug Fixes
+
+- Fixed built-in mTLS `HttpClient` caching to use certificate object identity, ensuring a new certificate instance with a reacquired private-key handle receives a new handler even when its thumbprint is unchanged. [#6217](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6217)
+- Fixed managed identity `WithForceRefresh(true)` to re-mint the MSI v2 binding certificate before acquiring a new token, while reusing a valid cached attestation token for the current key. [#6215](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6215)
+- Fixed system-browser authentication callbacks in Linux containers by adding opt-in IPv4 port-forwarding support through `MSAL_ALLOW_SYSTEM_BROWSER_PORT_FORWARDING`, disabled by default. [#6186](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6186)
+  
 4.90.1
 ======
 

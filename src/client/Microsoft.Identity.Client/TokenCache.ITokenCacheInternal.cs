@@ -701,7 +701,7 @@ namespace Microsoft.Identity.Client
                         return null;
                     }
 
-                    logger.Info(
+                    logger.InfoOrVerbose(
                         () => "Access token is not expired. Returning the found cache entry. " +
                         GetAccessTokenExpireLogMessageContent(msalAccessTokenCacheItem));
 

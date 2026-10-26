@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         /// <inheritdoc/>
         public void LogParameters(ILoggerAdapter logger)
         {
-            if (logger.IsLoggingEnabled(LogLevel.Info))
+            if (logger.IsInfoOrVerboseEnabled())
             {
                 var builder = new StringBuilder(
                     $"""
@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
                 {
                     builder.AppendLine("AcquireTokenInLongRunningProcess called: True");
                 }
-                logger.Info(builder.ToString());
+                logger.InfoOrVerbose(builder.ToString());
             }
         }
     }

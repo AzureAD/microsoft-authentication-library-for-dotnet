@@ -1327,39 +1327,6 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             };
         }
 
-        internal static void AddMocksToGetEntraTokenUsingCachedCert(
-            MockHttpManager httpManager,
-            IdentityLoggerAdapter identityLoggerAdapter,
-            bool mTLSPop = false,
-            bool assertClientId = false,
-            string expectedClientId = TestConstants.ClientId,
-            UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
-            string userAssignedId = null)
-        {
-            // cached-cert refresh still calls /getplatformmetadata (SAMI or UAMI flavor)
-            if (userAssignedIdentityId != UserAssignedIdentityId.None && userAssignedId != null)
-            {
-                httpManager.AddMockHandler(
-                    MockHelpers.MockCsrResponse(userAssignedIdentityId: userAssignedIdentityId, userAssignedId: userAssignedId));
-            }
-            else
-            {
-                httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
-            }
-
-            // Token request (no /issuecredential added here)
-            if (assertClientId)
-            {
-                httpManager.AddMockHandler(
-                    MockHelpers.MockImdsV2EntraTokenRequestResponseExpectClientId(identityLoggerAdapter, mTLSPop, expectedClientId));
-            }
-            else
-            {
-                httpManager.AddMockHandler(
-                    MockHelpers.MockImdsV2EntraTokenRequestResponse(identityLoggerAdapter));
-            }
-        }
-
         internal static void AddMocks_AttestedCertMustNotBeReused_ExpectIssueCredential400(
             MockHttpManager httpManager,
             UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
@@ -1493,4 +1460,3 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         #endregion
     }
 }
-
