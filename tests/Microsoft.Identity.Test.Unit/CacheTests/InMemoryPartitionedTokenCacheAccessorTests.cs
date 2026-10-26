@@ -5,11 +5,13 @@ using System.Collections.Concurrent;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Logger;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NSubstitute;
 
 namespace Microsoft.Identity.Test.Unit.CacheTests
 {
@@ -17,6 +19,42 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
     public class InMemoryPartitionedTokenCacheAccessorTests
     {
         #region Access token tests
+        [TestMethod]
+        [DataRow(false, false)]
+        [DataRow(false, true)]
+        [DataRow(true, false)]
+        [DataRow(true, true)]
+        public void GetAllAppAccessTokens_LogsPartitionCountOnlyAtVerbose(bool verboseEnabled, bool useRequestLogger)
+        {
+            // Arrange
+            var applicationLogger = Substitute.For<ILoggerAdapter>();
+            var requestLogger = Substitute.For<ILoggerAdapter>();
+            var effectiveLogger = useRequestLogger ? requestLogger : applicationLogger;
+            effectiveLogger.IsLoggingEnabled(LogLevel.Verbose).Returns(verboseEnabled);
+            var accessor = new InMemoryPartitionedAppTokenCacheAccessor(applicationLogger, null);
+            accessor.SaveAccessToken(TokenCacheHelper.CreateAccessTokenItem());
+            applicationLogger.ClearReceivedCalls();
+            requestLogger.ClearReceivedCalls();
+
+            // Act
+            var tokens = accessor.GetAllAccessTokens(requestlogger: useRequestLogger ? requestLogger : null);
+
+            // Assert
+            Assert.HasCount(1, tokens);
+            if (verboseEnabled)
+            {
+                effectiveLogger.Received(1).Log(LogLevel.Verbose, string.Empty,
+                    "[Internal cache] Total number of cache partitions found while getting access tokens: 1");
+            }
+            else
+            {
+                effectiveLogger.DidNotReceive().Log(Arg.Any<LogLevel>(), Arg.Any<string>(), Arg.Any<string>());
+            }
+
+            var unusedLogger = useRequestLogger ? applicationLogger : requestLogger;
+            unusedLogger.DidNotReceive().Log(Arg.Any<LogLevel>(), Arg.Any<string>(), Arg.Any<string>());
+        }
+
         [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
