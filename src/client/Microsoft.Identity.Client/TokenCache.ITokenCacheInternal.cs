@@ -475,7 +475,10 @@ namespace Microsoft.Identity.Client
 
             var accessTokens = Accessor.GetAllAccessTokens(partitionKey, logger);
 
-            requestParams.RequestContext.Logger.Always($"[FindAccessTokenAsync] Discovered {accessTokens.Count} access tokens in cache using partition key: {partitionKey}");
+            if (logger.IsLoggingEnabled(LogLevel.Verbose))
+            {
+                logger.Log(LogLevel.Verbose, string.Empty, $"[FindAccessTokenAsync] Discovered {accessTokens.Count} access tokens in cache using partition key: {partitionKey}");
+            }
 
             if (accessTokens.Count == 0)
             {
