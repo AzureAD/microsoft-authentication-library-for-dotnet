@@ -5,12 +5,17 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.Cache.Keys;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -20,6 +25,191 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
     [TestClass]
     public class TokenCacheSnapshotTests : TestBase
     {
+        // If a clone coverage test fails after changing a cache item or a base class, update
+        // CloneForSnapshot to handle the member, then update the fixture and expected members.
+        [TestMethod]
+        public void AccessTokenSnapshotCloneAccountsForEveryInstanceMember()
+        {
+            // Arrange
+            var time = DateTimeOffset.FromUnixTimeSeconds(1800000000);
+            var source = new MsalAccessTokenCacheItem(
+                "environment", "snapshot-tests", "scope-a scope-b", "tenant", "synthetic-access-token",
+                time, time.AddHours(1), time.AddHours(2), "client-info", "account",
+                "key", time.AddMinutes(30), "pop", "obo",
+                new SortedList<string, string> { ["partition"] = "one" })
+            {
+                AdditionalFieldsJson = "{\"future_item\":{\"values\":[1,2]}}",
+                IsExtendedLifeTimeToken = true
+            };
+            source.AddAdditionalCacheParameters(new Dictionary<string, string> { ["extra"] = "value" });
+            var expectedProperties = new[]
+            {
+                nameof(source.TenantId),
+                nameof(source.OboCacheKey),
+                nameof(source.KeyId),
+                nameof(source.TokenType),
+                nameof(source.ScopeSet),
+                nameof(source.ScopeString),
+                nameof(source.ExpiresOn),
+                nameof(source.ExtendedExpiresOn),
+                nameof(source.RefreshOn),
+                nameof(source.CachedAt),
+                nameof(source.IsExtendedLifeTimeToken),
+                nameof(source.CacheKey),
+                nameof(source.AdditionalCacheKeyComponents),
+                nameof(source.PersistedCacheParameters),
+                nameof(source.iOSCacheKey),
+                nameof(source.CredentialType),
+                nameof(source.ClientId),
+                nameof(source.Secret),
+                nameof(source.HomeAccountId),
+                nameof(source.Environment),
+                nameof(source.RawClientInfo),
+                nameof(source.AdditionalFieldsJson)
+            };
+            // Act
+            var clone = source.CloneForSnapshot();
+
+            // Assert
+            AssertSnapshotClone(source, clone, expectedProperties,
+                new[] { "_extraKeyParts", "_credentialDescriptor", "iOSCacheKeyLazy" });
+        }
+
+        [TestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public void RefreshTokenSnapshotCloneAccountsForEveryInstanceMember(bool familyToken)
+        {
+            // Arrange
+            var source = new MsalRefreshTokenCacheItem(
+                "environment", "snapshot-tests", "synthetic-refresh-token", "client-info",
+                familyToken ? "1" : "", "account",
+                familyToken ? null : new SortedList<string, string> { ["partition"] = "one" })
+            {
+                OboCacheKey = "obo",
+                AdditionalFieldsJson = "{\"future_item\":{\"values\":[1,2]}}"
+            };
+            var expectedProperties = new[]
+            {
+                nameof(source.FamilyId),
+                nameof(source.OboCacheKey),
+                nameof(source.IsFRT),
+                nameof(source.AdditionalCacheKeyComponents),
+                nameof(source.CacheKey),
+                nameof(source.iOSCacheKey),
+                nameof(source.CredentialType),
+                nameof(source.ClientId),
+                nameof(source.Secret),
+                nameof(source.HomeAccountId),
+                nameof(source.Environment),
+                nameof(source.RawClientInfo),
+                nameof(source.AdditionalFieldsJson)
+            };
+
+            // Act
+            var clone = source.CloneForSnapshot();
+
+            // Assert
+            AssertSnapshotClone(source, clone, expectedProperties, new[] { "iOSCacheKeyLazy" });
+        }
+
+        [TestMethod]
+        public void IdTokenSnapshotCloneAccountsForEveryInstanceMember()
+        {
+            // Arrange
+            var source = new MsalIdTokenCacheItem(
+                "environment", "snapshot-tests",
+                "header." + Base64UrlHelpers.Encode(
+                    "{\"sub\":\"subject\",\"tid\":\"tenant\",\"name\":\"Test User\",\"preferred_username\":\"user@example.com\"}"),
+                "client-info", "account", "tenant")
+            {
+                AdditionalFieldsJson = "{\"future_item\":{\"values\":[1,2]}}"
+            };
+            var expectedProperties = new[]
+            {
+                nameof(source.TenantId),
+                nameof(source.IdToken),
+                nameof(source.CacheKey),
+                nameof(source.iOSCacheKey),
+                nameof(source.CredentialType),
+                nameof(source.ClientId),
+                nameof(source.Secret),
+                nameof(source.HomeAccountId),
+                nameof(source.Environment),
+                nameof(source.RawClientInfo),
+                nameof(source.AdditionalFieldsJson)
+            };
+
+            // Act
+            var clone = source.CloneForSnapshot();
+
+            // Assert
+            AssertSnapshotClone(source, clone, expectedProperties, new[] { "idTokenLazy", "iOSCacheKeyLazy" });
+        }
+
+        [TestMethod]
+        public void AccountSnapshotCloneAccountsForEveryInstanceMember()
+        {
+            // Arrange
+            var source = new MsalAccountCacheItem(
+                "environment", "local-account", "client-info", "account", "account-source",
+                "Test User", "user@example.com", "tenant", "Test", "User",
+                new Dictionary<string, string> { ["app"] = "wam-account" })
+            {
+                AuthorityType = "B2C",
+                AdditionalFieldsJson = "{\"future_item\":{\"values\":[1,2]}}"
+            };
+            var expectedProperties = new[]
+            {
+                nameof(source.TenantId),
+                nameof(source.PreferredUsername),
+                nameof(source.Name),
+                nameof(source.GivenName),
+                nameof(source.FamilyName),
+                nameof(source.LocalAccountId),
+                nameof(source.AccountSource),
+                nameof(source.AuthorityType),
+                nameof(source.WamAccountIds),
+                nameof(source.CacheKey),
+                nameof(source.iOSCacheKey),
+                nameof(source.HomeAccountId),
+                nameof(source.Environment),
+                nameof(source.RawClientInfo),
+                nameof(source.AdditionalFieldsJson)
+            };
+
+            // Act
+            var clone = source.CloneForSnapshot();
+
+            // Assert
+            AssertSnapshotClone(source, clone, expectedProperties, new[] { "iOSCacheKeyLazy" });
+        }
+
+        [TestMethod]
+        public void AppMetadataSnapshotCloneAccountsForEveryInstanceMember()
+        {
+            // Arrange
+            var source = new MsalAppMetadataCacheItem("snapshot-tests", "environment", "1")
+            {
+                AdditionalFieldsJson = "{\"future_item\":{\"values\":[1,2]}}"
+            };
+            var expectedProperties = new[]
+            {
+                nameof(source.ClientId),
+                nameof(source.Environment),
+                nameof(source.FamilyId),
+                nameof(source.CacheKey),
+                nameof(source.iOSCacheKey),
+                nameof(source.AdditionalFieldsJson)
+            };
+
+            // Act
+            var clone = source.CloneForSnapshot();
+
+            // Assert
+            AssertSnapshotClone(source, clone, expectedProperties, new[] { "iOSCacheKeyLazy" });
+        }
+
         [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
@@ -719,6 +909,97 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             accessor.GetAllRefreshTokens().Single().AdditionalCacheKeyComponents["partition"] = "changed";
             accessor.GetAllAccounts().Single().WamAccountIds["app"] = "changed";
             accessor.GetAllIdTokens().Single().Secret = "changed";
+        }
+
+        private static void AssertSnapshotClone<T>(
+            T source, T clone, string[] expectedProperties, string[] expectedFields)
+            where T : MsalItemWithAdditionalFields
+        {
+            const BindingFlags InstanceMembers = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+            var properties = new List<PropertyInfo>();
+            var fields = new List<FieldInfo>();
+            for (var type = typeof(T); type != typeof(object); type = type.BaseType)
+            {
+                properties.AddRange(type.GetProperties(InstanceMembers | BindingFlags.DeclaredOnly));
+                fields.AddRange(type.GetFields(InstanceMembers | BindingFlags.DeclaredOnly)
+                    .Where(field => !field.IsDefined(typeof(CompilerGeneratedAttribute), false)));
+            }
+
+            Assert.AreNotSame(source, clone);
+            CollectionAssert.AreEquivalent(expectedProperties, properties.Select(property => property.Name).ToArray(),
+                $"Update the fixture and clone assertions whenever a {typeof(T).Name} property is added.");
+            CollectionAssert.AreEquivalent(expectedFields, fields.Select(field => field.Name).ToArray(),
+                $"Update the fixture and clone assertions whenever a {typeof(T).Name} field is added.");
+
+            foreach (var property in properties)
+            {
+                object expected = property.GetValue(source);
+                object actual = property.GetValue(clone);
+                if (source is MsalAccessTokenCacheItem &&
+                    property.Name == nameof(MsalAccessTokenCacheItem.IsExtendedLifeTimeToken))
+                {
+                    // Request-only state is deliberately not persisted in a snapshot.
+                    Assert.IsTrue((bool)expected);
+                    Assert.IsFalse((bool)actual);
+                }
+                else
+                {
+                    AssertSnapshotMemberEqual(expected, actual, $"{typeof(T).Name}.{property.Name}");
+                }
+            }
+
+            foreach (var field in fields)
+            {
+                AssertSnapshotMemberEqual(field.GetValue(source), field.GetValue(clone), $"{typeof(T).Name}.{field.Name}");
+            }
+        }
+
+        private static void AssertSnapshotMemberEqual(object expected, object actual, string member)
+        {
+            if (expected is HashSet<string> scopes)
+            {
+                Assert.AreNotSame(expected, actual, member);
+                CollectionAssert.AreEquivalent(scopes.ToArray(), ((HashSet<string>)actual).ToArray(), member);
+            }
+            else if (expected is IEnumerable<string> strings)
+            {
+                Assert.AreNotSame(expected, actual, member);
+                CollectionAssert.AreEqual(strings.ToArray(), ((IEnumerable<string>)actual).ToArray(), member);
+            }
+            else if (expected is IEnumerable<KeyValuePair<string, string>> entries)
+            {
+                Assert.AreNotSame(expected, actual, member);
+                CollectionAssert.AreEquivalent(entries.ToArray(),
+                    ((IEnumerable<KeyValuePair<string, string>>)actual).ToArray(), member);
+            }
+            else if (expected is IiOSKey key)
+            {
+                var clonedKey = (IiOSKey)actual;
+                Assert.AreNotSame(key, clonedKey, member);
+                Assert.AreEqual(key.iOSAccount, clonedKey.iOSAccount, member);
+                Assert.AreEqual(key.iOSGeneric, clonedKey.iOSGeneric, member);
+                Assert.AreEqual(key.iOSService, clonedKey.iOSService, member);
+                Assert.AreEqual(key.iOSType, clonedKey.iOSType, member);
+            }
+            else if (expected is IdToken token)
+            {
+                var clonedToken = (IdToken)actual;
+                Assert.AreNotSame(token, clonedToken, member);
+                Assert.AreNotSame(token.ClaimsPrincipal, clonedToken.ClaimsPrincipal, member);
+                CollectionAssert.AreEquivalent(
+                    token.ClaimsPrincipal.Claims.Select(claim =>
+                        (claim.Type, claim.Value, claim.ValueType, claim.Issuer, claim.OriginalIssuer)).ToArray(),
+                    clonedToken.ClaimsPrincipal.Claims.Select(claim =>
+                        (claim.Type, claim.Value, claim.ValueType, claim.Issuer, claim.OriginalIssuer)).ToArray(), member);
+            }
+            else if (expected is Lazy<IiOSKey> || expected is Lazy<IdToken>)
+            {
+                Assert.AreNotSame(expected, actual, member);
+            }
+            else
+            {
+                Assert.AreEqual(expected, actual, member);
+            }
         }
 
         private static void AssertJsonEqual(byte[] expected, byte[] actual)
