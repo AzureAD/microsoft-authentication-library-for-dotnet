@@ -195,6 +195,20 @@ namespace Microsoft.Identity.Client.Cache.Items
         private Lazy<IiOSKey> iOSCacheKeyLazy;
         public IiOSKey iOSCacheKey => iOSCacheKeyLazy.Value;
 
+        internal MsalRefreshTokenCacheItem CloneForSnapshot()
+        {
+            return new MsalRefreshTokenCacheItem(
+                Environment ?? "", ClientId ?? "", Secret ?? "",
+                RawClientInfo ?? "", FamilyId ?? "", HomeAccountId ?? "",
+                AdditionalCacheKeyComponents is null ? null :
+                    new SortedList<string, string>(AdditionalCacheKeyComponents))
+            {
+                OboCacheKey = OboCacheKey ?? "",
+                CredentialType = CredentialType ?? "",
+                AdditionalFieldsJson = AdditionalFieldsJson
+            };
+        }
+
         internal static MsalRefreshTokenCacheItem FromJsonString(string json)
         {
             if (string.IsNullOrWhiteSpace(json))

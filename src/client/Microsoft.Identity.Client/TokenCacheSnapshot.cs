@@ -40,22 +40,22 @@ namespace Microsoft.Identity.Client
             }
             foreach (var item in accessor.GetAllRefreshTokens())
             {
-                var copy = CacheSnapshotCloner.Clone(item);
+                var copy = item.CloneForSnapshot();
                 _state.RefreshTokens[copy.CacheKey] = copy;
             }
             foreach (var item in accessor.GetAllIdTokens())
             {
-                var copy = CacheSnapshotCloner.Clone(item);
+                var copy = item.CloneForSnapshot();
                 _state.IdTokens[copy.CacheKey] = copy;
             }
             foreach (var item in accessor.GetAllAccounts())
             {
-                var copy = CacheSnapshotCloner.Clone(item);
+                var copy = item.CloneForSnapshot();
                 _state.Accounts[copy.CacheKey] = copy;
             }
             foreach (var item in accessor.GetAllAppMetadata())
             {
-                var copy = CacheSnapshotCloner.Clone(item);
+                var copy = item.CloneForSnapshot();
                 _state.AppMetadata[copy.CacheKey] = copy;
             }
         }
@@ -78,19 +78,19 @@ namespace Microsoft.Identity.Client
             }
             foreach (var item in _state.RefreshTokens.Values)
             {
-                accessor.SaveRefreshToken(CacheSnapshotCloner.Clone(item));
+                accessor.SaveRefreshToken(item.CloneForSnapshot());
             }
             foreach (var item in _state.IdTokens.Values)
             {
-                accessor.SaveIdToken(CacheSnapshotCloner.Clone(item));
+                accessor.SaveIdToken(item.CloneForSnapshot());
             }
             foreach (var item in _state.Accounts.Values)
             {
-                accessor.SaveAccount(CacheSnapshotCloner.Clone(item));
+                accessor.SaveAccount(item.CloneForSnapshot());
             }
             foreach (var item in _state.AppMetadata.Values)
             {
-                accessor.SaveAppMetadata(CacheSnapshotCloner.Clone(item));
+                accessor.SaveAppMetadata(item.CloneForSnapshot());
             }
             return CloneUnknownNodes(_state.UnknownNodes);
         }
