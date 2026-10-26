@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             AssertJsonEqual(expected, second.SerializeMsalV3());
             var token = ((ITokenCacheInternal)second).Accessor.GetAllAccessTokens().Single();
             Assert.IsFalse(token.IsExtendedLifeTimeToken);
-            Assert.DoesNotContain(token.ScopeSet, "injected");
+            Assert.DoesNotContain("injected", token.ScopeSet);
         }
 
         [TestMethod]
