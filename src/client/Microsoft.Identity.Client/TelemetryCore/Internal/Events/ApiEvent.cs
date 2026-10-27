@@ -50,6 +50,17 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
             CorrelationId = correlationId;
         }
 
+        internal ApiEvent CreateBackgroundEvent()
+        {
+            var background = (ApiEvent)MemberwiseClone();
+            background.CacheInfo = CacheRefreshReason.ProactivelyRefreshed;
+            background.IsAccessTokenCacheHit = false;
+            background.CacheLevel = CacheLevel.None;
+            background.DurationInCacheInMs = 0;
+            background.DurationInHttpInMs = 0;
+            return background;
+        }
+
         public Guid CorrelationId { get; set; }
 
         public ApiIds ApiId { get; set; }

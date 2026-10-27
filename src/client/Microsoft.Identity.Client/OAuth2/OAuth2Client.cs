@@ -40,6 +40,7 @@ namespace Microsoft.Identity.Client.OAuth2
         private readonly IDictionary<string, string> _bodyParameters = new Dictionary<string, string>();
         private readonly IHttpManager _httpManager;
         private readonly X509Certificate2 _mtlsCertificate;
+        internal MsalServiceException LastHttpServiceException { get; private set; }
 
         public OAuth2Client(ILoggerAdapter logger, IHttpManager httpManager, X509Certificate2 mtlsCertificate)
         {
@@ -123,6 +124,7 @@ namespace Microsoft.Identity.Client.OAuth2
             CancellationToken? cancellationToken = null,
             IRetryPolicy retryPolicy = null)
         {
+            LastHttpServiceException = null;
             //Requests that are replayed by PKeyAuth do not need to have headers added because they already exist
             if (addCommonHeaders)
             {
@@ -137,6 +139,7 @@ namespace Microsoft.Identity.Client.OAuth2
                 IRetryPolicyFactory retryPolicyFactory = requestContext.ServiceBundle.Config.RetryPolicyFactory;
                 IRetryPolicy effectiveRetryPolicy = retryPolicy ?? retryPolicyFactory.GetRetryPolicy(RequestType.STS);
                 CancellationToken effectiveCancellationToken = cancellationToken ?? requestContext.UserCancellationToken;
+                bool sendingHttpRequest = false;
 
                 try
                 {
@@ -155,6 +158,7 @@ namespace Microsoft.Identity.Client.OAuth2
                             endpointUri = requestData.RequestUri;
                         }
 
+                        sendingHttpRequest = true;
                         response = await _httpManager.SendRequestAsync(
                             endpointUri,
                             _headers,
@@ -170,6 +174,7 @@ namespace Microsoft.Identity.Client.OAuth2
                     }
                     else
                     {
+                        sendingHttpRequest = true;
                         response = await _httpManager.SendRequestAsync(
                             endpointUri,
                             _headers,
@@ -186,6 +191,10 @@ namespace Microsoft.Identity.Client.OAuth2
                 }
                 catch (Exception ex)
                 {
+                    if (sendingHttpRequest && ex is MsalServiceException serviceException)
+                    {
+                        LastHttpServiceException = serviceException;
+                    }
                     if (requestContext.ApiEvent != null)
                     {
                         requestContext.ApiEvent.DurationInHttpInMs += _httpManager.LastRequestDurationInMs;
@@ -250,7 +259,15 @@ namespace Microsoft.Identity.Client.OAuth2
                 }
             }
 
-            return CreateResponse<T>(response, requestContext);
+            try
+            {
+                return CreateResponse<T>(response, requestContext);
+            }
+            catch (MsalServiceException ex)
+            {
+                LastHttpServiceException = ex;
+                throw;
+            }
         }
 
         internal void AddBodyParameter(KeyValuePair<string, string> kvp)

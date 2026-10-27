@@ -76,8 +76,29 @@ coordinate equivalent concurrent acquisitions within the process. The acquiring
 request publishes through the existing token cache; waiting callers recheck their own cache
 and receive their own `AuthenticationResult`. Warm cache hits do not wait. When a usable token
 is due for proactive refresh, callers receive it immediately while one eligible refresh runs.
-Canceling a waiter does not cancel another caller's acquisition. An acquisition failure is not
-shared with waiters; a subsequent caller can acquire using its own configuration.
+Canceling a waiter does not cancel another caller's acquisition. Direct and AppTokenProvider
+client-credential acquisitions have separate gates, including when a provider forwards a
+same-scope request to a direct client using the shared cache. Callback-driven acquisitions
+coordinate only within the same application instance and configured acquisition strategy:
+app token providers, dynamic certificate/assertion credentials, service-failure callbacks,
+and ordered request-modification callbacks distinguish strategies by object identity.
+Different strategies acquire their own gates, including for nested acquisitions; nesting
+does not bypass a live admission. A callback must not await a same-strategy acquisition
+that depends on its own publication. Completion-only observers do not distinguish strategies.
+Admission is released before completion callbacks, and proactive refresh owns separate
+telemetry from the foreground cache result.
+
+For eligible coordinated confidential-client acquisitions, a final direct token-endpoint
+HTTP 429 or 5xx response without `Retry-After` is cached for 60 seconds using the existing
+throttling infrastructure. This failure cache is scoped to the application instance and
+equivalent operation, not the shared token cache. Followers receive independent
+`MsalThrottledServiceException` wrappers carrying the original service error. A usable cached
+token takes precedence, including while proactive refresh is throttled. Existing HTTP retries
+and `Retry-After` enforcement are unchanged. Cache-bypass operations do not use this new policy.
+Credential errors (`invalid_client`, `invalid_grant`), claims challenges, cancellation,
+network errors, HTTP timeouts, and arbitrary provider or request-callback failures are not
+cached by this policy. Such failures can still cause successive acquisitions; coordination
+does not bound the latency of repeated timeouts or hung callbacks.
 
 No new configuration is required. Coordination is scoped to the existing cache instance, or
 the existing shared in-memory cache when enabled. It does not change cache callbacks, loading,
@@ -113,6 +134,20 @@ No extra requests or persistent storage are introduced. AppTokenProvider operati
 counted locally but may never traverse MSAL's ESTS HTTP path to report them.
 ESTS must support the two optional trailing fields before they can be used in server-side
 reporting; ingestion and server-side validation are not part of this SDK implementation.
+
+### Rollout and rollback
+
+Start with a canary deployment of the package version containing this change before widening
+deployment. Compare token-acquisition failures, throttling, latency, cache-hit rate, and
+token-endpoint traffic with the previously deployed version under equivalent workloads.
+Include concurrent cache misses, proactive refresh, and application callbacks in canary
+coverage. Do not rely on the new aggregate counters until ESTS ingestion supports them.
+Pause rollout if authentication failures, latency, or cache behavior regress.
+
+There is no runtime feature flag for coordination or its scoped failure cache. To roll back,
+pin the previously deployed MSAL.NET package version, restore dependencies, and redeploy
+affected applications. Cache serialization is unchanged; rollback does not require clearing
+the persisted token cache.
 
 ## Where do I file issues
 

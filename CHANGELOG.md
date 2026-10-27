@@ -5,6 +5,10 @@
 
 - Added opt-in reduced token-acquisition logging: set `MSAL_REDUCED_LOGGING=true` (or `1`) before application construction to move selected routine Information-level diagnostics to Verbose. Existing logging behavior is unchanged by default; acquisition summaries, warnings, and errors remain unchanged. [#6208](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6208) [#6224](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6224)
 
+### Bug Fixes
+
+- Coalesced equivalent cache-eligible confidential-client token acquisitions and proactive refreshes, preserving per-caller cache validation, callback composition, cancellation, and refresh metadata. Added aggregate `coalesced_requests` and `successful_acquisitions` fields to `x-client-current-telemetry`. Final direct token-endpoint HTTP 429 or 5xx failures without `Retry-After` are throttled for 60 seconds per application and operation; cache bypass, provider failures, network errors, and timeouts are excluded. [#6239](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6239)
+
 4.91.0
 ======
 

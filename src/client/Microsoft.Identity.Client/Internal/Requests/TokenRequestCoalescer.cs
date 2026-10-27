@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -10,20 +11,28 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.OAuth2.Throttling;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
     /// <summary>
     /// Coordinates acquisition, not results. Every admitted caller uses its existing cache session.
-    /// No token, exception, or completed operation is retained by the coordinator.
+    /// Tokens and completed operations are not retained; eligible service failures use throttling.
     /// </summary>
     internal sealed class TokenRequestCoalescer
     {
         private static readonly ConditionalWeakTable<object, GatePool> s_cacheGates = new ConditionalWeakTable<object, GatePool>();
         private static readonly object s_sharedCache = new object();
+        private static readonly ConditionalWeakTable<IServiceBundle, ThrottlingCache> s_failureCaches =
+            new ConditionalWeakTable<IServiceBundle, ThrottlingCache>();
+        private static readonly ConditionalWeakTable<object, StrategyIdentity> s_strategyIdentities =
+            new ConditionalWeakTable<object, StrategyIdentity>();
+        private static long s_nextStrategyId;
         private readonly GatePool _pool;
         private readonly string _key;
+        private readonly ThrottlingCache _failureCache;
         private readonly AuthenticationRequestParameters _parameters;
         private readonly CacheRefreshReason _initialRefreshReason;
         private readonly Func<Task<MsalAccessTokenCacheItem>> _findToken;
@@ -47,20 +56,26 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 : parameters.CacheSessionManager.TokenCacheInternal;
             _pool = s_cacheGates.GetValue(cache, _ => new GatePool());
             _key = CreateKey(parameters, flow, tokenHashToRefresh);
+            _failureCache = GetFailureCache(parameters.RequestContext.ServiceBundle);
         }
+
+        internal static ThrottlingCache GetFailureCache(IServiceBundle serviceBundle) =>
+            s_failureCaches.GetValue(serviceBundle, _ => new ThrottlingCache());
+
+        internal RequestContext RequestContext => _parameters.RequestContext;
 
         internal async Task<AuthenticationResult> ExecuteAsync(
             Func<Task<AuthenticationResult>> acquire,
             CancellationToken cancellationToken)
         {
-            using (await _pool.EnterAsync(_key, cancellationToken).ConfigureAwait(false))
+            using (var admission = await _pool.EnterAsync(_key, cancellationToken).ConfigureAwait(false))
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                return await ExecuteUnderGateAsync(acquire, null, cancellationToken).ConfigureAwait(false);
+                return await ExecuteUnderGateAsync(acquire, null, cancellationToken, admission).ConfigureAwait(false);
             }
         }
 
-        internal IDisposable TryEnter()
+        internal GatePool.Lease TryEnter()
         {
             var admission = _pool.TryEnter(_key);
             if (admission is null)
@@ -75,6 +90,32 @@ namespace Microsoft.Identity.Client.Internal.Requests
         /// another cache result or invoking its formatting and telemetry callbacks.
         /// </summary>
         internal async Task<AuthenticationResult> ExecuteUnderGateAsync(
+            Func<Task<AuthenticationResult>> acquire,
+            MsalAccessTokenCacheItem observedToken,
+            CancellationToken cancellationToken,
+            GatePool.Lease admission = null)
+        {
+            _parameters.ReleaseCoalescingAdmission = exception =>
+            {
+                // Publish a final eligible failure before observers can start another acquisition.
+                if (exception is MsalServiceException serviceException)
+                {
+                    RecordServiceFailure(serviceException, cancellationToken);
+                    _parameters.LastTokenEndpointServiceException = null;
+                }
+                admission?.Dispose();
+            };
+            try
+            {
+                return await ExecuteCoreAsync(acquire, observedToken, cancellationToken).ConfigureAwait(false);
+            }
+            finally
+            {
+                _parameters.ReleaseCoalescingAdmission = null;
+            }
+        }
+
+        private async Task<AuthenticationResult> ExecuteCoreAsync(
             Func<Task<AuthenticationResult>> acquire,
             MsalAccessTokenCacheItem observedToken,
             CancellationToken cancellationToken)
@@ -100,12 +141,63 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 // still a proactive acquisition, not a new foreground miss.
                 _parameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.ProactivelyRefreshed;
             }
-            var acquired = await acquire().ConfigureAwait(false);
+            else if (_parameters.RequestContext.ApiEvent.CacheInfo == CacheRefreshReason.NotApplicable)
+            {
+                _parameters.RequestContext.ApiEvent.CacheInfo = _initialRefreshReason;
+            }
+
+            var logger = _parameters.RequestContext.Logger;
+            if (_parameters.AppConfig.IsConfidentialClient)
+            {
+                ThrottleCommon.TryThrowServiceException(_key, _failureCache, logger, nameof(TokenRequestCoalescer));
+            }
+            AuthenticationResult acquired;
+            _parameters.LastTokenEndpointServiceException = null;
+            try
+            {
+                acquired = await acquire().ConfigureAwait(false);
+            }
+            catch (MsalServiceException ex)
+            {
+                RecordServiceFailure(ex, cancellationToken);
+                throw;
+            }
+            finally
+            {
+                _parameters.LastTokenEndpointServiceException = null;
+            }
             if (acquired.AuthenticationResultMetadata.TokenSource == TokenSource.IdentityProvider)
             {
                 _parameters.RequestContext.ServiceBundle.HttpTelemetryManager.RecordSuccessfulAcquisition(_initialRefreshReason);
             }
             return acquired;
+        }
+
+        private void RecordServiceFailure(MsalServiceException ex, CancellationToken cancellationToken)
+        {
+            if (_parameters.AppConfig.IsConfidentialClient &&
+                ReferenceEquals(ex, _parameters.LastTokenEndpointServiceException) &&
+                !cancellationToken.IsCancellationRequested &&
+                (ex.StatusCode == 429 || (ex.StatusCode >= 500 && ex.StatusCode < 600)) &&
+                ex is not MsalUiRequiredException &&
+                !string.Equals(ex.ErrorCode, MsalError.InvalidClient, StringComparison.OrdinalIgnoreCase) &&
+                !string.Equals(ex.ErrorCode, MsalError.InvalidGrantError, StringComparison.OrdinalIgnoreCase) &&
+                string.IsNullOrEmpty(ex.Claims) &&
+                !RetryAfterProvider.TryGetRetryAfterValue(ex.Headers, out _))
+            {
+                // Followers can observe the failure before RequestBase assigns the owner's correlation ID.
+                if (string.IsNullOrWhiteSpace(ex.CorrelationId))
+                {
+                    ex.CorrelationId = _parameters.CorrelationId.ToString();
+                }
+                _failureCache.AddAndCleanup(_key,
+                    new ThrottlingCacheEntry(ex, HttpStatusProvider.s_throttleDuration), _parameters.RequestContext.Logger);
+            }
+        }
+
+        private sealed class StrategyIdentity
+        {
+            internal string Id { get; } = Interlocked.Increment(ref s_nextStrategyId).ToString(CultureInfo.InvariantCulture);
         }
 
         private static bool IsSameGeneration(MsalAccessTokenCacheItem current, MsalAccessTokenCacheItem observed)
@@ -123,8 +215,33 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 key.Append(value?.Length ?? -1).Append(':').Append(value);
             }
+            void AddIdentity(object value)
+            {
+                Add(value is null ? null : s_strategyIdentities.GetValue(value, _ => new StrategyIdentity()).Id);
+            }
 
             Add(flow);
+            var provider = parameters.IsClientCredentialRequest ? parameters.AppConfig.AppTokenProvider : null;
+            var credential = provider is null && parameters.AppConfig.ClientCredential?.HasRequestCallback == true
+                ? parameters.AppConfig.ClientCredential : null;
+            var failureCallback = parameters.IsClientCredentialRequest ? parameters.AppConfig.OnMsalServiceFailure : null;
+            var requestCallbacks = parameters.OnBeforeTokenRequestHandler;
+            bool hasCallbacks = provider is not null || credential is not null || failureCallback is not null ||
+                requestCallbacks?.Count > 0;
+            // Only ordinary direct acquisitions coordinate across applications. Callback identity is
+            // reference identity, never an inference about equivalent delegate implementations.
+            AddIdentity(hasCallbacks ? parameters.RequestContext.ServiceBundle : null);
+            AddIdentity(provider);
+            AddIdentity(credential);
+            AddIdentity(failureCallback);
+            if (requestCallbacks is not null)
+            {
+                foreach (var callback in requestCallbacks)
+                {
+                    AddIdentity(callback);
+                }
+            }
+            Add(null);
             Add(parameters.AuthorityManager.OriginalAuthority.AuthorityInfo.CanonicalAuthority.AbsoluteUri.ToLowerInvariant());
             Add(parameters.AppConfig.ClientId);
             Add(CacheKeyFactory.GetKeyFromRequest(parameters));
@@ -182,7 +299,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
             }
 
-            internal async Task<IDisposable> EnterAsync(string key, CancellationToken cancellationToken)
+            internal async Task<Lease> EnterAsync(string key, CancellationToken cancellationToken)
             {
                 Entry entry;
                 lock (_entries)
@@ -203,7 +320,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
             }
 
-            internal IDisposable TryEnter(string key)
+            internal Lease TryEnter(string key)
             {
                 lock (_entries)
                 {
@@ -244,13 +361,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
             }
 
-            private sealed class Entry
+            internal sealed class Entry
             {
                 internal readonly SemaphoreSlim Semaphore = new SemaphoreSlim(1, 1);
                 internal int References;
             }
 
-            private sealed class Lease : IDisposable
+            internal sealed class Lease : IDisposable
             {
                 private GatePool _pool;
                 private readonly string _key;
