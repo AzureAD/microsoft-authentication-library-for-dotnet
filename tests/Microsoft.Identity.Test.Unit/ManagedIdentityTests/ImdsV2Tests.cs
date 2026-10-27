@@ -1644,22 +1644,24 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
         #region Attestation Tests
         [TestMethod]
-        [DataRow("AzurePublicCloud", "https://attestation.microsoft.com/")]
-        [DataRow("azurepubliccloud", "https://attestation.microsoft.com/")]
-        [DataRow("AzureUSGovernmentCloud", "https://attestation.microsoftonline.us/")]
-        [DataRow("AzureChinaCloud", "https://attestation.partner.microsoftonline.cn/")]
-        [DataRow("AzureBleuCloud", "https://attestation.sovcloud-identity.fr/")]
-        [DataRow("AzureGermanCloud", "https://attestation.windows-ppe.net/")]
-        [DataRow("USSec", "https://attestation.windows-ppe.net/")]
-        [DataRow("USNat", "https://attestation.windows-ppe.net/")]
-        [DataRow("AzureStack", "https://attestation.windows-ppe.net/")]
-        [DataRow("AzureDelosCloud", "https://attestation.windows-ppe.net/")]
-        [DataRow("AzureGovSGCloud", "https://attestation.windows-ppe.net/")]
-        [DataRow("UnknownCloud", "https://attestation.windows-ppe.net/")]
-        [DataRow("", "https://attestation.windows-ppe.net/")]
-        [DataRow(null, "https://attestation.windows-ppe.net/")]
-        public async Task AttestationProvider_ReceivesCloudEndpointOrOriginalFallback(
+        [DataRow("AzurePublicCloud", "westus2", "https://westus2.attestation.microsoft.com/")]
+        [DataRow("AzurePublicCloud", "eastus2", "https://eastus2.attestation.microsoft.com/")]
+        [DataRow("azurepubliccloud", "westus2", "https://westus2.attestation.microsoft.com/")]
+        [DataRow("AzureUSGovernmentCloud", "usgovvirginia", "https://usgovvirginia.attestation.microsoftonline.us/")]
+        [DataRow("AzureChinaCloud", "chinanorth", "https://chinanorth.attestation.partner.microsoftonline.cn/")]
+        [DataRow("AzureBleuCloud", "region1", "https://region1.attestation.sovcloud-identity.fr/")]
+        [DataRow("AzureGermanCloud", "region1", "https://attestation.windows-ppe.net/")]
+        [DataRow("USSec", "region1", "https://attestation.windows-ppe.net/")]
+        [DataRow("USNat", "region1", "https://attestation.windows-ppe.net/")]
+        [DataRow("AzureStack", "region1", "https://attestation.windows-ppe.net/")]
+        [DataRow("AzureDelosCloud", "region1", "https://attestation.windows-ppe.net/")]
+        [DataRow("AzureGovSGCloud", "region1", "https://attestation.windows-ppe.net/")]
+        [DataRow("UnknownCloud", "region1", "https://attestation.windows-ppe.net/")]
+        [DataRow("", "region1", "https://attestation.windows-ppe.net/")]
+        [DataRow(null, "region1", "https://attestation.windows-ppe.net/")]
+        public async Task AttestationProvider_ReceivesRegionalCloudEndpointOrOriginalFallback(
             string azureEnvironment,
+            string location,
             string expectedEndpoint)
         {
             // Arrange
@@ -1683,7 +1685,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 };
                 httpManager.AddMockHandler(MockHelpers.MockCsrResponse(
                     attestationEndpointOverride: "https://attestation.windows-ppe.net"));
-                var computeHandler = MockHelpers.MockImdsComputeMetadata(azureEnvironment: azureEnvironment);
+                var computeHandler = MockHelpers.MockImdsComputeMetadata(azureEnvironment: azureEnvironment, location: location);
                 computeHandler.ExpectedQueryParams = new Dictionary<string, string> { { "api-version", "2021-02-01" } };
                 computeHandler.ExpectedRequestHeaders = new Dictionary<string, string> { { "Metadata", "true" } };
                 httpManager.AddMockHandler(computeHandler);

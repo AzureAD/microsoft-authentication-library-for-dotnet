@@ -466,6 +466,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
 
             string resolvedAttestationEndpoint = ImdsComputeMetadataManager.ResolveAttestationEndpoint(
                 computeMetadata?.AzureEnvironment,
+                computeMetadata?.Location,
                 attestationEndpoint.AbsoluteUri,
                 _requestContext.Logger);
 

@@ -76,27 +76,28 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         internal static string ResolveAttestationEndpoint(
             string azureEnvironment,
+            string location,
             string imdsAttestationEndpoint,
             ILoggerAdapter logger)
         {
             if (string.Equals(azureEnvironment, "AzurePublicCloud", StringComparison.OrdinalIgnoreCase))
             {
-                return "https://attestation.microsoft.com";
+                return $"https://{location}.attestation.microsoft.com";
             }
 
             if (string.Equals(azureEnvironment, "AzureUSGovernmentCloud", StringComparison.OrdinalIgnoreCase))
             {
-                return "https://attestation.microsoftonline.us";
+                return $"https://{location}.attestation.microsoftonline.us";
             }
 
             if (string.Equals(azureEnvironment, "AzureChinaCloud", StringComparison.OrdinalIgnoreCase))
             {
-                return "https://attestation.partner.microsoftonline.cn";
+                return $"https://{location}.attestation.partner.microsoftonline.cn";
             }
 
             if (string.Equals(azureEnvironment, "AzureBleuCloud", StringComparison.OrdinalIgnoreCase))
             {
-                return "https://attestation.sovcloud-identity.fr";
+                return $"https://{location}.attestation.sovcloud-identity.fr";
             }
 
             logger.Info("[Managed Identity] Azure environment is missing or unsupported. " +
