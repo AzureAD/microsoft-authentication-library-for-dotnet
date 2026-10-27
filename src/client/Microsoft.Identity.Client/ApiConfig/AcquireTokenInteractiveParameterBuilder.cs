@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Client
         /// or the system default browser. If the broker (WAM, Authenticator, Company Portal) is configured, 
         /// this setting is only used when the broker is not installed.
         /// 
-        /// On .NET, including net8-windows, app developers must reference Microsoft.Identity.Client.Desktop
+        /// On .NET, including net10-windows, app developers must reference Microsoft.Identity.Client.Desktop
         /// and call PublicClientApplicationBuilder.WithDesktopFeatures() to enable the embedded web browser.
         /// 
         /// </summary>
@@ -240,7 +240,7 @@ namespace Microsoft.Identity.Client
             }
 #endif
 
-#if NET_CORE
+#if NET_CORE || NETSTANDARD2_1
             // Handle WinUI3 Window objects (including derived types)
             if (parent != null && IsWinUI3Window(parent))
             {
@@ -250,7 +250,7 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
-#if NET_CORE
+#if NET_CORE || NETSTANDARD2_1
         private static readonly Type WinUIWindowType = Type.GetType("Microsoft.UI.Xaml.Window, Microsoft.WinUI");
 
         /// <summary>

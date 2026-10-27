@@ -12,7 +12,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
     {
         internal static (string csrPem, RSA privateKey) Generate(RSA rsa, string clientId, string tenantId, CuidInfo cuid)
         {
-            // Use custom polyfill for downlevel frameworks (net462, net472, netstandard2.0)
+            // Use custom polyfill for .NET Framework and .NET Standard assets.
             // See CertificateRequest.cs
             var req = new CertificateRequest(
                 new X500DistinguishedName($"CN={clientId}, DC={tenantId}"),

@@ -10,6 +10,7 @@ using Microsoft.Identity.Client;
 [assembly: InternalsVisibleTo("Microsoft.Identity.Client.KeyAttestation" + KeyTokens.MSAL)]
 
 [assembly: InternalsVisibleTo("Microsoft.Identity.Test.Unit" + KeyTokens.MSAL)]
+[assembly: InternalsVisibleTo("Microsoft.Identity.Test.Compatibility" + KeyTokens.MSAL)]
 [assembly: InternalsVisibleTo("Microsoft.Identity.Lab.Api" + KeyTokens.MSAL)]
 [assembly: InternalsVisibleTo("Microsoft.Identity.Test.SideBySide" + KeyTokens.MSAL)]
 [assembly: InternalsVisibleTo("Microsoft.Identity.Test.Integration.NetCore" + KeyTokens.MSAL)]

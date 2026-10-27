@@ -2,9 +2,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworkNetDesktop48>net48</TargetFrameworkNetDesktop48>
-    <TargetFrameworkNet>net8.0</TargetFrameworkNet>
+    <TargetFrameworkNet>net10.0</TargetFrameworkNet>
 
-    <TargetFrameworks>$(TargetFrameworkNetDesktop48);$(TargetFrameworkNet)</TargetFrameworks>
+    <TargetFrameworks>$(TargetFrameworkNet)</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworkNetDesktop48);$(TargetFrameworkNet)</TargetFrameworks>
     <IsPackable>false</IsPackable>
 
     <Configurations>Debug;Release;Debug + MobileApps</Configurations>
@@ -40,10 +41,10 @@
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" />
     <!-- This reference is a workaround for a bug in .net46
     https://stackoverflow.com/questions/45563560/could-not-load-file-or-assembly-system-net-http-version-4-1-1-1-net-standard-->
-    <PackageReference Include="System.Net.Http" />
+    <PackageReference Include="System.Net.Http" Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop48)'" />
     <PackageReference Include="System.IO.FileSystem.AccessControl" />
     <PackageReference Include="Selenium.WebDriver" />
-    <PackageReference Include="System.Formats.Asn1" />
+    <PackageReference Include="System.Formats.Asn1" Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop48)'" />
 
     <PackageReference Include="coverlet.collector">
       <PrivateAssets>all</PrivateAssets>
@@ -73,6 +74,11 @@
   </ItemGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet)'">
     <DefineConstants>$(DefineConstants);NET_CORE</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet)'">
+    <!-- Existing compatibility tests intentionally exercise legacy certificate-loading
+         and ServicePointManager APIs that are obsolete in .NET 10. -->
+    <WarningsNotAsErrors>$(WarningsNotAsErrors);SYSLIB0014;SYSLIB0057</WarningsNotAsErrors>
   </PropertyGroup>
 
 </Project>

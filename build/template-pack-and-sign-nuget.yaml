@@ -16,9 +16,14 @@ steps:
     search_root: '${{ parameters.ProjectRootPath }}\${{ parameters.AssemblyName }}'
   condition: and(succeeded(), eq(variables['PipelineType'], 'OneBranch'))
 
-- task: VSBuild@1
+- task: DotNetCoreCLI@2
   displayName: 'Pack ${{ parameters.ProjectPath }}'
   inputs:
-    solution: '${{ parameters.ProjectRootPath }}\${{ parameters.AssemblyName }}\${{ parameters.AssemblyName }}.csproj'
-    msbuildArgs: '/t:pack /p:nobuild=${{parameters.NoBuild}} /p:IncludeSymbols=true'
-    configuration: ${{ parameters.BuildConfiguration }}
+    command: 'custom'
+    custom: 'msbuild'
+    arguments: >
+      "${{ parameters.ProjectRootPath }}\${{ parameters.AssemblyName }}\${{ parameters.AssemblyName }}.csproj"
+      /t:pack
+      /p:NoBuild=${{ parameters.NoBuild }}
+      /p:IncludeSymbols=true
+      /p:Configuration=${{ parameters.BuildConfiguration }}

@@ -21,6 +21,25 @@ The following table lists MSAL.NET versions currently supported and receiving se
 | --------------|--------------|--------|------------|--------|
 | 4.x           | [![NuGet](https://img.shields.io/nuget/v/microsoft.identity.client.svg?style=flat-square&label=nuget&colorB=00b200)](https://www.nuget.org/packages/Microsoft.Identity.Client/)   |Monthly| Active | Not planned.<br/>✅Supported versions: from 4.77.1 to [![NuGet](https://img.shields.io/nuget/v/microsoft.identity.client.svg?style=flat-square&label=nuget&colorB=00b200)](https://www.nuget.org/packages/Microsoft.Identity.Client/)<br/>⚠️Unsupported versions &lt; `4.77.1`.|
 
+### Target frameworks
+
+.NET 10 is the only modern .NET build target. The core library ships
+`netstandard2.0`, `netstandard2.1`, `net462`, and `net472` compatibility assets; Android and iOS
+targets use .NET 10. Building from source requires the SDK selected by
+`global.json` and the corresponding workloads when building mobile targets.
+
+There is no dedicated .NET 8 asset. Older .NET applications can resolve the
+`netstandard2.1` asset on .NET 8/9, preserving non-exportable certificate-key
+attachment, family refresh-token error/claims propagation, and WinUI3 parent-window
+handling, including the STA scheduler used by released WinUI3 extensions, without
+restoring an older modern build target. The `netstandard2.0`
+asset remains available for older compatible platforms. Token-cache snapshot APIs remain available
+in the compatibility assets, subject to their existing platform and cache-configuration
+restrictions; they do not require upgrading the application to .NET 10.
+
+The Linux devcontainer uses `LibsAndSamples.portable.slnf`. Windows CI uses
+`LibsAndSamples.sdk.slnf`, which also includes Windows-only samples.
+
 ### Performance perspectives
 
 [Our documentation](https://learn.microsoft.com/entra/msal/dotnet/advanced/performance-testing) describes the approach to performance testing.
