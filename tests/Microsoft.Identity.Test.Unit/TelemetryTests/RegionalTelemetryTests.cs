@@ -294,7 +294,11 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             Assert.HasCount(3, telemetryCategories);
             Assert.HasCount(1, telemetryCategories[0].Split(',')); // version
             Assert.HasCount(5, telemetryCategories[1].Split(',')); // api_id, cache_info, region_used, region_source, region_outcome
-            Assert.HasCount(6, telemetryCategories[2].Split(',')); // platform_fields
+            string cacheReason = telemetryCategories[1].Split(',')[1];
+            bool hasCoalescingCounts = cacheReason == CacheRefreshReason.Expired.ToString("D") ||
+                cacheReason == CacheRefreshReason.ProactivelyRefreshed.ToString("D") ||
+                cacheReason == CacheRefreshReason.NoCachedAccessToken.ToString("D");
+            Assert.HasCount(hasCoalescingCounts ? 8 : 6, telemetryCategories[2].Split(',')); // platform_fields
 
             Assert.AreEqual(TelemetryConstants.HttpTelemetrySchemaVersion.ToString(), telemetryCategories[0]); // version
 

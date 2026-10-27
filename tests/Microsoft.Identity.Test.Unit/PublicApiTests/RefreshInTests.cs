@@ -527,6 +527,16 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 .ConfigureAwait(false);
 
             Assert.IsTrue(TestCommon.YieldTillSatisfied(() => wasErrorLogged));
+            Assert.AreEqual(0, harness.HttpManager.QueueSize,
+                "Background refresh must still enter the existing instance-discovery path.");
+
+            // Cancellation must release admission so a later cache miss can acquire normally.
+            TestCommon.UpdateATWithRefreshOn(app.AppTokenCacheInternal.Accessor, expired: true);
+            harness.HttpManager.AddAllMocks(TokenResponseType.Valid_ClientCredentials);
+            var recovery = app.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync();
+            Assert.AreSame(recovery, await Task.WhenAny(recovery, Task.Delay(TimeSpan.FromSeconds(10))).ConfigureAwait(false));
+            Assert.AreEqual(TokenSource.IdentityProvider,
+                (await recovery.ConfigureAwait(false)).AuthenticationResultMetadata.TokenSource);
 
             void LocalLogCallback(LogLevel level, string message, bool containsPii)
             {

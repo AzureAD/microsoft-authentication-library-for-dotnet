@@ -92,15 +92,34 @@ namespace Microsoft.Identity.Client.Internal
             ApiEvent apiEvent,
             string callerSdkId,
             string callerSdkVersion,
-            Action<ExecutionResult, IList<KeyValuePair<string, object>>> tagsEnricher = null)
+            Action<ExecutionResult, IList<KeyValuePair<string, object>>> tagsEnricher = null,
+            TokenRequestCoalescer coalescer = null,
+            CancellationToken cancellationToken = default)
         {
+            var admission = coalescer?.TryEnter();
+            if (coalescer is not null && admission is null)
+            {
+                return;
+            }
+
             _ = Task.Run(async () =>
             {
                 try
                 {
                     var stopwatch = Stopwatch.StartNew();
-                    var authResult = await fetchAction().ConfigureAwait(false);
+                    AuthenticationResult authResult;
+                    using (admission)
+                    {
+                        authResult = coalescer is null
+                            ? await fetchAction().ConfigureAwait(false)
+                            : await coalescer.ExecuteUnderGateAsync(fetchAction, oldAccessToken, cancellationToken).ConfigureAwait(false);
+                    }
                     stopwatch.Stop();
+
+                    if (coalescer is not null && authResult is null)
+                    {
+                        return;
+                    }
 
                     // Proactive refresh runs outside RequestBase.RunAsync, so backfill the result's telemetry
                     // from the shared apiEvent using this operation's own elapsed time.

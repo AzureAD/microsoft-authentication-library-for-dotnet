@@ -68,6 +68,52 @@ MSAL.NET became Generally Available with MSAL.NET 3.0.8. Since MSAL.NET moved to
 - API documentation is available [on Microsoft Learn](https://learn.microsoft.com/dotnet/api/microsoft.identity.client)
 - Code samples are available from our [Samples](https://aka.ms/aaddevsamplesv2) page.
 
+## Concurrent token acquisition
+
+Cache-eligible confidential-client requests (client credentials, including app token providers,
+on-behalf-of, long-running on-behalf-of, and local silent acquisition)
+coordinate equivalent concurrent acquisitions within the process. The acquiring
+request publishes through the existing token cache; waiting callers recheck their own cache
+and receive their own `AuthenticationResult`. Warm cache hits do not wait. When a usable token
+is due for proactive refresh, callers receive it immediately while one eligible refresh runs.
+Canceling a waiter does not cancel another caller's acquisition. An acquisition failure is not
+shared with waiters; a subsequent caller can acquire using its own configuration.
+
+No new configuration is required. Coordination is scoped to the existing cache instance, or
+the existing shared in-memory cache when enabled. It does not change cache callbacks, loading,
+serialization, or storage, and it is not a distributed lock. Independently loaded in-memory
+snapshots backed by external persistence may not observe another request's publication and
+can still acquire separately. A successful equivalent single-leg burst needs one acquisition
+only when its publication is visible through the existing cache checks; retries and multi-leg
+exchanges can require additional requests. Different authority aliases or scope supersets
+are not guaranteed to coalesce.
+
+Public-client and managed-identity acquisition are unchanged; managed identity retains its
+existing semaphore and cache recheck, without the new proactive-refresh coordination.
+Force-refresh, claims-driven cache bypass, disabled
+caching, and default long-running OBO initiation retain their existing behavior; opt-in cache
+search for long-running initiation remains eligible. Binding and revoked-token validation
+still use the existing cache checks. Acquisition callbacks run for actual acquisitions, not
+for callers served from cache. Cache-validation extensions also run on post-admission
+cache rechecks.
+
+Coalescing effectiveness is reported through two aggregate counts appended to the third
+section of `x-client-current-telemetry`: `coalesced_requests` and `successful_acquisitions`.
+The first counts successful post-admission cache returns and suppressed proactive refresh
+attempts, even when the active refresh later fails. The second counts successful coordinated
+acquisitions, not individual HTTP attempts. Ordinary warm-cache hits and bypasses do not count.
+
+Counts are accumulated per application instance across initial expired, proactive, and
+missing-token reasons, then consumed by the next token request with one of those reasons.
+They describe prior operations, not the carrying request's reason, flow, or tenant, and are
+not an exact count of ESTS HTTP calls saved. SDK-managed HTTP retries and protocol replays
+send zero for these two fields rather than repeating a snapshot. Delivery is best-effort:
+failed sends, application disposal, or no subsequent eligible request can lose counts.
+No extra requests or persistent storage are introduced. AppTokenProvider operations are
+counted locally but may never traverse MSAL's ESTS HTTP path to report them.
+ESTS must support the two optional trailing fields before they can be used in server-side
+reporting; ingestion and server-side validation are not part of this SDK implementation.
+
 ## Where do I file issues
 
 You can file new issues in [this repository](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues).

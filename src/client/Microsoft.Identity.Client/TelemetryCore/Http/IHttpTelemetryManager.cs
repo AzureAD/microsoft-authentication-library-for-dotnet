@@ -16,8 +16,19 @@ namespace Microsoft.Identity.Client.TelemetryCore
     internal interface IHttpTelemetryManager
     {
         /// <summary>
-        /// Csv string with details about the current header (api used, force refresh flag)
+        /// CSV string describing the current request. Eligible refresh reasons also consume
+        /// the application's pending coalescing counters for a best-effort, first-attempt report.
         /// </summary>
         string GetCurrentRequestHeader(ApiEvent currentApiEvent);
+
+        /// <summary>
+        /// Records a post-admission cache result or a suppressed proactive refresh.
+        /// </summary>
+        void RecordCoalescedRequest(CacheRefreshReason initialReason);
+
+        /// <summary>
+        /// Records a successful coordinated acquisition, not individual HTTP attempts.
+        /// </summary>
+        void RecordSuccessfulAcquisition(CacheRefreshReason initialReason);
     }
 }

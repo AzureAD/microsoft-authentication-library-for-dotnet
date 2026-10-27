@@ -14,6 +14,8 @@ using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Instance.Oidc;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.TelemetryCore;
+using Microsoft.Identity.Client.TelemetryCore.Http;
 using Microsoft.Identity.Client.Utils;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client.Http.Retry;
@@ -205,6 +207,15 @@ namespace Microsoft.Identity.Client.OAuth2
                     requestContext.Logger.ErrorPii(ex);
 
                     throw;
+                }
+                finally
+                {
+                    // PKeyAuth and other protocol replays reuse this client's headers.
+                    if (_headers.TryGetValue(TelemetryConstants.XClientCurrentTelemetry, out string telemetry))
+                    {
+                        _headers[TelemetryConstants.XClientCurrentTelemetry] =
+                            HttpTelemetryManager.ClearCoalescingCounts(telemetry);
+                    }
                 }
             }
 
