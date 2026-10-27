@@ -1,10 +1,3 @@
-Unreleased
-==========
-
-### Bug Fixes
-
-- Default authentication-header resource probes no longer use ambient credentials. Applications requiring authenticated probes can continue supplying their own `HttpClient`.
-
 4.91.1
 ======
 
