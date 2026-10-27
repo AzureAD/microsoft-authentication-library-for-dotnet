@@ -14,7 +14,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.AuthScheme.PoP;
-#if !NET8_0
+#if !NET8_0_OR_GREATER
 using Microsoft.Identity.Client.Broker;
 #endif
 
@@ -155,7 +155,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
             }
         }
 
-#if !NET8_0
+#if !NET8_0_OR_GREATER
         [TestMethod]
         public async Task POP_WithMissingNonceForPCA_Async()
         {

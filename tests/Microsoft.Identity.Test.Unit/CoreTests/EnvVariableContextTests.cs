@@ -17,7 +17,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             Environment.SetEnvironmentVariable("var2", "val2");
             Environment.SetEnvironmentVariable("var3", "val3");
             Environment.SetEnvironmentVariable("var4", null);
-            Environment.SetEnvironmentVariable("var5", ""); // this is the same as null
+            Environment.SetEnvironmentVariable("var5", "");
+            string expectedVar5 = Environment.GetEnvironmentVariable("var5");
 
             using (new EnvVariableContext())
             {
@@ -33,7 +34,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             Assert.AreEqual("val2", Environment.GetEnvironmentVariable("var2"));
             Assert.AreEqual("val3", Environment.GetEnvironmentVariable("var3"));
             Assert.IsNull(Environment.GetEnvironmentVariable("var4"));
-            Assert.IsNull(Environment.GetEnvironmentVariable("var5"));
+            Assert.AreEqual(expectedVar5, Environment.GetEnvironmentVariable("var5"));
         }
     }
 }
