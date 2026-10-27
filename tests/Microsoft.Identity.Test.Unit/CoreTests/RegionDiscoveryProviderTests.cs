@@ -41,6 +41,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             base.TestInitialize();
 
             _environmentVariables = new EnvVariableContext();
+            Environment.SetEnvironmentVariable(TestConstants.RegionName, null);
             Environment.SetEnvironmentVariable("COSMIC_LOCATION", null);
             _harness = base.CreateTestHarness();
             _harness.ServiceBundle.Config.RetryPolicyFactory = _testRetryPolicyFactory;
@@ -60,7 +61,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         [TestCleanup]
         public override void TestCleanup()
         {
-            Environment.SetEnvironmentVariable(TestConstants.RegionName, "");
             _harness?.Dispose();
             _regionDiscoveryProvider = new RegionAndMtlsDiscoveryProvider(_httpManager);
             _httpManager.Dispose();

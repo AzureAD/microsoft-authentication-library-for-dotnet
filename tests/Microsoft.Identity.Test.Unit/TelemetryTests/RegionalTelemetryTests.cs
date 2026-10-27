@@ -23,6 +23,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
     public class RegionalTelemetryTests : TestBase
     {
         private MockHttpAndServiceBundle _harness;
+        private EnvVariableContext _environmentVariables;
         private readonly TestRetryPolicyFactory _testRetryPolicyFactory = new TestRetryPolicyFactory();
 
         [TestInitialize]
@@ -30,6 +31,9 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         {
             base.TestInitialize();
 
+            _environmentVariables = new EnvVariableContext();
+            Environment.SetEnvironmentVariable(TestConstants.RegionName, null);
+            Environment.SetEnvironmentVariable("COSMIC_LOCATION", null);
             _harness = CreateTestHarness();
             _harness.ServiceBundle.Config.RetryPolicyFactory = _testRetryPolicyFactory;
         }
@@ -37,8 +41,8 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         [TestCleanup]
         public override void TestCleanup()
         {
-            Environment.SetEnvironmentVariable(TestConstants.RegionName, null);
             _harness?.Dispose();
+            _environmentVariables.Dispose();
             base.TestCleanup();
         }
 
@@ -62,8 +66,6 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         [DataRow("COSMIC_LOCATION")]
         public async Task TelemetryAcceptanceTestAsync(string variableName)
         {
-            using var environmentVariables = new EnvVariableContext();
-            Environment.SetEnvironmentVariable(TestConstants.RegionName, null);
             Environment.SetEnvironmentVariable(variableName, TestConstants.Region);
 
             Trace.WriteLine("Step 1. Acquire Token For Client with region successful");
