@@ -457,6 +457,19 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                     "[ImdsV2] Credential Guard attestation currently supports only RSA CNG keys on Windows.");
             }
 
+            // Resolve only when attesting a newly minted binding, not on cache hits or unattested requests.
+            ComputeMetadataResponse computeMetadata = await ImdsComputeMetadataManager.GetComputeMetadataAsync(
+                _requestContext.ServiceBundle.HttpManager,
+                _requestContext.Logger,
+                cancellationToken: cancellationToken,
+                retryDelayCancellationToken: cancellationToken).ConfigureAwait(false);
+
+            string resolvedAttestationEndpoint = ImdsComputeMetadataManager.ResolveAttestationEndpoint(
+                computeMetadata?.AzureEnvironment,
+                computeMetadata?.Location,
+                attestationEndpoint.AbsoluteUri,
+                _requestContext.Logger);
+
             try
             {
                 // Call the attestation token provider delegate.
@@ -466,7 +479,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 // distinct ephemeral keys get distinct entries.
                 string keyId = rsaCng.Key.KeyName ?? GetPublicKeyFingerprint(rsaCng);
                 string attestationJwt = await _attestationTokenProvider(
-                    attestationEndpoint.AbsoluteUri,
+                    new Uri(resolvedAttestationEndpoint).AbsoluteUri,
                     rsaCng.Key.Handle,
                     tenantId,
                     keyId,
