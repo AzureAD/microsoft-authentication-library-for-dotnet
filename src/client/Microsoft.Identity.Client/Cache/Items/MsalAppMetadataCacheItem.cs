@@ -69,6 +69,15 @@ namespace Microsoft.Identity.Client.Cache.Items
         private Lazy<IiOSKey> iOSCacheKeyLazy;
         public IiOSKey iOSCacheKey => iOSCacheKeyLazy.Value;
 
+        internal MsalAppMetadataCacheItem CloneForSnapshot()
+        {
+            return new MsalAppMetadataCacheItem(
+                ClientId ?? "", Environment ?? "", FamilyId ?? "")
+            {
+                AdditionalFieldsJson = AdditionalFieldsJson
+            };
+        }
+
         internal static MsalAppMetadataCacheItem FromJsonString(string json)
         {
             if (string.IsNullOrWhiteSpace(json))
