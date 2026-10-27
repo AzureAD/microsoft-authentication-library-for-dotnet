@@ -13,6 +13,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity
     [Preserve(AllMembers = true)]
     internal class ComputeMetadataResponse
     {
+        /// <summary>Azure cloud environment used to select the attestation service.</summary>
+        [JsonProperty("azEnvironment")]
+        public string AzureEnvironment { get; set; }
+
         /// <summary>Operating system type (e.g., Windows, Linux).</summary>
         [JsonProperty("osType")]
         public string OsType { get; set; }
