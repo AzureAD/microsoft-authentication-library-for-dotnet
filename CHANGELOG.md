@@ -1,3 +1,22 @@
+4.92.0
+======
+
+### New Features
+
+- Added `COSMIC_LOCATION` as a regional auto-detection source, after `REGION_NAME` and before IMDS. [#6240](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6240)
+- Added `ITokenCacheSnapshotProvider` and `TokenCacheSnapshot` for process-local token-cache capture and restore without repeated JSON serialization. Use V3 serialization for persistence. [#6229](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6229)
+
+### Bug Fixes
+
+- Fixed certificate private-key attachment on .NET Framework 4.7.2 to support non-exportable CNG keys. [#6244](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6244)
+- Fixed managed identity KeyGuard attestation endpoint selection to use cloud-specific regional endpoints from IMDS compute metadata. [#6238](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6238)
+- Fixed Android broker request serialization by registering `BrokerRequest` in the source-generated JSON serializer context. [#6226](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6226)
+
+### Changes
+
+- Updated `Microsoft.Identity.Client.NativeInterop` from 0.20.6 to 0.20.7. [#6230](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6230)
+- Reduced OpenTelemetry metric-tag allocations using `TagList` and cached canonical tag-key sets. Custom enrichers should use noncanonical tag names. [#6227](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6227)
+
 4.91.1
 ======
 

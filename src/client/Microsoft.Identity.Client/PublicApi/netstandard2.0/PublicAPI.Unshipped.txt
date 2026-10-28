@@ -1,5 +1,0 @@
-Microsoft.Identity.Client.ITokenCacheSnapshotProvider
-Microsoft.Identity.Client.ITokenCacheSnapshotProvider.CreateSnapshot() -> Microsoft.Identity.Client.TokenCacheSnapshot
-Microsoft.Identity.Client.ITokenCacheSnapshotProvider.RestoreSnapshot(Microsoft.Identity.Client.TokenCacheSnapshot snapshot) -> void
-Microsoft.Identity.Client.TokenCacheSnapshot
-Microsoft.Identity.Client.TokenCacheSnapshot.SerializeMsalV3() -> byte[]
