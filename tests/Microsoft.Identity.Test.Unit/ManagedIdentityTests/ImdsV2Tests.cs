@@ -1612,6 +1612,81 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
         #region AttachPrivateKeyToCert Tests
         [TestMethod]
+        public void AttachPrivateKeyToCert_MismatchedKey_WrapsArgumentException()
+        {
+            // Arrange
+            using (RSA rsa = RSA.Create())
+            {
+                // Act
+                MsalServiceException exception = Assert.ThrowsExactly<MsalServiceException>(() =>
+                    CommonCryptographyManager.AttachPrivateKeyToCert(TestConstants.ValidRawCertificate, rsa));
+
+                // Assert
+                Assert.AreEqual(MsalError.InvalidCertificate, exception.ErrorCode);
+                Assert.IsInstanceOfType<ArgumentException>(exception.InnerException);
+            }
+        }
+
+        [TestMethod]
+        public void AttachPrivateKeyToCert_NonExportableCngKey_SignsAfterOriginalKeyIsDisposed()
+        {
+            if (!ImdsV2TestStoreCleaner.IsWindows)
+            {
+                Assert.Inconclusive("Non-exportable CNG keys require Windows.");
+            }
+
+            // Arrange
+            string keyName = "msal-attach-" + Guid.NewGuid().ToString("N");
+            CngKey key = CngKey.Create(CngAlgorithm.Rsa, keyName, new CngKeyCreationParameters
+            {
+                Provider = CngProvider.MicrosoftSoftwareKeyStorageProvider,
+                ExportPolicy = CngExportPolicies.None,
+                KeyUsage = CngKeyUsages.Signing
+            });
+
+            try
+            {
+                X509Certificate2 certificate;
+                using (key)
+                using (var rsa = new RSACng(key))
+                {
+                    Assert.IsFalse(key.IsEphemeral);
+                    Assert.Throws<CryptographicException>(() => rsa.ExportParameters(true));
+                    var request = new System.Security.Cryptography.X509Certificates.CertificateRequest(
+                        "CN=MSAL non-exportable key test", rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+                    using (X509Certificate2 issuedCertificate = request.CreateSelfSigned(
+                        DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddDays(1)))
+                    {
+                        // Act
+                        certificate = CommonCryptographyManager.AttachPrivateKeyToCert(
+                            Convert.ToBase64String(issuedCertificate.RawData), rsa);
+                    }
+                }
+
+                // Assert
+                using (certificate)
+                using (RSA privateKey = certificate.GetRSAPrivateKey())
+                using (RSA publicKey = certificate.GetRSAPublicKey())
+                {
+                    Assert.IsTrue(certificate.HasPrivateKey);
+                    Assert.IsNotNull(privateKey);
+                    byte[] data = { 1, 2, 3 };
+                    byte[] signature = privateKey.SignData(data, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+                    Assert.IsTrue(publicKey.VerifyData(
+                        data, signature, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1));
+                    Assert.Throws<CryptographicException>(() => privateKey.ExportParameters(true));
+                }
+            }
+            finally
+            {
+                using (CngKey persistedKey = CngKey.Open(keyName, CngProvider.MicrosoftSoftwareKeyStorageProvider))
+                {
+                    persistedKey.Delete();
+                }
+            }
+        }
+
+        [TestMethod]
         public void AttachPrivateKeyToCert_ValidInputs_ReturnsValidCertificate()
         {
             using (RSA rsa = RSA.Create())
