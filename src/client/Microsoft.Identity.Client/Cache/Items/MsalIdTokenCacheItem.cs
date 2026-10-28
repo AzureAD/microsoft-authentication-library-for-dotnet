@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Client.Cache.Items
         internal void InitCacheKey()
         {
             CacheKey = MsalCacheKeys.GetCredentialKey(
-                HomeAccountId,
+                GetHomeAccountIdKey(),
                 Environment,
                 StorageJsonValues.CredentialTypeIdToken,
                 ClientId,
@@ -69,7 +69,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         private IiOSKey InitiOSKey()
         {
-            string iOSAccount = MsalCacheKeys.GetiOSAccountKey(HomeAccountId, Environment);
+            string iOSAccount = MsalCacheKeys.GetiOSAccountKey(GetHomeAccountIdKey(), Environment);
 
             string iOSGeneric = MsalCacheKeys.GetiOSGenericKey(StorageJsonValues.CredentialTypeIdToken, ClientId, TenantId);
 
@@ -93,13 +93,16 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         internal MsalIdTokenCacheItem CloneForSnapshot()
         {
-            return new MsalIdTokenCacheItem(
+            var copy = new MsalIdTokenCacheItem(
                 Environment ?? "", ClientId ?? "", Secret ?? "",
                 RawClientInfo ?? "", HomeAccountId ?? "", TenantId ?? "")
             {
                 CredentialType = CredentialType ?? "",
+                SubjectKeyVersion = SubjectKeyVersion,
                 AdditionalFieldsJson = AdditionalFieldsJson
             };
+            copy.InitCacheKey();
+            return copy;
         }
 
         internal static MsalIdTokenCacheItem FromJsonString(string json)

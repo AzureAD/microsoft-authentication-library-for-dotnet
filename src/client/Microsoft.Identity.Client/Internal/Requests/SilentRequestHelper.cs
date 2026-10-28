@@ -50,6 +50,13 @@ namespace Microsoft.Identity.Client.Internal
                     "Refresh token was missing from the token refresh response, so the refresh token in the request is returned instead. ");
             }
 
+            // A refresh without identity metadata retains the redeemed credential's identity provenance.
+            if (msalTokenResponse.ClientInfo is null && msalTokenResponse.IdToken is null &&
+                !string.IsNullOrEmpty(msalRefreshTokenItem.RawClientInfo))
+            {
+                msalTokenResponse.ClientInfo = msalRefreshTokenItem.RawClientInfo;
+            }
+
             return msalTokenResponse;
         }
 

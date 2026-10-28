@@ -474,6 +474,8 @@ namespace Microsoft.Identity.Client
             Debug.Assert(partitionKey != null || !requestParams.AppConfig.IsConfidentialClient, "On confidential client, cache must be partitioned.");
 
             var accessTokens = Accessor.GetAllAccessTokens(partitionKey, logger);
+            accessTokens.FilterWithLogging(item => !item.IsLegacySubjectEntry, logger,
+                "Ignoring legacy subject-only access tokens; sign-in is required");
 
             requestParams.RequestContext.Logger.Always($"[FindAccessTokenAsync] Discovered {accessTokens.Count} access tokens in cache using partition key: {partitionKey}");
 
@@ -675,8 +677,8 @@ namespace Microsoft.Identity.Client
                 requestParams.ApiId != ApiEvent.ApiIds.AcquireTokenForUserAssignedManagedIdentity &&
                 !ApiEvent.IsOnBehalfOfRequest(requestParams.ApiId))
             {
-                tokenCacheItems.FilterWithLogging(item => item.HomeAccountId.Equals(
-                                requestParams.Account.HomeAccountId?.Identifier, StringComparison.OrdinalIgnoreCase),
+                tokenCacheItems.FilterWithLogging(item => item.MatchesHomeAccountId(
+                                requestParams.Account.HomeAccountId?.Identifier),
                                 requestParams.RequestContext.Logger,
                                 "Filtering AT by home account id");
             }
@@ -871,6 +873,8 @@ namespace Microsoft.Identity.Client
 
             var requestKey = CacheKeyFactory.GetKeyFromRequest(requestParams);
             var refreshTokens = Accessor.GetAllRefreshTokens(requestKey);
+            refreshTokens.FilterWithLogging(item => !item.IsLegacySubjectEntry, requestParams.RequestContext.Logger,
+                "Ignoring legacy subject-only refresh tokens; sign-in is required");
             requestParams.RequestContext.Logger.Always($"[FindRefreshTokenAsync] Discovered {refreshTokens.Count} refresh tokens in cache using key: {requestKey}");
 
             if (refreshTokens.Count != 0)
@@ -955,8 +959,8 @@ namespace Microsoft.Identity.Client
             }
             else
             {
-                cacheItems.FilterWithLogging(item => item.HomeAccountId.Equals(
-                                requestParams.Account.HomeAccountId?.Identifier, StringComparison.OrdinalIgnoreCase),
+                cacheItems.FilterWithLogging(item => item.MatchesHomeAccountId(
+                                requestParams.Account.HomeAccountId?.Identifier),
                                 requestParams.RequestContext.Logger,
                                 "Filtering RT by home account id");
             }
@@ -1032,6 +1036,14 @@ namespace Microsoft.Identity.Client
 
             var refreshTokenCacheItems = Accessor.GetAllRefreshTokens(partitionKey);
             var accountCacheItems = Accessor.GetAllAccounts(partitionKey);
+            refreshTokenCacheItems.FilterWithLogging(item => !item.IsLegacySubjectEntry, logger,
+                "[GetAccounts] Ignoring legacy subject-only refresh tokens; sign-in is required");
+
+            if (!string.IsNullOrEmpty(requestParameters.HomeAccountId))
+            {
+                accountCacheItems.FilterWithLogging(item => item.MatchesHomeAccountId(requestParameters.HomeAccountId),
+                    logger, "[GetAccounts] Filtering cached accounts by accountID", true);
+            }
 
             if (filterByClientId)
             {
@@ -1204,6 +1216,15 @@ namespace Microsoft.Identity.Client
         MsalIdTokenCacheItem ITokenCacheInternal.GetIdTokenCacheItem(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
         {
             var idToken = Accessor.GetIdToken(msalAccessTokenCacheItem);
+            if (idToken is not null &&
+                (idToken.IsLegacySubjectEntry ||
+                 !idToken.MatchesHomeAccountId(msalAccessTokenCacheItem.HomeAccountId) ||
+                 !msalAccessTokenCacheItem.MatchesHomeAccountId(idToken.HomeAccountId)))
+            {
+                ServiceBundle.ApplicationLogger.Warning("Ignoring an ID token with an unverified subject identity.");
+                return null;
+            }
+
             return idToken;
         }
 
@@ -1223,6 +1244,8 @@ namespace Microsoft.Identity.Client
             }
 
             var idTokenCacheItems = Accessor.GetAllIdTokens(homeAccountId);
+            idTokenCacheItems.FilterWithLogging(item => !item.IsLegacySubjectEntry, requestParameters.RequestContext.Logger,
+                "Ignoring legacy subject-only ID tokens; sign-in is required");
             FilterTokensByClientId(idTokenCacheItems);
 
             if (!requestParameters.AppConfig.MultiCloudSupportEnabled)
@@ -1272,7 +1295,19 @@ namespace Microsoft.Identity.Client
                         msalAccessTokenCacheItem.TenantId,
                         msalAccessTokenCacheItem.HomeAccountId,
                         account?.AccountSource,
-                        account?.Username));
+                        account?.Username)
+                {
+                    RawClientInfo = msalAccessTokenCacheItem.RawClientInfo,
+                    SubjectKeyVersion = msalAccessTokenCacheItem.SubjectKeyVersion
+                });
+
+            if (accountCacheItem is not null &&
+                (!accountCacheItem.MatchesHomeAccountId(msalAccessTokenCacheItem.HomeAccountId) ||
+                 !msalAccessTokenCacheItem.MatchesHomeAccountId(accountCacheItem.HomeAccountId)))
+            {
+                requestParameters.RequestContext.Logger.Warning("Ignoring an account record with a different subject identity.");
+                accountCacheItem = null;
+            }
 
             return new Account(
                 msalAccessTokenCacheItem.HomeAccountId,
@@ -1472,11 +1507,11 @@ namespace Microsoft.Identity.Client
             ILoggerAdapter logger = requestContext.Logger;
 
             var refreshTokens = Accessor.GetAllRefreshTokens(partitionKey, logger);
-            refreshTokens.RemoveAll(item => !item.HomeAccountId.Equals(partitionKey, StringComparison.OrdinalIgnoreCase));
+            refreshTokens.RemoveAll(item => !item.MatchesHomeAccountId(partitionKey));
             RemoveRefreshTokens(refreshTokens, logger, out bool filterByClientId);
 
             var accessTokens = Accessor.GetAllAccessTokens(partitionKey, logger);
-            accessTokens.RemoveAll(item => !item.HomeAccountId.Equals(partitionKey, StringComparison.OrdinalIgnoreCase));
+            accessTokens.RemoveAll(item => !item.MatchesHomeAccountId(partitionKey));
             RemoveAccessTokens(accessTokens, logger, filterByClientId);
 
             RemoveIdTokens(partitionKey, logger, filterByClientId);
@@ -1526,7 +1561,7 @@ namespace Microsoft.Identity.Client
         private int RemoveIdTokens(string partitionKey, ILoggerAdapter logger, bool filterByClientId)
         {
             var idTokens = Accessor.GetAllIdTokens(partitionKey);
-            idTokens.RemoveAll(item => !item.HomeAccountId.Equals(partitionKey, StringComparison.OrdinalIgnoreCase));
+            idTokens.RemoveAll(item => !item.MatchesHomeAccountId(partitionKey));
             if (filterByClientId)
             {
                 FilterTokensByClientId(idTokens);
@@ -1547,7 +1582,7 @@ namespace Microsoft.Identity.Client
             if (account != null)
             {
                 var accounts = Accessor.GetAllAccounts(account.HomeAccountId.Identifier);
-                accounts.RemoveAll(item => !(item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase) &&
+                accounts.RemoveAll(item => !(item.MatchesHomeAccountId(account.HomeAccountId.Identifier) &&
                                    item.PreferredUsername.Equals(account.Username, StringComparison.OrdinalIgnoreCase)));
 
                 foreach (MsalAccountCacheItem accountCacheItem in accounts)

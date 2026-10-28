@@ -170,7 +170,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         private IiOSKey InitiOSKey()
         {
-            string iOSAccount = MsalCacheKeys.GetiOSAccountKey(HomeAccountId, Environment);
+            string iOSAccount = MsalCacheKeys.GetiOSAccountKey(GetHomeAccountIdKey(), Environment);
 
             string iOSService = (TenantId ?? "").ToLowerInvariant();
 
@@ -188,7 +188,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         internal MsalAccountCacheItem CloneForSnapshot()
         {
-            return new MsalAccountCacheItem(
+            var copy = new MsalAccountCacheItem(
                 Environment ?? "", LocalAccountId ?? "", RawClientInfo ?? "",
                 HomeAccountId ?? "", AccountSource ?? "", Name ?? "",
                 PreferredUsername ?? "", TenantId ?? "", GivenName ?? "",
@@ -196,8 +196,11 @@ namespace Microsoft.Identity.Client.Cache.Items
                     new Dictionary<string, string>(WamAccountIds))
             {
                 AuthorityType = AuthorityType ?? "",
+                SubjectKeyVersion = SubjectKeyVersion,
                 AdditionalFieldsJson = AdditionalFieldsJson
             };
+            copy.InitCacheKey();
+            return copy;
         }
 
         internal static MsalAccountCacheItem FromJsonString(string json)
