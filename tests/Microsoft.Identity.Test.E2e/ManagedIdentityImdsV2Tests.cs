@@ -5,12 +5,16 @@ using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net.Http;
+using System.Reflection;
+using System.Runtime.Versioning;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.KeyAttestation;
+using Microsoft.Identity.Client.ManagedIdentity.V2;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -35,7 +39,8 @@ namespace Microsoft.Identity.Test.E2E
 
         private static IManagedIdentityApplication BuildMi(
            string userAssignedId = null,
-           string idType = null)
+           string idType = null,
+           ICsrFactory csrFactory = null)
         {
             ManagedIdentityId miId = userAssignedId is null
                 ? ManagedIdentityId.SystemAssigned
@@ -49,10 +54,161 @@ namespace Microsoft.Identity.Test.E2E
 
             var builder = ManagedIdentityApplicationBuilder.Create(miId);
             builder.Config.AccessorOptions = null;
+            if (csrFactory is not null)
+            {
+                builder.WithCsrFactory(csrFactory);
+            }
             return builder.Build();
         }
 
         #region Credential Guard Attestation Tests
+
+#if MSAL_TEST_NETSTANDARD20
+        /// <summary>
+        /// Exercises fresh KeyGuard certificate attachment and a live resource call using the compatibility asset.
+        /// Missing infrastructure must fail this regression rather than produce an inconclusive result.
+        /// </summary>
+        [TestMethod]
+        [TestCategory("MI_E2E_ImdsV2_NetStandard20")]
+        [DataRow(null, null, DisplayName = "NetStandard20_KeyGuard_ColdBinding_SAMI")]
+        [DataRow(UamiClientId, "clientid", DisplayName = "NetStandard20_KeyGuard_ColdBinding_UAMI")]
+        public async Task AcquireTokenAndCallAKV_NetStandard20_FreshNonExportableKeyBinding_Succeeds(
+            string id, string idType)
+        {
+            // Arrange
+            Assert.IsTrue(OperatingSystem.IsWindows(), "This regression requires the Windows KeyGuard runner.");
+            Assert.AreEqual(".NETStandard,Version=v2.0",
+                typeof(ManagedIdentityApplicationBuilder).Assembly
+                    .GetCustomAttribute<TargetFrameworkAttribute>().FrameworkName);
+
+            const string disablePersistence = "MSAL_MI_DISABLE_PERSISTENT_CERT_CACHE";
+            string originalValue = Environment.GetEnvironmentVariable(disablePersistence);
+            var csrFactory = new CountingCsrFactory();
+            try
+            {
+                // Bypass both binding-cache tiers without deleting other processes' persisted certificates.
+                Environment.SetEnvironmentVariable(disablePersistence, "true");
+                ImdsV2ManagedIdentitySource.ResetCertCacheForTest();
+                var mi = BuildMi(id, idType, csrFactory);
+
+                // Act
+                var result = await mi.AcquireTokenForManagedIdentity(AkvResource)
+                    .WithMtlsProofOfPossession()
+                    .WithAttestationSupport()
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.IsGreaterThan(0, csrFactory.InvocationCount, "A new CSR must exercise certificate attachment.");
+                Assert.AreEqual("mtls_pop", result.TokenType);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+                Assert.IsNotNull(result.BindingCertificate);
+                ValidateMtlsPopBinding(result.AccessToken, result.BindingCertificate);
+                using (RSA rsa = result.BindingCertificate.GetRSAPrivateKey())
+                {
+                    AssertProtectedKey(rsa);
+                }
+
+                await CallAkvSecretAsync(AkvSecretUrl, result.BindingCertificate,
+                    result.TokenType, result.AccessToken, requireSuccess: true).ConfigureAwait(false);
+            }
+            finally
+            {
+                ImdsV2ManagedIdentitySource.ResetCertCacheForTest();
+                Environment.SetEnvironmentVariable(disablePersistence, originalValue);
+            }
+        }
+
+        private static void AssertProtectedKey(RSA rsa)
+        {
+            Assert.IsInstanceOfType<RSACng>(rsa);
+            var key = ((RSACng)rsa).Key;
+            Assert.IsFalse(key.IsEphemeral, "KeyGuard must expose a named, persisted key.");
+            Assert.AreEqual(CngExportPolicies.None, key.ExportPolicy);
+            byte[] isolation = key.GetProperty("Virtual Iso", CngPropertyOptions.None).GetValue();
+            Assert.IsTrue(isolation.Length >= sizeof(int) && BitConverter.ToInt32(isolation, 0) != 0,
+                "The key must actually be VBS protected.");
+            Assert.Throws<CryptographicException>(() => rsa.ExportParameters(true));
+        }
+
+        /// <summary>
+        /// Verifies that the compatibility association reopens machine-scoped keys after the original handles close.
+        /// Requires permission to create machine keys on the dedicated Windows runner.
+        /// </summary>
+        [TestMethod]
+        [TestCategory("MI_E2E_ImdsV2_NetStandard20")]
+        public void AttachPrivateKey_NetStandard20_PreservesMachineScope()
+        {
+            // Arrange
+            Assert.IsTrue(OperatingSystem.IsWindows(), "Machine CNG keys require Windows.");
+            Assert.AreEqual(".NETStandard,Version=v2.0",
+                typeof(ManagedIdentityApplicationBuilder).Assembly
+                    .GetCustomAttribute<TargetFrameworkAttribute>().FrameworkName);
+            string keyName = "msal-e2e-machine-" + Guid.NewGuid().ToString("N");
+            CngKey key = CngKey.Create(CngAlgorithm.Rsa, keyName, new CngKeyCreationParameters
+            {
+                Provider = CngProvider.MicrosoftSoftwareKeyStorageProvider,
+                ExportPolicy = CngExportPolicies.None,
+                KeyUsage = CngKeyUsages.Signing,
+                KeyCreationOptions = CngKeyCreationOptions.MachineKey
+            });
+            try
+            {
+                X509Certificate2 attached;
+                using (key)
+                using (var rsa = new RSACng(key))
+                {
+                    var request = new CertificateRequest(
+                        "CN=MSAL machine-scope regression", rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+                    using (var issued = request.Create(request.SubjectName,
+                        X509SignatureGenerator.CreateForRSA(rsa, RSASignaturePadding.Pkcs1),
+                        DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddDays(1), new byte[] { 1 }))
+                    {
+                        // Act
+                        attached = CommonCryptographyManager.AttachPrivateKeyToCert(
+                            Convert.ToBase64String(issued.RawData), rsa);
+                    }
+                }
+
+                // Assert
+                using (attached)
+                using (RSA signing = attached.GetRSAPrivateKey())
+                using (RSA verification = attached.GetRSAPublicKey())
+                {
+                    Assert.IsInstanceOfType<RSACng>(signing);
+                    Assert.IsTrue(((RSACng)signing).Key.IsMachineKey);
+                    Assert.AreEqual(CngExportPolicies.None, ((RSACng)signing).Key.ExportPolicy);
+                    byte[] data = { 6, 2, 4, 5 };
+                    byte[] signature = signing.SignData(data, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+                    Assert.IsTrue(verification.VerifyData(
+                        data, signature, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1));
+                    Assert.Throws<CryptographicException>(() => signing.ExportParameters(true));
+                }
+            }
+            finally
+            {
+                key.Dispose();
+                using (CngKey cleanup = CngKey.Open(
+                    keyName, CngProvider.MicrosoftSoftwareKeyStorageProvider, CngKeyOpenOptions.MachineKey))
+                {
+                    cleanup.Delete();
+                }
+            }
+        }
+
+        private sealed class CountingCsrFactory : ICsrFactory
+        {
+            internal int InvocationCount { get; private set; }
+
+            public (string csrPem, RSA privateKey) Generate(
+                RSA rsa, string clientId, string tenantId, CuidInfo cuid)
+            {
+                AssertProtectedKey(rsa);
+                InvocationCount++;
+                return new DefaultCsrFactory().Generate(rsa, clientId, tenantId, cuid);
+            }
+        }
+#endif
 
         /// <summary>
         /// Tests mTLS PoP with Credential Guard attestation.
@@ -391,7 +547,8 @@ namespace Microsoft.Identity.Test.E2E
             string secretUrl,
             X509Certificate2 clientCertificate,
             string tokenType,
-            string accessToken)
+            string accessToken,
+            bool requireSuccess = false)
         {
             Assert.IsNotNull(clientCertificate, "Client certificate required.");
             Assert.IsFalse(string.IsNullOrEmpty(accessToken), "Access token required.");
@@ -415,6 +572,11 @@ namespace Microsoft.Identity.Test.E2E
 
             if (!response.IsSuccessStatusCode)
             {
+                if (requireSuccess)
+                {
+                    Assert.Fail($"AKV mTLS request failed with HTTP status {(int)response.StatusCode}.");
+                }
+
                 // AKV failures are infrastructure-related and should not fail the build.
                 // The core test validates mTLS PoP token acquisition; AKV is a downstream call.
                 Assert.Inconclusive(

@@ -26,4 +26,5 @@
     <PackageReference Include="System.Formats.Asn1" />
   </ItemGroup>
 
+  <Import Project="..\..\build\TestNetStandard20.targets" />
 </Project>

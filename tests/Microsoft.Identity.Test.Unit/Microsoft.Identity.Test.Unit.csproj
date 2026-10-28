@@ -75,4 +75,5 @@
     <DefineConstants>$(DefineConstants);NET_CORE</DefineConstants>
   </PropertyGroup>
 
+  <Import Project="..\..\build\TestNetStandard20.targets" />
 </Project>

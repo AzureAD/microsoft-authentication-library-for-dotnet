@@ -455,6 +455,8 @@ namespace Microsoft.Identity.Client
         public const string RequestTimeOut = "Request to the endpoint timed out.";
         public const string MalformedOidcAuthorityFormat = "Possible cause: When using Entra External ID, you didn't append /v2.0, for example {0}/v2.0\"";
         public const string InvalidCertificate = "The certificate received from the Imds server is invalid.";
+        public const string CertificatePrivateKeyAttachmentFailed =
+            "The IMDS certificate could not be associated with its private key. See the inner exception for details.";
         public const string CannotSwitchBetweenImdsVersionsForPreview = "ImdsV2 is currently experimental - A Bearer token has already been received; Please restart the application to receive a mTLS PoP token.";
         public const string MtlsPopTokenNotSupportedinImdsV1 = "mTLS Proof of Possession with managed identity is currently in private preview and is not supported on this VM. Ensure you're running on a supported VM image.";
 
