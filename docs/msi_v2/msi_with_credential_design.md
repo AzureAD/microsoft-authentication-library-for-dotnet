@@ -90,42 +90,25 @@ sequenceDiagram
 
 ## Certificate Handling
 
-### Protected CNG keys in the .NET Standard 2.0 asset
+### .NET Standard 2.0 support
 
-On Windows, the Standard 2.0 asset associates an issued certificate with its existing named,
-persisted Microsoft Software Key Storage Provider RSA key. It does not export private-key material
-or change the key's export policy. The association preserves user/machine scope and checks that
-the public keys match, including after reopening the associated key. Protected ephemeral keys
-and other protected providers are explicitly unsupported by this compatibility path.
-Modern .NET assets retain their existing `CopyWithPrivateKey` implementation.
+The .NET Standard 2.0 MSAL asset does not support managed identity mTLS PoP or bearer-over-mTLS,
+matching the .NET Framework 4.6.2 restriction. Both request builders throw `MsalClientException`
+with `MsalError.MtlsNotSupportedForManagedIdentity` before token acquisition or certificate attachment.
+Capability discovery skips IMDSv2 and reports no mTLS binding support.
+Ordinary managed identity bearer-token acquisition and caching remain supported.
+This restriction depends on the selected MSAL asset, even when the application runs on modern .NET.
 
-An attachment failure retains `MsalError.InvalidCertificate` for compatibility, but its message
-identifies private-key association as the failing operation; the inner exception preserves the cause.
-
-Run the focused Windows regressions against the actual Standard 2.0 DLL with:
+Run the regressions against the actual Standard 2.0 DLL with:
 
 ```powershell
-dotnet test tests\Microsoft.Identity.Test.Unit\Microsoft.Identity.Test.Unit.csproj --framework net8.0 -p:MsalTestAsset=netstandard2.0 --filter FullyQualifiedName~CertificateAttachmentTests
+dotnet test tests\Microsoft.Identity.Test.Unit\Microsoft.Identity.Test.Unit.csproj --framework net8.0 -p:MsalTestAsset=netstandard2.0 --filter FullyQualifiedName~NetStandard20ManagedIdentityTests
 ```
 
 `MsalTestAsset=netstandard2.0` builds the normal test graph and then replaces the runtime MSAL DLL
 with the Standard 2.0 build. The regression asserts the loaded assembly's target framework.
 This override requires a .NET test host: Framework-specific test types cannot load against
 the compatibility assembly. Omit that property to exercise the normal asset.
-
-The existing IMDSv2 pipeline also runs the `MI_E2E_ImdsV2_NetStandard20` category on the KeyGuard
-runner, using the same property. Those SAMI/UAMI tests bypass both binding-cache tiers, count real
-CSR generation, verify non-exportability before and after attachment, and require a successful
-attested token acquisition and Key Vault mTLS call. Missing infrastructure fails the tests.
-The same category includes a machine-scope lifetime/signing regression; its runner must have
-permission to create machine keys.
-`WithForceRefresh(true)` alone is insufficient: it refreshes the token but can reuse the certificate.
-
-To run that category directly on the configured Windows KeyGuard/IMDSv2 machine:
-
-```powershell
-dotnet test tests\Microsoft.Identity.Test.E2e\Microsoft.Identity.Test.E2E.MSI.csproj --framework net8.0 -p:MsalTestAsset=netstandard2.0 --filter TestCategory=MI_E2E_ImdsV2_NetStandard20
-```
 
 To start the flow, MSAL requires a certificate. MSAL follows these steps:
 

@@ -3,9 +3,6 @@
 
 using System;
 using System.Collections.Concurrent;
-#if NETSTANDARD
-using System.Runtime.InteropServices;
-#endif
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -142,30 +139,26 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
                 throw new MsalServiceException(MsalError.InvalidCertificate, MsalErrorMessage.InvalidCertificate, ex);
             }
 
-            using (certificate)
+            try
             {
-                try
-                {
 #if NET8_0_OR_GREATER
-                    // Attach the private key and return a new certificate instance
-                    return certificate.CopyWithPrivateKey(privateKey);
+                // Attach the private key and return a new certificate instance
+                return certificate.CopyWithPrivateKey(privateKey);
 #else
-                    // .NET Framework 4.7.2 and .NET Standard 2.0 - manual private key attachment
-                    return AttachPrivateKeyToOlderFrameworks(certificate, privateKey);
+                // .NET Framework 4.7.2 and .NET Standard 2.0 - manual private key attachment
+                return AttachPrivateKeyToOlderFrameworks(certificate, privateKey);
 #endif
-                }
-                catch (Exception ex)
-                {
-                    throw new MsalServiceException(
-                        MsalError.InvalidCertificate, MsalErrorMessage.CertificatePrivateKeyAttachmentFailed, ex);
-                }
+            }
+            catch (Exception ex)
+            {
+                throw new MsalServiceException(MsalError.InvalidCertificate, MsalErrorMessage.InvalidCertificate, ex);
             }
         }
 
 #if !NET8_0_OR_GREATER
         /// <summary>
-        /// Attaches a private key on targets without CopyWithPrivateKey.
-        /// Reuses supported persisted Windows CNG keys on .NET Standard 2.0; otherwise uses legacy export/import.
+        /// Attaches a private key to a certificate for older .NET Framework versions.
+        /// This method uses the older RSACng approach for .NET Framework 4.7.2 and .NET Standard 2.0.
         /// </summary>
         /// <param name="certificate">The certificate without private key</param>
         /// <param name="privateKey">The RSA private key to attach</param>
@@ -173,24 +166,6 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         /// <exception cref="NotSupportedException">Thrown when private key attachment fails</exception>
         private static X509Certificate2 AttachPrivateKeyToOlderFrameworks(X509Certificate2 certificate, RSA privateKey)
         {
-#if NETSTANDARD
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && privateKey is RSACng rsaCng)
-            {
-                CngKey key = rsaCng.Key;
-                if (!key.IsEphemeral &&
-                    !string.IsNullOrEmpty(key.KeyName) &&
-                    key.Provider == CngProvider.MicrosoftSoftwareKeyStorageProvider)
-                {
-                    return WindowsCngCertificateHelper.AttachPrivateKey(certificate, rsaCng);
-                }
-
-                if (key.ExportPolicy == CngExportPolicies.None)
-                {
-                    throw new NotSupportedException(
-                        "This protected CNG key requires a named, persisted Microsoft Software Key Storage Provider key for certificate attachment on .NET Standard 2.0.");
-                }
-            }
-#endif
             // For older frameworks, we need to use the legacy approach with RSACryptoServiceProvider
             // First, export the RSA parameters from the provided private key
             var parameters = privateKey.ExportParameters(includePrivateParameters: true);

@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Client
                     MsalErrorMessage.MtlsNotSupportedForNonWindowsMessage);
             }
 
-#if NET462
+#if NET462 || NETSTANDARD
             throw new MsalClientException(
                 MsalError.MtlsNotSupportedForManagedIdentity,
                 MsalErrorMessage.MtlsNotSupportedForManagedIdentityMessage);
@@ -109,7 +109,7 @@ namespace Microsoft.Identity.Client
                     MsalErrorMessage.MtlsNotSupportedForNonWindowsMessage);
             }
 
-#if NET462
+#if NET462 || NETSTANDARD
             throw new MsalClientException(
                 MsalError.MtlsNotSupportedForManagedIdentity,
                 MsalErrorMessage.MtlsNotSupportedForManagedIdentityMessage);
