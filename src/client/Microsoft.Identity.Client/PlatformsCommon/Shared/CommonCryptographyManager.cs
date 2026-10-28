@@ -132,7 +132,11 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             try
             {
                 byte[] certBytes = Convert.FromBase64String(rawCertificate);
+#if NET9_0_OR_GREATER
+                certificate = X509CertificateLoader.LoadCertificate(certBytes);
+#else
                 certificate = new X509Certificate2(certBytes);
+#endif
             }
             catch (FormatException ex)
             {

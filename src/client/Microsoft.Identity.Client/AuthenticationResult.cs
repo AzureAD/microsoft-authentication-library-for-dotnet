@@ -352,7 +352,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <remarks>
         /// Not all parameters are added here, only the ones that MSAL doesn't interpret itself and only scalars.
-        /// Not supported on mobile frameworks (e.g. net8-android or net8-ios)
+        /// Not supported on mobile frameworks (e.g. net10-android or net10-ios)
         /// </remarks>
         public IReadOnlyDictionary<string, string> AdditionalResponseParameters { get; set; }
 

@@ -14,7 +14,7 @@ uses the **binding certificate** to call an **mTLS-protected** Graph test endpoi
   - An **Azure VM/VMSS** with **System‑Assigned Managed Identity** enabled
   *(For UAMI, note the **clientId** you plan to use.)*
 - **Target resource access** (e.g., Graph test slice) permitting the MI to call it.
-- **.NET 8 SDK** on your dev machine.
+- **.NET 10 SDK** on your dev machine.
 - **NuGet access to the internal IDDP feed** (Azure DevOps **PAT** with Packaging **Read**).
 
 > New to Managed Identity? In the Azure Portal, enable **System assigned** on your VM/App and save; for **User assigned**, create the identity and **assign** it to the compute resource.
