@@ -1612,6 +1612,22 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
         #region AttachPrivateKeyToCert Tests
         [TestMethod]
+        public void AttachPrivateKeyToCert_MismatchedKey_WrapsArgumentException()
+        {
+            // Arrange
+            using (RSA rsa = RSA.Create())
+            {
+                // Act
+                MsalServiceException exception = Assert.ThrowsExactly<MsalServiceException>(() =>
+                    CommonCryptographyManager.AttachPrivateKeyToCert(TestConstants.ValidRawCertificate, rsa));
+
+                // Assert
+                Assert.AreEqual(MsalError.InvalidCertificate, exception.ErrorCode);
+                Assert.IsInstanceOfType<ArgumentException>(exception.InnerException);
+            }
+        }
+
+        [TestMethod]
         public void AttachPrivateKeyToCert_NonExportableCngKey_SignsAfterOriginalKeyIsDisposed()
         {
             if (!ImdsV2TestStoreCleaner.IsWindows)
