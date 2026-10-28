@@ -240,7 +240,7 @@ namespace Microsoft.Identity.Client
             }
 #endif
 
-#if NET_CORE || NETSTANDARD2_1
+#if NET_CORE
             // Handle WinUI3 Window objects (including derived types)
             if (parent != null && IsWinUI3Window(parent))
             {
@@ -250,7 +250,7 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
-#if NET_CORE || NETSTANDARD2_1
+#if NET_CORE
         private static readonly Type WinUIWindowType = Type.GetType("Microsoft.UI.Xaml.Window, Microsoft.WinUI");
 
         /// <summary>

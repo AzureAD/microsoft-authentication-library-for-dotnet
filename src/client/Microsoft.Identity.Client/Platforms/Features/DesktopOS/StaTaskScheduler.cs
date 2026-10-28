@@ -1,6 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-#if !NETSTANDARD || NETSTANDARD2_1
+#if !NETSTANDARD
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;

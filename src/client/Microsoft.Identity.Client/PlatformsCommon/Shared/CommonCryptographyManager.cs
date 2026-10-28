@@ -145,7 +145,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
             try
             {
-#if NET8_0_OR_GREATER || NETSTANDARD2_1
+#if NET8_0_OR_GREATER
                 // Attach the private key and return a new certificate instance
                 return certificate.CopyWithPrivateKey(privateKey);
 #else
@@ -159,7 +159,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             }
         }
 
-#if !NET8_0_OR_GREATER && !NETSTANDARD2_1
+#if !NET8_0_OR_GREATER
         /// <summary>
         /// Attaches a private key to a certificate for older .NET Framework versions.
         /// This method uses the older RSACng approach for .NET Framework 4.7.2 and .NET Standard 2.0.
