@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using Microsoft.Identity.Client.Internal;
 using JObject = System.Text.Json.Nodes.JsonObject;
 using JToken = System.Text.Json.Nodes.JsonNode;
 
@@ -53,6 +54,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             {
                 AllowTrailingCommas = true
             }).AsObject();
+            RestoreSharedClientInfo(root);
             var unknownNodes = ExtractUnknownNodes(root);
 
             var contract = new CacheSerializationContract(unknownNodes);
@@ -123,14 +125,74 @@ namespace Microsoft.Identity.Client.Cache.Items
             }
 
             return contract;
+        }
 
-            // private method for enumerating collection
-            static IEnumerable<JsonObject> GetElement(JsonObject root, string key)
+        private static void RestoreSharedClientInfo(JObject root)
+        {
+            // Other V3 producers store client_info only on an account or refresh token.
+            // Recover missing provenance only from an exact, verified sibling identity.
+            var groups = s_knownPropertyNames
+                .Where(key => key != StorageJsonValues.AppMetadata && root.ContainsKey(key))
+                .SelectMany(key => GetElement(root, key))
+                .Where(item => item is not null)
+                .GroupBy(item => (
+                    HomeAccountId: item[StorageJsonKeys.HomeAccountId]?.GetValue<string>(),
+                    Environment: item[StorageJsonKeys.Environment]?.GetValue<string>()?.ToLowerInvariant()));
+
+            foreach (var group in groups)
             {
-                foreach (var token in root[key].AsObject())
+                if (string.IsNullOrEmpty(group.Key.HomeAccountId) ||
+                    string.IsNullOrEmpty(group.Key.Environment) ||
+                    group.Any(item => item.ContainsKey(StorageJsonKeys.SubjectKeyVersion)))
                 {
-                    yield return token.Value as JObject;
+                    continue;
                 }
+
+                var missingClientInfo = group
+                    .Where(item => string.IsNullOrEmpty(item[StorageJsonKeys.ClientInfo]?.GetValue<string>()))
+                    .ToList();
+                if (missingClientInfo.Count == 0)
+                {
+                    continue;
+                }
+
+                string verifiedClientInfo = null;
+                bool conflictingIdentity = false;
+                foreach (var item in group)
+                {
+                    string rawClientInfo = item[StorageJsonKeys.ClientInfo]?.GetValue<string>();
+                    if (string.IsNullOrEmpty(rawClientInfo))
+                    {
+                        continue;
+                    }
+
+                    var clientInfo = ClientInfo.CreateFromJson(rawClientInfo);
+                    if (string.IsNullOrEmpty(clientInfo.UniqueObjectIdentifier) ||
+                        string.IsNullOrEmpty(clientInfo.UniqueTenantIdentifier) ||
+                        !string.Equals(group.Key.HomeAccountId, clientInfo.ToAccountIdentifier(), StringComparison.Ordinal))
+                    {
+                        conflictingIdentity = true;
+                        break;
+                    }
+
+                    verifiedClientInfo = rawClientInfo;
+                }
+
+                if (verifiedClientInfo is not null && !conflictingIdentity)
+                {
+                    foreach (var item in missingClientInfo)
+                    {
+                        item[StorageJsonKeys.ClientInfo] = verifiedClientInfo;
+                    }
+                }
+            }
+        }
+
+        private static IEnumerable<JObject> GetElement(JObject root, string key)
+        {
+            foreach (var token in root[key].AsObject())
+            {
+                yield return token.Value as JObject;
             }
         }
 

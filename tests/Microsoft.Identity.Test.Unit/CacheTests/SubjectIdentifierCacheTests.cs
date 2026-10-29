@@ -237,6 +237,117 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(TokenSource.Cache, cached.AuthenticationResultMetadata.TokenSource);
         }
 
+        [TestMethod]
+        [DataRow(StorageJsonValues.AccountRootKey)]
+        [DataRow(StorageJsonValues.CredentialTypeRefreshToken)]
+        public async Task SharedV3Cache_PreservesClientInfoIdentityAsync(string clientInfoSection)
+        {
+            // Arrange
+            using var http = new MockHttpManager();
+            var app = CreateApplication(http, false);
+            var cache = (TokenCache)app.UserTokenCacheInternal;
+            cache.Accessor = CreateFlatAccessor();
+            string clientInfo = MockHelpers.CreateClientInfo();
+            var signedIn = await SignInAsync(app, http, "member", clientInfo).ConfigureAwait(false);
+            string accessTokenKey = cache.Accessor.GetAllAccessTokens().Single().CacheKey;
+            var root = CreateSharedV3Cache(cache, clientInfoSection);
+
+            // Act
+            ((ITokenCacheSerializer)app.UserTokenCache).DeserializeMsalV3(root.ToJsonString().ToByteArray(), true);
+            var accounts = (await app.GetAccountsAsync().ConfigureAwait(false)).ToList();
+
+            // Assert
+            Assert.HasCount(1, accounts);
+            Assert.AreEqual(signedIn.Account.HomeAccountId.Identifier, accounts[0].HomeAccountId.Identifier);
+            Assert.AreEqual(accessTokenKey, cache.Accessor.GetAllAccessTokens().Single().CacheKey);
+            var cached = await app.AcquireTokenSilent(s_scopes, accounts[0]).ExecuteAsync().ConfigureAwait(false);
+            Assert.AreEqual("at-member", cached.AccessToken);
+            Assert.AreEqual(TokenSource.Cache, cached.AuthenticationResultMetadata.TokenSource);
+            Assert.IsNotNull(cached.IdToken);
+
+            http.AddMockHandler(new MockHttpMessageHandler
+            {
+                ExpectedMethod = HttpMethod.Post,
+                ExpectedPostData = new Dictionary<string, string> { ["refresh_token"] = "rt-member" },
+                ResponseMessage = CreateTokenResponse("member", false, refreshed: true)
+            });
+            var refreshed = await app.AcquireTokenSilent(s_scopes, accounts[0])
+                .WithForceRefresh(true).ExecuteAsync().ConfigureAwait(false);
+            Assert.AreEqual("at-refreshed-member", refreshed.AccessToken);
+            Assert.AreEqual(accessTokenKey, cache.Accessor.GetAllAccessTokens().Single().CacheKey);
+            Assert.AreEqual(clientInfo, cache.Accessor.GetAllAccessTokens().Single().RawClientInfo);
+            Assert.AreEqual(clientInfo, cache.Accessor.GetAllRefreshTokens().Single().RawClientInfo);
+        }
+
+        [TestMethod]
+        [DataRow("case")]
+        [DataRow("environment")]
+        [DataRow("mismatchedClientInfo")]
+        [DataRow("conflictingClientInfo")]
+        [DataRow("subjectVersion")]
+        [DataRow("unknownVersion")]
+        public async Task SharedV3Cache_DoesNotInferAmbiguousIdentityAsync(string scenario)
+        {
+            // Arrange
+            using var http = new MockHttpManager();
+            var app = CreateApplication(http, false);
+            var cache = (TokenCache)app.UserTokenCacheInternal;
+            cache.Accessor = CreateFlatAccessor();
+            var signedIn = await SignInAsync(app, http, "member", MockHelpers.CreateClientInfo()).ConfigureAwait(false);
+            var root = CreateSharedV3Cache(cache, StorageJsonValues.AccountRootKey);
+            var account = root[StorageJsonValues.AccountRootKey].AsObject().Single().Value.AsObject();
+            var idToken = root[StorageJsonValues.CredentialTypeIdToken].AsObject().Single().Value.AsObject();
+            string differentClientInfo = Base64UrlHelpers.Encode("{\"uid\":\"other\",\"utid\":\"tenant\"}");
+            switch (scenario)
+            {
+                case "case":
+                    account[StorageJsonKeys.HomeAccountId] = signedIn.Account.HomeAccountId.Identifier.ToUpperInvariant();
+                    break;
+                case "environment":
+                    account[StorageJsonKeys.Environment] = "other.example.test";
+                    break;
+                case "mismatchedClientInfo":
+                    account[StorageJsonKeys.ClientInfo] = differentClientInfo;
+                    break;
+                case "conflictingClientInfo":
+                    idToken[StorageJsonKeys.ClientInfo] = differentClientInfo;
+                    break;
+                case "subjectVersion":
+                    idToken[StorageJsonKeys.SubjectKeyVersion] = "1";
+                    break;
+                case "unknownVersion":
+                    idToken[StorageJsonKeys.SubjectKeyVersion] = "2";
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(scenario));
+            }
+
+            // Act
+            ((ITokenCacheSerializer)app.UserTokenCache).DeserializeMsalV3(root.ToJsonString().ToByteArray(), true);
+
+            // Assert
+            Assert.IsTrue(cache.Accessor.GetAllAccessTokens().Single().IsLegacySubjectEntry);
+            Assert.IsTrue(cache.Accessor.GetAllRefreshTokens().Single().IsLegacySubjectEntry);
+            Assert.IsEmpty(await app.GetAccountsAsync().ConfigureAwait(false));
+            var exception = await Assert.ThrowsExactlyAsync<MsalUiRequiredException>(
+                () => app.AcquireTokenSilent(s_scopes, signedIn.Account).ExecuteAsync()).ConfigureAwait(false);
+            Assert.AreEqual(MsalError.NoTokensFoundError, exception.ErrorCode);
+        }
+
+        private static JsonObject CreateSharedV3Cache(TokenCache cache, string clientInfoSection)
+        {
+            var root = JsonNode.Parse(new TokenCacheJsonSerializer(cache.Accessor).Serialize(null)).AsObject();
+            foreach (var section in root.Where(section => section.Key != clientInfoSection))
+            {
+                foreach (var entry in section.Value.AsObject())
+                {
+                    entry.Value.AsObject().Remove(StorageJsonKeys.ClientInfo);
+                }
+            }
+
+            return root;
+        }
+
         private static PublicClientApplication CreateApplication(MockHttpManager http, bool genericAuthority)
         {
             var builder = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
