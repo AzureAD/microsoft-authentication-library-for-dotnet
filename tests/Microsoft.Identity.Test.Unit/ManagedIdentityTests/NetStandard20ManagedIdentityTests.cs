@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
-                SetEnvironmentVariables(ManagedIdentitySource.Imds, ManagedIdentityTests.ImdsEndpoint);
+                SetImdsEnvironmentVariables();
                 var application = (ManagedIdentityApplication)ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager)
                     .Build();
@@ -114,7 +114,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
-                SetEnvironmentVariables(ManagedIdentitySource.Imds, ManagedIdentityTests.ImdsEndpoint);
+                SetImdsEnvironmentVariables();
                 var identity = userAssigned
                     ? ManagedIdentityId.WithUserAssignedClientId(TestConstants.ClientId)
                     : ManagedIdentityId.SystemAssigned;
@@ -141,6 +141,18 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .ExecuteAsync().ConfigureAwait(false);
                 Assert.AreEqual(TokenSource.Cache, cached.AuthenticationResultMetadata.TokenSource);
             }
+        }
+
+        private static void SetImdsEnvironmentVariables()
+        {
+            Environment.SetEnvironmentVariable("IDENTITY_ENDPOINT", null);
+            Environment.SetEnvironmentVariable("IDENTITY_HEADER", null);
+            Environment.SetEnvironmentVariable("IDENTITY_SERVER_THUMBPRINT", null);
+            Environment.SetEnvironmentVariable("IMDS_ENDPOINT", null);
+            Environment.SetEnvironmentVariable("MSI_ENDPOINT", null);
+            Environment.SetEnvironmentVariable("MSI_SECRET", null);
+            Environment.SetEnvironmentVariable("DEFAULT_IDENTITY_CLIENT_ID", null);
+            SetEnvironmentVariables(ManagedIdentitySource.Imds, ManagedIdentityTests.ImdsEndpoint);
         }
     }
 }
