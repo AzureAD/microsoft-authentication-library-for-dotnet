@@ -81,8 +81,8 @@ namespace Microsoft.Identity.Client.Instance.Oidc
         /// An issuer is valid if any of the following is true:
         /// 1. Same scheme and host as the authority (path can differ)
         /// 2. The issuer host is a well-known Microsoft authority host (HTTPS only)
-        /// 3. The issuer host is a regional variant of a well-known host (HTTPS only)
-        /// 4. CIAM-specific: the issuer matches {tenant}.ciamlogin.com patterns
+        /// 3. For well-known authority hosts, the issuer is a regional variant of a well-known host (HTTPS only)
+        /// 4. For other authority hosts, the issuer matches {tenant}.ciamlogin.com patterns
         /// </summary>
         /// <param name="authority">The authority URL.</param>
         /// <param name="issuer">The issuer from the OIDC metadata - the single source of truth.</param>
@@ -92,6 +92,13 @@ namespace Microsoft.Identity.Client.Instance.Oidc
             // Normalize both URLs to handle trailing slash differences
             string normalizedAuthority = authority.AbsoluteUri.TrimEnd('/');
             string normalizedIssuer = issuer?.TrimEnd('/');
+            // Uri.Host retains the optional DNS root dot, which does not change host eligibility.
+            string authorityHost = authority.Host;
+            if (authorityHost.EndsWith(".", StringComparison.Ordinal))
+            {
+                authorityHost = authorityHost.Substring(0, authorityHost.Length - 1);
+            }
+            bool isKnownMicrosoftAuthority = KnownMetadataProvider.IsKnownEnvironment(authorityHost);
 
             // OIDC validation: if the issuer's scheme and host match the authority's, consider it valid
             if (!string.IsNullOrEmpty(issuer) && Uri.TryCreate(issuer, UriKind.Absolute, out Uri issuerUri))
@@ -110,9 +117,9 @@ namespace Microsoft.Identity.Client.Instance.Oidc
                     return;
                 }
 
-                // Rule 3: The issuer host is a regional variant ({region}.{host}) of a well-known host
-                // (HTTPS only). E.g. westus2.login.microsoft.com
-                if (string.Equals(issuerUri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
+                // Rule 3: Only well-known authority hosts may accept a regional Microsoft issuer.
+                if (isKnownMicrosoftAuthority &&
+                    string.Equals(issuerUri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
                 {
                     string issuerHost = issuerUri.Host;
                     int firstDot = issuerHost.IndexOf('.');
@@ -144,7 +151,7 @@ namespace Microsoft.Identity.Client.Instance.Oidc
             }
 
             // If tenant extraction failed or returned empty, validation fails
-            if (!string.IsNullOrEmpty(tenant))
+            if (!isKnownMicrosoftAuthority && !string.IsNullOrEmpty(tenant))
             {
                 // Create a collection of valid CIAM issuer patterns for the tenant
                 string[] validCiamPatterns =
