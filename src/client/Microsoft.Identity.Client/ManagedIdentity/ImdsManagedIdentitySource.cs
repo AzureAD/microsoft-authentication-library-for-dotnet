@@ -266,6 +266,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 #if NET462
                     requestContext.Logger.Info("[Managed Identity] IMDSv2 flow is not supported on .NET Framework 4.6.2. Cryptographic operations required for managed identity authentication are unavailable on this platform. Skipping IMDSv2 probe.");
                     return (false, "IMDSv2 is not supported on .NET Framework 4.6.2");
+#elif NETSTANDARD
+                    requestContext.Logger.Info($"[Managed Identity] {MsalErrorMessage.MtlsNotSupportedForManagedIdentityMessage} Skipping IMDSv2 probe.");
+                    return (false, MsalErrorMessage.MtlsNotSupportedForManagedIdentityMessage);
 #else
                     apiVersionQueryParam = ImdsV2ManagedIdentitySource.ApiVersionQueryParam;
                     imdsApiVersion = ImdsV2ManagedIdentitySource.ImdsV2ApiVersion;

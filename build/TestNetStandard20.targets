@@ -1,0 +1,20 @@
+<Project>
+  <PropertyGroup Condition="'$(MsalTestAsset)' == 'netstandard2.0'">
+    <DefineConstants>$(DefineConstants);MSAL_TEST_NETSTANDARD20</DefineConstants>
+  </PropertyGroup>
+
+  <!-- Build the normal test graph, then explicitly select the compatibility DLL at runtime. -->
+  <Target Name="SelectMsalNetStandard20TestAsset" AfterTargets="Build"
+          Condition="'$(MsalTestAsset)' == 'netstandard2.0' and '$(TargetFramework)' != ''">
+    <Error Condition="'$(TargetFrameworkIdentifier)' != '.NETCoreApp'"
+           Text="MsalTestAsset=netstandard2.0 requires a .NET test host. Framework-specific test types cannot load against the compatibility asset." />
+    <MSBuild Projects="$(MSBuildThisFileDirectory)..\src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj"
+             Targets="Build"
+             Properties="TargetFramework=netstandard2.0;Configuration=$(Configuration)">
+      <Output TaskParameter="TargetOutputs" ItemName="_MsalNetStandard20TestAssembly" />
+    </MSBuild>
+    <Error Condition="'@(_MsalNetStandard20TestAssembly)' == ''"
+           Text="The netstandard2.0 MSAL test assembly was not built." />
+    <Copy SourceFiles="@(_MsalNetStandard20TestAssembly)" DestinationFolder="$(TargetDir)" />
+  </Target>
+</Project>

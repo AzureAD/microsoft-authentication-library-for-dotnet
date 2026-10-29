@@ -135,6 +135,19 @@ stages:
         minimumExpectedTests: '1'
         runSettingsFile: '$(MsalSourceDir)build\CodeCoverage.runsettings'
 
+    - task: DotNetCoreCLI@2
+      displayName: 'Verify unsupported managed identity mTLS (.NET Standard 2.0)'
+      inputs:
+        command: test
+        projects: '$(MsalSourceDir)tests/Microsoft.Identity.Test.Unit/Microsoft.Identity.Test.Unit.csproj'
+        arguments: >
+          --configuration $(BuildConfiguration)
+          --framework net8.0
+          /p:MsalTestAsset=netstandard2.0
+          /p:INCLUDE_MOBILE_AND_LEGACY_TFM=
+          --filter FullyQualifiedName~NetStandard20ManagedIdentityTests
+          -- RunConfiguration.TreatNoTestsAsError=true
+
     - task: BuildQualityChecks@10
       condition: ne(variables['Build.SourceBranch'], 'refs/heads/main') #gate should not run on main branch
       inputs:

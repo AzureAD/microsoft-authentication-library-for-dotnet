@@ -465,7 +465,11 @@ namespace Microsoft.Identity.Client
         public const string MtlsBearerWithoutRegion = "Bearer-over-mTLS does not require a region. When no region is specified, MSAL uses the global mTLS endpoint. Setting a region via .WithAzureRegion(...) is recommended for performance. See https://aka.ms/msal-net-pop for details.";
         public const string MtlsInvalidAuthorityTypeMessage = "mTLS PoP is only supported for AAD authority type. See https://aka.ms/msal-net-pop for details.";
         public const string MtlsNonTenantedAuthorityNotAllowedMessage = "mTLS authentication requires a tenanted authority. Using 'common', 'organizations', or similar non-tenanted authorities is not allowed. Please provide an authority with a specific tenant ID (e.g., 'https://login.microsoftonline.com/{tenantId}'). See https://aka.ms/msal-net-pop for details.";
+#if NETSTANDARD
+        public const string MtlsNotSupportedForManagedIdentityMessage = "IMDSv2 flow is not supported by the .NET Standard 2.0 MSAL asset. Managed identity mTLS requires a supported MSAL target framework.";
+#else
         public const string MtlsNotSupportedForManagedIdentityMessage = "IMDSv2 flow is not supported on .NET Framework 4.6.2. Cryptographic operations required for managed identity authentication are unavailable on this platform.";
+#endif
         public const string MtlsNotSupportedForNonWindowsMessage = "mTLS PoP with Managed Identity is not supported on this OS. See https://aka.ms/msal-net-pop.";
         public const string RegionRequiredForMtlsPopMessage = "mTLS Proof-of-Possession does not require a region. When regional auto-detection does not yield a region, MSAL falls back to the global mTLS endpoint. Setting a region via .WithAzureRegion(...) is recommended for performance. See https://aka.ms/msal-net-pop for details.";
         public const string MtlsPopNotSupportedForUsGovCloudApiMessage = "login.usgovcloudapi.net is not supported for mTLS PoP, please use login.microsoftonline.us";

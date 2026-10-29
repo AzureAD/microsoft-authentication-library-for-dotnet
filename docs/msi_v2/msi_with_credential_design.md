@@ -90,6 +90,26 @@ sequenceDiagram
 
 ## Certificate Handling
 
+### .NET Standard 2.0 support
+
+The .NET Standard 2.0 MSAL asset does not support managed identity mTLS PoP or bearer-over-mTLS,
+matching the .NET Framework 4.6.2 restriction. Both request builders throw `MsalClientException`
+with `MsalError.MtlsNotSupportedForManagedIdentity` before token acquisition or certificate attachment.
+Capability discovery skips IMDSv2 and reports no mTLS binding support.
+Ordinary managed identity bearer-token acquisition and caching remain supported.
+This restriction depends on the selected MSAL asset, even when the application runs on modern .NET.
+
+Run the regressions against the actual Standard 2.0 DLL with:
+
+```powershell
+dotnet test tests\Microsoft.Identity.Test.Unit\Microsoft.Identity.Test.Unit.csproj --framework net8.0 -p:MsalTestAsset=netstandard2.0 --filter FullyQualifiedName~NetStandard20ManagedIdentityTests
+```
+
+`MsalTestAsset=netstandard2.0` builds the normal test graph and then replaces the runtime MSAL DLL
+with the Standard 2.0 build. The regression asserts the loaded assembly's target framework.
+This override requires a .NET test host: Framework-specific test types cannot load against
+the compatibility assembly. Omit that property to exercise the normal asset.
+
 To start the flow, MSAL requires a certificate. MSAL follows these steps:
 
 1. **Check for an existing certificate (Windows only)**: MSAL looks for a certificate (`devicecert.mtlsauth.local`) in the given Azure resource (In the local user store). 
