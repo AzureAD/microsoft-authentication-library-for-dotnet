@@ -16,6 +16,8 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http.Retry;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
+using Microsoft.Identity.Client.TelemetryCore;
+using Microsoft.Identity.Client.TelemetryCore.Http;
 
 namespace Microsoft.Identity.Client.Http
 {
@@ -132,9 +134,22 @@ namespace Microsoft.Identity.Client.Http
             {
                 retryCount++;
 
+                var retryHeaders = headers;
+                if (headers is not null && headers.TryGetValue(TelemetryConstants.XClientCurrentTelemetry, out string telemetry))
+                {
+                    string clearedTelemetry = HttpTelemetryManager.ClearCoalescingCounts(telemetry);
+                    if (!string.Equals(telemetry, clearedTelemetry, StringComparison.Ordinal))
+                    {
+                        retryHeaders = new Dictionary<string, string>(headers)
+                        {
+                            [TelemetryConstants.XClientCurrentTelemetry] = clearedTelemetry
+                        };
+                    }
+                }
+
                 return await SendRequestAsync(
                     endpoint,
-                    headers,
+                    retryHeaders,
                     body,
                     method,
                     logger,

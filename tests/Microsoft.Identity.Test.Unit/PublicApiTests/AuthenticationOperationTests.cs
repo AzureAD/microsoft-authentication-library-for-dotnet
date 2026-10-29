@@ -364,8 +364,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
-                // Assert - validation was called and failed, so a new token was acquired
-                await authScheme.Received(1).ValidateCachedTokenAsync(
+                // Both the initial lookup and the post-admission recheck must reject the cached token.
+                await authScheme.Received(2).ValidateCachedTokenAsync(
                     Arg.Any<MsalCacheValidationData>())
                     .ConfigureAwait(false);
                 
@@ -523,7 +523,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ConfigureAwait(false);
 
                 Assert.AreEqual(TokenSource.IdentityProvider, result2.AuthenticationResultMetadata.TokenSource);
-                await authScheme.Received(1).ValidateCachedTokenAsync(Arg.Any<MsalCacheValidationData>())
+                // Both the initial lookup and the post-admission recheck must reject the cached token.
+                await authScheme.Received(2).ValidateCachedTokenAsync(Arg.Any<MsalCacheValidationData>())
                     .ConfigureAwait(false);
                 Assert.AreEqual(0, httpManager.QueueSize);
             }
@@ -622,9 +623,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
-                // Assert - validation was called and failed, token was refreshed via RT
+                // Both cache lookups fail validation, so the token is refreshed via RT.
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-                await authScheme.Received(1).ValidateCachedTokenAsync(Arg.Any<MsalCacheValidationData>())
+                await authScheme.Received(2).ValidateCachedTokenAsync(Arg.Any<MsalCacheValidationData>())
                     .ConfigureAwait(false);
                 Assert.AreEqual(0, httpManager.QueueSize);
             }

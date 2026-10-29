@@ -8,6 +8,8 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Internal.Requests;
+using Microsoft.Identity.Client.OAuth2.Throttling;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Polly;
@@ -43,6 +45,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // Retry policy at token request level
                 TimeSpan retryAfter = TimeSpan.Zero;
+                MsalServiceException serviceFailure = null;
+                var failureCache = TokenRequestCoalescer.GetFailureCache(app.ServiceBundle);
 
                 var retryPolicy = Policy.Handle<Exception>(ex =>
                 {
@@ -59,13 +63,30 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                 await Task.Delay(1 * 1100).ConfigureAwait(false); 
                                 break;
                             case 2:
+                                Assert.IsInstanceOfType<MsalServiceException>(exception);
+                                Assert.IsFalse(exception is MsalThrottledServiceException);
+                                serviceFailure = (MsalServiceException)exception;
                                 Assert.AreEqual(
                                     0, 
                                     retryAfter.TotalSeconds, 
                                     $"Exception should not have Retry-After and should not be a throttling exception - {exception}");
+                                Assert.AreEqual(1, httpManager.QueueSize);
+                                Assert.HasCount(1, failureCache.CacheForTest);
+                                break;
+                            case 3:
+                                Assert.IsInstanceOfType<MsalThrottledServiceException>(exception);
+                                Assert.AreSame(serviceFailure,
+                                    ((MsalThrottledServiceException)exception).OriginalServiceException);
+                                Assert.AreEqual(0, retryAfter.TotalSeconds, "Local throttling does not synthesize Retry-After.");
+                                Assert.AreEqual(1, httpManager.QueueSize, "An immediate external retry must not reach ESTS.");
+
+                                // Simulate waiting out the local throttle before the next external retry.
+                                var entry = failureCache.CacheForTest.Single();
+                                failureCache.CacheForTest[entry.Key] = new ThrottlingCacheEntry(serviceFailure,
+                                    DateTimeOffset.UtcNow.AddMinutes(-2), DateTimeOffset.UtcNow.AddMinutes(-1));
                                 break;
                             default:
-                                Assert.Fail("3rd attempt should succeed");
+                                Assert.Fail("4th attempt should succeed after the local throttle expires");
                                 break;
                         }
                     });
@@ -81,7 +102,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // Assert
                 Assert.IsNotNull(result);
-                Assert.AreEqual(3, attempts);
+                Assert.AreEqual(4, attempts);
+                Assert.AreEqual(0, httpManager.QueueSize);
+                Assert.IsTrue(failureCache.IsEmpty());
             }
         }
 

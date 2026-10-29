@@ -12,6 +12,11 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         AssertionType AssertionType { get; }
 
         /// <summary>
+        /// Whether resolving credential material invokes a caller-supplied callback.
+        /// </summary>
+        bool HasRequestCallback { get; }
+
+        /// <summary>
         /// Resolves credential material for a single token request.
         /// The returned <see cref="CredentialMaterial"/> contains the body parameters to add to
         /// the token request and, optionally, a certificate to use for mTLS transport.

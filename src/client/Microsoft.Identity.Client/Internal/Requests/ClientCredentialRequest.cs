@@ -103,11 +103,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
                             // before the async operation completes, breaking cancellation propagation and causing unbounded SemaphoreSlim convoy.
                             // See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/6053
                             using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-                            return await GetAccessTokenAsync(tokenSource.Token, logger).ConfigureAwait(false);
+                            return await GetAccessTokenAsync(tokenSource.Token, logger, coalesced: true).ConfigureAwait(false);
                         }, logger, ServiceBundle, AuthenticationRequestParameters.RequestContext.ApiEvent,
                         AuthenticationRequestParameters.RequestContext.ApiEvent.CallerSdkApiId,
                         AuthenticationRequestParameters.RequestContext.ApiEvent.CallerSdkVersion,
-                        AuthenticationRequestParameters.OtelTagsEnricher);
+                        AuthenticationRequestParameters.OtelTagsEnricher,
+                        CreateCoalescer(),
+                        cancellationToken);
                     }
                 }
                 catch (MsalServiceException e)
@@ -123,15 +125,28 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.NoCachedAccessToken;
                 }
 
-                authResult = await GetAccessTokenAsync(cancellationToken, logger).ConfigureAwait(false);
+                authResult = await CreateCoalescer().ExecuteAsync(
+                    () => GetAccessTokenAsync(cancellationToken, logger, coalesced: true),
+                    cancellationToken).ConfigureAwait(false);
             }
 
             return authResult;
         }
 
+        private TokenRequestCoalescer CreateCoalescer()
+        {
+            return new TokenRequestCoalescer(
+                AuthenticationRequestParameters,
+                nameof(ClientCredentialRequest),
+                GetCachedAccessTokenAsync,
+                CreateAuthenticationResultFromCacheAsync,
+                _clientParameters.AccessTokenHashToRefresh);
+        }
+
         private async Task<AuthenticationResult> GetAccessTokenAsync(
             CancellationToken cancellationToken, 
-            ILoggerAdapter logger)
+            ILoggerAdapter logger,
+            bool coalesced = false)
         {
             await ResolveAuthorityAsync().ConfigureAwait(false);
 
@@ -153,8 +168,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     else
                     {
                         // Get a token from the app provider delegate
-                        authResult = await GetAccessTokenFromAppProviderAsync(cancellationToken, logger)
-                            .ConfigureAwait(false);
+                        // The keyed gate already covers provider execution and publication. Do not nest
+                        // the legacy global provider gate: a provider can acquire a different token.
+                        authResult = coalesced
+                            ? await SendTokenRequestToAppTokenProviderAsync(logger, cancellationToken).ConfigureAwait(false)
+                            : await GetAccessTokenFromAppProviderAsync(cancellationToken, logger).ConfigureAwait(false);
                     }
 
                     // Success - invoke OnCompletion callback if configured
@@ -297,6 +315,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             MsalException exception,
             ILoggerAdapter logger)
         {
+            AuthenticationRequestParameters.ReleaseCoalescingAdmission?.Invoke(exception);
             if (AuthenticationRequestParameters.AppConfig.OnCompletion == null)
             {
                 return;
@@ -377,8 +396,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 return null;
             }
 
-            // Otherwise, record a successful cache hit and return the token.
-            MarkAccessTokenAsCacheHit();
             return cacheItem;
         }
 
@@ -453,9 +470,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
         /// returns the cached access token item 
         /// </summary>
         /// <param name="cachedAccessTokenItem"></param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        private Task<AuthenticationResult> CreateAuthenticationResultFromCacheAsync(MsalAccessTokenCacheItem cachedAccessTokenItem)
+        private Task<AuthenticationResult> CreateAuthenticationResultFromCacheAsync(
+            MsalAccessTokenCacheItem cachedAccessTokenItem, CancellationToken cancellationToken = default)
         {
+            MarkAccessTokenAsCacheHit();
             return AuthenticationResult.CreateAsync(
                 cachedAccessTokenItem,
                 null,
@@ -465,7 +485,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 AuthenticationRequestParameters.RequestContext.ApiEvent,
                 account: null,
                 spaAuthCode: null,
-                additionalResponseParameters: null);
+                additionalResponseParameters: null,
+                cancellationToken: cancellationToken);
         }
 
         /// <summary>

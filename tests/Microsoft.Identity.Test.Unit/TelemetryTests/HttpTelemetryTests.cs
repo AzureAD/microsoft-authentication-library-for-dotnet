@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Reflection;
 using System.Threading;
@@ -14,11 +15,15 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Http.Retry;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.OAuth2.Throttling;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.TelemetryCore.Http;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
@@ -38,6 +43,124 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
     {
         private MockHttpAndServiceBundle _harness;
         private PublicClientApplication _app;
+
+        [TestMethod]
+        public void CoalescingCounters_AggregateEligibleReasonsAndDrainOnce()
+        {
+            // Arrange
+            var manager = new HttpTelemetryManager();
+            foreach (CacheRefreshReason reason in Enum.GetValues(typeof(CacheRefreshReason)))
+            {
+                manager.RecordCoalescedRequest(reason);
+                manager.RecordSuccessfulAcquisition(reason);
+            }
+            var apiEvent = new ApiEvent(Guid.NewGuid())
+            {
+                ApiId = ApiIds.AcquireTokenForClient,
+                CacheInfo = CacheRefreshReason.ForceRefreshOrClaims,
+                IsManagedCertUsed = '1'
+            };
+
+            // Act / Assert: bypasses must not consume pending counts or extend the header.
+            Assert.AreEqual(string.Empty, manager.GetCurrentRequestHeader(null));
+            string bypassHeader = manager.GetCurrentRequestHeader(apiEvent);
+            Assert.HasCount(6, bypassHeader.Split('|')[2].Split(','));
+            apiEvent.CacheInfo = CacheRefreshReason.Expired;
+            string header = manager.GetCurrentRequestHeader(apiEvent);
+            Assert.AreEqual(bypassHeader.Split('|')[2] + ",3,3", header.Split('|')[2]);
+            Assert.IsTrue(manager.GetCurrentRequestHeader(apiEvent).EndsWith(",0,0", StringComparison.Ordinal));
+
+            manager.RecordCoalescedRequest(CacheRefreshReason.NoCachedAccessToken);
+            Assert.IsTrue(new HttpTelemetryManager().GetCurrentRequestHeader(apiEvent).EndsWith(",0,0", StringComparison.Ordinal),
+                "Counters belong to the application, not a process-global collector.");
+            Assert.IsTrue(manager.GetCurrentRequestHeader(apiEvent).EndsWith(",1,0", StringComparison.Ordinal));
+        }
+
+        [TestMethod]
+        public async Task CoalescingCounters_ConcurrentSnapshotsDoNotLoseOrDuplicateCountsAsync()
+        {
+            // Arrange
+            var manager = new HttpTelemetryManager();
+
+            // Act
+            var headers = await Task.WhenAll(Enumerable.Range(0, 128).Select(_ => Task.Run(() =>
+            {
+                manager.RecordCoalescedRequest(CacheRefreshReason.Expired);
+                manager.RecordSuccessfulAcquisition(CacheRefreshReason.NoCachedAccessToken);
+                return manager.GetCurrentRequestHeader(
+                    new ApiEvent(Guid.NewGuid()) { CacheInfo = CacheRefreshReason.ProactivelyRefreshed });
+            }))).ConfigureAwait(false);
+            string final = manager.GetCurrentRequestHeader(
+                new ApiEvent(Guid.NewGuid()) { CacheInfo = CacheRefreshReason.Expired });
+            var fields = headers.Append(final).Select(header => header.Split('|')[2].Split(',')).ToArray();
+
+            // Assert
+            Assert.AreEqual(128L, fields.Sum(values => long.Parse(values[6], CultureInfo.InvariantCulture)));
+            Assert.AreEqual(128L, fields.Sum(values => long.Parse(values[7], CultureInfo.InvariantCulture)));
+        }
+
+        [TestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task CoalescingCounters_AreNotRepeatedOnHttpRetriesOrProtocolReplaysAsync(bool httpRetry)
+        {
+            // Arrange
+            using var harness = new MockHttpAndServiceBundle();
+            var manager = harness.ServiceBundle.HttpTelemetryManager;
+            for (int i = 0; i < 8; i++)
+            {
+                manager.RecordCoalescedRequest(CacheRefreshReason.Expired);
+            }
+            manager.RecordSuccessfulAcquisition(CacheRefreshReason.Expired);
+            var apiEvent = new ApiEvent(Guid.NewGuid())
+            {
+                ApiId = ApiIds.AcquireTokenForClient,
+                CacheInfo = CacheRefreshReason.Expired,
+                IsManagedCertUsed = '1'
+            };
+            string firstHeader = manager.GetCurrentRequestHeader(apiEvent);
+            string clearedHeader = manager.GetCurrentRequestHeader(apiEvent);
+            var client = new OAuth2Client(harness.ServiceBundle.ApplicationLogger, harness.HttpManager, null);
+            client.AddHeader(TelemetryConstants.XClientCurrentTelemetry, firstHeader);
+            var context = new RequestContext(harness.ServiceBundle, Guid.NewGuid(), null) { ApiEvent = apiEvent };
+            var retryPolicy = Substitute.For<IRetryPolicy>();
+            retryPolicy.PauseForRetryAsync(Arg.Any<HttpResponse>(), Arg.Any<Exception>(), Arg.Any<int>(),
+                Arg.Any<ILoggerAdapter>(), Arg.Any<CancellationToken>())
+                .Returns(call => Task.FromResult(httpRetry && call.ArgAt<int>(2) == 0));
+
+            var first = harness.HttpManager.AddMockHandler(new MockHttpMessageHandler
+            {
+                ExpectedMethod = HttpMethod.Post,
+                ResponseMessage = new HttpResponseMessage(httpRetry ? HttpStatusCode.ServiceUnavailable : HttpStatusCode.Unauthorized),
+                AdditionalRequestValidation = _ => manager.RecordCoalescedRequest(CacheRefreshReason.Expired)
+            });
+            MockHttpMessageHandler retry = httpRetry ? harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost() : null;
+            var replay = harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost();
+            var endpoint = new Uri(TestConstants.AuthorityCommonTenant + "oauth2/v2.0/token");
+            Task<MsalTokenResponse> Send(bool isReplay = false) => client.ExecuteRequestAsync<MsalTokenResponse>(
+                endpoint, HttpMethod.Post, context, addCommonHeaders: !isReplay, retryPolicy: retryPolicy);
+
+            // Act
+            if (httpRetry)
+            {
+                await Send().ConfigureAwait(false);
+            }
+            else
+            {
+                await Assert.ThrowsAsync<MsalServiceException>(() => Send()).ConfigureAwait(false);
+            }
+            await Send(isReplay: true).ConfigureAwait(false);
+
+            // Assert
+            Assert.AreEqual(firstHeader, first.ActualRequestMessage.Headers.GetValues(TelemetryConstants.XClientCurrentTelemetry).Single());
+            if (retry is not null)
+            {
+                Assert.AreEqual(clearedHeader, retry.ActualRequestMessage.Headers.GetValues(TelemetryConstants.XClientCurrentTelemetry).Single());
+            }
+            Assert.AreEqual(clearedHeader, replay.ActualRequestMessage.Headers.GetValues(TelemetryConstants.XClientCurrentTelemetry).Single());
+            Assert.IsTrue(manager.GetCurrentRequestHeader(apiEvent).EndsWith(",1,0", StringComparison.Ordinal),
+                "Clearing a replay must not discard counts recorded after the original snapshot.");
+        }
 
         [TestCleanup]
         public override void TestCleanup()
@@ -890,7 +1013,10 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             Assert.HasCount(3, telemetryCategories);
             Assert.HasCount(1, telemetryCategories[0].Split(',')); // version
             Assert.HasCount(5, telemetryCategories[1].Split(',')); // api_id, cache_info, region_used, region_source, region_outcome
-            Assert.HasCount(6, telemetryCategories[2].Split(',')); // platform_fields
+            bool hasCoalescingCounts = cacheInfo == CacheRefreshReason.Expired ||
+                cacheInfo == CacheRefreshReason.ProactivelyRefreshed ||
+                cacheInfo == CacheRefreshReason.NoCachedAccessToken;
+            Assert.HasCount(hasCoalescingCounts ? 8 : 6, telemetryCategories[2].Split(',')); // platform_fields
 
             Assert.AreEqual(TelemetryConstants.HttpTelemetrySchemaVersion.ToString(), telemetryCategories[0]); // version
 

@@ -28,6 +28,8 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         /// </summary>
         public X509Certificate2 Certificate { get; }
 
+        public bool HasRequestCallback => Certificate is null;
+
         /// <summary>
         /// Constructor that accepts a certificate provider delegate.
         /// This allows both static certificates (via a simple delegate) and dynamic certificate resolution.
