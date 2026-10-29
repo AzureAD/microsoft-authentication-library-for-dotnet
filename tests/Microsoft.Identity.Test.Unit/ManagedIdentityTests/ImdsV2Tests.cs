@@ -3,8 +3,10 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Net;
 using System.Net.Http;
 using System.Security.Authentication;
 using System.Security.Cryptography;
@@ -81,16 +83,26 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
             string userAssignedId = null,
             string certificateRequestCertificate = TestConstants.ValidRawCertificate,
-            string expectedClaims = null)
+            string expectedClaims = null,
+            bool withAttestation = true,
+            MockHttpMessageHandler computeMetadataHandler = null)
         {
             if (userAssignedIdentityId != UserAssignedIdentityId.None && userAssignedId != null)
             {
                 httpManager.AddMockHandler(MockHelpers.MockCsrResponse(userAssignedIdentityId: userAssignedIdentityId, userAssignedId: userAssignedId));
+                if (withAttestation)
+                {
+                    httpManager.AddMockHandler(computeMetadataHandler ?? MockHelpers.MockImdsComputeMetadata());
+                }
                 httpManager.AddMockHandler(MockHelpers.MockCertificateRequestResponse(userAssignedIdentityId, userAssignedId, certificateRequestCertificate));
             }
             else
             {
                 httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
+                if (withAttestation)
+                {
+                    httpManager.AddMockHandler(computeMetadataHandler ?? MockHelpers.MockImdsComputeMetadata());
+                }
                 httpManager.AddMockHandler(MockHelpers.MockCertificateRequestResponse(certificate: certificateRequestCertificate));
             }
 
@@ -548,6 +560,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 // First attempt: full mint, then ESTS-R rejects the bound cert with invalid_client.
                 httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
+                httpManager.AddMockHandler(MockHelpers.MockImdsComputeMetadata());
                 httpManager.AddMockHandler(MockHelpers.MockCertificateRequestResponse(certificate: TestConstants.ValidRawCertificate));
                 httpManager.AddMockHandler(MockHelpers.MockImdsV2EntraTokenRequestResponse(
                     _identityLoggerAdapter,
@@ -593,6 +606,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 string certB = CreateRawCertFromXml("CN=imdsv2-fresh-binding", DateTimeOffset.UtcNow.AddDays(30));
 
                 httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
+                httpManager.AddMockHandler(MockHelpers.MockImdsComputeMetadata());
                 httpManager.AddMockHandler(MockHelpers.MockCertificateRequestResponse(certificate: certA));
                 var failingTokenHandler = MockHelpers.MockImdsV2EntraTokenRequestResponse(_identityLoggerAdapter);
                 failingTokenHandler.ExceptionToThrow = CreateSchannelTransportException();
@@ -649,6 +663,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 for (int attempt = 0; attempt < 2; attempt++)
                 {
                     httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
+                    httpManager.AddMockHandler(MockHelpers.MockImdsComputeMetadata());
                     httpManager.AddMockHandler(MockHelpers.MockCertificateRequestResponse(certificate: TestConstants.ValidRawCertificate));
                     var handler = MockHelpers.MockImdsV2EntraTokenRequestResponse(_identityLoggerAdapter);
                     handler.ExceptionToThrow = CreateSchannelTransportException();
@@ -690,6 +705,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
 
                 httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
+                httpManager.AddMockHandler(MockHelpers.MockImdsComputeMetadata());
                 httpManager.AddMockHandler(MockHelpers.MockCertificateRequestResponse(certificate: TestConstants.ValidRawCertificate));
                 var handler = MockHelpers.MockImdsV2EntraTokenRequestResponse(_identityLoggerAdapter);
                 handler.ExceptionToThrow = new HttpRequestException(
@@ -734,6 +750,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
 
                 httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
+                httpManager.AddMockHandler(MockHelpers.MockImdsComputeMetadata());
                 httpManager.AddMockHandler(MockHelpers.MockCertificateRequestResponse(certificate: TestConstants.ValidRawCertificate));
                 var handler = MockHelpers.MockImdsV2EntraTokenRequestResponse(_identityLoggerAdapter);
                 handler.ExceptionToThrow = new InvalidOperationException("Unexpected failure in the token exchange path.");
@@ -779,6 +796,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
 
                 httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
+                httpManager.AddMockHandler(MockHelpers.MockImdsComputeMetadata());
                 httpManager.AddMockHandler(MockHelpers.MockCertificateRequestResponse(
                     certificate: TestConstants.ValidRawCertificate,
                     mtlsEndpointOverride: "http://[invalid"));
@@ -869,6 +887,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
 
                 httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
+                httpManager.AddMockHandler(MockHelpers.MockImdsComputeMetadata());
                 httpManager.AddMockHandler(MockHelpers.MockCertificateRequestResponse(certificate: TestConstants.ValidRawCertificate));
 
                 // Cancel while the token leg is in flight. The mock validates the request first, then calls
@@ -931,7 +950,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 httpManager.AddMockHandler(failingTokenHandler);
 
                 // Retry: binding is re-minted and IMDS issues cert B, then the token succeeds.
-                AddMocksToGetEntraToken(httpManager, certificateRequestCertificate: certB);
+                AddMocksToGetEntraToken(httpManager, certificateRequestCertificate: certB, withAttestation: false);
 
                 // Act - no attestation.
                 var result = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
@@ -1593,6 +1612,81 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
         #region AttachPrivateKeyToCert Tests
         [TestMethod]
+        public void AttachPrivateKeyToCert_MismatchedKey_WrapsArgumentException()
+        {
+            // Arrange
+            using (RSA rsa = RSA.Create())
+            {
+                // Act
+                MsalServiceException exception = Assert.ThrowsExactly<MsalServiceException>(() =>
+                    CommonCryptographyManager.AttachPrivateKeyToCert(TestConstants.ValidRawCertificate, rsa));
+
+                // Assert
+                Assert.AreEqual(MsalError.InvalidCertificate, exception.ErrorCode);
+                Assert.IsInstanceOfType<ArgumentException>(exception.InnerException);
+            }
+        }
+
+        [TestMethod]
+        public void AttachPrivateKeyToCert_NonExportableCngKey_SignsAfterOriginalKeyIsDisposed()
+        {
+            if (!ImdsV2TestStoreCleaner.IsWindows)
+            {
+                Assert.Inconclusive("Non-exportable CNG keys require Windows.");
+            }
+
+            // Arrange
+            string keyName = "msal-attach-" + Guid.NewGuid().ToString("N");
+            CngKey key = CngKey.Create(CngAlgorithm.Rsa, keyName, new CngKeyCreationParameters
+            {
+                Provider = CngProvider.MicrosoftSoftwareKeyStorageProvider,
+                ExportPolicy = CngExportPolicies.None,
+                KeyUsage = CngKeyUsages.Signing
+            });
+
+            try
+            {
+                X509Certificate2 certificate;
+                using (key)
+                using (var rsa = new RSACng(key))
+                {
+                    Assert.IsFalse(key.IsEphemeral);
+                    Assert.Throws<CryptographicException>(() => rsa.ExportParameters(true));
+                    var request = new System.Security.Cryptography.X509Certificates.CertificateRequest(
+                        "CN=MSAL non-exportable key test", rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+                    using (X509Certificate2 issuedCertificate = request.CreateSelfSigned(
+                        DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddDays(1)))
+                    {
+                        // Act
+                        certificate = CommonCryptographyManager.AttachPrivateKeyToCert(
+                            Convert.ToBase64String(issuedCertificate.RawData), rsa);
+                    }
+                }
+
+                // Assert
+                using (certificate)
+                using (RSA privateKey = certificate.GetRSAPrivateKey())
+                using (RSA publicKey = certificate.GetRSAPublicKey())
+                {
+                    Assert.IsTrue(certificate.HasPrivateKey);
+                    Assert.IsNotNull(privateKey);
+                    byte[] data = { 1, 2, 3 };
+                    byte[] signature = privateKey.SignData(data, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+                    Assert.IsTrue(publicKey.VerifyData(
+                        data, signature, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1));
+                    Assert.Throws<CryptographicException>(() => privateKey.ExportParameters(true));
+                }
+            }
+            finally
+            {
+                using (CngKey persistedKey = CngKey.Open(keyName, CngProvider.MicrosoftSoftwareKeyStorageProvider))
+                {
+                    persistedKey.Delete();
+                }
+            }
+        }
+
+        [TestMethod]
         public void AttachPrivateKeyToCert_ValidInputs_ReturnsValidCertificate()
         {
             using (RSA rsa = RSA.Create())
@@ -1625,6 +1719,151 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
         #region Attestation Tests
         [TestMethod]
+        [DataRow("AzurePublicCloud", "westus2", "https://westus2.attestation.microsoft.com/")]
+        [DataRow("AzurePublicCloud", "eastus2", "https://eastus2.attestation.microsoft.com/")]
+        [DataRow("azurepubliccloud", "westus2", "https://westus2.attestation.microsoft.com/")]
+        [DataRow("AzureUSGovernmentCloud", "usgovvirginia", "https://usgovvirginia.attestation.microsoftonline.us/")]
+        [DataRow("AzureChinaCloud", "chinanorth", "https://chinanorth.attestation.partner.microsoftonline.cn/")]
+        [DataRow("AzureBleuCloud", "region1", "https://region1.attestation.sovcloud-identity.fr/")]
+        [DataRow("AzureGermanCloud", "region1", "https://attestation.windows-ppe.net/")]
+        [DataRow("USSec", "region1", "https://attestation.windows-ppe.net/")]
+        [DataRow("USNat", "region1", "https://attestation.windows-ppe.net/")]
+        [DataRow("AzureStack", "region1", "https://attestation.windows-ppe.net/")]
+        [DataRow("AzureDelosCloud", "region1", "https://attestation.windows-ppe.net/")]
+        [DataRow("AzureGovSGCloud", "region1", "https://attestation.windows-ppe.net/")]
+        [DataRow("UnknownCloud", "region1", "https://attestation.windows-ppe.net/")]
+        [DataRow("", "region1", "https://attestation.windows-ppe.net/")]
+        [DataRow(null, "region1", "https://attestation.windows-ppe.net/")]
+        public async Task AttestationProvider_ReceivesRegionalCloudEndpointOrOriginalFallback(
+            string azureEnvironment,
+            string location,
+            string expectedEndpoint)
+        {
+            // Arrange
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
+                var mi = await CreateManagedIdentityAsync(
+                    httpManager, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
+                string capturedEndpoint = null;
+                int providerCalls = 0;
+                PopKeyAttestor.s_testAttestationProvider = (endpoint, keyHandle, clientId, keyId, ct) =>
+                {
+                    capturedEndpoint = endpoint;
+                    providerCalls++;
+                    const string jwt = "fake.jwt.token";
+                    return Task.FromResult(new AttestationResult(
+                        AttestationStatus.Success,
+                        new AttestationToken(jwt, DateTimeOffset.UtcNow.AddHours(1)),
+                        jwt, 0, string.Empty));
+                };
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponse(
+                    attestationEndpointOverride: "https://attestation.windows-ppe.net"));
+                var computeHandler = MockHelpers.MockImdsComputeMetadata(azureEnvironment: azureEnvironment, location: location);
+                computeHandler.ExpectedQueryParams = new Dictionary<string, string> { { "api-version", "2021-02-01" } };
+                computeHandler.ExpectedRequestHeaders = new Dictionary<string, string> { { "Metadata", "true" } };
+                httpManager.AddMockHandler(computeHandler);
+                httpManager.AddMockHandler(MockHelpers.MockCertificateRequestResponse());
+                httpManager.AddMockHandler(MockHelpers.MockImdsV2EntraTokenRequestResponse(_identityLoggerAdapter));
+
+                // Act
+                var result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession()
+                    .WithAttestationSupport()
+                    .ExecuteAsync().ConfigureAwait(false);
+                var cached = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession()
+                    .WithAttestationSupport()
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual(expectedEndpoint, capturedEndpoint);
+                Assert.AreEqual(1, providerCalls);
+                Assert.AreEqual(MTLSPoP, result.TokenType);
+                Assert.AreEqual(TokenSource.Cache, cached.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(0, httpManager.QueueSize);
+            }
+        }
+
+        [TestMethod]
+        [DataRow(HttpStatusCode.NotFound, "")]
+        [DataRow(HttpStatusCode.OK, "not-json")]
+        [DataRow(HttpStatusCode.OK, "null")]
+        public async Task AttestationProvider_ComputeMetadataUnavailable_UsesOriginalEndpoint(
+            HttpStatusCode statusCode, string body)
+        {
+            // Arrange
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager(disableInternalRetries: true))
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
+                var mi = await CreateManagedIdentityAsync(
+                    httpManager, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
+                string capturedEndpoint = null;
+                PopKeyAttestor.s_testAttestationProvider = (endpoint, keyHandle, clientId, keyId, ct) =>
+                {
+                    capturedEndpoint = endpoint;
+                    const string jwt = "fake.jwt.token";
+                    return Task.FromResult(new AttestationResult(
+                        AttestationStatus.Success,
+                        new AttestationToken(jwt, DateTimeOffset.UtcNow.AddHours(1)),
+                        jwt, 0, string.Empty));
+                };
+                var computeHandler = MockHelpers.MockImdsComputeMetadata();
+                computeHandler.ResponseMessage = new HttpResponseMessage(statusCode)
+                {
+                    Content = new StringContent(body)
+                };
+                AddMocksToGetEntraToken(httpManager, computeMetadataHandler: computeHandler);
+
+                // Act
+                var result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession()
+                    .WithAttestationSupport()
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual("https://fake_attestation_endpoint/", capturedEndpoint);
+                Assert.AreEqual(MTLSPoP, result.TokenType);
+            }
+        }
+
+        [TestMethod]
+        public async Task AttestationProvider_ComputeMetadataCancelled_DoesNotAttestOrMint()
+        {
+            // Arrange
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            using (var cts = new CancellationTokenSource())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
+                var mi = await CreateManagedIdentityAsync(
+                    httpManager, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
+                bool attestationCalled = false;
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
+                var computeHandler = MockHelpers.MockImdsComputeMetadata();
+                computeHandler.AdditionalRequestValidation = _ => cts.Cancel();
+                httpManager.AddMockHandler(computeHandler);
+
+                // Act
+                await Assert.ThrowsAsync<OperationCanceledException>(async () =>
+                    await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                        .WithMtlsProofOfPossession()
+                        .WithAttestationProviderForTests((endpoint, handle, clientId, keyId, logger, ct) =>
+                        {
+                            attestationCalled = true;
+                            return Task.FromResult("fake.jwt.token");
+                        })
+                        .ExecuteAsync(cts.Token).ConfigureAwait(false)).ConfigureAwait(false);
+
+                // Assert
+                Assert.IsFalse(attestationCalled);
+                Assert.AreEqual(0, httpManager.QueueSize);
+            }
+        }
+
+        [TestMethod]
         public async Task MtlsPop_NoAttestationProvider_UsesNonAttestedFlow()
         {
             using (new EnvVariableContext())
@@ -1636,7 +1875,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 // Add mocks for successful non-attested flow (CSR + issuecredential + token)
                 // Note: No attestation token in the certificate request
-                AddMocksToGetEntraToken(httpManager);
+                AddMocksToGetEntraToken(httpManager, withAttestation: false);
 
                 var result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .WithMtlsProofOfPossession()
@@ -1661,8 +1900,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var mi = await CreateManagedIdentityAsync(httpManager, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
 
-                // Only the CSR-metadata request is consumed before attestation fails; no cert/token mocks.
+                // Only metadata requests are consumed before attestation fails; no cert/token mocks.
                 httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
+                httpManager.AddMockHandler(MockHelpers.MockImdsComputeMetadata());
 
                 // Act: a configured provider that yields no token must hard-fail for a KeyGuard key rather
                 // than silently sending a non-attested certificate request to IMDS.
@@ -1690,6 +1930,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var mi = await CreateManagedIdentityAsync(httpManager, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
 
                 httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
+                httpManager.AddMockHandler(MockHelpers.MockImdsComputeMetadata());
 
                 // Act: whitespace/empty token is treated as a failed attestation, not a non-attested fallback.
                 var ex = await Assert.ThrowsAsync<MsalServiceException>(async () =>
@@ -1716,6 +1957,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var mi = await CreateManagedIdentityAsync(httpManager, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
 
                 httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
+                httpManager.AddMockHandler(MockHelpers.MockImdsComputeMetadata());
 
                 // Act: an exception from the provider must surface as attestation_failed with the cause preserved.
                 var ex = await Assert.ThrowsAsync<MsalServiceException>(async () =>
@@ -1745,6 +1987,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var mi = await CreateManagedIdentityAsync(httpManager, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
 
                 httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
+                httpManager.AddMockHandler(MockHelpers.MockImdsComputeMetadata());
 
                 // Act: a cancellation surfaced by the attestation provider must propagate unchanged,
                 // not be masked as an attestation_failed service error.
@@ -1780,6 +2023,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var mi = await CreateManagedIdentityAsync(httpManager, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
 
                 httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
+                httpManager.AddMockHandler(MockHelpers.MockImdsComputeMetadata());
 
                 // Simulate the production failure: MAA policy/dbx deny surfaces as a native error code + reason.
                 const string reason = "The enclave rejected the evidence (key type / PCR policy).";
@@ -1814,6 +2058,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var mi = await CreateManagedIdentityAsync(httpManager, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
 
                 httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
+                httpManager.AddMockHandler(MockHelpers.MockImdsComputeMetadata());
 
                 const string reason = "Native library raised SEHException: 0x80090011";
                 PopKeyAttestor.s_testAttestationProvider = (endpoint, keyHandle, clientId, keyId, ct) =>
@@ -1846,6 +2091,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var mi = await CreateManagedIdentityAsync(httpManager, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
 
                 httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
+                httpManager.AddMockHandler(MockHelpers.MockImdsComputeMetadata());
 
                 PopKeyAttestor.s_testAttestationProvider = (endpoint, keyHandle, clientId, keyId, ct) =>
                     Task.FromResult(new AttestationResult(AttestationStatus.TokenEmpty, null, null, 0, "rc==0 but token buffer was null."));
@@ -1876,6 +2122,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var mi = await CreateManagedIdentityAsync(httpManager, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
 
                 httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
+                httpManager.AddMockHandler(MockHelpers.MockImdsComputeMetadata());
 
                 PopKeyAttestor.s_testAttestationProvider = (endpoint, keyHandle, clientId, keyId, ct) =>
                     Task.FromResult(new AttestationResult(AttestationStatus.NotInitialized, null, null, -1, "Native library not initialized."));
@@ -1906,6 +2153,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var mi = await CreateManagedIdentityAsync(httpManager, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
 
                 httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
+                httpManager.AddMockHandler(MockHelpers.MockImdsComputeMetadata());
 
                 // Defensive: a "Success" status with no JWT must still be treated as a failure.
                 PopKeyAttestor.s_testAttestationProvider = (endpoint, keyHandle, clientId, keyId, ct) =>
@@ -1936,6 +2184,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var mi = await CreateManagedIdentityAsync(httpManager, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
 
                 httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
+                httpManager.AddMockHandler(MockHelpers.MockImdsComputeMetadata());
 
                 // A "Success" status with a whitespace-only JWT must be treated as a failure here so the
                 // richer Status/NativeErrorCode/Reason is surfaced, rather than leaking a blank token that
@@ -2262,6 +2511,44 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
+        public async Task AttestationProvider_ReceivesTenantIdAsClientIdMetadata()
+        {
+            // Arrange
+            string capturedClientIdMetadata = null;
+            PopKeyAttestor.s_testAttestationProvider = (endpoint, keyHandle, clientIdMetadata, keyId, ct) =>
+            {
+                capturedClientIdMetadata = clientIdMetadata;
+                const string fakeJwt = "fake.jwt.token";
+                var token = new AttestationToken(fakeJwt, DateTimeOffset.UtcNow.AddHours(1));
+                return Task.FromResult(new AttestationResult(AttestationStatus.Success, token, fakeJwt, 0, string.Empty));
+            };
+
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                ManagedIdentityClient.ResetSourceForTest();
+                ImdsV2ManagedIdentitySource.ResetCertCacheForTest();
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
+
+                var managedIdentityApp = await CreateManagedIdentityAsync(
+                    httpManager,
+                    managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
+
+                AddMocksToGetEntraToken(httpManager);
+
+                // Act
+                await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession()
+                    .WithAttestationSupport()
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual(TestConstants.TenantId, capturedClientIdMetadata);
+                Assert.AreNotEqual(TestConstants.ClientId, capturedClientIdMetadata);
+            }
+        }
+
+        [TestMethod]
         public async Task MaaTokenCache_Hit_DoesNotCallAttestationProviderAgain()
         {
             // Validates the MAA token cache itself: after a first acquire populates the cache,
@@ -2328,6 +2615,53 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.AreEqual(1, providerCallCount,
                     "MAA attestation provider must NOT be called again — the MAA token cache should have been hit.");
             }
+        }
+
+        [TestMethod]
+        public async Task MaaTokenCache_DifferentClientIdMetadata_SharesCacheEntry()
+        {
+            // Arrange
+            int providerCallCount = 0;
+            string providerClientIdMetadata = null;
+            PopKeyAttestor.s_testAttestationProvider = (endpoint, keyHandle, clientIdMetadata, keyId, ct) =>
+            {
+                Interlocked.Increment(ref providerCallCount);
+                providerClientIdMetadata = clientIdMetadata;
+                const string fakeJwt = "fake.jwt.token";
+                var token = new AttestationToken(fakeJwt, DateTimeOffset.UtcNow.AddHours(1));
+                return Task.FromResult(new AttestationResult(AttestationStatus.Success, token, fakeJwt, 0, string.Empty));
+            };
+
+            const string endpoint = "https://eastus.attestation.azure.net";
+            const string keyId = "TestKeyClientIdMetadata";
+            const string managedIdentityClientId = "11111111-1111-1111-1111-111111111111";
+            const string tenantId = "22222222-2222-2222-2222-222222222222";
+
+            using var rsa = new RSACng(2048);
+            var keyHandle = rsa.Key.Handle;
+
+            // Act
+            AttestationResult firstResult = await PopKeyAttestor.AttestCredentialGuardAsync(
+                endpoint,
+                keyHandle,
+                managedIdentityClientId,
+                keyId,
+                cancellationToken: CancellationToken.None).ConfigureAwait(false);
+
+            Assert.AreEqual(1, providerCallCount);
+            Assert.AreEqual(managedIdentityClientId, providerClientIdMetadata);
+
+            AttestationResult secondResult = await PopKeyAttestor.AttestCredentialGuardAsync(
+                endpoint,
+                keyHandle,
+                tenantId,
+                keyId,
+                cancellationToken: CancellationToken.None).ConfigureAwait(false);
+
+            // Assert
+            Assert.AreEqual(1, providerCallCount, "Changing client_id metadata must not create a second MAA cache entry.");
+            Assert.AreEqual(managedIdentityClientId, providerClientIdMetadata, "The provider must not be called on the cache hit.");
+            Assert.AreEqual(firstResult.Jwt, secondResult.Jwt);
         }
 
         [TestMethod]
@@ -2591,51 +2925,76 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
         #region Cached certificate tests
         [TestMethod]
-        public async Task mTLSPop_ForceRefresh_UsesCachedCert_NoIssueCredential_PostsCanonicalClientId_AndSkipsAttestation()
+        public async Task mTLSPop_ForceRefresh_RemintsCachedCert_PostsCanonicalClientId_AndReusesCachedAttestation()
         {
+            int providerCallCount = 0;
+            PopKeyAttestor.s_testAttestationProvider = (endpoint, keyHandle, clientId, keyId, ct) =>
+            {
+                Interlocked.Increment(ref providerCallCount);
+                var fakeJwt = "******";
+                var token = new AttestationToken(fakeJwt, DateTimeOffset.UtcNow.AddHours(1));
+                return Task.FromResult(new AttestationResult(AttestationStatus.Success, token, fakeJwt, 0, string.Empty));
+            };
+
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
-                // Start clean across tests
+                // Arrange
                 SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
 
-                var mi = await CreateManagedIdentityAsync(httpManager, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
+                var sharedKeyProvider = new TestKeyGuardManagedIdentityKeyProvider();
+                var mi = await CreateManagedIdentityAsync(
+                    httpManager,
+                    managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard,
+                    keyProvider: sharedKeyProvider).ConfigureAwait(false);
+                string certA = CreateRawCertFromXml("CN=force-refresh-original", DateTimeOffset.UtcNow.AddDays(30));
+                string certB = CreateRawCertFromXml("CN=force-refresh-reminted", DateTimeOffset.UtcNow.AddDays(30));
 
                 // First acquire: full flow (CSR + issuecredential + token)
-                AddMocksToGetEntraToken(httpManager);
+                AddMocksToGetEntraToken(httpManager, certificateRequestCertificate: certA);
 
-                // Use counting provider for this test
-                var countingProvider = TestAttestationProviders.CreateCountingProvider();
-
+                // Act
                 var result1 = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .WithMtlsProofOfPossession()
-                    .WithAttestationProviderForTests(countingProvider.GetDelegate())
+                    .WithAttestationSupport()
                     .ExecuteAsync().ConfigureAwait(false);
 
+                // Assert
                 Assert.AreEqual(ImdsV2Tests.MTLSPoP, result1.TokenType);
                 Assert.IsNotNull(result1.BindingCertificate);
                 Assert.AreEqual(TokenSource.IdentityProvider, result1.AuthenticationResultMetadata.TokenSource);
-                Assert.AreEqual(1, countingProvider.CallCount, "Attestation must be called exactly once on first mint.");
+                Assert.AreEqual(1, providerCallCount, "Attestation must be called exactly once on first mint.");
 
-                // Second acquire: FORCE REFRESH to bypass token cache.
-                // Expect: 1x getplatformmetadata + token request. NO /issuecredential. Attestation NOT called again.
-                MockHelpers.AddMocksToGetEntraTokenUsingCachedCert(
-                    httpManager,
-                    _identityLoggerAdapter,
-                    mTLSPop: true,
-                    assertClientId: true,                 // assert canonical client_id is posted
-                    expectedClientId: TestConstants.ClientId);
+                // Arrange
+                httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
+                httpManager.AddMockHandler(MockHelpers.MockImdsComputeMetadata());
+                httpManager.AddMockHandler(MockHelpers.MockCertificateRequestResponse(certificate: certB));
+                httpManager.AddMockHandler(
+                    MockHelpers.MockImdsV2EntraTokenRequestResponseExpectClientId(
+                        _identityLoggerAdapter,
+                        mTLSPop: true,
+                        expectedClientId: TestConstants.ClientId));
 
+                // Act
                 var result2 = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                    .WithForceRefresh(true)                // if your API is parameterless, use .WithForceRefresh()
+                    .WithForceRefresh(true)
                     .WithMtlsProofOfPossession()
-                    .WithAttestationProviderForTests(countingProvider.GetDelegate())
+                    .WithAttestationSupport()
                     .ExecuteAsync().ConfigureAwait(false);
 
+                // Assert
+                using var originalCert = new X509Certificate2(Convert.FromBase64String(certA));
+                using var remintedCert = new X509Certificate2(Convert.FromBase64String(certB));
                 Assert.AreEqual(ImdsV2Tests.MTLSPoP, result2.TokenType);
                 Assert.IsNotNull(result2.BindingCertificate);
                 Assert.AreEqual(TokenSource.IdentityProvider, result2.AuthenticationResultMetadata.TokenSource);
-                Assert.AreEqual(1, countingProvider.CallCount, "Attestation must NOT be invoked on refresh when cert is cached.");
+                Assert.AreEqual(remintedCert.Thumbprint, result2.BindingCertificate.Thumbprint,
+                    "Force refresh must bind the token to the newly minted certificate.");
+                Assert.AreNotEqual(originalCert.Thumbprint, result2.BindingCertificate.Thumbprint,
+                    "Force refresh must not reuse the cached binding certificate.");
+                Assert.AreEqual(1, providerCallCount,
+                    "Force refresh must reuse the valid cached attestation JWT because the binding certificate uses the current key.");
+                Assert.AreEqual(0, httpManager.QueueSize, "Force refresh must call /issuecredential before the token endpoint.");
             }
         }
 
@@ -2643,7 +3002,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow(UserAssignedIdentityId.ClientId, TestConstants.ClientId, TestConstants.ClientId + "-2")]
         [DataRow(UserAssignedIdentityId.ResourceId, TestConstants.MiResourceId, TestConstants.MiResourceId + "-2")]
         [DataRow(UserAssignedIdentityId.ObjectId, TestConstants.ObjectId, TestConstants.ObjectId + "-2")]
-        public async Task mTLSPop_CachedCertIsPerIdentity_OnRefresh_Identity1UsesCache_Identity2Mints(
+        public async Task mTLSPop_ForceRefresh_RemintsCachedCertPerIdentity_AndOtherIdentityMints(
             UserAssignedIdentityId userAssignedIdentityId,
             string userAssignedId1,
             string userAssignedId2)
@@ -2651,29 +3010,37 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
+                // Arrange
                 SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
+                string identity1CertA = CreateRawCertFromXml("CN=identity-1-original", DateTimeOffset.UtcNow.AddDays(30));
+                string identity1CertB = CreateRawCertFromXml("CN=identity-1-reminted", DateTimeOffset.UtcNow.AddDays(30));
+                string identity2Cert = CreateRawCertFromXml("CN=identity-2", DateTimeOffset.UtcNow.AddDays(30));
 
                 // Identity 1 – first acquire (mint)
                 var mi1 = await CreateManagedIdentityAsync(httpManager, userAssignedIdentityId, userAssignedId1, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
-                AddMocksToGetEntraToken(httpManager, userAssignedIdentityId, userAssignedId1);
+                AddMocksToGetEntraToken(
+                    httpManager,
+                    userAssignedIdentityId,
+                    userAssignedId1,
+                    certificateRequestCertificate: identity1CertA);
 
+                // Act
                 var result1 = await mi1.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .WithMtlsProofOfPossession()
                     .WithAttestationSupport()
                     .ExecuteAsync().ConfigureAwait(false);
+
+                // Assert
                 Assert.AreEqual(TokenSource.IdentityProvider, result1.AuthenticationResultMetadata.TokenSource);
 
-                // Identity 1 – force refresh (should use cached cert ? NO /issuecredential)
-                MockHelpers.AddMocksToGetEntraTokenUsingCachedCert(
+                // Arrange - identity 1 force refresh must re-mint its binding certificate.
+                AddMocksToGetEntraToken(
                     httpManager,
-                    _identityLoggerAdapter,
-                    mTLSPop: true,
-                    assertClientId: true,
-                    expectedClientId: TestConstants.ClientId,
-                    userAssignedIdentityId: userAssignedIdentityId,
-                    userAssignedId: userAssignedId1
-                );
+                    userAssignedIdentityId,
+                    userAssignedId1,
+                    certificateRequestCertificate: identity1CertB);
 
+                // Act
                 var result1Refresh = await mi1.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .WithForceRefresh(true)
                     .WithMtlsProofOfPossession()
@@ -2681,17 +3048,32 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
+                // Assert
+                using var identity1OriginalCert = new X509Certificate2(Convert.FromBase64String(identity1CertA));
+                using var identity1RemintedCert = new X509Certificate2(Convert.FromBase64String(identity1CertB));
                 Assert.AreEqual(TokenSource.IdentityProvider, result1Refresh.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(identity1RemintedCert.Thumbprint, result1Refresh.BindingCertificate.Thumbprint);
+                Assert.AreNotEqual(identity1OriginalCert.Thumbprint, result1Refresh.BindingCertificate.Thumbprint);
 
-                // Identity 2 – new identity (should MINT again ? requires /issuecredential)
+                // Arrange - identity 2 has an independent cache entry and must mint its own certificate.
                 var mi2 = await CreateManagedIdentityAsync(httpManager, userAssignedIdentityId, userAssignedId2, addProbeMock: false, addSourceCheck: false, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
-                AddMocksToGetEntraToken(httpManager, userAssignedIdentityId, userAssignedId2);
+                AddMocksToGetEntraToken(
+                    httpManager,
+                    userAssignedIdentityId,
+                    userAssignedId2,
+                    certificateRequestCertificate: identity2Cert);
 
+                // Act
                 var result2 = await mi2.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .WithMtlsProofOfPossession()
                     .WithAttestationSupport()
                     .ExecuteAsync().ConfigureAwait(false);
+
+                // Assert
+                using var expectedIdentity2Cert = new X509Certificate2(Convert.FromBase64String(identity2Cert));
                 Assert.AreEqual(TokenSource.IdentityProvider, result2.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(expectedIdentity2Cert.Thumbprint, result2.BindingCertificate.Thumbprint);
+                Assert.AreEqual(0, httpManager.QueueSize);
             }
         }
         #endregion
@@ -2727,7 +3109,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     httpManager,
                     userAssignedIdentityId,
                     userAssignedId,
-                    certificateRequestCertificate: TestConstants.ValidRawCertificate);
+                    certificateRequestCertificate: TestConstants.ValidRawCertificate,
+                    withAttestation: false);
 
                 var first = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .WithMtlsProofOfPossession()
@@ -2954,7 +3337,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var mi = await CreateManagedIdentityAsync(httpManager, idKind, idValue, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard)
                     .ConfigureAwait(false);
 
-                AddMocksToGetEntraToken(httpManager, idKind, idValue, certificateRequestCertificate: rawCert);
+                AddMocksToGetEntraToken(httpManager, idKind, idValue, certificateRequestCertificate: rawCert, withAttestation: false);
 
                 var first = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .WithMtlsProofOfPossession()

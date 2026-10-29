@@ -15,6 +15,7 @@ using System.Globalization;
 using Microsoft.Identity.Client.Internal;
 using System.Linq;
 using Microsoft.Identity.Test.Common.Core.Helpers;
+using Microsoft.Identity.Test.Unit.Helpers;
 using NSubstitute.Extensions;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
@@ -33,7 +34,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
 
             using (var harness = CreateTestHarness())
             {
-                harness.HttpManager.AddMockHandler(
+                MockHttpMessageHandler handler = harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler()
                     {
                         ExpectedUrl = wsTrustAddress,
@@ -63,6 +64,273 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
                                                    .ConfigureAwait(false);
 
                 Assert.IsNotNull(wsTrustResponse.Token);
+                Assert.IsFalse(handler.AllowAutoRedirect);
+            }
+        }
+
+        [TestMethod]
+        public async Task WsTrustHttpRedirectIsRejectedWithoutFollowingTestAsync()
+        {
+            // Arrange
+            const string wsTrustAddress = "https://some/address/usernamemixed";
+            var endpoint = new WsTrustEndpoint(new Uri(wsTrustAddress), WsTrustVersion.WsTrust13);
+
+            using (var harness = CreateTestHarness())
+            {
+                var response = new HttpResponseMessage(HttpStatusCode.TemporaryRedirect);
+                response.Headers.Location = new Uri("http://some/address/redirected");
+
+                MockHttpMessageHandler handler = harness.HttpManager.AddMockHandler(
+                    new MockHttpMessageHandler
+                    {
+                        ExpectedUrl = wsTrustAddress,
+                        ExpectedMethod = HttpMethod.Post,
+                        ResponseMessage = response
+                    });
+
+                var requestContext = new RequestContext(harness.ServiceBundle, Guid.NewGuid(), null);
+                string wsTrustRequest = endpoint.BuildTokenRequestMessageUsernamePassword(
+                    "urn:federation:SomeAudience",
+                    "username",
+                    "password");
+
+                // Act
+                MsalClientException exception = await AssertException.TaskThrowsAsync<MsalClientException>(
+                    () => harness.ServiceBundle.WsTrustWebRequestManager.GetWsTrustResponseAsync(
+                        endpoint,
+                        wsTrustRequest,
+                        requestContext))
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual(MsalError.NonHttpsRedirectNotSupported, exception.ErrorCode);
+                Assert.IsFalse(handler.AllowAutoRedirect);
+                Assert.IsNotNull(handler.ActualRequestMessage);
+            }
+        }
+
+        [TestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task WsTrustHttpsRedirectIsFollowedTestAsync(bool retryEachHop)
+        {
+            // Arrange
+            const string wsTrustAddress = "https://some/address/usernamemixed";
+            const string redirectedWsTrustAddress = "https://some/redirected/usernamemixed";
+            var endpoint = new WsTrustEndpoint(new Uri(wsTrustAddress), WsTrustVersion.WsTrust13);
+            var redirectResponse = new HttpResponseMessage(HttpStatusCode.TemporaryRedirect);
+            redirectResponse.Headers.Location = new Uri(redirectedWsTrustAddress);
+            string wsTrustRequest = endpoint.BuildTokenRequestMessageUsernamePassword(
+                "urn:federation:SomeAudience",
+                "username",
+                "password");
+
+            using (var harness = CreateTestHarness())
+            {
+                harness.ServiceBundle.Config.RetryPolicyFactory = new TestRetryPolicyFactory();
+                if (retryEachHop)
+                {
+                    harness.HttpManager.AddMockHandler(new MockHttpMessageHandler
+                    {
+                        ExpectedUrl = wsTrustAddress,
+                        ExpectedMethod = HttpMethod.Post,
+                        ResponseMessage = new HttpResponseMessage(HttpStatusCode.InternalServerError)
+                    });
+                }
+
+                MockHttpMessageHandler redirectHandler = harness.HttpManager.AddMockHandler(
+                    new MockHttpMessageHandler
+                    {
+                        ExpectedUrl = wsTrustAddress,
+                        ExpectedMethod = HttpMethod.Post,
+                        ResponseMessage = redirectResponse
+                    });
+                if (retryEachHop)
+                {
+                    harness.HttpManager.AddMockHandler(new MockHttpMessageHandler
+                    {
+                        ExpectedUrl = redirectedWsTrustAddress,
+                        ExpectedMethod = HttpMethod.Post,
+                        ResponseMessage = new HttpResponseMessage(HttpStatusCode.InternalServerError)
+                    });
+                }
+
+                MockHttpMessageHandler responseHandler = harness.HttpManager.AddMockHandler(
+                    new MockHttpMessageHandler
+                    {
+                        ExpectedUrl = redirectedWsTrustAddress,
+                        ExpectedMethod = HttpMethod.Post,
+                        AdditionalRequestValidation = request =>
+                        {
+                            Assert.IsNotNull(request.Content);
+                            Assert.AreEqual(
+                                "application/soap+xml",
+                                request.Content.Headers.ContentType.MediaType);
+                            Assert.AreEqual(
+                                wsTrustRequest,
+                                request.Content.ReadAsStringAsync().GetAwaiter().GetResult());
+                        },
+                        ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                        {
+                            Content = new StringContent(
+                                File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("WsTrustResponse13.xml")))
+                        }
+                    });
+
+                var requestContext = new RequestContext(harness.ServiceBundle, Guid.NewGuid(), null);
+
+                // Act
+                WsTrustResponse wsTrustResponse =
+                    await harness.ServiceBundle.WsTrustWebRequestManager.GetWsTrustResponseAsync(
+                        endpoint,
+                        wsTrustRequest,
+                        requestContext)
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.IsNotNull(wsTrustResponse.Token);
+                Assert.IsFalse(redirectHandler.AllowAutoRedirect);
+                Assert.IsFalse(responseHandler.AllowAutoRedirect);
+                Assert.IsTrue(redirectHandler.UseDefaultCredentials);
+                Assert.IsTrue(responseHandler.UseDefaultCredentials);
+                Assert.IsNotNull(redirectHandler.ActualRequestMessage);
+                Assert.IsNotNull(responseHandler.ActualRequestMessage);
+                Assert.AreEqual(0, harness.HttpManager.QueueSize);
+            }
+        }
+
+        [TestMethod]
+        public async Task WsTrustCrossOriginCredentialRedirectIsRejectedTestAsync()
+        {
+            // Arrange
+            const string wsTrustAddress = "https://some/address/usernamemixed";
+            var endpoint = new WsTrustEndpoint(new Uri(wsTrustAddress), WsTrustVersion.WsTrust13);
+            var redirectResponse = new HttpResponseMessage(HttpStatusCode.TemporaryRedirect);
+            redirectResponse.Headers.Location = new Uri("https://different.example/usernamemixed");
+
+            using (var harness = CreateTestHarness())
+            {
+                MockHttpMessageHandler handler = harness.HttpManager.AddMockHandler(
+                    new MockHttpMessageHandler
+                    {
+                        ExpectedUrl = wsTrustAddress,
+                        ExpectedMethod = HttpMethod.Post,
+                        ResponseMessage = redirectResponse
+                    });
+
+                var requestContext = new RequestContext(harness.ServiceBundle, Guid.NewGuid(), null);
+                string wsTrustRequest = endpoint.BuildTokenRequestMessageUsernamePassword(
+                    "urn:federation:SomeAudience",
+                    "username",
+                    "password");
+
+                // Act
+                MsalClientException exception = await AssertException.TaskThrowsAsync<MsalClientException>(
+                    () => harness.ServiceBundle.WsTrustWebRequestManager.GetWsTrustResponseAsync(
+                        endpoint,
+                        wsTrustRequest,
+                        requestContext))
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual(MsalError.WsTrustCrossOriginRedirectNotSupported, exception.ErrorCode);
+                Assert.IsNotNull(handler.ActualRequestMessage);
+                Assert.AreEqual(0, harness.HttpManager.QueueSize);
+            }
+        }
+
+        [TestMethod]
+        public async Task WsTrustMultipleChoicesRedirectChangesPostToGetTestAsync()
+        {
+            // Arrange
+            const string wsTrustAddress = "https://some/address/usernamemixed";
+            const string redirectedWsTrustAddress = "https://redirected.some/address/usernamemixed";
+            var endpoint = new WsTrustEndpoint(new Uri(wsTrustAddress), WsTrustVersion.WsTrust13);
+            var redirectResponse = new HttpResponseMessage(HttpStatusCode.MultipleChoices);
+            redirectResponse.Headers.Location = new Uri(redirectedWsTrustAddress);
+
+            using (var harness = CreateTestHarness())
+            {
+                harness.HttpManager.AddMockHandler(
+                    new MockHttpMessageHandler
+                    {
+                        ExpectedUrl = wsTrustAddress,
+                        ExpectedMethod = HttpMethod.Post,
+                        ResponseMessage = redirectResponse
+                    });
+                MockHttpMessageHandler responseHandler = harness.HttpManager.AddMockHandler(
+                    new MockHttpMessageHandler
+                    {
+                        ExpectedUrl = redirectedWsTrustAddress,
+                        ExpectedMethod = HttpMethod.Get,
+                        AdditionalRequestValidation = request => Assert.IsNull(request.Content),
+                        ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                        {
+                            Content = new StringContent(
+                                File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("WsTrustResponse13.xml")))
+                        }
+                    });
+
+                var requestContext = new RequestContext(harness.ServiceBundle, Guid.NewGuid(), null);
+                string wsTrustRequest = endpoint.BuildTokenRequestMessageUsernamePassword(
+                    "urn:federation:SomeAudience",
+                    "username",
+                    "password");
+
+                // Act
+                WsTrustResponse wsTrustResponse =
+                    await harness.ServiceBundle.WsTrustWebRequestManager.GetWsTrustResponseAsync(
+                        endpoint,
+                        wsTrustRequest,
+                        requestContext)
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.IsNotNull(wsTrustResponse.Token);
+                Assert.IsFalse(responseHandler.UseDefaultCredentials);
+                Assert.IsNotNull(responseHandler.ActualRequestMessage);
+            }
+        }
+
+        [TestMethod]
+        public async Task WsTrustHttpEndpointIsRejectedBeforeRequestTestAsync()
+        {
+            // Arrange
+            const string wsTrustAddress = "http://some/address/usernamemixed";
+            var endpoint = new WsTrustEndpoint(new Uri(wsTrustAddress), WsTrustVersion.WsTrust13);
+
+            using (var harness = CreateTestHarness())
+            {
+                MockHttpMessageHandler handler = harness.HttpManager.AddMockHandler(
+                    new MockHttpMessageHandler
+                    {
+                        ExpectedUrl = wsTrustAddress,
+                        ExpectedMethod = HttpMethod.Post,
+                        ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                        {
+                            Content = new StringContent(
+                                File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("WsTrustResponse13.xml")))
+                        }
+                    });
+
+                var requestContext = new RequestContext(harness.ServiceBundle, Guid.NewGuid(), null);
+                string wsTrustRequest = endpoint.BuildTokenRequestMessageUsernamePassword(
+                    "urn:federation:SomeAudience",
+                    "username",
+                    "password");
+
+                // Act
+                MsalClientException exception = await AssertException.TaskThrowsAsync<MsalClientException>(
+                    () => harness.ServiceBundle.WsTrustWebRequestManager.GetWsTrustResponseAsync(
+                        endpoint,
+                        wsTrustRequest,
+                        requestContext))
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual(MsalError.WsTrustEndpointNotFoundInMetadataDocument, exception.ErrorCode);
+                Assert.IsNull(handler.ActualRequestMessage);
+                harness.HttpManager.ClearQueue();
             }
         }
 

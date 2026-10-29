@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http.Headers;
@@ -34,5 +35,7 @@ namespace Microsoft.Identity.Client.Http
         public string UserAgent { get; set; }
 
         public string Body { get; set; }
+
+        public Uri RequestUri { get; set; }
     }
 }

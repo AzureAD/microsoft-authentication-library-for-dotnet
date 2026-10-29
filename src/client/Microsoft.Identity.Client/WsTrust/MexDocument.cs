@@ -221,7 +221,11 @@ namespace Microsoft.Identity.Client.WsTrust
                 XElement endpointAddress = endpointReference.Elements(XmlNamespace.Wsa10 + "Address").FirstOrDefault();
                 if (endpointAddress != null && Uri.IsWellFormedUriString(endpointAddress.Value, UriKind.Absolute))
                 {
-                    _bindings[portBindingNameSegments[1]].Url = new Uri(endpointAddress.Value);
+                    var endpointUri = new Uri(endpointAddress.Value);
+                    if (string.Equals(endpointUri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
+                    {
+                        _bindings[portBindingNameSegments[1]].Url = endpointUri;
+                    }
                 }
             }
         }

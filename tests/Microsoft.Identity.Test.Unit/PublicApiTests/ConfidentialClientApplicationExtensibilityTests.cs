@@ -39,7 +39,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             // Act
             var app = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
-                .WithExperimentalFeatures()
                 .WithAuthority(TestConstants.AuthorityCommonTenant)
                 .WithCertificate((AssertionRequestOptions options) =>
                 {
@@ -62,7 +61,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             // Act
             var app = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
-                .WithExperimentalFeatures()
                 .WithAuthority(TestConstants.AuthorityCommonTenant)
                 .WithCertificate((AssertionRequestOptions options) =>
                 {
@@ -84,7 +82,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             // Act
             var app = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
-                .WithExperimentalFeatures()
                 .WithAuthority(TestConstants.AuthorityCommonTenant)
                 .WithCertificate((AssertionRequestOptions options) =>
                 {
@@ -110,7 +107,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 var app = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
-                    .WithExperimentalFeatures()
                     .WithAuthority(TestConstants.AuthorityCommonTenant)
                     .WithHttpManager(harness.HttpManager)
                     .WithCertificate((AssertionRequestOptions options) =>
@@ -146,7 +142,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 var app = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
-                    .WithExperimentalFeatures()
                     .WithAuthority(TestConstants.AuthorityCommonTenant)
                     .WithHttpManager(harness.HttpManager)
                     .WithCertificate((AssertionRequestOptions options) =>
@@ -183,7 +178,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 var app = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
-                    .WithExperimentalFeatures()
                     .WithAuthority(TestConstants.AuthorityCommonTenant)
                     .WithHttpManager(harness.HttpManager)
                     .WithCertificate((AssertionRequestOptions options) =>
@@ -232,7 +226,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 var app = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
-                    .WithExperimentalFeatures()
                     .WithAuthority(TestConstants.AuthorityCommonTenant)
                     .WithHttpManager(harness.HttpManager)
                     .WithCertificate((AssertionRequestOptions options) =>
@@ -274,7 +267,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 var app = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
-                    .WithExperimentalFeatures()
                     .WithAuthority(TestConstants.AuthorityCommonTenant)
                     .WithHttpManager(harness.HttpManager)
                     .WithCertificate((AssertionRequestOptions options) =>
@@ -315,7 +307,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 var app = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
-                    .WithExperimentalFeatures()
                     .WithAuthority(TestConstants.AuthorityCommonTenant)
                     .WithCertificate(cert)
                     .WithHttpManager(harness.HttpManager)
@@ -368,7 +359,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 var app = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
-                    .WithExperimentalFeatures()
                     .WithAuthority(TestConstants.AuthorityCommonTenant)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(harness.HttpManager)
@@ -410,7 +400,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 var app = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
-                    .WithExperimentalFeatures()
                     .WithAuthority(TestConstants.AuthorityCommonTenant)
                     .WithCertificate((AssertionRequestOptions options) =>
                     {
@@ -455,7 +444,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 var app = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
-                    .WithExperimentalFeatures()
                     .WithAuthority(TestConstants.AuthorityCommonTenant)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(harness.HttpManager)
@@ -512,7 +500,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 var app = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
-                    .WithExperimentalFeatures()
                     .WithAuthority(TestConstants.AuthorityCommonTenant)
                     .WithCertificate(certificate)
                     .WithHttpManager(harness.HttpManager)
@@ -576,7 +563,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 var app = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
-                    .WithExperimentalFeatures()
                     .WithAuthority(TestConstants.AuthorityCommonTenant)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(harness.HttpManager)
@@ -623,7 +609,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 var app = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
-                    .WithExperimentalFeatures()
                     .WithAuthority(TestConstants.AuthorityCommonTenant)
                     .WithHttpManager(harness.HttpManager)
                     .WithLogging(logCallback, LogLevel.Info, enablePiiLogging: true, enableDefaultPlatformLogging: false)
@@ -691,7 +676,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 var app = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
-                    .WithExperimentalFeatures()
                     .WithAuthority(TestConstants.AuthorityCommonTenant)
                     .WithHttpManager(harness.HttpManager)
                     .WithCertificate((AssertionRequestOptions options) =>

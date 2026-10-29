@@ -1,3 +1,55 @@
+4.91.1
+======
+
+### Changes
+
+- Added opt-in reduced token-acquisition logging: set `MSAL_REDUCED_LOGGING=true` (or `1`) before application construction to move selected routine Information-level diagnostics to Verbose. Existing logging behavior is unchanged by default; acquisition summaries, warnings, and errors remain unchanged. [#6208](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6208) [#6224](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6224)
+
+4.91.0
+======
+
+### New Features
+
+- Made the dynamic certificate provider and confidential-client callbacks (`OnMsalServiceFailure`, `OnCompletion`, and `OnBackgroundTokenRefreshCompleted`) generally available, removing the experimental feature opt-in requirement. [#6216](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6216)
+
+### Bug Fixes
+
+- Fixed built-in mTLS `HttpClient` caching to use certificate object identity, ensuring a new certificate instance with a reacquired private-key handle receives a new handler even when its thumbprint is unchanged. [#6217](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6217)
+- Fixed managed identity `WithForceRefresh(true)` to re-mint the MSI v2 binding certificate before acquiring a new token, while reusing a valid cached attestation token for the current key. [#6215](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6215)
+- Fixed system-browser authentication callbacks in Linux containers by adding opt-in IPv4 port-forwarding support through `MSAL_ALLOW_SYSTEM_BROWSER_PORT_FORWARDING`, disabled by default. [#6186](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6186)
+  
+4.90.1
+======
+
+### New Features
+- Added `IMsalWsTrustHttpClientFactory`, allowing custom HTTP client factories to provide redirect-disabled, credential-policy-aware clients for federation metadata (MEX) and WS-Trust requests. Added `MsalError.TooManyRedirects` and `MsalError.WsTrustCrossOriginRedirectNotSupported` for redirect failures. [#6165](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6165)
+
+### Bug Fixes
+- Hardened federation metadata and WS-Trust requests by requiring HTTPS, securely validating redirects, rejecting credential-bearing cross-origin redirects, and limiting redirect chains. [#6165](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6165)
+- Fixed instance discovery so a custom authority port is not forwarded to the global discovery host, while preserving the port when discovery uses the authority host. [#6155](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6155)
+- Fixed KeyGuard attestation to send the tenant ID as the MAA `client_id` metadata value without changing managed-identity client-ID handling or attestation-cache partitioning. [#6200](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6200)
+
+### Changes
+- Updated `Microsoft.Azure.Security.KeyGuardAttestation` from version 1.1.7 to 1.1.8. [#6202](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6202)
+
+4.90.0
+======
+
+### Changes
+- Updated the KeyGuardAttestation package version to 1.1.7. [#6189](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6189)
+  
+4.89.0
+======
+
+### New Features
+- Added a read-only known-cloud metadata lookup and token-exchange scope helper, so higher-level SDKs can resolve cloud-specific metadata for public and sovereign clouds. [#6104](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6104)
+- Added the `MSAL_MI_DISABLE_IMDS_V2` process-level kill switch, allowing managed identity callers to disable IMDSv2 and fall back to IMDSv1 for bearer-token requests. [#6178](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6178)
+- Added a configurable timeout for managed identity capability discovery, covering probes, retries, fallback, compute metadata, and binding-strength detection under one deadline. [#6181](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6181)
+
+### Bug Fixes
+- Restored certificate re-mint and retry when IMDSv2 mTLS token requests encounter raw Schannel credential failures, while preserving the managed identity exception contract. [#6173](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6173)
+- Fixed `MsalFailure` metrics to always emit the `RawStsErrorCode` dimension, using an empty value when no STS error code is available so the metric schema remains stable. [#6175](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6175)
+
 4.88.0
 ======
 

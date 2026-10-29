@@ -566,6 +566,18 @@ namespace Microsoft.Identity.Client
         public const string NonHttpsRedirectNotSupported = "non_https_redirect_failed";
 
         /// <summary>
+        /// A credential-bearing WS-Trust redirect targeted a different origin.
+        /// <para>Mitigation</para>Configure the federation service to keep credential-bearing redirects on the original HTTPS origin.
+        /// </summary>
+        public const string WsTrustCrossOriginRedirectNotSupported = "wstrust_cross_origin_redirect_failed";
+
+        /// <summary>
+        /// The HTTP request exceeded the maximum number of redirects.
+        /// <para>Mitigation</para>Correct the redirect loop in the federation service configuration.
+        /// </summary>
+        public const string TooManyRedirects = "too_many_redirects";
+
+        /// <summary>
         /// The request could not be performed because the network is down.
         /// <para>Mitigation [App development]</para> In the application you could either inform the user that there are network issues
         /// or retry later

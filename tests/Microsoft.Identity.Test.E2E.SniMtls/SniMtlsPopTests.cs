@@ -86,7 +86,7 @@ namespace Microsoft.Identity.Test.E2E.SniMtls
             using JsonDocument responseJson = JsonDocument.Parse(graphResponse.ResponseBody);
             JsonElement error = responseJson.RootElement.GetProperty("error");
             Assert.AreEqual("InvalidAuthenticationToken", error.GetProperty("code").GetString());
-            Assert.AreEqual("MtlsMissingClientCertificate", error.GetProperty("message").GetString());
+            Assert.AreEqual("MissingClientCertificate", error.GetProperty("message").GetString());
         }
 
         private static async Task<(IConfidentialClientApplication Application, AuthenticationResult Result)> AcquireMtlsPopTokenAsync(

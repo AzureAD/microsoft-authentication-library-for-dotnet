@@ -10,6 +10,7 @@ namespace Microsoft.Identity.Client.Core
     internal interface ILoggerAdapter
     {
         bool PiiLoggingEnabled { get; }
+        bool IsReducedLoggingEnabled { get; }
         bool IsDefaultPlatformLoggingEnabled { get; }
         string ClientName { get; }
         string ClientVersion { get; }

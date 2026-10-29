@@ -669,12 +669,18 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private void LogReturnedToken(AuthenticationResult result)
         {
-            if (result.AccessToken != null &&
-                AuthenticationRequestParameters.RequestContext.Logger.IsLoggingEnabled(LogLevel.Info))
+            if (result.AccessToken is null)
+            {
+                return;
+            }
+
+            var logger = AuthenticationRequestParameters.RequestContext.Logger;
+            logger.InfoOrVerbose("\n\t=== Token Acquisition finished successfully:");
+
+            if (logger.IsLoggingEnabled(LogLevel.Info))
             {
                 string scopes = string.Join(" ", result.Scopes);
 
-                AuthenticationRequestParameters.RequestContext.Logger.Info("\n\t=== Token Acquisition finished successfully:");
                 AuthenticationRequestParameters.RequestContext.Logger.InfoPii(
                        () => $" AT expiration time: {result.ExpiresOn}, scopes: {scopes}. " +
                             $"source: {result.AuthenticationResultMetadata.TokenSource}",

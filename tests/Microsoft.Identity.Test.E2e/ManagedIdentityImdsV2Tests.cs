@@ -104,6 +104,38 @@ namespace Microsoft.Identity.Test.E2E
         }
 
         /// <summary>
+        /// Tests that an mTLS PoP request without Credential Guard attestation is rejected.
+        /// </summary>
+        [RunOnAzureDevOps]
+        [TestCategory("MI_E2E_ImdsV2_Attested")]
+        [TestMethod]
+        [DataRow(null /*SAMI*/, null, DisplayName = "AcquireToken_OnImdsV2_MtlsPoP_WithoutAttestation_IsRejected-SAMI")]
+        [DataRow(UamiClientId, "clientid", DisplayName = "AcquireToken_OnImdsV2_MtlsPoP_WithoutAttestation_IsRejected-UAMI-ClientId")]
+        public async Task AcquireToken_OnImdsV2_MtlsPoP_WithoutAttestation_IsRejected(string id, string idType)
+        {
+        if (!OperatingSystem.IsWindows())
+        {
+            Assert.Inconclusive("Credential Guard attestation is only available on Windows.");
+        }
+
+        var mi = BuildMi(id, idType);
+
+        // Act
+        MsalServiceException exception = await Assert.ThrowsAsync<MsalServiceException>(async () =>
+            await mi.AcquireTokenForManagedIdentity(GraphResource)
+                .WithMtlsProofOfPossession()
+                .ExecuteAsync()
+                .ConfigureAwait(false)).ConfigureAwait(false);
+
+        // Assert
+        Assert.AreEqual(400, exception.StatusCode);
+        Assert.IsTrue(exception.Message.Contains("invalid_request", StringComparison.Ordinal));
+        Assert.IsTrue(exception.Message.Contains(
+            "Attestation Token is missing / empty in the issue credential request",
+            StringComparison.Ordinal));
+        }
+
+        /// <summary>
         /// Tests that <c>.WithRequestOverMtls()</c> on an IMDSv2-capable host uses the full attested
         /// mTLS flow (Credential Guard-issued certificate) to connect to ESTS, but requests
         /// <c>token_type=bearer</c>, returning a standard bearer token with no binding certificate.

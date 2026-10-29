@@ -213,7 +213,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         }
 
         private async Task<CertificateRequestResponse> ExecuteCertificateRequestAsync(
-            string clientId,
+            string tenantId,
             string attestationEndpoint,
             string csr,
             ManagedIdentityKeyInfo managedIdentityKeyInfo)
@@ -236,7 +236,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
             if (managedIdentityKeyInfo.Type == ManagedIdentityKeyType.KeyGuard)
             {
                 attestationJwt = await GetAttestationJwtAsync(
-                    clientId,
+                    tenantId,
                     attestationUri,
                     managedIdentityKeyInfo,
                     _requestContext.UserCancellationToken).ConfigureAwait(false);
@@ -362,7 +362,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                     var privateKey = csrAndKey.privateKey;
 
                     var certificateRequestResponse = await ExecuteCertificateRequestAsync(
-                        csrMetadata.ClientId,
+                        csrMetadata.TenantId,
                         csrMetadata.AttestationEndpoint,
                         csr,
                         keyInfo).ConfigureAwait(false);
@@ -431,13 +431,13 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         /// Obtains an attestation JWT for the Credential Guard/CSR payload using the configured
         /// attestation token provider delegate.
         /// </summary>
-        /// <param name="clientId">Client ID to be sent to the attestation provider.</param>
+        /// <param name="tenantId">Tenant ID sent as the MAA <c>client_id</c> telemetry metadata.</param>
         /// <param name="attestationEndpoint">The attestation endpoint.</param>
         /// <param name="keyInfo">The key information.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>JWT string suitable for the IMDSv2 attested PoP flow, or null for non-attested flow.</returns>
         private async Task<string> GetAttestationJwtAsync(
-            string clientId,
+            string tenantId,
             Uri attestationEndpoint,
             ManagedIdentityKeyInfo keyInfo,
             CancellationToken cancellationToken)
@@ -457,6 +457,19 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                     "[ImdsV2] Credential Guard attestation currently supports only RSA CNG keys on Windows.");
             }
 
+            // Resolve only when attesting a newly minted binding, not on cache hits or unattested requests.
+            ComputeMetadataResponse computeMetadata = await ImdsComputeMetadataManager.GetComputeMetadataAsync(
+                _requestContext.ServiceBundle.HttpManager,
+                _requestContext.Logger,
+                cancellationToken: cancellationToken,
+                retryDelayCancellationToken: cancellationToken).ConfigureAwait(false);
+
+            string resolvedAttestationEndpoint = ImdsComputeMetadataManager.ResolveAttestationEndpoint(
+                computeMetadata?.AzureEnvironment,
+                computeMetadata?.Location,
+                attestationEndpoint.AbsoluteUri,
+                _requestContext.Logger);
+
             try
             {
                 // Call the attestation token provider delegate.
@@ -466,9 +479,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
                 // distinct ephemeral keys get distinct entries.
                 string keyId = rsaCng.Key.KeyName ?? GetPublicKeyFingerprint(rsaCng);
                 string attestationJwt = await _attestationTokenProvider(
-                    attestationEndpoint.AbsoluteUri,
+                    new Uri(resolvedAttestationEndpoint).AbsoluteUri,
                     rsaCng.Key.Handle,
-                    clientId,
+                    tenantId,
                     keyId,
                     _requestContext.Logger,
                     cancellationToken).ConfigureAwait(false);

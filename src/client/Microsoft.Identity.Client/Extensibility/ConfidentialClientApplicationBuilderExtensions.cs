@@ -51,8 +51,13 @@ namespace Microsoft.Identity.Client.Extensibility
         /// and this method are configured.
         /// </exception>
         /// <remarks>
+        /// <para>Use this overload when the certificate or private-key handle is managed externally and may rotate or become invalid.
+        /// The callback should return the current usable certificate and private-key handle for each network token request.</para>
         /// <para>This method cannot be used together with <see cref="ConfidentialClientApplicationBuilder.WithCertificate(X509Certificate2)"/>.</para>
         /// <para>The callback is not invoked when tokens are retrieved from cache, only for network calls.</para>
+        /// <para>For mTLS transport, return the same certificate object instance while its private-key handle remains usable.
+        /// After reacquiring the private-key handle, return a new certificate object instance even when the certificate
+        /// thumbprint is unchanged. This allows MSAL to create a new transport handler for the refreshed handle.</para>
         /// <para>The certificate returned by the callback will be used to sign the client assertion (JWT) for that token request.</para>
         /// <para>The callback can perform async operations such as fetching certificates from Azure Key Vault or other secret management systems.</para>
         /// <para>See https://aka.ms/msal-net-client-credentials for more details on client credentials.</para>
@@ -62,8 +67,6 @@ namespace Microsoft.Identity.Client.Extensibility
             Func<AssertionRequestOptions, Task<X509Certificate2>> certificateProvider, 
             CertificateOptions certificateOptions)
         {
-            builder.ValidateUseOfExperimentalFeature();
-
             if (certificateProvider == null)
             {
                 throw new ArgumentNullException(nameof(certificateProvider));
@@ -125,8 +128,6 @@ namespace Microsoft.Identity.Client.Extensibility
             this ConfidentialClientApplicationBuilder builder,
             Func<AssertionRequestOptions, ExecutionResult, Task<bool>> onMsalServiceFailure)
         {
-            builder.ValidateUseOfExperimentalFeature();
-
             if (onMsalServiceFailure == null)
                 throw new ArgumentNullException(nameof(onMsalServiceFailure));
 
@@ -179,8 +180,6 @@ namespace Microsoft.Identity.Client.Extensibility
             this ConfidentialClientApplicationBuilder builder,
             Func<AssertionRequestOptions, ExecutionResult, Task> onCompletion)
         {
-            builder.ValidateUseOfExperimentalFeature();
-
             if (onCompletion == null)
             {
                 throw new ArgumentNullException(nameof(onCompletion));
@@ -212,8 +211,6 @@ namespace Microsoft.Identity.Client.Extensibility
             this ConfidentialClientApplicationBuilder builder,
             Func<ExecutionResult, Task> onBackgroundTokenRefreshCompleted)
         {
-            builder.ValidateUseOfExperimentalFeature();
-
             if (onBackgroundTokenRefreshCompleted == null)
             {
                 throw new ArgumentNullException(nameof(onBackgroundTokenRefreshCompleted));
