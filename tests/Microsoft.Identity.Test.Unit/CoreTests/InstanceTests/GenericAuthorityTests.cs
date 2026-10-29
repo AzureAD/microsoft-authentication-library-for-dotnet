@@ -469,6 +469,154 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             }
         }
 
+        public static IEnumerable<object[]> GetIssuerValidationScenariosWithMetadata()
+        {
+            foreach (object[] scenario in OidcIssuerValidationTests.GetIssuerValidationScenarios())
+            {
+                yield return scenario.Concat(new object[] { false }).ToArray();
+                yield return scenario.Concat(new object[] { true }).ToArray();
+            }
+        }
+
+        [TestMethod]
+        [DynamicData(nameof(GetIssuerValidationScenariosWithMetadata))]
+        public async Task OidcIssuerValidation_SharedScenarios_Async(
+            string scenario, string authority, string issuer, bool expectedValid, bool useCustomInstanceMetadata)
+        {
+            // Arrange
+            using (var httpManager = new MockHttpManager())
+            {
+                var builder = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithHttpManager(httpManager)
+                    .WithOidcAuthority(authority)
+                    .WithRedirectUri(TestConstants.RedirectUri)
+                    .WithClientSecret(TestConstants.ClientSecret);
+
+                if (useCustomInstanceMetadata)
+                {
+                    string authorityHost = new Uri(authority).Host;
+                    string issuerHost = new Uri(issuer).Host;
+                    string aliases = string.Join(",", new[] { authorityHost, issuerHost }
+                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                        .Select(host => $"\"{host}\""));
+                    builder.WithInstanceDiscoveryMetadata(
+                        $@"{{""metadata"":[{{""preferred_network"":""{authorityHost}"",""preferred_cache"":""{authorityHost}"",""aliases"":[{aliases}]}}]}}");
+                }
+
+                var app = builder.Build();
+
+                string discoveryEndpoint = authority.TrimEnd('/') + "/" + Constants.WellKnownOpenIdConfigurationPath;
+                const string tokenEndpoint = TestConstants.GenericAuthority + "/connect/token";
+                const string authorizationEndpoint = TestConstants.GenericAuthority + "/connect/authorize";
+                var scopes = new[] { "api" };
+
+                for (int attempt = 0; !expectedValid && attempt < 2; attempt++)
+                {
+                    var rejectedDiscovery = httpManager.AddMockHandler(
+                        CreateOidcHttpHandler(discoveryEndpoint, issuer: issuer));
+                    var blockedTokenRequest = httpManager.AddMockHandler(
+                        CreateTokenResponseHttpHandler(tokenEndpoint, "api", "api", "client_credentials"));
+                    Func<Task> operation = attempt == 0
+                        ? () => app.AcquireTokenForClient(scopes).ExecuteAsync()
+                        : () => app.GetAuthorizationRequestUrl(scopes).ExecuteAsync();
+
+                    // Act
+                    var exception = await AssertException.TaskThrowsAsync<MsalServiceException>(operation)
+                        .ConfigureAwait(false);
+
+                    // Assert
+                    Assert.AreEqual(MsalError.AuthorityValidationFailed, exception.ErrorCode, scenario);
+                    Assert.IsNotNull(rejectedDiscovery.ActualRequestMessage, scenario);
+                    Assert.IsNull(blockedTokenRequest.ActualRequestMessage, scenario);
+                    Assert.AreEqual(1, httpManager.QueueSize, scenario);
+                    httpManager.ClearQueue();
+                }
+
+                var acceptedDiscovery = httpManager.AddMockHandler(
+                    CreateOidcHttpHandler(discoveryEndpoint, issuer: expectedValid ? issuer : authority));
+
+                // Act
+                Uri authorizationUri = await app.GetAuthorizationRequestUrl(scopes)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual(authorizationEndpoint, authorizationUri.GetLeftPart(UriPartial.Path), scenario);
+                Assert.IsNotNull(acceptedDiscovery.ActualRequestMessage, scenario);
+                Assert.AreEqual(0, httpManager.QueueSize, scenario);
+
+                var tokenRequest = httpManager.AddMockHandler(
+                    CreateTokenResponseHttpHandler(tokenEndpoint, "api", "api", "client_credentials"));
+
+                // Act
+                AuthenticationResult result = await app.AcquireTokenForClient(scopes)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource, scenario);
+                Assert.IsNotNull(tokenRequest.ActualRequestMessage, scenario);
+                Assert.AreEqual(0, httpManager.QueueSize, scenario);
+            }
+        }
+
+        [TestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task OidcDiscovery_TransportFailureAndCancellation_PreserveErrorAndAllowRecovery_Async(bool cancelRequest)
+        {
+            // Arrange
+            using (var httpManager = new MockHttpManager(disableInternalRetries: true))
+            using (var cancellation = new CancellationTokenSource())
+            {
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithHttpManager(httpManager)
+                    .WithOidcAuthority(TestConstants.GenericAuthority)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .Build();
+                string discoveryEndpoint = TestConstants.GenericAuthority + "/" + Constants.WellKnownOpenIdConfigurationPath;
+                var failedDiscovery = CreateOidcHttpHandler(discoveryEndpoint);
+                failedDiscovery.ExceptionToThrow = cancelRequest
+                    ? new TaskCanceledException("Synthetic discovery cancellation")
+                    : new HttpRequestException("Synthetic discovery transport failure");
+                httpManager.AddMockHandler(failedDiscovery);
+                if (cancelRequest)
+                {
+                    cancellation.Cancel();
+                }
+
+                // Act
+                var exception = await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
+                    app.AcquireTokenForClient(new[] { "api" }).ExecuteAsync(cancellation.Token))
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual("oidc_failure", exception.ErrorCode);
+                if (cancelRequest)
+                {
+                    Assert.IsInstanceOfType<TaskCanceledException>(exception.InnerException);
+                }
+                else
+                {
+                    Assert.AreSame(failedDiscovery.ExceptionToThrow, exception.InnerException);
+                }
+                Assert.AreEqual(0, httpManager.QueueSize);
+
+                var validDiscovery = httpManager.AddMockHandler(CreateOidcHttpHandler(discoveryEndpoint));
+                httpManager.AddMockHandler(CreateTokenResponseHttpHandler(
+                    TestConstants.GenericAuthority + "/connect/token", "api", "api", "client_credentials"));
+
+                // Act
+                AuthenticationResult result = await app.AcquireTokenForClient(new[] { "api" })
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+                Assert.IsNotNull(validDiscovery.ActualRequestMessage);
+                Assert.AreEqual(0, httpManager.QueueSize);
+            }
+        }
+
         private static MockHttpMessageHandler CreateTokenResponseHttpHandler(
             string tokenEndpoint,
             string scopesInRequest,
@@ -526,13 +674,19 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             return string.Format(CultureInfo.InvariantCulture, "someheader.{0}.somesignature", Base64UrlHelpers.Encode(id));
         }
 
-        private static MockHttpMessageHandler CreateOidcHttpHandler(string oidcEndpoint, string authority = null)
+        private static MockHttpMessageHandler CreateOidcHttpHandler(
+            string oidcEndpoint, string authority = null, string issuer = null)
         {
+            string response = issuer is null
+                ? TestConstants.GetOidcResponse(authority)
+                : TestConstants.GenericOidcResponse.Replace(
+                    $"\"issuer\":\"{TestConstants.GenericAuthority}\"", $"\"issuer\":\"{issuer}\"");
+
             return new MockHttpMessageHandler()
             {
                 ExpectedMethod = HttpMethod.Get,
                 ExpectedUrl = oidcEndpoint,
-                ResponseMessage = MockHelpers.CreateSuccessResponseMessage(TestConstants.GetOidcResponse(authority))
+                ResponseMessage = MockHelpers.CreateSuccessResponseMessage(response)
             };
         }
     }
