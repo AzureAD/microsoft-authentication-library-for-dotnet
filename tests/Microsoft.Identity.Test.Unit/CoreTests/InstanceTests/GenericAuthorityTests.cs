@@ -471,7 +471,14 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
         public static IEnumerable<object[]> GetIssuerValidationScenariosWithMetadata()
         {
-            foreach (object[] scenario in OidcIssuerValidationTests.GetIssuerValidationScenarios())
+            var rootedAuthorityScenarios = new[]
+            {
+                new object[] { "RootDot_KnownAuthority_RegionalIssuer", "https://login.microsoftonline.com./tenant", "https://eastus.login.microsoftonline.com/tenant", true },
+                new object[] { "RootDot_KnownAuthority_CiamIssuer", "https://login.microsoftonline.com./mytenantid", "https://mytenantid.ciamlogin.com/mytenantid/v2.0", false },
+                new object[] { "RootDot_CustomAuthority_RegionalIssuer", "https://custom.example.com./tenant", "https://eastus.login.microsoftonline.com/tenant", false },
+                new object[] { "RootDot_CustomAuthority_CiamIssuer", "https://custom.example.com./mytenantid", "https://mytenantid.ciamlogin.com/mytenantid/v2.0", true }
+            };
+            foreach (object[] scenario in OidcIssuerValidationTests.GetIssuerValidationScenarios().Concat(rootedAuthorityScenarios))
             {
                 yield return scenario.Concat(new object[] { false }).ToArray();
                 yield return scenario.Concat(new object[] { true }).ToArray();
@@ -576,14 +583,15 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     .Build();
                 string discoveryEndpoint = TestConstants.GenericAuthority + "/" + Constants.WellKnownOpenIdConfigurationPath;
                 var failedDiscovery = CreateOidcHttpHandler(discoveryEndpoint);
-                failedDiscovery.ExceptionToThrow = cancelRequest
-                    ? new TaskCanceledException("Synthetic discovery cancellation")
-                    : new HttpRequestException("Synthetic discovery transport failure");
-                httpManager.AddMockHandler(failedDiscovery);
                 if (cancelRequest)
                 {
-                    cancellation.Cancel();
+                    failedDiscovery.AdditionalRequestValidation = _ => cancellation.Cancel();
                 }
+                else
+                {
+                    failedDiscovery.ExceptionToThrow = new HttpRequestException("Synthetic discovery transport failure");
+                }
+                httpManager.AddMockHandler(failedDiscovery);
 
                 // Act
                 var exception = await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
@@ -594,12 +602,14 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 Assert.AreEqual("oidc_failure", exception.ErrorCode);
                 if (cancelRequest)
                 {
-                    Assert.IsInstanceOfType<TaskCanceledException>(exception.InnerException);
+                    Assert.IsInstanceOfType<OperationCanceledException>(exception.InnerException);
+                    Assert.IsTrue(cancellation.IsCancellationRequested);
                 }
                 else
                 {
                     Assert.AreSame(failedDiscovery.ExceptionToThrow, exception.InnerException);
                 }
+                Assert.IsNotNull(failedDiscovery.ActualRequestMessage);
                 Assert.AreEqual(0, httpManager.QueueSize);
 
                 var validDiscovery = httpManager.AddMockHandler(CreateOidcHttpHandler(discoveryEndpoint));

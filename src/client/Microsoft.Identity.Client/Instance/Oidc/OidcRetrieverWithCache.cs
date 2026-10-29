@@ -92,7 +92,13 @@ namespace Microsoft.Identity.Client.Instance.Oidc
             // Normalize both URLs to handle trailing slash differences
             string normalizedAuthority = authority.AbsoluteUri.TrimEnd('/');
             string normalizedIssuer = issuer?.TrimEnd('/');
-            bool isKnownMicrosoftAuthority = KnownMetadataProvider.IsKnownEnvironment(authority.Host);
+            // Uri.Host retains the optional DNS root dot, which does not change host eligibility.
+            string authorityHost = authority.Host;
+            if (authorityHost.EndsWith(".", StringComparison.Ordinal))
+            {
+                authorityHost = authorityHost.Substring(0, authorityHost.Length - 1);
+            }
+            bool isKnownMicrosoftAuthority = KnownMetadataProvider.IsKnownEnvironment(authorityHost);
 
             // OIDC validation: if the issuer's scheme and host match the authority's, consider it valid
             if (!string.IsNullOrEmpty(issuer) && Uri.TryCreate(issuer, UriKind.Absolute, out Uri issuerUri))

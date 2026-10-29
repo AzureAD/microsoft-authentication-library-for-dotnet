@@ -225,6 +225,12 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [DataRow("https://evil.login.microsoftonline.com/tenant", "https://eastus.login.microsoftonline.com/tenant", false)]
         [DataRow("https://login.microsoftonline.com.evil.com/tenant", "https://eastus.login.microsoftonline.com/tenant", false)]
         [DataRow("https://custom.example.com:8443/tenant", "https://eastus.login.microsoftonline.com:9443/tenant", false)]
+        [DataRow("https://login.microsoftonline.com./tenant", "https://eastus.login.microsoftonline.com/tenant", true)]
+        [DataRow("https://LOGIN.MICROSOFTONLINE.COM.:8443/tenant", "https://evil.login.microsoftonline.com/tenant", true)]
+        [DataRow("https://login.microsoftonline.us./tenant", "https://evil.login.microsoftonline.us/tenant", true)]
+        [DataRow("https://login.windows-ppe.net./tenant", "https://evil.login.windows-ppe.net/tenant", true)]
+        [DataRow("https://custom.example.com./tenant", "https://eastus.login.microsoftonline.com/tenant", false)]
+        [DataRow("https://login.microsoftonline.com.evil.com./tenant", "https://eastus.login.microsoftonline.com/tenant", false)]
         public void ValidateIssuer_RegionalIssuer_RequiresKnownAuthority(string authority, string issuer, bool expectedValid)
         {
             // Arrange
@@ -263,6 +269,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             DisplayName = "CIAM_HostOnly")]
         [DataRow("https://custom.example.com/attacker.onmicrosoft.com", "https://attacker.onmicrosoft.com.ciamlogin.com/attacker.onmicrosoft.com/v2.0/")]
         [DataRow("https://login.microsoftonline.com.evil.com/mytenantid", "https://mytenantid.ciamlogin.com/mytenantid/v2.0")]
+        [DataRow("https://custom.example.com./mytenantid", "https://mytenantid.ciamlogin.com/mytenantid/v2.0")]
         public void ValidateIssuer_CIAM_ShouldPass(string authority, string issuer)
         {
             OidcRetrieverWithCache.ValidateIssuer(new Uri(authority), issuer);
@@ -329,6 +336,10 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [DataRow("https://login.microsoftonline.com/tenant", "https://east..login.microsoftonline.com/tenant")]
         [DataRow("https://login.microsoftonline.com/tenant", "ftp://eastus.login.microsoftonline.com/tenant")]
         [DataRow("https://custom.example.com/tenant", "https://contoso.b2clogin.com/tenant/v2.0")]
+        [DataRow("https://login.microsoftonline.com./mytenantid", "https://mytenantid.ciamlogin.com")]
+        [DataRow("https://LOGIN.MICROSOFTONLINE.COM.:8443/mytenantid", "https://mytenantid.ciamlogin.com/mytenantid")]
+        [DataRow("https://login.microsoftonline.us./mytenantid", "https://mytenantid.ciamlogin.com/mytenantid/v2.0")]
+        [DataRow("https://login.windows-ppe.net./mytenantid", "https://mytenantid.ciamlogin.com/mytenantid/v2.0")]
         public void ValidateIssuer_ShouldThrow(string authority, string issuer)
         {
             var ex = AssertException.Throws<MsalServiceException>(
