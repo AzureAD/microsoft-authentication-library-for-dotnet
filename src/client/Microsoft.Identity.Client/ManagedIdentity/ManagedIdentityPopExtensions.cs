@@ -58,22 +58,11 @@ namespace Microsoft.Identity.Client
                     "WithMtlsProofOfPossession() and WithRequestOverMtls() are mutually exclusive; call only one on a managed identity request.");
             }
 
-            if (!DesktopOsHelper.IsWindows())
-            {
-                throw new MsalClientException(
-                    MsalError.MtlsNotSupportedForManagedIdentity,
-                    MsalErrorMessage.MtlsNotSupportedForNonWindowsMessage);
-            }
+            ValidateMtlsPlatformSupport();
 
-#if NET462 || NETSTANDARD
-            throw new MsalClientException(
-                MsalError.MtlsNotSupportedForManagedIdentity,
-                MsalErrorMessage.MtlsNotSupportedForManagedIdentityMessage);
-#else
             builder.CommonParameters.IsMtlsPopRequested = true;
             builder.CommonParameters.MtlsPopMinStrength = options.MinStrength;
             return builder;
-#endif
         }
 
         /// <summary>
@@ -102,6 +91,14 @@ namespace Microsoft.Identity.Client
                     "WithMtlsProofOfPossession() and WithRequestOverMtls() are mutually exclusive; call only one on a managed identity request.");
             }
 
+            ValidateMtlsPlatformSupport();
+
+            builder.CommonParameters.PreferMsiV2 = true;
+            return builder;
+        }
+
+        private static void ValidateMtlsPlatformSupport()
+        {
             if (!DesktopOsHelper.IsWindows())
             {
                 throw new MsalClientException(
@@ -113,9 +110,6 @@ namespace Microsoft.Identity.Client
             throw new MsalClientException(
                 MsalError.MtlsNotSupportedForManagedIdentity,
                 MsalErrorMessage.MtlsNotSupportedForManagedIdentityMessage);
-#else
-            builder.CommonParameters.PreferMsiV2 = true;
-            return builder;
 #endif
         }
     }

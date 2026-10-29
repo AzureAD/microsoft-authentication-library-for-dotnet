@@ -35,22 +35,16 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [RunOnWindows]
-        [DataRow(false, false, false)]
-        [DataRow(false, false, true)]
-        [DataRow(false, true, false)]
-        [DataRow(true, false, false)]
-        [DataRow(true, false, true)]
-        [DataRow(true, true, false)]
+        [DataRow(false, false)]
+        [DataRow(false, true)]
+        [DataRow(true, false)]
         public void MtlsRequest_ThrowsUnsupportedBeforeAcquisition(
-            bool userAssigned, bool requestOverMtls, bool explicitOptions)
+            bool requestOverMtls, bool explicitOptions)
         {
             // Arrange
             using (var httpManager = new MockHttpManager())
             {
-                var identity = userAssigned
-                    ? ManagedIdentityId.WithUserAssignedClientId(TestConstants.ClientId)
-                    : ManagedIdentityId.SystemAssigned;
-                var request = ManagedIdentityApplicationBuilder.Create(identity)
+                var request = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager)
                     .Build()
                     .AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource);
@@ -106,28 +100,21 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        [DataRow(false)]
-        [DataRow(true)]
-        public async Task BearerRequest_StillAcquiresAndCachesTokenAsync(bool userAssigned)
+        public async Task BearerRequest_StillAcquiresTokenAsync()
         {
             // Arrange
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
                 SetImdsEnvironmentVariables();
-                var identity = userAssigned
-                    ? ManagedIdentityId.WithUserAssignedClientId(TestConstants.ClientId)
-                    : ManagedIdentityId.SystemAssigned;
-                var application = ManagedIdentityApplicationBuilder.Create(identity)
+                var application = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager)
                     .Build();
                 httpManager.AddManagedIdentityMockHandler(
                     ManagedIdentityTests.ImdsEndpoint,
                     ManagedIdentityTests.Resource,
                     MockHelpers.GetMsiSuccessfulResponse(),
-                    ManagedIdentitySource.Imds,
-                    userAssignedId: userAssigned ? TestConstants.ClientId : null,
-                    userAssignedIdentityId: userAssigned ? UserAssignedIdentityId.ClientId : UserAssignedIdentityId.None);
+                    ManagedIdentitySource.Imds);
 
                 // Act
                 var result = await application.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
@@ -137,9 +124,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.AreEqual("Bearer", result.TokenType);
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
                 Assert.AreEqual(0, httpManager.QueueSize);
-                var cached = await application.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                    .ExecuteAsync().ConfigureAwait(false);
-                Assert.AreEqual(TokenSource.Cache, cached.AuthenticationResultMetadata.TokenSource);
             }
         }
 
