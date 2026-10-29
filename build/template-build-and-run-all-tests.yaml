@@ -144,6 +144,7 @@ stages:
           --configuration $(BuildConfiguration)
           --framework net8.0
           /p:MsalTestAsset=netstandard2.0
+          /p:INCLUDE_MOBILE_AND_LEGACY_TFM=
           --filter FullyQualifiedName~NetStandard20ManagedIdentityTests
           -- RunConfiguration.TreatNoTestsAsError=true
 
