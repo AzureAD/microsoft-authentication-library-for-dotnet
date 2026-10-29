@@ -95,6 +95,11 @@ equivalent operation, not the shared token cache. Followers receive independent
 `MsalThrottledServiceException` wrappers carrying the original service error. A usable cached
 token takes precedence, including while proactive refresh is throttled. Existing HTTP retries
 and `Retry-After` enforcement are unchanged. Cache-bypass operations do not use this new policy.
+Disabling internal HTTP retries with `retryOnceOn5xx: false` does not disable this throttle.
+Caller-managed acquisition retries can receive `MsalThrottledServiceException` until the
+60-second window expires; these wrappers preserve the original headers and do not synthesize
+`Retry-After`. External retry policies must allow for this local backoff rather than retrying
+immediately.
 Credential errors (`invalid_client`, `invalid_grant`), claims challenges, cancellation,
 network errors, HTTP timeouts, and arbitrary provider or request-callback failures are not
 cached by this policy. Such failures can still cause successive acquisitions; coordination

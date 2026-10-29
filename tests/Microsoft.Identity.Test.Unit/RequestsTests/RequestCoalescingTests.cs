@@ -616,6 +616,69 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
+        public async Task QueuedCacheResult_BlockedFormatter_DoesNotBlockOtherWaitersAsync()
+        {
+            // Arrange
+            using var http = new BlockingTokenEndpoint { Block = true };
+            using var cancellation = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+            var app = CreateDirectApp(http);
+            var formatting = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+            var release = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+            int formats = 0;
+            var operation = Substitute.For<IAuthenticationOperation2>();
+            operation.AccessTokenType.Returns("bearer");
+            operation.KeyId.Returns((string)null);
+            operation.GetTokenRequestParams().Returns(new Dictionary<string, string>());
+            operation.ValidateCachedTokenAsync(Arg.Any<MsalCacheValidationData>()).Returns(Task.FromResult(true));
+            operation.FormatResultAsync(Arg.Any<AuthenticationResult>(), Arg.Any<CancellationToken>())
+                .Returns(async _ =>
+                {
+                    if (Interlocked.Increment(ref formats) == 1)
+                    {
+                        formatting.TrySetResult(true);
+                        await release.Task.ConfigureAwait(false);
+                    }
+                });
+
+            // Act: both followers miss the cache and queue before the owner publishes.
+            var owner = app.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync(cancellation.Token);
+            await AwaitAsync(http.Entered.Task).ConfigureAwait(false);
+            var waiters = Enumerable.Range(0, 2).Select(_ => app.AcquireTokenForClient(TestConstants.s_scope)
+                .WithAuthenticationOperation(operation).ExecuteAsync(cancellation.Token)).ToArray();
+            try
+            {
+                Assert.IsTrue(waiters.All(t => !t.IsCompleted));
+                Assert.AreEqual(1, http.Calls, "Both followers must wait on the owner's admission.");
+                http.Release.TrySetResult(true);
+                await AwaitAsync(owner).ConfigureAwait(false);
+                await AwaitAsync(formatting.Task).ConfigureAwait(false);
+
+                // Assert: one queued caller completes while the other's formatter remains suspended.
+                var completed = await AwaitAsync(Task.WhenAny(waiters)).ConfigureAwait(false);
+                var result = await completed.ConfigureAwait(false);
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(1, waiters.Count(t => t.IsCompleted));
+                Assert.AreEqual(1, http.Calls);
+                Assert.AreEqual((1L, 1L), ReadCoalescingTelemetry(app),
+                    "A suspended formatter must not yet count as a successful coalesced request.");
+            }
+            finally
+            {
+                http.Release.TrySetResult(true);
+                release.TrySetResult(true);
+                await Task.WhenAll(waiters).ConfigureAwait(false);
+            }
+
+            var results = await Task.WhenAll(waiters).ConfigureAwait(false);
+            Assert.AreEqual(2, formats);
+            Assert.IsTrue(results.All(r => r.AuthenticationResultMetadata.TokenSource == TokenSource.Cache));
+            Assert.AreNotSame(results[0], results[1]);
+            Assert.AreNotEqual(results[0].CorrelationId, results[1].CorrelationId);
+            Assert.AreEqual(1, http.Calls);
+            Assert.AreEqual((1L, 0L), ReadCoalescingTelemetry(app));
+        }
+
+        [TestMethod]
         [DataRow(false)]
         [DataRow(true)]
         public async Task RejectedCacheRecheck_RestoresMissMetadataAndEmitsBufferedTelemetryAsync(bool validation)

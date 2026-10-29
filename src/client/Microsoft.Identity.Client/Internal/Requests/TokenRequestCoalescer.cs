@@ -128,6 +128,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 (observedToken is null || !IsSameGeneration(cachedToken, observedToken) ||
                  !SilentRequestHelper.NeedsRefresh(cachedToken)))
             {
+                // Validation is coordinated; formatting an accepted token is caller-local.
+                _parameters.ReleaseCoalescingAdmission?.Invoke(null);
                 var result = observedToken is null
                     ? await _createResult(cachedToken, cancellationToken).ConfigureAwait(false)
                     : null;
