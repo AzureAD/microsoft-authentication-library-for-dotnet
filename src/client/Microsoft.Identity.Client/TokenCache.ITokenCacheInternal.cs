@@ -221,7 +221,7 @@ namespace Microsoft.Identity.Client
                     }
 
                     // Don't cache access tokens from broker
-                    if (ShouldCacheAccessToken(msalAccessTokenCacheItem, response.TokenSource))
+                    if (!requestParams.IsIdJagRequest && ShouldCacheAccessToken(msalAccessTokenCacheItem, response.TokenSource))
                     {
                         logger.Info("[SaveTokenResponseAsync] Saving AT in cache and removing overlapping ATs...");
                         DeleteAccessTokensWithIntersectingScopes(
@@ -256,13 +256,16 @@ namespace Microsoft.Identity.Client
                         instanceDiscoveryMetadata.PreferredCache,
                         response.FamilyId);
 
-                    SaveToLegacyAdalCache(
-                        requestParams,
-                        response,
-                        msalRefreshTokenCacheItem,
-                        msalIdTokenCacheItem,
-                        tenantId,
-                        instanceDiscoveryMetadata);
+                    if (!requestParams.IsIdJagRequest)
+                    {
+                        SaveToLegacyAdalCache(
+                            requestParams,
+                            response,
+                            msalRefreshTokenCacheItem,
+                            msalIdTokenCacheItem,
+                            tenantId,
+                            instanceDiscoveryMetadata);
+                    }
                 }
                 finally
                 {

@@ -1,0 +1,3 @@
+Microsoft.Identity.Client.AcquireTokenByAuthorizationCodeParameterBuilder.WithIdJag(string audience, string resource = null) -> Microsoft.Identity.Client.AcquireTokenByAuthorizationCodeParameterBuilder
+Microsoft.Identity.Client.AcquireTokenOnBehalfOfParameterBuilder.WithIdJag(string audience, string resource = null) -> Microsoft.Identity.Client.AcquireTokenOnBehalfOfParameterBuilder
+Microsoft.Identity.Client.AcquireTokenSilentParameterBuilder.WithIdJag(string audience, string resource = null) -> Microsoft.Identity.Client.AcquireTokenSilentParameterBuilder

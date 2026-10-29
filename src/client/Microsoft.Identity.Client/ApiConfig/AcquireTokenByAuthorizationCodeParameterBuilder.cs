@@ -49,6 +49,24 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
+        /// <summary>
+        /// Requests an Identity Assertion Authorization Grant (ID-JAG) instead of an API access token.
+        /// </summary>
+        /// <param name="audience">The external authorization server that will redeem the grant.</param>
+        /// <param name="resource">The optional external API resource.</param>
+        /// <returns>The builder to chain the .With methods.</returns>
+        /// <remarks>
+        /// This experimental feature requires experimental features to be enabled on the application.
+        /// The grant is returned in <see cref="AuthenticationResult.AccessToken"/> and is not cached.
+        /// Redeem it at the external authorization server; do not send it to an API as a bearer token.
+        /// </remarks>
+        public AcquireTokenByAuthorizationCodeParameterBuilder WithIdJag(string audience, string resource = null)
+        {
+            ValidateUseOfExperimentalFeature();
+            CommonParameters.SetIdJag(audience, resource);
+            return this;
+        }
+
         /// <inheritdoc/>
         internal override ApiEvent.ApiIds CalculateApiEventId()
         {

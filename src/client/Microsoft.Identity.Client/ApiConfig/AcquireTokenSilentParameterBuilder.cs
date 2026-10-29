@@ -70,6 +70,27 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Requests an Identity Assertion Authorization Grant (ID-JAG) using a cached refresh token.
+        /// </summary>
+        /// <param name="audience">The external authorization server that will redeem the grant.</param>
+        /// <param name="resource">The optional external API resource.</param>
+        /// <returns>The builder to chain the .With methods.</returns>
+        /// <remarks>
+        /// This experimental feature requires a confidential client with experimental features enabled.
+        /// Ordinary access-token cache entries are bypassed and the returned grant is not cached.
+        /// Refresh-token rotation and session updates are preserved. A missing or unusable refresh token
+        /// requires the usual <see cref="MsalUiRequiredException"/> recovery.
+        /// Redeem <see cref="AuthenticationResult.AccessToken"/> at the external authorization server,
+        /// not at an API. Public clients, brokers, and PoP options are not supported.
+        /// </remarks>
+        public AcquireTokenSilentParameterBuilder WithIdJag(string audience, string resource = null)
+        {
+            ValidateUseOfExperimentalFeature();
+            CommonParameters.SetIdJag(audience, resource);
+            return this;
+        }
+
+        /// <summary>
         /// Specifies if the client application should ignore access tokens when reading the token cache.
         /// Refresh tokens will still be used. Any new tokens from the Identity Provider will still be written to the token cache.
         /// By default the token is taken from the the user token cache (forceRefresh=false)

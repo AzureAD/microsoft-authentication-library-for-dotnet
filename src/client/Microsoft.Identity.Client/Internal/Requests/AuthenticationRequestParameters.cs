@@ -123,6 +123,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
         }
 
         public bool IsMtlsPopRequested => _commonParameters.IsMtlsPopRequested;
+        public string IdJagAudience => _commonParameters.IdJagAudience;
+        public string IdJagResource => _commonParameters.IdJagResource;
+        public bool IsIdJagRequest => IdJagAudience is not null;
         public bool PreferMsiV2 => _commonParameters.PreferMsiV2;
         public MtlsBindingStrength MtlsPopMinStrength => _commonParameters.MtlsPopMinStrength;
         public bool? SendOfflineAccessScope => _commonParameters.SendOfflineAccessScope;

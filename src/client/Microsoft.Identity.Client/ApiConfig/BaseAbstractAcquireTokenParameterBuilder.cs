@@ -146,6 +146,19 @@ namespace Microsoft.Identity.Client
         {
             Validate();
             CommonParameters.ApiId = CalculateApiEventId();
+            if (CommonParameters.IdJagAudience is not null &&
+                (!ServiceBundle.Config.IsConfidentialClient ||
+                 ServiceBundle.Config.IsBrokerEnabled ||
+                 CommonParameters.IsMtlsPopRequested ||
+                 CommonParameters.PopAuthenticationConfiguration is not null ||
+                 !string.Equals(CommonParameters.AuthenticationOperation.AccessTokenType, "Bearer", StringComparison.OrdinalIgnoreCase) ||
+                 (CommonParameters.ApiId != ApiEvent.ApiIds.AcquireTokenByAuthorizationCode &&
+                  CommonParameters.ApiId != ApiEvent.ApiIds.AcquireTokenOnBehalfOf &&
+                  CommonParameters.ApiId != ApiEvent.ApiIds.AcquireTokenSilent)))
+            {
+                throw new InvalidOperationException("ID-JAG requires confidential-client authorization code, OBO, or silent acquisition without broker or PoP options.");
+            }
+
             CommonParameters.CorrelationId = CommonParameters.UseCorrelationIdFromUser ? CommonParameters.UserProvidedCorrelationId : Guid.NewGuid();
         }
 

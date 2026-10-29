@@ -45,6 +45,24 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public string FmiPathSuffix { get; internal set; }
         public string ClientAssertionFmiPath { get; internal set; }
         public bool IsMtlsPopRequested { get; set; }
+        public string IdJagAudience { get; set; }
+        public string IdJagResource { get; set; }
+
+        internal void SetIdJag(string audience, string resource)
+        {
+            if (string.IsNullOrWhiteSpace(audience))
+            {
+                throw new ArgumentException("An ID-JAG audience is required.", nameof(audience));
+            }
+
+            if (resource is not null && string.IsNullOrWhiteSpace(resource))
+            {
+                throw new ArgumentException("An ID-JAG resource must be nonempty when specified.", nameof(resource));
+            }
+
+            IdJagAudience = audience;
+            IdJagResource = resource;
+        }
 
         /// <summary>
         /// When true, MSAL uses the full IMDSv2 attested flow (mTLS connection to ESTS via a

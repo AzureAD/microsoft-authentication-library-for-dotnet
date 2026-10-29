@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.ClientCredential;
@@ -177,6 +178,21 @@ namespace Microsoft.Identity.Client.OAuth2
                 _oAuth2Client.AddBodyParameter(kvp.Key, kvp.Value);
             }
 
+            if (_requestParams.IsIdJagRequest)
+            {
+                if (_requestParams.ExtraQueryParameters.Keys.Any(key =>
+                    string.Equals(key, "requested_token_type", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(key, "audience", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(key, "resource", StringComparison.OrdinalIgnoreCase)))
+                {
+                    throw new InvalidOperationException("ID-JAG parameters cannot also be supplied as extra query parameters.");
+                }
+
+                _oAuth2Client.AddBodyParameter("requested_token_type", "urn:ietf:params:oauth:token-type:id-jag");
+                _oAuth2Client.AddBodyParameter("audience", _requestParams.IdJagAudience);
+                _oAuth2Client.AddBodyParameter("resource", _requestParams.IdJagResource);
+            }
+
             if (!string.IsNullOrEmpty(_requestParams.FmiPathSuffix))
             {
                 _oAuth2Client.AddBodyParameter(OAuth2Parameter.FmiPath, _requestParams.FmiPathSuffix);
@@ -222,13 +238,38 @@ namespace Microsoft.Identity.Client.OAuth2
             builder.AppendQueryParameters(_requestParams.ExtraQueryParameters);
             Uri tokenEndpointWithQueryParams = builder.Uri;
 
+            var handlers = _requestParams.OnBeforeTokenRequestHandler;
+            if (_requestParams.IsIdJagRequest)
+            {
+                string grantType = _oAuth2Client.GetBodyParameters()[OAuth2Parameter.GrantType];
+                handlers = handlers is null
+                    ? new List<Func<OnBeforeTokenRequestData, Task>>()
+                    : new List<Func<OnBeforeTokenRequestData, Task>>(handlers);
+                handlers.Add(data =>
+                {
+                    if (!data.BodyParameters.TryGetValue("requested_token_type", out string tokenType) ||
+                        !string.Equals(tokenType, "urn:ietf:params:oauth:token-type:id-jag", StringComparison.Ordinal) ||
+                        !data.BodyParameters.TryGetValue("audience", out string audience) ||
+                        !string.Equals(audience, _requestParams.IdJagAudience, StringComparison.Ordinal) ||
+                        !string.Equals(data.BodyParameters.TryGetValue("resource", out string resource) ? resource : null,
+                            _requestParams.IdJagResource, StringComparison.Ordinal) ||
+                        !data.BodyParameters.TryGetValue(OAuth2Parameter.GrantType, out string actualGrantType) ||
+                        !string.Equals(actualGrantType, grantType, StringComparison.Ordinal))
+                    {
+                        throw new InvalidOperationException("Token-request callbacks cannot change ID-JAG parameters or the underlying grant type.");
+                    }
+
+                    return Task.CompletedTask;
+                });
+            }
+
             try
             {
                 logger.Verbose(() => "[Token Client] Fetching MsalTokenResponse .... ");
                 MsalTokenResponse msalTokenResponse =
                     await _oAuth2Client
                         .GetTokenAsync(tokenEndpointWithQueryParams,
-                            _requestParams.RequestContext, true, _requestParams.OnBeforeTokenRequestHandler)
+                            _requestParams.RequestContext, true, handlers)
                         .ConfigureAwait(false);
 
                 return msalTokenResponse;
@@ -249,7 +290,7 @@ namespace Microsoft.Identity.Client.OAuth2
                         return await _oAuth2Client.GetTokenAsync(
                             tokenEndpointWithQueryParams,
                             _requestParams.RequestContext,
-                            false, _requestParams.OnBeforeTokenRequestHandler).ConfigureAwait(false);
+                            false, handlers).ConfigureAwait(false);
                     }
                 }
 

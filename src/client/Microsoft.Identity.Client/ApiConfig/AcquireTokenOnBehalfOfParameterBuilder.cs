@@ -71,6 +71,25 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Requests an Identity Assertion Authorization Grant (ID-JAG) instead of an API access token.
+        /// </summary>
+        /// <param name="audience">The external authorization server that will redeem the grant.</param>
+        /// <param name="resource">The optional external API resource.</param>
+        /// <returns>The builder to chain the .With methods.</returns>
+        /// <remarks>
+        /// This experimental feature requires experimental features to be enabled on the application.
+        /// Ordinary access-token cache entries are bypassed and the returned grant is not cached.
+        /// Redeem <see cref="AuthenticationResult.AccessToken"/> at the external authorization server,
+        /// not at an API. Long-running OBO and PoP options are not supported.
+        /// </remarks>
+        public AcquireTokenOnBehalfOfParameterBuilder WithIdJag(string audience, string resource = null)
+        {
+            ValidateUseOfExperimentalFeature();
+            CommonParameters.SetIdJag(audience, resource);
+            return this;
+        }
+
+        /// <summary>
         /// Specifies a key by which to look up the token in the cache instead of searching by an assertion.
         /// </summary>
         /// <param name="cacheKey">Key by which to look up the token in the cache</param>

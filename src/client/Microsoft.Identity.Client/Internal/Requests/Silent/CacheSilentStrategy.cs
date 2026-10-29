@@ -54,7 +54,8 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
 
             AuthenticationResult authResult = null;
 
-            if (!_silentParameters.ForceRefresh && string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
+            if (!AuthenticationRequestParameters.IsIdJagRequest &&
+                !_silentParameters.ForceRefresh && string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
             {
                 cachedAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
 
