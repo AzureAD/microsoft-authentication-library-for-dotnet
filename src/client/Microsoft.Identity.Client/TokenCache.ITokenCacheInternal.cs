@@ -1038,6 +1038,8 @@ namespace Microsoft.Identity.Client
             var accountCacheItems = Accessor.GetAllAccounts(partitionKey);
             refreshTokenCacheItems.FilterWithLogging(item => !item.IsLegacySubjectEntry, logger,
                 "[GetAccounts] Ignoring legacy subject-only refresh tokens; sign-in is required");
+            accountCacheItems.FilterWithLogging(item => !item.IsLegacySubjectEntry, logger,
+                "[GetAccounts] Ignoring legacy subject-only accounts; sign-in is required");
 
             if (!string.IsNullOrEmpty(requestParameters.HomeAccountId))
             {

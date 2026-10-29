@@ -192,6 +192,51 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.HasCount(1, await app.GetAccountsAsync().ConfigureAwait(false));
         }
 
+        [TestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task IosAccountAfterSignIn_UsesFreshMetadataAsync(bool hasClientInfo)
+        {
+            // Arrange
+            using var http = new MockHttpManager();
+            var app = CreateApplication(http, false);
+            var cache = (TokenCache)app.UserTokenCacheInternal;
+            cache.Accessor = CreateFlatAccessor(useIosAccountKeys: true);
+            string clientInfo = hasClientInfo ? MockHelpers.CreateClientInfo() : null;
+            await SignInAsync(app, http, "member", clientInfo).ConfigureAwait(false);
+            var originalAccount = cache.Accessor.GetAllAccounts().Single();
+            var legacyJson = originalAccount.ToJObject();
+            legacyJson.Remove(StorageJsonKeys.SubjectKeyVersion);
+            legacyJson[StorageJsonKeys.Username] = "old@example.test";
+            cache.Accessor.DeleteAccount(originalAccount);
+            cache.Accessor.SaveAccount(MsalAccountCacheItem.FromJObject(legacyJson));
+            Assert.AreEqual("old@example.test", cache.Accessor.GetAllAccounts().Single().PreferredUsername);
+
+            // Act
+            var signedIn = await SignInAsync(app, http, "member", clientInfo).ConfigureAwait(false);
+            var storedAccounts = cache.Accessor.GetAllAccounts();
+            Assert.HasCount(hasClientInfo ? 1 : 2, storedAccounts);
+            if (!hasClientInfo)
+            {
+                Assert.IsTrue(storedAccounts[0].IsLegacySubjectEntry);
+                Assert.AreEqual("old@example.test", storedAccounts[0].PreferredUsername);
+            }
+
+            var accounts = (await app.GetAccountsAsync().ConfigureAwait(false)).ToList();
+            var selectedAccount = await app.GetAccountAsync(signedIn.Account.HomeAccountId.Identifier).ConfigureAwait(false);
+
+            // Assert
+            Assert.HasCount(1, accounts);
+            Assert.AreEqual("member@example.test", signedIn.Account.Username);
+            Assert.AreEqual(signedIn.Account.Username, accounts[0].Username);
+            Assert.IsNotNull(selectedAccount);
+            Assert.AreEqual(signedIn.Account.Username, selectedAccount.Username);
+            var cached = await app.AcquireTokenSilent(s_scopes, selectedAccount).ExecuteAsync().ConfigureAwait(false);
+            Assert.AreEqual(signedIn.Account.Username, cached.Account.Username);
+            Assert.AreEqual("at-member", cached.AccessToken);
+            Assert.AreEqual(TokenSource.Cache, cached.AuthenticationResultMetadata.TokenSource);
+        }
+
         private static PublicClientApplication CreateApplication(MockHttpManager http, bool genericAuthority)
         {
             var builder = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
@@ -218,12 +263,12 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         private static async Task<AuthenticationResult> SignInAsync(
-            PublicClientApplication app, MockHttpManager http, string subject)
+            PublicClientApplication app, MockHttpManager http, string subject, string clientInfo = null)
         {
             http.AddMockHandler(new MockHttpMessageHandler
             {
                 ExpectedMethod = HttpMethod.Post,
-                ResponseMessage = CreateTokenResponse(subject, true)
+                ResponseMessage = CreateTokenResponse(subject, true, clientInfo: clientInfo)
             });
             return await app.AcquireTokenInteractive(s_scopes).ExecuteAsync().ConfigureAwait(false);
         }
@@ -281,15 +326,18 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.HasCount(subjects.Length, accessor.GetAllAccounts().Select(t => t.iOSCacheKey.iOSAccount).Distinct(StringComparer.OrdinalIgnoreCase));
         }
 
-        private static ITokenCacheAccessor CreateFlatAccessor()
+        private static ITokenCacheAccessor CreateFlatAccessor(bool useIosAccountKeys = false)
         {
             // Android persists JSON by CacheKey and ignores optional partition keys on enumeration.
             var accessor = Substitute.For<ITokenCacheAccessor>();
             var accessTokens = new Dictionary<string, string>(StringComparer.Ordinal);
             var refreshTokens = new Dictionary<string, string>(StringComparer.Ordinal);
             var idTokens = new Dictionary<string, string>(StringComparer.Ordinal);
-            var accounts = new Dictionary<string, string>(StringComparer.Ordinal);
+            var accounts = new Dictionary<(string Account, string Service), string>();
             var metadata = new Dictionary<string, MsalAppMetadataCacheItem>(StringComparer.Ordinal);
+
+            (string Account, string Service) GetAccountKey(MsalAccountCacheItem item) =>
+                useIosAccountKeys ? (item.iOSCacheKey.iOSAccount, item.iOSCacheKey.iOSService) : (item.CacheKey, null);
 
             accessor.When(a => a.SaveAccessToken(Arg.Any<MsalAccessTokenCacheItem>())).Do(c =>
             {
@@ -309,7 +357,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             accessor.When(a => a.SaveAccount(Arg.Any<MsalAccountCacheItem>())).Do(c =>
             {
                 var item = c.Arg<MsalAccountCacheItem>();
-                accounts[item.CacheKey] = item.ToJObject().ToJsonString();
+                accounts[GetAccountKey(item)] = item.ToJObject().ToJsonString();
             });
             accessor.When(a => a.SaveAppMetadata(Arg.Any<MsalAppMetadataCacheItem>())).Do(c =>
             {
@@ -319,20 +367,22 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             accessor.GetAllAccessTokens().ReturnsForAnyArgs(_ => accessTokens.Values.Select(MsalAccessTokenCacheItem.FromJsonString).ToList());
             accessor.GetAllRefreshTokens().ReturnsForAnyArgs(_ => refreshTokens.Values.Select(MsalRefreshTokenCacheItem.FromJsonString).ToList());
             accessor.GetAllIdTokens().ReturnsForAnyArgs(_ => idTokens.Values.Select(MsalIdTokenCacheItem.FromJsonString).ToList());
-            accessor.GetAllAccounts().ReturnsForAnyArgs(_ => accounts.Values.Select(MsalAccountCacheItem.FromJsonString).ToList());
+            // Exercise the iOS upgrade join with legacy account records enumerated first.
+            accessor.GetAllAccounts().ReturnsForAnyArgs(_ => accounts.Values.Select(MsalAccountCacheItem.FromJsonString)
+                .OrderBy(item => item.SubjectKeyVersion).ToList());
             accessor.GetAllAppMetadata().Returns(_ => metadata.Values.ToList());
             accessor.GetIdToken(Arg.Any<MsalAccessTokenCacheItem>()).Returns(c =>
                 idTokens.TryGetValue(c.Arg<MsalAccessTokenCacheItem>().GetIdTokenItem().CacheKey, out string json)
                     ? MsalIdTokenCacheItem.FromJsonString(json) : null);
             accessor.GetAccount(Arg.Any<MsalAccountCacheItem>()).Returns(c =>
-                accounts.TryGetValue(c.Arg<MsalAccountCacheItem>().CacheKey, out string json)
+                accounts.TryGetValue(GetAccountKey(c.Arg<MsalAccountCacheItem>()), out string json)
                     ? MsalAccountCacheItem.FromJsonString(json) : null);
             accessor.GetAppMetadata(Arg.Any<MsalAppMetadataCacheItem>()).Returns(c =>
                 metadata.TryGetValue(c.Arg<MsalAppMetadataCacheItem>().CacheKey, out var item) ? item : null);
             accessor.When(a => a.DeleteAccessToken(Arg.Any<MsalAccessTokenCacheItem>())).Do(c => accessTokens.Remove(c.Arg<MsalAccessTokenCacheItem>().CacheKey));
             accessor.When(a => a.DeleteRefreshToken(Arg.Any<MsalRefreshTokenCacheItem>())).Do(c => refreshTokens.Remove(c.Arg<MsalRefreshTokenCacheItem>().CacheKey));
             accessor.When(a => a.DeleteIdToken(Arg.Any<MsalIdTokenCacheItem>())).Do(c => idTokens.Remove(c.Arg<MsalIdTokenCacheItem>().CacheKey));
-            accessor.When(a => a.DeleteAccount(Arg.Any<MsalAccountCacheItem>())).Do(c => accounts.Remove(c.Arg<MsalAccountCacheItem>().CacheKey));
+            accessor.When(a => a.DeleteAccount(Arg.Any<MsalAccountCacheItem>())).Do(c => accounts.Remove(GetAccountKey(c.Arg<MsalAccountCacheItem>())));
             accessor.When(a => a.Clear()).Do(_ =>
             {
                 accessTokens.Clear();
