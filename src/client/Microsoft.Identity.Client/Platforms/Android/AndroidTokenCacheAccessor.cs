@@ -5,6 +5,7 @@ using Android.App;
 using Android.Content;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
@@ -21,66 +22,85 @@ namespace Microsoft.Identity.Client.Platforms.Android
         private const string IdTokenSharedPreferenceName = "com.microsoft.identity.client.idToken";
         private const string AccountSharedPreferenceName = "com.microsoft.identity.client.Account";
 
-        private readonly ISharedPreferences _accessTokenSharedPreference;
-        private readonly ISharedPreferences _refreshTokenSharedPreference;
-        private readonly ISharedPreferences _idTokenSharedPreference;
-        private readonly ISharedPreferences _accountSharedPreference;
+        private readonly (ISharedPreferences Legacy, ISharedPreferences Subject) _accessTokenSharedPreference;
+        private readonly (ISharedPreferences Legacy, ISharedPreferences Subject) _refreshTokenSharedPreference;
+        private readonly (ISharedPreferences Legacy, ISharedPreferences Subject) _idTokenSharedPreference;
+        private readonly (ISharedPreferences Legacy, ISharedPreferences Subject) _accountSharedPreference;
 
         private readonly RequestContext _requestContext;
 
-        public AndroidTokenCacheAccessor()
+        public AndroidTokenCacheAccessor() : this(requestContext: null)
         {
-            _accessTokenSharedPreference = Application.Context.GetSharedPreferences(AccessTokenSharedPreferenceName,
-                    FileCreationMode.Private);
-            _refreshTokenSharedPreference = Application.Context.GetSharedPreferences(RefreshTokenSharedPreferenceName,
-                    FileCreationMode.Private);
-            _idTokenSharedPreference = Application.Context.GetSharedPreferences(IdTokenSharedPreferenceName,
-                    FileCreationMode.Private);
-            _accountSharedPreference = Application.Context.GetSharedPreferences(AccountSharedPreferenceName,
-                FileCreationMode.Private);
-
-            if (_accessTokenSharedPreference == null ||
-                _refreshTokenSharedPreference == null ||
-                _idTokenSharedPreference == null ||
-                _accountSharedPreference == null)
-            {
-                throw new MsalClientException(
-                    MsalError.FailedToCreateSharedPreference,
-                    "Fail to create SharedPreference");
-            }
         }
 
-        public AndroidTokenCacheAccessor(RequestContext requestContext) : this()
+        public AndroidTokenCacheAccessor(RequestContext requestContext)
+            : this(name => Application.Context.GetSharedPreferences(name, FileCreationMode.Private), requestContext)
         {
+        }
+
+        internal AndroidTokenCacheAccessor(Func<string, ISharedPreferences> getPreferences, RequestContext requestContext)
+        {
+            if (getPreferences is null)
+            {
+                throw new ArgumentNullException(nameof(getPreferences));
+            }
+
             _requestContext = requestContext;
+            _accessTokenSharedPreference = OpenPreferences(AccessTokenSharedPreferenceName);
+            _refreshTokenSharedPreference = OpenPreferences(RefreshTokenSharedPreferenceName);
+            _idTokenSharedPreference = OpenPreferences(IdTokenSharedPreferenceName);
+            _accountSharedPreference = OpenPreferences(AccountSharedPreferenceName);
+
+            (ISharedPreferences Legacy, ISharedPreferences Subject) OpenPreferences(string name)
+            {
+                var legacy = getPreferences(name);
+                // Separate storage makes legacy collisions ineligible without changing shared cache formats.
+                var subject = getPreferences(name + ".subject.v1");
+                if (legacy is null || subject is null)
+                {
+                    throw new MsalClientException(MsalError.FailedToCreateSharedPreference, "Fail to create SharedPreference");
+                }
+
+                return (legacy, subject);
+            }
         }
 
         #region SaveItem
         public void SaveAccessToken(MsalAccessTokenCacheItem item)
         {
-            ISharedPreferencesEditor editor = _accessTokenSharedPreference.Edit();
-            editor.PutString(item.CacheKey, item.ToJsonString());
-            editor.Apply();
+            Save(item, item.CacheKey, _accessTokenSharedPreference);
         }
 
         public void SaveRefreshToken(MsalRefreshTokenCacheItem item)
         {
-            ISharedPreferencesEditor editor = _refreshTokenSharedPreference.Edit();
-            editor.PutString(item.CacheKey, item.ToJsonString());
-            editor.Apply();
+            Save(item, item.CacheKey, _refreshTokenSharedPreference);
         }
 
         public void SaveIdToken(MsalIdTokenCacheItem item)
         {
-            ISharedPreferencesEditor editor = _idTokenSharedPreference.Edit();
-            editor.PutString(item.CacheKey, item.ToJsonString());
-            editor.Apply();
+            Save(item, item.CacheKey, _idTokenSharedPreference);
         }
 
         public void SaveAccount(MsalAccountCacheItem item)
         {
-            ISharedPreferencesEditor editor = _accountSharedPreference.Edit();
-            editor.PutString(item.CacheKey, item.ToJsonString());
+            Save(item, item.CacheKey, _accountSharedPreference);
+        }
+
+        private static (ISharedPreferences Preferences, string Key) GetStorage(
+            MsalCacheItemBase item, string cacheKey, (ISharedPreferences Legacy, ISharedPreferences Subject) store)
+        {
+            item.IsAndroidCacheItem = true;
+            // Length-prefix the exact subject so neither case folding nor delimiters can merge identities.
+            return item.IsAndroidSubject
+                ? (store.Subject, item.HomeAccountId.Length.ToString(CultureInfo.InvariantCulture) + ":" + item.HomeAccountId + ":" + cacheKey)
+                : (store.Legacy, cacheKey);
+        }
+
+        private static void Save(MsalCacheItemBase item, string cacheKey, (ISharedPreferences Legacy, ISharedPreferences Subject) store)
+        {
+            var storage = GetStorage(item, cacheKey, store);
+            var editor = storage.Preferences.Edit();
+            editor.PutString(storage.Key, item.ToJObject().ToString());
             editor.Apply();
         }
         #endregion
@@ -88,35 +108,39 @@ namespace Microsoft.Identity.Client.Platforms.Android
         #region DeleteItem
         public void DeleteAccessToken(MsalAccessTokenCacheItem item)
         {
-            Delete(item.CacheKey, _accessTokenSharedPreference.Edit());
+            Delete(item, item.CacheKey, _accessTokenSharedPreference);
         }
 
         public void DeleteRefreshToken(MsalRefreshTokenCacheItem item)
         {
-            Delete(item.CacheKey, _refreshTokenSharedPreference.Edit());
+            Delete(item, item.CacheKey, _refreshTokenSharedPreference);
         }
 
         public void DeleteIdToken(MsalIdTokenCacheItem item)
         {
-            Delete(item.CacheKey, _idTokenSharedPreference.Edit());
+            Delete(item, item.CacheKey, _idTokenSharedPreference);
         }
 
         public void DeleteAccount(MsalAccountCacheItem item)
         {
-            Delete(item.CacheKey, _accountSharedPreference.Edit());
+            Delete(item, item.CacheKey, _accountSharedPreference);
 
         }
 
-        private void Delete(string key, ISharedPreferencesEditor editor)
+        private static void Delete(MsalCacheItemBase item, string cacheKey, (ISharedPreferences Legacy, ISharedPreferences Subject) store)
         {
-            editor.Remove(key);
+            var storage = GetStorage(item, cacheKey, store);
+            var editor = storage.Preferences.Edit();
+            editor.Remove(storage.Key);
             editor.Apply();
         }
 
-        private void DeleteAll(ISharedPreferences sharedPreferences)
+        private static void DeleteAll((ISharedPreferences Legacy, ISharedPreferences Subject) store)
         {
-            var editor = sharedPreferences.Edit();
-
+            var editor = store.Legacy.Edit();
+            editor.Clear();
+            editor.Apply();
+            editor = store.Subject.Edit();
             editor.Clear();
             editor.Apply();
         }
@@ -134,30 +158,69 @@ namespace Microsoft.Identity.Client.Platforms.Android
         #region GetItem
         public MsalIdTokenCacheItem GetIdToken(MsalAccessTokenCacheItem accessTokenCacheItem)
         {
-            return MsalIdTokenCacheItem.FromJsonString(
-                _idTokenSharedPreference.GetString(accessTokenCacheItem.GetIdTokenItem().CacheKey, null));
+            var item = accessTokenCacheItem.GetIdTokenItem();
+            return GetItem(item, item.CacheKey, _idTokenSharedPreference, MsalIdTokenCacheItem.FromJsonString);
         }
         #endregion
 
         #region GetAll
         public List<MsalAccessTokenCacheItem> GetAllAccessTokens(string optionalPartitionKey = null, ILoggerAdapter requestlogger = null)
         {
-            return _accessTokenSharedPreference.All.Values.Cast<string>().Select(x => MsalAccessTokenCacheItem.FromJsonString(x)).ToList();
+            return GetAll(_accessTokenSharedPreference, MsalAccessTokenCacheItem.FromJsonString, requestlogger);
         }
 
         public List<MsalRefreshTokenCacheItem> GetAllRefreshTokens(string optionalPartitionKey = null, ILoggerAdapter requestlogger = null)
         {
-            return _refreshTokenSharedPreference.All.Values.Cast<string>().Select(x => MsalRefreshTokenCacheItem.FromJsonString(x)).ToList();
+            return GetAll(_refreshTokenSharedPreference, MsalRefreshTokenCacheItem.FromJsonString, requestlogger);
         }
 
         public List<MsalIdTokenCacheItem> GetAllIdTokens(string optionalPartitionKey = null, ILoggerAdapter requestlogger = null)
         {
-            return _idTokenSharedPreference.All.Values.Cast<string>().Select(x => MsalIdTokenCacheItem.FromJsonString(x)).ToList();
+            return GetAll(_idTokenSharedPreference, MsalIdTokenCacheItem.FromJsonString, requestlogger);
         }
 
         public List<MsalAccountCacheItem> GetAllAccounts(string optionalPartitionKey = null, ILoggerAdapter requestlogger = null)
         {
-            return _accountSharedPreference.All.Values.Cast<string>().Select(x => MsalAccountCacheItem.FromJsonString(x)).ToList();
+            return GetAll(_accountSharedPreference, MsalAccountCacheItem.FromJsonString, requestlogger);
+        }
+
+        private List<T> GetAll<T>((ISharedPreferences Legacy, ISharedPreferences Subject) store,
+            Func<string, T> deserialize, ILoggerAdapter logger) where T : MsalCacheItemBase
+        {
+            var items = store.Legacy.All.Values.Cast<string>().Select(json => Read(json, deserialize)).ToList();
+            if (items.RemoveAll(item => item.IsAndroidSubject) > 0)
+            {
+                (logger ?? _requestContext?.Logger)?.Warning("Ignoring legacy Android subject entries; sign-in is required.");
+            }
+
+            items.AddRange(store.Subject.All.Values.Cast<string>().Select(json => Read(json, deserialize)));
+            return items;
+        }
+
+        private T GetItem<T>(MsalCacheItemBase query, string cacheKey,
+            (ISharedPreferences Legacy, ISharedPreferences Subject) store, Func<string, T> deserialize) where T : MsalCacheItemBase
+        {
+            var storage = GetStorage(query, cacheKey, store);
+            var item = Read(storage.Preferences.GetString(storage.Key, null), deserialize);
+            if (item is not null && (item.IsAndroidSubject != query.IsAndroidSubject ||
+                !item.MatchesHomeAccountId(query.HomeAccountId)))
+            {
+                _requestContext?.Logger.Warning("Ignoring an Android cache record with a different identity.");
+                return null;
+            }
+
+            return item;
+        }
+
+        private static T Read<T>(string json, Func<string, T> deserialize) where T : MsalCacheItemBase
+        {
+            var item = deserialize(json);
+            if (item is not null)
+            {
+                item.IsAndroidCacheItem = true;
+            }
+
+            return item;
         }
         #endregion
 
@@ -165,7 +228,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
 
         public MsalAccountCacheItem GetAccount(MsalAccountCacheItem accountCacheItem)
         {
-            return MsalAccountCacheItem.FromJsonString(_accountSharedPreference.GetString(accountCacheItem.CacheKey, null));
+            return GetItem(accountCacheItem, accountCacheItem.CacheKey, _accountSharedPreference, MsalAccountCacheItem.FromJsonString);
         }
 
         /// <summary>

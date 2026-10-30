@@ -675,8 +675,8 @@ namespace Microsoft.Identity.Client
                 requestParams.ApiId != ApiEvent.ApiIds.AcquireTokenForUserAssignedManagedIdentity &&
                 !ApiEvent.IsOnBehalfOfRequest(requestParams.ApiId))
             {
-                tokenCacheItems.FilterWithLogging(item => item.HomeAccountId.Equals(
-                                requestParams.Account.HomeAccountId?.Identifier, StringComparison.OrdinalIgnoreCase),
+                tokenCacheItems.FilterWithLogging(item => item.MatchesHomeAccountId(
+                                requestParams.Account.HomeAccountId?.Identifier),
                                 requestParams.RequestContext.Logger,
                                 "Filtering AT by home account id");
             }
@@ -955,8 +955,8 @@ namespace Microsoft.Identity.Client
             }
             else
             {
-                cacheItems.FilterWithLogging(item => item.HomeAccountId.Equals(
-                                requestParams.Account.HomeAccountId?.Identifier, StringComparison.OrdinalIgnoreCase),
+                cacheItems.FilterWithLogging(item => item.MatchesHomeAccountId(
+                                requestParams.Account.HomeAccountId?.Identifier),
                                 requestParams.RequestContext.Logger,
                                 "Filtering RT by home account id");
             }
@@ -1032,6 +1032,13 @@ namespace Microsoft.Identity.Client
 
             var refreshTokenCacheItems = Accessor.GetAllRefreshTokens(partitionKey);
             var accountCacheItems = Accessor.GetAllAccounts(partitionKey);
+
+            if (!string.IsNullOrEmpty(requestParameters.HomeAccountId))
+            {
+                accountCacheItems.FilterWithLogging(item => !item.IsAndroidSubject ||
+                    item.MatchesHomeAccountId(requestParameters.HomeAccountId), logger,
+                    "[GetAccounts] Filtering Android subject accounts by accountID");
+            }
 
             if (filterByClientId)
             {
@@ -1272,7 +1279,10 @@ namespace Microsoft.Identity.Client
                         msalAccessTokenCacheItem.TenantId,
                         msalAccessTokenCacheItem.HomeAccountId,
                         account?.AccountSource,
-                        account?.Username));
+                        account?.Username)
+                {
+                    RawClientInfo = msalAccessTokenCacheItem.RawClientInfo
+                });
 
             return new Account(
                 msalAccessTokenCacheItem.HomeAccountId,
@@ -1472,11 +1482,11 @@ namespace Microsoft.Identity.Client
             ILoggerAdapter logger = requestContext.Logger;
 
             var refreshTokens = Accessor.GetAllRefreshTokens(partitionKey, logger);
-            refreshTokens.RemoveAll(item => !item.HomeAccountId.Equals(partitionKey, StringComparison.OrdinalIgnoreCase));
+            refreshTokens.RemoveAll(item => !item.MatchesHomeAccountId(partitionKey));
             RemoveRefreshTokens(refreshTokens, logger, out bool filterByClientId);
 
             var accessTokens = Accessor.GetAllAccessTokens(partitionKey, logger);
-            accessTokens.RemoveAll(item => !item.HomeAccountId.Equals(partitionKey, StringComparison.OrdinalIgnoreCase));
+            accessTokens.RemoveAll(item => !item.MatchesHomeAccountId(partitionKey));
             RemoveAccessTokens(accessTokens, logger, filterByClientId);
 
             RemoveIdTokens(partitionKey, logger, filterByClientId);
@@ -1526,7 +1536,7 @@ namespace Microsoft.Identity.Client
         private int RemoveIdTokens(string partitionKey, ILoggerAdapter logger, bool filterByClientId)
         {
             var idTokens = Accessor.GetAllIdTokens(partitionKey);
-            idTokens.RemoveAll(item => !item.HomeAccountId.Equals(partitionKey, StringComparison.OrdinalIgnoreCase));
+            idTokens.RemoveAll(item => !item.MatchesHomeAccountId(partitionKey));
             if (filterByClientId)
             {
                 FilterTokensByClientId(idTokens);
@@ -1547,7 +1557,7 @@ namespace Microsoft.Identity.Client
             if (account != null)
             {
                 var accounts = Accessor.GetAllAccounts(account.HomeAccountId.Identifier);
-                accounts.RemoveAll(item => !(item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase) &&
+                accounts.RemoveAll(item => !(item.MatchesHomeAccountId(account.HomeAccountId.Identifier) &&
                                    item.PreferredUsername.Equals(account.Username, StringComparison.OrdinalIgnoreCase)));
 
                 foreach (MsalAccountCacheItem accountCacheItem in accounts)
