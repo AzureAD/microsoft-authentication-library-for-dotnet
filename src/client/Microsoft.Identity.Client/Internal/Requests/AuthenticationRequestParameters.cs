@@ -72,6 +72,26 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             HomeAccountId = homeAccountId;
             CacheKeyComponents = cacheKeyComponents;
+            if (cacheKeyComponents is not null)
+            {
+                foreach (string key in cacheKeyComponents.Keys)
+                {
+                    if (key.StartsWith("msal.id_jag.", StringComparison.OrdinalIgnoreCase))
+                    {
+                        throw new ArgumentException("The msal.id_jag. cache key namespace is reserved.", nameof(cacheKeyComponents));
+                    }
+                }
+            }
+            AccessTokenCacheKeyComponents = cacheKeyComponents;
+            if (IsIdJagRequest)
+            {
+                AccessTokenCacheKeyComponents = cacheKeyComponents is null
+                    ? new SortedList<string, string>(StringComparer.Ordinal)
+                    : new SortedList<string, string>(cacheKeyComponents, StringComparer.Ordinal);
+                AccessTokenCacheKeyComponents.Add("msal.id_jag.token_type", "urn:ietf:params:oauth:token-type:id-jag");
+                AccessTokenCacheKeyComponents.Add("msal.id_jag.audience", IdJagAudience);
+                AccessTokenCacheKeyComponents.Add("msal.id_jag.resource", IdJagResource ?? string.Empty);
+            }
             PartitionRefreshToken = commonParameters.PartitionRefreshToken;
 
             // Defer JSON merge to first access — cache hits never read ClaimsAndClientCapabilities,
@@ -163,6 +183,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public IEnumerable<string> PersistedCacheParameters => _commonParameters.AdditionalCacheParameters;
 
         public SortedList<string, string> CacheKeyComponents {get; private set; }
+
+        public SortedList<string, string> AccessTokenCacheKeyComponents { get; }
 
         public bool PartitionRefreshToken { get; private set; }
 

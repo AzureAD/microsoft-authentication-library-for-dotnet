@@ -78,7 +78,7 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods.</returns>
         /// <remarks>
         /// This experimental feature requires experimental features to be enabled on the application.
-        /// Ordinary access-token cache entries are bypassed and the returned grant is not cached.
+        /// Grants are cached separately from ordinary access tokens, with audience and resource included in their cache identity.
         /// Redeem <see cref="AuthenticationResult.AccessToken"/> at the external authorization server,
         /// not at an API. Long-running OBO and PoP options are not supported.
         /// </remarks>

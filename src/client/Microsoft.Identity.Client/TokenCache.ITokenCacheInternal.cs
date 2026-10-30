@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Client
                         requestParams.AuthenticationScheme.KeyId,
                         CacheKeyFactory.GetOboKey(requestParams.LongRunningOboCacheKey, requestParams.UserAssertion),
                         requestParams.PersistedCacheParameters,
-                        requestParams.CacheKeyComponents);
+                        requestParams.AccessTokenCacheKeyComponents);
             }
 
             if (!string.IsNullOrEmpty(response.RefreshToken))
@@ -221,7 +221,7 @@ namespace Microsoft.Identity.Client
                     }
 
                     // Don't cache access tokens from broker
-                    if (!requestParams.IsIdJagRequest && ShouldCacheAccessToken(msalAccessTokenCacheItem, response.TokenSource))
+                    if (ShouldCacheAccessToken(msalAccessTokenCacheItem, response.TokenSource))
                     {
                         logger.Info("[SaveTokenResponseAsync] Saving AT in cache and removing overlapping ATs...");
                         DeleteAccessTokensWithIntersectingScopes(
@@ -525,8 +525,8 @@ namespace Microsoft.Identity.Client
         private void FilterTokensByAdditionalKeyComponents(List<MsalAccessTokenCacheItem> accessTokens, AuthenticationRequestParameters requestParams)
         {
             bool requestHasComponents =
-                requestParams.CacheKeyComponents != null &&
-                requestParams.CacheKeyComponents.Count > 0;
+                requestParams.AccessTokenCacheKeyComponents != null &&
+                requestParams.AccessTokenCacheKeyComponents.Count > 0;
 
             int countBeforeFilter = accessTokens.Count;
 
@@ -534,7 +534,7 @@ namespace Microsoft.Identity.Client
             {
                 accessTokens.FilterWithLogging(item =>
                     item.AdditionalCacheKeyComponents != null &&
-                    CollectionHelpers.AreDictionariesEqual(item.AdditionalCacheKeyComponents, requestParams.CacheKeyComponents),
+                    CollectionHelpers.AreDictionariesEqual(item.AdditionalCacheKeyComponents, requestParams.AccessTokenCacheKeyComponents),
                     requestParams.RequestContext.Logger,
                     "Filtering by additional key components");
             }

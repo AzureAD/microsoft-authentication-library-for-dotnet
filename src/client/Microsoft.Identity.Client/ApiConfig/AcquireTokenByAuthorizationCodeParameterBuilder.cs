@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods.</returns>
         /// <remarks>
         /// This experimental feature requires experimental features to be enabled on the application.
-        /// The grant is returned in <see cref="AuthenticationResult.AccessToken"/> and is not cached.
+        /// The grant is returned in <see cref="AuthenticationResult.AccessToken"/> and cached separately from ordinary access tokens.
         /// Redeem it at the external authorization server; do not send it to an API as a bearer token.
         /// </remarks>
         public AcquireTokenByAuthorizationCodeParameterBuilder WithIdJag(string audience, string resource = null)

@@ -70,14 +70,14 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Requests an Identity Assertion Authorization Grant (ID-JAG) using a cached refresh token.
+        /// Requests an Identity Assertion Authorization Grant (ID-JAG) from its isolated cache or using an SDK-held refresh token.
         /// </summary>
         /// <param name="audience">The external authorization server that will redeem the grant.</param>
         /// <param name="resource">The optional external API resource.</param>
         /// <returns>The builder to chain the .With methods.</returns>
         /// <remarks>
         /// This experimental feature requires a confidential client with experimental features enabled.
-        /// Ordinary access-token cache entries are bypassed and the returned grant is not cached.
+        /// Grants are cached separately from ordinary access tokens, with audience and resource included in their cache identity.
         /// Refresh-token rotation and session updates are preserved. A missing or unusable refresh token
         /// requires the usual <see cref="MsalUiRequiredException"/> recovery.
         /// Redeem <see cref="AuthenticationResult.AccessToken"/> at the external authorization server,

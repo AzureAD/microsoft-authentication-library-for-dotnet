@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         [TestMethod]
         [DataRow(null, 300)]
         [DataRow(Resource, 900)]
-        public async Task AuthorizationCodeBootstrapsSessionWithoutCachingGrantAsync(string resource, int lifetime)
+        public async Task AuthorizationCodeCachesGrantAndBootstrapsSessionAsync(string resource, int lifetime)
         {
             // Arrange
             using var httpManager = new MockHttpManager();
@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             Assert.IsTrue(result.ExpiresOn <= DateTimeOffset.UtcNow.AddSeconds(lifetime));
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
             Assert.AreEqual(IdJagTokenType, result.AdditionalResponseParameters["issued_token_type"]);
-            Assert.IsEmpty(app.UserTokenCacheInternal.Accessor.GetAllAccessTokens());
+            Assert.AreEqual("id-jag", app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Single().Secret);
             Assert.AreEqual("initial-rt", app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Single().Secret);
             Assert.HasCount(1, app.UserTokenCacheInternal.Accessor.GetAllIdTokens());
             Assert.AreEqual(result.Account.HomeAccountId, (await app.GetAccountsAsync().ConfigureAwait(false)).Single().HomeAccountId);
@@ -69,16 +69,17 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     ["refresh_token"] = "initial-rt"
                 });
             var refreshed = await app.AcquireTokenSilent(s_scopes, result.Account)
-                .WithIdJag(Audience).ExecuteAsync().ConfigureAwait(false);
+                .WithIdJag(Audience).WithForceRefresh(true).ExecuteAsync().ConfigureAwait(false);
             Assert.AreEqual("second-id-jag", refreshed.AccessToken);
             Assert.AreEqual("initial-rt", app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Single().Secret);
-            Assert.IsEmpty(app.UserTokenCacheInternal.Accessor.GetAllAccessTokens());
+            CollectionAssert.AreEquivalent(resource is null ? new[] { "second-id-jag" } : new[] { "id-jag", "second-id-jag" },
+                app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Select(item => item.Secret).ToArray());
         }
 
         [TestMethod]
         [DataRow(false)]
         [DataRow(true)]
-        public async Task SilentBypassesAccessTokenCacheAndPreservesOrdinaryTokenAsync(bool forceRefresh)
+        public async Task SilentCachesGrantAndPreservesOrdinaryTokenAsync(bool forceRefresh)
         {
             // Arrange
             using var httpManager = new MockHttpManager();
@@ -98,7 +99,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
             // Assert
             Assert.AreEqual("id-jag", grant.AccessToken);
-            Assert.AreEqual("ordinary-at", app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Single().Secret);
+            CollectionAssert.AreEquivalent(new[] { "ordinary-at", "id-jag" },
+                app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Select(item => item.Secret).ToArray());
             Assert.AreEqual("rotated-rt", app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Single().Secret);
             var ordinary = await app.AcquireTokenSilent(s_scopes, session.Account).ExecuteAsync().ConfigureAwait(false);
             Assert.AreEqual("ordinary-at", ordinary.AccessToken);
@@ -111,13 +113,14 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 .WithIdJag(Audience + "other").ExecuteAsync().ConfigureAwait(false);
             Assert.AreEqual("next-id-jag", next.AccessToken);
             Assert.AreEqual("rotated-rt", app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Single().Secret);
-            Assert.AreEqual("ordinary-at", app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Single().Secret);
+            CollectionAssert.AreEquivalent(new[] { "ordinary-at", "id-jag", "next-id-jag" },
+                app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Select(item => item.Secret).ToArray());
         }
 
         [TestMethod]
         [DataRow(false)]
         [DataRow(true)]
-        public async Task OboBypassesCacheWithoutReplacingOrdinaryTokenAsync(bool forceRefresh)
+        public async Task OboCachesGrantWithoutReplacingOrdinaryTokenAsync(bool forceRefresh)
         {
             // Arrange
             using var httpManager = new MockHttpManager();
@@ -142,7 +145,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
             // Assert
             Assert.AreEqual("obo-id-jag", result.AccessToken);
-            Assert.AreEqual("ordinary-obo-at", app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Single().Secret);
+            CollectionAssert.AreEquivalent(new[] { "ordinary-obo-at", "obo-id-jag" },
+                app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Select(item => item.Secret).ToArray());
             Assert.IsEmpty(app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens());
             var ordinary = await app.AcquireTokenOnBehalfOf(s_scopes, assertion).ExecuteAsync().ConfigureAwait(false);
             Assert.AreEqual("ordinary-obo-at", ordinary.AccessToken);
@@ -254,7 +258,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
         [TestMethod]
         [TestCategory("IdJagFunctional")]
-        public async Task SerializedSessionSurvivesApplicationRestartWithoutPersistingGrantsAsync()
+        public async Task SerializedSessionRestoresIsolatedGrantsAcrossApplicationRestartsAsync()
         {
             // Arrange
             using var httpManager = new MockHttpManager();
@@ -266,7 +270,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 serializedCache = data;
                 cacheWrites++;
             });
-            AddTokenResponse(httpManager, CreateResponse("bootstrap-grant", "initial-rt"),
+            AddTokenResponse(httpManager, CreateResponse("bootstrap-grant", "initial-rt", 900),
                 new Dictionary<string, string> { ["grant_type"] = "authorization_code" }, resource: Resource);
 
             // Act
@@ -276,7 +280,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             // Assert
             Assert.AreEqual("bootstrap-grant", bootstrap.AccessToken);
             Assert.AreEqual(1, cacheWrites);
-            Assert.IsEmpty(ReadCacheSecrets(serializedCache, "AccessToken"));
+            CollectionAssert.AreEquivalent(new[] { "bootstrap-grant" }, ReadCacheSecrets(serializedCache, "AccessToken"));
             CollectionAssert.AreEquivalent(new[] { "initial-rt" }, ReadCacheSecrets(serializedCache, "RefreshToken"));
             Assert.HasCount(1, ReadCacheSecrets(serializedCache, "IdToken"));
 
@@ -289,15 +293,20 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             var account = await restarted.GetAccountAsync(bootstrap.Account.HomeAccountId.Identifier).ConfigureAwait(false);
             Assert.IsNotNull(account);
             Assert.AreEqual(bootstrap.Account.HomeAccountId.Identifier, account.HomeAccountId.Identifier);
+            var cachedGrant = await restarted.AcquireTokenSilent(s_scopes, account)
+                .WithIdJag(Audience, Resource).ExecuteAsync().ConfigureAwait(false);
+            Assert.AreEqual("bootstrap-grant", cachedGrant.AccessToken);
+            Assert.AreEqual(TokenSource.Cache, cachedGrant.AuthenticationResultMetadata.TokenSource);
+            Assert.AreEqual(1, cacheWrites);
             AddTokenResponse(httpManager, CreateResponse("refreshed-grant", "rotated-rt", includeIdToken: false),
                 new Dictionary<string, string> { ["grant_type"] = "refresh_token", ["refresh_token"] = "initial-rt" },
                 resource: Resource);
             var refreshed = await restarted.AcquireTokenSilent(s_scopes, account)
-                .WithIdJag(Audience, Resource).ExecuteAsync().ConfigureAwait(false);
+                .WithIdJag(Audience, Resource).WithForceRefresh(true).ExecuteAsync().ConfigureAwait(false);
             Assert.AreEqual("refreshed-grant", refreshed.AccessToken);
             Assert.AreEqual(TokenSource.IdentityProvider, refreshed.AuthenticationResultMetadata.TokenSource);
             Assert.AreEqual(2, cacheWrites);
-            Assert.IsEmpty(ReadCacheSecrets(serializedCache, "AccessToken"));
+            CollectionAssert.AreEquivalent(new[] { "refreshed-grant" }, ReadCacheSecrets(serializedCache, "AccessToken"));
             CollectionAssert.AreEquivalent(new[] { "rotated-rt" }, ReadCacheSecrets(serializedCache, "RefreshToken"));
             Assert.HasCount(1, ReadCacheSecrets(serializedCache, "IdToken"));
 
@@ -312,12 +321,16 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 .ExecuteAsync().ConfigureAwait(false);
             Assert.AreEqual("ordinary-at", ordinary.AccessToken);
             Assert.AreEqual(TokenSource.IdentityProvider, ordinary.AuthenticationResultMetadata.TokenSource);
-            CollectionAssert.AreEquivalent(new[] { "ordinary-at" }, ReadCacheSecrets(serializedCache, "AccessToken"));
+            CollectionAssert.AreEquivalent(new[] { "ordinary-at", "refreshed-grant" }, ReadCacheSecrets(serializedCache, "AccessToken"));
             CollectionAssert.AreEquivalent(new[] { "rotated-rt" }, ReadCacheSecrets(serializedCache, "RefreshToken"));
             var cached = await ordinaryApp.AcquireTokenSilent(s_scopes, restoredAccount)
                 .ExecuteAsync().ConfigureAwait(false);
             Assert.AreEqual("ordinary-at", cached.AccessToken);
             Assert.AreEqual(TokenSource.Cache, cached.AuthenticationResultMetadata.TokenSource);
+            var stillCachedGrant = await ordinaryApp.AcquireTokenSilent(s_scopes, restoredAccount)
+                .WithIdJag(Audience, Resource).ExecuteAsync().ConfigureAwait(false);
+            Assert.AreEqual("refreshed-grant", stillCachedGrant.AccessToken);
+            Assert.AreEqual(TokenSource.Cache, stillCachedGrant.AuthenticationResultMetadata.TokenSource);
         }
 
         [TestMethod]
@@ -347,9 +360,12 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 (Audience, Resource, Scopes: s_scopes),
                 (Audience: Audience + "other", Resource, Scopes: s_scopes),
                 (Audience, Resource: Resource + "other", Scopes: s_scopes),
-                (Audience, Resource, Scopes: new[] { "agent.admin" })
+                (Audience, Resource, Scopes: new[] { "agent.admin" }),
+                (Audience, Resource: (string)null, Scopes: s_scopes)
             };
             string refreshToken = "initial-rt";
+            var expectedTokens = new List<string> { "ordinary-at" };
+            int requestIndex = 0;
 
             // Act / Assert
             foreach (var request in requests)
@@ -362,7 +378,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     account = await restarted.GetAccountAsync(ordinary.Account.HomeAccountId.Identifier).ConfigureAwait(false);
                     Assert.IsNotNull(account);
                 }
-                string nextRefreshToken = refreshToken + "-rotated";
+                bool cacheHit = requestIndex++ == 1;
+                string nextRefreshToken = cacheHit ? refreshToken : refreshToken + "-rotated";
                 var expected = new Dictionary<string, string>
                 {
                     ["grant_type"] = useObo ? "urn:ietf:params:oauth:grant-type:jwt-bearer" : "refresh_token"
@@ -377,16 +394,20 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     expected["refresh_token"] = refreshToken;
                 }
                 string grantToken = "grant-for-" + nextRefreshToken;
-                AddTokenResponse(httpManager, CreateResponse(grantToken, nextRefreshToken, scopes: request.Scopes),
-                    expected, resource: request.Resource, audience: request.Audience, scopes: request.Scopes);
+                if (!cacheHit)
+                {
+                    AddTokenResponse(httpManager, CreateResponse(grantToken, nextRefreshToken, 900, scopes: request.Scopes),
+                        expected, resource: request.Resource, audience: request.Audience, scopes: request.Scopes);
+                    expectedTokens.Add(grantToken);
+                }
                 var grant = useObo
                     ? await restarted.AcquireTokenOnBehalfOf(request.Scopes, assertion)
                         .WithIdJag(request.Audience, request.Resource).ExecuteAsync().ConfigureAwait(false)
                     : await restarted.AcquireTokenSilent(request.Scopes, account)
                         .WithIdJag(request.Audience, request.Resource).ExecuteAsync().ConfigureAwait(false);
                 Assert.AreEqual(grantToken, grant.AccessToken);
-                Assert.AreEqual(TokenSource.IdentityProvider, grant.AuthenticationResultMetadata.TokenSource);
-                CollectionAssert.AreEquivalent(new[] { "ordinary-at" }, ReadCacheSecrets(serializedCache, "AccessToken"));
+                Assert.AreEqual(cacheHit ? TokenSource.Cache : TokenSource.IdentityProvider, grant.AuthenticationResultMetadata.TokenSource);
+                CollectionAssert.AreEquivalent(expectedTokens, ReadCacheSecrets(serializedCache, "AccessToken"));
                 CollectionAssert.AreEquivalent(useObo ? Array.Empty<string>() : new[] { nextRefreshToken },
                     ReadCacheSecrets(serializedCache, "RefreshToken"));
 
@@ -395,7 +416,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     : await restarted.AcquireTokenSilent(s_scopes, account).ExecuteAsync().ConfigureAwait(false);
                 Assert.AreEqual("ordinary-at", cached.AccessToken);
                 Assert.AreEqual(TokenSource.Cache, cached.AuthenticationResultMetadata.TokenSource);
-                CollectionAssert.AreEquivalent(new[] { "ordinary-at" }, ReadCacheSecrets(serializedCache, "AccessToken"));
+                CollectionAssert.AreEquivalent(expectedTokens, ReadCacheSecrets(serializedCache, "AccessToken"));
                 refreshToken = nextRefreshToken;
             }
         }
@@ -439,7 +460,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
             // Assert
             Assert.AreEqual(first.HomeAccountId.Identifier, firstGrant.Account.HomeAccountId.Identifier);
-            CollectionAssert.AreEquivalent(new[] { "first-user-at", "second-user-at" },
+            CollectionAssert.AreEquivalent(new[] { "first-user-at", "second-user-at", "first-user-grant" },
                 ReadCacheSecrets(serializedCache, "AccessToken"));
             CollectionAssert.AreEquivalent(new[] { "first-user-rotated-rt", "second-user-rt" },
                 ReadCacheSecrets(serializedCache, "RefreshToken"));
@@ -456,7 +477,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             var secondGrant = await restarted.AcquireTokenSilent(s_scopes, second)
                 .WithIdJag(Audience).ExecuteAsync().ConfigureAwait(false);
             Assert.AreEqual(second.HomeAccountId.Identifier, secondGrant.Account.HomeAccountId.Identifier);
-            CollectionAssert.AreEquivalent(new[] { "second-user-at" }, ReadCacheSecrets(serializedCache, "AccessToken"));
+            CollectionAssert.AreEquivalent(new[] { "second-user-at", "second-user-grant" }, ReadCacheSecrets(serializedCache, "AccessToken"));
             CollectionAssert.AreEquivalent(new[] { "second-user-rt" }, ReadCacheSecrets(serializedCache, "RefreshToken"));
             var ordinary = await restarted.AcquireTokenSilent(s_scopes, second).ExecuteAsync().ConfigureAwait(false);
             Assert.AreEqual("second-user-at", ordinary.AccessToken);
@@ -507,8 +528,192 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             var recovered = await restarted.AcquireTokenSilent(s_scopes, account)
                 .WithIdJag(Audience).ExecuteAsync().ConfigureAwait(false);
             Assert.AreEqual("recovered-grant", recovered.AccessToken);
-            CollectionAssert.AreEquivalent(new[] { "ordinary-at" }, ReadCacheSecrets(serializedCache, "AccessToken"));
+            CollectionAssert.AreEquivalent(new[] { "ordinary-at", "recovered-grant" }, ReadCacheSecrets(serializedCache, "AccessToken"));
             CollectionAssert.AreEquivalent(new[] { "recovered-rt" }, ReadCacheSecrets(serializedCache, "RefreshToken"));
+        }
+
+        [TestMethod]
+        [TestCategory("IdJagFunctional")]
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task CachedGrantsAreReusedWithoutMatchingOrdinaryTokensAsync(bool useObo)
+        {
+            // Arrange
+            using var httpManager = new MockHttpManager();
+            IConfidentialClientApplication app = BuildApp(httpManager);
+            var assertion = new UserAssertion("validated-incoming-access-token");
+            AddTokenResponse(httpManager, CreateResponse("ordinary-at", "initial-rt", 3600),
+                new Dictionary<string, string>
+                {
+                    ["grant_type"] = useObo ? "urn:ietf:params:oauth:grant-type:jwt-bearer" : "authorization_code"
+                }, idJag: false);
+            var session = useObo
+                ? await app.AcquireTokenOnBehalfOf(s_scopes, assertion).ExecuteAsync().ConfigureAwait(false)
+                : await app.AcquireTokenByAuthorizationCode(s_scopes, "code").ExecuteAsync().ConfigureAwait(false);
+            AddTokenResponse(httpManager, CreateResponse("cached-grant", "rotated-rt", 900),
+                new Dictionary<string, string>
+                {
+                    ["grant_type"] = useObo ? "urn:ietf:params:oauth:grant-type:jwt-bearer" : "refresh_token"
+                }, resource: Resource);
+
+            // Act
+            var first = useObo
+                ? await app.AcquireTokenOnBehalfOf(s_scopes, assertion).WithIdJag(Audience, Resource).ExecuteAsync().ConfigureAwait(false)
+                : await app.AcquireTokenSilent(s_scopes, session.Account).WithIdJag(Audience, Resource).ExecuteAsync().ConfigureAwait(false);
+            var cached = useObo
+                ? await app.AcquireTokenOnBehalfOf(s_scopes, assertion).WithIdJag(Audience, Resource).ExecuteAsync().ConfigureAwait(false)
+                : await app.AcquireTokenSilent(s_scopes, session.Account).WithIdJag(Audience, Resource).ExecuteAsync().ConfigureAwait(false);
+
+            // Assert
+            Assert.AreEqual("cached-grant", first.AccessToken);
+            Assert.AreEqual(TokenSource.IdentityProvider, first.AuthenticationResultMetadata.TokenSource);
+            Assert.AreEqual("cached-grant", cached.AccessToken);
+            Assert.AreEqual(TokenSource.Cache, cached.AuthenticationResultMetadata.TokenSource);
+            var ordinary = useObo
+                ? await app.AcquireTokenOnBehalfOf(s_scopes, assertion).ExecuteAsync().ConfigureAwait(false)
+                : await app.AcquireTokenSilent(s_scopes, session.Account).ExecuteAsync().ConfigureAwait(false);
+            Assert.AreEqual("ordinary-at", ordinary.AccessToken);
+            Assert.AreEqual(TokenSource.Cache, ordinary.AuthenticationResultMetadata.TokenSource);
+
+            var expectedRefresh = new Dictionary<string, string>
+            {
+                ["grant_type"] = useObo ? "urn:ietf:params:oauth:grant-type:jwt-bearer" : "refresh_token"
+            };
+            if (!useObo)
+            {
+                expectedRefresh["refresh_token"] = "rotated-rt";
+            }
+            AddTokenResponse(httpManager, CreateResponse("replacement-grant", "replacement-rt"), expectedRefresh, resource: Resource);
+            var refreshed = useObo
+                ? await app.AcquireTokenOnBehalfOf(s_scopes, assertion).WithIdJag(Audience, Resource).WithForceRefresh(true).ExecuteAsync().ConfigureAwait(false)
+                : await app.AcquireTokenSilent(s_scopes, session.Account).WithIdJag(Audience, Resource).WithForceRefresh(true).ExecuteAsync().ConfigureAwait(false);
+            Assert.AreEqual("replacement-grant", refreshed.AccessToken);
+            Assert.AreEqual(TokenSource.IdentityProvider, refreshed.AuthenticationResultMetadata.TokenSource);
+
+            var expectedOrdinary = new Dictionary<string, string>
+            {
+                ["grant_type"] = useObo ? "urn:ietf:params:oauth:grant-type:jwt-bearer" : "refresh_token"
+            };
+            if (!useObo)
+            {
+                expectedOrdinary["refresh_token"] = "replacement-rt";
+            }
+            AddTokenResponse(httpManager, CreateResponse("replacement-at", null, 3600), expectedOrdinary, idJag: false);
+            var refreshedOrdinary = useObo
+                ? await app.AcquireTokenOnBehalfOf(s_scopes, assertion).WithForceRefresh(true).ExecuteAsync().ConfigureAwait(false)
+                : await app.AcquireTokenSilent(s_scopes, session.Account).WithForceRefresh(true).ExecuteAsync().ConfigureAwait(false);
+            Assert.AreEqual("replacement-at", refreshedOrdinary.AccessToken);
+            var retainedGrant = useObo
+                ? await app.AcquireTokenOnBehalfOf(s_scopes, assertion).WithIdJag(Audience, Resource).ExecuteAsync().ConfigureAwait(false)
+                : await app.AcquireTokenSilent(s_scopes, session.Account).WithIdJag(Audience, Resource).ExecuteAsync().ConfigureAwait(false);
+            Assert.AreEqual("replacement-grant", retainedGrant.AccessToken);
+            Assert.AreEqual(TokenSource.Cache, retainedGrant.AuthenticationResultMetadata.TokenSource);
+        }
+
+        [TestMethod]
+        [TestCategory("IdJagFunctional")]
+        [DataRow(false, false)]
+        [DataRow(true, false)]
+        [DataRow(false, true)]
+        [DataRow(true, true)]
+        public async Task CachedGrantsRespectExpiryAndClaimsAsync(bool useObo, bool useClaims)
+        {
+            using var httpManager = new MockHttpManager();
+            IConfidentialClientApplication app = BuildApp(httpManager);
+            var assertion = new UserAssertion("validated-incoming-access-token");
+            AddTokenResponse(httpManager, CreateResponse("initial-grant", "initial-rt", useClaims ? 900 : 1),
+                new Dictionary<string, string>
+                {
+                    ["grant_type"] = useObo ? "urn:ietf:params:oauth:grant-type:jwt-bearer" : "authorization_code"
+                });
+            var session = useObo
+                ? await app.AcquireTokenOnBehalfOf(s_scopes, assertion).WithIdJag(Audience).ExecuteAsync().ConfigureAwait(false)
+                : await app.AcquireTokenByAuthorizationCode(s_scopes, "code").WithIdJag(Audience).ExecuteAsync().ConfigureAwait(false);
+            string claims = useClaims ? "{\"access_token\":{\"acrs\":{\"essential\":true,\"value\":\"c1\"}}}" : null;
+            var expected = new Dictionary<string, string>
+            {
+                ["grant_type"] = useObo ? "urn:ietf:params:oauth:grant-type:jwt-bearer" : "refresh_token"
+            };
+            if (useClaims)
+            {
+                expected["claims"] = claims;
+            }
+            AddTokenResponse(httpManager, CreateResponse("refreshed-grant", "rotated-rt"), expected);
+            var refreshed = useObo
+                ? await app.AcquireTokenOnBehalfOf(s_scopes, assertion).WithIdJag(Audience).WithClaims(claims).ExecuteAsync().ConfigureAwait(false)
+                : await app.AcquireTokenSilent(s_scopes, session.Account).WithIdJag(Audience).WithClaims(claims).ExecuteAsync().ConfigureAwait(false);
+            Assert.AreEqual("refreshed-grant", refreshed.AccessToken);
+            Assert.AreEqual(TokenSource.IdentityProvider, refreshed.AuthenticationResultMetadata.TokenSource);
+        }
+
+        [TestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task ReservedCacheKeyNamespaceIsRejectedAsync(bool idJag)
+        {
+            using var httpManager = new MockHttpManager();
+            var app = BuildApp(httpManager);
+            var request = app.AcquireTokenByAuthorizationCode(s_scopes, "code");
+            request.WithAdditionalCacheKeyComponents(new SortedList<string, Func<CancellationToken, Task<string>>>
+                {
+                    ["msal.id_jag.token_type"] = cancellationToken => Task.FromResult(IdJagTokenType)
+                });
+            if (idJag)
+            {
+                request.WithIdJag(Audience);
+            }
+            await Assert.ThrowsAsync<ArgumentException>(() => request.ExecuteAsync()).ConfigureAwait(false);
+            Assert.IsEmpty(app.UserTokenCacheInternal.Accessor.GetAllAccessTokens());
+            Assert.IsEmpty(app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens());
+        }
+
+        [TestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task CallerCacheKeysPreserveRefreshTokenPartitioningAsync(bool partitionRefreshToken)
+        {
+            using var httpManager = new MockHttpManager();
+            var app = BuildApp(httpManager);
+            var components = new SortedList<string, Func<CancellationToken, Task<string>>>
+            {
+                ["caller-partition"] = cancellationToken => Task.FromResult("first-partition")
+            };
+            AddTokenResponse(httpManager, CreateResponse("ordinary-at", "initial-rt", 3600),
+                new Dictionary<string, string> { ["grant_type"] = "authorization_code" }, idJag: false);
+            var bootstrapRequest = app.AcquireTokenByAuthorizationCode(s_scopes, "code");
+            bootstrapRequest.WithAdditionalCacheKeyComponents(components);
+            bootstrapRequest.CommonParameters.PartitionRefreshToken = partitionRefreshToken;
+            var session = await bootstrapRequest.ExecuteAsync().ConfigureAwait(false);
+            AddTokenResponse(httpManager, CreateResponse("grant", "rotated-rt"),
+                new Dictionary<string, string> { ["grant_type"] = "refresh_token", ["refresh_token"] = "initial-rt" });
+            var grantRequest = app.AcquireTokenSilent(s_scopes, session.Account).WithIdJag(Audience);
+            grantRequest.WithAdditionalCacheKeyComponents(components);
+            grantRequest.CommonParameters.PartitionRefreshToken = partitionRefreshToken;
+            var grant = await grantRequest.ExecuteAsync().ConfigureAwait(false);
+            Assert.AreEqual("grant", grant.AccessToken);
+            var cachedRequest = app.AcquireTokenSilent(s_scopes, session.Account).WithIdJag(Audience);
+            cachedRequest.WithAdditionalCacheKeyComponents(components);
+            cachedRequest.CommonParameters.PartitionRefreshToken = partitionRefreshToken;
+            var cached = await cachedRequest.ExecuteAsync().ConfigureAwait(false);
+            Assert.AreEqual("grant", cached.AccessToken);
+            Assert.AreEqual(TokenSource.Cache, cached.AuthenticationResultMetadata.TokenSource);
+            var ordinaryRequest = app.AcquireTokenSilent(s_scopes, session.Account);
+            ordinaryRequest.WithAdditionalCacheKeyComponents(components);
+            ordinaryRequest.CommonParameters.PartitionRefreshToken = partitionRefreshToken;
+            var ordinary = await ordinaryRequest.ExecuteAsync().ConfigureAwait(false);
+            Assert.AreEqual("ordinary-at", ordinary.AccessToken);
+            Assert.AreEqual(TokenSource.Cache, ordinary.AuthenticationResultMetadata.TokenSource);
+            var refreshToken = app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Single();
+            Assert.AreEqual("rotated-rt", refreshToken.Secret);
+            if (partitionRefreshToken)
+            {
+                Assert.HasCount(1, refreshToken.AdditionalCacheKeyComponents);
+                Assert.AreEqual("first-partition", refreshToken.AdditionalCacheKeyComponents["caller-partition"]);
+            }
+            else
+            {
+                Assert.IsTrue(refreshToken.AdditionalCacheKeyComponents is null || refreshToken.AdditionalCacheKeyComponents.Count == 0);
+            }
         }
 
         private static void AttachSerializedCache(
@@ -553,7 +758,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         private static HttpResponseMessage CreateResponse(
-            string token, string refreshToken, int lifetime = 300, bool includeIdToken = true,
+            string token, string refreshToken, int lifetime = 900, bool includeIdToken = true,
             string[] scopes = null, string uid = TestConstants.Uid)
         {
             return MockHelpers.CreateSuccessResponseMessage(JsonSerializer.Serialize(new Dictionary<string, object>
