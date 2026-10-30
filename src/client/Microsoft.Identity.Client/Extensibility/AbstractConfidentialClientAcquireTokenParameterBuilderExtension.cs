@@ -466,7 +466,7 @@ namespace Microsoft.Identity.Client.Extensibility
                 return (T)builder;
             }
 
-            builder.ValidateUseOfExperimentalFeature();
+            builder.ValidateUseOfExperimentalFeature(nameof(WithClaimsFromClient));
 
             builder.CommonParameters.ClientClaims = claimsJson;
 

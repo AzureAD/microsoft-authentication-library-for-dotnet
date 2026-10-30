@@ -108,6 +108,28 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
+        public void WithClaimsFromClient_ExperimentalFeatureErrorNamesPublicApi()
+        {
+            // Arrange
+            var app = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithAuthority(AzureCloudInstance.AzurePublic, TestConstants.Utid)
+                .WithClientSecret(TestConstants.ClientSecret)
+                .BuildConcrete();
+
+            // Act
+            MsalClientException exception = Assert.Throws<MsalClientException>(
+                () => app.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithClaimsFromClient(NspClaims));
+
+            // Assert
+            Assert.AreEqual(MsalError.ExperimentalFeature, exception.ErrorCode);
+            Assert.AreEqual(
+                MsalErrorMessage.ExperimentalFeature(nameof(AbstractConfidentialClientAcquireTokenParameterBuilderExtension.WithClaimsFromClient)),
+                exception.Message);
+        }
+
+        [TestMethod]
         [DataRow(null)]
         [DataRow("")]
         [DataRow("   ")]
@@ -127,6 +149,28 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             // Assert
             Assert.IsNull(builder.CommonParameters.ClientClaims);
             Assert.IsNull(builder.CommonParameters.CacheKeyComponents);
+        }
+
+        [TestMethod]
+        public void WithClaimsFromClient_Silent_ExperimentalFeatureErrorNamesPublicApi()
+        {
+            // Arrange
+            var app = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithAuthority(AzureCloudInstance.AzurePublic, TestConstants.Utid)
+                .WithClientSecret(TestConstants.ClientSecret)
+                .BuildConcrete();
+
+            // Act
+            MsalClientException exception = Assert.Throws<MsalClientException>(
+                () => app.AcquireTokenSilent(TestConstants.s_scope, TestConstants.s_user)
+                    .WithClaimsFromClient(NspClaims));
+
+            // Assert
+            Assert.AreEqual(MsalError.ExperimentalFeature, exception.ErrorCode);
+            Assert.AreEqual(
+                MsalErrorMessage.ExperimentalFeature(nameof(AbstractConfidentialClientAcquireTokenParameterBuilderExtension.WithClaimsFromClient)),
+                exception.Message);
         }
 
         [TestMethod]
