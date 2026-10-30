@@ -18,6 +18,9 @@ namespace Microsoft.Identity.Client.Extensibility
     /// </summary>
     public static class AbstractConfidentialClientAcquireTokenParameterBuilderExtension
     {
+        private const string ClaimsFromClientRequiresConfidentialClient =
+            "WithClaimsFromClient on AcquireTokenSilent is supported only for confidential client applications.";
+
         /// <summary>
         /// Specifies client-originated claims to include in the token request.
         /// Unlike <see cref="AbstractAcquireTokenParameterBuilder{T}.WithClaims"/> (for server-issued
@@ -34,20 +37,40 @@ namespace Microsoft.Identity.Client.Extensibility
             string claimsJson)
             where T : AbstractConfidentialClientAcquireTokenParameterBuilder<T>
         {
+            return ApplyClaimsFromClient(builder, claimsJson);
+        }
+
+        /// <summary>
+        /// Specifies client-originated claims for confidential client silent token acquisition.
+        /// Unlike <see cref="AbstractAcquireTokenParameterBuilder{T}.WithClaims"/> (for server-issued
+        /// claims challenges), tokens acquired with client claims <b>are cached</b> and the cache entry
+        /// is keyed on the claims value. Different claims values produce separate cache entries.
+        /// If the silent request redeems a refresh token, the claims are included in the token request.
+        /// Use stable, non-dynamic values to avoid unbounded cache growth.
+        /// </summary>
+        /// <param name="builder">The silent request builder to chain options to.</param>
+        /// <param name="claimsJson">A JSON string containing the client-originated claims. Must be valid JSON.</param>
+        /// <returns>The builder to chain the .With methods.</returns>
+        /// <exception cref="MsalClientException">
+        /// Thrown when non-empty claims are configured on a public client application.
+        /// </exception>
+        public static AcquireTokenSilentParameterBuilder WithClaimsFromClient(
+            this AcquireTokenSilentParameterBuilder builder,
+            string claimsJson)
+        {
             if (string.IsNullOrWhiteSpace(claimsJson))
             {
-                return (T)builder;
+                return builder;
             }
 
-            builder.ValidateUseOfExperimentalFeature();
+            if (!builder.ServiceBundle.Config.IsConfidentialClient)
+            {
+                throw new MsalClientException(
+                    MsalError.InvalidRequest,
+                    ClaimsFromClientRequiresConfidentialClient);
+            }
 
-            builder.CommonParameters.ClientClaims = claimsJson;
-
-            // Use indexer (not SortedList.Add) so repeated calls are last-write-wins rather than throwing.
-            builder.CommonParameters.CacheKeyComponents ??= new SortedList<string, Func<CancellationToken, Task<string>>>();
-            builder.CommonParameters.CacheKeyComponents["client_claims"] = _ => Task.FromResult(claimsJson);
-
-            return (T)builder;
+            return ApplyClaimsFromClient(builder, claimsJson);
         }
 
         /// <summary>
@@ -431,6 +454,27 @@ namespace Microsoft.Identity.Client.Extensibility
             builder.CommonParameters.OtelTagsEnricher = tagsEnricher;
 
             return builder;
+        }
+
+        private static T ApplyClaimsFromClient<T>(
+            AbstractAcquireTokenParameterBuilder<T> builder,
+            string claimsJson)
+            where T : AbstractAcquireTokenParameterBuilder<T>
+        {
+            if (string.IsNullOrWhiteSpace(claimsJson))
+            {
+                return (T)builder;
+            }
+
+            builder.ValidateUseOfExperimentalFeature(nameof(WithClaimsFromClient));
+
+            builder.CommonParameters.ClientClaims = claimsJson;
+
+            // Use indexer (not SortedList.Add) so repeated calls are last-write-wins rather than throwing.
+            builder.CommonParameters.CacheKeyComponents ??= new SortedList<string, Func<CancellationToken, Task<string>>>();
+            builder.CommonParameters.CacheKeyComponents["client_claims"] = _ => Task.FromResult(claimsJson);
+
+            return (T)builder;
         }
     }
 }
