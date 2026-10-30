@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Extensibility;
@@ -14,7 +15,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {
     /// <summary>
     /// Unit tests for <c>WithClaimsFromClient()</c> on confidential client
-    /// (<see cref="ConfidentialClientApplication"/> / AcquireTokenForClient).
+    /// token acquisition, including AcquireTokenForClient and AcquireTokenSilent.
     /// Client-originated claims are merged into the ESTS POST body and participate in cache
     /// keying (unlike server-issued <c>WithClaims</c>, which bypasses the cache).
     /// </summary>
@@ -26,6 +27,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         // A second, distinct claims value used to exercise separate-cache-entry behaviour.
         private const string OtherClaims = @"{""xms_az_nwperimid"":{""values"":[""eastus""]}}";
+
+        private const string ServerClaims = @"{""access_token"":{""acrs"":{""essential"":true}}}";
+
+        private const string MergedServerAndClientClaims =
+            @"{""access_token"":{""acrs"":{""essential"":true}},""xms_az_nwperimid"":{""essential"":true}}";
 
         // ---------------------------------------------------------------------------------
         // Builder-level unit tests (no HTTP)
@@ -99,6 +105,53 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             // Assert — CommonParameters.Claims (the cache-bypass property) must be null
             Assert.IsNull(builder.CommonParameters.Claims,
                 "WithClaimsFromClient must NOT set CommonParameters.Claims — that would bypass the cache.");
+        }
+
+        [TestMethod]
+        [DataRow(null)]
+        [DataRow("")]
+        [DataRow("   ")]
+        public void WithClaimsFromClient_Silent_NullOrWhitespace_IsNoOp(string emptyClaims)
+        {
+            // Arrange
+            var app = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithAuthority(AzureCloudInstance.AzurePublic, TestConstants.Utid)
+                .WithClientSecret(TestConstants.ClientSecret)
+                .BuildConcrete();
+
+            // Act
+            var builder = app.AcquireTokenSilent(TestConstants.s_scope, TestConstants.s_user)
+                .WithClaimsFromClient(emptyClaims);
+
+            // Assert
+            Assert.IsNull(builder.CommonParameters.ClientClaims);
+            Assert.IsNull(builder.CommonParameters.CacheKeyComponents);
+        }
+
+        [TestMethod]
+        public async Task WithClaimsFromClient_Silent_ChangedClaims_LastValueWinsAsync()
+        {
+            // Arrange
+            var app = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithAuthority(AzureCloudInstance.AzurePublic, TestConstants.Utid)
+                .WithClientSecret(TestConstants.ClientSecret)
+                .WithExperimentalFeatures(true)
+                .BuildConcrete();
+
+            // Act
+            var builder = app.AcquireTokenSilent(TestConstants.s_scope, TestConstants.s_user)
+                .WithClaimsFromClient(NspClaims)
+                .WithClaimsFromClient(OtherClaims);
+
+            string cacheKeyValue = await builder.CommonParameters.CacheKeyComponents["client_claims"](default)
+                .ConfigureAwait(false);
+
+            // Assert
+            Assert.AreEqual(OtherClaims, builder.CommonParameters.ClientClaims);
+            Assert.AreEqual(OtherClaims, cacheKeyValue);
+            Assert.IsNull(builder.CommonParameters.Claims);
         }
 
         // ---------------------------------------------------------------------------------
@@ -353,6 +406,181 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // Assert — normal token acquisition succeeds
                 Assert.IsNotNull(result);
+            }
+        }
+
+        // ---------------------------------------------------------------------------------
+        // Confidential Client / AcquireTokenSilent — cache lookup and refresh-token redemption
+        // ---------------------------------------------------------------------------------
+
+        [TestMethod]
+        public async Task WithClaimsFromClient_Silent_DifferentClaims_RetrieveMatchingCachedTokenAsync()
+        {
+            // Arrange
+            using (var harness = CreateTestHarness())
+            {
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithAuthority(AzureCloudInstance.AzurePublic, TestConstants.Utid)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithHttpManager(harness.HttpManager)
+                    .WithExperimentalFeatures(true)
+                    .BuildConcrete();
+
+                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(
+                    TestConstants.AuthorityUtidTenant,
+                    bodyParameters: new Dictionary<string, string>
+                    {
+                        { OAuth2Parameter.Claims, NspClaims }
+                    },
+                    responseMessage: MockHelpers.CreateSuccessResponseMessage(
+                        MockHelpers.GetDefaultTokenResponse("token-for-nsp")));
+
+                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(
+                    TestConstants.AuthorityUtidTenant,
+                    bodyParameters: new Dictionary<string, string>
+                    {
+                        { OAuth2Parameter.Claims, OtherClaims }
+                    },
+                    responseMessage: MockHelpers.CreateSuccessResponseMessage(
+                        MockHelpers.GetDefaultTokenResponse("token-for-other")));
+
+                await app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, "code-for-nsp")
+                    .WithClaimsFromClient(NspClaims)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                await app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, "code-for-other")
+                    .WithClaimsFromClient(OtherClaims)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                IAccount account = (await app.GetAccountsAsync().ConfigureAwait(false)).Single();
+
+                // Act
+                AuthenticationResult nspResult = await app.AcquireTokenSilent(TestConstants.s_scope, account)
+                    .WithClaimsFromClient(NspClaims)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                AuthenticationResult otherResult = await app.AcquireTokenSilent(TestConstants.s_scope, account)
+                    .WithClaimsFromClient(OtherClaims)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual("token-for-nsp", nspResult.AccessToken);
+                Assert.AreEqual(TokenSource.Cache, nspResult.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual("token-for-other", otherResult.AccessToken);
+                Assert.AreEqual(TokenSource.Cache, otherResult.AuthenticationResultMetadata.TokenSource);
+
+                var cachedAccessTokens = app.UserTokenCacheInternal.Accessor.GetAllAccessTokens();
+                Assert.HasCount(2, cachedAccessTokens);
+                CollectionAssert.AreEquivalent(
+                    new[] { NspClaims, OtherClaims },
+                    cachedAccessTokens.Select(
+                        token => token.AdditionalCacheKeyComponents["client_claims"]).ToArray());
+            }
+        }
+
+        [TestMethod]
+        public async Task WithClaimsFromClient_Silent_ChangedClaims_RefreshesAndForwardsRawClaimsAsync()
+        {
+            // Arrange
+            using (var harness = CreateTestHarness())
+            {
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithAuthority(AzureCloudInstance.AzurePublic, TestConstants.Utid)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithHttpManager(harness.HttpManager)
+                    .WithExperimentalFeatures(true)
+                    .BuildConcrete();
+
+                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(
+                    TestConstants.AuthorityUtidTenant,
+                    responseMessage: MockHelpers.CreateSuccessResponseMessage(
+                        MockHelpers.GetDefaultTokenResponse("initial-token")));
+
+                AuthenticationResult initialResult = await app
+                    .AcquireTokenByAuthorizationCode(TestConstants.s_scope, "initial-code")
+                    .WithClaimsFromClient(NspClaims)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(
+                    TestConstants.AuthorityUtidTenant,
+                    bodyParameters: new Dictionary<string, string>
+                    {
+                        { OAuth2Parameter.GrantType, OAuth2GrantType.RefreshToken },
+                        { OAuth2Parameter.Claims, OtherClaims }
+                    },
+                    responseMessage: MockHelpers.CreateSuccessResponseMessage(
+                        MockHelpers.GetDefaultTokenResponse("refreshed-token")));
+
+                // Act
+                AuthenticationResult result = await app.AcquireTokenSilent(TestConstants.s_scope, initialResult.Account)
+                    .WithClaimsFromClient(OtherClaims)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual("refreshed-token", result.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+                Assert.HasCount(2, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens());
+            }
+        }
+
+        [TestMethod]
+        public async Task WithClaimsFromClient_Silent_WithServerClaims_BypassesCacheAndMergesClaimsAsync()
+        {
+            // Arrange
+            using (var harness = CreateTestHarness())
+            {
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithAuthority(AzureCloudInstance.AzurePublic, TestConstants.Utid)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithHttpManager(harness.HttpManager)
+                    .WithExperimentalFeatures(true)
+                    .BuildConcrete();
+
+                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(
+                    TestConstants.AuthorityUtidTenant,
+                    responseMessage: MockHelpers.CreateSuccessResponseMessage(
+                        MockHelpers.GetDefaultTokenResponse("initial-token")));
+
+                AuthenticationResult initialResult = await app
+                    .AcquireTokenByAuthorizationCode(TestConstants.s_scope, "initial-code")
+                    .WithClaimsFromClient(NspClaims)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(
+                    TestConstants.AuthorityUtidTenant,
+                    bodyParameters: new Dictionary<string, string>
+                    {
+                        { OAuth2Parameter.Claims, MergedServerAndClientClaims }
+                    },
+                    responseMessage: MockHelpers.CreateSuccessResponseMessage(
+                        MockHelpers.GetDefaultTokenResponse("server-claims-token")));
+
+                // Act
+                AuthenticationResult result = await app.AcquireTokenSilent(TestConstants.s_scope, initialResult.Account)
+                    .WithClaimsFromClient(NspClaims)
+                    .WithClaims(ServerClaims)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual("server-claims-token", result.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
             }
         }
     }
