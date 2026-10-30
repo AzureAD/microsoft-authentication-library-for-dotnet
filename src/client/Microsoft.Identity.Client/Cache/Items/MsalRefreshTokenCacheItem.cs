@@ -69,7 +69,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             if (!string.IsNullOrWhiteSpace(FamilyId))
             {
                 char d = MsalCacheKeys.CacheKeyDelimiter;
-                key = $"{GetHomeAccountIdKey()}{d}{Environment}{d}{StorageJsonValues.CredentialTypeRefreshToken}{d}{FamilyId}{d}{d}".ToLowerInvariant();
+                key = $"{HomeAccountId}{d}{Environment}{d}{StorageJsonValues.CredentialTypeRefreshToken}{d}{FamilyId}{d}{d}".ToLowerInvariant();
 
             }
             else if (AdditionalCacheKeyComponents != null && AdditionalCacheKeyComponents.Count > 0)
@@ -78,7 +78,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                 // in the ToLowerInvariant() call inside GetCredentialKey, keeping
                 // cache key casing consistent with the AT partition pattern.
                 key = MsalCacheKeys.GetCredentialKey(
-                       GetHomeAccountIdKey(),
+                       HomeAccountId,
                        Environment,
                        StorageJsonValues.CredentialTypeRefreshToken,
                        ClientId,
@@ -89,7 +89,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             else
             {
                 key = MsalCacheKeys.GetCredentialKey(
-                       GetHomeAccountIdKey(),
+                       HomeAccountId,
                        Environment,
                        StorageJsonValues.CredentialTypeRefreshToken,
                        ClientId,
@@ -125,7 +125,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 
             string iOSGeneric = GetiOSGeneric();
 
-            string iOSAccount = MsalCacheKeys.GetiOSAccountKey(GetHomeAccountIdKey(), Environment);
+            string iOSAccount = MsalCacheKeys.GetiOSAccountKey(HomeAccountId, Environment);
 
             int iOSType = (int)MsalCacheKeys.iOSCredentialAttrType.RefreshToken;
 
@@ -197,19 +197,16 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         internal MsalRefreshTokenCacheItem CloneForSnapshot()
         {
-            var copy = new MsalRefreshTokenCacheItem(
+            return new MsalRefreshTokenCacheItem(
                 Environment ?? "", ClientId ?? "", Secret ?? "",
                 RawClientInfo ?? "", FamilyId ?? "", HomeAccountId ?? "",
                 AdditionalCacheKeyComponents is null ? null :
                     new SortedList<string, string>(AdditionalCacheKeyComponents))
             {
                 OboCacheKey = OboCacheKey ?? "",
-                SubjectKeyVersion = SubjectKeyVersion,
                 CredentialType = CredentialType ?? "",
                 AdditionalFieldsJson = AdditionalFieldsJson
             };
-            copy.InitCacheKey();
-            return copy;
         }
 
         internal static MsalRefreshTokenCacheItem FromJsonString(string json)

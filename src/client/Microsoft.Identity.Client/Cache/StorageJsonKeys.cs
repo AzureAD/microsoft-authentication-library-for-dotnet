@@ -8,7 +8,6 @@ namespace Microsoft.Identity.Client.Cache
     internal static class StorageJsonKeys
     {
         public const string HomeAccountId = "home_account_id";
-        public const string SubjectKeyVersion = "msal_subject_key_version";
         public const string Environment = "environment";
         public const string Realm = "realm";
         public const string LocalAccountId = "local_account_id";

@@ -169,11 +169,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                RefreshOn,
                TokenType,
                OboCacheKey,
-               AdditionalCacheKeyComponents)
-            {
-                SubjectKeyVersion = SubjectKeyVersion
-            };
-            newAtItem.InitCacheKey();
+               AdditionalCacheKeyComponents);
 
             return newAtItem;
         }
@@ -213,7 +209,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             }
 
             CacheKey = MsalCacheKeys.GetCredentialKey(
-                GetHomeAccountIdKey(),
+                HomeAccountId,
                 Environment,
                 _credentialDescriptor,
                 ClientId,
@@ -240,7 +236,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         private IiOSKey InitiOSKey()
         {
-            string iOSAccount = MsalCacheKeys.GetiOSAccountKey(GetHomeAccountIdKey(), Environment);
+            string iOSAccount = MsalCacheKeys.GetiOSAccountKey(HomeAccountId, Environment);
 
             string iOSService = MsalCacheKeys.GetiOSServiceKey(_credentialDescriptor, ClientId, TenantId, ScopeString, _extraKeyParts);
 
@@ -317,7 +313,6 @@ namespace Microsoft.Identity.Client.Cache.Items
                 Secret = Secret ?? "",
                 RawClientInfo = RawClientInfo ?? "",
                 HomeAccountId = HomeAccountId ?? "",
-                SubjectKeyVersion = SubjectKeyVersion,
                 OboCacheKey = string.IsNullOrEmpty(OboCacheKey) ? null : OboCacheKey,
                 CredentialType = CredentialType ?? "",
                 AdditionalFieldsJson = AdditionalFieldsJson,
@@ -443,12 +438,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         internal MsalIdTokenCacheItem GetIdTokenItem()
         {
-            var item = new MsalIdTokenCacheItem(Environment, ClientId, Secret, RawClientInfo, HomeAccountId, TenantId)
-            {
-                SubjectKeyVersion = SubjectKeyVersion
-            };
-            item.InitCacheKey();
-            return item;
+            return new MsalIdTokenCacheItem(Environment, ClientId, Secret, RawClientInfo, HomeAccountId, TenantId);
         }
 
         internal bool IsExpiredWithBuffer()

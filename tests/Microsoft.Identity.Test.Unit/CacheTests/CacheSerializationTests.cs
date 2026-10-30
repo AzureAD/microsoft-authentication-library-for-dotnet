@@ -165,7 +165,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     extendedExpiresOn: DateTimeHelpers.UnixTimestampToDateTime(23456));
 
                 item.Environment += $"_{keyPrefix}{i}"; // ensure we get unique cache keys
-                item.SubjectKeyVersion = 0; // Match the legacy serialized fixture.
                 item.InitCacheKey();
                 accessor.SaveAccessToken(item);
             }
@@ -174,7 +173,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             {
                 var item = CreateRefreshTokenItem();
                 item.Environment += $"_{keyPrefix}{i}"; // ensure we get unique cache keys
-                item.SubjectKeyVersion = 0;
                 item.InitCacheKey();
                 accessor.SaveRefreshToken(item);
             }
@@ -182,7 +180,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             // Create an FRT
             var frt = CreateRefreshTokenItem(true);
             frt.FamilyId = "1";
-            frt.SubjectKeyVersion = 0;
             frt.InitCacheKey();
             accessor.SaveRefreshToken(frt);
 
@@ -190,7 +187,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             {
                 var item = CreateIdTokenItem();
                 item.Environment += $"_{keyPrefix}{i}"; // ensure we get unique cache keys
-                item.SubjectKeyVersion = 0;
                 item.InitCacheKey();
                 accessor.SaveIdToken(item);
             }
@@ -199,7 +195,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             {
                 var item = CreateAccountItem();
                 item.Environment += $"_{keyPrefix}{i}"; // ensure we get unique cache keys
-                item.SubjectKeyVersion = 0;
                 item.InitCacheKey();
                 accessor.SaveAccount(item);
             }
@@ -711,8 +706,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                );
 
             expectedAccessTokenItem.AdditionalFieldsJson = "{\r\n  \"access_token_type\": \"Bearer\"\r\n}";
-            expectedAccessTokenItem.SubjectKeyVersion = 0;
-            expectedAccessTokenItem.InitCacheKey();
 
             AssertAccessTokenCacheItemsAreEqual(expectedAccessTokenItem, accessor.GetAllAccessTokens().First());
 

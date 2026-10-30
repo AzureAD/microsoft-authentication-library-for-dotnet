@@ -462,7 +462,7 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
         [TestMethod]
         [DeploymentItem(@"Resources/token_cache_adfs.json")]
         [WorkItem(89)] // https://github.com/AzureAD/microsoft-authentication-extensions-for-dotnet/issues/89
-        public async Task LegacyAdfsCache_RequiresSignInAsync()
+        public async Task CacheWorksWithAdfsAsync()
         {
             // Arrange
             string cacheWithOneUser = File.ReadAllText(
@@ -484,7 +484,7 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
             var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
 
             // Assert
-            Assert.IsEmpty(accounts);
+            Assert.AreEqual(1, accounts.Count());
         }
 
         // [Bug] Fix the flaky test EventFires2Async #5198

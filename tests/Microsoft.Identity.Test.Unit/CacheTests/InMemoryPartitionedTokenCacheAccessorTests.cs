@@ -322,11 +322,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             var at2 = TokenCacheHelper.CreateAccessTokenItem("scope1", "tenant1", "homeAccountId2");
             var at3 = TokenCacheHelper.CreateAccessTokenItem("scope1", "tenant2", "homeAccountId");
 
-            idt2.RawClientInfo = at2.RawClientInfo;
-            idt2.InitCacheKey();
-            idt3.RawClientInfo = at3.RawClientInfo;
-            idt3.InitCacheKey();
-
             // Assert: Null non-existing item
             Assert.IsNull(accessor.GetIdToken(at2));
 

@@ -474,8 +474,6 @@ namespace Microsoft.Identity.Client
             Debug.Assert(partitionKey != null || !requestParams.AppConfig.IsConfidentialClient, "On confidential client, cache must be partitioned.");
 
             var accessTokens = Accessor.GetAllAccessTokens(partitionKey, logger);
-            accessTokens.FilterWithLogging(item => !item.IsLegacySubjectEntry, logger,
-                "Ignoring legacy subject-only access tokens; sign-in is required");
 
             requestParams.RequestContext.Logger.Always($"[FindAccessTokenAsync] Discovered {accessTokens.Count} access tokens in cache using partition key: {partitionKey}");
 
@@ -873,8 +871,6 @@ namespace Microsoft.Identity.Client
 
             var requestKey = CacheKeyFactory.GetKeyFromRequest(requestParams);
             var refreshTokens = Accessor.GetAllRefreshTokens(requestKey);
-            refreshTokens.FilterWithLogging(item => !item.IsLegacySubjectEntry, requestParams.RequestContext.Logger,
-                "Ignoring legacy subject-only refresh tokens; sign-in is required");
             requestParams.RequestContext.Logger.Always($"[FindRefreshTokenAsync] Discovered {refreshTokens.Count} refresh tokens in cache using key: {requestKey}");
 
             if (refreshTokens.Count != 0)
@@ -1036,15 +1032,12 @@ namespace Microsoft.Identity.Client
 
             var refreshTokenCacheItems = Accessor.GetAllRefreshTokens(partitionKey);
             var accountCacheItems = Accessor.GetAllAccounts(partitionKey);
-            refreshTokenCacheItems.FilterWithLogging(item => !item.IsLegacySubjectEntry, logger,
-                "[GetAccounts] Ignoring legacy subject-only refresh tokens; sign-in is required");
-            accountCacheItems.FilterWithLogging(item => !item.IsLegacySubjectEntry, logger,
-                "[GetAccounts] Ignoring legacy subject-only accounts; sign-in is required");
 
             if (!string.IsNullOrEmpty(requestParameters.HomeAccountId))
             {
-                accountCacheItems.FilterWithLogging(item => item.MatchesHomeAccountId(requestParameters.HomeAccountId),
-                    logger, "[GetAccounts] Filtering cached accounts by accountID", true);
+                accountCacheItems.FilterWithLogging(item => !item.IsAndroidSubject ||
+                    item.MatchesHomeAccountId(requestParameters.HomeAccountId), logger,
+                    "[GetAccounts] Filtering Android subject accounts by accountID");
             }
 
             if (filterByClientId)
@@ -1218,15 +1211,6 @@ namespace Microsoft.Identity.Client
         MsalIdTokenCacheItem ITokenCacheInternal.GetIdTokenCacheItem(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
         {
             var idToken = Accessor.GetIdToken(msalAccessTokenCacheItem);
-            if (idToken is not null &&
-                (idToken.IsLegacySubjectEntry ||
-                 !idToken.MatchesHomeAccountId(msalAccessTokenCacheItem.HomeAccountId) ||
-                 !msalAccessTokenCacheItem.MatchesHomeAccountId(idToken.HomeAccountId)))
-            {
-                ServiceBundle.ApplicationLogger.Warning("Ignoring an ID token with an unverified subject identity.");
-                return null;
-            }
-
             return idToken;
         }
 
@@ -1246,8 +1230,6 @@ namespace Microsoft.Identity.Client
             }
 
             var idTokenCacheItems = Accessor.GetAllIdTokens(homeAccountId);
-            idTokenCacheItems.FilterWithLogging(item => !item.IsLegacySubjectEntry, requestParameters.RequestContext.Logger,
-                "Ignoring legacy subject-only ID tokens; sign-in is required");
             FilterTokensByClientId(idTokenCacheItems);
 
             if (!requestParameters.AppConfig.MultiCloudSupportEnabled)
@@ -1299,17 +1281,8 @@ namespace Microsoft.Identity.Client
                         account?.AccountSource,
                         account?.Username)
                 {
-                    RawClientInfo = msalAccessTokenCacheItem.RawClientInfo,
-                    SubjectKeyVersion = msalAccessTokenCacheItem.SubjectKeyVersion
+                    RawClientInfo = msalAccessTokenCacheItem.RawClientInfo
                 });
-
-            if (accountCacheItem is not null &&
-                (!accountCacheItem.MatchesHomeAccountId(msalAccessTokenCacheItem.HomeAccountId) ||
-                 !msalAccessTokenCacheItem.MatchesHomeAccountId(accountCacheItem.HomeAccountId)))
-            {
-                requestParameters.RequestContext.Logger.Warning("Ignoring an account record with a different subject identity.");
-                accountCacheItem = null;
-            }
 
             return new Account(
                 msalAccessTokenCacheItem.HomeAccountId,

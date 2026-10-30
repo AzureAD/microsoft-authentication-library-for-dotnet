@@ -1087,12 +1087,11 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
         [TestMethod]
         [TestCategory(TestCategories.TokenCacheTests)]
-        public async Task SaveSubjectAccessAndRefreshTokenWithNoClientInfoAsync()
+        public async Task SaveAccessAndRefreshTokenWithNoClientInfoAsync()
         {
             var serviceBundle = TestCommon.CreateDefaultServiceBundle();
             ITokenCacheInternal cache = new TokenCache(serviceBundle, false);
             MsalTokenResponse response = TestConstants.CreateMsalTokenResponse();
-            response.ClientInfo = null;
 
             var requestParams = TestCommon.CreateAuthenticationRequestParameters(serviceBundle);
             requestParams.AuthorityManager = new AuthorityManager(
@@ -1104,7 +1103,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             await cache.SaveTokenResponseAsync(requestParams, response).ConfigureAwait(false);
 
-            requestParams.Account = new Account(cache.Accessor.GetAllRefreshTokens().Single().HomeAccountId, null, null);
+            requestParams.Account = new Account(_homeAccountId, null, null);
             response.IdToken = null;
             response.ClientInfo = null;
             response.AccessToken = "access-token-2";

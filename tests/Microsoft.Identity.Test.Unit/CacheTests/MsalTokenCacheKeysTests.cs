@@ -2,13 +2,11 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
-using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.CacheTests
@@ -17,35 +15,11 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
     public class MsalTokenCacheKeysTests : TestBase
     {
         [TestMethod]
-        [DataRow(null, false)]
-        [DataRow("1", false)]
-        [DataRow(null, true)]
-        public void SubjectRefreshTokenKeys_PreserveCaseAcrossKeyVariants(string familyId, bool extendedKey)
-        {
-            // Arrange
-            var components = extendedKey ? new SortedList<string, string> { ["partition"] = "value" } : null;
-            var lower = new MsalRefreshTokenCacheItem("issuer", "client", "first", null, familyId, "member.tenant-id", components);
-            var upper = new MsalRefreshTokenCacheItem("issuer", "client", "second", null, familyId, "Member.tenant-id", components);
-
-            // Act
-            var restoredLower = MsalRefreshTokenCacheItem.FromJsonString(lower.ToJObject().ToJsonString());
-            var restoredUpper = MsalRefreshTokenCacheItem.FromJsonString(upper.ToJObject().ToJsonString());
-
-            // Assert
-            Assert.AreNotEqual(restoredLower.CacheKey, restoredUpper.CacheKey);
-            Assert.AreNotEqual(restoredLower.iOSCacheKey.iOSAccount, restoredUpper.iOSCacheKey.iOSAccount);
-            Assert.AreEqual(lower.CacheKey, restoredLower.CacheKey);
-            Assert.AreEqual(upper.CacheKey, restoredUpper.CacheKey);
-            Assert.IsFalse(restoredLower.MatchesHomeAccountId(upper.HomeAccountId));
-        }
-
-        [TestMethod]
         public void MsalAccessTokenCacheKey()
         {
             var tokenResponse = new MsalTokenResponse();
             tokenResponse.Scope = "user.read user.write";
             tokenResponse.TokenType = "bearer";
-            tokenResponse.ClientInfo = MockHelpers.CreateClientInfo();
 
             var item = new MsalAccessTokenCacheItem("login.microsoftonline.com", "clientId", tokenResponse, "contoso.com", "uid.utid");
             var iOSKey = item.iOSCacheKey;
@@ -63,7 +37,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             var tokenResponse = new MsalTokenResponse();
             tokenResponse.Scope = "user.read user.write";
             tokenResponse.TokenType = "pop";
-            tokenResponse.ClientInfo = MockHelpers.CreateClientInfo();
 
             var item = new MsalAccessTokenCacheItem("login.microsoftonline.com", "clientId", tokenResponse, "contoso.com", "uid.utid");
             var iOSKey = item.iOSCacheKey;
@@ -126,10 +99,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 "contoso.com",
                 "uid.utid",
                 null,
-                "localId")
-            {
-                RawClientInfo = MockHelpers.CreateClientInfo()
-            };
+                "localId");
 
             var iOSKey = item.iOSCacheKey;
 
