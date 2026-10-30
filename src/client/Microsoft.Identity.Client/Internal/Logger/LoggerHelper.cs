@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
         private static Lazy<string> s_msalVersionLazy = new Lazy<string>(MsalIdHelper.GetMsalVersion);
         private static Lazy<string> s_runtimeVersionLazy = new Lazy<string>(() => PlatformProxyFactory.CreatePlatformProxy(null).GetRuntimeVersion());
         private static readonly Lazy<ILoggerAdapter> s_nullLogger = new Lazy<ILoggerAdapter>(() => new NullLogger());
-        private static readonly Lazy<ILoggerAdapter> s_nullLoggerWithFullLogging = new Lazy<ILoggerAdapter>(() => new NullLogger(isReducedLoggingEnabled: false));
+        private static readonly Lazy<ILoggerAdapter> s_nullLoggerWithReducedLogging = new Lazy<ILoggerAdapter>(() => new NullLogger(isReducedLoggingEnabled: true));
 
         public static string GetClientInfo(string clientName, string clientVersion)
         {
@@ -44,15 +44,15 @@ namespace Microsoft.Identity.Client.Internal.Logger
         {
             // Snapshot once per application, not per request or message.
             string value = Environment.GetEnvironmentVariable(ReducedLoggingEnvironmentVariable);
-            bool enabled = !string.Equals(value, "false", StringComparison.OrdinalIgnoreCase) &&
-                !string.Equals(value, "0", StringComparison.Ordinal);
+            bool enabled = string.Equals(value, "true", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(value, "1", StringComparison.Ordinal);
             var logger = CreateLogger(Guid.Empty, config, enabled);
 
-            if (enabled && !string.IsNullOrEmpty(value) &&
-                !string.Equals(value, "true", StringComparison.OrdinalIgnoreCase) &&
-                !string.Equals(value, "1", StringComparison.Ordinal))
+            if (!enabled && !string.IsNullOrEmpty(value) &&
+                !string.Equals(value, "false", StringComparison.OrdinalIgnoreCase) &&
+                !string.Equals(value, "0", StringComparison.Ordinal))
             {
-                logger.Warning("Invalid MSAL_REDUCED_LOGGING value. Expected true, false, 1 or 0. Reduced logging is enabled.");
+                logger.Warning("Invalid MSAL_REDUCED_LOGGING value. Expected true, false, 1 or 0. Reduced logging is disabled.");
             }
 
             return logger;
@@ -61,13 +61,13 @@ namespace Microsoft.Identity.Client.Internal.Logger
         public static ILoggerAdapter CreateLogger(
             Guid correlationId,
             ApplicationConfiguration config,
-            bool isReducedLoggingEnabled = true)
+            bool isReducedLoggingEnabled = false)
         {
             if (config.IdentityLogger == null)
             {
                 if (config.LoggingCallback == null)
                 {
-                    return isReducedLoggingEnabled ? s_nullLogger.Value : s_nullLoggerWithFullLogging.Value;
+                    return isReducedLoggingEnabled ? s_nullLoggerWithReducedLogging.Value : s_nullLogger.Value;
                 }
 
                 return CallbackIdentityLoggerAdapter.Create(correlationId, config, isReducedLoggingEnabled: isReducedLoggingEnabled);

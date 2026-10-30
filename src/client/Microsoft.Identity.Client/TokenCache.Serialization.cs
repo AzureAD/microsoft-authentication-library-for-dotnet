@@ -7,10 +7,31 @@ using JToken = System.Text.Json.Nodes.JsonNode;
 
 namespace Microsoft.Identity.Client
 {
-    public sealed partial class TokenCache : ITokenCacheInternal
+    public sealed partial class TokenCache : ITokenCacheInternal, ITokenCacheSnapshotProvider
     {
         // Unknown token cache data support for forwards compatibility.
         private IDictionary<string, JToken> _unknownNodes;
+
+        TokenCacheSnapshot ITokenCacheSnapshotProvider.CreateSnapshot()
+        {
+            Validate();
+            return new TokenCacheSnapshot(Accessor, _unknownNodes, IsAppTokenCache);
+        }
+
+        void ITokenCacheSnapshotProvider.RestoreSnapshot(TokenCacheSnapshot snapshot)
+        {
+            Validate();
+            if (snapshot is null)
+            {
+                Accessor.Clear();
+                return;
+            }
+            if (snapshot.IsApplicationCache != IsAppTokenCache)
+            {
+                throw new System.ArgumentException("The snapshot belongs to a different cache type.", nameof(snapshot));
+            }
+            _unknownNodes = snapshot.Restore(Accessor);
+        }
 
         byte[] ITokenCacheSerializer.SerializeAdalV3()
         {

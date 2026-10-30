@@ -1,3 +1,10 @@
+4.91.1
+======
+
+### Changes
+
+- Added opt-in reduced token-acquisition logging: set `MSAL_REDUCED_LOGGING=true` (or `1`) before application construction to move selected routine Information-level diagnostics to Verbose. Existing logging behavior is unchanged by default; acquisition summaries, warnings, and errors remain unchanged. [#6208](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6208) [#6224](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/6224)
+
 4.91.0
 ======
 

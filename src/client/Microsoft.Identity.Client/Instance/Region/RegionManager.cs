@@ -185,8 +185,16 @@ namespace Microsoft.Identity.Client.Region
                     try
                     {
                         string region = Environment.GetEnvironmentVariable("REGION_NAME")?.Replace(" ", string.Empty).ToLowerInvariant();
+                        bool validRegion = ValidateRegion(region, "REGION_NAME env variable", logger);
 
-                        if (ValidateRegion(region, "REGION_NAME env variable", logger)) // this is just to validate the region string
+                        if (!validRegion)
+                        {
+                            // https://eng.ms/docs/experiences-devices/m365-core/substrate-platform/cosmic-group/partners/onboarding/configure-containers/cosmic-env-variables.html
+                            region = Environment.GetEnvironmentVariable("COSMIC_LOCATION")?.Replace(" ", string.Empty).ToLowerInvariant();
+                            validRegion = ValidateRegion(region, "COSMIC_LOCATION env variable", logger);
+                        }
+
+                        if (validRegion)
                         {
                             logger.Info(() => $"[Region discovery] Region found in environment variable: {region}.");
                             result = new RegionInfo(region, RegionAutodetectionSource.EnvVariable, null);

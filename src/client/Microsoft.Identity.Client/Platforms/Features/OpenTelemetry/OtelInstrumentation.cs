@@ -125,6 +125,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             unit: "s",
             description: "Remaining lifetime of acquired tokens at the time of acquisition."));
 
+        private static readonly IReadOnlyDictionary<string, HashSet<string>> s_canonicalTagKeysByMetric =
+            BuildCanonicalTagKeysByMetric();
+
         public OtelInstrumentation()
         {
             // Needed to fail fast if the runtime, like in-process Azure Functions, doesn't support OpenTelemetry
@@ -138,52 +141,58 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
         private static string MsalVersionPlatformTag(string platform) =>
             $"{MsalIdHelper.GetMsalVersion()},{platform}";
 
-        // Builds the final TagList for a metric by appending the caller-supplied extra tags (if any) after
-        // MSAL's canonical base tags. The extra tags are materialized once per acquisition by the caller
-        // (see OtelEnrichmentHelper.MaterializeExtraTags) and the same fixed set is merged into every
-        // instrument, so this method never invokes the enricher and never throws on its behalf. The
-        // canonical base tags are emitted first and are protected: an extra tag with a null/empty key is
-        // skipped, and an extra tag whose key collides with a canonical base tag key is dropped (a duplicate
-        // key would otherwise shadow MSAL's canonical value in last-wins backends). So the canonical metric
-        // set cannot be removed, overridden, or altered by the enricher.
+        // Appends the caller-supplied extra tags (if any) after MSAL's canonical tags. The extra tags are
+        // materialized once per acquisition by the caller (see OtelEnrichmentHelper.MaterializeExtraTags)
+        // and the same fixed set is merged into every instrument, so this method never invokes the enricher
+        // and never throws on its behalf. The canonical tags are emitted first and are protected: an extra
+        // tag with a null/empty key is skipped, and an extra tag whose key collides with a canonical tag key
+        // is dropped (a duplicate key would otherwise shadow MSAL's canonical value in last-wins backends).
+        // Canonical keys are cached once per metric so collision checks do not allocate or repeatedly populate
+        // a HashSet for every metric recorded.
         //
         // metricName identifies the instrument these base tags are recorded on. In Debug builds it is used to
         // assert that every canonical base tag is declared in MsalMetricsCatalog for that metric, so the public
         // catalog stays the single source of truth: adding a base tag here without declaring it there fails the
         // test suite immediately. Calls are omitted from non-DEBUG builds.
-        private static TagList BuildTagList(
+        internal static void AddExtraTags(
             string metricName,
             IReadOnlyList<KeyValuePair<string, object>> extraTags,
-            params KeyValuePair<string, object>[] baseTags)
+            ref TagList tags)
         {
-            AssertCanonicalTagsDeclared(metricName, baseTags);
+            AssertCanonicalTagsDeclared(metricName, in tags);
 
-            if (extraTags == null || extraTags.Count == 0)
+            if (extraTags is null || extraTags.Count == 0)
             {
-                return new TagList(baseTags);
+                return;
             }
 
-            var tagList = new TagList();
-            var baseKeys = new HashSet<string>(StringComparer.Ordinal);
-            foreach (KeyValuePair<string, object> tag in baseTags)
-            {
-                tagList.Add(tag);
-                baseKeys.Add(tag.Key);
-            }
+            HashSet<string> canonicalTagKeys = s_canonicalTagKeysByMetric[metricName];
 
             foreach (KeyValuePair<string, object> tag in extraTags)
             {
                 // Never let a caller-supplied tag remove, override, or corrupt a canonical tag:
                 // drop tags with a null/empty key and tags whose key collides with a base tag key.
-                if (string.IsNullOrEmpty(tag.Key) || baseKeys.Contains(tag.Key))
+                if (string.IsNullOrEmpty(tag.Key) || canonicalTagKeys.Contains(tag.Key))
                 {
                     continue;
                 }
 
-                tagList.Add(tag);
+                tags.Add(tag);
+            }
+        }
+
+        private static IReadOnlyDictionary<string, HashSet<string>> BuildCanonicalTagKeysByMetric()
+        {
+            var result = new Dictionary<string, HashSet<string>>(
+                MsalMetricsCatalog.CanonicalTagsByMetric.Count,
+                StringComparer.Ordinal);
+
+            foreach (KeyValuePair<string, IReadOnlyList<string>> metric in MsalMetricsCatalog.CanonicalTagsByMetric)
+            {
+                result[metric.Key] = new HashSet<string>(metric.Value, StringComparer.Ordinal);
             }
 
-            return tagList;
+            return result;
         }
 
         // Debug-only guard that keeps the public MsalMetricsCatalog mapping in sync with the tags actually
@@ -191,7 +200,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
         // catalog; a given call may emit a subset of the declared tags (some are conditional), so this checks
         // containment, not equality. Calls are omitted from non-DEBUG builds, so there is no shipping-path overhead.
         [Conditional("DEBUG")]
-        private static void AssertCanonicalTagsDeclared(string metricName, KeyValuePair<string, object>[] baseTags)
+        private static void AssertCanonicalTagsDeclared(string metricName, in TagList tags)
         {
             // Don't rely on the assert to halt execution: Debug.Assert routes to trace listeners and only the
             // test host's listener throws; the default listener can continue past a failure. So guard the null
@@ -203,11 +212,11 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                 return;
             }
 
-            foreach (KeyValuePair<string, object> tag in baseTags)
+            for (int i = 0; i < tags.Count; i++)
             {
                 Debug.Assert(
-                    canonicalTags.Contains(tag.Key),
-                    $"Tag '{tag.Key}' is recorded for metric '{metricName}' but is not declared in " +
+                    canonicalTags.Contains(tags[i].Key),
+                    $"Tag '{tags[i].Key}' is recorded for metric '{metricName}' but is not declared in " +
                     "MsalMetricsCatalog.CanonicalTagsByMetric. Add it to the metric's canonical tag list.");
             }
         }
@@ -243,36 +252,45 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             if (s_durationInL1CacheInUs.Value.Enabled && authResultMetadata.TokenSource == TokenSource.Cache
                 && authResultMetadata.CacheLevel.Equals(CacheLevel.L1Cache))
             {
-                var tags = BuildTagList(MsalMetricsCatalog.DurationInL1CacheHistogramName, extraTags,
+                var tags = new TagList
+                {
                     new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                     new(TelemetryConstants.Platform, platform),
                     new(TelemetryConstants.ApiId, apiId),
                     new(TelemetryConstants.TokenSource, authResultMetadata.TokenSource),
                     new(TelemetryConstants.CacheLevel, authResultMetadata.CacheLevel),
-                    new(TelemetryConstants.CacheRefreshReason, authResultMetadata.CacheRefreshReason));
+                    new(TelemetryConstants.CacheRefreshReason, authResultMetadata.CacheRefreshReason),
+                };
+                AddExtraTags(MsalMetricsCatalog.DurationInL1CacheHistogramName, extraTags, ref tags);
                 s_durationInL1CacheInUs.Value.Record(totalDurationInUs, in tags);
             }
 
             // Only log cache duration if L2 cache was used.
             if (s_durationInL2Cache.Value.Enabled && cacheLevel == CacheLevel.L2Cache)
             {
-                var tags = BuildTagList(MsalMetricsCatalog.DurationInL2CacheHistogramName, extraTags,
+                var tags = new TagList
+                {
                     new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                     new(TelemetryConstants.Platform, platform),
                     new(TelemetryConstants.ApiId, apiId),
-                    new(TelemetryConstants.CacheRefreshReason, authResultMetadata.CacheRefreshReason));
+                    new(TelemetryConstants.CacheRefreshReason, authResultMetadata.CacheRefreshReason),
+                };
+                AddExtraTags(MsalMetricsCatalog.DurationInL2CacheHistogramName, extraTags, ref tags);
                 s_durationInL2Cache.Value.Record(authResultMetadata.DurationInCacheInMs, in tags);
             }
 
             if (s_durationInExtensionInMs.Value.Enabled)
             {
-                var tags = BuildTagList(MsalMetricsCatalog.DurationInExtensionHistogramName, extraTags,
+                var tags = new TagList
+                {
                     new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                     new(TelemetryConstants.Platform, platform),
                     new(TelemetryConstants.ApiId, apiId),
                     new(TelemetryConstants.TokenSource, authResultMetadata.TokenSource),
                     new(TelemetryConstants.CacheLevel, authResultMetadata.CacheLevel),
-                    new(TelemetryConstants.TokenType, authResultMetadata.TelemetryTokenType));
+                    new(TelemetryConstants.TokenType, authResultMetadata.TelemetryTokenType),
+                };
+                AddExtraTags(MsalMetricsCatalog.DurationInExtensionHistogramName, extraTags, ref tags);
                 s_durationInExtensionInMs.Value.Record(authResultMetadata.DurationCreatingExtendedTokenInUs, in tags);
             }
 
@@ -280,25 +298,31 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             {
                 if (s_durationTotal.Value.Enabled)
                 {
-                    var tags = BuildTagList(MsalMetricsCatalog.TotalDurationHistogramName, extraTags,
+                    var tags = new TagList
+                    {
                         new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                         new(TelemetryConstants.Platform, platform),
                         new(TelemetryConstants.ApiId, apiId),
                         new(TelemetryConstants.TokenSource, authResultMetadata.TokenSource),
                         new(TelemetryConstants.CacheLevel, cacheLevel),
                         new(TelemetryConstants.CacheRefreshReason, authResultMetadata.CacheRefreshReason),
-                        new(TelemetryConstants.TokenType, authResultMetadata.TelemetryTokenType));
+                        new(TelemetryConstants.TokenType, authResultMetadata.TelemetryTokenType),
+                    };
+                    AddExtraTags(MsalMetricsCatalog.TotalDurationHistogramName, extraTags, ref tags);
                     s_durationTotal.Value.Record(authResultMetadata.DurationTotalInMs, in tags);
                 }
 
                 // Only log duration in HTTP when token is fetched from IDP.
                 if (s_durationInHttp.Value.Enabled && authResultMetadata.TokenSource == TokenSource.IdentityProvider)
                 {
-                    var tags = BuildTagList(MsalMetricsCatalog.DurationInHttpHistogramName, extraTags,
+                    var tags = new TagList
+                    {
                         new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                         new(TelemetryConstants.Platform, platform),
                         new(TelemetryConstants.ApiId, apiId),
-                        new(TelemetryConstants.TokenType, authResultMetadata.TelemetryTokenType));
+                        new(TelemetryConstants.TokenType, authResultMetadata.TelemetryTokenType),
+                    };
+                    AddExtraTags(MsalMetricsCatalog.DurationInHttpHistogramName, extraTags, ref tags);
                     s_durationInHttp.Value.Record(authResultMetadata.DurationInHttpInMs, in tags);
                 }
             }
@@ -306,7 +330,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             {
                 if (s_durationTotalV2.Value.Enabled)
                 {
-                    var tags = BuildTagList(MsalMetricsCatalog.TotalDurationV2HistogramName, extraTags,
+                    var tags = new TagList
+                    {
                         new(TelemetryConstants.MsalVersionPlatform, MsalVersionPlatformTag(platform)),
                         new(TelemetryConstants.ApiId, apiId),
                         new(TelemetryConstants.TokenSource, authResultMetadata.TokenSource),
@@ -314,18 +339,23 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                         new(TelemetryConstants.CacheRefreshReason, authResultMetadata.CacheRefreshReason),
                         new(TelemetryConstants.TokenType, authResultMetadata.TelemetryTokenType),
                         new(TelemetryConstants.ErrorCode, string.Empty),
-                        new(TelemetryConstants.Succeeded, true));
+                        new(TelemetryConstants.Succeeded, true),
+                    };
+                    AddExtraTags(MsalMetricsCatalog.TotalDurationV2HistogramName, extraTags, ref tags);
                     s_durationTotalV2.Value.Record(authResultMetadata.DurationTotalInMs, in tags);
                 }
 
                 // Only log duration in HTTP when token is fetched from IDP.
                 if (s_durationInHttpV2.Value.Enabled && authResultMetadata.TokenSource == TokenSource.IdentityProvider)
                 {
-                    var tags = BuildTagList(MsalMetricsCatalog.DurationInHttpV2HistogramName, extraTags,
+                    var tags = new TagList
+                    {
                         new(TelemetryConstants.MsalVersionPlatform, MsalVersionPlatformTag(platform)),
                         new(TelemetryConstants.ApiId, apiId),
                         new(TelemetryConstants.TokenType, authResultMetadata.TelemetryTokenType),
-                        new(TelemetryConstants.HttpStatusCode, 200));
+                        new(TelemetryConstants.HttpStatusCode, 200),
+                    };
+                    AddExtraTags(MsalMetricsCatalog.DurationInHttpV2HistogramName, extraTags, ref tags);
                     s_durationInHttpV2.Value.Record(authResultMetadata.DurationInHttpInMs, in tags);
                 }
             }
@@ -355,15 +385,18 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
         {
             if (s_successCounter.Value.Enabled)
             {
-                var tags = BuildTagList(MsalMetricsCatalog.SuccessCounterName, extraTags,
-                        new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
-                        new(TelemetryConstants.Platform, platform),
-                        new(TelemetryConstants.ApiId, apiId),
-                        new(TelemetryConstants.CallerSdkId, callerSdkId ?? string.Empty + "," + callerSdkVersion ?? string.Empty),
-                        new(TelemetryConstants.TokenSource, tokenSource),
-                        new(TelemetryConstants.CacheRefreshReason, cacheRefreshReason),
-                        new(TelemetryConstants.CacheLevel, cacheLevel),
-                        new(TelemetryConstants.TokenType, tokenType));
+                var tags = new TagList
+                {
+                    new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
+                    new(TelemetryConstants.Platform, platform),
+                    new(TelemetryConstants.ApiId, apiId),
+                    new(TelemetryConstants.CallerSdkId, callerSdkId ?? string.Empty + "," + callerSdkVersion ?? string.Empty),
+                    new(TelemetryConstants.TokenSource, tokenSource),
+                    new(TelemetryConstants.CacheRefreshReason, cacheRefreshReason),
+                    new(TelemetryConstants.CacheLevel, cacheLevel),
+                    new(TelemetryConstants.TokenType, tokenType),
+                };
+                AddExtraTags(MsalMetricsCatalog.SuccessCounterName, extraTags, ref tags);
                 s_successCounter.Value.Add(1, in tags);
                 logger.Verbose(() => "[OpenTelemetry] Completed incrementing to success counter.");
             }
@@ -383,11 +416,14 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             {
                 if (s_durationInHttp.Value.Enabled)
                 {
-                    var tags = BuildTagList(MsalMetricsCatalog.DurationInHttpHistogramName, extraTags,
+                    var tags = new TagList
+                    {
                         new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                         new(TelemetryConstants.Platform, platform),
                         new(TelemetryConstants.ApiId, apiId),
-                        new(TelemetryConstants.TokenType, authResultMetadata.TelemetryTokenType));
+                        new(TelemetryConstants.TokenType, authResultMetadata.TelemetryTokenType),
+                    };
+                    AddExtraTags(MsalMetricsCatalog.DurationInHttpHistogramName, extraTags, ref tags);
                     s_durationInHttp.Value.Record(authResultMetadata.DurationInHttpInMs, in tags);
                 }
             }
@@ -395,11 +431,14 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             {
                 if (s_durationInHttpV2.Value.Enabled)
                 {
-                    var tags = BuildTagList(MsalMetricsCatalog.DurationInHttpV2HistogramName, extraTags,
+                    var tags = new TagList
+                    {
                         new(TelemetryConstants.MsalVersionPlatform, MsalVersionPlatformTag(platform)),
                         new(TelemetryConstants.ApiId, apiId),
                         new(TelemetryConstants.TokenType, authResultMetadata.TelemetryTokenType),
-                        new(TelemetryConstants.HttpStatusCode, 200));
+                        new(TelemetryConstants.HttpStatusCode, 200),
+                    };
+                    AddExtraTags(MsalMetricsCatalog.DurationInHttpV2HistogramName, extraTags, ref tags);
                     s_durationInHttpV2.Value.Record(authResultMetadata.DurationInHttpInMs, in tags);
                 }
             }
@@ -436,7 +475,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             if (_isExtendedMetricsEnabled && s_durationTotalV2.Value.Enabled)
             {
                 // TokenSource is empty on failure: no token was acquired, so no source applies.
-                var tags = BuildTagList(MsalMetricsCatalog.TotalDurationV2HistogramName, extraTags,
+                var tags = new TagList
+                {
                     new(TelemetryConstants.MsalVersionPlatform, MsalVersionPlatformTag(platform)),
                     new(TelemetryConstants.ApiId, apiEvent.ApiId),
                     new(TelemetryConstants.TokenSource, string.Empty),
@@ -444,7 +484,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                     new(TelemetryConstants.CacheRefreshReason, apiEvent.CacheInfo),
                     new(TelemetryConstants.TokenType, apiEvent.TokenType),
                     new(TelemetryConstants.ErrorCode, errorCode),
-                    new(TelemetryConstants.Succeeded, false));
+                    new(TelemetryConstants.Succeeded, false),
+                };
+                AddExtraTags(MsalMetricsCatalog.TotalDurationV2HistogramName, extraTags, ref tags);
                 s_durationTotalV2.Value.Record(totalDurationInMs, in tags);
             }
 
@@ -466,7 +508,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             if (!s_failureCounter.Value.Enabled)
                 return;
 
-            var baseTags = new List<KeyValuePair<string, object>>
+            var tags = new TagList
             {
                 new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                 new(TelemetryConstants.Platform, platform),
@@ -475,10 +517,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                 new(TelemetryConstants.CallerSdkId, callerSdkId ?? string.Empty + "," + callerSdkVersion ?? string.Empty),
                 new(TelemetryConstants.CacheRefreshReason, cacheRefreshReason),
                 new(TelemetryConstants.TokenType, tokenType),
-                new(TelemetryConstants.RawStsErrorCode, rawStsErrorCode ?? string.Empty)
+                new(TelemetryConstants.RawStsErrorCode, rawStsErrorCode ?? string.Empty),
             };
-
-            var tags = BuildTagList(MsalMetricsCatalog.FailureCounterName, extraTags, baseTags.ToArray());
+            AddExtraTags(MsalMetricsCatalog.FailureCounterName, extraTags, ref tags);
 
             s_failureCounter.Value.Add(1, in tags);
         }
@@ -500,11 +541,14 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
 
             if (apiEvent.DurationInHttpInMs > 0)
             {
-                var tags = BuildTagList(MsalMetricsCatalog.DurationInHttpV2HistogramName, extraTags,
+                var tags = new TagList
+                {
                     new(TelemetryConstants.MsalVersionPlatform, MsalVersionPlatformTag(platform)),
                     new(TelemetryConstants.ApiId, apiEvent.ApiId),
                     new(TelemetryConstants.TokenType, apiEvent.TokenType),
-                    new(TelemetryConstants.HttpStatusCode, httpStatusCode));
+                    new(TelemetryConstants.HttpStatusCode, httpStatusCode),
+                };
+                AddExtraTags(MsalMetricsCatalog.DurationInHttpV2HistogramName, extraTags, ref tags);
                 s_durationInHttpV2.Value.Record(apiEvent.DurationInHttpInMs, in tags);
             }
         }
@@ -524,13 +568,16 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             {
                 long remainingSeconds = Math.Max(0, (long)(expiresOn - DateTimeOffset.UtcNow).TotalSeconds);
 
-                var tags = BuildTagList(MsalMetricsCatalog.RemainingTokenLifetimeHistogramName, extraTags,
+                var tags = new TagList
+                {
                     new(TelemetryConstants.MsalVersionPlatform, MsalVersionPlatformTag(platform)),
                     new(TelemetryConstants.ApiId, apiId),
                     new(TelemetryConstants.TokenSource, tokenSource),
                     new(TelemetryConstants.CacheLevel, cacheLevel),
                     new(TelemetryConstants.CacheRefreshReason, cacheRefreshReason),
-                    new(TelemetryConstants.TokenType, tokenType));
+                    new(TelemetryConstants.TokenType, tokenType),
+                };
+                AddExtraTags(MsalMetricsCatalog.RemainingTokenLifetimeHistogramName, extraTags, ref tags);
                 s_remainingTokenLifetime.Value.Record(remainingSeconds, in tags);
             }
         }

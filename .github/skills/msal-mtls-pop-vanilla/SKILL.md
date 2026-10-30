@@ -1,19 +1,6 @@
 ---
-skill_name: msal-mtls-pop-vanilla
-version: 1.0
+name: msal-mtls-pop-vanilla
 description: Direct mTLS PoP token acquisition for target resources using Managed Identity or Confidential Client
-applies_to:
-  - MSAL.NET/mTLS-PoP
-  - MSAL.NET/Managed-Identity
-  - MSAL.NET/Confidential-Client
-tags:
-  - msal
-  - mtls
-  - pop
-  - proof-of-possession
-  - managed-identity
-  - confidential-client
-  - vanilla-flow
 ---
 
 # MSAL.NET mTLS PoP - Vanilla Flow (Direct Token Acquisition)

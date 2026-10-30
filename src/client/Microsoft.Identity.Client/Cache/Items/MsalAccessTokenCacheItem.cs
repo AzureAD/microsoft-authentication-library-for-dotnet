@@ -295,6 +295,43 @@ namespace Microsoft.Identity.Client.Cache.Items
         private Lazy<IiOSKey> iOSCacheKeyLazy;
         public IiOSKey iOSCacheKey => iOSCacheKeyLazy.Value;
 
+        internal MsalAccessTokenCacheItem CloneForSnapshot()
+        {
+            // Match V3 timestamp precision and omit request-only state such as IsExtendedLifeTimeToken.
+            var copy = new MsalAccessTokenCacheItem(
+                ScopeString ?? "", NormalizeSnapshotTimestamp(CachedAt),
+                NormalizeSnapshotTimestamp(ExpiresOn),
+                NormalizeSnapshotTimestamp(ExtendedExpiresOn),
+                RefreshOn.HasValue && NormalizeSnapshotTimestamp(RefreshOn.Value).ToUnixTimeSeconds() != 0
+                    ? NormalizeSnapshotTimestamp(RefreshOn.Value) : (DateTimeOffset?)null,
+                TenantId ?? "", string.IsNullOrEmpty(KeyId) ? null : KeyId,
+                string.IsNullOrEmpty(TokenType) || TokenType.Equals(StorageJsonValues.TokenTypeBearer, StringComparison.OrdinalIgnoreCase)
+                    ? StorageJsonValues.TokenTypeBearer : TokenType)
+            {
+                Environment = Environment ?? "",
+                ClientId = ClientId ?? "",
+                Secret = Secret ?? "",
+                RawClientInfo = RawClientInfo ?? "",
+                HomeAccountId = HomeAccountId ?? "",
+                OboCacheKey = string.IsNullOrEmpty(OboCacheKey) ? null : OboCacheKey,
+                CredentialType = CredentialType ?? "",
+                AdditionalFieldsJson = AdditionalFieldsJson,
+                AdditionalCacheKeyComponents = AdditionalCacheKeyComponents is null ? null :
+                    new SortedList<string, string>(AdditionalCacheKeyComponents),
+                PersistedCacheParameters = PersistedCacheParameters is null ? null :
+                    new Dictionary<string, string>(PersistedCacheParameters)
+            };
+            copy.InitCacheKey();
+            return copy;
+        }
+
+        private static DateTimeOffset NormalizeSnapshotTimestamp(DateTimeOffset value)
+        {
+            // V3 truncates towards zero, unlike ToUnixTimeSeconds for pre-epoch values.
+            var epoch = new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.Zero);
+            return DateTimeOffset.FromUnixTimeSeconds((long)(value - epoch).TotalSeconds);
+        }
+
         internal static MsalAccessTokenCacheItem FromJsonString(string json)
         {
             if (string.IsNullOrWhiteSpace(json))

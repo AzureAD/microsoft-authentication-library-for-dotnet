@@ -186,6 +186,20 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         #endregion
 
+        internal MsalAccountCacheItem CloneForSnapshot()
+        {
+            return new MsalAccountCacheItem(
+                Environment ?? "", LocalAccountId ?? "", RawClientInfo ?? "",
+                HomeAccountId ?? "", AccountSource ?? "", Name ?? "",
+                PreferredUsername ?? "", TenantId ?? "", GivenName ?? "",
+                FamilyName ?? "", WamAccountIds is null ? null :
+                    new Dictionary<string, string>(WamAccountIds))
+            {
+                AuthorityType = AuthorityType ?? "",
+                AdditionalFieldsJson = AdditionalFieldsJson
+            };
+        }
+
         internal static MsalAccountCacheItem FromJsonString(string json)
         {
             if (string.IsNullOrWhiteSpace(json))

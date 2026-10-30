@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client
@@ -116,7 +117,10 @@ namespace Microsoft.Identity.Client
         /// </summary>
         internal static HttpClient GetHttpClient()
         {
-            return _httpClientFactory.Value.GetHttpClient();
+            IMsalHttpClientFactory factory = _httpClientFactory.Value;
+            return factory is SimpleHttpClientFactory simpleFactory
+                ? simpleFactory.GetHttpClientForUnauthenticatedRequest()
+                : factory.GetHttpClient();
         }
 
         /// <summary>

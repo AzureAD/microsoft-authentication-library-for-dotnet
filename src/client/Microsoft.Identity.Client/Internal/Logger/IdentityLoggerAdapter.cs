@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
             string clientName,
             string clientVersion,
             bool enablePiiLogging,
-            bool isReducedLoggingEnabled = true)
+            bool isReducedLoggingEnabled = false)
         {
             ClientName = clientName;
             ClientVersion = clientVersion;
@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
         public static ILoggerAdapter Create(
             Guid correlationId,
             ApplicationConfiguration config,
-            bool isReducedLoggingEnabled = true)
+            bool isReducedLoggingEnabled = false)
         {
             return new IdentityLoggerAdapter(
                 config?.IdentityLogger,

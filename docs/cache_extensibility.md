@@ -123,3 +123,45 @@ In user flows, only the access tokens will be cached by the new schema. Refresh 
 
 3. Try to use `WithAdditionalCacheKeyComponents` set to `client_id` -> error
 4. POP Access token (all known schemes) and WithAdditionalCacheKeyComponents. Assert external cache key.
+
+## Process-local token cache snapshots
+
+Use the optional `ITokenCacheSnapshotProvider` interface to cache isolated `TokenCacheSnapshot` objects in memory, avoiding JSON serialization on each access. It works with both `AppTokenCache` and `UserTokenCache`.
+
+### Example
+
+For a single application instance using default cache synchronization:
+
+```csharp
+TokenCacheSnapshot snapshot = null;
+
+app.AppTokenCache.SetBeforeAccess(args =>
+{
+    var provider = (ITokenCacheSnapshotProvider)args.TokenCache;
+    provider.RestoreSnapshot(snapshot);
+});
+
+app.AppTokenCache.SetAfterAccess(args =>
+{
+    if (args.HasStateChanged)
+    {
+        snapshot = ((ITokenCacheSnapshotProvider)args.TokenCache).CreateSnapshot();
+    }
+});
+```
+
+### Usage notes
+
+- **Synchronization:** Call snapshot methods inside cache callbacks; they do not acquire locks. Keep MSAL's default synchronization or provide an equivalent. Partitioned providers must select snapshots by cache key and synchronize storage shared across application instances.
+- **Isolation:** Capture and restore copy mutable state. Snapshots can be reused across independent caches, but app and user snapshots are not interchangeable.
+- **Restore behavior:** Matches `DeserializeMsalV3(payload, shouldClearExistingCache: true)`, including unknown fields and retained application metadata. Restoring `null` clears tokens and accounts but retains metadata and existing unknown top-level fields.
+- **Storage:** Snapshots are process-local, not a transport or cross-version format. Use `snapshot.SerializeMsalV3()` for persistent or distributed storage.
+- **Security and memory:** Snapshots contain credentials. Never log them; protect them and bound retention. They may retain more memory than JSON bytes.
+- **Limitations:** Unsupported on mobile or with internal cache options such as shared caching.
+
+### Benchmarks
+
+- `TokenCacheSnapshotBenchmarks` compares JSON and snapshots for capture, restore, and warm `AcquireTokenForClient` calls with 1, 10, and 100 tokens per partition.
+- `TokenCacheRetentionBenchmarks` reports estimated live memory as `Retained/partition`, using the median of three full-GC measurements. Time and `Allocated` measure the whole batch, not one partition.
+
+These benchmarks use local MSAL and are excluded from the existing Identity.Web package mode.

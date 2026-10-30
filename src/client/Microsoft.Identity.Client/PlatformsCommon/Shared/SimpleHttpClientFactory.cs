@@ -82,6 +82,13 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
                 useDefaultCredentials: true);
         }
 
+        internal HttpClient GetHttpClientForUnauthenticatedRequest()
+        {
+            return GetHttpClient(
+                allowAutoRedirect: true,
+                useDefaultCredentials: false);
+        }
+
         HttpClient IMsalWsTrustHttpClientFactory.GetHttpClient(bool useDefaultCredentials)
         {
             return GetHttpClient(
