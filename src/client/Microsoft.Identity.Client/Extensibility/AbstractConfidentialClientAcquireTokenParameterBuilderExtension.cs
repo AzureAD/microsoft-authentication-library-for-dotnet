@@ -18,6 +18,9 @@ namespace Microsoft.Identity.Client.Extensibility
     /// </summary>
     public static class AbstractConfidentialClientAcquireTokenParameterBuilderExtension
     {
+        private const string ClaimsFromClientRequiresConfidentialClient =
+            "WithClaimsFromClient on AcquireTokenSilent is supported only for confidential client applications.";
+
         /// <summary>
         /// Specifies client-originated claims to include in the token request.
         /// Unlike <see cref="AbstractAcquireTokenParameterBuilder{T}.WithClaims"/> (for server-issued
@@ -48,10 +51,25 @@ namespace Microsoft.Identity.Client.Extensibility
         /// <param name="builder">The silent request builder to chain options to.</param>
         /// <param name="claimsJson">A JSON string containing the client-originated claims. Must be valid JSON.</param>
         /// <returns>The builder to chain the .With methods.</returns>
+        /// <exception cref="MsalClientException">
+        /// Thrown when non-empty claims are configured on a public client application.
+        /// </exception>
         public static AcquireTokenSilentParameterBuilder WithClaimsFromClient(
             this AcquireTokenSilentParameterBuilder builder,
             string claimsJson)
         {
+            if (string.IsNullOrWhiteSpace(claimsJson))
+            {
+                return builder;
+            }
+
+            if (!builder.ServiceBundle.Config.IsConfidentialClient)
+            {
+                throw new MsalClientException(
+                    MsalError.InvalidRequest,
+                    ClaimsFromClientRequiresConfidentialClient);
+            }
+
             return ApplyClaimsFromClient(builder, claimsJson);
         }
 
