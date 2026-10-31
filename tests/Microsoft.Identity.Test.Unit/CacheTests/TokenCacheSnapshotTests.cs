@@ -797,9 +797,10 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 Assert.HasCount(readsBefore + 1, store.Reads);
                 Assert.AreEqual(assertions[partition].AssertionHash, store.Reads.Last());
                 Assert.AreEqual(2, store.Writes);
-                var token = cache.Accessor.GetAllAccessTokens().Single();
+                var token = ((ITokenCacheInternal)store.LastReadTarget).Accessor.GetAllAccessTokens().Single();
                 Assert.AreEqual(tokens[partition], token.Secret);
                 Assert.AreEqual(assertions[partition].AssertionHash, token.OboCacheKey);
+                Assert.IsEmpty(cache.Accessor.GetAllAccessTokens());
                 Assert.AreEqual(0, httpManager.QueueSize);
             }
         }
@@ -811,6 +812,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             private readonly Dictionary<string, byte[]> _bytes = new Dictionary<string, byte[]>(StringComparer.Ordinal);
 
             public List<string> Reads { get; } = new List<string>();
+            public ITokenCacheSerializer LastReadTarget { get; private set; }
             public int Writes { get; private set; }
 
             public UserFlowCacheStore(ITokenCache cache, bool useSnapshot)
@@ -821,6 +823,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     Assert.IsFalse(args.IsApplicationCache);
                     Assert.IsFalse(string.IsNullOrEmpty(args.SuggestedCacheKey));
                     Reads.Add(args.SuggestedCacheKey);
+                    LastReadTarget = args.TokenCache;
                     if (_useSnapshot)
                     {
                         _snapshots.TryGetValue(args.SuggestedCacheKey, out var snapshot);
