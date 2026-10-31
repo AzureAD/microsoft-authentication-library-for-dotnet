@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
@@ -145,6 +146,101 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [TestMethod]
+        [DataRow("msal-v3")]
+        [DataRow("snapshot")]
+        [DataRow("empty")]
+        public async Task AwaitedHydrationDoesNotRequireExecutionContextFlow(string shape)
+        {
+            var cache = CreateCache();
+            var seed = CreateCache();
+            seed.DeserializeMsalV3(Blob("before"), true);
+            var snapshot = ((ITokenCacheSnapshotProvider)seed).CreateSnapshot();
+            cache.SetBeforeAccessAsync(async args =>
+            {
+                Task hydration;
+                using (ExecutionContext.SuppressFlow())
+                {
+                    hydration = Task.Run(() =>
+                    {
+                        switch (shape)
+                        {
+                            case "msal-v3": args.TokenCache.DeserializeMsalV3(Blob("before"), true); break;
+                            case "snapshot": ((ITokenCacheSnapshotProvider)args.TokenCache).RestoreSnapshot(snapshot); break;
+                            case "empty": args.TokenCache.DeserializeMsalV3(null, true); break;
+                            default: Assert.Fail("Unknown hydration shape."); break;
+                        }
+                    });
+                }
+                await hydration.ConfigureAwait(false);
+            });
+
+            var accounts = (await CreateSession(cache).GetAccountsAsync().ConfigureAwait(false)).ToArray();
+            Assert.HasCount(shape == "empty" ? 0 : 1, accounts);
+            if (accounts.Length != 0)
+                Assert.AreEqual("before", accounts[0].Username);
+            Assert.IsEmpty(cache.Accessor.GetAllAccounts());
+        }
+
+        [TestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task SuppressedFlowStillRejectsIncompleteHydration(bool legacyFormat)
+        {
+            var cache = CreateCache();
+            var seed = CreateCache();
+            seed.DeserializeMsalV3(Blob("before"), true);
+#pragma warning disable CS0618
+            byte[] legacyBytes = seed.SerializeMsalV2();
+#pragma warning restore CS0618
+            cache.SetBeforeAccessAsync(async args =>
+            {
+                Task hydration;
+                using (ExecutionContext.SuppressFlow())
+                {
+                    hydration = Task.Run(() =>
+                    {
+                        if (legacyFormat)
+                        {
+#pragma warning disable CS0618
+                            args.TokenCache.DeserializeMsalV2(legacyBytes);
+#pragma warning restore CS0618
+                        }
+                        else
+                        {
+                            args.TokenCache.DeserializeMsalV3(Blob("before"), false);
+                        }
+                    });
+                }
+                await hydration.ConfigureAwait(false);
+            });
+            await ExpectUnsupported(() => CreateSession(cache).GetAccountsAsync(), "clear-existing").ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        public async Task RetriedHydrationCannotReuseTheFailedAttemptsCompletion()
+        {
+            var cache = CreateCache();
+            bool failPublication = true;
+            cache.SetBeforeAccess(args =>
+            {
+                if (failPublication)
+                    args.TokenCache.DeserializeMsalV3(Blob("before"), true);
+            });
+            cache.SetAfterAccess(_ =>
+            {
+                if (failPublication)
+                    throw new InvalidOperationException("synthetic-publication");
+            });
+            var session = CreateSession(cache);
+            bool failed = false;
+            try { await session.GetAccountsAsync().ConfigureAwait(false); }
+            catch (InvalidOperationException exception) when (exception.Message == "synthetic-publication") { failed = true; }
+            Assert.IsTrue(failed);
+            failPublication = false;
+            await ExpectUnsupported(() => session.GetAccountsAsync(), "hydration").ConfigureAwait(false);
+        }
+
+        [TestMethod]
         [DataRow(false)]
         [DataRow(true)]
         public async Task CacheWithoutNotificationsKeepsItsWarmState(bool isolated)
@@ -251,6 +347,61 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual("before", (await session.GetAccountsAsync().ConfigureAwait(false)).Single().Username);
             await session.SaveTokenResponseAsync(TestConstants.CreateMsalTokenResponse()).ConfigureAwait(false);
             Assert.AreEqual("after", (await session.GetAccountsAsync().ConfigureAwait(false)).Single().Username);
+        }
+
+        [TestMethod]
+        [DataRow(false, false)]
+        [DataRow(true, false)]
+        [DataRow(true, true)]
+        public async Task RefreshPreservesPersistedTenantProfiles(bool isolated, bool changedBeforeWrite)
+        {
+            SetIsolation(isolated);
+            const string homeTenant = "11111111-1111-1111-1111-111111111111";
+            const string guestTenant = "33333333-3333-3333-3333-333333333333";
+            const string addedTenant = "44444444-4444-4444-4444-444444444444";
+            const string authority = "https://login.microsoftonline.com/" + homeTenant;
+            var cache = CreateCache();
+            cache.DeserializeMsalV3(Blob("before"), true);
+            foreach (string tenant in new[] { homeTenant, guestTenant })
+            {
+                var seed = TestConstants.CreateMsalTokenResponse(tenant);
+                cache.Accessor.SaveIdToken(new MsalIdTokenCacheItem(
+                    "login.microsoftonline.com", ClientId, seed, tenant, HomeId));
+            }
+            byte[] persisted = cache.SerializeMsalV3();
+            cache.Accessor.SaveIdToken(new MsalIdTokenCacheItem(
+                "login.microsoftonline.com", ClientId, TestConstants.CreateMsalTokenResponse(addedTenant), addedTenant, HomeId));
+            byte[] changed = cache.SerializeMsalV3();
+            cache.DeserializeMsalV3(null, true);
+            cache.SetBeforeAccess(args => args.TokenCache.DeserializeMsalV3(
+                changedBeforeWrite && args.HasStateChanged ? changed : persisted, true));
+            cache.SetAfterAccess(args =>
+            {
+                if (args.HasStateChanged)
+                    persisted = args.TokenCache.SerializeMsalV3();
+            });
+            var session = CreateSession(cache, authority: authority);
+            var before = (await session.GetAccountsAsync().ConfigureAwait(false)).Single();
+            Assert.AreEqual(2, before.GetTenantProfiles().Count());
+            Assert.IsNotNull(await session.FindRefreshTokenAsync().ConfigureAwait(false));
+            if (isolated)
+                Assert.IsEmpty(cache.Accessor.GetAllIdTokens(HomeId));
+
+            var response = TestConstants.CreateMsalTokenResponse(homeTenant);
+            response.ClientInfo = TestConstants.CreateClientInfo("user", homeTenant);
+            response.IdToken = TestConstants.CreateIdToken("updated-user", "updated@example.test", homeTenant);
+            var result = await session.SaveTokenResponseAsync(response).ConfigureAwait(false);
+
+            var profiles = result.Item3.GetTenantProfiles().ToArray();
+            var expectedTenants = changedBeforeWrite
+                ? new[] { homeTenant, guestTenant, addedTenant }
+                : new[] { homeTenant, guestTenant };
+            CollectionAssert.AreEquivalent(expectedTenants,
+                profiles.Select(profile => profile.TenantId).ToArray());
+            Assert.AreEqual("updated-user", profiles.Single(profile => profile.TenantId == homeTenant)
+                .ClaimsPrincipal.FindFirst("oid").Value);
+            Assert.AreEqual(expectedTenants.Length, (await CreateSession(cache, authority: authority).GetAccountsAsync().ConfigureAwait(false))
+                .Single().GetTenantProfiles().Count());
         }
 
         [TestMethod]
@@ -682,6 +833,43 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [TestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task ConfidentialSilentAcquisitionPreservesLoginHintResolution(bool loginHint)
+        {
+            using var httpManager = new MockHttpManager();
+            var application = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                .WithAuthority("https://login.microsoftonline.com/" + TestConstants.Utid)
+                .WithClientSecret("synthetic-not-a-credential")
+                .WithInstanceDiscovery(false)
+                .WithLegacyCacheCompatibility(false)
+                .WithHttpManager(httpManager)
+                .BuildConcrete();
+            var cache = (ITokenCacheInternal)application.UserTokenCache;
+            TokenCacheHelper.PopulateCache(cache.Accessor, environment: "login.microsoftonline.com", addSecondAt: false);
+            var seed = cache.Accessor.GetAllAccounts().Single();
+            var account = new Account(seed.HomeAccountId, seed.PreferredUsername, seed.Environment);
+            byte[] persisted = cache.SerializeMsalV3();
+            cache.DeserializeMsalV3(null, true);
+            int hydrations = 0;
+            cache.SetBeforeAccess(args =>
+            {
+                Assert.AreEqual(loginHint, ReferenceEquals(cache, args.TokenCache));
+                hydrations++;
+                args.TokenCache.DeserializeMsalV3(persisted, true);
+            });
+
+            var builder = loginHint
+                ? application.AcquireTokenSilent(TestConstants.s_scope, account.Username)
+                : application.AcquireTokenSilent(TestConstants.s_scope, account);
+            var result = await builder.ExecuteAsync().ConfigureAwait(false);
+
+            Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+            Assert.AreEqual(account.HomeAccountId.Identifier, result.Account.HomeAccountId.Identifier);
+            Assert.AreEqual(1, hydrations);
+        }
+
+        [TestMethod]
         public async Task DefaultHydrationDoesNotCopyOrReplaceTheRoot()
         {
             var cache = CreateCache();
@@ -849,14 +1037,15 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         private static CacheSessionManager CreateSession(ITokenCacheInternal cache, CancellationToken cancellationToken = default,
-            bool knownAccount = true)
+            bool knownAccount = true, string authority = null)
         {
             var service = ((TokenCache)cache).ServiceBundle;
             var context = new RequestContext(service, Guid.NewGuid(), null, cancellationToken)
             {
                 ApiEvent = new ApiEvent(Guid.NewGuid())
             };
-            var request = TestCommon.CreateAuthenticationRequestParameters(service, requestContext: context,
+            var request = TestCommon.CreateAuthenticationRequestParameters(service,
+                authority: authority == null ? null : Authority.CreateAuthority(authority), requestContext: context,
                 apiID: ApiEvent.ApiIds.AcquireTokenSilent);
             request.Account = knownAccount ? new Account(HomeId, "before", "login.microsoftonline.com") : null;
             return new CacheSessionManager(cache, request);

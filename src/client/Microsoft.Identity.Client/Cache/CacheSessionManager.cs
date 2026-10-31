@@ -267,7 +267,8 @@ namespace Microsoft.Identity.Client.Cache
 
         private void PrepareReadView()
         {
-            if (_readView != null ||
+            if (_cacheRefreshedForRead ||
+                _readView != null ||
                 !(TokenCacheInternal is TokenCache root) ||
                 !root.UseIsolatedCacheReads ||
                 !(root.Accessor is InMemoryPartitionedUserTokenCacheAccessor) ||

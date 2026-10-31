@@ -20,6 +20,8 @@ publication, is coordinated with exclusive writes and removals on the original
 cache. Public clients, application-token caches, native-platform accessors,
 disabled internal caches, legacy-enabled caches, whole-cache/no-key operations,
 and caches with synchronization disabled retain their existing behavior.
+A session that already hydrated the original cache before its partition was known
+keeps that read path, including when an account is later resolved from a login hint.
 
 This changes the serialization contract for qualifying operations. Existing
 serializers must meet the requirements below or use the opt-out. MSAL does not
@@ -51,6 +53,9 @@ For qualifying operations:
   own mutable state.
 - All cache work is awaited before the callback completes. Background publication
   after a callback returns is outside the coordinated lifecycle.
+
+Awaited hydration may run with execution-context flow suppressed. Complete-hydration
+validation follows the supplied private target, not the callback's execution context.
 
 Read callbacks receive an operation-owned cache; write callbacks still receive
 the original cache. Captured-root, incremental, load-once, and read callbacks that

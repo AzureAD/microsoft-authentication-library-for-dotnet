@@ -14,6 +14,7 @@ namespace Microsoft.Identity.Client
         // Unknown token cache data support for forwards compatibility.
         private IDictionary<string, JToken> _unknownNodes;
         private static readonly AsyncLocal<ReadHydrationScope> s_readHydration = new AsyncLocal<ReadHydrationScope>();
+        private ReadHydrationScope _activeReadHydration;
         private const string ReadIsolationOptOutHint = " Set AppContext switch '" +
             DisableCacheReadIsolationSwitch + "' to true before constructing the application to restore the previous cache behavior.";
 
@@ -104,6 +105,7 @@ namespace Microsoft.Identity.Client
         internal IDisposable BeginReadHydration(ITokenCacheInternal source)
         {
             var scope = new ReadHydrationScope(this, source, s_readHydration.Value);
+            Volatile.Write(ref _activeReadHydration, scope);
             s_readHydration.Value = scope;
             return scope;
         }
@@ -123,8 +125,7 @@ namespace Microsoft.Identity.Client
         private void ValidateCompleteHydration(bool clearsExistingState)
         {
             ValidateSerializationTarget();
-            var scope = s_readHydration.Value;
-            if (scope != null && ReferenceEquals(scope.Target, this) && !clearsExistingState)
+            if (Volatile.Read(ref _activeReadHydration) != null && !clearsExistingState)
             {
                 throw new NotSupportedException("Isolated cache reads require complete MSALv3 hydration with clear-existing enabled." + ReadIsolationOptOutHint);
             }
@@ -132,17 +133,17 @@ namespace Microsoft.Identity.Client
 
         private void RecordCompleteHydration()
         {
-            var scope = s_readHydration.Value;
-            if (scope != null && ReferenceEquals(scope.Target, this))
+            var scope = Volatile.Read(ref _activeReadHydration);
+            if (scope != null)
             {
-                scope.Hydrated = true;
+                Volatile.Write(ref scope.Hydrated, true);
             }
         }
 
         internal void ValidateReadHydration()
         {
-            var scope = s_readHydration.Value;
-            if (scope != null && ReferenceEquals(scope.Target, this) && !scope.Hydrated)
+            var scope = Volatile.Read(ref _activeReadHydration);
+            if (scope != null && !Volatile.Read(ref scope.Hydrated))
             {
                 throw new NotSupportedException("Isolated cache reads require complete MSALv3 or structured snapshot hydration in each BeforeAccess callback." + ReadIsolationOptOutHint);
             }
@@ -165,6 +166,9 @@ namespace Microsoft.Identity.Client
             public void Dispose()
             {
                 // Providers can capture this execution context for work that outlives hydration.
+                var target = Target;
+                if (target != null)
+                    Interlocked.CompareExchange(ref target._activeReadHydration, null, this);
                 Target = null;
                 Source = null;
                 s_readHydration.Value = Previous;
