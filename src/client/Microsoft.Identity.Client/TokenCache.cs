@@ -29,10 +29,19 @@ namespace Microsoft.Identity.Client
     /// In the case of ConfidentialClientApplication, two instances are used, one for the user token cache, and one for the application
     /// token cache (in the case of applications using the client credential flows).
     /// </summary>
+    /// <remarks>
+    /// Synchronized confidential-client user caches with legacy ADAL compatibility disabled
+    /// hydrate operation-owned read views for known user partitions. Serialization callbacks
+    /// must completely hydrate the cache supplied in their notification arguments and support
+    /// overlapping read lifecycles. To restore the previous read behavior, set the AppContext
+    /// switch <c>Microsoft.Identity.Client.DisableCacheReadIsolation</c> to <c>true</c> before
+    /// constructing the application. Other cache configurations retain their existing behavior.
+    /// </remarks>
     public sealed partial class TokenCache : ITokenCacheInternal
 #pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
     {
         internal const int ExpirationTooLongInDays = 10 * 365;
+        internal const string DisableCacheReadIsolationSwitch = "Microsoft.Identity.Client.DisableCacheReadIsolation";
 
         private readonly IFeatureFlags _featureFlags;
         internal ITokenCacheAccessor Accessor { get; set; }
@@ -46,6 +55,7 @@ namespace Microsoft.Identity.Client
         ILegacyCachePersistence ITokenCacheInternal.LegacyPersistence => LegacyCachePersistence;
 
         internal bool IsAppTokenCache { get; }
+        internal bool UseIsolatedCacheReads { get; }
         bool ITokenCacheInternal.IsApplicationCache => IsAppTokenCache;
 
         private readonly OptionalSemaphoreSlim _semaphoreSlim;
@@ -65,13 +75,22 @@ namespace Microsoft.Identity.Client
         internal TokenCache(
             IServiceBundle serviceBundle, 
             bool isApplicationTokenCache,
-            ILegacyCachePersistence legacyCachePersistenceForTest=null)
+            ILegacyCachePersistence legacyCachePersistenceForTest=null,
+            bool isReadView = false)
         {
             if (serviceBundle == null)
                 throw new ArgumentNullException(nameof(serviceBundle));
 
             // useRealSemaphore= false for MyApps and potentially for all apps when using non-singleton MSAL
-            _semaphoreSlim = new OptionalSemaphoreSlim(useRealSemaphore: serviceBundle.Config.CacheSynchronizationEnabled);
+            // Capture once so the read path and its coordinator cannot disagree.
+            UseIsolatedCacheReads = !isReadView && !isApplicationTokenCache &&
+                serviceBundle.Config.IsConfidentialClient &&
+                serviceBundle.Config.CacheSynchronizationEnabled &&
+                !serviceBundle.Config.LegacyCacheCompatibilityEnabled &&
+                !(AppContext.TryGetSwitch(DisableCacheReadIsolationSwitch, out bool disabled) && disabled);
+            _semaphoreSlim = new OptionalSemaphoreSlim(
+                useRealSemaphore: serviceBundle.Config.CacheSynchronizationEnabled,
+                allowSharedReaders: UseIsolatedCacheReads);
 
             var proxy = serviceBundle?.PlatformProxy ?? PlatformProxyFactory.CreatePlatformProxy(null);
             Accessor = proxy.CreateTokenCacheAccessor(serviceBundle.Config.AccessorOptions, isApplicationTokenCache);
