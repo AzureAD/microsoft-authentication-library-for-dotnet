@@ -10,8 +10,28 @@ namespace Microsoft.Identity.Client
     /// This interface will be available in TokenCacheNotificationArgs callback to enable serialization/deserialization of the cache.
     /// </summary>
     /// <remarks>
-    /// The methods in this class are not thread safe. It is expected that they will be called from the token cache callbacks, 
-    /// registered via SetBeforeAccess, SetAfterAccess. These callbacks thread safe because they are triggered sequentially.
+    /// These methods are not thread safe. Call them from token cache notifications using
+    /// <see cref="TokenCacheNotificationArgs.TokenCache"/>, rather than a captured cache instance.
+    /// <para>
+    /// Eligible synchronized confidential-client user-cache reads use operation-owned caches when legacy ADAL
+    /// compatibility is disabled, an in-memory user accessor is used, serialization callbacks are registered,
+    /// and the request has a known partition key before its first hydration. Different read operations may
+    /// invoke callbacks concurrently. Providers must synchronize their own shared state and await all cache work,
+    /// including publication, before returning. Writes and removals remain exclusive on the original cache instance.
+    /// </para>
+    /// <para>
+    /// Every eligible BeforeAccess notification must completely hydrate its supplied cache using
+    /// <see cref="DeserializeMsalV3"/> with <c>shouldClearExistingCache: true</c>, or a structured snapshot restore.
+    /// A null payload can represent an empty partition. Incremental, load-once, and no-op hydration are not
+    /// supported for these isolated reads.
+    /// </para>
+    /// <para>
+    /// To restore the previous read behavior, set the AppContext switch
+    /// <c>Microsoft.Identity.Client.DisableCacheReadIsolation</c> to <c>true</c> before constructing the application.
+    /// Existing applications must be recreated or the process restarted. The opt-out restores the previous
+    /// coherence limitations. Other ineligible paths retain their existing behavior; disabling cache synchronization
+    /// does not make callbacks thread safe.
+    /// </para>
     /// </remarks>
     public interface ITokenCacheSerializer
     {

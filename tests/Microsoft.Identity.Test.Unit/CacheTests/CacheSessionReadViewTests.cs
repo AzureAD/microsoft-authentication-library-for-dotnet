@@ -563,6 +563,58 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [TestMethod]
+        public async Task RootTokenWriteWaitsForAfterAccessPublication()
+        {
+            var cache = CreateCache();
+            byte[] persisted = Blob("before");
+            var publicationEntered = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+            var resumePublication = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+            bool mutationEntered = false;
+            cache.SetBeforeAccess(args =>
+            {
+                if (args.HasStateChanged)
+                    mutationEntered = true;
+                args.TokenCache.DeserializeMsalV3(persisted, true);
+            });
+            cache.SetAfterAccessAsync(async args =>
+            {
+                if (args.HasStateChanged)
+                {
+                    persisted = args.TokenCache.SerializeMsalV3();
+                }
+                else
+                {
+                    byte[] captured = args.TokenCache.SerializeMsalV3();
+                    publicationEntered.TrySetResult(true);
+                    await resumePublication.Task.ConfigureAwait(false);
+                    persisted = captured;
+                }
+            });
+
+            var read = CreateSession(cache).GetAccountsAsync();
+            await Complete(publicationEntered.Task).ConfigureAwait(false);
+            var response = TestConstants.CreateMsalTokenResponse();
+            response.AccessToken = "published-mutation";
+            var write = CreateSession(cache).SaveTokenResponseAsync(response);
+            try
+            {
+                Assert.IsFalse(mutationEntered, "The mutation entered its callback before read publication completed.");
+                Assert.IsFalse(write.IsCompleted, "The mutation must queue while AfterAccess publication is paused.");
+            }
+            finally
+            {
+                resumePublication.TrySetResult(true);
+                await Complete(Task.WhenAll(read, write)).ConfigureAwait(false);
+            }
+
+            var recovered = CreateCache();
+            recovered.DeserializeMsalV3(persisted, true);
+            Assert.AreEqual("published-mutation", recovered.Accessor.GetAllAccessTokens().Single().Secret,
+                "The old read publication must not overwrite the persisted mutation.");
+            Assert.IsTrue(mutationEntered);
+        }
+
+        [TestMethod]
         public async Task RootTokenWriteWaitsForTheEntireIsolatedHydration()
         {
             var cache = CreateCache();
