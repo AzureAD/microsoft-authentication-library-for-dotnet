@@ -1,3 +1,7 @@
+Microsoft.Identity.Client.AuthenticationResult.CertificateThumbprint.get -> string
+Microsoft.Identity.Client.AuthenticationResult.CertificateThumbprint.set -> void
+Microsoft.Identity.Client.AuthenticationResult.CertificateThumbprint256.get -> string
+Microsoft.Identity.Client.AuthenticationResult.CertificateThumbprint256.set -> void
 Microsoft.Identity.Client.ITokenCacheSnapshotProvider
 Microsoft.Identity.Client.ITokenCacheSnapshotProvider.CreateSnapshot() -> Microsoft.Identity.Client.TokenCacheSnapshot
 Microsoft.Identity.Client.ITokenCacheSnapshotProvider.RestoreSnapshot(Microsoft.Identity.Client.TokenCacheSnapshot snapshot) -> void

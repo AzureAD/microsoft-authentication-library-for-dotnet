@@ -169,7 +169,11 @@ namespace Microsoft.Identity.Client.Cache.Items
                RefreshOn,
                TokenType,
                OboCacheKey,
-               AdditionalCacheKeyComponents);
+               AdditionalCacheKeyComponents)
+            {
+                CertificateThumbprint = CertificateThumbprint,
+                CertificateThumbprint256 = CertificateThumbprint256
+            };
 
             return newAtItem;
         }
@@ -268,6 +272,10 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         internal string TokenType { get; }
 
+        internal string CertificateThumbprint { get; set; }
+
+        internal string CertificateThumbprint256 { get; set; }
+
         internal HashSet<string> ScopeSet { get; }
 
         internal string ScopeString { get; }
@@ -314,6 +322,8 @@ namespace Microsoft.Identity.Client.Cache.Items
                 RawClientInfo = RawClientInfo ?? "",
                 HomeAccountId = HomeAccountId ?? "",
                 OboCacheKey = string.IsNullOrEmpty(OboCacheKey) ? null : OboCacheKey,
+                CertificateThumbprint = CertificateThumbprint,
+                CertificateThumbprint256 = CertificateThumbprint256,
                 CredentialType = CredentialType ?? "",
                 AdditionalFieldsJson = AdditionalFieldsJson,
                 AdditionalCacheKeyComponents = AdditionalCacheKeyComponents is null ? null :
@@ -360,6 +370,8 @@ namespace Microsoft.Identity.Client.Cache.Items
             string oboCacheKey = JsonHelper.ExtractExistingOrDefault<string>(j, StorageJsonKeys.UserAssertionHash);
             string keyId = JsonHelper.ExtractExistingOrDefault<string>(j, StorageJsonKeys.KeyId);
             string tokenType = JsonHelper.ExtractExistingOrDefault<string>(j, StorageJsonKeys.TokenType) ?? StorageJsonValues.TokenTypeBearer;
+            string certificateThumbprint = JsonHelper.ExtractExistingOrDefault<string>(j, StorageJsonKeys.CertificateThumbprint);
+            string certificateThumbprint256 = JsonHelper.ExtractExistingOrDefault<string>(j, StorageJsonKeys.CertificateThumbprint256);
             string scopes = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.Target);
             var additionalCacheKeyComponents = JsonHelper.ExtractInnerJsonAsDictionary(j, StorageJsonKeys.CacheExtensions);
             var persistedCacheParameters = JsonHelper.ExtractInnerJsonAsDictionary(j, StorageJsonKeys.PersistedCacheParameters);
@@ -382,6 +394,8 @@ namespace Microsoft.Identity.Client.Cache.Items
 
             item.PersistedCacheParameters = persistedCacheParameters;
             item.OboCacheKey = oboCacheKey;
+            item.CertificateThumbprint = certificateThumbprint;
+            item.CertificateThumbprint256 = certificateThumbprint256;
             item.PopulateFieldsFromJObject(j);
 
             item.InitCacheKey();
@@ -401,6 +415,8 @@ namespace Microsoft.Identity.Client.Cache.Items
             SetItemIfValueNotNull(json, StorageJsonKeys.ExpiresOn, DateTimeHelpers.DateTimeToUnixTimestamp(ExpiresOn));
             SetItemIfValueNotNull(json, StorageJsonKeys.ExtendedExpiresOn, extExpiresUnixTimestamp);
             SetItemIfValueNotNull(json, StorageJsonKeys.KeyId, KeyId);
+            SetItemIfValueNotNull(json, StorageJsonKeys.CertificateThumbprint, CertificateThumbprint);
+            SetItemIfValueNotNull(json, StorageJsonKeys.CertificateThumbprint256, CertificateThumbprint256);
             SetItemIfValueNotNullOrDefault(json, StorageJsonKeys.TokenType, TokenType, StorageJsonValues.TokenTypeBearer);
             SetItemIfValueNotNull(
                 json,

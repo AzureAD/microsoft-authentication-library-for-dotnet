@@ -72,6 +72,7 @@ namespace Microsoft.Identity.Client
             #region Create Cache Objects
             if (!string.IsNullOrEmpty(response.AccessToken))
             {
+                var authenticationCertificate = requestParams.ResolvedCertificate ?? requestParams.MtlsCertificate;
                 msalAccessTokenCacheItem =
                     new MsalAccessTokenCacheItem(
                         instanceDiscoveryMetadata.PreferredCache,
@@ -82,7 +83,11 @@ namespace Microsoft.Identity.Client
                         requestParams.AuthenticationScheme.KeyId,
                         CacheKeyFactory.GetOboKey(requestParams.LongRunningOboCacheKey, requestParams.UserAssertion),
                         requestParams.PersistedCacheParameters,
-                        requestParams.CacheKeyComponents);
+                        requestParams.CacheKeyComponents)
+                    {
+                        CertificateThumbprint = authenticationCertificate?.Thumbprint,
+                        CertificateThumbprint256 = authenticationCertificate?.ComputeSha256Thumbprint()
+                    };
             }
 
             if (!string.IsNullOrEmpty(response.RefreshToken))
