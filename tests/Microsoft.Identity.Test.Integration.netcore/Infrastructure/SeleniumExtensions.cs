@@ -253,14 +253,14 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             HandleConsent(driver, user, fields, prompt);
             if (isDeviceCodeFlow)
             {
-                // Only approve remote sign-ins for device-code requests initiated by this test.
-                HandleDeviceCodeApproval(driver);
+                // Restrict approval to test-initiated device-code flows; the helper detects the optional UI.
+                HandleDeviceCodeApprovalIfPresent(driver);
             }
 
             HandleStaySignedIn(driver);
         }
 
-        internal static void HandleDeviceCodeApproval(IWebDriver driver)
+        internal static void HandleDeviceCodeApprovalIfPresent(IWebDriver driver)
         {
             var approvalScreen = driver.WaitForElementToBeVisibleAndEnabled(
                 By.Id("appConfirmRemoteConnectTitle"),

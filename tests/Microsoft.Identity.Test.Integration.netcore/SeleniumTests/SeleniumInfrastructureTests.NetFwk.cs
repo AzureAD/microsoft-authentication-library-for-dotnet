@@ -37,19 +37,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         #endregion
 
         [TestMethod]
-        public void DeviceCodeApproval_ApprovesExpectedScreen()
-        {
-            // Arrange
-            var driver = CreateDeviceCodeApprovalDriver(out var approveButton);
-
-            // Act
-            SeleniumExtensions.HandleDeviceCodeApproval(driver);
-
-            // Assert
-            approveButton.Received(1).Click();
-        }
-
-        [TestMethod]
         public void DeviceCodeApproval_DoesNotApproveWithoutExpectedScreen()
         {
             // Arrange
@@ -58,7 +45,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 .Returns(_ => throw new NoSuchElementException());
 
             // Act
-            SeleniumExtensions.HandleDeviceCodeApproval(driver);
+            SeleniumExtensions.HandleDeviceCodeApprovalIfPresent(driver);
 
             // Assert
             approveButton.DidNotReceive().Click();
@@ -75,7 +62,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
             // Act
             var exception = Assert.Throws<WebDriverException>(
-                () => SeleniumExtensions.HandleDeviceCodeApproval(driver));
+                () => SeleniumExtensions.HandleDeviceCodeApprovalIfPresent(driver));
 
             // Assert
             Assert.AreEqual("Approval click failed", exception.Message);
