@@ -198,7 +198,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 catch (OperationCanceledException ex) when (
                     !isBackgroundRefresh &&
                     ServiceBundle.Config.AppTokenProvider is null &&
-                    cancellationToken.IsCancellationRequested)
+                    cancellationToken.IsCancellationRequested &&
+                    ReferenceEquals(ex, AuthenticationRequestParameters.RequestContext.TokenRequestCancellationException))
                 {
                     var cancellationException = new MsalClientException(
                         MsalError.AuthenticationCanceledError,
