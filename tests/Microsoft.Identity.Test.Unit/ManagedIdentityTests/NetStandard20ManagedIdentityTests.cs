@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 // Assert
                 Assert.AreEqual(MsalError.MtlsNotSupportedForManagedIdentity, exception.ErrorCode);
-                Assert.Contains(".NET Standard 2.0", exception.Message);
+                Assert.AreEqual(MsalErrorMessage.MtlsNotSupportedForManagedIdentityMessage, exception.Message);
                 Assert.IsFalse(request.CommonParameters.IsMtlsPopRequested);
                 Assert.IsFalse(request.CommonParameters.PreferMsiV2);
             }
