@@ -141,6 +141,7 @@ namespace Microsoft.Identity.Client.OAuth2
             // credentialToUse can be null, e.g. for public client apps (no client credential configured).
             IClientCredential credentialToUse = _serviceBundle.Config.ClientCredential;
 
+            _requestParams.ResolvedCertificate = null;
             if (credentialToUse != null)
             {
                 using (_requestParams.RequestContext.Logger.LogBlockDuration("[TokenClient] Resolving credential material"))
@@ -156,7 +157,10 @@ namespace Microsoft.Identity.Client.OAuth2
                         _oAuth2Client.AddBodyParameter(kvp.Key, kvp.Value);
                     }
 
-                    _requestParams.ResolvedCertificate = material.ResolvedCertificate;
+                    if (material.ResolvedCertificate != null)
+                    {
+                        _requestParams.ResolvedCertificate = material.ResolvedCertificate;
+                    }
                 }
             }
 
