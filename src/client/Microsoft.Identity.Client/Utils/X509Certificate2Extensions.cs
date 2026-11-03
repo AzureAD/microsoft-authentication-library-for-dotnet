@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 
@@ -14,10 +15,19 @@ namespace Microsoft.Identity.Client.Utils
         /// </summary>
         internal static string ComputeX5tS256KeyId(this X509Certificate2 certificate)
         {
+            return Base64UrlHelpers.Encode(ComputeSha256Hash(certificate));
+        }
+
+        internal static string ComputeSha256Thumbprint(this X509Certificate2 certificate)
+        {
+            return BitConverter.ToString(ComputeSha256Hash(certificate)).Replace("-", string.Empty);
+        }
+
+        private static byte[] ComputeSha256Hash(X509Certificate2 certificate)
+        {
             using (var sha256 = SHA256.Create())
             {
-                byte[] hash = sha256.ComputeHash(certificate.RawData);
-                return Base64UrlHelpers.Encode(hash);
+                return sha256.ComputeHash(certificate.RawData);
             }
         }
     }
