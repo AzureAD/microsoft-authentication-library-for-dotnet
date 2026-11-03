@@ -152,6 +152,13 @@ namespace Microsoft.Identity.Client.Extensibility
         /// <remarks>
         /// <para>This callback is invoked for both successful and failed token acquisitions. Check <see cref="ExecutionResult.Successful"/> to determine the outcome.</para>
         /// <para>This callback is only invoked for network token acquisition attempts, not when tokens are retrieved from cache.</para>
+        /// <para>When the caller cancels an in-flight foreground token request, MSAL awaits this callback once before
+        /// propagating the original cancellation. The callback receives <see cref="ExecutionResult.Successful"/> set to
+        /// <c>false</c> and a <see cref="MsalClientException"/> with error code <see cref="MsalError.AuthenticationCanceledError"/>
+        /// and the original cancellation exception as its inner exception.</para>
+        /// <para>This cancellation notification does not apply to proactive background refresh. The callback is not
+        /// guaranteed for failures before token acquisition or unexpected non-MSAL exceptions. Certificate ownership
+        /// remains with the application; this notification does not establish that other requests have finished using a certificate.</para>
         /// <para>If multiple calls to <c>OnCompletion</c> are made, only the last configured callback will be used.</para>
         /// <para>Exceptions thrown by this callback will be caught and logged internally to prevent disruption of the authentication flow.</para>
         /// <para>The callback is invoked on the same thread/context as the token acquisition request.</para>
