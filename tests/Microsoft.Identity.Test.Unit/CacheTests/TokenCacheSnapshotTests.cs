@@ -39,7 +39,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 new SortedList<string, string> { ["partition"] = "one" })
             {
                 AdditionalFieldsJson = "{\"future_item\":{\"values\":[1,2]}}",
-                CertificateThumbprint256 = "sha256-certificate-thumbprint",
                 IsExtendedLifeTimeToken = true
             };
             source.AddAdditionalCacheParameters(new Dictionary<string, string> { ["extra"] = "value" });
@@ -49,7 +48,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 nameof(source.OboCacheKey),
                 nameof(source.KeyId),
                 nameof(source.TokenType),
-                nameof(source.CertificateThumbprint256),
                 nameof(source.ScopeSet),
                 nameof(source.ScopeString),
                 nameof(source.ExpiresOn),

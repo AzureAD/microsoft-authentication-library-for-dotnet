@@ -31,7 +31,6 @@ namespace Microsoft.Identity.Client.Cache
         public const string FamilyId = "family_id";
         public const string AppMetadata = "appmetadata";
         public const string KeyId = "kid";
-        public const string CertificateThumbprint256 = "certificate_thumbprint256";
         public const string TokenType = "token_type";
         public const string WamAccountIds = "wam_account_ids";
         public const string AccountSource = "account_source";

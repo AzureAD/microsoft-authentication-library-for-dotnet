@@ -50,8 +50,6 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(TestConstants.DefaultAccessToken, acquired.AccessToken);
                 Assert.AreEqual(TokenSource.IdentityProvider, acquired.AuthenticationResultMetadata.TokenSource);
                 Assert.IsNull(acquired.CertificateThumbprint256);
-                var entry = app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single();
-                Assert.IsNull(entry.CertificateThumbprint256);
                 Assert.AreEqual(1, providerInvocations);
 
                 // Act
@@ -62,8 +60,6 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(TestConstants.DefaultAccessToken, cached.AccessToken);
                 Assert.AreEqual(TokenSource.Cache, cached.AuthenticationResultMetadata.TokenSource);
                 Assert.IsNull(cached.CertificateThumbprint256);
-                entry = app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single();
-                Assert.IsNull(entry.CertificateThumbprint256);
                 Assert.AreEqual(1, providerInvocations);
             }
         }

@@ -478,7 +478,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     Assert.AreEqual(cert.Thumbprint, result.BindingCertificate.Thumbprint,
                         "BindingCertificate must match the cert passed to WithCertificate().");
                     Assert.AreEqual(cert.ComputeSha256Thumbprint(), result.CertificateThumbprint256);
-                    Assert.AreEqual(result.CertificateThumbprint256, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().CertificateThumbprint256);
 
                     // Second token acquisition - should retrieve from cache
                     AuthenticationResult secondResult = await app.AcquireTokenForClient(TestConstants.s_scope)
@@ -494,7 +493,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     Assert.IsNotNull(secondResult.BindingCertificate);
                     Assert.AreEqual(result.BindingCertificate.Thumbprint,
                         secondResult.BindingCertificate.Thumbprint);
-                    Assert.AreEqual(result.CertificateThumbprint256, secondResult.CertificateThumbprint256);
+                    Assert.IsNull(secondResult.CertificateThumbprint256);
                 }
             }
         }

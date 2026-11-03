@@ -72,12 +72,6 @@ namespace Microsoft.Identity.Client
             #region Create Cache Objects
             if (!string.IsNullOrEmpty(response.AccessToken))
             {
-                bool tokenFromAppProvider = requestParams.ApiId == ApiEvent.ApiIds.AcquireTokenForClient &&
-                    requestParams.AppConfig.AppTokenProvider is not null;
-                // TLS captures its certificate before a dynamic provider can rotate during assertion resolution.
-                var authenticationCertificate = tokenFromAppProvider
-                    ? null
-                    : requestParams.MtlsCertificate ?? requestParams.ResolvedCertificate;
                 msalAccessTokenCacheItem =
                     new MsalAccessTokenCacheItem(
                         instanceDiscoveryMetadata.PreferredCache,
@@ -88,10 +82,7 @@ namespace Microsoft.Identity.Client
                         requestParams.AuthenticationScheme.KeyId,
                         CacheKeyFactory.GetOboKey(requestParams.LongRunningOboCacheKey, requestParams.UserAssertion),
                         requestParams.PersistedCacheParameters,
-                        requestParams.CacheKeyComponents)
-                    {
-                        CertificateThumbprint256 = authenticationCertificate?.ComputeSha256Thumbprint()
-                    };
+                        requestParams.CacheKeyComponents);
             }
 
             if (!string.IsNullOrEmpty(response.RefreshToken))

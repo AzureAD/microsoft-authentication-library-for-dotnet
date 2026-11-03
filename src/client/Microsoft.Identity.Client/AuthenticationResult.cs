@@ -236,7 +236,6 @@ namespace Microsoft.Identity.Client
             {
                 ExpiresOn = msalAccessTokenCacheItem.ExpiresOn;
                 Scopes = msalAccessTokenCacheItem.ScopeSet;
-                CertificateThumbprint256 = msalAccessTokenCacheItem.CertificateThumbprint256;
 
 #pragma warning disable CS0618 // Type or member is obsolete
                 ExtendedExpiresOn = msalAccessTokenCacheItem.ExtendedExpiresOn;
@@ -349,14 +348,13 @@ namespace Microsoft.Identity.Client
         public X509Certificate2 BindingCertificate { get; set; }
 
         /// <summary>
-        /// Gets the SHA-256 thumbprint of the certificate used to authenticate the client when this access token was acquired,
+        /// Gets the SHA-256 thumbprint of the certificate used to authenticate the client during this acquisition call,
         /// formatted as an uppercase hexadecimal string without separators.
-        /// Returns <c>null</c> when no certificate was used or the certificate is unknown to MSAL.
+        /// Returns <c>null</c> for cache hits, when no certificate was used, or when the certificate is unknown to MSAL.
         /// </summary>
         /// <remarks>
-        /// This value is persisted with the access token and identifies
-        /// the certificate used for the original acquisition, not the currently configured certificate.
-        /// Older cache entries without the SHA-256 thumbprint return <c>null</c>.
+        /// This value is request-only and is not persisted in the token cache.
+        /// A cached result returns <c>null</c> even when a certificate was used to acquire the cached token.
         /// This is diagnostic metadata, not proof of possession or a replacement for <see cref="BindingCertificate"/>.
         /// </remarks>
         public string CertificateThumbprint256 { get; set; }
