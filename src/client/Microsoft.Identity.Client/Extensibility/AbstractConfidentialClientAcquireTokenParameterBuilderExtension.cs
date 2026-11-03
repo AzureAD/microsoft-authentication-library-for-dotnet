@@ -7,6 +7,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.OAuth2;
 
@@ -24,8 +25,9 @@ namespace Microsoft.Identity.Client.Extensibility
         /// <summary>
         /// Specifies client-originated claims to include in the token request.
         /// Unlike <see cref="AbstractAcquireTokenParameterBuilder{T}.WithClaims"/> (for server-issued
-        /// claims challenges), tokens acquired with client claims <b>are cached</b> and the cache entry
-        /// is keyed on the claims value. Different claims values produce separate cache entries.
+        /// claims challenges), access tokens acquired with client claims <b>are cached</b> and matched
+        /// using the exact raw claims string. Semantically equivalent JSON with different whitespace or
+        /// property ordering is treated as a different access-token cache value.
         /// Use stable, non-dynamic values to avoid unbounded cache growth.
         /// </summary>
         /// <typeparam name="T">The concrete confidential client builder type.</typeparam>
@@ -43,8 +45,9 @@ namespace Microsoft.Identity.Client.Extensibility
         /// <summary>
         /// Specifies client-originated claims for confidential client silent token acquisition.
         /// Unlike <see cref="AbstractAcquireTokenParameterBuilder{T}.WithClaims"/> (for server-issued
-        /// claims challenges), tokens acquired with client claims <b>are cached</b> and the cache entry
-        /// is keyed on the claims value. Different claims values produce separate cache entries.
+        /// claims challenges), access tokens acquired with client claims <b>are cached</b> and matched
+        /// using the exact raw claims string. Semantically equivalent JSON with different whitespace or
+        /// property ordering is treated as a different access-token cache value.
         /// If the silent request redeems a refresh token, the claims are included in the token request.
         /// Use stable, non-dynamic values to avoid unbounded cache growth.
         /// </summary>
@@ -470,7 +473,8 @@ namespace Microsoft.Identity.Client.Extensibility
 
             // Use indexer (not SortedList.Add) so repeated calls are last-write-wins rather than throwing.
             builder.CommonParameters.CacheKeyComponents ??= new SortedList<string, Func<CancellationToken, Task<string>>>();
-            builder.CommonParameters.CacheKeyComponents["client_claims"] = _ => Task.FromResult(claimsJson);
+            builder.CommonParameters.CacheKeyComponents[AcquireTokenCommonParameters.ClientClaimsCacheKey] =
+                _ => Task.FromResult(claimsJson);
 
             return (T)builder;
         }

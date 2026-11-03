@@ -27,6 +27,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
     {
         private readonly IServiceBundle _serviceBundle;
         private readonly AcquireTokenCommonParameters _commonParameters;
+        private readonly string _claims;
+        private readonly string _clientClaims;
         private string _loginHint;
         private Lazy<string> _claimsAndClientCapabilities;
 
@@ -41,6 +43,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             _serviceBundle = serviceBundle;
             _commonParameters = commonParameters;
+            _claims = commonParameters.Claims;
+            _clientClaims = commonParameters.ClientClaims;
             RequestContext = requestContext;
 
             CacheSessionManager = new CacheSessionManager(tokenCache, this);
@@ -78,7 +82,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             // so we avoid parsing on the hot path.
             _claimsAndClientCapabilities = new Lazy<string>(() =>
                 ClaimsHelper.GetMergedClaimsAndClientCapabilities(
-                    ClaimsHelper.MergeClaimsObjects(_commonParameters.Claims, _commonParameters.ClientClaims),
+                    ClaimsHelper.MergeClaimsObjects(_claims, _clientClaims),
                     _serviceBundle.Config.ClientCapabilities));
         }
 
@@ -141,7 +145,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             get
             {
-                return _commonParameters.Claims;
+                return _claims;
             }
         }
 
