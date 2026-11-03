@@ -444,11 +444,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             // Arrange
             using var harness = CreateTestHarness();
             harness.HttpManager.AddInstanceDiscoveryMockHandler();
-            using var key = RSA.Create(2048);
-            var certificateRequest = new CertificateRequest(
-                "CN=Cancellation test", key, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
-            using var certificate = certificateRequest.CreateSelfSigned(
-                DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddDays(1));
+            using var certificate = CertHelper.CreateTestCert();
             using var cancellation = new CancellationTokenSource();
             using var handler = new CancelableTokenRequestHandler();
             harness.HttpManager.AddMockHandler(handler);
@@ -541,11 +537,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             // Arrange
             using var harness = CreateTestHarness();
             harness.HttpManager.AddInstanceDiscoveryMockHandler();
-            using var key = RSA.Create(2048);
-            var certificateRequest = new CertificateRequest(
-                "CN=Pre-request cancellation test", key, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
-            using var certificate = certificateRequest.CreateSelfSigned(
-                DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddDays(1));
+            using var certificate = CertHelper.CreateTestCert();
             using var cancellation = new CancellationTokenSource();
             var loading = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
             int providerCount = 0;
@@ -705,11 +697,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             // Arrange
             using var harness = CreateTestHarness();
             harness.HttpManager.AddInstanceDiscoveryMockHandler();
-            using var key = RSA.Create(2048);
-            var certificateRequest = new CertificateRequest(
-                "CN=Background cancellation test", key, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
-            using var certificate = certificateRequest.CreateSelfSigned(
-                DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddDays(1));
+            using var certificate = CertHelper.CreateTestCert();
             using var cancellation = new CancellationTokenSource();
             using var handler = new CancelableTokenRequestHandler();
             harness.HttpManager.AddMockHandler(handler);
