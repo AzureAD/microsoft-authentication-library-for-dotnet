@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
@@ -20,6 +21,53 @@ namespace Microsoft.Identity.Test.Unit
     [TestClass]
     public class AppTokenProviderTests : TestBase
     {
+        [TestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task AppTokenProvider_WithConfiguredCertificate_DoesNotReportCertificateThumbprint256Async(bool sendCertificateOverMtls)
+        {
+            // Arrange
+            using (var harness = CreateTestHarness())
+            {
+                int providerInvocations = 0;
+                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithInstanceDiscovery(false)
+                    .WithCertificate(CertHelper.GetOrCreateTestCert(),
+                        new CertificateOptions { SendCertificateOverMtls = sendCertificateOverMtls })
+                    .WithAppTokenProvider(_ =>
+                    {
+                        providerInvocations++;
+                        return Task.FromResult(GetAppTokenProviderResult());
+                    })
+                    .WithHttpManager(harness.HttpManager)
+                    .BuildConcrete();
+
+                // Act
+                var acquired = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual(TestConstants.DefaultAccessToken, acquired.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, acquired.AuthenticationResultMetadata.TokenSource);
+                Assert.IsNull(acquired.CertificateThumbprint256);
+                var entry = app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single();
+                Assert.IsNull(entry.CertificateThumbprint256);
+                Assert.AreEqual(1, providerInvocations);
+
+                // Act
+                var cached = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual(TestConstants.DefaultAccessToken, cached.AccessToken);
+                Assert.AreEqual(TokenSource.Cache, cached.AuthenticationResultMetadata.TokenSource);
+                Assert.IsNull(cached.CertificateThumbprint256);
+                entry = app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single();
+                Assert.IsNull(entry.CertificateThumbprint256);
+                Assert.AreEqual(1, providerInvocations);
+            }
+        }
+
         [TestMethod]
         public async Task ValidateAppTokenProviderAsync()
         {

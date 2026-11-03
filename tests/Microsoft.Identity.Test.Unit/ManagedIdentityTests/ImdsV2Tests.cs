@@ -238,10 +238,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.AreEqual(MTLSPoP, result.TokenType);
                 Assert.IsNotNull(result.BindingCertificate);
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-                Assert.AreEqual(result.BindingCertificate.Thumbprint, result.CertificateThumbprint);
                 Assert.AreEqual(result.BindingCertificate.ComputeSha256Thumbprint(), result.CertificateThumbprint256);
-                Assert.AreEqual(result.CertificateThumbprint,
-                    ((ManagedIdentityApplication)managedIdentityApp).AppTokenCacheInternal.Accessor.GetAllAccessTokens()[0].CertificateThumbprint);
                 Assert.AreEqual(result.CertificateThumbprint256,
                     ((ManagedIdentityApplication)managedIdentityApp).AppTokenCacheInternal.Accessor.GetAllAccessTokens()[0].CertificateThumbprint256);
 
@@ -255,7 +252,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.AreEqual(MTLSPoP, result.TokenType);
                 Assert.IsNotNull(result.BindingCertificate);
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
-                Assert.AreEqual(result.BindingCertificate.Thumbprint, result.CertificateThumbprint);
                 Assert.AreEqual(result.BindingCertificate.ComputeSha256Thumbprint(), result.CertificateThumbprint256);
             }
         }

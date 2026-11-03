@@ -156,10 +156,7 @@ namespace Microsoft.Identity.Client.OAuth2
                         _oAuth2Client.AddBodyParameter(kvp.Key, kvp.Value);
                     }
 
-                    if (material.ResolvedCertificate != null)
-                    {
-                        _requestParams.ResolvedCertificate = material.ResolvedCertificate;
-                    }
+                    _requestParams.ResolvedCertificate = material.ResolvedCertificate;
                 }
             }
 

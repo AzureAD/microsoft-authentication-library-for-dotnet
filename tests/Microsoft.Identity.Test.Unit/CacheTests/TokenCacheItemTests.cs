@@ -16,11 +16,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
     public class TokenCacheItemTests
     {
         [TestMethod]
-        [DataRow(null, null)]
-        [DataRow("0123456789ABCDEF0123456789ABCDEF01234567", null)]
-        [DataRow(null, "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF")]
-        [DataRow("0123456789ABCDEF0123456789ABCDEF01234567", "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF")]
-        public void AccessTokenCertificateThumbprint_PreservedBySerializationAndExpiryChange(string thumbprint, string thumbprint256)
+        [DataRow(null)]
+        [DataRow("0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF")]
+        public void AccessTokenCertificateThumbprint256_PreservedBySerializationAndExpiryChange(string thumbprint256)
         {
             // Arrange
             var now = DateTimeOffset.FromUnixTimeSeconds(1800000000);
@@ -28,7 +26,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 "environment", "client", "scope", "tenant", "access-token",
                 now, now.AddHours(1), now.AddHours(2), null, null)
             {
-                CertificateThumbprint = thumbprint,
                 CertificateThumbprint256 = thumbprint256
             };
 
@@ -37,13 +34,10 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             var expired = deserialized.WithExpiresOn(now);
 
             // Assert
-            Assert.AreEqual(thumbprint, deserialized.CertificateThumbprint);
-            Assert.AreEqual(thumbprint, expired.CertificateThumbprint);
             Assert.AreEqual(thumbprint256, deserialized.CertificateThumbprint256);
             Assert.AreEqual(thumbprint256, expired.CertificateThumbprint256);
             Assert.AreEqual(item.CacheKey, deserialized.CacheKey);
             Assert.AreEqual(item.CacheKey, expired.CacheKey);
-            Assert.AreEqual(thumbprint is not null, item.ToJObject().ContainsKey(StorageJsonKeys.CertificateThumbprint));
             Assert.AreEqual(thumbprint256 is not null, item.ToJObject().ContainsKey(StorageJsonKeys.CertificateThumbprint256));
         }
 

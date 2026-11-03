@@ -5,6 +5,7 @@
 using System;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
@@ -214,9 +215,57 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         #region WithCertificate (Dynamic Provider) Integration Tests
 
         [TestMethod]
+        public async Task CertificateThumbprint256_UsesTlsCertificateWhenProviderRotatesBetweenLookupsAsync()
+        {
+            // Arrange
+            using (var harness = CreateTestHarness())
+            {
+                var tlsCertificate = CertHelper.GetOrCreateTestCert();
+                var laterCertificate = CertHelper.GetOrCreateTestCert(regenerateCert: true);
+                using var sha256 = SHA256.Create();
+                string tlsThumbprint256 = BitConverter.ToString(sha256.ComputeHash(tlsCertificate.RawData)).Replace("-", string.Empty);
+                int providerCount = 0;
+                var handler = harness.HttpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+                handler.ExpectedMtlsBindingCertificate = tlsCertificate;
+
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithAuthority(TestConstants.AuthorityCommonTenant)
+                    .WithInstanceDiscovery(false)
+                    .WithHttpManager(harness.HttpManager)
+                    .WithCertificate((AssertionRequestOptions options) =>
+                    {
+                        providerCount++;
+                        return Task.FromResult(providerCount == 1 ? tlsCertificate : laterCertificate);
+                    }, new CertificateOptions { SendCertificateOverMtls = true })
+                    .BuildConcrete();
+
+                // Act
+                var acquired = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual(2, providerCount, "The provider must rotate between TLS preflight and credential resolution.");
+                Assert.AreEqual(TokenSource.IdentityProvider, acquired.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(tlsThumbprint256, acquired.CertificateThumbprint256);
+                Assert.AreEqual(tlsThumbprint256, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().CertificateThumbprint256);
+
+                // Act
+                var cached = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual(TokenSource.Cache, cached.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(tlsThumbprint256, cached.CertificateThumbprint256);
+                Assert.AreEqual(tlsThumbprint256, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().CertificateThumbprint256);
+                Assert.AreEqual(3, providerCount, "A cache hit may resolve the current TLS certificate but must preserve acquisition provenance.");
+            }
+        }
+
+        [TestMethod]
         [DataRow(false)]
         [DataRow(true)]
-        public async Task CertificateThumbprint_PersistsAcrossCacheHitsAndRotationAsync(bool dynamicProvider)
+        public async Task CertificateThumbprint256_PersistsAcrossCacheHitsAndRotationAsync(bool dynamicProvider)
         {
             // Arrange
             using (var harness = CreateTestHarness())
@@ -255,10 +304,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ExecuteAsync().ConfigureAwait(false);
 
                 // Assert
-                Assert.AreEqual(cert1.Thumbprint, acquired.CertificateThumbprint);
                 Assert.AreEqual(thumbprint2561, acquired.CertificateThumbprint256);
                 var entry = app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single();
-                Assert.AreEqual(cert1.Thumbprint, entry.CertificateThumbprint);
                 Assert.AreEqual(thumbprint2561, entry.CertificateThumbprint256);
                 string cacheKey = entry.CacheKey;
 
@@ -269,10 +316,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // Assert
                 Assert.AreEqual(TokenSource.Cache, cached.AuthenticationResultMetadata.TokenSource);
-                Assert.AreEqual(cert1.Thumbprint, cached.CertificateThumbprint);
                 Assert.AreEqual(thumbprint2561, cached.CertificateThumbprint256);
                 Assert.AreEqual(dynamicProvider ? 1 : 0, providerCount);
-                Assert.AreEqual(cert1.Thumbprint, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().CertificateThumbprint);
                 Assert.AreEqual(thumbprint2561, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().CertificateThumbprint256);
 
                 // Arrange
@@ -305,13 +350,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // Assert
                 Assert.AreEqual(TokenSource.Cache, snapshotResult.AuthenticationResultMetadata.TokenSource);
-                Assert.AreEqual(cert1.Thumbprint, snapshotResult.CertificateThumbprint);
                 Assert.AreEqual(thumbprint2561, snapshotResult.CertificateThumbprint256);
                 Assert.AreEqual(TokenSource.Cache, deserializedResult.AuthenticationResultMetadata.TokenSource);
-                Assert.AreEqual(cert1.Thumbprint, deserializedResult.CertificateThumbprint);
                 Assert.AreEqual(thumbprint2561, deserializedResult.CertificateThumbprint256);
                 Assert.AreEqual(dynamicProvider ? 1 : 0, providerCount);
-                Assert.AreEqual(cert1.Thumbprint, restored.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().CertificateThumbprint);
                 Assert.AreEqual(thumbprint2561, restored.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().CertificateThumbprint256);
 
                 // Act
@@ -321,23 +363,18 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // Assert
                 Assert.AreEqual(TokenSource.IdentityProvider, refreshed.AuthenticationResultMetadata.TokenSource);
-                Assert.AreEqual(cert2.Thumbprint, refreshed.CertificateThumbprint);
                 Assert.AreEqual(thumbprint2562, refreshed.CertificateThumbprint256);
                 Assert.AreEqual(dynamicProvider ? 2 : 0, providerCount);
                 entry = restored.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single();
-                Assert.AreEqual(cert2.Thumbprint, entry.CertificateThumbprint);
                 Assert.AreEqual(thumbprint2562, entry.CertificateThumbprint256);
                 Assert.AreEqual(cacheKey, entry.CacheKey, "Certificate provenance must not change the cache key.");
             }
         }
 
         [TestMethod]
-        [DataRow(false, null)]
-        [DataRow(true, null)]
-        [DataRow(false, "legacy-sha1-thumbprint")]
-        [DataRow(true, "legacy-sha1-thumbprint")]
-        public async Task CertificateThumbprints_UnknownCredentialAndOlderCacheEntry_PreserveAvailableMetadataAsync(
-            bool clientAssertion, string legacyThumbprint)
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task CertificateThumbprint256_UnknownCredentialAndOlderCacheEntry_ReturnNullAsync(bool clientAssertion)
         {
             // Arrange
             using (var harness = CreateTestHarness())
@@ -363,16 +400,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ExecuteAsync().ConfigureAwait(false);
 
                 // Assert
-                Assert.IsNull(acquired.CertificateThumbprint);
                 Assert.IsNull(acquired.CertificateThumbprint256);
                 var entry = app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single();
-                Assert.IsNull(entry.CertificateThumbprint);
                 Assert.IsNull(entry.CertificateThumbprint256);
-                Assert.IsFalse(entry.ToJObject().ContainsKey(StorageJsonKeys.CertificateThumbprint));
                 Assert.IsFalse(entry.ToJObject().ContainsKey(StorageJsonKeys.CertificateThumbprint256));
 
                 // Arrange
-                entry.CertificateThumbprint = legacyThumbprint;
                 byte[] serialized = ((ITokenCacheSerializer)app.AppTokenCache).SerializeMsalV3();
                 var restored = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
@@ -388,9 +421,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // Assert
                 Assert.AreEqual(TokenSource.Cache, cached.AuthenticationResultMetadata.TokenSource);
-                Assert.AreEqual(legacyThumbprint, cached.CertificateThumbprint, "Do not substitute the currently configured certificate for historical provenance.");
                 Assert.IsNull(cached.CertificateThumbprint256);
-                Assert.AreEqual(legacyThumbprint, restored.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().CertificateThumbprint);
                 Assert.IsNull(restored.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().CertificateThumbprint256);
             }
         }
@@ -891,12 +922,79 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // Assert
                 Assert.AreEqual(2, certProviderCount, "Provider should be called twice");
                 Assert.IsNotNull(result.AccessToken);
-                Assert.AreEqual(cert2.Thumbprint, result.CertificateThumbprint);
                 Assert.AreEqual(cert2.ComputeSha256Thumbprint(), result.CertificateThumbprint256);
-                Assert.AreEqual(cert2.Thumbprint,
-                    ((ITokenCacheInternal)app.AppTokenCache).Accessor.GetAllAccessTokens().Single().CertificateThumbprint);
                 Assert.AreEqual(result.CertificateThumbprint256,
                     ((ITokenCacheInternal)app.AppTokenCache).Accessor.GetAllAccessTokens().Single().CertificateThumbprint256);
+            }
+        }
+
+        [TestMethod]
+        public async Task CertificateThumbprint256_RetryWithoutResolvedCertificate_DoesNotReportFailedAttemptCertificateAsync()
+        {
+            // Arrange
+            using (var harness = CreateTestHarness())
+            {
+                var certificate = CertHelper.GetOrCreateTestCert();
+                int providerCount = 0;
+                int failureCount = 0;
+                ExecutionResult failedAttempt = null;
+                ExecutionResult completion = null;
+                harness.HttpManager.AddFailureTokenEndpointResponse("request_failed");
+                var successHandler = harness.HttpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithAuthority(TestConstants.AuthorityCommonTenant)
+                    .WithInstanceDiscovery(false)
+                    .WithHttpManager(harness.HttpManager)
+                    .WithClientAssertion((AssertionRequestOptions options, CancellationToken cancellationToken) =>
+                    {
+                        providerCount++;
+                        return Task.FromResult(new ClientSignedAssertion
+                        {
+                            Assertion = "external-assertion",
+                            TokenBindingCertificate = providerCount == 2 ? certificate : null
+                        });
+                    })
+                    .OnMsalServiceFailure((AssertionRequestOptions options, ExecutionResult result) =>
+                    {
+                        failedAttempt = result;
+                        failureCount++;
+                        return Task.FromResult(failureCount == 1);
+                    })
+                    .OnCompletion((AssertionRequestOptions options, ExecutionResult result) =>
+                    {
+                        completion = result;
+                        return Task.CompletedTask;
+                    })
+                    .BuildConcrete();
+
+                // Act
+                var acquired = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual(3, providerCount, "Resolve no TLS certificate in preflight, a certificate on failure, and none on retry.");
+                Assert.AreEqual(1, failureCount);
+                Assert.IsNotNull(failedAttempt);
+                Assert.AreSame(certificate, failedAttempt.ClientCertificate);
+                Assert.IsEmpty(successHandler.ClientCertificates);
+                Assert.AreEqual(TokenSource.IdentityProvider, acquired.AuthenticationResultMetadata.TokenSource);
+                Assert.IsNull(acquired.CertificateThumbprint256);
+                Assert.IsNull(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().CertificateThumbprint256);
+                Assert.IsNotNull(completion);
+                Assert.IsTrue(completion.Successful);
+                Assert.IsNull(completion.ClientCertificate);
+
+                // Act
+                var cached = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual(TokenSource.Cache, cached.AuthenticationResultMetadata.TokenSource);
+                Assert.IsNull(cached.CertificateThumbprint256);
+                Assert.IsNull(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().CertificateThumbprint256);
+                Assert.AreEqual(4, providerCount, "The cache hit should only invoke assertion preflight.");
             }
         }
 
