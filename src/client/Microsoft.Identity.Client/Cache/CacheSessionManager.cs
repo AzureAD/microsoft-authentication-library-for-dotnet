@@ -202,6 +202,11 @@ namespace Microsoft.Identity.Client.Cache
                                         .AcquireReadAsync(_requestParams.RequestContext.UserCancellationToken).ConfigureAwait(false);
                                 }
                             }
+                            // Unkeyed initialization may complete while this read waits for the root lease.
+                            if (_cacheRefreshedForRead)
+                            {
+                                return;
+                            }
                             using var hydrationScope = _readView?.BeginReadHydration(TokenCacheInternal);
                             string key = CacheKeyFactory.GetKeyFromRequest(_requestParams);
 

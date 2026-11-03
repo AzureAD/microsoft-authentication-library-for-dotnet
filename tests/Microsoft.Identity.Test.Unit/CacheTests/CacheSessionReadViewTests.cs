@@ -1120,6 +1120,71 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [TestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task ConcurrentUnkeyedReadRechecksCompletionAfterRootAdmission(bool synchronous)
+        {
+            var cache = CreateCache();
+            cache.DeserializeMsalV3(Blob("before"), true);
+            int beforeCalls = 0;
+            int afterCalls = 0;
+            TokenCacheCallback before = args =>
+            {
+                Assert.IsNull(args.SuggestedCacheKey);
+                Interlocked.Increment(ref beforeCalls);
+            };
+            TokenCacheCallback after = _ => Interlocked.Increment(ref afterCalls);
+            if (synchronous)
+            {
+                cache.SetBeforeAccess(before);
+                cache.SetAfterAccess(after);
+            }
+            else
+            {
+                cache.SetBeforeAccessAsync(args => { before(args); return Task.CompletedTask; });
+                cache.SetAfterAccessAsync(args => { after(args); return Task.CompletedTask; });
+            }
+
+            var session = CreateSession(cache, knownAccount: false);
+            Assert.AreEqual("before", (await session.GetAccountsAsync().ConfigureAwait(false)).Single().Username);
+            var viewField = typeof(CacheSessionManager).GetField("_readView", BindingFlags.Instance | BindingFlags.NonPublic);
+            var completedField = typeof(CacheSessionManager).GetField("_cacheRefreshedForRead", BindingFlags.Instance | BindingFlags.NonPublic);
+            var view = (ITokenCacheInternal)viewField.GetValue(session);
+            byte[] pinnedState = view.SerializeMsalV3();
+
+            await cache.Semaphore.WaitAsync(CancellationToken.None).ConfigureAwait(false);
+            Task<IEnumerable<IAccount>> waiting;
+            try
+            {
+                // Recreate the publication window without a timing-dependent pause or production test hook.
+                completedField.SetValue(session, false);
+                waiting = session.GetAccountsAsync();
+                Assert.IsFalse(waiting.IsCompleted);
+                Assert.AreEqual(0, view.Semaphore.CurrentCount,
+                    "The second read must hold the private semaphore while waiting for root admission.");
+                Assert.AreEqual(1, beforeCalls);
+                Assert.AreEqual(1, afterCalls);
+            }
+            finally
+            {
+                completedField.SetValue(session, true);
+                cache.Semaphore.Release();
+            }
+
+            await Complete(waiting).ConfigureAwait(false);
+            Assert.AreEqual("before", (await waiting.ConfigureAwait(false)).Single().Username);
+            Assert.AreEqual("before", (await session.GetAccountsAsync().ConfigureAwait(false)).Single().Username);
+            Assert.AreSame(view, viewField.GetValue(session));
+            CollectionAssert.AreEqual(pinnedState, view.SerializeMsalV3());
+            Assert.AreEqual(1, beforeCalls, "Completed unkeyed hydration must not invoke BeforeAccess again.");
+            Assert.AreEqual(1, afterCalls, "Completed unkeyed hydration must not invoke AfterAccess again.");
+            Assert.AreEqual(1, view.Semaphore.CurrentCount);
+            using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+            await cache.Semaphore.WaitAsync(timeout.Token).ConfigureAwait(false);
+            cache.Semaphore.Release();
+        }
+
+        [TestMethod]
         public async Task ConcurrentReadsInOneSessionPublishOnlyOneHydratedView()
         {
             // Arrange
