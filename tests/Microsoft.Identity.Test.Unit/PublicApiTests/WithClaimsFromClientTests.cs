@@ -43,8 +43,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [DataRow("   ")]
         public void WithClaimsFromClient_NullOrWhitespace_IsNoOp(string emptyClaims)
         {
-            // Arrange — experimental features intentionally NOT enabled: the null/whitespace
-            // guard must return before the experimental-feature gate is evaluated.
+            // Arrange
             var app = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
                 .WithAuthority(AzureCloudInstance.AzurePublic, TestConstants.Utid)
@@ -70,7 +69,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 .Create(TestConstants.ClientId)
                 .WithAuthority(AzureCloudInstance.AzurePublic, TestConstants.Utid)
                 .WithClientSecret(TestConstants.ClientSecret)
-                .WithExperimentalFeatures(true)
                 .BuildConcrete();
 
             // Act
@@ -95,7 +93,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 .Create(TestConstants.ClientId)
                 .WithAuthority(AzureCloudInstance.AzurePublic, TestConstants.Utid)
                 .WithClientSecret(TestConstants.ClientSecret)
-                .WithExperimentalFeatures(true)
                 .BuildConcrete();
 
             // Act
@@ -108,7 +105,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        public void WithClaimsFromClient_ExperimentalFeatureErrorNamesPublicApi()
+        public async Task WithClaimsFromClient_NonEmptyClaims_DoesNotRequireExperimentalFeaturesAsync()
         {
             // Arrange
             var app = ConfidentialClientApplicationBuilder
@@ -118,15 +115,15 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 .BuildConcrete();
 
             // Act
-            MsalClientException exception = Assert.Throws<MsalClientException>(
-                () => app.AcquireTokenForClient(TestConstants.s_scope)
-                    .WithClaimsFromClient(NspClaims));
+            var builder = app.AcquireTokenForClient(TestConstants.s_scope)
+                .WithClaimsFromClient(NspClaims);
+
+            string cacheKeyValue = await builder.CommonParameters.CacheKeyComponents["client_claims"](default)
+                .ConfigureAwait(false);
 
             // Assert
-            Assert.AreEqual(MsalError.ExperimentalFeature, exception.ErrorCode);
-            Assert.AreEqual(
-                MsalErrorMessage.ExperimentalFeature(nameof(AbstractConfidentialClientAcquireTokenParameterBuilderExtension.WithClaimsFromClient)),
-                exception.Message);
+            Assert.AreEqual(NspClaims, builder.CommonParameters.ClientClaims);
+            Assert.AreEqual(NspClaims, cacheKeyValue);
         }
 
         [TestMethod]
@@ -152,7 +149,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        public void WithClaimsFromClient_Silent_ExperimentalFeatureErrorNamesPublicApi()
+        public async Task WithClaimsFromClient_Silent_NonEmptyClaims_DoesNotRequireExperimentalFeaturesAsync()
         {
             // Arrange
             var app = ConfidentialClientApplicationBuilder
@@ -162,15 +159,15 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 .BuildConcrete();
 
             // Act
-            MsalClientException exception = Assert.Throws<MsalClientException>(
-                () => app.AcquireTokenSilent(TestConstants.s_scope, TestConstants.s_user)
-                    .WithClaimsFromClient(NspClaims));
+            var builder = app.AcquireTokenSilent(TestConstants.s_scope, TestConstants.s_user)
+                .WithClaimsFromClient(NspClaims);
+
+            string cacheKeyValue = await builder.CommonParameters.CacheKeyComponents["client_claims"](default)
+                .ConfigureAwait(false);
 
             // Assert
-            Assert.AreEqual(MsalError.ExperimentalFeature, exception.ErrorCode);
-            Assert.AreEqual(
-                MsalErrorMessage.ExperimentalFeature(nameof(AbstractConfidentialClientAcquireTokenParameterBuilderExtension.WithClaimsFromClient)),
-                exception.Message);
+            Assert.AreEqual(NspClaims, builder.CommonParameters.ClientClaims);
+            Assert.AreEqual(NspClaims, cacheKeyValue);
         }
 
         [TestMethod]
@@ -199,7 +196,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             // Arrange
             var app = PublicClientApplicationBuilder
                 .Create(TestConstants.ClientId)
-                .WithExperimentalFeatures(true)
                 .BuildConcrete();
 
             var builder = app.AcquireTokenSilent(TestConstants.s_scope, TestConstants.s_user);

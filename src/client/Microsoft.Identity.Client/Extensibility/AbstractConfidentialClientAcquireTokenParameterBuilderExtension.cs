@@ -466,8 +466,6 @@ namespace Microsoft.Identity.Client.Extensibility
                 return (T)builder;
             }
 
-            builder.ValidateUseOfExperimentalFeature(nameof(WithClaimsFromClient));
-
             builder.CommonParameters.ClientClaims = claimsJson;
 
             // Use indexer (not SortedList.Add) so repeated calls are last-write-wins rather than throwing.
