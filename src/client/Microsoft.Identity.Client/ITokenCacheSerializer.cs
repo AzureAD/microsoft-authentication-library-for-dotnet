@@ -16,14 +16,23 @@ namespace Microsoft.Identity.Client
     /// Eligible synchronized confidential-client user-cache reads use operation-owned caches when legacy ADAL
     /// compatibility is disabled, an in-memory user accessor is used, serialization callbacks are registered,
     /// and the request has a known partition key before its first hydration. Different read operations may
-    /// invoke callbacks concurrently. Providers must synchronize their own shared state and await all cache work,
-    /// including publication, before returning. Writes and removals remain exclusive on the original cache instance.
+    /// invoke async-only read callbacks concurrently. If either BeforeAccess or AfterAccess has a synchronous
+    /// callback, MSAL keeps the entire read notification lifecycle sequential. Async providers must synchronize
+    /// their own shared state and await all cache work, including publication, before returning.
+    /// Writes and removals remain exclusive on the original cache instance.
     /// </para>
     /// <para>
     /// Every eligible BeforeAccess notification must completely hydrate its supplied cache using
-    /// <see cref="DeserializeMsalV3"/> with <c>shouldClearExistingCache: true</c>, or a structured snapshot restore.
+    /// <see cref="DeserializeMsalV3"/>, or a structured snapshot restore. Each private hydration attempt starts
+    /// with empty cache state, so a complete MSALv3 payload can use the default clear-existing flag.
     /// A null payload can represent an empty partition. Incremental, load-once, and no-op hydration are not
     /// supported for these isolated reads.
+    /// </para>
+    /// <para>
+    /// Successful keyed reads publish independently owned decoded state to the original cache after both
+    /// notifications succeed, preserving subsequent unkeyed account discovery. Clear-existing restores replace
+    /// the original state; other complete MSALv3 restores merge it. Unkeyed reads keep their original notification
+    /// target and pin independently owned state before releasing the original cache.
     /// </para>
     /// <para>
     /// To restore the previous read behavior, set the AppContext switch

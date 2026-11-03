@@ -32,8 +32,9 @@ namespace Microsoft.Identity.Client
     /// <remarks>
     /// Synchronized confidential-client user caches with legacy ADAL compatibility disabled
     /// hydrate operation-owned read views for known user partitions. Serialization callbacks
-    /// must completely hydrate the cache supplied in their notification arguments and support
-    /// overlapping read lifecycles. To restore the previous read behavior, set the AppContext
+    /// must completely hydrate the cache supplied in their notification arguments. Async-only
+    /// read callbacks may overlap; lifecycles with synchronous read callbacks remain sequential.
+    /// To restore the previous read behavior, set the AppContext
     /// switch <c>Microsoft.Identity.Client.DisableCacheReadIsolation</c> to <c>true</c> before
     /// constructing the application. Other cache configurations retain their existing behavior.
     /// </remarks>

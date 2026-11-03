@@ -182,6 +182,7 @@ namespace Microsoft.Identity.Client.Cache
 
                     TelemetryData telemetryData = new TelemetryData();
                     IDisposable readLease = null;
+                    bool exclusiveReadLifecycle = false;
                     try
                     {
                         if (!_cacheRefreshedForRead) // double check locking
@@ -189,8 +190,17 @@ namespace Microsoft.Identity.Client.Cache
                             if (_readView != null)
                             {
                                 // Cover L2-to-L1 publication as well as private deserialization.
-                                readLease = await TokenCacheInternal.Semaphore
-                                    .AcquireReadAsync(_requestParams.RequestContext.UserCancellationToken).ConfigureAwait(false);
+                                if (_readView.BeforeAccess != null || _readView.AfterAccess != null)
+                                {
+                                    await TokenCacheInternal.Semaphore
+                                        .WaitAsync(_requestParams.RequestContext.UserCancellationToken).ConfigureAwait(false);
+                                    exclusiveReadLifecycle = true;
+                                }
+                                else
+                                {
+                                    readLease = await TokenCacheInternal.Semaphore
+                                        .AcquireReadAsync(_requestParams.RequestContext.UserCancellationToken).ConfigureAwait(false);
+                                }
                             }
                             using var hydrationScope = _readView?.BeginReadHydration(TokenCacheInternal);
                             string key = CacheKeyFactory.GetKeyFromRequest(_requestParams);
@@ -245,6 +255,18 @@ namespace Microsoft.Identity.Client.Cache
 
                             }
 
+                            if (_readView != null)
+                            {
+                                _readView.PublishReadView((TokenCache)TokenCacheInternal);
+                            }
+                            else if (TokenCacheInternal is TokenCache root &&
+                                root.UseIsolatedCacheReads &&
+                                root.Accessor is InMemoryPartitionedUserTokenCacheAccessor)
+                            {
+                                // Whole-cache callbacks keep their original target/lifecycle, but
+                                // subsequent lookups must not follow a later keyed publication.
+                                _readView = root.CreatePinnedReadView();
+                            }
                             _cacheRefreshedForRead = true;
 
                         }
@@ -252,6 +274,8 @@ namespace Microsoft.Identity.Client.Cache
                     finally
                     {
                         refreshCache.Semaphore.Release();
+                        if (exclusiveReadLifecycle)
+                            TokenCacheInternal.Semaphore.Release();
                         readLease?.Dispose();
                         _requestParams.RequestContext.Logger.Verbose(()=>"[Cache Session Manager] Released cache semaphore");
                         RequestContext.ApiEvent.CacheLevel = telemetryData.CacheLevel;

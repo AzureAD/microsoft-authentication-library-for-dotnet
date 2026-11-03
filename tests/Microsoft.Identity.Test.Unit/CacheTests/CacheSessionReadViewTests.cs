@@ -138,15 +138,195 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [TestMethod]
-        public async Task IncrementalHydrationCannotSilentlyUseAnEmptyPrivateBase()
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task FullSnapshotHydrationAcceptsTheDefaultClearFlag(bool empty)
         {
             var cache = CreateCache();
-            cache.SetBeforeAccess(args => args.TokenCache.DeserializeMsalV3(Blob("before"), false));
-            await ExpectUnsupported(() => CreateSession(cache).GetAccountsAsync(), "clear-existing").ConfigureAwait(false);
+            cache.DeserializeMsalV3(Blob("root"), true);
+            cache.SetBeforeAccessAsync(args =>
+            {
+                args.TokenCache.DeserializeMsalV3(empty ? null : Blob("private"));
+                return Task.CompletedTask;
+            });
+
+            var accounts = (await CreateSession(cache).GetAccountsAsync().ConfigureAwait(false)).ToArray();
+            Assert.HasCount(empty ? 0 : 1, accounts);
+            if (!empty)
+                Assert.AreEqual("private", accounts[0].Username);
+            Assert.AreEqual(empty ? "root" : "private", cache.Accessor.GetAllAccounts().Single().PreferredUsername);
+        }
+
+        [TestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task DefaultFlagRetryStartsWithoutFailedHydrationState(bool empty)
+        {
+            var cache = CreateCache();
+            bool failPublication = true;
+            cache.SetBeforeAccessAsync(args =>
+            {
+                byte[] payload = failPublication
+                    ? Encoding.UTF8.GetBytes(Encoding.UTF8.GetString(Blob("failed")).Replace(HomeId, "stale.user"))
+                    : empty ? null : Encoding.UTF8.GetBytes(Encoding.UTF8.GetString(Blob("retry"))
+                        .Replace(",\"future_node\":{\"value\":42}", string.Empty));
+                args.TokenCache.DeserializeMsalV3(payload);
+                return Task.CompletedTask;
+            });
+            cache.SetAfterAccessAsync(_ =>
+            {
+                if (failPublication)
+                    throw new InvalidOperationException("synthetic-publication");
+                return Task.CompletedTask;
+            });
+            var session = CreateSession(cache);
+            bool failed = false;
+            try { await session.GetAccountsAsync().ConfigureAwait(false); }
+            catch (InvalidOperationException exception) when (exception.Message == "synthetic-publication") { failed = true; }
+            Assert.IsTrue(failed);
+
+            failPublication = false;
+            var accounts = (await session.GetAccountsAsync().ConfigureAwait(false)).ToArray();
+            Assert.HasCount(empty ? 0 : 1, accounts);
+            if (!empty)
+                Assert.AreEqual("retry", accounts[0].Username);
+            var field = typeof(CacheSessionManager).GetField("_readView", BindingFlags.Instance | BindingFlags.NonPublic);
+            var view = (ITokenCacheInternal)field.GetValue(session);
+            Assert.HasCount(empty ? 0 : 1, view.Accessor.GetAllAccounts());
+            using var json = JsonDocument.Parse(view.SerializeMsalV3());
+            Assert.IsFalse(json.RootElement.TryGetProperty("future_node", out _),
+                "Unknown JSON from a failed hydration must not survive the next attempt.");
+            Assert.HasCount(empty ? 0 : 1, cache.Accessor.GetAllAccounts());
+            if (!empty)
+                Assert.AreEqual("retry", cache.Accessor.GetAllAccounts().Single().PreferredUsername);
+        }
+
+        [TestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task SynchronousReadLifecyclesRemainSequential(bool synchronousBefore)
+        {
+            var cache = CreateCache();
+            int calls = 0;
+            var firstEntered = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+            var resume = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+            TokenCacheCallback hydrate = args =>
+            {
+                Assert.AreNotSame(cache, args.TokenCache);
+                args.TokenCache.DeserializeMsalV3(Blob("private"), true);
+                if (Interlocked.Increment(ref calls) == 1)
+                    firstEntered.TrySetResult(true);
+            };
+            if (synchronousBefore)
+            {
+                cache.SetBeforeAccess(hydrate);
+                cache.SetAfterAccessAsync(async _ =>
+                {
+                    if (Volatile.Read(ref calls) == 1)
+                        await resume.Task.ConfigureAwait(false);
+                });
+            }
+            else
+            {
+                cache.SetBeforeAccessAsync(async args =>
+                {
+                    hydrate(args);
+                    if (Volatile.Read(ref calls) == 1)
+                        await resume.Task.ConfigureAwait(false);
+                });
+                cache.SetAfterAccess(_ => { });
+            }
+
+            var first = CreateSession(cache).GetAccountsAsync();
+            await Complete(firstEntered.Task).ConfigureAwait(false);
+            var second = CreateSession(cache).GetAccountsAsync();
+            try
+            {
+                Assert.AreEqual(1, Volatile.Read(ref calls),
+                    "A second lifecycle must not enter until the synchronous provider's first lifecycle finishes.");
+                Assert.IsFalse(second.IsCompleted);
+            }
+            finally
+            {
+                resume.TrySetResult(true);
+                await Complete(Task.WhenAll(first, second)).ConfigureAwait(false);
+            }
+            Assert.AreEqual(2, calls);
+        }
+
+        [TestMethod]
+        public async Task CancelledSynchronousLifecycleWaitDoesNotReleaseTheOwner()
+        {
+            var cache = CreateCache();
+            var publicationEntered = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+            var resume = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+            int calls = 0;
+            cache.SetBeforeAccess(args =>
+            {
+                Interlocked.Increment(ref calls);
+                args.TokenCache.DeserializeMsalV3(Blob("private"), true);
+            });
+            cache.SetAfterAccessAsync(async _ =>
+            {
+                if (Volatile.Read(ref calls) == 1)
+                {
+                    publicationEntered.TrySetResult(true);
+                    await resume.Task.ConfigureAwait(false);
+                }
+            });
+            var first = CreateSession(cache).GetAccountsAsync();
+            await Complete(publicationEntered.Task).ConfigureAwait(false);
+            try
+            {
+                using var cancellation = new CancellationTokenSource();
+                var secondSession = CreateSession(cache, cancellation.Token);
+                var second = secondSession.GetAccountsAsync();
+                cancellation.Cancel();
+                await ExpectCancellation(second).ConfigureAwait(false);
+                Assert.AreEqual(1, calls);
+                Assert.AreEqual(0, cache.Semaphore.CurrentCount);
+                var field = typeof(CacheSessionManager).GetField("_readView", BindingFlags.Instance | BindingFlags.NonPublic);
+                Assert.AreEqual(1, ((ITokenCacheInternal)field.GetValue(secondSession)).Semaphore.CurrentCount);
+            }
+            finally
+            {
+                resume.TrySetResult(true);
+                await Complete(first).ConfigureAwait(false);
+            }
+            Assert.AreEqual(1, cache.Semaphore.CurrentCount);
+            await Complete(CreateSession(cache).GetAccountsAsync()).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        public async Task AsyncReadLifecyclesRemainParallelByDefault()
+        {
+            var cache = CreateCache();
+            int calls = 0;
+            var bothEntered = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+            cache.SetBeforeAccessAsync(async args =>
+            {
+                Assert.AreNotSame(cache, args.TokenCache);
+                int call = Interlocked.Increment(ref calls);
+                args.TokenCache.DeserializeMsalV3(Blob("private-" + call), true);
+                if (call == 2)
+                    bothEntered.TrySetResult(true);
+                await Complete(bothEntered.Task).ConfigureAwait(false);
+            });
+
+            var first = CreateSession(cache).GetAccountsAsync();
+            var second = CreateSession(cache).GetAccountsAsync();
+            await Complete(Task.WhenAll(first, second)).ConfigureAwait(false);
+            CollectionAssert.AreEquivalent(new[] { "private-1", "private-2" },
+                new[] { (await first.ConfigureAwait(false)).Single().Username,
+                    (await second.ConfigureAwait(false)).Single().Username });
+            Assert.HasCount(1, cache.Accessor.GetAllAccounts());
+            CollectionAssert.Contains(new[] { "private-1", "private-2" },
+                cache.Accessor.GetAllAccounts().Single().PreferredUsername);
         }
 
         [TestMethod]
         [DataRow("msal-v3")]
+        [DataRow("msal-v3-default")]
         [DataRow("snapshot")]
         [DataRow("empty")]
         public async Task AwaitedHydrationDoesNotRequireExecutionContextFlow(string shape)
@@ -165,6 +345,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                         switch (shape)
                         {
                             case "msal-v3": args.TokenCache.DeserializeMsalV3(Blob("before"), true); break;
+                            case "msal-v3-default": args.TokenCache.DeserializeMsalV3(Blob("before")); break;
                             case "snapshot": ((ITokenCacheSnapshotProvider)args.TokenCache).RestoreSnapshot(snapshot); break;
                             case "empty": args.TokenCache.DeserializeMsalV3(null, true); break;
                             default: Assert.Fail("Unknown hydration shape."); break;
@@ -178,13 +359,13 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.HasCount(shape == "empty" ? 0 : 1, accounts);
             if (accounts.Length != 0)
                 Assert.AreEqual("before", accounts[0].Username);
-            Assert.IsEmpty(cache.Accessor.GetAllAccounts());
+            Assert.HasCount(shape == "empty" ? 0 : 1, cache.Accessor.GetAllAccounts());
+            if (shape != "empty")
+                Assert.AreEqual("before", cache.Accessor.GetAllAccounts().Single().PreferredUsername);
         }
 
         [TestMethod]
-        [DataRow(false)]
-        [DataRow(true)]
-        public async Task SuppressedFlowStillRejectsIncompleteHydration(bool legacyFormat)
+        public async Task SuppressedFlowStillRejectsLegacyHydration()
         {
             var cache = CreateCache();
             var seed = CreateCache();
@@ -199,21 +380,14 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 {
                     hydration = Task.Run(() =>
                     {
-                        if (legacyFormat)
-                        {
 #pragma warning disable CS0618
-                            args.TokenCache.DeserializeMsalV2(legacyBytes);
+                        args.TokenCache.DeserializeMsalV2(legacyBytes);
 #pragma warning restore CS0618
-                        }
-                        else
-                        {
-                            args.TokenCache.DeserializeMsalV3(Blob("before"), false);
-                        }
                     });
                 }
                 await hydration.ConfigureAwait(false);
             });
-            await ExpectUnsupported(() => CreateSession(cache).GetAccountsAsync(), "clear-existing").ConfigureAwait(false);
+            await ExpectUnsupported(() => CreateSession(cache).GetAccountsAsync(), "MSALv3").ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -385,7 +559,12 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(2, before.GetTenantProfiles().Count());
             Assert.IsNotNull(await session.FindRefreshTokenAsync().ConfigureAwait(false));
             if (isolated)
+            {
+                Assert.HasCount(2, cache.Accessor.GetAllIdTokens(HomeId));
+                // Preserve the refresh-from-empty-root regression despite intentional publication.
+                cache.DeserializeMsalV3(null, true);
                 Assert.IsEmpty(cache.Accessor.GetAllIdTokens(HomeId));
+            }
 
             var response = TestConstants.CreateMsalTokenResponse(homeTenant);
             response.ClientInfo = TestConstants.CreateClientInfo("user", homeTenant);
@@ -879,7 +1058,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual("before", (await session.GetAccountsAsync().ConfigureAwait(false)).Single().Username);
             Assert.AreEqual("after", (await CreateSession(cache, knownAccount: knownAccount)
                 .GetAccountsAsync().ConfigureAwait(false)).Single().Username);
-            Assert.AreEqual(!publicClient && knownAccount ? "before" : "after",
+            Assert.AreEqual(!publicClient ? "before" : "after",
                 (await session.GetAccountsAsync().ConfigureAwait(false)).Single().Username);
             Assert.AreEqual(2, calls);
         }
@@ -937,7 +1116,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             });
             var session = CreateSession(cache);
             Assert.AreEqual("private", (await session.GetAccountsAsync().ConfigureAwait(false)).Single().Username);
-            Assert.AreEqual("root", cache.Accessor.GetAllAccounts().Single().PreferredUsername);
+            Assert.AreEqual("private", cache.Accessor.GetAllAccounts().Single().PreferredUsername);
         }
 
         [TestMethod]

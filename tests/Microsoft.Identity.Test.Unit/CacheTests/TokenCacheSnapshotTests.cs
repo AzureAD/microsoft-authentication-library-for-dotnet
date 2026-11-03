@@ -800,7 +800,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 var token = ((ITokenCacheInternal)store.LastReadTarget).Accessor.GetAllAccessTokens().Single();
                 Assert.AreEqual(tokens[partition], token.Secret);
                 Assert.AreEqual(assertions[partition].AssertionHash, token.OboCacheKey);
-                Assert.IsEmpty(cache.Accessor.GetAllAccessTokens());
+                var published = cache.Accessor.GetAllAccessTokens().Single();
+                Assert.AreEqual(tokens[partition], published.Secret);
+                Assert.AreEqual(assertions[partition].AssertionHash, published.OboCacheKey);
                 Assert.AreEqual(0, httpManager.QueueSize);
             }
         }
