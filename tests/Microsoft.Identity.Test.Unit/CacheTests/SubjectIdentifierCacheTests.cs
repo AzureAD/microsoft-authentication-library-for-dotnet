@@ -29,6 +29,78 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         private static readonly string[] s_scopes = { "api.read" };
 
         [TestMethod]
+        [DataRow(false, false, false)]
+        [DataRow(true, false, false)]
+        [DataRow(false, true, false)]
+        [DataRow(true, true, false)]
+        [DataRow(false, false, true)]
+        [DataRow(true, false, true)]
+        public async Task AndroidMixedIdentities_RejectAmbiguousAccountsAsync(
+            bool subjectFirst, bool identicalIdentifier, bool genericAuthority)
+        {
+            // Arrange
+            using var http = new MockHttpManager();
+            var app = CreateApplication(http, genericAuthority);
+            var cache = (TokenCache)app.UserTokenCacheInternal;
+            var stores = new Dictionary<string, Dictionary<string, object>>(StringComparer.Ordinal);
+            cache.Accessor = CreateAccessor(stores);
+            string clientInfo = Base64UrlHelpers.Encode("{\"uid\":\"member\",\"utid\":\"tenant-id\"}");
+            string subjectId = identicalIdentifier ? "member.tenant-id" : "Member.tenant-id";
+
+            // Act
+            var first = subjectFirst
+                ? await SignInAsync(app, http, subjectId).ConfigureAwait(false)
+                : await SignInAsync(app, http, "regular", clientInfo).ConfigureAwait(false);
+            Assert.AreEqual(4, stores.Values.Sum(store => store.Count));
+            var second = subjectFirst
+                ? await SignInAsync(app, http, "regular", clientInfo).ConfigureAwait(false)
+                : await SignInAsync(app, http, subjectId).ConfigureAwait(false);
+
+            // Assert
+            // Neither sign-in may overwrite or evict the other identity's credentials.
+            Assert.IsTrue(stores.Values.All(store => store.Count == 1));
+            var unrelated = await SignInAsync(app, http, "unrelated").ConfigureAwait(false);
+            cache.Accessor = CreateAccessor(stores);
+            AssertStoredSubjects(cache.Accessor, "unrelated");
+            Assert.HasCount(1, await app.GetAccountsAsync().ConfigureAwait(false));
+            Assert.IsNull(await app.GetAccountAsync(subjectId).ConfigureAwait(false));
+
+            foreach (var account in new[] { first.Account, second.Account })
+            {
+                foreach (bool forceRefresh in new[] { false, true })
+                {
+                    // No HTTP handler is queued: an ambiguous credential must never reach the endpoint.
+                    var error = await Assert.ThrowsExactlyAsync<MsalUiRequiredException>(() =>
+                        app.AcquireTokenSilent(s_scopes, account).WithForceRefresh(forceRefresh).ExecuteAsync())
+                        .ConfigureAwait(false);
+                    Assert.AreEqual(MsalError.NoTokensFoundError, error.ErrorCode);
+                }
+
+                await app.RemoveAsync(account).ConfigureAwait(false);
+                AssertStoredSubjects(cache.Accessor, "unrelated");
+                Assert.AreEqual(12, stores.Values.Sum(store => store.Count));
+            }
+
+            foreach (var store in stores.Where(pair => pair.Key.StartsWith(
+                "com.microsoft.identity.client.accessToken", StringComparison.Ordinal)))
+            {
+                foreach (string json in store.Value.Values)
+                {
+                    var accessToken = MsalAccessTokenCacheItem.FromJsonString(json);
+                    if (accessToken.HomeAccountId != "unrelated")
+                    {
+                        Assert.IsNull(cache.Accessor.GetIdToken(accessToken));
+                    }
+                }
+            }
+
+            await AssertCachedTokenAsync(app, unrelated.Account, "unrelated").ConfigureAwait(false);
+            cache.Accessor.Clear();
+            var fresh = await SignInAsync(app, http, subjectId).ConfigureAwait(false);
+            await AssertCachedTokenAsync(app, fresh.Account, subjectId).ConfigureAwait(false);
+        }
+
+        [TestMethod]
         [DataRow("member", "Member", false, true)]
         [DataRow("Member", "member", false, false)]
         [DataRow("member.tenant-id", "Member.tenant-id", true, true)]

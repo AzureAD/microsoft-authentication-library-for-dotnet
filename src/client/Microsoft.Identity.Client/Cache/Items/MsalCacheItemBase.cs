@@ -23,6 +23,11 @@ namespace Microsoft.Identity.Client.Cache.Items
             string.Equals(HomeAccountId, homeAccountId,
                 IsAndroidSubject ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase);
 
+        internal bool MatchesAccountIdentity(string homeAccountId, string rawClientInfo) =>
+            (!IsAndroidCacheItem ||
+                IsAndroidSubject == (!string.IsNullOrEmpty(homeAccountId) && string.IsNullOrEmpty(rawClientInfo))) &&
+            MatchesHomeAccountId(homeAccountId);
+
         internal override void PopulateFieldsFromJObject(JObject j)
         {
             HomeAccountId = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.HomeAccountId);

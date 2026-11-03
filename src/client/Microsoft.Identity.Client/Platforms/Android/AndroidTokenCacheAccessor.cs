@@ -187,6 +187,19 @@ namespace Microsoft.Identity.Client.Platforms.Android
         private List<T> GetAll<T>((ISharedPreferences Legacy, ISharedPreferences Subject) store,
             Func<string, T> deserialize, ILoggerAdapter logger) where T : MsalCacheItemBase
         {
+            var items = ReadAll(store, deserialize, logger);
+            var ambiguousIdentities = GetAmbiguousIdentities();
+            if (items.RemoveAll(item => ambiguousIdentities.Contains(GetIdentityKey(item))) > 0)
+            {
+                (logger ?? _requestContext?.Logger)?.Warning("Ignoring ambiguous Android account identities; clear the cache and sign in again.");
+            }
+
+            return items;
+        }
+
+        private List<T> ReadAll<T>((ISharedPreferences Legacy, ISharedPreferences Subject) store,
+            Func<string, T> deserialize, ILoggerAdapter logger = null) where T : MsalCacheItemBase
+        {
             var items = store.Legacy.All.Values.Cast<string>().Select(json => Read(json, deserialize)).ToList();
             if (items.RemoveAll(item => item.IsAndroidSubject) > 0)
             {
@@ -197,15 +210,62 @@ namespace Microsoft.Identity.Client.Platforms.Android
             return items;
         }
 
+        private HashSet<string> GetAmbiguousIdentities()
+        {
+            var ambiguous = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            if ((_accessTokenSharedPreference.Subject.All.Count == 0 &&
+                _refreshTokenSharedPreference.Subject.All.Count == 0 &&
+                _idTokenSharedPreference.Subject.All.Count == 0 &&
+                _accountSharedPreference.Subject.All.Count == 0) ||
+                (_accessTokenSharedPreference.Legacy.All.Count == 0 &&
+                _refreshTokenSharedPreference.Legacy.All.Count == 0 &&
+                _idTokenSharedPreference.Legacy.All.Count == 0 &&
+                _accountSharedPreference.Legacy.All.Count == 0))
+            {
+                return ambiguous;
+            }
+
+            // IAccount does not encode identity provenance. Keep both sides of a mixed collision
+            // ineligible, including orphaned credentials, so removal cannot reactivate the other side.
+            var identities = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
+            Add(ReadAll(_accessTokenSharedPreference, MsalAccessTokenCacheItem.FromJsonString));
+            Add(ReadAll(_refreshTokenSharedPreference, MsalRefreshTokenCacheItem.FromJsonString));
+            Add(ReadAll(_idTokenSharedPreference, MsalIdTokenCacheItem.FromJsonString));
+            Add(ReadAll(_accountSharedPreference, MsalAccountCacheItem.FromJsonString));
+            return ambiguous;
+
+            void Add<T>(IEnumerable<T> items) where T : MsalCacheItemBase
+            {
+                foreach (var item in items)
+                {
+                    string key = GetIdentityKey(item);
+                    if (identities.TryGetValue(key, out bool isSubject) && isSubject != item.IsAndroidSubject)
+                    {
+                        ambiguous.Add(key);
+                    }
+                    else
+                    {
+                        identities[key] = item.IsAndroidSubject;
+                    }
+                }
+            }
+        }
+
+        private static string GetIdentityKey(MsalCacheItemBase item)
+        {
+            string environment = item.Environment ?? string.Empty;
+            return environment.Length.ToString(CultureInfo.InvariantCulture) + ":" + environment + item.HomeAccountId;
+        }
+
         private T GetItem<T>(MsalCacheItemBase query, string cacheKey,
             (ISharedPreferences Legacy, ISharedPreferences Subject) store, Func<string, T> deserialize) where T : MsalCacheItemBase
         {
             var storage = GetStorage(query, cacheKey, store);
             var item = Read(storage.Preferences.GetString(storage.Key, null), deserialize);
-            if (item is not null && (item.IsAndroidSubject != query.IsAndroidSubject ||
-                !item.MatchesHomeAccountId(query.HomeAccountId)))
+            if (item is not null && (!item.MatchesAccountIdentity(query.HomeAccountId, query.RawClientInfo) ||
+                GetAmbiguousIdentities().Contains(GetIdentityKey(item))))
             {
-                _requestContext?.Logger.Warning("Ignoring an Android cache record with a different identity.");
+                _requestContext?.Logger.Warning("Ignoring an Android cache record with a different or ambiguous identity.");
                 return null;
             }
 

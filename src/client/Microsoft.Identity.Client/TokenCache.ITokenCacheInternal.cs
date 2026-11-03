@@ -230,6 +230,7 @@ namespace Microsoft.Identity.Client
                             tenantId,
                             msalAccessTokenCacheItem.ScopeSet,
                             msalAccessTokenCacheItem.HomeAccountId,
+                            msalAccessTokenCacheItem.RawClientInfo,
                             msalAccessTokenCacheItem.TokenType,
                             msalAccessTokenCacheItem.AdditionalCacheKeyComponents);
 

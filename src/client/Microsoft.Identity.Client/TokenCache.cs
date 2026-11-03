@@ -120,6 +120,7 @@ namespace Microsoft.Identity.Client
             string tenantId,
             HashSet<string> scopeSet,
             string homeAccountId,
+            string rawClientInfo,
             string tokenType,
             SortedList<string, string> additionalCacheKeyComponents)
         {
@@ -156,7 +157,7 @@ namespace Microsoft.Identity.Client
             {
                 // filter by identifier of the user instead
                 accessTokensToDelete.RemoveAll(
-                            item => !item.MatchesHomeAccountId(homeAccountId));
+                            item => !item.MatchesAccountIdentity(homeAccountId, rawClientInfo));
                 requestParams.RequestContext.Logger.Info(() => "Matching entries after filtering by user - " + accessTokensToDelete.Count);
             }
 
@@ -209,8 +210,8 @@ namespace Microsoft.Identity.Client
 
         private bool RtMatchesAccount(MsalRefreshTokenCacheItem rtItem, MsalAccountCacheItem account)
         {
-            bool homeAccIdMatch = rtItem.MatchesHomeAccountId(account.HomeAccountId) &&
-                account.MatchesHomeAccountId(rtItem.HomeAccountId);
+            bool homeAccIdMatch = rtItem.MatchesAccountIdentity(account.HomeAccountId, account.RawClientInfo) &&
+                account.MatchesAccountIdentity(rtItem.HomeAccountId, rtItem.RawClientInfo);
             bool clientIdMatch =
                 rtItem.IsFRT || // Cannot filter by client ID if the RT can be used by multiple clients
                 rtItem.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase);
