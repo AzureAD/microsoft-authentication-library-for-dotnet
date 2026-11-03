@@ -12,6 +12,7 @@ using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NSubstitute;
 using OpenQA.Selenium;
 
 namespace Microsoft.Identity.Test.Integration.SeleniumTests
@@ -34,6 +35,69 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         }
 
         #endregion
+
+        [TestMethod]
+        public void DeviceCodeApproval_ApprovesExpectedScreen()
+        {
+            // Arrange
+            var driver = CreateDeviceCodeApprovalDriver(out var approveButton);
+
+            // Act
+            SeleniumExtensions.HandleDeviceCodeApproval(driver);
+
+            // Assert
+            approveButton.Received(1).Click();
+        }
+
+        [TestMethod]
+        public void DeviceCodeApproval_DoesNotApproveWithoutExpectedScreen()
+        {
+            // Arrange
+            var driver = CreateDeviceCodeApprovalDriver(out var approveButton);
+            driver.FindElement(Arg.Is<By>(by => by.Equals(By.Id("appConfirmRemoteConnectTitle"))))
+                .Returns(_ => throw new NoSuchElementException());
+
+            // Act
+            SeleniumExtensions.HandleDeviceCodeApproval(driver);
+
+            // Assert
+            approveButton.DidNotReceive().Click();
+            driver.DidNotReceive().FindElement(Arg.Is<By>(by => by.Equals(By.Id("idBtn_Approve"))));
+        }
+
+        [TestMethod]
+        public void DeviceCodeApproval_PropagatesApprovalFailure()
+        {
+            // Arrange
+            var driver = CreateDeviceCodeApprovalDriver(out var approveButton);
+            approveButton.When(button => button.Click())
+                .Do(_ => throw new WebDriverException("Approval click failed"));
+
+            // Act
+            var exception = Assert.Throws<WebDriverException>(
+                () => SeleniumExtensions.HandleDeviceCodeApproval(driver));
+
+            // Assert
+            Assert.AreEqual("Approval click failed", exception.Message);
+        }
+
+        private static IWebDriver CreateDeviceCodeApprovalDriver(out IWebElement approveButton)
+        {
+            var driver = Substitute.For<IWebDriver, IJavaScriptExecutor>();
+            var approvalScreen = Substitute.For<IWebElement>();
+            approvalScreen.Displayed.Returns(true);
+            approvalScreen.Enabled.Returns(true);
+            driver.FindElement(Arg.Is<By>(by => by.Equals(By.Id("appConfirmRemoteConnectTitle"))))
+                .Returns(approvalScreen);
+
+            approveButton = Substitute.For<IWebElement>();
+            approveButton.Displayed.Returns(true);
+            approveButton.Enabled.Returns(true);
+            driver.FindElement(Arg.Is<By>(by => by.Equals(By.Id("idBtn_Approve"))))
+                .Returns(approveButton);
+
+            return driver;
+        }
 
         // This test checks that MSAL.netcore / MSAL.netfx / MSAL.netstandard DLLs are actually used
         [TestMethod]
