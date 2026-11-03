@@ -532,6 +532,86 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
+        public async Task AcquireTokenForClient_QueuedAppTokenProviderCanceled_DoesNotInvokeCompletion()
+        {
+            // Arrange
+            using var harness = CreateTestHarness();
+            harness.HttpManager.AddInstanceDiscoveryMockHandler();
+            using var cancellation = new CancellationTokenSource();
+            var providerEntered = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+            var releaseProvider = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+            var secondCallQueued = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+            int providerCount = 0;
+            int completionCount = 0;
+            int semaphoreEntries = 0;
+            var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                .WithAuthority(TestConstants.AuthorityCommonTenant)
+                .WithHttpManager(harness.HttpManager)
+                .WithLogging((_, message, _) =>
+                {
+                    if (message.Contains("[ClientCredentialRequest] Entering client credential request semaphore.") &&
+                        Interlocked.Increment(ref semaphoreEntries) == 2)
+                    {
+                        secondCallQueued.TrySetResult(true);
+                    }
+                }, LogLevel.Verbose)
+                .WithAppTokenProvider(async _ =>
+                {
+                    Interlocked.Increment(ref providerCount);
+                    providerEntered.TrySetResult(true);
+                    await releaseProvider.Task.ConfigureAwait(false);
+                    return new AppTokenProviderResult
+                    {
+                        AccessToken = TestConstants.DefaultAccessToken,
+                        ExpiresInSeconds = 3600
+                    };
+                })
+                .OnCompletion((_, _) =>
+                {
+                    Interlocked.Increment(ref completionCount);
+                    return Task.CompletedTask;
+                })
+                .Build();
+            Task<AuthenticationResult> firstCall = app.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync();
+            Task<AuthenticationResult> queuedCall = null;
+
+            try
+            {
+                // Act
+                Assert.AreSame(providerEntered.Task,
+                    await Task.WhenAny(providerEntered.Task, firstCall, Task.Delay(TimeSpan.FromSeconds(10))).ConfigureAwait(false));
+                queuedCall = app.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync(cancellation.Token);
+                Assert.AreSame(secondCallQueued.Task,
+                    await Task.WhenAny(secondCallQueued.Task, queuedCall, Task.Delay(TimeSpan.FromSeconds(10))).ConfigureAwait(false));
+                Assert.IsFalse(queuedCall.IsCompleted);
+                cancellation.Cancel();
+                Assert.AreSame(queuedCall,
+                    await Task.WhenAny(queuedCall, Task.Delay(TimeSpan.FromSeconds(10))).ConfigureAwait(false));
+                await Assert.ThrowsAsync<OperationCanceledException>(() => queuedCall).ConfigureAwait(false);
+
+                // Assert
+                Assert.IsTrue(queuedCall.IsCanceled);
+                Assert.AreEqual(1, providerCount, "The queued call must not enter the provider.");
+                Assert.AreEqual(0, completionCount, "Canceling a queued provider call must not notify completion.");
+                releaseProvider.TrySetResult(true);
+                Assert.AreSame(firstCall,
+                    await Task.WhenAny(firstCall, Task.Delay(TimeSpan.FromSeconds(10))).ConfigureAwait(false));
+                Assert.AreEqual(TestConstants.DefaultAccessToken, (await firstCall.ConfigureAwait(false)).AccessToken);
+                Assert.AreEqual(1, completionCount, "The successful first call must still notify completion.");
+            }
+            finally
+            {
+                cancellation.Cancel();
+                releaseProvider.TrySetResult(true);
+                await Task.WhenAny(firstCall, Task.Delay(TimeSpan.FromSeconds(10))).ConfigureAwait(false);
+                if (queuedCall is not null)
+                {
+                    await Task.WhenAny(queuedCall, Task.Delay(TimeSpan.FromSeconds(10))).ConfigureAwait(false);
+                }
+            }
+        }
+
+        [TestMethod]
         public async Task AcquireTokenForClient_BackgroundHttpRequestCanceled_DoesNotInvokeCompletion()
         {
             // Arrange
@@ -567,11 +647,15 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             TokenCacheHelper.PopulateCache(app.AppTokenCacheInternal.Accessor, addSecondAt: false);
             TestCommon.UpdateATWithRefreshOn(app.AppTokenCacheInternal.Accessor);
 
+            // Act
+            Task<AuthenticationResult> acquisition = app.AcquireTokenForClient(TestConstants.s_scope)
+                .ExecuteAsync(cancellation.Token);
             try
             {
-                // Act
-                var result = await app.AcquireTokenForClient(TestConstants.s_scope)
-                    .ExecuteAsync(cancellation.Token).ConfigureAwait(false);
+                Assert.AreSame(acquisition,
+                    await Task.WhenAny(acquisition, Task.Delay(TimeSpan.FromSeconds(10))).ConfigureAwait(false),
+                    "The foreground cache hit must return without waiting for the background token POST.");
+                var result = await acquisition.ConfigureAwait(false);
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
                 Assert.AreSame(handler.RequestStarted,
                     await Task.WhenAny(handler.RequestStarted, Task.Delay(TimeSpan.FromSeconds(10))).ConfigureAwait(false));
@@ -587,6 +671,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             finally
             {
                 cancellation.Cancel();
+                await Task.WhenAny(acquisition, Task.Delay(TimeSpan.FromSeconds(10))).ConfigureAwait(false);
                 await Task.WhenAny(cancellationObserved.Task, Task.Delay(TimeSpan.FromSeconds(10))).ConfigureAwait(false);
             }
         }

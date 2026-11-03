@@ -195,7 +195,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     await InvokeOnCompletionCallbackAsync(authResult: null, exception: ex, logger).ConfigureAwait(false);
                     throw;
                 }
-                catch (OperationCanceledException ex) when (!isBackgroundRefresh && cancellationToken.IsCancellationRequested)
+                catch (OperationCanceledException ex) when (
+                    !isBackgroundRefresh &&
+                    ServiceBundle.Config.AppTokenProvider is null &&
+                    cancellationToken.IsCancellationRequested)
                 {
                     var cancellationException = new MsalClientException(
                         MsalError.AuthenticationCanceledError,
