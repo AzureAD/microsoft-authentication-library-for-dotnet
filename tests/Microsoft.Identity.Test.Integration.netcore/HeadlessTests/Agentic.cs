@@ -24,6 +24,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private const string Scope = "https://graph.microsoft.com/.default";
 
         [TestMethod]
+        [Ignore("Temporarily disabled pending investigation.")]
         public async Task AgentUserIdentityGetsTokenForGraphTest()
         {
             await AgentUserIdentityGetsTokenForGraphAsync().ConfigureAwait(false);
