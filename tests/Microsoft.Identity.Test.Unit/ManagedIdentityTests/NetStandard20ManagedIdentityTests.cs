@@ -78,15 +78,18 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         public async Task Discovery_SkipsImdsV2AndReportsNoMtlsSupportAsync()
         {
             // Arrange
+            int httpClientFactoryCalls = 0;
             using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager())
+            using (var httpManager = new MockHttpManager(messageHandlerFunc: () =>
+            {
+                Interlocked.Increment(ref httpClientFactoryCalls);
+                return MockHelpers.MockImdsProbe(ImdsVersion.V1);
+            }))
             {
                 SetImdsEnvironmentVariables();
                 var application = (ManagedIdentityApplication)ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager)
                     .Build();
-                httpManager.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V1));
-
                 // Act
                 var capabilities = await application.GetManagedIdentityCapabilitiesAsync(CancellationToken.None)
                     .ConfigureAwait(false);
@@ -95,7 +98,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.AreEqual(ManagedIdentitySource.Imds, capabilities.Source);
                 Assert.AreEqual(MtlsBindingStrength.None, capabilities.MaxSupportedBindingStrength);
                 Assert.IsFalse(capabilities.IsMtlsPopSupportedByHost);
-                Assert.AreEqual(0, httpManager.QueueSize);
+                Assert.AreEqual(1, httpClientFactoryCalls);
             }
         }
 
