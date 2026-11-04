@@ -113,6 +113,7 @@ namespace Microsoft.Identity.Client
             }
 
             Account account = null;
+            IDictionary<string, TenantProfile> tenantProfiles = null;
             if (idToken != null)
             {
                 Debug.Assert(
@@ -144,7 +145,6 @@ namespace Microsoft.Identity.Client
                              wamAccountIds);
 
                 // Add the newly obtained id token to the list of profiles.
-                IDictionary<string, TenantProfile> tenantProfiles = null;
                 if (msalIdTokenCacheItem.TenantId != null)
                 {
                     if (CacheOptions.IsDisabledFor(ServiceBundle.Config.AccessorOptions))
@@ -158,7 +158,9 @@ namespace Microsoft.Identity.Client
                     }
                     else
                     {
-                        tenantProfiles = await GetTenantProfilesAsync(requestParams, homeAccountId).ConfigureAwait(false);
+                        tenantProfiles = UseIsolatedCacheReads && requestParams.AuthorityInfo.CanBeTenanted && homeAccountId != null
+                            ? new Dictionary<string, TenantProfile>()
+                            : await GetTenantProfilesAsync(requestParams, homeAccountId).ConfigureAwait(false);
                         if (tenantProfiles != null)
                         {
                             tenantProfiles[msalIdTokenCacheItem.TenantId] = new TenantProfile(msalIdTokenCacheItem);
@@ -218,6 +220,17 @@ namespace Microsoft.Identity.Client
                         }).ConfigureAwait(false);
 
                         requestParams.RequestContext.ApiEvent.DurationInCacheInMs += measuredResultDuration.Milliseconds;
+                    }
+
+                    if (UseIsolatedCacheReads && tenantProfiles != null)
+                    {
+                        // Private reads do not populate the root; collect profiles after write-side hydration.
+                        var persistedProfiles = await GetTenantProfilesAsync(requestParams, homeAccountId).ConfigureAwait(false);
+                        foreach (var profile in persistedProfiles)
+                        {
+                            if (profile.Key != msalIdTokenCacheItem.TenantId)
+                                tenantProfiles[profile.Key] = profile.Value;
+                        }
                     }
 
                     // Don't cache access tokens from broker
