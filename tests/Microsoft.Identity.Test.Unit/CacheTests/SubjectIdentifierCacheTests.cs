@@ -363,7 +363,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.HasCount(2, adalEntries);
             if (!adalHasClientInfo)
             {
-                adalEntries.Single(pair => pair.Value.RefreshToken == "rt-member").Value.RawClientInfo = null;
+                adalEntries.Single(pair => pair.Value.RawClientInfo == clientInfo).Value.RawClientInfo = null;
                 legacyCache.WriteCache(AdalCacheOperations.Serialize(app.ServiceBundle.ApplicationLogger, adalEntries));
             }
 
