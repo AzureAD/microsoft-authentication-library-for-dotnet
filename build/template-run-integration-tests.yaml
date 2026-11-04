@@ -3,6 +3,8 @@
 
 steps:
 
+- template: template-install-tse-certificate.yaml
+
 - task: VSTest@2
   displayName: 'Run integration tests .NET Framework (non-OneBranch)'
   condition: and(succeeded(), eq(variables['PipelineType'], 'legacy'))
