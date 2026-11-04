@@ -12,10 +12,11 @@ using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Platforms.Android
 {
-    internal class AndroidTokenCacheAccessor : ITokenCacheAccessor
+    internal class AndroidTokenCacheAccessor : ITokenCacheAccessor, ILegacyCacheIdentityFilter
     {
         private const string AccessTokenSharedPreferenceName = "com.microsoft.identity.client.accessToken";
         private const string RefreshTokenSharedPreferenceName = "com.microsoft.identity.client.refreshToken";
@@ -225,10 +226,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
             // ineligible, including orphaned credentials, so removal cannot reactivate the other side.
             // Legacy subject records remain identity evidence even though they cannot be acquired.
             var identities = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
-            Add(ReadAll(_accessTokenSharedPreference, MsalAccessTokenCacheItem.FromJsonString, includeLegacySubjects: true));
-            Add(ReadAll(_refreshTokenSharedPreference, MsalRefreshTokenCacheItem.FromJsonString, includeLegacySubjects: true));
-            Add(ReadAll(_idTokenSharedPreference, MsalIdTokenCacheItem.FromJsonString, includeLegacySubjects: true));
-            Add(ReadAll(_accountSharedPreference, MsalAccountCacheItem.FromJsonString, includeLegacySubjects: true));
+            Add(ReadAllItems());
             return ambiguous;
 
             void Add<T>(IEnumerable<T> items) where T : MsalCacheItemBase
@@ -246,6 +244,41 @@ namespace Microsoft.Identity.Client.Platforms.Android
                     }
                 }
             }
+        }
+
+        private IEnumerable<MsalCacheItemBase> ReadAllItems()
+        {
+            return ReadAll(_accessTokenSharedPreference, MsalAccessTokenCacheItem.FromJsonString, includeLegacySubjects: true)
+                .Cast<MsalCacheItemBase>()
+                .Concat(ReadAll(_refreshTokenSharedPreference, MsalRefreshTokenCacheItem.FromJsonString, includeLegacySubjects: true))
+                .Concat(ReadAll(_idTokenSharedPreference, MsalIdTokenCacheItem.FromJsonString, includeLegacySubjects: true))
+                .Concat(ReadAll(_accountSharedPreference, MsalAccountCacheItem.FromJsonString, includeLegacySubjects: true));
+        }
+
+        public Func<IAccount, bool> GetLegacyAccountFilter(IEnumerable<string> environments)
+        {
+            var ambiguous = GetAmbiguousIdentities();
+            var homeAccountIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var usernames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            if (ambiguous.Count > 0)
+            {
+                foreach (var item in ReadAllItems())
+                {
+                    if (ambiguous.Contains(GetIdentityKey(item)) &&
+                        (environments is null || environments.ContainsOrdinalIgnoreCase(item.Environment)))
+                    {
+                        homeAccountIds.Add(item.HomeAccountId);
+                        if (item is MsalAccountCacheItem account && !string.IsNullOrEmpty(account.PreferredUsername))
+                        {
+                            // Older ADAL entries may identify an account only by username.
+                            usernames.Add(account.PreferredUsername);
+                        }
+                    }
+                }
+            }
+
+            return account => !homeAccountIds.Contains(account.HomeAccountId?.Identifier) &&
+                !usernames.Contains(account.Username);
         }
 
         private static string GetIdentityKey(MsalCacheItemBase item)

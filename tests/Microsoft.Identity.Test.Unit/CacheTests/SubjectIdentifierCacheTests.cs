@@ -11,6 +11,7 @@ using Android.Content;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Platforms.Android;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
@@ -274,9 +275,10 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [TestMethod]
-        [DataRow(false)]
-        [DataRow(true)]
-        public async Task AndroidClientInfo_PreservesLegacyKeysAndRefreshAsync(bool emptyIdToken)
+        [DataRow(false, false)]
+        [DataRow(true, false)]
+        [DataRow(false, true)]
+        public async Task AndroidClientInfo_PreservesLegacyKeysAndRefreshAsync(bool emptyIdToken, bool includeIdToken)
         {
             // Arrange
             using var http = new MockHttpManager();
@@ -285,7 +287,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             var stores = new Dictionary<string, Dictionary<string, object>>(StringComparer.Ordinal);
             cache.Accessor = CreateAccessor(stores);
             string clientInfo = MockHelpers.CreateClientInfo();
-            var signedIn = await SignInAsync(app, http, "member", clientInfo).ConfigureAwait(false);
+            string subject = includeIdToken ? ClientInfo.CreateFromJson(clientInfo).ToAccountIdentifier() : "member";
+            var signedIn = await SignInAsync(app, http, subject, clientInfo).ConfigureAwait(false);
             var originalKeys = stores.ToDictionary(pair => pair.Key, pair => pair.Value.Keys.ToArray());
             Assert.IsTrue(stores.Where(pair => pair.Key.EndsWith(".subject.v1", StringComparison.Ordinal))
                 .All(pair => pair.Value.Count == 0));
@@ -300,23 +303,110 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             http.AddMockHandler(new MockHttpMessageHandler
             {
                 ExpectedMethod = HttpMethod.Post,
-                ExpectedPostData = new Dictionary<string, string> { ["refresh_token"] = "rt-member" },
-                ResponseMessage = CreateTokenResponse("member", false, refreshed: true, emptyIdToken: emptyIdToken)
+                ExpectedPostData = new Dictionary<string, string> { ["refresh_token"] = "rt-" + subject },
+                ResponseMessage = CreateTokenResponse(subject, includeIdToken, refreshed: true, emptyIdToken: emptyIdToken)
             });
             var refreshed = await app.AcquireTokenSilent(s_scopes, account)
                 .WithForceRefresh(true).ExecuteAsync().ConfigureAwait(false);
 
             // Assert
-            Assert.AreEqual("at-member", cached.AccessToken);
-            Assert.AreEqual("member", cached.ClaimsPrincipal.FindFirst("sub").Value);
-            Assert.AreEqual("member@example.test", cached.Account.Username);
-            Assert.AreEqual("at-refreshed-member", refreshed.AccessToken);
+            Assert.AreEqual("at-" + subject, cached.AccessToken);
+            Assert.AreEqual(subject, cached.ClaimsPrincipal.FindFirst("sub").Value);
+            Assert.AreEqual(subject + "@example.test", cached.Account.Username);
+            Assert.AreEqual("at-refreshed-" + subject, refreshed.AccessToken);
             Assert.AreEqual(clientInfo, cache.Accessor.GetAllAccessTokens().Single().RawClientInfo);
             Assert.AreEqual(clientInfo, cache.Accessor.GetAllRefreshTokens().Single().RawClientInfo);
             foreach (var store in stores)
             {
                 CollectionAssert.AreEquivalent(originalKeys[store.Key], store.Value.Keys.ToArray());
             }
+
+            var next = await app.AcquireTokenSilent(s_scopes, signedIn.Account).ExecuteAsync().ConfigureAwait(false);
+            Assert.AreEqual(refreshed.AccessToken, next.AccessToken);
+            Assert.AreEqual(TokenSource.Cache, next.AuthenticationResultMetadata.TokenSource);
+            Assert.HasCount(1, await app.GetAccountsAsync().ConfigureAwait(false));
+            await app.RemoveAsync(signedIn.Account).ConfigureAwait(false);
+            Assert.IsTrue(stores.Values.All(store => store.Count == 0));
+        }
+
+        [TestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task AndroidMixedIdentities_ExcludeAdalFallbackAsync(bool adalHasClientInfo)
+        {
+            // Arrange
+            using var http = new MockHttpManager();
+            var legacyCache = new InMemoryLegacyCachePersistence();
+            var app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                .WithAuthority(TestConstants.AuthorityHomeTenant, false)
+                .WithInstanceDiscovery(false)
+                .WithRedirectUri(TestConstants.RedirectUri)
+                .WithHttpManager(http)
+                .WithUserTokenLegacyCachePersistenceForTest(legacyCache)
+                .BuildConcrete();
+            app.ServiceBundle.ConfigureMockWebUI();
+            // Enable desktop legacy persistence while exercising the source-linked Android accessor.
+            app.UserTokenCacheInternal.SetBeforeAccess(_ => { });
+            var cache = (TokenCache)app.UserTokenCacheInternal;
+            var stores = new Dictionary<string, Dictionary<string, object>>(StringComparer.Ordinal);
+            cache.Accessor = CreateAccessor(stores);
+            string clientInfo = MockHelpers.CreateClientInfo("member", "tenant-id");
+            string unrelatedClientInfo = MockHelpers.CreateClientInfo("other", "tenant-id");
+            var regular = await SignInAsync(app, http, "member", clientInfo).ConfigureAwait(false);
+            var subject = await SignInAsync(app, http, "Member.tenant-id",
+                username: regular.Account.Username).ConfigureAwait(false);
+            var unrelated = await SignInAsync(app, http, "other", unrelatedClientInfo).ConfigureAwait(false);
+            cache.RemoveAccountInternal(unrelated.Account, new RequestContext(app.ServiceBundle, Guid.NewGuid(), null));
+            cache.Accessor = CreateAccessor(stores);
+
+            var adalEntries = AdalCacheOperations.Deserialize(app.ServiceBundle.ApplicationLogger, legacyCache.LoadCache());
+            Assert.HasCount(2, adalEntries);
+            if (!adalHasClientInfo)
+            {
+                adalEntries.Single(pair => pair.Value.RefreshToken == "rt-member").Value.RawClientInfo = null;
+                legacyCache.WriteCache(AdalCacheOperations.Serialize(app.ServiceBundle.ApplicationLogger, adalEntries));
+            }
+
+            byte[] originalAdalCache = legacyCache.LoadCache();
+            Assert.AreEqual("rt-member", CacheFallbackOperations.GetRefreshToken(
+                app.ServiceBundle.ApplicationLogger, legacyCache, new[] { regular.Account.Environment },
+                TestConstants.ClientId, subject.Account).Secret);
+
+            // Act
+            var usernameOnlyAccount = new Account(null, regular.Account.Username, regular.Account.Environment);
+            foreach (var account in new[] { subject.Account, regular.Account, usernameOnlyAccount })
+            {
+                foreach (bool forceRefresh in new[] { false, true })
+                {
+                    // No HTTP handler is queued: ADAL must not redeem the excluded identity.
+                    var error = await Assert.ThrowsExactlyAsync<MsalUiRequiredException>(() =>
+                        app.AcquireTokenSilent(s_scopes, account).WithForceRefresh(forceRefresh).ExecuteAsync())
+                        .ConfigureAwait(false);
+                    Assert.AreEqual(MsalError.NoTokensFoundError, error.ErrorCode);
+                }
+
+                await app.RemoveAsync(account).ConfigureAwait(false);
+                CollectionAssert.AreEqual(originalAdalCache, legacyCache.LoadCache());
+            }
+
+            // Assert
+            var accounts = await app.GetAccountsAsync().ConfigureAwait(false);
+            Assert.HasCount(1, accounts);
+            Assert.AreEqual(unrelated.Account.HomeAccountId.Identifier, accounts.Single().HomeAccountId.Identifier);
+            Assert.IsNull(await app.GetAccountAsync(subject.Account.HomeAccountId.Identifier).ConfigureAwait(false));
+            http.AddMockHandler(new MockHttpMessageHandler
+            {
+                ExpectedMethod = HttpMethod.Post,
+                ExpectedPostData = new Dictionary<string, string> { ["refresh_token"] = "rt-other" },
+                ResponseMessage = CreateTokenResponse("other", true, refreshed: true)
+            });
+            var refreshed = await app.AcquireTokenSilent(s_scopes, unrelated.Account)
+                .WithForceRefresh(true).ExecuteAsync().ConfigureAwait(false);
+            Assert.AreEqual("at-refreshed-other", refreshed.AccessToken);
+            Assert.AreEqual(unrelated.Account.HomeAccountId.Identifier, refreshed.Account.HomeAccountId.Identifier);
+            await app.RemoveAsync(unrelated.Account).ConfigureAwait(false);
+            Assert.AreEqual("rt-member", AdalCacheOperations.Deserialize(
+                app.ServiceBundle.ApplicationLogger, legacyCache.LoadCache()).Single().Value.RefreshToken);
         }
 
         [TestMethod]
@@ -431,18 +521,19 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         private static async Task<AuthenticationResult> SignInAsync(
-            PublicClientApplication app, MockHttpManager http, string subject, string clientInfo = null)
+            PublicClientApplication app, MockHttpManager http, string subject, string clientInfo = null, string username = null)
         {
             http.AddMockHandler(new MockHttpMessageHandler
             {
                 ExpectedMethod = HttpMethod.Post,
-                ResponseMessage = CreateTokenResponse(subject, true, clientInfo: clientInfo)
+                ResponseMessage = CreateTokenResponse(subject, true, clientInfo: clientInfo, username: username)
             });
             return await app.AcquireTokenInteractive(s_scopes).ExecuteAsync().ConfigureAwait(false);
         }
 
         private static HttpResponseMessage CreateTokenResponse(
-            string subject, bool includeIdToken, bool refreshed = false, string clientInfo = null, bool emptyIdToken = false)
+            string subject, bool includeIdToken, bool refreshed = false, string clientInfo = null, bool emptyIdToken = false,
+            string username = null)
         {
             var response = new JsonObject
             {
@@ -462,7 +553,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 var claims = new JsonObject
                 {
                     ["sub"] = subject,
-                    ["preferred_username"] = subject + "@example.test",
+                    ["preferred_username"] = username ?? subject + "@example.test",
                     ["iss"] = Authority,
                     ["aud"] = TestConstants.ClientId
                 };

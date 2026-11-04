@@ -926,12 +926,33 @@ namespace Microsoft.Identity.Client
                   .ConfigureAwait(false);
                 var aliases = metadata.Aliases;
 
-                return CacheFallbackOperations.GetRefreshToken(
+                var identityFilter = Accessor as ILegacyCacheIdentityFilter;
+                var accountFilter = identityFilter?.GetLegacyAccountFilter(aliases);
+                if (accountFilter?.Invoke(requestParams.Account) == false)
+                {
+                    requestParams.RequestContext.Logger.Warning("Skipping ADAL refresh for an ambiguous Android account.");
+                    return null;
+                }
+
+                var refreshToken = CacheFallbackOperations.GetRefreshToken(
                     requestParams.RequestContext.Logger,
                     LegacyCachePersistence,
                     aliases,
                     requestParams.AppConfig.ClientId,
                     requestParams.Account);
+
+                if (refreshToken is not null && identityFilter is not null)
+                {
+                    if (!accountFilter(new Account(refreshToken.HomeAccountId, requestParams.Account.Username, refreshToken.Environment)))
+                    {
+                        requestParams.RequestContext.Logger.Warning("Ignoring an ADAL refresh token for an ambiguous Android account.");
+                        return null;
+                    }
+
+                    refreshToken.IsAndroidCacheItem = true;
+                }
+
+                return refreshToken;
             }
 
             return null;
@@ -1117,13 +1138,19 @@ namespace Microsoft.Identity.Client
                 }
             }
 
+            var legacyAccountFilter = IsLegacyAdalCacheEnabled(requestParameters)
+                ? (Accessor as ILegacyCacheIdentityFilter)?.GetLegacyAccountFilter(instanceMetadata.Aliases)
+                : null;
+
             if (IsLegacyAdalCacheEnabled(requestParameters))
             {
                 UpdateMapWithAdalAccountsWithClientInfo(
                     environment,
                     instanceMetadata.Aliases,
                     adalUsersResult,
-                    clientInfoToAccountMap);
+                    clientInfoToAccountMap,
+                    legacyAccountFilter,
+                    logger);
             }
 
             // Add WAM accounts stored in MSAL's cache - for which we do not have an RT
@@ -1157,7 +1184,9 @@ namespace Microsoft.Identity.Client
                 UpdateWithAdalAccountsWithoutClientInfo(environment,
                  instanceMetadata.Aliases,
                  adalUsersResult,
-                 accounts);
+                 accounts,
+                 legacyAccountFilter,
+                 logger);
             }
 
             if (!string.IsNullOrEmpty(requestParameters.HomeAccountId))
@@ -1176,7 +1205,9 @@ namespace Microsoft.Identity.Client
           string envFromRequest,
           IEnumerable<string> envAliases,
           AdalUsersForMsal adalUsers,
-          IDictionary<string, Account> clientInfoToAccountMap)
+          IDictionary<string, Account> clientInfoToAccountMap,
+          Func<IAccount, bool> accountFilter,
+          ILoggerAdapter logger)
         {
             foreach (KeyValuePair<string, AdalUserInfo> pair in adalUsers?.GetUsersWithClientInfo(envAliases))
             {
@@ -1185,8 +1216,15 @@ namespace Microsoft.Identity.Client
 
                 if (!clientInfoToAccountMap.ContainsKey(accountIdentifier))
                 {
-                    clientInfoToAccountMap[accountIdentifier] = new Account(
+                    var account = new Account(
                             accountIdentifier, pair.Value.DisplayableId, envFromRequest, null);
+                    if (accountFilter?.Invoke(account) == false)
+                    {
+                        logger.Warning("Ignoring an ADAL account with an ambiguous Android identity.");
+                        continue;
+                    }
+
+                    clientInfoToAccountMap[accountIdentifier] = account;
                 }
             }
         }
@@ -1195,7 +1233,9 @@ namespace Microsoft.Identity.Client
             string envFromRequest,
             IEnumerable<string> envAliases,
             AdalUsersForMsal adalUsers,
-            List<IAccount> accounts)
+            List<IAccount> accounts,
+            Func<IAccount, bool> accountFilter,
+            ILoggerAdapter logger)
         {
             var uniqueUserNames = accounts.Select(a => a.Username).Distinct().ToList();
 
@@ -1203,7 +1243,14 @@ namespace Microsoft.Identity.Client
             {
                 if (!string.IsNullOrEmpty(user.DisplayableId) && !uniqueUserNames.Contains(user.DisplayableId))
                 {
-                    accounts.Add(new Account(null, user.DisplayableId, envFromRequest, null));
+                    var account = new Account(null, user.DisplayableId, envFromRequest, null);
+                    if (accountFilter?.Invoke(account) == false)
+                    {
+                        logger.Warning("Ignoring an ADAL account with an ambiguous Android identity.");
+                        continue;
+                    }
+
+                    accounts.Add(account);
                     uniqueUserNames.Add(user.DisplayableId);
                 }
             }
@@ -1407,12 +1454,20 @@ namespace Microsoft.Identity.Client
 
                     if (IsLegacyAdalCacheEnabled(requestParameters))
                     {
-                        CacheFallbackOperations.RemoveAdalUser(
-                           requestParameters.RequestContext.Logger,
-                           LegacyCachePersistence,
-                           ClientId,
-                           account?.Username,
-                           cacheKey);
+                        var accountFilter = (Accessor as ILegacyCacheIdentityFilter)?.GetLegacyAccountFilter(null);
+                        if (accountFilter?.Invoke(account) == false)
+                        {
+                            requestParameters.RequestContext.Logger.Warning("Skipping ADAL removal for an ambiguous Android account.");
+                        }
+                        else
+                        {
+                            CacheFallbackOperations.RemoveAdalUser(
+                               requestParameters.RequestContext.Logger,
+                               LegacyCachePersistence,
+                               ClientId,
+                               account?.Username,
+                               cacheKey);
+                        }
                     }
                 }
                 finally
