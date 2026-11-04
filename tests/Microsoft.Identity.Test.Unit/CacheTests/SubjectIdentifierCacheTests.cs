@@ -101,6 +101,79 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [TestMethod]
+        [DataRow("Account", false)]
+        [DataRow("Account", true)]
+        [DataRow("accessToken", false)]
+        [DataRow("refreshToken", false)]
+        [DataRow("idToken", false)]
+        public async Task AndroidLegacyMixedIdentities_RequireCacheClearAsync(string legacyType, bool hasVersionedSubject)
+        {
+            // Arrange
+            using var http = new MockHttpManager();
+            var app = CreateApplication(http, false);
+            var cache = (TokenCache)app.UserTokenCacheInternal;
+            var stores = new Dictionary<string, Dictionary<string, object>>(StringComparer.Ordinal);
+            cache.Accessor = CreateAccessor(stores);
+            var subject = await SignInAsync(app, http, "Member.tenant-id").ConfigureAwait(false);
+            MsalCacheItemBase legacyItem = legacyType switch
+            {
+                "accessToken" => cache.Accessor.GetAllAccessTokens().Single(),
+                "refreshToken" => cache.Accessor.GetAllRefreshTokens().Single(),
+                "idToken" => cache.Accessor.GetAllIdTokens().Single(),
+                "Account" => cache.Accessor.GetAllAccounts().Single(),
+                _ => throw new ArgumentOutOfRangeException(nameof(legacyType))
+            };
+            cache.Accessor.Clear();
+            string clientInfo = Base64UrlHelpers.Encode("{\"uid\":\"member\",\"utid\":\"tenant-id\"}");
+            var regular = await SignInAsync(app, http, "regular", clientInfo).ConfigureAwait(false);
+            var regularAccessToken = cache.Accessor.GetAllAccessTokens().Single();
+            var regularAccount = cache.Accessor.GetAllAccounts().Single();
+            AuthenticationResult unrelated = hasVersionedSubject
+                ? await SignInAsync(app, http, "unrelated").ConfigureAwait(false)
+                : null;
+
+            // Model a pre-upgrade cache with only one surviving subject record.
+            SeedLegacyStore(stores, legacyType, legacyItem);
+            var originalEntries = stores.ToDictionary(pair => pair.Key, pair => pair.Value.ToArray());
+            cache.Accessor = CreateAccessor(stores);
+
+            // Act
+            foreach (var account in new[] { subject.Account, regular.Account })
+            {
+                foreach (bool forceRefresh in new[] { false, true })
+                {
+                    // No HTTP handler is queued: neither identity's credential may be redeemed.
+                    var error = await Assert.ThrowsExactlyAsync<MsalUiRequiredException>(() =>
+                        app.AcquireTokenSilent(s_scopes, account).WithForceRefresh(forceRefresh).ExecuteAsync())
+                        .ConfigureAwait(false);
+                    Assert.AreEqual(MsalError.NoTokensFoundError, error.ErrorCode);
+                }
+
+                await app.RemoveAsync(account).ConfigureAwait(false);
+                foreach (var store in stores)
+                {
+                    CollectionAssert.AreEquivalent(originalEntries[store.Key], store.Value.ToArray());
+                }
+            }
+
+            // Assert
+            Assert.IsNull(cache.Accessor.GetIdToken(regularAccessToken));
+            Assert.IsNull(cache.Accessor.GetAccount(regularAccount));
+            Assert.IsNull(await app.GetAccountAsync(subject.Account.HomeAccountId.Identifier).ConfigureAwait(false));
+            Assert.IsNull(await app.GetAccountAsync(regular.Account.HomeAccountId.Identifier).ConfigureAwait(false));
+            Assert.HasCount(hasVersionedSubject ? 1 : 0, await app.GetAccountsAsync().ConfigureAwait(false));
+            AssertStoredSubjects(cache.Accessor, hasVersionedSubject ? new[] { "unrelated" } : Array.Empty<string>());
+            if (unrelated is not null)
+            {
+                await AssertCachedTokenAsync(app, unrelated.Account, "unrelated").ConfigureAwait(false);
+            }
+
+            cache.Accessor.Clear();
+            var fresh = await SignInAsync(app, http, "Member.tenant-id").ConfigureAwait(false);
+            await AssertCachedTokenAsync(app, fresh.Account, "Member.tenant-id").ConfigureAwait(false);
+        }
+
+        [TestMethod]
         [DataRow("member", "Member", false, true)]
         [DataRow("Member", "member", false, false)]
         [DataRow("member.tenant-id", "Member.tenant-id", true, true)]

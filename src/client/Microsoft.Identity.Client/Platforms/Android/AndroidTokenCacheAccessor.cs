@@ -198,10 +198,10 @@ namespace Microsoft.Identity.Client.Platforms.Android
         }
 
         private List<T> ReadAll<T>((ISharedPreferences Legacy, ISharedPreferences Subject) store,
-            Func<string, T> deserialize, ILoggerAdapter logger = null) where T : MsalCacheItemBase
+            Func<string, T> deserialize, ILoggerAdapter logger = null, bool includeLegacySubjects = false) where T : MsalCacheItemBase
         {
             var items = store.Legacy.All.Values.Cast<string>().Select(json => Read(json, deserialize)).ToList();
-            if (items.RemoveAll(item => item.IsAndroidSubject) > 0)
+            if (!includeLegacySubjects && items.RemoveAll(item => item.IsAndroidSubject) > 0)
             {
                 (logger ?? _requestContext?.Logger)?.Warning("Ignoring legacy Android subject entries; sign-in is required.");
             }
@@ -213,25 +213,22 @@ namespace Microsoft.Identity.Client.Platforms.Android
         private HashSet<string> GetAmbiguousIdentities()
         {
             var ambiguous = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            if ((_accessTokenSharedPreference.Subject.All.Count == 0 &&
-                _refreshTokenSharedPreference.Subject.All.Count == 0 &&
-                _idTokenSharedPreference.Subject.All.Count == 0 &&
-                _accountSharedPreference.Subject.All.Count == 0) ||
-                (_accessTokenSharedPreference.Legacy.All.Count == 0 &&
+            if (_accessTokenSharedPreference.Legacy.All.Count == 0 &&
                 _refreshTokenSharedPreference.Legacy.All.Count == 0 &&
                 _idTokenSharedPreference.Legacy.All.Count == 0 &&
-                _accountSharedPreference.Legacy.All.Count == 0))
+                _accountSharedPreference.Legacy.All.Count == 0)
             {
                 return ambiguous;
             }
 
             // IAccount does not encode identity provenance. Keep both sides of a mixed collision
             // ineligible, including orphaned credentials, so removal cannot reactivate the other side.
+            // Legacy subject records remain identity evidence even though they cannot be acquired.
             var identities = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
-            Add(ReadAll(_accessTokenSharedPreference, MsalAccessTokenCacheItem.FromJsonString));
-            Add(ReadAll(_refreshTokenSharedPreference, MsalRefreshTokenCacheItem.FromJsonString));
-            Add(ReadAll(_idTokenSharedPreference, MsalIdTokenCacheItem.FromJsonString));
-            Add(ReadAll(_accountSharedPreference, MsalAccountCacheItem.FromJsonString));
+            Add(ReadAll(_accessTokenSharedPreference, MsalAccessTokenCacheItem.FromJsonString, includeLegacySubjects: true));
+            Add(ReadAll(_refreshTokenSharedPreference, MsalRefreshTokenCacheItem.FromJsonString, includeLegacySubjects: true));
+            Add(ReadAll(_idTokenSharedPreference, MsalIdTokenCacheItem.FromJsonString, includeLegacySubjects: true));
+            Add(ReadAll(_accountSharedPreference, MsalAccountCacheItem.FromJsonString, includeLegacySubjects: true));
             return ambiguous;
 
             void Add<T>(IEnumerable<T> items) where T : MsalCacheItemBase
