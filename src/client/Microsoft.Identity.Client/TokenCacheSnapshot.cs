@@ -95,7 +95,7 @@ namespace Microsoft.Identity.Client
             return CloneUnknownNodes(_state.UnknownNodes);
         }
 
-        private static IDictionary<string, JsonNode> CloneUnknownNodes(IDictionary<string, JsonNode> nodes)
+        internal static IDictionary<string, JsonNode> CloneUnknownNodes(IDictionary<string, JsonNode> nodes)
         {
             var copy = new Dictionary<string, JsonNode>(StringComparer.Ordinal);
             if (nodes is not null)
