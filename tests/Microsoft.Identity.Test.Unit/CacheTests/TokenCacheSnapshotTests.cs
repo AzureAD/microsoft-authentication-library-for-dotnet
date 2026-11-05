@@ -65,6 +65,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 nameof(source.HomeAccountId),
                 nameof(source.Environment),
                 nameof(source.RawClientInfo),
+                nameof(source.IsAndroidCacheItem),
+                nameof(source.IsAndroidSubject),
                 nameof(source.AdditionalFieldsJson)
             };
             // Act
@@ -103,6 +105,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 nameof(source.HomeAccountId),
                 nameof(source.Environment),
                 nameof(source.RawClientInfo),
+                nameof(source.IsAndroidCacheItem),
+                nameof(source.IsAndroidSubject),
                 nameof(source.AdditionalFieldsJson)
             };
 
@@ -137,6 +141,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 nameof(source.HomeAccountId),
                 nameof(source.Environment),
                 nameof(source.RawClientInfo),
+                nameof(source.IsAndroidCacheItem),
+                nameof(source.IsAndroidSubject),
                 nameof(source.AdditionalFieldsJson)
             };
 
@@ -175,6 +181,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 nameof(source.HomeAccountId),
                 nameof(source.Environment),
                 nameof(source.RawClientInfo),
+                nameof(source.IsAndroidCacheItem),
+                nameof(source.IsAndroidSubject),
                 nameof(source.AdditionalFieldsJson)
             };
 

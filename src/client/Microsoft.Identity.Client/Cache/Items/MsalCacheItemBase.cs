@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using Microsoft.Identity.Client.Utils;
 using JObject = System.Text.Json.Nodes.JsonObject;
 
@@ -12,6 +13,20 @@ namespace Microsoft.Identity.Client.Cache.Items
         internal string HomeAccountId { get; set; }
         internal string Environment { get; set; }
         internal string RawClientInfo { get; set; }
+
+        // Set only by Android's private cache accessor, never inferred from shared V3 records.
+        internal bool IsAndroidCacheItem { get; set; }
+        internal bool IsAndroidSubject => IsAndroidCacheItem &&
+            !string.IsNullOrEmpty(HomeAccountId) && string.IsNullOrEmpty(RawClientInfo);
+
+        internal bool MatchesHomeAccountId(string homeAccountId) =>
+            string.Equals(HomeAccountId, homeAccountId,
+                IsAndroidSubject ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase);
+
+        internal bool MatchesAccountIdentity(string homeAccountId, string rawClientInfo) =>
+            (!IsAndroidCacheItem ||
+                IsAndroidSubject == (!string.IsNullOrEmpty(homeAccountId) && string.IsNullOrEmpty(rawClientInfo))) &&
+            MatchesHomeAccountId(homeAccountId);
 
         internal override void PopulateFieldsFromJObject(JObject j)
         {
