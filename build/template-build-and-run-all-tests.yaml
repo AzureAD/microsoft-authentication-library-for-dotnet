@@ -47,7 +47,7 @@ stages:
 
   - job: 'BuilMacConsoleAppWithBroker'
     pool:
-        vmImage: macOS-14
+        vmImage: macOS-15
 
     variables:
         runCodesignValidationInjection: false
