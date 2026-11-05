@@ -1,3 +1,10 @@
+MSAL.NET 5 (unreleased)
+=======================
+
+### Breaking Changes
+
+- Removed the .NET Framework 4.6.2 (`net462`) target from `Microsoft.Identity.Client`, `Microsoft.Identity.Client.Broker`, and `Microsoft.Identity.Client.Desktop`. The minimum supported .NET Framework version for v5 is now 4.7.2 (`net472`); retarget applications before upgrading. Other target frameworks and existing 4.x releases are unchanged.
+
 4.91.1
 ======
 

@@ -1192,7 +1192,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
         [TestMethod]
         [TestCategory(TestCategories.TokenCacheTests)]
-        public void CanDeserializeTokenCacheInNet462()
+        public void CanDeserializeNullTokenCache()
         {
             var tokenCache = new TokenCache(TestCommon.CreateDefaultServiceBundle(), false)
             {

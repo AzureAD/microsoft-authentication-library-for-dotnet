@@ -123,7 +123,6 @@ public class AcquireTokenForClientParameterBuilder
 | KeyGuard available | `Software` | Uses KeyGuard (host max, never downgrades). |
 | Software only | `KeyGuard` | **Throws `MsalClientException` at AcquireToken.** |
 | Software only | `Software` | Uses software. ✅ |
-| .NET 4.6.2 | any non-`Bearer` | **Throws.** |
 | any | `Bearer` (default) | No floor; same as parameterless `WithMtlsProofOfPossession()`. |
 
 - `PoPOptions.MinStrength` is a **floor assertion**, never a downgrade dial.
@@ -200,7 +199,7 @@ Feature is internal-only (Azure SDK private chain). No external migration story 
 - [ ] `PoPOptions` class added in `Microsoft.Identity.Client.AppConfig` with `MinStrength` property (default `Bearer`).
 - [ ] `WithMtlsProofOfPossession(PoPOptions)` overload added on `AcquireTokenForManagedIdentityParameterBuilder` and `AcquireTokenForClientParameterBuilder`.
 - [ ] `MsalError.MinStrengthNotMet` thrown when host can't meet floor; error message names host actual strength + required floor.
-- [ ] Tests cover: AKS/Linux host → `IsMtlsPopSupportedByHost = false`; Windows TVM/CVM → KeyGuard tier; KeyGuard host passes floor; software host fails floor; .NET 4.6.2 fails floor; default `Bearer` floor behaves identically to parameterless overload; ConfClient parity.
+- [ ] Tests cover: AKS/Linux host → `IsMtlsPopSupportedByHost = false`; Windows TVM/CVM → KeyGuard tier; KeyGuard host passes floor; software host fails floor; default `Bearer` floor behaves identically to parameterless overload; ConfClient parity.
 
 ## Resolved
 

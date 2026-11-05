@@ -65,15 +65,9 @@ namespace Microsoft.Identity.Client
                     MsalErrorMessage.MtlsNotSupportedForNonWindowsMessage);
             }
 
-#if NET462
-            throw new MsalClientException(
-                MsalError.MtlsNotSupportedForManagedIdentity,
-                MsalErrorMessage.MtlsNotSupportedForManagedIdentityMessage);
-#else
             builder.CommonParameters.IsMtlsPopRequested = true;
             builder.CommonParameters.MtlsPopMinStrength = options.MinStrength;
             return builder;
-#endif
         }
 
         /// <summary>
@@ -109,14 +103,8 @@ namespace Microsoft.Identity.Client
                     MsalErrorMessage.MtlsNotSupportedForNonWindowsMessage);
             }
 
-#if NET462
-            throw new MsalClientException(
-                MsalError.MtlsNotSupportedForManagedIdentity,
-                MsalErrorMessage.MtlsNotSupportedForManagedIdentityMessage);
-#else
             builder.CommonParameters.PreferMsiV2 = true;
             return builder;
-#endif
         }
     }
 }

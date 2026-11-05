@@ -557,7 +557,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity.V2
         /// <summary>
         /// Computes a stable hex fingerprint of the RSA public key.
         /// Used as a cache key for ephemeral CNG keys that have no key name.
-        /// Compatible with .NET Framework 4.6.2 and netstandard2.0.
+        /// Compatible with .NET Framework 4.7.2 and netstandard2.0.
         /// </summary>
         private static string GetPublicKeyFingerprint(RSA rsa)
         {
