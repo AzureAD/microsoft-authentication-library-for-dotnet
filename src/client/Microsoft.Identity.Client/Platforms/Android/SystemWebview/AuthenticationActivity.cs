@@ -15,7 +15,6 @@ using AndroidX.Browser.CustomTabs;
 using Android.Support.CustomTabs;
 #endif
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 using Uri = Android.Net.Uri;
 
@@ -23,11 +22,11 @@ namespace Microsoft.Identity.Client.Platforms.Android.SystemWebview
 {
     /// <summary>
     /// </summary>
-    [Activity(Name = "microsoft.identity.client.AuthenticationActivity", Exported=true)]
+    [Activity(Name = "microsoft.identity.client.AuthenticationActivity", Exported = false)]
     [Preserve(AllMembers = true)]
     internal class AuthenticationActivity : Activity
     {
-        internal static RequestContext RequestContext { get; set; }
+        internal static SystemWebViewRequest PendingRequest { get; set; }
 
         /// <summary>
         /// Default Constructor
@@ -43,12 +42,20 @@ namespace Microsoft.Identity.Client.Platforms.Android.SystemWebview
         private string _requestUrl;
         private int _requestId;
         private bool _restarted;
+        private SystemWebViewRequest _request;
 
         /// <summary>
         /// </summary>
         protected override void OnCreate(Bundle bundle)
         {
             base.OnCreate(bundle);
+
+            _request = PendingRequest;
+            if (!HasPendingRequest())
+            {
+                Finish();
+                return;
+            }
 
             // If activity is killed by the OS, savedInstance will be the saved bundle.
             if (bundle != null)
@@ -70,6 +77,13 @@ namespace Microsoft.Identity.Client.Platforms.Android.SystemWebview
             if (string.IsNullOrEmpty(_requestUrl))
             {
                 SendError(MsalError.InvalidRequest, "Request url is not set on the intent");
+                return;
+            }
+
+            if (!string.Equals(_requestUrl, _request.AuthorizationUri.AbsoluteUri, StringComparison.Ordinal))
+            {
+                _request.RequestContext.Logger.Warning("Ignoring a system browser launch that does not match the pending request.");
+                Finish();
             }
         }
 
@@ -80,7 +94,23 @@ namespace Microsoft.Identity.Client.Platforms.Android.SystemWebview
         protected override void OnNewIntent(Intent intent)
         {
             base.OnNewIntent(intent);
-            string url = intent.GetStringExtra(AndroidConstants.CustomTabRedirect);
+            if (IsFinishing)
+            {
+                return;
+            }
+
+            if (!HasPendingRequest())
+            {
+                Finish();
+                return;
+            }
+
+            string url = intent?.GetStringExtra(AndroidConstants.CustomTabRedirect);
+            if (!_request.IsValidRedirect(url))
+            {
+                _request.RequestContext.Logger.Warning("Ignoring a system browser response that does not match the pending request.");
+                return;
+            }
 
             Intent resultIntent = new Intent();
             resultIntent.PutExtra(AndroidConstants.AuthorizationFinalUrl, url);
@@ -94,6 +124,17 @@ namespace Microsoft.Identity.Client.Platforms.Android.SystemWebview
         protected override void OnResume()
         {
             base.OnResume();
+
+            if (IsFinishing)
+            {
+                return;
+            }
+
+            if (!HasPendingRequest())
+            {
+                Finish();
+                return;
+            }
 
             if (_restarted)
             {
@@ -110,7 +151,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.SystemWebview
                 Intent browserIntent = new Intent(Intent.ActionView, Uri.Parse(_requestUrl));
                 browserIntent.AddCategory(Intent.CategoryBrowsable);
 
-                RequestContext.Logger.Warning(
+                _request.RequestContext.Logger.Warning(
                     "Browser with custom tabs package not available. " +
                     "Launching with alternate browser. See https://aka.ms/msal-net-system-browsers for details.");
 
@@ -127,7 +168,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.SystemWebview
             }
             else
             {
-                RequestContext.Logger.Info(() =>
+                _request.RequestContext.Logger.Info(() =>
                     string.Format(
                     CultureInfo.CurrentCulture,
                     "Browser with custom tabs package available. Using {0}. ",
@@ -164,9 +205,25 @@ namespace Microsoft.Identity.Client.Platforms.Android.SystemWebview
          */
         private void ReturnToCaller(int resultCode, Intent data)
         {
+            if (ReferenceEquals(PendingRequest, _request))
+            {
+                PendingRequest = null;
+            }
+
             data.PutExtra(AndroidConstants.RequestId, _requestId);
             SetResult((Result)resultCode, data);
             Finish();
+        }
+
+        private bool HasPendingRequest()
+        {
+            if (_request is not null && ReferenceEquals(PendingRequest, _request))
+            {
+                return true;
+            }
+
+            global::Android.Util.Log.Warn("MSAL", "Ignoring system browser activity without a pending authentication request.");
+            return false;
         }
 
         /**

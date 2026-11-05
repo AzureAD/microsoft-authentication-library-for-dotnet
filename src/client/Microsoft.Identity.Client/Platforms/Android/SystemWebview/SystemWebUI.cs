@@ -23,8 +23,6 @@ namespace Microsoft.Identity.Client.Platforms.Android.SystemWebview
             _parent = parent;
         }
 
-        public RequestContext RequestContext { get; set; }
-
         public override async Task<AuthorizationResult> AcquireAuthorizationAsync(
             Uri authorizationUri,
             Uri redirectUri,
@@ -35,25 +33,36 @@ namespace Microsoft.Identity.Client.Platforms.Android.SystemWebview
 
             returnedUriReady = new SemaphoreSlim(0);
 
+            var pendingRequest = new SystemWebViewRequest(authorizationUri, redirectUri, requestContext);
+            AuthenticationActivity.PendingRequest = pendingRequest;
+
             try
             {
-                var agentIntent = new Intent(_parent.Activity, typeof(AuthenticationActivity));
-                agentIntent.PutExtra(AndroidConstants.RequestUrlKey, authorizationUri.AbsoluteUri);
-                agentIntent.PutExtra(AndroidConstants.CustomTabRedirect, redirectUri.OriginalString);
-                AuthenticationActivity.RequestContext = RequestContext;
-                _parent.Activity.RunOnUiThread(()=> _parent.Activity.StartActivityForResult(agentIntent, 0));
-            }
-            catch (Exception ex)
-            {
-                requestContext.Logger.ErrorPii(ex);
-                throw new MsalClientException(
-                    MsalError.AuthenticationUiFailedError,
-                    "AuthenticationActivity failed to start",
-                    ex);
-            }
+                try
+                {
+                    var agentIntent = new Intent(_parent.Activity, typeof(AuthenticationActivity));
+                    agentIntent.PutExtra(AndroidConstants.RequestUrlKey, authorizationUri.AbsoluteUri);
+                    _parent.Activity.RunOnUiThread(()=> _parent.Activity.StartActivityForResult(agentIntent, 0));
+                }
+                catch (Exception ex)
+                {
+                    requestContext.Logger.ErrorPii(ex);
+                    throw new MsalClientException(
+                        MsalError.AuthenticationUiFailedError,
+                        "AuthenticationActivity failed to start",
+                        ex);
+                }
 
-            await returnedUriReady.WaitAsync(cancellationToken).ConfigureAwait(false);
-            return authorizationResult;
+                await returnedUriReady.WaitAsync(cancellationToken).ConfigureAwait(false);
+                return authorizationResult;
+            }
+            finally
+            {
+                if (ReferenceEquals(AuthenticationActivity.PendingRequest, pendingRequest))
+                {
+                    AuthenticationActivity.PendingRequest = null;
+                }
+            }
         }
 
         public override Uri UpdateRedirectUri(Uri redirectUri)

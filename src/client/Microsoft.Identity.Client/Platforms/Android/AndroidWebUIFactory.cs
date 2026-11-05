@@ -40,10 +40,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
                 };
             }
 
-            return new SystemWebUI(coreUIParent)
-            {
-                RequestContext = requestContext
-            };
+            return new SystemWebUI(coreUIParent);
         }
 
         public bool IsSystemWebViewAvailable
