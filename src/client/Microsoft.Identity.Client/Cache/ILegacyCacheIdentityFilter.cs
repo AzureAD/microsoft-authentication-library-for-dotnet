@@ -8,7 +8,8 @@ namespace Microsoft.Identity.Client.Cache
 {
     internal interface ILegacyCacheIdentityFilter
     {
-        // A per-operation snapshot; null environments covers cross-environment ADAL removal.
-        Func<IAccount, bool> GetLegacyAccountFilter(IEnumerable<string> environments);
+        // Per-operation snapshots using the lookup's aliases; null covers cross-environment removal.
+        Func<string, bool> GetAccountFilter(IEnumerable<string> environments);
+        Func<IAccount, string, bool> GetLegacyAccountFilter(IEnumerable<string> environments);
     }
 }

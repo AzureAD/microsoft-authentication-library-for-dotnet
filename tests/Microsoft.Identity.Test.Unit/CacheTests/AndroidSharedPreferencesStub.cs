@@ -48,5 +48,6 @@ namespace Microsoft.Identity.Client.Platforms.Android
     internal static class MsalError
     {
         internal const string FailedToCreateSharedPreference = "shared_preference_creation_failed";
+        internal const string UserMismatch = Client.MsalError.UserMismatch;
     }
 }

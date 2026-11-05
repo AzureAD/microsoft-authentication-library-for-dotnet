@@ -69,22 +69,22 @@ namespace Microsoft.Identity.Client.Platforms.Android
         #region SaveItem
         public void SaveAccessToken(MsalAccessTokenCacheItem item)
         {
-            Save(item, item.CacheKey, _accessTokenSharedPreference);
+            Save(item, item.CacheKey, _accessTokenSharedPreference, MsalAccessTokenCacheItem.FromJsonString);
         }
 
         public void SaveRefreshToken(MsalRefreshTokenCacheItem item)
         {
-            Save(item, item.CacheKey, _refreshTokenSharedPreference);
+            Save(item, item.CacheKey, _refreshTokenSharedPreference, MsalRefreshTokenCacheItem.FromJsonString);
         }
 
         public void SaveIdToken(MsalIdTokenCacheItem item)
         {
-            Save(item, item.CacheKey, _idTokenSharedPreference);
+            Save(item, item.CacheKey, _idTokenSharedPreference, MsalIdTokenCacheItem.FromJsonString);
         }
 
         public void SaveAccount(MsalAccountCacheItem item)
         {
-            Save(item, item.CacheKey, _accountSharedPreference);
+            Save(item, item.CacheKey, _accountSharedPreference, MsalAccountCacheItem.FromJsonString);
         }
 
         private static (ISharedPreferences Preferences, string Key) GetStorage(
@@ -97,9 +97,17 @@ namespace Microsoft.Identity.Client.Platforms.Android
                 : (store.Legacy, cacheKey);
         }
 
-        private static void Save(MsalCacheItemBase item, string cacheKey, (ISharedPreferences Legacy, ISharedPreferences Subject) store)
+        private static void Save<T>(T item, string cacheKey,
+            (ISharedPreferences Legacy, ISharedPreferences Subject) store, Func<string, T> deserialize) where T : MsalCacheItemBase
         {
             var storage = GetStorage(item, cacheKey, store);
+            if (!item.IsAndroidSubject &&
+                Read(store.Legacy.GetString(storage.Key, null), deserialize)?.IsAndroidSubject == true)
+            {
+                throw new MsalClientException(MsalError.UserMismatch,
+                    "A legacy Android subject entry conflicts with this account. Clear the cache and sign in again.");
+            }
+
             var editor = storage.Preferences.Edit();
             editor.PutString(storage.Key, item.ToJObject().ToString());
             editor.Apply();
@@ -225,25 +233,33 @@ namespace Microsoft.Identity.Client.Platforms.Android
             // IAccount does not encode identity provenance. Keep both sides of a mixed collision
             // ineligible, including orphaned credentials, so removal cannot reactivate the other side.
             // Legacy subject records remain identity evidence even though they cannot be acquired.
-            var identities = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
-            Add(ReadAllItems());
-            return ambiguous;
+            return GetAmbiguousIdentities(ReadAllItems(), GetIdentityKey);
+        }
 
-            void Add<T>(IEnumerable<T> items) where T : MsalCacheItemBase
+        private static HashSet<string> GetAmbiguousIdentities(
+            IEnumerable<MsalCacheItemBase> items, Func<MsalCacheItemBase, string> getKey)
+        {
+            var ambiguous = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var identities = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
+            foreach (var item in items)
             {
-                foreach (var item in items)
+                string key = getKey(item);
+                if (string.IsNullOrEmpty(key))
                 {
-                    string key = GetIdentityKey(item);
-                    if (identities.TryGetValue(key, out bool isSubject) && isSubject != item.IsAndroidSubject)
-                    {
-                        ambiguous.Add(key);
-                    }
-                    else
-                    {
-                        identities[key] = item.IsAndroidSubject;
-                    }
+                    continue;
+                }
+
+                if (identities.TryGetValue(key, out bool isSubject) && isSubject != item.IsAndroidSubject)
+                {
+                    ambiguous.Add(key);
+                }
+                else
+                {
+                    identities[key] = item.IsAndroidSubject;
                 }
             }
+
+            return ambiguous;
         }
 
         private IEnumerable<MsalCacheItemBase> ReadAllItems()
@@ -255,30 +271,42 @@ namespace Microsoft.Identity.Client.Platforms.Android
                 .Concat(ReadAll(_accountSharedPreference, MsalAccountCacheItem.FromJsonString, includeLegacySubjects: true));
         }
 
-        public Func<IAccount, bool> GetLegacyAccountFilter(IEnumerable<string> environments)
+        private IEnumerable<MsalCacheItemBase> ReadIdentityEvidence(IEnumerable<string> environments) =>
+            ReadAllItems().Where(item => environments is null || environments.ContainsOrdinalIgnoreCase(item.Environment));
+
+        public Func<string, bool> GetAccountFilter(IEnumerable<string> environments)
         {
-            var ambiguous = GetAmbiguousIdentities();
+            var ambiguous = GetAmbiguousIdentities(ReadIdentityEvidence(environments), item => item.HomeAccountId);
+            return homeAccountId => !ambiguous.Contains(homeAccountId);
+        }
+
+        public Func<IAccount, string, bool> GetLegacyAccountFilter(IEnumerable<string> environments)
+        {
+            var items = ReadIdentityEvidence(environments).ToList();
+            var ambiguous = GetAmbiguousIdentities(items, item => item.HomeAccountId);
             var homeAccountIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             var usernames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            if (ambiguous.Count > 0)
+            var uniqueIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var item in items)
             {
-                foreach (var item in ReadAllItems())
+                // ADAL itself may be the only remaining CI-backed side of a collision.
+                if (item.IsAndroidSubject || ambiguous.Contains(item.HomeAccountId))
                 {
-                    if (ambiguous.Contains(GetIdentityKey(item)) &&
-                        (environments is null || environments.ContainsOrdinalIgnoreCase(item.Environment)))
+                    homeAccountIds.Add(item.HomeAccountId);
+                    uniqueIds.Add(AccountId.ParseFromString(item.HomeAccountId)?.ObjectId);
+                    string username = item is MsalAccountCacheItem account
+                        ? account.PreferredUsername
+                        : (item as MsalIdTokenCacheItem)?.GetUsername();
+                    if (!string.IsNullOrEmpty(username))
                     {
-                        homeAccountIds.Add(item.HomeAccountId);
-                        if (item is MsalAccountCacheItem account && !string.IsNullOrEmpty(account.PreferredUsername))
-                        {
-                            // Older ADAL entries may identify an account only by username.
-                            usernames.Add(account.PreferredUsername);
-                        }
+                        usernames.Add(username);
                     }
                 }
             }
 
-            return account => !homeAccountIds.Contains(account.HomeAccountId?.Identifier) &&
-                !usernames.Contains(account.Username);
+            return (account, uniqueId) => !homeAccountIds.Contains(account.HomeAccountId?.Identifier) &&
+                !usernames.Contains(account.Username) &&
+                (account.HomeAccountId is not null || string.IsNullOrEmpty(uniqueId) || !uniqueIds.Contains(uniqueId));
         }
 
         private static string GetIdentityKey(MsalCacheItemBase item)
