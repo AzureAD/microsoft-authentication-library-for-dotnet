@@ -3,3 +3,4 @@ Microsoft.Identity.Client.ITokenCacheSnapshotProvider.CreateSnapshot() -> Micros
 Microsoft.Identity.Client.ITokenCacheSnapshotProvider.RestoreSnapshot(Microsoft.Identity.Client.TokenCacheSnapshot snapshot) -> void
 Microsoft.Identity.Client.TokenCacheSnapshot
 Microsoft.Identity.Client.TokenCacheSnapshot.SerializeMsalV3() -> byte[]
+static Microsoft.Identity.Client.Extensibility.AbstractConfidentialClientAcquireTokenParameterBuilderExtension.WithClaimsFromClient(this Microsoft.Identity.Client.AcquireTokenSilentParameterBuilder builder, string claimsJson) -> Microsoft.Identity.Client.AcquireTokenSilentParameterBuilder

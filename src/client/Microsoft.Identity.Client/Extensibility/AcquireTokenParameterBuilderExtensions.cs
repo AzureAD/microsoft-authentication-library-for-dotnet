@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
 
 namespace Microsoft.Identity.Client.Advanced  
 {
@@ -100,6 +101,13 @@ namespace Microsoft.Identity.Client.Extensibility
             if (key.Length == 0)
             {
                 throw new ArgumentException("Value cannot be empty.", nameof(key));
+            }
+
+            if (string.Equals(key, AcquireTokenCommonParameters.ClientClaimsCacheKey, StringComparison.Ordinal))
+            {
+                throw new ArgumentException(
+                    $"The cache partition key '{AcquireTokenCommonParameters.ClientClaimsCacheKey}' is reserved.",
+                    nameof(key));
             }
 
             if (value is null)
