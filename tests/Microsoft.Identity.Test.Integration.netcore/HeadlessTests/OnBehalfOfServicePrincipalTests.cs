@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Security.Cryptography.X509Certificates;
@@ -22,7 +23,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private const string OboServiceTseClientId = "482c55e1-578e-4a1e-bb06-b3cfde53e14b";
         private const string OboServiceDownstreamApiTseClientId = "b0b1e288-5d87-49f7-8ba5-164304157c9c";
         private const string TseAuthenticationAuthority = "https://login.microsoftonline.com/d8d14ca6-f1fa-41c1-ae95-0db6258ec0a0";
-        private const string TseCertificateThumbprint = "D831CA99C5DC7C835C7A410CF2B33BA79D6E61F1";
+        private const string TseCertificateUriSan = "urn:/eid1/c/pub/t/Me_N-B6jSkuT5F9XHpElWg/a/TGq7MXLk0UeJfZ46G9x1Hw";
 
         /// <summary>
         /// Client -> Middletier -> RP
@@ -187,12 +188,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         private static X509Certificate2 FindTseCertificate()
         {
-            using var store = new X509Store(StoreName.My, StoreLocation.LocalMachine);
-            store.Open(OpenFlags.ReadOnly);
-            var certificates = store.Certificates.Find(X509FindType.FindByThumbprint, TseCertificateThumbprint, validOnly: false);
-            Assert.HasCount(1, certificates, "Install the LabAuthTse certificate in LocalMachine/My.");
-            Assert.IsTrue(certificates[0].HasPrivateKey, "The LabAuthTse certificate must have its private key.");
-            return certificates[0];
+            return TseCertificateHelper.FindCertificate(new Uri(TseCertificateUriSan));
         }
     }
 }
