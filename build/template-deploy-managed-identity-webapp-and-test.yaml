@@ -55,6 +55,18 @@ parameters:
   default: 'e9207e64-f339-4a63-b074-90dc105a1954'
 
 steps:
+
+# Ensure the required SDKs are available on the agent.
+# The .NET 10 SDK is required to satisfy global.json (rollForward: latestFeature stays within 10.0.x and won't fall back to 8.x).
+- task: UseDotNet@2
+  displayName: 'Install .NET SDK 10.0.302 (required by global.json)'
+  inputs:
+    packageType: 'sdk'
+    version: '10.0.302'
+    includePreviewVersions: false
+    performMultiLevelLookup: true
+
+# The .NET 8 SDK is required to build and publish the net8.0 ManagedIdentityWebApi.
 - task: UseDotNet@2
   displayName: 'Install .NET 8 SDK'
   inputs:
