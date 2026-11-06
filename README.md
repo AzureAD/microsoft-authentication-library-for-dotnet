@@ -21,6 +21,16 @@ The following table lists MSAL.NET versions currently supported and receiving se
 | --------------|--------------|--------|------------|--------|
 | 4.x           | [![NuGet](https://img.shields.io/nuget/v/microsoft.identity.client.svg?style=flat-square&label=nuget&colorB=00b200)](https://www.nuget.org/packages/Microsoft.Identity.Client/)   |Monthly| Active | Not planned.<br/>✅Supported versions: from 4.77.1 to [![NuGet](https://img.shields.io/nuget/v/microsoft.identity.client.svg?style=flat-square&label=nuget&colorB=00b200)](https://www.nuget.org/packages/Microsoft.Identity.Client/)<br/>⚠️Unsupported versions &lt; `4.77.1`.|
 
+### MSAL.NET 5 development
+
+MSAL.NET 5 is being developed on `rel/v5`; `main` remains the 4.x development line.
+The minimum supported .NET Framework version for v5 is **4.7.2** across
+`Microsoft.Identity.Client`, `Microsoft.Identity.Client.Broker`, and
+`Microsoft.Identity.Client.Desktop`. Retarget .NET Framework applications to `net472`
+or later before upgrading to v5. Other target frameworks remain unchanged, including
+`netstandard2.0`, `net8.0`, and the optional Android/iOS targets.
+This does not change support for existing 4.x releases.
+
 ### Performance perspectives
 
 [Our documentation](https://learn.microsoft.com/entra/msal/dotnet/advanced/performance-testing) describes the approach to performance testing.
