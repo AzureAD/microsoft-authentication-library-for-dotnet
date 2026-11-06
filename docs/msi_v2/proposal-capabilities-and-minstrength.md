@@ -79,7 +79,7 @@ The public source enum drops the separate `ImdsV2 = 8` value; detection reports 
 - **Safe for AKS-on-IMDS:** those nodes are Linux with no TVM/CVM profile, so `IsMtlsPopSupportedByHost` comes back `false`. Azure SDK also checks for AKS via `FEDERATED_TOKEN_FILE` before it ever calls MSAL's MI path — a second safety net.
 - **Future bearer-over-IMDSv2:** today bearer is served by v1 and v2 is only used for PoP, so there's no current bearer-over-v2 path. The shape doesn't block it later — `Bearer` is the floor of the strength range and v1/v2 routing is internal, so it can be wired up without an API change.
 
-### 3. `WithMtlsProofOfPossession(PoPOptions)` — floor assertion
+### 3. `WithMtlsProofOfPossession(PoPOptions)` — floor assertion.
 
 ```csharp
 namespace Microsoft.Identity.Client.AppConfig
