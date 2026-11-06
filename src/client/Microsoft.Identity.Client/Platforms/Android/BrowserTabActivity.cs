@@ -46,9 +46,8 @@ namespace Microsoft.Identity.Client
                 return;
             }
 
-            Intent intent = new Intent(this, typeof (AuthenticationActivity));
+            Intent intent = request.CreateIntent(this);
             intent.PutExtra(AndroidConstants.CustomTabRedirect, url);
-            intent.SetFlags(ActivityFlags.ClearTop | ActivityFlags.SingleTop);
             StartActivity(intent);
             Finish();
         }

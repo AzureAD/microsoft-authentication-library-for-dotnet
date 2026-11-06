@@ -84,6 +84,12 @@
              Link="WebUITests\SystemWebViewRequest.cs" />
     <Compile Include="..\..\src\client\Microsoft.Identity.Client\Platforms\Android\BrowserTabActivity.cs"
              Link="WebUITests\BrowserTabActivity.cs" />
+    <Compile Include="..\..\src\client\Microsoft.Identity.Client\Platforms\Android\SystemWebview\SystemWebUI.cs"
+             Link="WebUITests\SystemWebUI.cs" />
+    <Compile Include="..\..\src\client\Microsoft.Identity.Client\Platforms\Android\WebviewBase.cs"
+             Link="WebUITests\WebviewBase.cs" />
+    <Compile Include="..\..\src\client\Microsoft.Identity.Client\Platforms\Android\AuthenticationContinuationHelper.cs"
+             Link="WebUITests\AuthenticationContinuationHelper.cs" />
   </ItemGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet)'">
     <DefineConstants>$(DefineConstants);NET_CORE</DefineConstants>

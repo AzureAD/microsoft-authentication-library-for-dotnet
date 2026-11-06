@@ -2,8 +2,10 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Android.App;
 using Android.Content;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
@@ -16,9 +18,9 @@ namespace Microsoft.Identity.Client.Platforms.Android.SystemWebview
     [Preserve(AllMembers = true)]
     internal class SystemWebUI : WebviewBase
     {
-        private readonly CoreUIParent _parent;
+        private readonly Activity _parent;
 
-        public SystemWebUI(CoreUIParent parent)
+        public SystemWebUI(Activity parent)
         {
             _parent = parent;
         }
@@ -29,40 +31,75 @@ namespace Microsoft.Identity.Client.Platforms.Android.SystemWebview
             RequestContext requestContext,
             CancellationToken cancellationToken)
         {
-            AuthenticationContinuationHelper.LastRequestLogger = requestContext.Logger;
-
-            returnedUriReady = new SemaphoreSlim(0);
-
             var pendingRequest = new SystemWebViewRequest(authorizationUri, redirectUri, requestContext);
             AuthenticationActivity.PendingRequest = pendingRequest;
 
-            try
+            using (cancellationToken.Register(() => pendingRequest.Completion.TrySetCanceled(cancellationToken)))
             {
                 try
                 {
-                    var agentIntent = new Intent(_parent.Activity, typeof(AuthenticationActivity));
-                    agentIntent.PutExtra(AndroidConstants.RequestUrlKey, authorizationUri.AbsoluteUri);
-                    _parent.Activity.RunOnUiThread(()=> _parent.Activity.StartActivityForResult(agentIntent, 0));
-                }
-                catch (Exception ex)
-                {
-                    requestContext.Logger.ErrorPii(ex);
-                    throw new MsalClientException(
-                        MsalError.AuthenticationUiFailedError,
-                        "AuthenticationActivity failed to start",
-                        ex);
-                }
+                    try
+                    {
+                        _parent.RunOnUiThread(() =>
+                        {
+                            if (pendingRequest.Completion.Task.IsCompleted ||
+                                !ReferenceEquals(AuthenticationActivity.PendingRequest, pendingRequest))
+                            {
+                                requestContext.Logger.Info("Skipping a cancelled or superseded system browser launch.");
+                                pendingRequest.Completion.TrySetCanceled();
+                                return;
+                            }
 
-                await returnedUriReady.WaitAsync(cancellationToken).ConfigureAwait(false);
-                return authorizationResult;
-            }
-            finally
-            {
-                if (ReferenceEquals(AuthenticationActivity.PendingRequest, pendingRequest))
+                            try
+                            {
+                                var manager = (ActivityManager)_parent.GetSystemService(Context.ActivityService);
+                                pendingRequest.CallerTask = manager.AppTasks.FirstOrDefault(task =>
+                                {
+#if NET8_0_OR_GREATER
+                                    if (OperatingSystem.IsAndroidVersionAtLeast(29))
+                                    {
+                                        return task.TaskInfo.TaskId == _parent.TaskId;
+                                    }
+#endif
+                                    return task.TaskInfo.PersistentId == _parent.TaskId;
+                                });
+                                if (pendingRequest.CallerTask is null)
+                                {
+                                    requestContext.Logger.Warning("The calling activity's task is unavailable.");
+                                }
+
+                                _parent.StartActivity(pendingRequest.CreateIntent(_parent));
+                            }
+                            catch (Exception ex)
+                            {
+                                FailStartup(pendingRequest, ex);
+                            }
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        FailStartup(pendingRequest, ex);
+                    }
+
+                    return await pendingRequest.Completion.Task.ConfigureAwait(false);
+                }
+                finally
                 {
-                    AuthenticationActivity.PendingRequest = null;
+                    if (ReferenceEquals(AuthenticationActivity.PendingRequest, pendingRequest))
+                    {
+                        AuthenticationActivity.PendingRequest = null;
+                    }
                 }
             }
+        }
+
+        private static void FailStartup(SystemWebViewRequest request, Exception exception)
+        {
+            request.RequestContext.Logger.ErrorPii(exception);
+            request.Completion.TrySetException(new MsalClientException(
+                MsalError.AuthenticationUiFailedError,
+                "AuthenticationActivity failed to start",
+                exception));
         }
 
         public override Uri UpdateRedirectUri(Uri redirectUri)

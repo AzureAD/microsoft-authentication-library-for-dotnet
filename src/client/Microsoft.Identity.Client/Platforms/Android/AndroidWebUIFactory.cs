@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
                 };
             }
 
-            return new SystemWebUI(coreUIParent);
+            return new SystemWebUI(coreUIParent.Activity);
         }
 
         public bool IsSystemWebViewAvailable

@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -15,14 +14,14 @@ using AndroidX.Browser.CustomTabs;
 using Android.Support.CustomTabs;
 #endif
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.UI;
 using Uri = Android.Net.Uri;
 
 namespace Microsoft.Identity.Client.Platforms.Android.SystemWebview
 {
     /// <summary>
     /// </summary>
-    [Activity(Name = "microsoft.identity.client.AuthenticationActivity", Exported = false)]
+    [Activity(Name = "microsoft.identity.client.AuthenticationActivity", Exported = false, TaskAffinity = "", ExcludeFromRecents = true)]
     [Preserve(AllMembers = true)]
     internal class AuthenticationActivity : Activity
     {
@@ -40,7 +39,6 @@ namespace Microsoft.Identity.Client.Platforms.Android.SystemWebview
             "android.support.customtabs.action.CustomTabsService";
 
         private string _requestUrl;
-        private int _requestId;
         private bool _restarted;
         private SystemWebViewRequest _request;
 
@@ -51,9 +49,17 @@ namespace Microsoft.Identity.Client.Platforms.Android.SystemWebview
             base.OnCreate(bundle);
 
             _request = PendingRequest;
-            if (!HasPendingRequest())
+            if (!HasPendingRequest() || !_request.MatchesIntent(Intent))
             {
+                global::Android.Util.Log.Warn("MSAL", "Ignoring a system browser launch that does not match the pending request.");
                 Finish();
+                return;
+            }
+
+            _requestUrl = _request.AuthorizationUri.AbsoluteUri;
+            if (Intent.GetStringExtra(AndroidConstants.CustomTabRedirect) is not null)
+            {
+                ProcessResponse(Intent);
                 return;
             }
 
@@ -62,28 +68,6 @@ namespace Microsoft.Identity.Client.Platforms.Android.SystemWebview
             {
                 _restarted = true;
                 return;
-            }
-
-            if (Intent == null)
-            {
-                SendError(
-                    MsalError.UnresolvableIntentError,
-                    "Received null data intent from caller");
-                return;
-            }
-
-            _requestUrl = Intent.GetStringExtra(AndroidConstants.RequestUrlKey);
-            _requestId = Intent.GetIntExtra(AndroidConstants.RequestId, 0);
-            if (string.IsNullOrEmpty(_requestUrl))
-            {
-                SendError(MsalError.InvalidRequest, "Request url is not set on the intent");
-                return;
-            }
-
-            if (!string.Equals(_requestUrl, _request.AuthorizationUri.AbsoluteUri, StringComparison.Ordinal))
-            {
-                _request.RequestContext.Logger.Warning("Ignoring a system browser launch that does not match the pending request.");
-                Finish();
             }
         }
 
@@ -99,12 +83,17 @@ namespace Microsoft.Identity.Client.Platforms.Android.SystemWebview
                 return;
             }
 
-            if (!HasPendingRequest())
+            if (!HasPendingRequest() || !_request.MatchesIntent(intent))
             {
                 Finish();
                 return;
             }
 
+            ProcessResponse(intent);
+        }
+
+        private void ProcessResponse(Intent intent)
+        {
             string url = intent?.GetStringExtra(AndroidConstants.CustomTabRedirect);
             if (!_request.IsValidRedirect(url))
             {
@@ -112,10 +101,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.SystemWebview
                 return;
             }
 
-            Intent resultIntent = new Intent();
-            resultIntent.PutExtra(AndroidConstants.AuthorizationFinalUrl, url);
-            ReturnToCaller(AndroidConstants.AuthCodeReceived,
-                resultIntent);
+            CompleteRequest(AuthorizationResult.FromUri(url));
         }
 
         /// <summary>
@@ -195,48 +181,33 @@ namespace Microsoft.Identity.Client.Platforms.Android.SystemWebview
          */
         private void cancelRequest()
         {
-            ReturnToCaller(AndroidConstants.Cancel, new Intent());
+            CompleteRequest(AuthorizationResult.FromStatus(AuthorizationStatus.UserCancel));
         }
 
         /**
          * Return the error back to caller.
-         * @param resultCode The result code to return back.
-         * @param data {@link Intent} contains the detailed result.
          */
-        private void ReturnToCaller(int resultCode, Intent data)
+        private void CompleteRequest(AuthorizationResult result)
         {
             if (ReferenceEquals(PendingRequest, _request))
             {
                 PendingRequest = null;
             }
 
-            data.PutExtra(AndroidConstants.RequestId, _requestId);
-            SetResult((Result)resultCode, data);
+            _request.RestoreCallerTask();
             Finish();
+            _request.Completion.TrySetResult(result);
         }
 
         private bool HasPendingRequest()
         {
-            if (_request is not null && ReferenceEquals(PendingRequest, _request))
+            if (_request is not null && !_request.Completion.Task.IsCompleted && ReferenceEquals(PendingRequest, _request))
             {
                 return true;
             }
 
             global::Android.Util.Log.Warn("MSAL", "Ignoring system browser activity without a pending authentication request.");
             return false;
-        }
-
-        /**
-         * Send error back to caller with the error description.
-         * @param errorCode The error code to send back.
-         * @param errorDescription The error description to send back.
-         */
-        private void SendError(string errorCode, string errorDescription)
-        {
-            Intent errorIntent = new Intent();
-            errorIntent.PutExtra(OAuth2ResponseBaseClaim.Error, errorCode);
-            errorIntent.PutExtra(OAuth2ResponseBaseClaim.ErrorDescription, errorDescription);
-            ReturnToCaller(AndroidConstants.AuthCodeError, errorIntent);
         }
 
         private string GetChromePackageWithCustomTabSupport(Context context)

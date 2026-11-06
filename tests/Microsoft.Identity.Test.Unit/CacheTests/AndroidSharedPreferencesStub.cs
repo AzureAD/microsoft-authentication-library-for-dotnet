@@ -52,5 +52,6 @@ namespace Microsoft.Identity.Client.Platforms.Android
         internal const string UnresolvableIntentError = "unresolvable_intent";
         internal const string InvalidRequest = Client.MsalError.InvalidRequest;
         internal const string AndroidActivityNotFound = "android_activity_not_found";
+        internal const string AuthenticationUiFailedError = Client.MsalError.AuthenticationUiFailedError;
     }
 }
