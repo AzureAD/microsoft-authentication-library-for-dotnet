@@ -112,18 +112,12 @@ namespace Microsoft.Identity.Test.Integration.Broker
 
             Uri requestUri = new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b");
 
-            #pragma warning disable CS0618 // Type or member is obsolete
-            var result = await pca
-                .AcquireTokenByUsernamePassword(
-                    scopes,
-                    user.Upn,
-                    user.GetOrFetchPassword())
+            var result = await pca.AcquireBrokerTokenForTest(scopes, user.Upn)
                 .WithProofOfPossession(
                     parsedHeaders.PopNonce, 
                     HttpMethod.Get,
                     requestUri)
                 .ExecuteAsync().ConfigureAwait(false);
-            #pragma warning restore CS0618
 
             MsalAssert.AssertAuthResult(
                 result, 
@@ -137,40 +131,6 @@ namespace Microsoft.Identity.Test.Integration.Broker
                 HttpMethod.Get,
                 result);
         }
-    
-        [RunOn(SkipConditions.OneBranchBuild | SkipConditions.Linux)]
-        public async Task WamInvalidROPC_ThrowsException_TestAsync()
-        {
-            var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
-            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
-            string[] scopes = { "User.Read" };
-            WamLoggerValidator wastestLogger = new WamLoggerValidator();
-
-            IPublicClientApplication pca = PublicClientApplicationBuilder
-               .Create(app.AppId)
-               .WithAuthority(app.Authority, "organizations")
-               .WithLogging(wastestLogger, enablePiiLogging: true) // it's important that the PII is turned on, otherwise context is 'pii'
-               .WithBroker(_brokerOptions)
-               .Build();
-
-            #pragma warning disable CS0618 // Type or member is obsolete
-            MsalServiceException ex = await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
-                pca.AcquireTokenByUsernamePassword(
-                    scopes,
-                    "noUser",
-                    "badPassword")
-                .ExecuteAsync())
-                .ConfigureAwait(false);
-            #pragma warning restore CS0618
-
-            Assert.AreEqual("0x2142008A", ex.AdditionalExceptionData[MsalException.BrokerErrorTag]);
-            Assert.AreEqual("User name is malformed.", ex.AdditionalExceptionData[MsalException.BrokerErrorContext]); // message might change. not a big deal
-            Assert.AreEqual("ApiContractViolation", ex.AdditionalExceptionData[MsalException.BrokerErrorStatus]);
-            Assert.AreEqual("3399811229", ex.AdditionalExceptionData[MsalException.BrokerErrorCode]);
-            Assert.IsNotNull(ex.AdditionalExceptionData[MsalException.BrokerTelemetry]);
-            
-        }
-
         [RunOn(SkipConditions.OneBranchBuild)]
         public async Task WamSilentAuthLoginHintNoAccontInCacheAsync()
         {
@@ -200,7 +160,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
         }
 
         [RunOn(SkipConditions.OneBranchBuild | SkipConditions.Linux)]
-        public async Task WamUsernamePasswordRequestAsync()
+        public async Task WamProvisionedAccountRequestAsync()
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
             var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
@@ -221,10 +181,8 @@ namespace Microsoft.Identity.Test.Integration.Broker
             // Get Accounts
             var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
 
-            // Acquire token using username password
-            #pragma warning disable CS0618 // Type or member is obsolete
-            var result = await pca.AcquireTokenByUsernamePassword(scopes, user.Upn, user.GetOrFetchPassword()).ExecuteAsync().ConfigureAwait(false);
-            #pragma warning restore CS0618
+            // Acquire token using the provisioned broker account
+            var result = await pca.AcquireBrokerTokenForTest(scopes, user.Upn).ExecuteAsync().ConfigureAwait(false);
             MsalAssert.AssertAuthResult(result, TokenSource.Broker, user.TenantId, scopes);
             Assert.IsNotNull(result.AuthenticationResultMetadata.Telemetry);
 
@@ -271,13 +229,10 @@ namespace Microsoft.Identity.Test.Integration.Broker
             .Build();
 
             string jwk = CreateJwk();
-            //Do a login with username password
-            #pragma warning disable CS0618 // Type or member is obsolete
-            AuthenticationResult result = await pca
-            .AcquireTokenByUsernamePassword(_SSH_scopes, user.Upn, user.GetOrFetchPassword())
+            //Do a login with the provisioned broker account
+            AuthenticationResult result = await pca.AcquireBrokerTokenForTest(_SSH_scopes, user.Upn)
             .ExecuteAsync()
             .ConfigureAwait(false);
-            #pragma warning restore CS0618
 
             //Assert successful login
             var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
@@ -296,7 +251,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
         }
 
         [RunOn(SkipConditions.OneBranchBuild | SkipConditions.Linux)]
-        public async Task WamUsernamePasswordWithForceRefreshAsync()
+        public async Task WamProvisionedAccountWithForceRefreshAsync()
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
             var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
@@ -313,17 +268,12 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .WithBroker(_brokerOptions)
                .Build();
 
-            // Acquire token using username password
-            #pragma warning disable CS0618 // Type or member is obsolete
-            var result = await pca.AcquireTokenByUsernamePassword(
-                scopes, 
-                user.Upn, 
-                user.GetOrFetchPassword())
+            // Acquire token using the provisioned broker account
+            var result = await pca.AcquireBrokerTokenForTest(scopes, user.Upn)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
-            #pragma warning restore CS0618
 
-            string ropcToken = result.AccessToken;
+            string initialToken = result.AccessToken;
 
             MsalAssert.AssertAuthResult(result, TokenSource.Broker, user.TenantId, scopes);
             Assert.IsNotNull(result.AuthenticationResultMetadata.Telemetry);
@@ -337,18 +287,18 @@ namespace Microsoft.Identity.Test.Integration.Broker
                 .ExecuteAsync().ConfigureAwait(false);
 
             // This proves the token is from the cache
-            Assert.AreEqual(ropcToken, result.AccessToken);
+            Assert.AreEqual(initialToken, result.AccessToken);
 
             result = await pca.AcquireTokenSilent(scopes, account)
                 .WithForceRefresh(true)
                .ExecuteAsync().ConfigureAwait(false);
 
             // This proves the token is not from the cache
-            Assert.AreNotEqual(ropcToken, result.AccessToken);
+            Assert.AreNotEqual(initialToken, result.AccessToken);
         }
 
         [RunOn(SkipConditions.OneBranchBuild | SkipConditions.Linux)]
-        public async Task WamUsernamePasswordRequestAsync_WithPiiAsync()
+        public async Task WamProvisionedAccountRequestAsync_WithPiiAsync()
         {
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
             var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
@@ -368,10 +318,8 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .WithBroker(_brokerOptions)
                .Build();
 
-            // Acquire token using username password
-            #pragma warning disable CS0618 // Type or member is obsolete
-            var result = await pca.AcquireTokenByUsernamePassword(scopes, user.Upn, user.GetOrFetchPassword()).ExecuteAsync().ConfigureAwait(false);
-            #pragma warning restore CS0618
+            // Acquire token using the provisioned broker account
+            var result = await pca.AcquireBrokerTokenForTest(scopes, user.Upn).ExecuteAsync().ConfigureAwait(false);
 
             MsalAssert.AssertAuthResult(result, TokenSource.Broker, user.TenantId, scopes);
             Assert.IsNotNull(result.AuthenticationResultMetadata.Telemetry);
@@ -423,10 +371,8 @@ namespace Microsoft.Identity.Test.Integration.Broker
                })
                .Build();
 
-            // Acquire token using username password
-            #pragma warning disable CS0618 // Type or member is obsolete
-            var result = await pca.AcquireTokenByUsernamePassword(scopes, user.Upn, user.GetOrFetchPassword()).ExecuteAsync().ConfigureAwait(false);
-            #pragma warning restore CS0618
+            // Acquire token using the provisioned broker account
+            var result = await pca.AcquireBrokerTokenForTest(scopes, user.Upn).ExecuteAsync().ConfigureAwait(false);
 
             MsalAssert.AssertAuthResult(result, TokenSource.Broker, user.TenantId, scopes);
             Assert.IsNotNull(result.AuthenticationResultMetadata.Telemetry);
@@ -472,7 +418,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
         }
 
         [RunOn(SkipConditions.OneBranchBuild | SkipConditions.Linux)]
-        public async Task WamUsernamePasswordPopTokenEnforcedWithCaOnValidResourceAsync()
+        public async Task WamProvisionedAccountPopTokenEnforcedWithCaOnValidResourceAsync()
         {
             //Arrange
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPop).ConfigureAwait(false);
@@ -491,22 +437,20 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .WithBroker(_brokerOptions)
                .Build();
 
-            // Acquire token using username password with POP on a valid resource
+            // Acquire token using the provisioned broker account with POP on a valid resource
             // CA policy enforces token issuance to popUser only for SPO
             // https://learn.microsoft.com/azure/active-directory/conditional-access/concept-token-protection
-            #pragma warning disable CS0618 // Type or member is obsolete
-            var result = await pca.AcquireTokenByUsernamePassword(scopes, user.Upn, user.GetOrFetchPassword())
+            var result = await pca.AcquireBrokerTokenForTest(scopes, user.Upn)
                 .WithProofOfPossession("some_nonce", System.Net.Http.HttpMethod.Get, new Uri(pca.Authority))
                 .ExecuteAsync()
                 .ConfigureAwait(false);
-            #pragma warning restore CS0618
 
             //Act
             Assert.AreEqual(user.Upn, result.Account.Username);
         }
 
         [RunOn(SkipConditions.OneBranchBuild | SkipConditions.Linux)]
-        public async Task WamUsernamePasswordPopTokenEnforcedWithCaOnInValidResourceAsync()
+        public async Task WamProvisionedAccountPopTokenEnforcedWithCaOnInValidResourceAsync()
         {
             //Arrange
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPop).ConfigureAwait(false);
@@ -525,16 +469,14 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .WithBroker(_brokerOptions)
                .Build();
 
-            // Acquire token using username password with POP on a resource not in the CA policy
+            // Acquire token using the provisioned broker account with POP on a resource not in the CA policy
             // CA policy enforces token issuance to popUser only for Exchange Online this call will fail with UI Required Exception
             // https://learn.microsoft.com/azure/active-directory/conditional-access/concept-token-protection
-            #pragma warning disable CS0618 // Type or member is obsolete
             await Assert.ThrowsAsync<MsalUiRequiredException>(async () =>
-                await pca.AcquireTokenByUsernamePassword(scopes, user.Upn, user.GetOrFetchPassword())
+                await pca.AcquireBrokerTokenForTest(scopes, user.Upn)
                     .WithProofOfPossession("some_nonce", System.Net.Http.HttpMethod.Get, new Uri(pca.Authority))
                     .ExecuteAsync()
                     .ConfigureAwait(false)).ConfigureAwait(false);
-            #pragma warning restore CS0618
         }
     }
 }

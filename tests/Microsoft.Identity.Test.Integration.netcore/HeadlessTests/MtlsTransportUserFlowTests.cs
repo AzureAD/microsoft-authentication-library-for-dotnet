@@ -80,21 +80,17 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var appApiConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppWebApi).ConfigureAwait(false);
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
 
-            // Step 1: Acquire a user assertion via ROPC (public client — no mTLS needed here)
+            // Step 1: Acquire a user assertion via delegated refresh-token setup (public client — no mTLS needed here)
             var pca = PublicClientApplicationBuilder
                 .Create(appConfig.AppId)
                 .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
                 .WithTestLogging()
                 .Build();
 
-#pragma warning disable CS0618
-            AuthenticationResult userResult = await pca
-                .AcquireTokenByUsernamePassword([appApiConfig.DefaultScopes], user.Upn, user.GetOrFetchPassword())
-                .ExecuteAsync(CancellationToken.None)
+            AuthenticationResult userResult = await pca.AcquireDelegatedTokenAsync([appApiConfig.DefaultScopes], user.Upn)
                 .ConfigureAwait(false);
-#pragma warning restore CS0618
 
-            Assert.IsNotNull(userResult?.AccessToken, "Failed to acquire user token via ROPC.");
+            Assert.IsNotNull(userResult?.AccessToken, "Failed to acquire user token via delegated refresh-token setup.");
 
             // Step 2: Build the OBO confidential client with SendCertificateOverMtls=true.
             // The cert authenticates the app at the TLS layer AND client_assertion is sent in the body
@@ -158,12 +154,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithTestLogging()
                 .BuildConcrete();
 
-#pragma warning disable CS0618
-            AuthenticationResult userResultConcrete = await pcaConcrete
-                .AcquireTokenByUsernamePassword([appApiConfig.DefaultScopes], user.Upn, user.GetOrFetchPassword())
-                .ExecuteAsync(CancellationToken.None)
+            AuthenticationResult userResultConcrete = await pcaConcrete.AcquireDelegatedTokenAsync([appApiConfig.DefaultScopes], user.Upn)
                 .ConfigureAwait(false);
-#pragma warning restore CS0618
 
             var rtCacheItem = pcaConcrete.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().FirstOrDefault();
             Assert.IsNotNull(rtCacheItem, "Refresh token must be present in cache.");
@@ -215,21 +207,17 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var appApiConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppWebApi).ConfigureAwait(false);
             var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
 
-            // Step 1: Acquire user assertion via ROPC
+            // Step 1: Acquire user assertion via delegated refresh-token setup
             var pca = PublicClientApplicationBuilder
                 .Create(appConfig.AppId)
                 .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
                 .WithTestLogging()
                 .Build();
 
-#pragma warning disable CS0618
-            AuthenticationResult userResult = await pca
-                .AcquireTokenByUsernamePassword([appApiConfig.DefaultScopes], user.Upn, user.GetOrFetchPassword())
-                .ExecuteAsync(CancellationToken.None)
+            AuthenticationResult userResult = await pca.AcquireDelegatedTokenAsync([appApiConfig.DefaultScopes], user.Upn)
                 .ConfigureAwait(false);
-#pragma warning restore CS0618
 
-            Assert.IsNotNull(userResult?.AccessToken, "Failed to acquire user token via ROPC.");
+            Assert.IsNotNull(userResult?.AccessToken, "Failed to acquire user token via delegated refresh-token setup.");
 
             // Step 2: OBO with cert but WITHOUT SendCertificateOverMtls — cert goes in the body as
             // client_assertion, NOT at the TLS layer. Request goes to login.microsoftonline.com.
@@ -291,14 +279,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithTestLogging()
                 .Build();
 
-#pragma warning disable CS0618
-            AuthenticationResult userResult = await pca
-                .AcquireTokenByUsernamePassword([appApiConfig.DefaultScopes], user.Upn, user.GetOrFetchPassword())
-                .ExecuteAsync(CancellationToken.None)
+            AuthenticationResult userResult = await pca.AcquireDelegatedTokenAsync([appApiConfig.DefaultScopes], user.Upn)
                 .ConfigureAwait(false);
-#pragma warning restore CS0618
 
-            Assert.IsNotNull(userResult?.AccessToken, "Failed to acquire user token via ROPC.");
+            Assert.IsNotNull(userResult?.AccessToken, "Failed to acquire user token via delegated refresh-token setup.");
 
             var recordingFactory = new RecordingMtlsHttpClientFactory();
             var cca = ConfidentialClientApplicationBuilder
@@ -357,12 +341,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithTestLogging()
                 .BuildConcrete();
 
-#pragma warning disable CS0618
-            AuthenticationResult userResult = await pcaConcrete
-                .AcquireTokenByUsernamePassword([appApiConfig.DefaultScopes], user.Upn, user.GetOrFetchPassword())
-                .ExecuteAsync(CancellationToken.None)
+            AuthenticationResult userResult = await pcaConcrete.AcquireDelegatedTokenAsync([appApiConfig.DefaultScopes], user.Upn)
                 .ConfigureAwait(false);
-#pragma warning restore CS0618
 
             var rtItem = pcaConcrete.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().FirstOrDefault();
             Assert.IsNotNull(rtItem, "Refresh token must be present in cache.");

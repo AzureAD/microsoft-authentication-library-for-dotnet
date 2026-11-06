@@ -146,7 +146,6 @@ namespace NetCoreTestApp
                 // display menu
                 Console.WriteLine(@"
                         1. IWA
-                        2. Acquire Token with Username and Password
                         3. Acquire Token with Device Code
                         4. Acquire Token Interactive (via CustomWebUI)
                         5. Acquire Token Interactive
@@ -178,14 +177,7 @@ namespace NetCoreTestApp
 
                             break;
 
-                        case 2: // acquire token u/p
-                            string password = GetPasswordFromConsole();
-#pragma warning disable CS0618 // Type or member is obsolete
-                            authTask = pca.AcquireTokenByUsernamePassword(s_scopes, s_username, password).ExecuteAsync(CancellationToken.None);
-#pragma warning restore CS0618
-                            await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
 
-                            break;
 
                         case 3:
                             authTask = pca.AcquireTokenWithDeviceCode(
@@ -503,36 +495,6 @@ namespace NetCoreTestApp
 
             Console.WriteLine($"{level} {message}");
             Console.ResetColor();
-        }
-
-        private static string GetPasswordFromConsole()
-        {
-            Console.Write("Password: ");
-            string pwd = "";
-
-            while (true)
-            {
-                ConsoleKeyInfo i = Console.ReadKey(true);
-                if (i.Key == ConsoleKey.Enter)
-                {
-                    break;
-                }
-                else if (i.Key == ConsoleKey.Backspace)
-                {
-                    if (pwd.Length > 0)
-                    {
-                        pwd.Remove(pwd.Length - 1, 1);
-                        Console.Write("\b \b");
-                    }
-                }
-                else if (i.KeyChar != '\u0000') // KeyChar == '\u0000' if the key pressed does not correspond to a printable character, e.g. F1, Pause-Break, etc
-                {
-                    pwd += i.KeyChar;
-                    Console.Write("*");
-                }
-            }
-
-            return pwd;
         }
 
         private static async Task<string> CallGraphAsync(string token)

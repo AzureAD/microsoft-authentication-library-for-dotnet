@@ -228,39 +228,6 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
             }
         }
-
-        [TestMethod]
-        public async Task NullBrokerUsernamePasswordRequestTest_Async()
-        {
-            using (var harness = CreateTestHarness())
-            {
-                var builder = PublicClientApplicationBuilder
-                    .Create(TestConstants.ClientId)
-                    .WithHttpManager(harness.HttpManager);
-
-                var app = builder
-                    .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.None))
-                    .BuildConcrete();
-
-                // important: set the func after calling `WithBroker`
-                builder.Config.BrokerCreatorFunc = (_, _, logger) => { return new NullBroker(logger); };
-
-                harness.HttpManager.AddInstanceDiscoveryMockHandler();
-                harness.HttpManager.AddWsTrustMockHandler();
-                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost();
-
-                // Act
-                #pragma warning disable CS0618 // Type or member is obsolete
-                var result = await app.AcquireTokenByUsernamePassword(new[] { "User.Read" }, "username", "password")
-                    .ExecuteAsync()
-                    .ConfigureAwait(false);
-                #pragma warning restore CS0618
-
-                // Assert
-                Assert.IsNotNull(result);
-            }
-        }
-
         [TestMethod]
         public void BrokerGetAccountsAsyncOnUnsupportedPlatformTest()
         {
