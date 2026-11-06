@@ -149,6 +149,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     {
                         logger.Verbose(() => "[ClientCredentialRequest] Sending token request to AAD.");
                         MsalTokenResponse msalTokenResponse = await SendTokenRequestAsync(GetBodyParameters(), cancellationToken).ConfigureAwait(false);
+                        if (string.IsNullOrEmpty(msalTokenResponse.IdToken))
+                        {
+                            await ResolveTenantIdForAuthenticationResultAsync().ConfigureAwait(false);
+                        }
+
                         authResult = await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse, cancellationToken).ConfigureAwait(false);
                     }
                     else
@@ -470,9 +475,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
         /// </summary>
         /// <param name="cachedAccessTokenItem"></param>
         /// <returns></returns>
-        private Task<AuthenticationResult> CreateAuthenticationResultFromCacheAsync(MsalAccessTokenCacheItem cachedAccessTokenItem)
+        private async Task<AuthenticationResult> CreateAuthenticationResultFromCacheAsync(MsalAccessTokenCacheItem cachedAccessTokenItem)
         {
-            return AuthenticationResult.CreateAsync(
+            await ResolveTenantIdForAuthenticationResultAsync(allowNetwork: false).ConfigureAwait(false);
+
+            return await AuthenticationResult.CreateAsync(
                 cachedAccessTokenItem,
                 null,
                 AuthenticationRequestParameters.AuthenticationScheme,
@@ -481,7 +488,22 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 AuthenticationRequestParameters.RequestContext.ApiEvent,
                 account: null,
                 spaAuthCode: null,
-                additionalResponseParameters: null);
+                additionalResponseParameters: null,
+                resolvedTenantId: AuthenticationRequestParameters.ResolvedTenantId).ConfigureAwait(false);
+        }
+
+        private async Task ResolveTenantIdForAuthenticationResultAsync(bool allowNetwork = true)
+        {
+            if (ServiceBundle.Config.AppTokenProvider is not null ||
+                !string.IsNullOrEmpty(AuthenticationRequestParameters.ResolvedTenantId))
+            {
+                return;
+            }
+
+            AuthenticationRequestParameters.ResolvedTenantId = await AuthorityHelpers.ResolveTenantIdAsync(
+                AuthenticationRequestParameters.AuthorityManager.OriginalAuthority.AuthorityInfo,
+                AuthenticationRequestParameters.RequestContext,
+                allowNetwork && string.IsNullOrEmpty(AuthenticationRequestParameters.RequestContext.ApiEvent.RegionUsed)).ConfigureAwait(false);
         }
 
         /// <summary>

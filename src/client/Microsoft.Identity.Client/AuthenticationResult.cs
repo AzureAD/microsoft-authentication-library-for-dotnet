@@ -141,7 +141,8 @@ namespace Microsoft.Identity.Client
             Account account,
             string spaAuthCode,
             IReadOnlyDictionary<string, string> additionalResponseParameters,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken = default,
+            string resolvedTenantId = null)
         {
             if (authenticationScheme == null)
             {
@@ -158,6 +159,7 @@ namespace Microsoft.Identity.Client
                 account,
                 spaAuthCode,
                 additionalResponseParameters,
+                resolvedTenantId,
                 authenticationScheme);
 
             // Apply token formatting (async if supported, sync otherwise)
@@ -195,6 +197,7 @@ namespace Microsoft.Identity.Client
             Account account,
             string spaAuthCode,
             IReadOnlyDictionary<string, string> additionalResponseParameters,
+            string resolvedTenantId,
             IAuthenticationOperation authenticationScheme)
         {
             string homeAccountId =
@@ -218,9 +221,9 @@ namespace Microsoft.Identity.Client
             }
 
             UniqueId = msalIdTokenCacheItem?.IdToken?.GetUniqueId();
-            // For client credentials flow, ID token is not available, so fall back to access token's tenant
+            // For client credentials, use resolved authority metadata when the cache realm is a tenant domain.
             // See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5743
-            TenantId = msalIdTokenCacheItem?.IdToken?.TenantId ?? msalAccessTokenCacheItem?.TenantId;
+            TenantId = GetTenantId(msalIdTokenCacheItem, msalAccessTokenCacheItem, resolvedTenantId);
             IdToken = msalIdTokenCacheItem?.Secret;
             SpaAuthCode = spaAuthCode;
             _authenticationScheme = authenticationScheme;
@@ -251,6 +254,31 @@ namespace Microsoft.Identity.Client
 
                 AccessToken = msalAccessTokenCacheItem.Secret;
             }
+        }
+
+        private static string GetTenantId(
+            MsalIdTokenCacheItem msalIdTokenCacheItem,
+            MsalAccessTokenCacheItem msalAccessTokenCacheItem,
+            string resolvedTenantId)
+        {
+            string idTokenTenantId = msalIdTokenCacheItem?.IdToken?.TenantId;
+            if (!string.IsNullOrEmpty(idTokenTenantId))
+            {
+                return idTokenTenantId;
+            }
+
+            if (!string.IsNullOrEmpty(resolvedTenantId))
+            {
+                return resolvedTenantId;
+            }
+
+            string cacheTenantId = msalAccessTokenCacheItem?.TenantId;
+            return IsDomainTenant(cacheTenantId) ? null : cacheTenantId;
+        }
+
+        private static bool IsDomainTenant(string tenantId)
+        {
+            return !string.IsNullOrEmpty(tenantId) && tenantId.Contains(".");
         }
 
         /// <summary>

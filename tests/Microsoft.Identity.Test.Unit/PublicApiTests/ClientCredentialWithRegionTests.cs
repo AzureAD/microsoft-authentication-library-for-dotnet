@@ -24,6 +24,46 @@ namespace Microsoft.Identity.Test.Unit
         public const string EastUsRegion = "eastus";
 
         [TestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task DomainAuthority_RegionalToken_DoesNotFetchGlobalOidcMetadataAsync(bool autodetectRegion)
+        {
+            using (new EnvVariableContext())
+            using (var harness = CreateTestHarness())
+            {
+                Environment.SetEnvironmentVariable("REGION_NAME", EastUsRegion);
+                string tenantDomain = $"tenant-{Guid.NewGuid():N}.onmicrosoft.com";
+                string tokenEndpoint = $"https://{EastUsRegion}.login.microsoft.com/{tenantDomain}/oauth2/v2.0/token";
+                harness.HttpManager.AddMockHandler(new MockHttpMessageHandler
+                {
+                    ExpectedMethod = HttpMethod.Post,
+                    ExpectedUrl = tokenEndpoint,
+                    ResponseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage()
+                });
+                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithAuthority($"https://login.microsoftonline.com/{tenantDomain}/")
+                    .WithAzureRegion(autodetectRegion ? ConfidentialClientApplication.AttemptRegionDiscovery : EastUsRegion)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithHttpManager(harness.HttpManager)
+                    .BuildConcrete();
+
+                AuthenticationResult result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.AreEqual(tokenEndpoint, result.AuthenticationResultMetadata.TokenEndpoint);
+                Assert.AreEqual(EastUsRegion, result.AuthenticationResultMetadata.RegionDetails.RegionUsed);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+                Assert.IsNull(result.TenantId);
+
+                AuthenticationResult cachedResult = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.AreEqual(TokenSource.Cache, cachedResult.AuthenticationResultMetadata.TokenSource);
+                Assert.IsNull(cachedResult.TenantId);
+            }
+        }
+
+        [TestMethod]
         // regression for #2837
         public async Task AuthorityOverrideAndRegionalAsync()
         {
