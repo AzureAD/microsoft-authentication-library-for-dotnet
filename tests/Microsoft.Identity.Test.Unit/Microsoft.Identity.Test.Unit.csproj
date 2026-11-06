@@ -70,6 +70,9 @@
 
   <ItemGroup>
     <Folder Include="CacheExtension\" />
+    <!-- Exercise the Android accessor with a small SharedPreferences test double on desktop test hosts. -->
+    <Compile Include="..\..\src\client\Microsoft.Identity.Client\Platforms\Android\AndroidTokenCacheAccessor.cs"
+             Link="CacheTests\AndroidTokenCacheAccessor.cs" />
   </ItemGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet)'">
     <DefineConstants>$(DefineConstants);NET_CORE</DefineConstants>

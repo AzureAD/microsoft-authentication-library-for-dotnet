@@ -5,82 +5,111 @@ using Android.App;
 using Android.Content;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Platforms.Android
 {
-    internal class AndroidTokenCacheAccessor : ITokenCacheAccessor
+    internal class AndroidTokenCacheAccessor : ITokenCacheAccessor, ILegacyCacheIdentityFilter
     {
         private const string AccessTokenSharedPreferenceName = "com.microsoft.identity.client.accessToken";
         private const string RefreshTokenSharedPreferenceName = "com.microsoft.identity.client.refreshToken";
         private const string IdTokenSharedPreferenceName = "com.microsoft.identity.client.idToken";
         private const string AccountSharedPreferenceName = "com.microsoft.identity.client.Account";
 
-        private readonly ISharedPreferences _accessTokenSharedPreference;
-        private readonly ISharedPreferences _refreshTokenSharedPreference;
-        private readonly ISharedPreferences _idTokenSharedPreference;
-        private readonly ISharedPreferences _accountSharedPreference;
+        private readonly (ISharedPreferences Legacy, ISharedPreferences Subject) _accessTokenSharedPreference;
+        private readonly (ISharedPreferences Legacy, ISharedPreferences Subject) _refreshTokenSharedPreference;
+        private readonly (ISharedPreferences Legacy, ISharedPreferences Subject) _idTokenSharedPreference;
+        private readonly (ISharedPreferences Legacy, ISharedPreferences Subject) _accountSharedPreference;
 
         private readonly RequestContext _requestContext;
 
-        public AndroidTokenCacheAccessor()
+        public AndroidTokenCacheAccessor() : this(requestContext: null)
         {
-            _accessTokenSharedPreference = Application.Context.GetSharedPreferences(AccessTokenSharedPreferenceName,
-                    FileCreationMode.Private);
-            _refreshTokenSharedPreference = Application.Context.GetSharedPreferences(RefreshTokenSharedPreferenceName,
-                    FileCreationMode.Private);
-            _idTokenSharedPreference = Application.Context.GetSharedPreferences(IdTokenSharedPreferenceName,
-                    FileCreationMode.Private);
-            _accountSharedPreference = Application.Context.GetSharedPreferences(AccountSharedPreferenceName,
-                FileCreationMode.Private);
-
-            if (_accessTokenSharedPreference == null ||
-                _refreshTokenSharedPreference == null ||
-                _idTokenSharedPreference == null ||
-                _accountSharedPreference == null)
-            {
-                throw new MsalClientException(
-                    MsalError.FailedToCreateSharedPreference,
-                    "Fail to create SharedPreference");
-            }
         }
 
-        public AndroidTokenCacheAccessor(RequestContext requestContext) : this()
+        public AndroidTokenCacheAccessor(RequestContext requestContext)
+            : this(name => Application.Context.GetSharedPreferences(name, FileCreationMode.Private), requestContext)
         {
+        }
+
+        internal AndroidTokenCacheAccessor(Func<string, ISharedPreferences> getPreferences, RequestContext requestContext)
+        {
+            if (getPreferences is null)
+            {
+                throw new ArgumentNullException(nameof(getPreferences));
+            }
+
             _requestContext = requestContext;
+            _accessTokenSharedPreference = OpenPreferences(AccessTokenSharedPreferenceName);
+            _refreshTokenSharedPreference = OpenPreferences(RefreshTokenSharedPreferenceName);
+            _idTokenSharedPreference = OpenPreferences(IdTokenSharedPreferenceName);
+            _accountSharedPreference = OpenPreferences(AccountSharedPreferenceName);
+
+            (ISharedPreferences Legacy, ISharedPreferences Subject) OpenPreferences(string name)
+            {
+                var legacy = getPreferences(name);
+                // Separate storage makes legacy collisions ineligible without changing shared cache formats.
+                var subject = getPreferences(name + ".subject.v1");
+                if (legacy is null || subject is null)
+                {
+                    throw new MsalClientException(MsalError.FailedToCreateSharedPreference, "Fail to create SharedPreference");
+                }
+
+                return (legacy, subject);
+            }
         }
 
         #region SaveItem
         public void SaveAccessToken(MsalAccessTokenCacheItem item)
         {
-            ISharedPreferencesEditor editor = _accessTokenSharedPreference.Edit();
-            editor.PutString(item.CacheKey, item.ToJsonString());
-            editor.Apply();
+            Save(item, item.CacheKey, _accessTokenSharedPreference, MsalAccessTokenCacheItem.FromJsonString);
         }
 
         public void SaveRefreshToken(MsalRefreshTokenCacheItem item)
         {
-            ISharedPreferencesEditor editor = _refreshTokenSharedPreference.Edit();
-            editor.PutString(item.CacheKey, item.ToJsonString());
-            editor.Apply();
+            Save(item, item.CacheKey, _refreshTokenSharedPreference, MsalRefreshTokenCacheItem.FromJsonString);
         }
 
         public void SaveIdToken(MsalIdTokenCacheItem item)
         {
-            ISharedPreferencesEditor editor = _idTokenSharedPreference.Edit();
-            editor.PutString(item.CacheKey, item.ToJsonString());
-            editor.Apply();
+            Save(item, item.CacheKey, _idTokenSharedPreference, MsalIdTokenCacheItem.FromJsonString);
         }
 
         public void SaveAccount(MsalAccountCacheItem item)
         {
-            ISharedPreferencesEditor editor = _accountSharedPreference.Edit();
-            editor.PutString(item.CacheKey, item.ToJsonString());
+            Save(item, item.CacheKey, _accountSharedPreference, MsalAccountCacheItem.FromJsonString);
+        }
+
+        private static (ISharedPreferences Preferences, string Key) GetStorage(
+            MsalCacheItemBase item, string cacheKey, (ISharedPreferences Legacy, ISharedPreferences Subject) store)
+        {
+            item.IsAndroidCacheItem = true;
+            // Length-prefix the exact subject so neither case folding nor delimiters can merge identities.
+            return item.IsAndroidSubject
+                ? (store.Subject, item.HomeAccountId.Length.ToString(CultureInfo.InvariantCulture) + ":" + item.HomeAccountId + ":" + cacheKey)
+                : (store.Legacy, cacheKey);
+        }
+
+        private static void Save<T>(T item, string cacheKey,
+            (ISharedPreferences Legacy, ISharedPreferences Subject) store, Func<string, T> deserialize) where T : MsalCacheItemBase
+        {
+            var storage = GetStorage(item, cacheKey, store);
+            if (!item.IsAndroidSubject &&
+                Read(store.Legacy.GetString(storage.Key, null), deserialize)?.IsAndroidSubject == true)
+            {
+                throw new MsalClientException(MsalError.UserMismatch,
+                    "A legacy Android subject entry conflicts with this account. Clear the cache and sign in again.");
+            }
+
+            var editor = storage.Preferences.Edit();
+            editor.PutString(storage.Key, item.ToJObject().ToString());
             editor.Apply();
         }
         #endregion
@@ -88,35 +117,39 @@ namespace Microsoft.Identity.Client.Platforms.Android
         #region DeleteItem
         public void DeleteAccessToken(MsalAccessTokenCacheItem item)
         {
-            Delete(item.CacheKey, _accessTokenSharedPreference.Edit());
+            Delete(item, item.CacheKey, _accessTokenSharedPreference);
         }
 
         public void DeleteRefreshToken(MsalRefreshTokenCacheItem item)
         {
-            Delete(item.CacheKey, _refreshTokenSharedPreference.Edit());
+            Delete(item, item.CacheKey, _refreshTokenSharedPreference);
         }
 
         public void DeleteIdToken(MsalIdTokenCacheItem item)
         {
-            Delete(item.CacheKey, _idTokenSharedPreference.Edit());
+            Delete(item, item.CacheKey, _idTokenSharedPreference);
         }
 
         public void DeleteAccount(MsalAccountCacheItem item)
         {
-            Delete(item.CacheKey, _accountSharedPreference.Edit());
+            Delete(item, item.CacheKey, _accountSharedPreference);
 
         }
 
-        private void Delete(string key, ISharedPreferencesEditor editor)
+        private static void Delete(MsalCacheItemBase item, string cacheKey, (ISharedPreferences Legacy, ISharedPreferences Subject) store)
         {
-            editor.Remove(key);
+            var storage = GetStorage(item, cacheKey, store);
+            var editor = storage.Preferences.Edit();
+            editor.Remove(storage.Key);
             editor.Apply();
         }
 
-        private void DeleteAll(ISharedPreferences sharedPreferences)
+        private static void DeleteAll((ISharedPreferences Legacy, ISharedPreferences Subject) store)
         {
-            var editor = sharedPreferences.Edit();
-
+            var editor = store.Legacy.Edit();
+            editor.Clear();
+            editor.Apply();
+            editor = store.Subject.Edit();
             editor.Clear();
             editor.Apply();
         }
@@ -134,30 +167,178 @@ namespace Microsoft.Identity.Client.Platforms.Android
         #region GetItem
         public MsalIdTokenCacheItem GetIdToken(MsalAccessTokenCacheItem accessTokenCacheItem)
         {
-            return MsalIdTokenCacheItem.FromJsonString(
-                _idTokenSharedPreference.GetString(accessTokenCacheItem.GetIdTokenItem().CacheKey, null));
+            var item = accessTokenCacheItem.GetIdTokenItem();
+            return GetItem(item, item.CacheKey, _idTokenSharedPreference, MsalIdTokenCacheItem.FromJsonString);
         }
         #endregion
 
         #region GetAll
         public List<MsalAccessTokenCacheItem> GetAllAccessTokens(string optionalPartitionKey = null, ILoggerAdapter requestlogger = null)
         {
-            return _accessTokenSharedPreference.All.Values.Cast<string>().Select(x => MsalAccessTokenCacheItem.FromJsonString(x)).ToList();
+            return GetAll(_accessTokenSharedPreference, MsalAccessTokenCacheItem.FromJsonString, requestlogger);
         }
 
         public List<MsalRefreshTokenCacheItem> GetAllRefreshTokens(string optionalPartitionKey = null, ILoggerAdapter requestlogger = null)
         {
-            return _refreshTokenSharedPreference.All.Values.Cast<string>().Select(x => MsalRefreshTokenCacheItem.FromJsonString(x)).ToList();
+            return GetAll(_refreshTokenSharedPreference, MsalRefreshTokenCacheItem.FromJsonString, requestlogger);
         }
 
         public List<MsalIdTokenCacheItem> GetAllIdTokens(string optionalPartitionKey = null, ILoggerAdapter requestlogger = null)
         {
-            return _idTokenSharedPreference.All.Values.Cast<string>().Select(x => MsalIdTokenCacheItem.FromJsonString(x)).ToList();
+            return GetAll(_idTokenSharedPreference, MsalIdTokenCacheItem.FromJsonString, requestlogger);
         }
 
         public List<MsalAccountCacheItem> GetAllAccounts(string optionalPartitionKey = null, ILoggerAdapter requestlogger = null)
         {
-            return _accountSharedPreference.All.Values.Cast<string>().Select(x => MsalAccountCacheItem.FromJsonString(x)).ToList();
+            return GetAll(_accountSharedPreference, MsalAccountCacheItem.FromJsonString, requestlogger);
+        }
+
+        private List<T> GetAll<T>((ISharedPreferences Legacy, ISharedPreferences Subject) store,
+            Func<string, T> deserialize, ILoggerAdapter logger) where T : MsalCacheItemBase
+        {
+            var items = ReadAll(store, deserialize, logger);
+            var ambiguousIdentities = GetAmbiguousIdentities();
+            if (items.RemoveAll(item => ambiguousIdentities.Contains(GetIdentityKey(item))) > 0)
+            {
+                (logger ?? _requestContext?.Logger)?.Warning("Ignoring ambiguous Android account identities; clear the cache and sign in again.");
+            }
+
+            return items;
+        }
+
+        private List<T> ReadAll<T>((ISharedPreferences Legacy, ISharedPreferences Subject) store,
+            Func<string, T> deserialize, ILoggerAdapter logger = null, bool includeLegacySubjects = false) where T : MsalCacheItemBase
+        {
+            var items = store.Legacy.All.Values.Cast<string>().Select(json => Read(json, deserialize)).ToList();
+            if (!includeLegacySubjects && items.RemoveAll(item => item.IsAndroidSubject) > 0)
+            {
+                (logger ?? _requestContext?.Logger)?.Warning("Ignoring legacy Android subject entries; sign-in is required.");
+            }
+
+            items.AddRange(store.Subject.All.Values.Cast<string>().Select(json => Read(json, deserialize)));
+            return items;
+        }
+
+        private HashSet<string> GetAmbiguousIdentities()
+        {
+            var ambiguous = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            if (_accessTokenSharedPreference.Legacy.All.Count == 0 &&
+                _refreshTokenSharedPreference.Legacy.All.Count == 0 &&
+                _idTokenSharedPreference.Legacy.All.Count == 0 &&
+                _accountSharedPreference.Legacy.All.Count == 0)
+            {
+                return ambiguous;
+            }
+
+            // IAccount does not encode identity provenance. Keep both sides of a mixed collision
+            // ineligible, including orphaned credentials, so removal cannot reactivate the other side.
+            // Legacy subject records remain identity evidence even though they cannot be acquired.
+            return GetAmbiguousIdentities(ReadAllItems(), GetIdentityKey);
+        }
+
+        private static HashSet<string> GetAmbiguousIdentities(
+            IEnumerable<MsalCacheItemBase> items, Func<MsalCacheItemBase, string> getKey)
+        {
+            var ambiguous = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var identities = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
+            foreach (var item in items)
+            {
+                string key = getKey(item);
+                if (string.IsNullOrEmpty(key))
+                {
+                    continue;
+                }
+
+                if (identities.TryGetValue(key, out bool isSubject) && isSubject != item.IsAndroidSubject)
+                {
+                    ambiguous.Add(key);
+                }
+                else
+                {
+                    identities[key] = item.IsAndroidSubject;
+                }
+            }
+
+            return ambiguous;
+        }
+
+        private IEnumerable<MsalCacheItemBase> ReadAllItems()
+        {
+            return ReadAll(_accessTokenSharedPreference, MsalAccessTokenCacheItem.FromJsonString, includeLegacySubjects: true)
+                .Cast<MsalCacheItemBase>()
+                .Concat(ReadAll(_refreshTokenSharedPreference, MsalRefreshTokenCacheItem.FromJsonString, includeLegacySubjects: true))
+                .Concat(ReadAll(_idTokenSharedPreference, MsalIdTokenCacheItem.FromJsonString, includeLegacySubjects: true))
+                .Concat(ReadAll(_accountSharedPreference, MsalAccountCacheItem.FromJsonString, includeLegacySubjects: true));
+        }
+
+        private IEnumerable<MsalCacheItemBase> ReadIdentityEvidence(IEnumerable<string> environments) =>
+            ReadAllItems().Where(item => environments is null || environments.ContainsOrdinalIgnoreCase(item.Environment));
+
+        public Func<string, bool> GetAccountFilter(IEnumerable<string> environments)
+        {
+            var ambiguous = GetAmbiguousIdentities(ReadIdentityEvidence(environments), item => item.HomeAccountId);
+            return homeAccountId => !ambiguous.Contains(homeAccountId);
+        }
+
+        public Func<IAccount, string, bool> GetLegacyAccountFilter(IEnumerable<string> environments)
+        {
+            var items = ReadIdentityEvidence(environments).ToList();
+            var ambiguous = GetAmbiguousIdentities(items, item => item.HomeAccountId);
+            var homeAccountIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var usernames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var uniqueIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var item in items)
+            {
+                // ADAL itself may be the only remaining CI-backed side of a collision.
+                if (item.IsAndroidSubject || ambiguous.Contains(item.HomeAccountId))
+                {
+                    homeAccountIds.Add(item.HomeAccountId);
+                    uniqueIds.Add(AccountId.ParseFromString(item.HomeAccountId)?.ObjectId);
+                    string username = item is MsalAccountCacheItem account
+                        ? account.PreferredUsername
+                        : (item as MsalIdTokenCacheItem)?.GetUsername();
+                    if (!string.IsNullOrEmpty(username))
+                    {
+                        usernames.Add(username);
+                    }
+                }
+            }
+
+            return (account, uniqueId) => !homeAccountIds.Contains(account.HomeAccountId?.Identifier) &&
+                !usernames.Contains(account.Username) &&
+                (account.HomeAccountId is not null || string.IsNullOrEmpty(uniqueId) || !uniqueIds.Contains(uniqueId));
+        }
+
+        private static string GetIdentityKey(MsalCacheItemBase item)
+        {
+            string environment = item.Environment ?? string.Empty;
+            return environment.Length.ToString(CultureInfo.InvariantCulture) + ":" + environment + item.HomeAccountId;
+        }
+
+        private T GetItem<T>(MsalCacheItemBase query, string cacheKey,
+            (ISharedPreferences Legacy, ISharedPreferences Subject) store, Func<string, T> deserialize) where T : MsalCacheItemBase
+        {
+            var storage = GetStorage(query, cacheKey, store);
+            var item = Read(storage.Preferences.GetString(storage.Key, null), deserialize);
+            if (item is not null && (!item.MatchesAccountIdentity(query.HomeAccountId, query.RawClientInfo) ||
+                GetAmbiguousIdentities().Contains(GetIdentityKey(item))))
+            {
+                _requestContext?.Logger.Warning("Ignoring an Android cache record with a different or ambiguous identity.");
+                return null;
+            }
+
+            return item;
+        }
+
+        private static T Read<T>(string json, Func<string, T> deserialize) where T : MsalCacheItemBase
+        {
+            var item = deserialize(json);
+            if (item is not null)
+            {
+                item.IsAndroidCacheItem = true;
+            }
+
+            return item;
         }
         #endregion
 
@@ -165,7 +346,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
 
         public MsalAccountCacheItem GetAccount(MsalAccountCacheItem accountCacheItem)
         {
-            return MsalAccountCacheItem.FromJsonString(_accountSharedPreference.GetString(accountCacheItem.CacheKey, null));
+            return GetItem(accountCacheItem, accountCacheItem.CacheKey, _accountSharedPreference, MsalAccountCacheItem.FromJsonString);
         }
 
         /// <summary>
