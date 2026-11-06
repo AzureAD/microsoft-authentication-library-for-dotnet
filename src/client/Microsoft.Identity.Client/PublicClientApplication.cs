@@ -4,10 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Security;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
-using Microsoft.Identity.Client.WsTrust;
 
 namespace Microsoft.Identity.Client
 {
@@ -137,37 +135,6 @@ namespace Microsoft.Identity.Client
                 ClientExecutorFactory.CreatePublicClientExecutor(this),
                 scopes);
         }
-
-        /// <inheritdoc/>
-        [Obsolete("This API has been deprecated, use a more secure flow. See https://aka.ms/msal-ropc-migration for migration guidance", false)]
-        [EditorBrowsable(EditorBrowsableState.Never)] // deprecated, this API is no longer supported
-        public AcquireTokenByUsernamePasswordParameterBuilder AcquireTokenByUsernamePassword(
-            IEnumerable<string> scopes,
-            string username,
-            SecureString password)
-        {
-            return AcquireTokenByUsernamePasswordParameterBuilder.Create(
-                ClientExecutorFactory.CreatePublicClientExecutor(this),
-                scopes,
-                username,
-                new string(password.PasswordToCharArray()));
-        }
-
-        /// <inheritdoc/>
-        [Obsolete("This API has been deprecated, use a more secure flow. See https://aka.ms/msal-ropc-migration for migration guidance", false)]
-        [EditorBrowsable(EditorBrowsableState.Never)] // deprecated, this API is no longer supported
-        public AcquireTokenByUsernamePasswordParameterBuilder AcquireTokenByUsernamePassword(
-            IEnumerable<string> scopes,
-            string username,
-            string password)
-        {
-            return AcquireTokenByUsernamePasswordParameterBuilder.Create(
-                ClientExecutorFactory.CreatePublicClientExecutor(this),
-                scopes,
-                username,
-                password);
-        }
-
         /// <summary>
         /// Used to determine if the currently available broker is able to perform Proof-of-Possession.
         /// </summary>

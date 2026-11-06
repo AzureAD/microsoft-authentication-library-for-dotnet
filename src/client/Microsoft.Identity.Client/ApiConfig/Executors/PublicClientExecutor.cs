@@ -84,26 +84,5 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
 
             return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
         }
-
-        public async Task<AuthenticationResult> ExecuteAsync(
-            AcquireTokenCommonParameters commonParameters,
-            AcquireTokenByUsernamePasswordParameters usernamePasswordParameters,
-            CancellationToken cancellationToken)
-        {
-            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, commonParameters.MtlsCertificate, cancellationToken);
-
-            var requestParams = await _publicClientApplication.CreateRequestParametersAsync(
-                commonParameters,
-                requestContext,
-                _publicClientApplication.UserTokenCacheInternal,
-                cancellationToken).ConfigureAwait(false);
-
-            var handler = new UsernamePasswordRequest(
-                ServiceBundle,
-                requestParams,
-                usernamePasswordParameters);
-
-            return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
-        }
     }
 }

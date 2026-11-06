@@ -41,18 +41,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             Trace.WriteLine("Acquire a token using a not so common authority alias");
 
-            #pragma warning disable CS0618 // Type or member is obsolete
-            AuthenticationResult authResult = await pca.AcquireTokenByUsernamePassword(
-               s_scopes,
-                user.Upn,
-                user.GetOrFetchPassword())
-                // BugBug https://identitydivision.visualstudio.com/Engineering/_workitems/edit/776308/
-                // sts.windows.net fails when doing instance discovery, e.g.:
-                // https://sts.windows.net/common/discovery/instance?api-version=1.1&authorization_endpoint=https%3A%2F%2Fsts.windows.net%2Ff645ad92-e38d-4d1a-b510-d1b09a74a8ca%2Foauth2%2Fv2.0%2Fauthorize
-                .WithTenantId(user.TenantId)
-                .ExecuteAsync()
+            AuthenticationResult authResult = await pca.AcquireDelegatedTokenAsync(s_scopes, user.Upn)
                 .ConfigureAwait(false);
-            #pragma warning restore CS0618
 
             Assert.IsNotNull(authResult.AccessToken);
 
@@ -80,12 +70,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             Trace.WriteLine("Acquire a token using a not so common authority alias");
 
-            #pragma warning disable CS0618 // Type or member is obsolete
+#pragma warning disable CS0618 // Type or member is obsolete
             MsalServiceException exception = await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
-                 pca.AcquireTokenByUsernamePassword(
-                    s_scopes,
-                     user.Upn,
-                     user.GetOrFetchPassword())
+                 pca.AcquireTokenWithDeviceCode(s_scopes, _ => throw new InvalidOperationException("Unexpected device authorization for invalid authority."))
                      .ExecuteAsync())
                 .ConfigureAwait(false);
             #pragma warning restore CS0618
@@ -108,12 +95,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             Trace.WriteLine("Acquire a token using a not so common authority alias");
 
-            #pragma warning disable CS0618 // Type or member is obsolete
+#pragma warning disable CS0618 // Type or member is obsolete
             _ = await AssertException.TaskThrowsAsync<HttpRequestException>(() =>
-                 pca.AcquireTokenByUsernamePassword(
-                    s_scopes,
-                     user.Upn,
-                     user.GetOrFetchPassword())
+                 pca.AcquireTokenWithDeviceCode(s_scopes, _ => throw new InvalidOperationException("Unexpected device authorization for invalid authority."))
                      .ExecuteAsync())
                 .ConfigureAwait(false);
             #pragma warning restore CS0618

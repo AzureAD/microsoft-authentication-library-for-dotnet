@@ -39,7 +39,6 @@ namespace DesktopTestApp
         private const string B2CPolicyWithDotAuthority = "https://msidlabb2c.b2clogin.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_B2C.SignUpPolicyICM/";
         private const string B2CEditProfileAuthority = "https://msidlabb2c.b2clogin.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_ProfileEditPolicy/";
         public const string B2CCustomDomainAuthority = "https://public.msidlabb2c.com/tfp/public.msidlabb2c.com/B2C_1_signupsignin_userflow/";
-        public const string B2CROPCAuthority = "https://msidlabb2c.b2clogin.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_ROPC_Auth";
 
         private bool IsForceRefreshEnabled => forceRefreshCheckBox.Checked;
 
@@ -196,51 +195,6 @@ namespace DesktopTestApp
                 }
             }
         }
-
-        private async void acquireTokenByUPButton_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                _publicClientHandler.PublicClientApplication = PublicClientApplicationBuilder
-                    .Create(CurrentClientId)
-                    .WithAuthority("https://login.microsoftonline.com/organizations")
-                    .BuildConcrete();
-
-                await AcquireTokenByUsernamePasswordAsync().ConfigureAwait(true);
-            }
-            catch (Exception exc)
-            {
-                CreateException(exc);
-            }
-        }
-
-        private async Task AcquireTokenByUsernamePasswordAsync()
-        {
-            try
-            {
-                ClearResultPageInfo();
-                userPasswordTextBox.PasswordChar = '*';
-
-                string username = loginHintTextBox.Text; //Can be blank for U/P
- #pragma warning disable CS0618 // Type or member is obsolete
-                AuthenticationResult authResult = await _publicClientHandler.PublicClientApplication
-                    .AcquireTokenByUsernamePassword(
-                        SplitScopeString(scopes.Text),
-                        username,
-                        userPasswordTextBox.Text)
-                    .ExecuteAsync(CancellationToken.None)
-                    .ConfigureAwait(true);
-#pragma warning restore CS0618
-
-                SetResultPageInfo(authResult);
-                RefreshUserList();
-            }
-            catch (Exception exc)
-            {
-                CreateException(exc);
-            }
-        }
-
         private async void acquireTokenSilent_Click(object sender, EventArgs e)
         {
             using (new UIProgressScope(this))
@@ -700,22 +654,6 @@ namespace DesktopTestApp
             }
         }
 
-        private async void RopcB2CAT_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                _publicClientHandler.PublicClientApplication = PublicClientApplicationBuilder
-                   .Create(_b2CClientId)
-                   .WithB2CAuthority(B2CROPCAuthority)
-                   .BuildConcrete();
-                await AcquireTokenByUsernamePasswordAsync().ConfigureAwait(true);
-            }
-            catch (Exception exc)
-            {
-                CreateException(exc);
-            }
-        }
-        
         private async Task GetB2CClientIdFromLabAsync()
         {
             if (_b2CClientId != null)

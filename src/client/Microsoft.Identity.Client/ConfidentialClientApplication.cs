@@ -25,7 +25,6 @@ namespace Microsoft.Identity.Client
             IConfidentialClientApplication,
             IByRefreshToken,
             ILongRunningWebApi,
-            IByUsernameAndPassword,
             IByUserFederatedIdentityCredential
     {
         /// <summary>
@@ -170,20 +169,6 @@ namespace Microsoft.Identity.Client
                 ClientExecutorFactory.CreateConfidentialClientExecutor(this),
                 scopes);
         }
-
-        /// <inheritdoc/>
-        AcquireTokenByUsernameAndPasswordConfidentialParameterBuilder IByUsernameAndPassword.AcquireTokenByUsernamePassword(
-            IEnumerable<string> scopes,
-            string username,
-            string password)
-        {
-            return AcquireTokenByUsernameAndPasswordConfidentialParameterBuilder.Create(
-                ClientExecutorFactory.CreateConfidentialClientExecutor(this),
-                scopes,
-                username,
-                password);
-        }
-
         /// <inheritdoc/>
         AcquireTokenByUserFederatedIdentityCredentialParameterBuilder IByUserFederatedIdentityCredential.AcquireTokenByUserFederatedIdentityCredential(
             IEnumerable<string> scopes,

@@ -19,7 +19,6 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
         public const string ADFSv4NonFederated = "ADFSv4 NonFederated";
         public const string ADFSv2019Federated = "ADFSv2019 Federated";
         public const string ADFSv2019NonFederated = "ADFSv2019 NonFederated";
-        public const string B2CROPC = "B2C ROPC";
         public const string B2CFacebookb2clogin = "B2C FB b2clogin.com";
         public const string B2CLocalEditProfile = "B2C Local edit profile";
         public const string B2CFacebookMicrosoftLogin = "B2C FB microsoftonline.com";
@@ -84,10 +83,6 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
         public const string B2CWebSubmitId = "next";
         public const string B2CWebPasswordId = "password";
         public const string B2CLoginAuthority = "b2clogin.com";
-        public const string ROPC = "ROPC";
-        public const string AcquireTokenByRopcButtonId = "acquireTokenByROPC";
-        public const string ROPCUsernameId = "usernameId";
-        public const string ROPCPasswordId = "passwordId";
         public const string MicrosoftOnlineAuthority = "login.microsoftonline.com";
         public const string NonB2CAuthority = "non-b2c authority";
         public const string B2CEditProfileAuthority = "Edit profile policy authority";

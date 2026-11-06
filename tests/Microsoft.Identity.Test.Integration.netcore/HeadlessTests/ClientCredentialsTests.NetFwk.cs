@@ -365,18 +365,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithAuthority(app.Authority, "organizations")
                 .BuildConcrete();
 
-#pragma warning disable CS0618 // Type or member is obsolete
-            AuthenticationResult authResult = await msalPublicClient
-                .AcquireTokenByUsernamePassword(s_scopes, user.Upn, user.GetOrFetchPassword())
-                .ExecuteAsync(CancellationToken.None)
+            AuthenticationResult authResult = await msalPublicClient.AcquireDelegatedTokenAsync(s_scopes, user.Upn)
                 .ConfigureAwait(false);
-#pragma warning restore CS0618
 
-var confidentialApp = ConfidentialClientApplicationBuilder
-    .Create(app.AppId)
-    .WithAuthority(app.Authority, user.TenantId)
-    .WithTestLogging()
-    .BuildConcrete();
+            var confidentialApp = ConfidentialClientApplicationBuilder
+                .Create(app.AppId)
+                .WithAuthority(app.Authority, user.TenantId)
+                .WithTestLogging()
+                .BuildConcrete();
 
             var rt = msalPublicClient.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().FirstOrDefault();
 

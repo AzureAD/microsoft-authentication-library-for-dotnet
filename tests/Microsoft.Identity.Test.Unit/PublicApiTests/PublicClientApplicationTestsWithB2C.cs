@@ -321,18 +321,16 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     app.ServiceBundle,
                                         AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
-                // Arrange AcquireTokenWithUsernamePassword
+                // Arrange an interactive authorization-code exchange
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(
                     TestConstants.B2CLoginAuthority,
                     responseMessage: MockHelpers.CreateSuccessResponseMessage("non json response"));
 
                 // Act 
-#pragma warning disable CS0618 // Type or member is obsolete 
-                var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(() => 
-                    app.AcquireTokenByUsernamePassword(new[] { "user.read" }, "username", "password" ) // no scopes -> no Access Token!
+                var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
+                    app.AcquireTokenInteractive(new[] { "user.read" })
                     .ExecuteAsync())
                     .ConfigureAwait(false);
-#pragma warning restore CS0618
                 // Assert
                 Assert.AreEqual(MsalError.JsonParseError, ex.ErrorCode);
                 Assert.AreEqual(MsalErrorMessage.JsonParseErrorMessage, ex.Message);

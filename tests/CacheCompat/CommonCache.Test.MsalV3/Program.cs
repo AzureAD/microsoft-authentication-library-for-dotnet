@@ -67,12 +67,23 @@ namespace CommonCache.Test.MsalV2
                     }
                     catch (MsalUiRequiredException)
                     {
-                        #pragma warning disable CS0618 // Type or memeber is obsolete
+                        if (!string.Equals(Environment.GetEnvironmentVariable("MSAL_CACHECOMPAT_DEVICE_CODE"), "1", StringComparison.Ordinal))
+                        {
+                            throw new InvalidOperationException("The cross-version cache needs delegated sign-in. Seed it with a supported client, or explicitly enable device-code setup with MSAL_CACHECOMPAT_DEVICE_CODE=1.");
+                        }
+
                         var result = await app
-                            .AcquireTokenByUsernamePassword(scopes, labUserData.Upn, labUserData.Password)
+                            .AcquireTokenWithDeviceCode(scopes, code =>
+                            {
+                                Console.WriteLine(code.Message);
+                                return Task.CompletedTask;
+                            })
                             .ExecuteAsync(CancellationToken.None)
                             .ConfigureAwait(false);
-                        #pragma warning restore CS0618
+                        if (!string.Equals(result.Account.Username, labUserData.Upn, StringComparison.OrdinalIgnoreCase))
+                        {
+                            throw new InvalidOperationException("Device-code setup signed in a different user from the requested cache-compatibility identity.");
+                        }
 
                         if (string.IsNullOrWhiteSpace(result.AccessToken))
                         {

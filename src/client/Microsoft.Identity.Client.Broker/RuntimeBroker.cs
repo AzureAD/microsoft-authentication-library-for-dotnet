@@ -7,7 +7,6 @@ using System.Globalization;
 using System.Linq;
 using System.Diagnostics;
 using System.ComponentModel;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Cache;
@@ -30,10 +29,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
         internal const string ErrorMessageSuffix = " For more details see https://aka.ms/msal-net-wam";
         private readonly BrokerOptions _brokerOptions;
         private static Exception s_initException;
-
-        // Linux broker's username password flow is via interactive calls
-        [DllImport("libX11.so.6")]
-        private static extern IntPtr XOpenDisplay(string display);
 
         private static Dictionary<NativeInterop.LogLevel, LogLevel> LogLevelMap = new Dictionary<NativeInterop.LogLevel, LogLevel>()
         {
@@ -456,58 +451,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
 
             return msalTokenResponse;
         }
-
-        [Obsolete("This API has been deprecated, use a more secure flow. See https://aka.ms/msal-ropc-migration for migration guidance", false)]
-        [EditorBrowsable(EditorBrowsableState.Never)] // deprecated, this API is no longer supported
-        public async Task<MsalTokenResponse> AcquireTokenByUsernamePasswordAsync(
-            AuthenticationRequestParameters authenticationRequestParameters,
-            AcquireTokenByUsernamePasswordParameters acquireTokenByUsernamePasswordParameters)
-        {
-            using LogEventWrapper logEventWrapper = new LogEventWrapper(this);
-            Debug.Assert(s_lazyCore.Value != null, "Should not call this API if msal runtime init failed");
-
-            var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
-            MsalTokenResponse msalTokenResponse;
-
-            _logger?.Verbose(() => "[RuntimeBroker] Acquiring token with Username Password flow.");
-
-            using (AuthParameters authParams = WamAdapters.GetCommonAuthParameters(
-                authenticationRequestParameters,
-                _brokerOptions,
-                _logger))
-            {
-                authParams.Properties["MSALRuntime_Username"] = acquireTokenByUsernamePasswordParameters.Username;
-                authParams.Properties["MSALRuntime_Password"] = acquireTokenByUsernamePasswordParameters.Password;
-                // For Linux broker, use the interactive flow with username password to get the token
-                if (Environment.GetEnvironmentVariable("TF_BUILD") != null && DesktopOsHelper.IsLinux())
-                {
-                    using (NativeInterop.AuthResult result = await s_lazyCore.Value.SignInInteractivelyAsync(
-                        XOpenDisplay(":1"),
-                        authParams,
-                        authenticationRequestParameters.CorrelationId.ToString("D"),
-                        acquireTokenByUsernamePasswordParameters.Username,
-                        cancellationToken).ConfigureAwait(false))
-                    {
-                        var errorMessage = "Could not acquire token with username and password.";
-                        msalTokenResponse = WamAdapters.HandleResponse(result, authenticationRequestParameters, _logger, errorMessage);
-                    }
-                }
-                else
-                {
-                    using (NativeInterop.AuthResult result = await s_lazyCore.Value.SignInSilentlyAsync(
-                        authParams,
-                        authenticationRequestParameters.CorrelationId.ToString("D"),
-                        cancellationToken).ConfigureAwait(false))
-                    {
-                        var errorMessage = "Could not acquire token with username and password.";
-                        msalTokenResponse = WamAdapters.HandleResponse(result, authenticationRequestParameters, _logger, errorMessage);
-                    }
-                }
-            }
-
-            return msalTokenResponse;
-        }
-
         public async Task RemoveAccountAsync(ApplicationConfiguration appConfig, IAccount account)
         {
             using LogEventWrapper logEventWrapper = new LogEventWrapper(this);
