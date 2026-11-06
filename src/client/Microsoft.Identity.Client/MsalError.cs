@@ -95,14 +95,6 @@ namespace Microsoft.Identity.Client
         public const string MultipleAccountsForLoginHint = "multiple_accounts_for_login_hint";
 
         /// <summary>
-        /// This error code comes back from <see cref="ClientApplicationBase.AcquireTokenSilent(System.Collections.Generic.IEnumerable{string}, IAccount)"/> calls when
-        /// the user cache had not been set in the application constructor. This should never happen in MSAL.NET 3.x as the cache is created by the application
-        /// </summary>
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete("This error code is not in use")]
-        public const string TokenCacheNullError = "token_cache_null";
-
-        /// <summary>
         /// One of two conditions was encountered:
         /// <list type="bullet">
         /// <item><description>The <c>Prompt.NoPrompt</c> was passed in an interactive token call, but the constraint could not be honored because user interaction is required,
@@ -576,15 +568,6 @@ namespace Microsoft.Identity.Client
         /// <para>Mitigation</para>Correct the redirect loop in the federation service configuration.
         /// </summary>
         public const string TooManyRedirects = "too_many_redirects";
-
-        /// <summary>
-        /// The request could not be performed because the network is down.
-        /// <para>Mitigation [App development]</para> In the application you could either inform the user that there are network issues
-        /// or retry later
-        /// </summary>
-        [Obsolete("MSAL no longer throws this error - it will allow the HttpClient exceptions to propagate. App developers may write their own logic for detecting access to the network issues, for example by using Xamarin.Essentials. ")]
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public const string NetworkNotAvailableError = "network_not_available";
 
         /// <summary>
         /// The B2C authority host is not the same as the one used when creating the client application.
@@ -1197,28 +1180,10 @@ namespace Microsoft.Identity.Client
         public const string CryptographicError = "cryptographic_error";
 
         /// <summary>
-        /// <para>What happened?</para> A region is <b>not</b> required for mTLS Proof of Possession. When no region is specified, MSAL uses the global mTLS endpoint, so this error is no longer raised. The constant is retained for backwards compatibility.
-        /// <para>Mitigation</para> No action needed. Optionally set a region via .WithAzureRegion(...) for improved performance.
-        /// </summary>
-        public const string MtlsPopWithoutRegion = "mtls_pop_without_region";
-
-        /// <summary>
-        /// <para>What happened?</para> A region is <b>not</b> required for Bearer-over-mTLS. When no region is specified, MSAL uses the global mTLS endpoint, so this error is no longer raised. The constant is retained for backwards compatibility.
-        /// <para>Mitigation</para> No action needed. Optionally set a region via .WithAzureRegion(...) for improved performance.
-        /// </summary>
-        public const string MtlsBearerWithoutRegion = "mtls_bearer_without_region";
-
-        /// <summary>
         /// <para>What happened?</para> mTLS Proof of Possession (mTLS PoP) is configured but a certificate was not provided.
         /// <para>Mitigation</para> Ensure that a valid certificate is provided in the configuration when using mTLS PoP as it is required for secure authentication.
         /// </summary>
         public const string MtlsCertificateNotProvided = "mtls_certificate_not_provided";
-
-        /// <summary>
-        /// <para>What happened?</para> A region is <b>not</b> required for mTLS Proof of Possession (mTLS PoP). When regional auto-detection does not yield a region, MSAL falls back to the global mTLS endpoint, so this error is no longer raised. The constant is retained for backwards compatibility.
-        /// <para>Mitigation:</para> No action needed. Optionally set a region via .WithAzureRegion(...) for improved performance.
-        /// </summary>
-        public const string RegionRequiredForMtlsPop = "region_required_for_mtls_pop";
 
         /// <summary>
         /// <para>What happened?</para> mTLS is not supported for managed identity authentication.

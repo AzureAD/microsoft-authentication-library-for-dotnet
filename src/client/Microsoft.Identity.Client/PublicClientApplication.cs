@@ -75,6 +75,7 @@ namespace Microsoft.Identity.Client
             return ServiceBundle.PlatformProxy.GetWebUiFactory(ServiceBundle.Config).IsUserInteractive;
         }
 
+#if !ANDROID && !iOS
         /// <summary>
         /// Returns <c>true</c> if an authentication broker can be used.
         /// This method is only needed for mobile scenarios which support Mobile Application Management (MAM). In other cases, use <c>WithBroker</c>, which will fall back to use a browser if an authentication broker is unavailable.
@@ -84,18 +85,16 @@ namespace Microsoft.Identity.Client
         /// <item><description>On Windows, the broker (WAM) can be used on Windows 10 and is always installed. See https://aka.ms/msal-net-wam </description></item>
         /// <item><description>On Mac, Linux, and older versions of Windows a broker is not available.</description></item>
         /// <item><description>In .NET 8 apps, target <c>net8.0-windows10.0.17763.0</c> for all Windows versions and target <c>net8.0</c> for Linux and Mac.</description></item>
-        /// <item><description>In .NET classic or .NET Core 3.1 apps, install Microsoft.Identity.Client.Desktop first and call <c>WithDesktopFeatures()</c>.</description></item>
+        /// <item><description>In desktop apps, install Microsoft.Identity.Client.Broker and call <c>WithBroker(BrokerOptions)</c>.</description></item>
         /// <item><description>In mobile apps, the device must be Intune joined and Authenticator or Company Portal must be installed. See https://aka.ms/msal-brokers </description></item>
         /// </list>
         /// </remarks>
-#if ANDROID || iOS 
-        [Obsolete("This method is obsolete. Applications should rely on the library automatically falling back to a browser if the broker is not available. ", false)]
-#endif
         public bool IsBrokerAvailable()
         {
             return ServiceBundle.PlatformProxy.CreateBroker(ServiceBundle.Config, null)
                     .IsBrokerInstalledAndInvokable(ServiceBundle.Config.Authority?.AuthorityInfo?.AuthorityType ?? AuthorityType.Aad);
         }
+#endif
 
         /// <inheritdoc/>
         [CLSCompliant(false)]

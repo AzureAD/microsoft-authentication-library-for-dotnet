@@ -117,14 +117,11 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             int callCount = 0;
 
-            var credential = new CertificateAndClaimsClientCredential(
-                certificateProvider: _ =>
+            var credential = new CertificateAndClaimsClientCredential(certificateProvider: _ =>
                 {
                     Interlocked.Increment(ref callCount);
                     return Task.FromResult(s_cert);
-                },
-                claimsToSign: null,
-                appendDefaultClaims: true);
+                });
 
             CredentialMaterial material = await credential
                 .GetCredentialMaterialAsync(RegularContext(), CancellationToken.None)
@@ -164,14 +161,11 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             int callCount = 0;
 
-            var credential = new CertificateAndClaimsClientCredential(
-                certificateProvider: _ =>
+            var credential = new CertificateAndClaimsClientCredential(certificateProvider: _ =>
                 {
                     Interlocked.Increment(ref callCount);
                     return Task.FromResult(s_cert);
-                },
-                claimsToSign: null,
-                appendDefaultClaims: true);
+                });
 
             CredentialMaterial material = await credential
                 .GetCredentialMaterialAsync(MtlsContext(), CancellationToken.None)
@@ -211,40 +205,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         public async Task Row4_SecretCredential_MtlsMode_ThrowsMsalClientExceptionAsync()
         {
             var credential = new ClientSecretCredential("my-secret");
-            MsalClientException ex = await Assert.ThrowsExactlyAsync<MsalClientException>(
-                () => credential.GetCredentialMaterialAsync(MtlsContext(), CancellationToken.None))
-                .ConfigureAwait(false);
-
-            Assert.AreEqual(MsalError.InvalidCredentialMaterial, ex.ErrorCode);
-        }
-
-        // ──────────────────────────────────────────────
-        // Row 5 – SignedAssertion (static) + Regular
-        // ──────────────────────────────────────────────
-
-        [TestMethod]
-        public async Task Row5_StaticSignedAssertion_Regular_ReturnsJwtBearerAsync()
-        {
-            const string jwt = "header.payload.signature";
-            var credential = new SignedAssertionClientCredential(jwt);
-            CredentialMaterial material = await credential
-                .GetCredentialMaterialAsync(RegularContext(), CancellationToken.None)
-                .ConfigureAwait(false);
-
-            Assert.IsNotNull(material);
-            Assert.IsNull(material.ResolvedCertificate);
-            Assert.AreEqual(OAuth2AssertionType.JwtBearer, material.TokenRequestParameters[OAuth2Parameter.ClientAssertionType]);
-            Assert.AreEqual(jwt, material.TokenRequestParameters[OAuth2Parameter.ClientAssertion]);
-        }
-
-        // ──────────────────────────────────────────────
-        // Row 6 – SignedAssertion (static) + MtlsMode  (unsupported)
-        // ──────────────────────────────────────────────
-
-        [TestMethod]
-        public async Task Row6_StaticSignedAssertion_MtlsMode_ThrowsMsalClientExceptionAsync()
-        {
-            var credential = new SignedAssertionClientCredential("header.payload.signature");
             MsalClientException ex = await Assert.ThrowsExactlyAsync<MsalClientException>(
                 () => credential.GetCredentialMaterialAsync(MtlsContext(), CancellationToken.None))
                 .ConfigureAwait(false);
@@ -488,14 +448,11 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             AssertionRequestOptions capturedOptions = null;
 
-            var credential = new CertificateAndClaimsClientCredential(
-                certificateProvider: opts =>
+            var credential = new CertificateAndClaimsClientCredential(certificateProvider: opts =>
                 {
                     capturedOptions = opts;
                     return Task.FromResult(s_cert);
-                },
-                claimsToSign: null,
-                appendDefaultClaims: true);
+                });
 
             await credential
                 .GetCredentialMaterialAsync(RegularContext(), CancellationToken.None)
@@ -518,15 +475,12 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             int callCount = 0;
             AssertionRequestOptions capturedOptions = null;
 
-            var credential = new CertificateAndClaimsClientCredential(
-                certificateProvider: opts =>
+            var credential = new CertificateAndClaimsClientCredential(certificateProvider: opts =>
                 {
                     capturedOptions = opts;
                     Interlocked.Increment(ref callCount);
                     return Task.FromResult(s_cert);
-                },
-                claimsToSign: null,
-                appendDefaultClaims: true);
+                });
 
             CredentialMaterial material = await credential
                 .GetCredentialMaterialAsync(MtlsContext(), CancellationToken.None)
@@ -549,10 +503,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             // Dynamic provider returning null in mTLS mode should throw
             // MtlsCertificateNotProvided (mode-aware error mapping).
-            var credential = new CertificateAndClaimsClientCredential(
-                certificateProvider: _ => Task.FromResult<X509Certificate2>(null),
-                claimsToSign: null,
-                appendDefaultClaims: true);
+            var credential = new CertificateAndClaimsClientCredential(certificateProvider: _ => Task.FromResult<X509Certificate2>(null));
 
             MsalClientException ex = await Assert.ThrowsExactlyAsync<MsalClientException>(
                 () => credential.GetCredentialMaterialAsync(MtlsContext(), CancellationToken.None))
@@ -566,10 +517,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             // Regular (JWT-bearer) mode keeps the historical InvalidClientAssertion error code
             // when the provider returns null; only mTLS mode swaps in MtlsCertificateNotProvided.
-            var credential = new CertificateAndClaimsClientCredential(
-                certificateProvider: _ => Task.FromResult<X509Certificate2>(null),
-                claimsToSign: null,
-                appendDefaultClaims: true);
+            var credential = new CertificateAndClaimsClientCredential(certificateProvider: _ => Task.FromResult<X509Certificate2>(null));
 
             MsalClientException ex = await Assert.ThrowsExactlyAsync<MsalClientException>(
                 () => credential.GetCredentialMaterialAsync(RegularContext(), CancellationToken.None))
@@ -584,14 +532,11 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             // Verify the provider path works for regular mode with claims
             int callCount = 0;
 
-            var credential = new CertificateAndClaimsClientCredential(
-                certificateProvider: _ =>
+            var credential = new CertificateAndClaimsClientCredential(certificateProvider: _ =>
                 {
                     Interlocked.Increment(ref callCount);
                     return Task.FromResult(s_cert);
-                },
-                claimsToSign: new Dictionary<string, string> { { "custom_claim", "value" } },
-                appendDefaultClaims: true);
+                });
 
             CredentialMaterial material = await credential
                 .GetCredentialMaterialAsync(RegularContext(), CancellationToken.None)
@@ -605,22 +550,5 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 material.TokenRequestParameters[OAuth2Parameter.ClientAssertionType]);
         }
 
-        [TestMethod]
-        public async Task DynamicCert_MtlsMode_WithClaims_ThrowsMtlsCertificateNotProvidedAsync()
-        {
-            // WithClientClaims is JWT-bearer only. Combining it with mTLS PoP is a misconfiguration:
-            // the cert is meant to sign the assertion, not bind the TLS transport. Reject early
-            // with MtlsCertificateNotProvided rather than silently re-purposing the certificate.
-            var credential = new CertificateAndClaimsClientCredential(
-                certificateProvider: _ => Task.FromResult(s_cert),
-                claimsToSign: new Dictionary<string, string> { { "custom_claim", "value" } },
-                appendDefaultClaims: true);
-
-            MsalClientException ex = await Assert.ThrowsExactlyAsync<MsalClientException>(
-                () => credential.GetCredentialMaterialAsync(MtlsContext(), CancellationToken.None))
-                .ConfigureAwait(false);
-
-            Assert.AreEqual(MsalError.MtlsCertificateNotProvided, ex.ErrorCode);
-        }
     }
 }

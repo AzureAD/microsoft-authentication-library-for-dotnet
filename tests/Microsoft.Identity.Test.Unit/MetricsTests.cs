@@ -289,14 +289,12 @@ namespace Microsoft.Identity.Test.Unit
 
         private async Task TestAcquireTokenSilent_Async(PublicClientApplication pca, int expectedTokensFromIdp = 0, int expectedTokensFromCache = 0, int expectedTokensFromBroker = 0)
         {
-#pragma warning disable CS0618 // Type or member is obsolete
             AuthenticationResult result = await pca.AcquireTokenSilent(
                 TestConstants.s_scope.ToArray(),
                 TestConstants.DisplayableId)
-                .WithAuthority(pca.Authority, false)
+                .WithTenantIdFromAuthority(new Uri(pca.Authority))
                 .ExecuteAsync()
                 .ConfigureAwait(false);
-#pragma warning restore CS0618 // Type or member is obsolete
 
             Assert.IsNotNull(result);
             Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);

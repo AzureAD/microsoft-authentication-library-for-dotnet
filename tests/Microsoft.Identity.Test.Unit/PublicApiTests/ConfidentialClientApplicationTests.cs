@@ -54,12 +54,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             users.Add(mockUser1);
             users.Add(mockUser2);
-#pragma warning disable CS0618 // Type or member is obsolete
             mockApp.GetAccountsAsync().Returns(users);
 
             // Now call the substitute
             IEnumerable<IAccount> actualUsers = mockApp.GetAccountsAsync().Result;
-#pragma warning restore CS0618 // Type or member is obsolete
 
             // Check the users property
             Assert.IsNotNull(actualUsers);
@@ -529,7 +527,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         private enum CredentialType
         {
             Certificate,
-            CertificateAndClaims,
             SignedAssertion,
             SignedAssertionDelegate,
             SignedAssertionAsyncDelegate,
@@ -556,17 +553,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             switch (credentialType)
             {
-                case CredentialType.CertificateAndClaims:
-#pragma warning disable CS0618 // Type or member is obsolete
-                    builder = builder.WithClientClaims(cert, TestConstants.s_clientAssertionClaims);
-#pragma warning restore CS0618 // Type or member is obsolete
-                    app = builder.BuildConcrete();
-                    Assert.AreEqual(cert, app.Certificate);
-                    break;
                 case CredentialType.SignedAssertion:
-#pragma warning disable CS0618 // Type or member is soft obsolete
-                    builder = builder.WithClientAssertion(TestConstants.DefaultClientAssertion);
-#pragma warning restore CS0618 // Type or member is soft obsolete
+                    builder = builder.WithClientAssertion((AssertionRequestOptions _) => Task.FromResult(TestConstants.DefaultClientAssertion));
                     app = builder.BuildConcrete();
                     Assert.IsNull(app.Certificate);
                     break;
@@ -691,14 +679,16 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddInstanceDiscoveryMockHandler();
 
                 var cert = new X509Certificate2(ResourceHelper.GetTestResourceRelativePath("valid.crtfile"));
-                (ConfidentialClientApplication App, MockHttpMessageHandler Handler) setup = CreateConfidentialClient(httpManager, cert, CredentialType.CertificateAndClaims);
+                (ConfidentialClientApplication App, MockHttpMessageHandler Handler) setup = CreateConfidentialClient(httpManager, cert);
                 var app = setup.App;
                 var tokenHttpHandler = setup.Handler;
 
                 var appCacheAccess = app.AppTokenCache.RecordAccess();
                 var userCacheAccess = app.UserTokenCache.RecordAccess();
 
-                var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray()).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                    .WithExtraClientAssertionClaims(System.Text.Json.JsonSerializer.Serialize(TestConstants.s_clientAssertionClaims))
+                    .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
                 Assert.IsNotNull("header.payload.signature", result.AccessToken);
                 Assert.AreEqual(TestConstants.s_scope.AsSingleString(), result.Scopes.AsSingleString());
                 appCacheAccess.AssertAccessCounts(1, 1);
@@ -753,7 +743,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // assert client credential
 
-                Assert.IsTrue((app.AppConfig as ApplicationConfiguration).ClientCredential is SignedAssertionClientCredential);
+                Assert.IsTrue((app.AppConfig as ApplicationConfiguration).ClientCredential is ClientAssertionStringDelegateCredential);
             }
         }
 
@@ -1115,15 +1105,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 var confidentialClientApplication = confidentialClientApplicationBuilder.Build();
 
-#pragma warning disable CS0618 // Type or member is obsolete
                 Uri authorizationRequestUrl = confidentialClientApplication
                     .GetAuthorizationRequestUrl(new List<string> { "" })
-                    .WithAuthority(AzureCloudInstance.AzurePublic, Constants.Consumers)
+                    .WithTenantId(Constants.Consumers)
                     .ExecuteAsync()
                     .ConfigureAwait(false)
                     .GetAwaiter()
                     .GetResult();
-#pragma warning restore CS0618 // Type or member is obsolete
 
                 Assert.StartsWith(Constants.Consumers, authorizationRequestUrl.Segments[1]);
             }
@@ -1354,16 +1342,14 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 var userCacheAccess = app.UserTokenCache.RecordAccess();
 
                 const string CustomRedirectUri = "custom://redirect-uri";
-#pragma warning disable CS0618 // Type or member is obsolete
                 Task<Uri> task = app
                     .GetAuthorizationRequestUrl(TestConstants.s_scope)
                     .WithRedirectUri(CustomRedirectUri)
                     .WithLoginHint(TestConstants.DisplayableId)
-                    .WithExtraQueryParameters("extra=qp")
+                    .WithExtraQueryParameters(new Dictionary<string, (string Value, bool IncludeInCacheKey)> { { "extra", ("qp", false) } })
                     .WithExtraScopesToConsent(TestConstants.s_scopeForAnotherResource)
-                    .WithAuthority(TestConstants.AuthorityGuestTenant)
+                    .WithTenantIdFromAuthority(new Uri(TestConstants.AuthorityGuestTenant))
                     .ExecuteAsync(CancellationToken.None);
-#pragma warning restore CS0618 // Type or member is obsolete
 
                 var uri = task.Result;
                 Assert.IsNotNull(uri);
