@@ -1,3 +1,11 @@
+Unreleased
+==========
+
+### Changes
+
+- Restricted generic OIDC regional-issuer matching to authorities on built-in known Microsoft hosts. Custom authorities now reject regional Microsoft issuers, including valid region names, while continuing to accept non-regional known Microsoft issuers as required by [#5927](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/5927). Regional prefixes remain unrestricted for known Microsoft authority hosts. Authority classification ignores an optional trailing DNS root dot.
+- Disabled tenant-derived CIAM issuer matching for generic OIDC authorities on built-in known Microsoft hosts. Existing CIAM matching for other authority hosts is unchanged.
+
 4.91.1
 ======
 
