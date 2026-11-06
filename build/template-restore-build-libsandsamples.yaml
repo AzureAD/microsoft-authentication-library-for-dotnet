@@ -2,6 +2,7 @@
 # Performs Nuget Restore and Build of LibsAndSamples.sln based on BuildPlatform and BuildConfiguration
 
 parameters:
+  Solution: 'LibsAndSamples.sdk.slnf'
   BuildPlatform: 'any cpu'
   BuildConfiguration: 'Release'
   MicrosoftIdentityClientVersion: '4.60.0-devopsbuild'
@@ -14,20 +15,31 @@ steps:
   inputs:
     script: 'nuget locals all -clear'
 
-#Restore workload with the .NET Core CLI task
-- task: DotNetCoreCLI@2
+- task: PowerShell@2
   displayName: 'dotnet workload restore for Desktop project'
   inputs:
-    command: 'custom'
-    custom: 'workload'
-    arguments: 'restore .\src\client\Microsoft.Identity.Client.Desktop\Microsoft.Identity.Client.Desktop.csproj'
+    targetType: 'inline'
+    pwsh: true
+    script: |
+      dotnet workload restore .\src\client\Microsoft.Identity.Client.Desktop\Microsoft.Identity.Client.Desktop.csproj
+      $exitCode = $LASTEXITCODE
+      if ($exitCode -ne 0) {
+          Write-Host "##vso[task.logissue type=error;]Desktop workload restore failed (exit $exitCode)."
+          exit $exitCode
+      }
 
-- task: DotNetCoreCLI@2
+- task: PowerShell@2
   displayName: 'dotnet workload restore'
   inputs:
-    command: 'custom'
-    custom: 'workload'
-    arguments: 'restore .\src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj'
+    targetType: 'inline'
+    pwsh: true
+    script: |
+      dotnet workload restore .\src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj
+      $exitCode = $LASTEXITCODE
+      if ($exitCode -ne 0) {
+          Write-Host "##vso[task.logissue type=error;]Core workload restore failed (exit $exitCode)."
+          exit $exitCode
+      }
 
 - task: Bash@3
   displayName: Install MAUI
@@ -36,19 +48,29 @@ steps:
     script: |
       dotnet workload install android ios macos maui --source https://api.nuget.org/v3/index.json
 
-- task: VSBuild@1
+- task: DotNetCoreCLI@2
   displayName: 'NuGet restore ${{ parameters.Solution }}'
   inputs:
-    solution: ${{ parameters.Solution }}
-    msbuildArgs: '/t:restore'
-    platform: ${{ parameters.BuildPlatform }}
-    configuration: ${{ parameters.BuildConfiguration }}
+    command: 'restore'
+    projects: '${{ parameters.Solution }}'
+    selectOrConfig: 'config'
+    nugetConfigPath: 'NuGet.Config'
+    restoreArguments: >
+      /p:Platform="${{ parameters.BuildPlatform }}"
+      /p:Configuration="${{ parameters.BuildConfiguration }}"
 
-- task: VSBuild@1
+- task: DotNetCoreCLI@2
   displayName: 'Build solution ${{ parameters.Solution }}'
   inputs:
-    solution: ${{ parameters.Solution }}
-    msbuildArgs: '/p:RunCodeAnalysis=false /p:MicrosoftIdentityClientVersion=${{ parameters.MicrosoftIdentityClientVersion }} /p:LabApiVersion=${{ parameters.LabApiVersion }} /p:SourceLinkCreate=true /p:ContinousIntegrationBuild=true'
-    platform: ${{ parameters.BuildPlatform }}
-    configuration: ${{ parameters.BuildConfiguration }}
-    maximumCpuCount: true
+    command: 'build'
+    projects: '${{ parameters.Solution }}'
+    arguments: >
+      --no-restore
+      /m
+      /p:Platform="${{ parameters.BuildPlatform }}"
+      /p:Configuration="${{ parameters.BuildConfiguration }}"
+      /p:RunCodeAnalysis=false
+      /p:MicrosoftIdentityClientVersion=${{ parameters.MicrosoftIdentityClientVersion }}
+      /p:LabApiVersion=${{ parameters.LabApiVersion }}
+      /p:SourceLinkCreate=true
+      /p:ContinousIntegrationBuild=true

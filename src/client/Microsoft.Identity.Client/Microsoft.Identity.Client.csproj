@@ -4,14 +4,14 @@
     <TargetFrameworkNetDesktop462>net462</TargetFrameworkNetDesktop462>
     <TargetFrameworkNetDesktop472>net472</TargetFrameworkNetDesktop472>
     <TargetFrameworkNetStandard>netstandard2.0</TargetFrameworkNetStandard>
-    <TargetFrameworkNet>net8.0</TargetFrameworkNet>
+    <TargetFrameworkNet>net10.0</TargetFrameworkNet>
     <Configurations>Debug;Release;Debug + MobileApps</Configurations>
   </PropertyGroup>
 
   <!-- Mobile targets are disabled by default to speed up dev box -->
   <PropertyGroup Condition="'$(INCLUDE_MOBILE_AND_LEGACY_TFM)' != ''">
-    <TargetFrameworkNetAndroid>net8.0-android</TargetFrameworkNetAndroid>
-    <TargetFrameworkNetIos>net8.0-ios</TargetFrameworkNetIos>
+    <TargetFrameworkNetAndroid>net10.0-android</TargetFrameworkNetAndroid>
+    <TargetFrameworkNetIos>net10.0-ios</TargetFrameworkNetIos>
   </PropertyGroup>
 
   <!-- mobile SDK constraints -->

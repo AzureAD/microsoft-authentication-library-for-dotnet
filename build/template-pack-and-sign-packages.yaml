@@ -16,11 +16,17 @@ steps:
     Contents: '**\*'
     TargetFolder: $(Build.SourcesDirectory)\src\client
 
-# Use the latest .NET SDK
+# Required by legacy signing; install before selecting the build SDK.
 - task: UseDotNet@2
-  displayName: 'Use the latest .NET 8'
+  displayName: 'Install legacy signing SDK 2.x'
   inputs:
-    version: 8.x
+    version: 2.x
+
+# Use the .NET 10 SDK for both restore and package creation.
+- task: UseDotNet@2
+  displayName: 'Use the latest .NET 10'
+  inputs:
+    version: 10.x
 
 - task: Bash@3
   displayName: Install MAUI
@@ -30,24 +36,21 @@ steps:
       dotnet nuget locals all --clear 
       dotnet workload install android ios macos maui --source "https://pkgs.dev.azure.com/IdentityDivision/_packaging/IDDP_PublicPackages/nuget/v3/index.json"
     
-- task: VSBuild@1
+- task: DotNetCoreCLI@2
   displayName: 'NuGet restore'
   inputs:
-    solution: 'LibsAndSamples.sln'
-    msbuildArgs: '/t:restore'
-    platform: 'any cpu'
-    configuration: 'Release'
+    command: 'custom'
+    custom: 'msbuild'
+    arguments: >
+      LibsAndSamples.sdk.slnf
+      /t:restore
+      /p:Platform="any cpu"
+      /p:Configuration=Release
 
 # Run Post-build code analysis (e.g. Roslyn)
 - template: template-postbuild-code-analysis.yaml
 
 # Pack and sign all of the nuget packages
-# Required for the signing task, but does not need to be used
-- task: UseDotNet@2
-  displayName: 'Use .Net Core SDK 2.x'
-  inputs:
-    version: 2.x
-
 - template: template-pack-and-sign-all-nugets.yaml
 
 #enabled only for legacy build
