@@ -94,7 +94,6 @@ namespace DesktopTestApp
             this.userList = new System.Windows.Forms.ComboBox();
             this.label7 = new System.Windows.Forms.Label();
             this.acquireTokenSilent = new System.Windows.Forms.Button();
-            this.acquireTokenWIA = new System.Windows.Forms.Button();
             this.acquireTokenInteractive = new System.Windows.Forms.Button();
             this.label6 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
@@ -435,7 +434,6 @@ namespace DesktopTestApp
             this.publicClientTabPage.Controls.Add(this.userList);
             this.publicClientTabPage.Controls.Add(this.label7);
             this.publicClientTabPage.Controls.Add(this.acquireTokenSilent);
-            this.publicClientTabPage.Controls.Add(this.acquireTokenWIA);
             this.publicClientTabPage.Controls.Add(this.acquireTokenInteractive);
             this.publicClientTabPage.Controls.Add(this.label6);
             this.publicClientTabPage.Controls.Add(this.label4);
@@ -801,16 +799,6 @@ namespace DesktopTestApp
             this.acquireTokenSilent.UseVisualStyleBackColor = true;
             this.acquireTokenSilent.Click += new System.EventHandler(this.acquireTokenSilent_Click);
             // 
-            // acquireTokenWIA
-            // 
-            this.acquireTokenWIA.Location = new System.Drawing.Point(207, 546);
-            this.acquireTokenWIA.Name = "acquireTokenWIA";
-            this.acquireTokenWIA.Size = new System.Drawing.Size(240, 30);
-            this.acquireTokenWIA.TabIndex = 9;
-            this.acquireTokenWIA.Text = "Acquire Token By WindowsIntegratedAuth";
-            this.acquireTokenWIA.UseVisualStyleBackColor = true;
-            this.acquireTokenWIA.Click += new System.EventHandler(this.acquireTokenByWindowsIntegratedAuth_Click);
-            // 
             // acquireTokenInteractive
             // 
             this.acquireTokenInteractive.Location = new System.Drawing.Point(15, 546);
@@ -829,7 +817,7 @@ namespace DesktopTestApp
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(195, 13);
             this.label6.TabIndex = 5;
-            this.label6.Text = "Login Hint (Username for IWA and U/P)";
+            this.label6.Text = "Login Hint (Username for U/P)";
             // 
             // label4
             // 
@@ -943,7 +931,6 @@ namespace DesktopTestApp
         private ComboBox userList;
         private Label label7;
         private Button acquireTokenSilent;
-        private Button acquireTokenWIA;
         private Button acquireTokenInteractive;
         private Label label6;
         private Label label4;
@@ -970,4 +957,3 @@ namespace DesktopTestApp
         private CheckBox ciamCheckBox;
     }
 }
-

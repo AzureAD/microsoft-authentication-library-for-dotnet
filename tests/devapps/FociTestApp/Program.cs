@@ -18,7 +18,6 @@ namespace FociTestApp
         private const string FAMILY_MEMBER_1 = "7660e4d6-d3f3-4385-9851-bc9027ef4a03";
         private const string FAMILY_MEMBER_2 = "9668f2bd-6103-4292-9024-84fa2d1b6fb2";
         private const string NON_FAMILY_MEMBER = "0615b6ca-88d4-4884-8729-b178178f7c27";
-        private static bool s_useIWA = false;
 
         private static readonly string[] s_scopes = new[] { "user.read" };
 
@@ -98,7 +97,6 @@ namespace FociTestApp
 
                         7. Clear cache via App1
                         8. Clear cache via App2
-                        t. Toggle IWA (currently {(s_useIWA ? "ON" : "OFF")})
                         0. Exit App
                     Enter your Selection: ");
                 char.TryParse(Console.ReadLine(), out var selection);
@@ -157,9 +155,6 @@ namespace FociTestApp
                             break;
                         case '0':
                             return;
-                        case 't':
-                            s_useIWA = true;
-                            break;
                         default:
                             break;
                     }
@@ -178,12 +173,6 @@ namespace FociTestApp
 
         private static Task<AuthenticationResult> StartAcquireTokenAsync(IPublicClientApplication pca)
         {
-            if (s_useIWA)
-            {
-#pragma warning disable CS0618 // Type or member is obsolete
-                return pca.AcquireTokenByIntegratedWindowsAuth(s_scopes).ExecuteAsync();
-#pragma warning restore CS0618 // Type or member is obsolete
-            }
             return pca.AcquireTokenInteractive(s_scopes).WithUseEmbeddedWebView(false).ExecuteAsync();
         }
 

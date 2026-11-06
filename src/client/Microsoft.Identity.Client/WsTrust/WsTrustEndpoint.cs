@@ -28,17 +28,7 @@ namespace Microsoft.Identity.Client.WsTrust
         public Uri Uri { get; }
         public WsTrustVersion Version { get; }
 
-        public string BuildTokenRequestMessageWindowsIntegratedAuth(string cloudAudienceUri)
-        {
-            return BuildTokenRequestMessage(UserAuthType.IntegratedAuth, cloudAudienceUri, string.Empty, string.Empty);
-        }
-
         public string BuildTokenRequestMessageUsernamePassword(string cloudAudienceUri, string username, string password)
-        {
-            return BuildTokenRequestMessage(UserAuthType.UsernamePassword, cloudAudienceUri, username, password);
-        }
-
-        private string BuildTokenRequestMessage(UserAuthType authType, string cloudAudienceUri, string username, string password)
         {
             string soapAction;
             string trustNamespace;
@@ -97,10 +87,7 @@ namespace Microsoft.Identity.Client.WsTrust
                     writer.WriteString(Uri.ToString());
                     writer.WriteEndElement(); // To
 
-                    if (authType == UserAuthType.UsernamePassword)
-                    {
-                        AppendSecurityHeader(writer, username, password);
-                    }
+                    AppendSecurityHeader(writer, username, password);
 
                     writer.WriteEndElement(); // Header
 

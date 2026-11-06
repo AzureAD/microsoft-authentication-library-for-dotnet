@@ -19,13 +19,11 @@ using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
-using Microsoft.Identity.Client.TelemetryCore;
 
 namespace Microsoft.Identity.Test.Unit.RequestsTests
 {
     [TestClass]
-    public class IntegratedWindowsAuthAndUsernamePasswordTests : TestBase
+    public class UsernamePasswordTests : TestBase
     {
         private string _password = "x";
 
@@ -48,25 +46,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             // user realm discovery
             httpManager.AddMockHandler(handler);
             return handler;
-        }
-
-        private void AddMockHandlerDefaultUserRealmDiscovery_ManagedUser(MockHttpManager httpManager)
-        {
-            // user realm discovery
-            httpManager.AddMockHandler(
-                new MockHttpMessageHandler
-                {
-                    ExpectedMethod = HttpMethod.Get,
-                    ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
-                    {
-                        Content = new StringContent(
-                            "{\"ver\":\"1.0\"," +
-                            "\"account_type\":\"Managed\"," +
-                            "\"domain_name\":\"some_domain.onmicrosoft.com\"," +
-                            "\"cloud_audience_urn\":\"urn:federation:MicrosoftOnline\"," +
-                            "\"cloud_instance_name\":\"login.microsoftonline.com\"}")
-                    }
-                });
         }
 
         private void AddMockHandlerMex(MockHttpManager httpManager)
@@ -96,21 +75,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     {
                         Content = new StringContent(
                             File.ReadAllText(ResourceHelper.GetTestResourceRelativePath(@"WsTrustResponse.xml")))
-                    }
-                });
-        }
-
-        private void AddMockHandlerWsTrustWindowsTransport(MockHttpManager httpManager)
-        {
-            httpManager.AddMockHandler(
-                new MockHttpMessageHandler
-                {
-                    ExpectedUrl = "https://msft.sts.microsoft.com/adfs/services/trust/13/windowstransport",
-                    ExpectedMethod = HttpMethod.Post,
-                    ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
-                    {
-                        Content = new StringContent(
-                            File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("WsTrustResponse13.xml")))
                     }
                 });
         }
@@ -160,253 +124,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         {"api-version", "1.0"}
                     }
                 });
-        }
-
-        [TestMethod]
-        public async Task AcquireTokenByIntegratedWindowsAuthTest_ManagedUserAsync()
-        {
-            // Arrange
-            using (var httpManager = new MockHttpManager())
-            {
-                httpManager.AddInstanceDiscoveryMockHandler();
-
-                AddMockHandlerDefaultUserRealmDiscovery_ManagedUser(httpManager);
-
-                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                        .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
-                                                        .WithHttpManager(httpManager)
-                                                        .BuildConcrete();
-
-                // Act
-                MsalClientException exception = await AssertException.TaskThrowsAsync<MsalClientException>(
-                    async () => await app
-                        .AcquireTokenByIntegratedWindowsAuth(TestConstants.s_scope)
-                        .WithUsername(TestConstants.s_user.Username)
-                        .ExecuteAsync(CancellationToken.None)
-                        .ConfigureAwait(false)).ConfigureAwait(false);
-
-                // Assert
-                Assert.AreEqual(MsalError.IntegratedWindowsAuthNotSupportedForManagedUser, exception.ErrorCode);
-            }
-        }
-
-        [TestMethod]
-        public async Task AcquireTokenByIntegratedWindowsAuthTest_ManagedUser_DiscoveryFailed_ThrowsExceptionAsync()
-        {
-            // Arrange
-            using (var httpManager = new MockHttpManager())
-            {
-                httpManager.AddInstanceDiscoveryMockHandler();
-
-                httpManager.AddMockHandler(
-                    new MockHttpMessageHandler
-                    {
-                        ExpectedMethod = HttpMethod.Get,
-                        ResponseMessage = new HttpResponseMessage(HttpStatusCode.NotFound)
-                        {
-                            Content = new StringContent(
-                                "{\"ver\":\"1.0\"," +
-                                "\"account_type\":\"Managed\"," +
-                                "\"domain_name\":\"some_domain.onmicrosoft.com\"," +
-                                "\"cloud_audience_urn\":\"urn:federation:MicrosoftOnline\"," +
-                                "\"cloud_instance_name\":\"login.microsoftonline.com\"}")
-                        }
-                    });
-
-                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                        .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
-                                                        .WithHttpManager(httpManager)
-                                                        .BuildConcrete();
-
-                // Act
-                MsalServiceException exception = await AssertException.TaskThrowsAsync<MsalServiceException>(
-                    async () => await app
-                        .AcquireTokenByIntegratedWindowsAuth(TestConstants.s_scope)
-                        .WithUsername(TestConstants.s_user.Username)
-                        .ExecuteAsync(CancellationToken.None)
-                        .ConfigureAwait(false)).ConfigureAwait(false);
-
-                // Assert
-                Assert.AreEqual(MsalError.UserRealmDiscoveryFailed, exception.ErrorCode);
-                Assert.AreEqual(HttpStatusCode.NotFound, (HttpStatusCode)exception.StatusCode);
-            }
-        }
-
-        [TestMethod]
-        public async Task AcquireTokenByIntegratedWindowsAuthTest_UnknownUserAsync()
-        {
-            // Arrange
-            using (var httpManager = new MockHttpManager())
-            {
-                httpManager.AddInstanceDiscoveryMockHandler();
-
-                // user realm discovery - unknown user type
-                httpManager.AddMockHandler(
-                    new MockHttpMessageHandler
-                    {
-                        ExpectedMethod = HttpMethod.Get,
-                        ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
-                        {
-                            Content = new StringContent(
-                                "{\"ver\":\"1.0\"," +
-                                "\"account_type\":\"Bogus\"}")
-                        }
-                    });
-
-                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                        .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
-                                                        .WithHttpManager(httpManager)
-                                                        .BuildConcrete();
-
-                // Act
-                MsalClientException exception = await AssertException.TaskThrowsAsync<MsalClientException>(
-                    async () => await app
-                        .AcquireTokenByIntegratedWindowsAuth(TestConstants.s_scope)
-                        .WithUsername(TestConstants.s_user.Username)
-                        .ExecuteAsync(CancellationToken.None)
-                        .ConfigureAwait(false)).ConfigureAwait(false);
-
-                // Assert
-                Assert.AreEqual(MsalError.UnknownUserType, exception.ErrorCode);
-            }
-        }
-
-        [TestMethod]
-        [DeploymentItem(@"Resources\TestMex.xml")]
-        [DeploymentItem(@"Resources\TestMex3rdParty.xml")]
-        [DeploymentItem(@"Resources\WsTrustResponse13.xml")]
-        [DataRow("TestMex.xml")]
-        [DataRow("TestMex3rdParty.xml")]
-        public async Task AcquireTokenByIntegratedWindowsAuth3rdPartyIDPTestAsync(string federationMetadataFilePath)
-        {
-            using (var httpManager = new MockHttpManager())
-            {
-                httpManager.AddInstanceDiscoveryMockHandler();
-                var expectedRequestHeaders = new Dictionary<string, string> { { Constants.CcsRoutingHintHeader, CoreHelpers.GetCcsUpnHint(TestConstants.s_user.Username) } };
-
-                MockHttpMessageHandler realmDiscoveryHandler = AddMockHandlerDefaultUserRealmDiscovery(httpManager);
-                AddMockHandlerWsTrustWindowsTransport(httpManager);
-                MockHttpMessageHandler mockTokenRequestHttpHandler = AddMockHandlerAadSuccess(httpManager, TestConstants.AuthorityCommonTenant, expectedRequestHeaders);
-                mockTokenRequestHttpHandler.ExpectedQueryParams = TestConstants.ExtraQueryParameters;
-                mockTokenRequestHttpHandler.ExpectedPostData = new Dictionary<string, string> { { OAuth2Parameter.Claims, TestConstants.Claims } };
-                string federationMetadata = File.ReadAllText(ResourceHelper.GetTestResourceRelativePath(federationMetadataFilePath));
-
-                //Using 3rd party federation metadata
-                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                        .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
-                                                        .WithHttpManager(httpManager)
-                                                        .WithExtraQueryParameters(TestConstants.ExtraQueryParametersNoAffectOnCacheKeys)
-                                                        .BuildConcrete();
-
-                AuthenticationResult result = await app
-                    .AcquireTokenByIntegratedWindowsAuth(TestConstants.s_scope)
-                                                        .WithClaims(TestConstants.Claims)
-                                                        .WithUsername(TestConstants.s_user.Username)
-                                                        .WithFederationMetadata(federationMetadata)
-                                                        .ExecuteAsync().ConfigureAwait(false);
-
-                Assert.IsNotNull(result);
-                Assert.AreEqual("some-access-token", result.AccessToken);
-                Assert.IsNotNull(result.Account);
-                Assert.AreEqual(TestConstants.DisplayableId, result.Account.Username);
-                Assert.IsNotNull(realmDiscoveryHandler.ActualRequestMessage.Headers);
-                StringAssert.Contains(realmDiscoveryHandler.ActualRequestMessage.Headers.ToString(), TestConstants.XClientSku,
-                    StringComparison.OrdinalIgnoreCase,
-                    "Client info header should contain " + TestConstants.XClientSku);
-                StringAssert.Contains(realmDiscoveryHandler.ActualRequestMessage.Headers.ToString(), TestConstants.XClientVer,
-                    StringComparison.OrdinalIgnoreCase,
-                    "Client info header should contain " + TestConstants.XClientVer);
-            }
-        }
-
-        [TestMethod]
-        [DeploymentItem(@"Resources\TestMex.xml")]
-        [DeploymentItem(@"Resources\WsTrustResponse13.xml")]
-        public async Task AcquireTokenByIntegratedWindowsAuthMetadataTestAsync()
-        {
-            using (var httpManager = new MockHttpManager())
-            {
-                httpManager.AddInstanceDiscoveryMockHandler();
-
-                MockHttpMessageHandler realmDiscoveryHandler = AddMockHandlerDefaultUserRealmDiscovery(httpManager);
-                AddMockHandlerMex(httpManager);
-                AddMockHandlerWsTrustWindowsTransport(httpManager);
-
-                MockHttpMessageHandler mockTokenRequestHttpHandler = AddMockHandlerAadSuccess(httpManager, TestConstants.AuthorityCommonTenant);
-                mockTokenRequestHttpHandler.ExpectedQueryParams = TestConstants.ExtraQueryParameters;
-                mockTokenRequestHttpHandler.ExpectedPostData = new Dictionary<string, string> { { OAuth2Parameter.Claims, TestConstants.Claims } };
-
-                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                        .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
-                                                        .WithHttpManager(httpManager)
-                                                        .WithExtraQueryParameters(TestConstants.ExtraQueryParametersNoAffectOnCacheKeys)
-                                                        .BuildConcrete();
-
-                AuthenticationResult result = await app
-                    .AcquireTokenByIntegratedWindowsAuth(TestConstants.s_scope)
-                                                        .WithClaims(TestConstants.Claims)
-                                                        .WithUsername(TestConstants.s_user.Username)
-                                                        .ExecuteAsync().ConfigureAwait(false);
-
-                Assert.IsNotNull(result);
-                Assert.AreEqual("some-access-token", result.AccessToken);
-                Assert.IsNotNull(result.Account);
-                Assert.AreEqual(TestConstants.DisplayableId, result.Account.Username);
-                Assert.IsNotNull(realmDiscoveryHandler.ActualRequestMessage.Headers);
-                StringAssert.Contains(realmDiscoveryHandler.ActualRequestMessage.Headers.ToString(), TestConstants.XClientSku,
-                    StringComparison.OrdinalIgnoreCase,
-                    "Client info header should contain " + TestConstants.XClientSku);
-                StringAssert.Contains(realmDiscoveryHandler.ActualRequestMessage.Headers.ToString(), TestConstants.XClientVer,
-                    StringComparison.OrdinalIgnoreCase,
-                    "Client info header should contain " + TestConstants.XClientVer);
-
-                // Assert telemetry ApiId
-                Assert.AreEqual(ApiEvent.ApiIds.AcquireTokenByIntegratedWindowsAuth.ToString("D"), mockTokenRequestHttpHandler.ActualRequestMessage.Headers.GetValues(TelemetryConstants.XClientCurrentTelemetry).Single().Split('|')[1].Split(',')[0]);
-            }
-        }
-
-        [TestMethod]
-        [DeploymentItem(@"Resources\TestMex.xml")]
-        [DeploymentItem(@"Resources\WsTrustResponse13.xml")]
-        public async Task AcquireTokenByIntegratedWindowsAuthInvalidClientTestAsync()
-        {
-            IDictionary<string, string> extraQueryParamsAndClaims =
-                TestConstants.ExtraQueryParameters.ToDictionary(e => e.Key, e => e.Value);
-            extraQueryParamsAndClaims.Add(OAuth2Parameter.Claims, TestConstants.Claims);
-
-            using (var httpManager = new MockHttpManager())
-            {
-                httpManager.AddInstanceDiscoveryMockHandler();
-
-                MockHttpMessageHandler realmDiscoveryHandler = AddMockHandlerDefaultUserRealmDiscovery(httpManager);
-                AddMockHandlerMex(httpManager);
-                AddMockHandlerWsTrustWindowsTransport(httpManager);
-                httpManager.AddMockHandler(
-                   new MockHttpMessageHandler
-                   {
-                       ExpectedUrl = "https://login.microsoftonline.com/common/oauth2/v2.0/token",
-                       ExpectedMethod = HttpMethod.Post,
-                       ResponseMessage = MockHelpers.CreateInvalidClientResponseMessage()
-                   });
-
-                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                        .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
-                                                        .WithHttpManager(httpManager)
-                                                        .WithExtraQueryParameters(TestConstants.ExtraQueryParametersNoAffectOnCacheKeys)
-                                                        .BuildConcrete();
-
-                MsalServiceException result = await AssertException.TaskThrowsAsync<MsalServiceException>(
-                    async () => await app.AcquireTokenByIntegratedWindowsAuth(TestConstants.s_scope)
-                                                        .WithClaims(TestConstants.Claims)
-                                                        .WithUsername(TestConstants.s_user.Username)
-                                                        .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
-
-                // Check inner exception
-                Assert.AreEqual(MsalError.InvalidClient, result.ErrorCode);
-
-                // There should be no cached entries.
-                Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
-            }
         }
 
         [TestMethod]
@@ -552,9 +269,9 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 AddMockHandlerDefaultUserRealmDiscovery(httpManager);
                 AddMockHandlerMex(httpManager);
 
-                // Mex does not return integrated auth endpoint (../13/windowstransport)
+                // The username/password endpoint returns an error.
                 httpManager.AddMockHandlerContentNotFound(HttpMethod.Post,
-                    "https://msft.sts.microsoft.com/adfs/services/trust/13/windowstransport");
+                    "https://msft.sts.microsoft.com/adfs/services/trust/2005/usernamemixed");
 
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                         .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
@@ -625,9 +342,9 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 AddMockHandlerDefaultUserRealmDiscovery(httpManager);
                 AddMockHandlerMex(httpManager);
 
-                // Mex does not return integrated auth endpoint (.../13/windowstransport)
+                // The username/password endpoint returns an error.
                 httpManager.AddMockHandlerContentNotFound(HttpMethod.Post,
-                    "https://msft.sts.microsoft.com/adfs/services/trust/13/windowstransport");
+                    "https://msft.sts.microsoft.com/adfs/services/trust/2005/usernamemixed");
 
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                         .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)

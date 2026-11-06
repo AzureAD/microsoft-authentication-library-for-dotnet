@@ -113,7 +113,7 @@ namespace Microsoft.Identity.Client
         internal bool IsInstanceDiscoverySupported => AuthorityType == AuthorityType.Aad;
 
         /// <summary>
-        /// For IWA
+        /// Whether federated username/password requests can perform a WS-Trust exchange.
         /// </summary>
         internal bool IsWsTrustFlowSupported =>
             AuthorityType == AuthorityType.Aad ||

@@ -7,6 +7,12 @@ The MSAL library for .NET is part of the [Microsoft identity platform for develo
 | [Conceptual documentation](https://aka.ms/msalnet) | [Getting Started](https://learn.microsoft.com/entra/msal/dotnet/getting-started/choosing-msal-dotnet) | [Sample Code](https://aka.ms/aaddevsamplesv2) | [API Reference](https://learn.microsoft.com/dotnet/api/overview/) | [Support](README.md#community-help-and-support) | [Feedback](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues)
 | ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
 
+## MSAL.NET 5 development
+
+The `rel/v5` development line removes Integrated Windows Authentication (IWA).
+Windows desktop callers should migrate to [WAM for OS-account SSO](docs/msal-v5-iwa-migration.md).
+This is an unreleased v5 change; it does not change the 4.x development line or target frameworks.
+
 ## NuGet Package
 
 [![NuGet](https://img.shields.io/nuget/v/microsoft.identity.client.svg?style=flat-square&label=nuget&colorB=00b200)](https://www.nuget.org/packages/Microsoft.Identity.Client/)

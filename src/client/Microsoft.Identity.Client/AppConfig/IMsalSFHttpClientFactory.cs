@@ -16,7 +16,6 @@ namespace Microsoft.Identity.Client
     /// <remarks>
     /// Implementations must be thread safe. 
     /// Do not create a new HttpClient for each call to <see cref="GetHttpClient"/> - this leads to socket exhaustion.
-    /// If your app uses Integrated Windows Authentication, ensure <see cref="HttpClientHandler.UseDefaultCredentials"/> is set to true.
     /// </remarks>
     public interface IMsalSFHttpClientFactory : IMsalHttpClientFactory
     {

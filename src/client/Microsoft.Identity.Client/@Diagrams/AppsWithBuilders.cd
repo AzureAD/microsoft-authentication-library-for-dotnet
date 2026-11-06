@@ -28,7 +28,6 @@
     <Position X="0.5" Y="5" Width="10.25" />
     <Members>
       <Method Name="AcquireTokenAsync" Hidden="true" />
-      <Method Name="AcquireTokenByIntegratedWindowsAuthAsync" Hidden="true" />
       <Method Name="AcquireTokenByUsernamePasswordAsync" Hidden="true" />
       <Method Name="AcquireTokenWithDeviceCodeAsync" Hidden="true" />
       <Method Name="IByRefreshToken.AcquireTokenByRefreshTokenAsync" Hidden="true" />

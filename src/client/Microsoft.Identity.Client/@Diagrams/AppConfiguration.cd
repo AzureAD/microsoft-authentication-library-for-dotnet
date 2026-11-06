@@ -123,7 +123,6 @@
     <Position X="1" Y="3.75" Width="6.75" />
     <Members>
       <Method Name="AcquireTokenAsync" Hidden="true" />
-      <Method Name="AcquireTokenByIntegratedWindowsAuthAsync" Hidden="true" />
       <Method Name="AcquireTokenByUsernamePasswordAsync" Hidden="true" />
       <Method Name="AcquireTokenWithDeviceCodeAsync" Hidden="true" />
     </Members>
