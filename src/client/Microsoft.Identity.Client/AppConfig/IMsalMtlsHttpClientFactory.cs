@@ -19,7 +19,6 @@ namespace Microsoft.Identity.Client
     /// A different certificate object instance must receive a different HttpClient, even when its thumbprint
     /// is unchanged, because it may carry a newly acquired private-key handle.
     /// Do not cache mTLS HttpClient instances by certificate thumbprint alone.
-    /// If your application requires Integrated Windows Authentication, set <see cref="HttpClientHandler.UseDefaultCredentials"/> to true.
     /// This interface is designed to support mTLS scenarios.
     /// </remarks>
     public interface IMsalMtlsHttpClientFactory : IMsalHttpClientFactory

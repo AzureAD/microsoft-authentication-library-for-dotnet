@@ -95,7 +95,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
         /// ClientId
         /// Authority (env + tenant)
         /// Scopes
-        /// hash(RT) or UPN for IWA (not supported)
+        /// hash(RT)
         /// </summary>
         private static string GetRequestStrictThumbprint(
             IReadOnlyDictionary<string, string> bodyParams,

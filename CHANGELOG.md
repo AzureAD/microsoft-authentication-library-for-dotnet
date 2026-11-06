@@ -1,3 +1,10 @@
+MSAL.NET 5 (unreleased)
+=======================
+
+### Breaking Changes
+
+- Removed Integrated Windows Authentication (IWA): `AcquireTokenByIntegratedWindowsAuth` on `IPublicClientApplication` and `PublicClientApplication`, its parameter builder, and the IWA-specific error constants. Existing callers must migrate before rebuilding against v5; no compatibility stub is provided. Windows desktop applications can use WAM with `PublicClientApplication.OperatingSystemAccount` for OS-account SSO and fall back to broker-backed interactive authentication when needed. Federated username/password and broker-backed silent SSO remain available. See the [v5 IWA migration guide](docs/msal-v5-iwa-migration.md).
+
 4.91.1
 ======
 

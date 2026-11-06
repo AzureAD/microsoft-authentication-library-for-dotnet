@@ -171,32 +171,6 @@ namespace DesktopTestApp
             }
         }
 
-        private async void acquireTokenByWindowsIntegratedAuth_Click(object sender, EventArgs e)
-        {
-            using (new UIProgressScope(this))
-            {
-                ClearResultPageInfo();
-                string username = loginHintTextBox.Text; // Can be blank
-
-                try
-                {
-                    AuthenticationResult authenticationResult = await _publicClientHandler.PublicClientApplication
-                        .AcquireTokenByIntegratedWindowsAuth(SplitScopeString(scopes.Text))
-                        .WithUsername(username)
-                        .ExecuteAsync(CancellationToken.None)
-                        .ConfigureAwait(true);
-
-                    SetResultPageInfo(authenticationResult);
-                    RefreshUserList();
-
-                }
-                catch (Exception exc)
-                {
-                    CreateException(exc);
-                }
-            }
-        }
-
         private async void acquireTokenByUPButton_Click(object sender, EventArgs e)
         {
             try

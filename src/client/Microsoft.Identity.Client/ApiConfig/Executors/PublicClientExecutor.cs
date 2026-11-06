@@ -66,27 +66,6 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
 
         public async Task<AuthenticationResult> ExecuteAsync(
             AcquireTokenCommonParameters commonParameters,
-            AcquireTokenByIntegratedWindowsAuthParameters integratedWindowsAuthParameters,
-            CancellationToken cancellationToken)
-        {
-            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, commonParameters.MtlsCertificate, cancellationToken);
-
-            var requestParams = await _publicClientApplication.CreateRequestParametersAsync(
-                commonParameters,
-                requestContext,
-                _publicClientApplication.UserTokenCacheInternal,
-                cancellationToken).ConfigureAwait(false);
-
-            var handler = new IntegratedWindowsAuthRequest(
-                ServiceBundle,
-                requestParams,
-                integratedWindowsAuthParameters);
-
-            return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
-        }
-
-        public async Task<AuthenticationResult> ExecuteAsync(
-            AcquireTokenCommonParameters commonParameters,
             AcquireTokenByUsernamePasswordParameters usernamePasswordParameters,
             CancellationToken cancellationToken)
         {

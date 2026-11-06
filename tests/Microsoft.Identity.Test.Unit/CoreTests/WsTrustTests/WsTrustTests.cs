@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
                     });
 
                 var requestContext = new RequestContext(harness.ServiceBundle, Guid.NewGuid(), null);
-                var wsTrustRequest = endpoint.BuildTokenRequestMessageWindowsIntegratedAuth("urn:federation:SomeAudience");
+                var wsTrustRequest = endpoint.BuildTokenRequestMessageUsernamePassword("urn:federation:SomeAudience", "user", "password");
                 var wsTrustResponse = await harness.ServiceBundle.WsTrustWebRequestManager.GetWsTrustResponseAsync(endpoint, wsTrustRequest, requestContext)
                                                    .ConfigureAwait(false);
 
@@ -348,7 +348,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
                 var requestContext = new RequestContext(harness.ServiceBundle, Guid.NewGuid(), null);
                 try
                 {
-                    var message = endpoint.BuildTokenRequestMessageWindowsIntegratedAuth("urn:federation:SomeAudience");
+                    var message = endpoint.BuildTokenRequestMessageUsernamePassword("urn:federation:SomeAudience", "user", "password");
 
                     WsTrustResponse wstResponse =
                         await harness.ServiceBundle.WsTrustWebRequestManager.GetWsTrustResponseAsync(endpoint, message, requestContext).ConfigureAwait(false);
@@ -387,7 +387,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
                 var requestContext = new RequestContext(harness.ServiceBundle, Guid.NewGuid(), null);
                 try
                 {
-                    var message = endpoint.BuildTokenRequestMessageWindowsIntegratedAuth("urn:federation:SomeAudience");
+                    var message = endpoint.BuildTokenRequestMessageUsernamePassword("urn:federation:SomeAudience", "user", "password");
 
                     WsTrustResponse wstResponse =
                         await harness.ServiceBundle.WsTrustWebRequestManager.GetWsTrustResponseAsync(endpoint, message, requestContext).ConfigureAwait(false);
@@ -425,7 +425,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
 
                 var requestContext = new RequestContext(harness.ServiceBundle, Guid.NewGuid(), null);
 
-                var message = endpoint.BuildTokenRequestMessageWindowsIntegratedAuth("urn:federation:SomeAudience");
+                var message = endpoint.BuildTokenRequestMessageUsernamePassword("urn:federation:SomeAudience", "user", "password");
 
                 var ex = await AssertException.TaskThrowsAsync<MsalClientException>(() =>
                     harness.ServiceBundle.WsTrustWebRequestManager.GetWsTrustResponseAsync(endpoint, message, requestContext)).ConfigureAwait(false);

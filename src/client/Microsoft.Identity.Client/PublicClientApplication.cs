@@ -130,15 +130,6 @@ namespace Microsoft.Identity.Client
         }
 
         /// <inheritdoc/>
-        public AcquireTokenByIntegratedWindowsAuthParameterBuilder AcquireTokenByIntegratedWindowsAuth(
-            IEnumerable<string> scopes)
-        {
-            return AcquireTokenByIntegratedWindowsAuthParameterBuilder.Create(
-                ClientExecutorFactory.CreatePublicClientExecutor(this),
-                scopes);
-        }
-
-        /// <inheritdoc/>
         [Obsolete("This API has been deprecated, use a more secure flow. See https://aka.ms/msal-ropc-migration for migration guidance", false)]
         [EditorBrowsable(EditorBrowsableState.Never)] // deprecated, this API is no longer supported
         public AcquireTokenByUsernamePasswordParameterBuilder AcquireTokenByUsernamePassword(

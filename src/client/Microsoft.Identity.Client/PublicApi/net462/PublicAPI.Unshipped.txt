@@ -3,3 +3,10 @@ Microsoft.Identity.Client.ITokenCacheSnapshotProvider.CreateSnapshot() -> Micros
 Microsoft.Identity.Client.ITokenCacheSnapshotProvider.RestoreSnapshot(Microsoft.Identity.Client.TokenCacheSnapshot snapshot) -> void
 Microsoft.Identity.Client.TokenCacheSnapshot
 Microsoft.Identity.Client.TokenCacheSnapshot.SerializeMsalV3() -> byte[]
+*REMOVED*const Microsoft.Identity.Client.MsalError.IntegratedWindowsAuthenticationFailed = "integrated_windows_authentication_failed" -> string
+*REMOVED*const Microsoft.Identity.Client.MsalError.IntegratedWindowsAuthNotSupportedForManagedUser = "integrated_windows_auth_not_supported_managed_user" -> string
+*REMOVED*Microsoft.Identity.Client.AcquireTokenByIntegratedWindowsAuthParameterBuilder
+*REMOVED*Microsoft.Identity.Client.AcquireTokenByIntegratedWindowsAuthParameterBuilder.WithFederationMetadata(string federationMetadata) -> Microsoft.Identity.Client.AcquireTokenByIntegratedWindowsAuthParameterBuilder
+*REMOVED*Microsoft.Identity.Client.AcquireTokenByIntegratedWindowsAuthParameterBuilder.WithUsername(string username) -> Microsoft.Identity.Client.AcquireTokenByIntegratedWindowsAuthParameterBuilder
+*REMOVED*Microsoft.Identity.Client.IPublicClientApplication.AcquireTokenByIntegratedWindowsAuth(System.Collections.Generic.IEnumerable<string> scopes) -> Microsoft.Identity.Client.AcquireTokenByIntegratedWindowsAuthParameterBuilder
+*REMOVED*Microsoft.Identity.Client.PublicClientApplication.AcquireTokenByIntegratedWindowsAuth(System.Collections.Generic.IEnumerable<string> scopes) -> Microsoft.Identity.Client.AcquireTokenByIntegratedWindowsAuthParameterBuilder

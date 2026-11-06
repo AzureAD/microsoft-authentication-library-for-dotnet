@@ -171,20 +171,6 @@
       <FileName>ApiConfig\AcquireTokenWithDeviceCodeParameterBuilder.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Microsoft.Identity.Client.ApiConfig.AcquireTokenByIntegratedWindowsAuthParameterBuilder">
-    <Position X="15" Y="8" Width="4" />
-    <Members>
-      <Method Name="AcquireTokenByIntegratedWindowsAuthParameterBuilder" Hidden="true" />
-      <Method Name="CalculateApiEventId" Hidden="true" />
-      <Method Name="Create" Hidden="true" />
-      <Method Name="ExecuteAsync" Hidden="true" />
-      <Property Name="Parameters" Hidden="true" />
-    </Members>
-    <TypeIdentifier>
-      <HashCode>AAAAABAAAAAAAAAAAAAAAAAAAAAAAEAAAIAAIAAAAEA=</HashCode>
-      <FileName>ApiConfig\AcquireTokenByIntegratedWindowsAuthParameterBuilder.cs</FileName>
-    </TypeIdentifier>
-  </Class>
   <Class Name="Microsoft.Identity.Client.ApiConfig.AcquireTokenByUsernamePasswordParameterBuilder" Collapsed="true">
     <Position X="13.25" Y="7" Width="3.5" />
     <TypeIdentifier>

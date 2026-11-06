@@ -18,7 +18,7 @@ using System.Text.Json;
 namespace Microsoft.Identity.Client.Internal.Requests
 {
     /// <summary>
-    ///     Handles requests that are non-interactive. Currently MSAL supports Integrated Windows Auth.
+    ///     Handles non-interactive username/password requests, including federated WS-Trust authentication.
     /// </summary>
     internal class UsernamePasswordRequest : RequestBase
     {
@@ -124,7 +124,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 var wsTrustResponse = await _commonNonInteractiveHandler.PerformWsTrustMexExchangeAsync(
                                           userRealmResponse.FederationMetadataUrl,
                                           userRealmResponse.CloudAudienceUrn,
-                                          UserAuthType.UsernamePassword,
                                           _usernamePasswordParameters.Username,
                                           _usernamePasswordParameters.Password,
                                           _usernamePasswordParameters.FederationMetadata).ConfigureAwait(false);
