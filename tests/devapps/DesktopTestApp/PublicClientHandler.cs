@@ -3,10 +3,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Utils;
 
 namespace DesktopTestApp
 {
@@ -52,7 +54,7 @@ namespace DesktopTestApp
                     .AcquireTokenInteractive(scopes)
                     .WithAccount(CurrentUser)
                     .WithPrompt(uiBehavior)
-                    .WithExtraQueryParameters(extraQueryParams)
+                    .WithExtraQueryParameters(ParseExtraQueryParameters(extraQueryParams))
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
             }
@@ -62,7 +64,7 @@ namespace DesktopTestApp
                     .AcquireTokenInteractive(scopes)
                     .WithLoginHint(LoginHint)
                     .WithPrompt(uiBehavior)
-                    .WithExtraQueryParameters(extraQueryParams)
+                    .WithExtraQueryParameters(ParseExtraQueryParameters(extraQueryParams))
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
             }
@@ -87,7 +89,7 @@ namespace DesktopTestApp
                     .AcquireTokenInteractive(scopes)
                     .WithAccount(CurrentUser)
                     .WithPrompt(uiBehavior)
-                    .WithExtraQueryParameters(extraQueryParams)
+                    .WithExtraQueryParameters(ParseExtraQueryParameters(extraQueryParams))
                     .WithTenantIdFromAuthority(new Uri(AuthorityOverride))
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
@@ -98,7 +100,7 @@ namespace DesktopTestApp
                     .AcquireTokenInteractive(scopes)
                     .WithLoginHint(LoginHint)
                     .WithPrompt(uiBehavior)
-                    .WithExtraQueryParameters(extraQueryParams)
+                    .WithExtraQueryParameters(ParseExtraQueryParameters(extraQueryParams))
                     .WithTenantIdFromAuthority(new Uri(AuthorityOverride))
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
@@ -138,7 +140,7 @@ namespace DesktopTestApp
                    .AcquireTokenInteractive(scopes)
                    .WithAccount(CurrentUser)
                    .WithPrompt(uiBehavior)
-                   .WithExtraQueryParameters(extraQueryParams)
+                   .WithExtraQueryParameters(ParseExtraQueryParameters(extraQueryParams))
                    .WithB2CAuthority(b2cAuthority)
                    .ExecuteAsync(CancellationToken.None)
                    .ConfigureAwait(false);
@@ -146,6 +148,12 @@ namespace DesktopTestApp
 
             CurrentUser = result.Account;
             return result;
+        }
+
+        private static IDictionary<string, (string Value, bool IncludeInCacheKey)> ParseExtraQueryParameters(string parameters)
+        {
+            return CoreHelpers.ParseKeyValueList(parameters, '&', true, null)
+                .ToDictionary(pair => pair.Key, pair => (pair.Value, false));
         }
 
         public void CreateOrUpdatePublicClientApp(string interactiveAuthority, string applicationId)

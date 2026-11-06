@@ -134,7 +134,7 @@ namespace NetFx
                             .Create(s_clientIdForPublicApp)
                             .WithAuthority(GetAuthority())
 #if NET47
-                    .WithDesktopFeatures()
+                    .WithWindowsDesktopFeatures(new BrokerOptions(BrokerOptions.OperatingSystems.Windows))
 #endif
                             .WithLogging(Log, LogLevel.Verbose, true);
 

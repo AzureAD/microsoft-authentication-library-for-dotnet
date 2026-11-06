@@ -3,3 +3,133 @@ Microsoft.Identity.Client.ITokenCacheSnapshotProvider.CreateSnapshot() -> Micros
 Microsoft.Identity.Client.ITokenCacheSnapshotProvider.RestoreSnapshot(Microsoft.Identity.Client.TokenCacheSnapshot snapshot) -> void
 Microsoft.Identity.Client.TokenCacheSnapshot
 Microsoft.Identity.Client.TokenCacheSnapshot.SerializeMsalV3() -> byte[]
+*REMOVED*Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T>.WithAdfsAuthority(string authorityUri, bool validateAuthority = true) -> T
+*REMOVED*Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T>.WithAuthority(Microsoft.Identity.Client.AadAuthorityAudience authorityAudience, bool validateAuthority = true) -> T
+*REMOVED*Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T>.WithAuthority(Microsoft.Identity.Client.AzureCloudInstance azureCloudInstance, Microsoft.Identity.Client.AadAuthorityAudience authorityAudience, bool validateAuthority = true) -> T
+*REMOVED*Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T>.WithAuthority(Microsoft.Identity.Client.AzureCloudInstance azureCloudInstance, System.Guid tenantId, bool validateAuthority = true) -> T
+*REMOVED*Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T>.WithAuthority(Microsoft.Identity.Client.AzureCloudInstance azureCloudInstance, string tenant, bool validateAuthority = true) -> T
+*REMOVED*Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T>.WithAuthority(string authorityUri, bool validateAuthority = true) -> T
+*REMOVED*Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T>.WithAuthority(string cloudInstanceUri, System.Guid tenantId, bool validateAuthority = true) -> T
+*REMOVED*Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T>.WithAuthority(string cloudInstanceUri, string tenant, bool validateAuthority = true) -> T
+*REMOVED*Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T>.WithExtraQueryParameters(string extraQueryParameters) -> T
+*REMOVED*Microsoft.Identity.Client.AbstractApplicationBuilder<T>.WithExtraQueryParameters(System.Collections.Generic.IDictionary<string, string> extraQueryParameters) -> T
+*REMOVED*Microsoft.Identity.Client.AbstractApplicationBuilder<T>.WithExtraQueryParameters(string extraQueryParameters) -> T
+*REMOVED*Microsoft.Identity.Client.AbstractApplicationBuilder<T>.WithInstanceDicoveryMetadata(System.Uri instanceDiscoveryUri) -> T
+*REMOVED*Microsoft.Identity.Client.AbstractApplicationBuilder<T>.WithInstanceDicoveryMetadata(string instanceDiscoveryJson) -> T
+*REMOVED*Microsoft.Identity.Client.AbstractApplicationBuilder<T>.WithTelemetry(Microsoft.Identity.Client.ITelemetryConfig telemetryConfig) -> T
+*REMOVED*Microsoft.Identity.Client.AbstractConfidentialClientAcquireTokenParameterBuilder<T>.WithProofOfPossession(Microsoft.Identity.Client.AppConfig.PoPAuthenticationConfiguration popAuthenticationConfiguration) -> T
+*REMOVED*Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder.WithAzureRegion(bool useAzureRegion) -> Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder
+*REMOVED*Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder.WithPreferredAzureRegion(bool useAzureRegion = true, string regionUsedIfAutoDetectFails = "", bool fallbackToGlobal = true) -> Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder
+*REMOVED*Microsoft.Identity.Client.Advanced.AcquireTokenParameterBuilderExtensions
+*REMOVED*Microsoft.Identity.Client.ApplicationOptions.KerberosServicePrincipalName.get -> string
+*REMOVED*Microsoft.Identity.Client.ApplicationOptions.KerberosServicePrincipalName.set -> void
+*REMOVED*Microsoft.Identity.Client.ApplicationOptions.TicketContainer.get -> Microsoft.Identity.Client.Kerberos.KerberosTicketContainer
+*REMOVED*Microsoft.Identity.Client.ApplicationOptions.TicketContainer.set -> void
+*REMOVED*Microsoft.Identity.Client.AuthenticationResult.ExtendedExpiresOn.get -> System.DateTimeOffset
+*REMOVED*Microsoft.Identity.Client.AuthenticationResult.IsExtendedLifeTimeToken.get -> bool
+*REMOVED*Microsoft.Identity.Client.BaseAbstractAcquireTokenParameterBuilder<T>.WithExtraQueryParameters(System.Collections.Generic.Dictionary<string, string> extraQueryParameters) -> T
+*REMOVED*Microsoft.Identity.Client.Cache.CacheData
+*REMOVED*Microsoft.Identity.Client.Cache.CacheData.AdalV3State.get -> byte[]
+*REMOVED*Microsoft.Identity.Client.Cache.CacheData.AdalV3State.set -> void
+*REMOVED*Microsoft.Identity.Client.Cache.CacheData.CacheData() -> void
+*REMOVED*Microsoft.Identity.Client.Cache.CacheData.UnifiedState.get -> byte[]
+*REMOVED*Microsoft.Identity.Client.Cache.CacheData.UnifiedState.set -> void
+*REMOVED*Microsoft.Identity.Client.ConfidentialClientApplicationBuilder.WithClientAssertion(string signedClientAssertion) -> Microsoft.Identity.Client.ConfidentialClientApplicationBuilder
+*REMOVED*Microsoft.Identity.Client.ConfidentialClientApplicationBuilder.WithClientClaims(System.Security.Cryptography.X509Certificates.X509Certificate2 certificate, System.Collections.Generic.IDictionary<string, string> claimsToSign, bool mergeWithDefaultClaims = true, bool sendX5C = false) -> Microsoft.Identity.Client.ConfidentialClientApplicationBuilder
+*REMOVED*Microsoft.Identity.Client.ConfidentialClientApplicationBuilder.WithClientClaims(System.Security.Cryptography.X509Certificates.X509Certificate2 certificate, System.Collections.Generic.IDictionary<string, string> claimsToSign, bool mergeWithDefaultClaims) -> Microsoft.Identity.Client.ConfidentialClientApplicationBuilder
+*REMOVED*Microsoft.Identity.Client.ConfidentialClientApplicationBuilder.WithGenericAuthority(string authorityUri) -> Microsoft.Identity.Client.ConfidentialClientApplicationBuilder
+*REMOVED*Microsoft.Identity.Client.ConfidentialClientApplicationBuilder.WithTelemetryClient(params Microsoft.IdentityModel.Abstractions.ITelemetryClient[] telemetryClients) -> Microsoft.Identity.Client.ConfidentialClientApplicationBuilder
+*REMOVED*Microsoft.Identity.Client.EmbeddedWebViewOptions.WebView2BrowserExecutableFolder.get -> string
+*REMOVED*Microsoft.Identity.Client.EmbeddedWebViewOptions.WebView2BrowserExecutableFolder.set -> void
+*REMOVED*Microsoft.Identity.Client.IAppConfig.TelemetryConfig.get -> Microsoft.Identity.Client.ITelemetryConfig
+*REMOVED*Microsoft.Identity.Client.IConfidentialClientApplication.AcquireTokenSilent(System.Collections.Generic.IEnumerable<string> scopes, string loginHint) -> Microsoft.Identity.Client.AcquireTokenSilentParameterBuilder
+*REMOVED*Microsoft.Identity.Client.IConfidentialClientApplication.GetAccountsAsync() -> System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<Microsoft.Identity.Client.IAccount>>
+*REMOVED*Microsoft.Identity.Client.ITelemetryConfig
+*REMOVED*Microsoft.Identity.Client.ITelemetryConfig.AudienceType.get -> Microsoft.Identity.Client.TelemetryAudienceType
+*REMOVED*Microsoft.Identity.Client.ITelemetryConfig.DispatchAction.get -> System.Action<Microsoft.Identity.Client.ITelemetryEventPayload>
+*REMOVED*Microsoft.Identity.Client.ITelemetryConfig.SessionId.get -> string
+*REMOVED*Microsoft.Identity.Client.ITelemetryEventPayload
+*REMOVED*Microsoft.Identity.Client.ITelemetryEventPayload.BoolValues.get -> System.Collections.Generic.IReadOnlyDictionary<string, bool>
+*REMOVED*Microsoft.Identity.Client.ITelemetryEventPayload.Int64Values.get -> System.Collections.Generic.IReadOnlyDictionary<string, long>
+*REMOVED*Microsoft.Identity.Client.ITelemetryEventPayload.IntValues.get -> System.Collections.Generic.IReadOnlyDictionary<string, int>
+*REMOVED*Microsoft.Identity.Client.ITelemetryEventPayload.Name.get -> string
+*REMOVED*Microsoft.Identity.Client.ITelemetryEventPayload.StringValues.get -> System.Collections.Generic.IReadOnlyDictionary<string, string>
+*REMOVED*Microsoft.Identity.Client.ITelemetryEventPayload.ToJsonString() -> string
+*REMOVED*Microsoft.Identity.Client.ITokenCacheSerializer.DeserializeMsalV2(byte[] msalV2State) -> void
+*REMOVED*Microsoft.Identity.Client.ITokenCacheSerializer.SerializeMsalV2() -> byte[]
+*REMOVED*Microsoft.Identity.Client.Kerberos.KerberosKeyTypes
+*REMOVED*Microsoft.Identity.Client.Kerberos.KerberosKeyTypes.Aes128CtsHmacSha196 = 17 -> Microsoft.Identity.Client.Kerberos.KerberosKeyTypes
+*REMOVED*Microsoft.Identity.Client.Kerberos.KerberosKeyTypes.Aes256CtsHmacSha196 = 18 -> Microsoft.Identity.Client.Kerberos.KerberosKeyTypes
+*REMOVED*Microsoft.Identity.Client.Kerberos.KerberosKeyTypes.DecCbcCrc = 1 -> Microsoft.Identity.Client.Kerberos.KerberosKeyTypes
+*REMOVED*Microsoft.Identity.Client.Kerberos.KerberosKeyTypes.DesCbcMd5 = 3 -> Microsoft.Identity.Client.Kerberos.KerberosKeyTypes
+*REMOVED*Microsoft.Identity.Client.Kerberos.KerberosKeyTypes.None = 0 -> Microsoft.Identity.Client.Kerberos.KerberosKeyTypes
+*REMOVED*Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicket
+*REMOVED*Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicket.ClientKey.get -> string
+*REMOVED*Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicket.ClientKey.set -> void
+*REMOVED*Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicket.ClientName.get -> string
+*REMOVED*Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicket.ClientName.set -> void
+*REMOVED*Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicket.ErrorMessage.get -> string
+*REMOVED*Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicket.ErrorMessage.set -> void
+*REMOVED*Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicket.KerberosMessageBuffer.get -> string
+*REMOVED*Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicket.KerberosMessageBuffer.set -> void
+*REMOVED*Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicket.KerberosSupplementalTicket() -> void
+*REMOVED*Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicket.KerberosSupplementalTicket(string errorMessage) -> void
+*REMOVED*Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicket.KeyType.get -> Microsoft.Identity.Client.Kerberos.KerberosKeyTypes
+*REMOVED*Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicket.KeyType.set -> void
+*REMOVED*Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicket.Realm.get -> string
+*REMOVED*Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicket.Realm.set -> void
+*REMOVED*Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicket.ServicePrincipalName.get -> string
+*REMOVED*Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicket.ServicePrincipalName.set -> void
+*REMOVED*Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicketManager
+*REMOVED*Microsoft.Identity.Client.Kerberos.KerberosTicketContainer
+*REMOVED*Microsoft.Identity.Client.Kerberos.KerberosTicketContainer.AccessToken = 1 -> Microsoft.Identity.Client.Kerberos.KerberosTicketContainer
+*REMOVED*Microsoft.Identity.Client.Kerberos.KerberosTicketContainer.IdToken = 0 -> Microsoft.Identity.Client.Kerberos.KerberosTicketContainer
+*REMOVED*Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource.DefaultToImds = 6 -> Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource
+*REMOVED*Microsoft.Identity.Client.ManagedIdentityApplicationBuilder.WithTelemetryClient(params Microsoft.IdentityModel.Abstractions.ITelemetryClient[] telemetryClients) -> Microsoft.Identity.Client.ManagedIdentityApplicationBuilder
+*REMOVED*Microsoft.Identity.Client.MsalManagedIdentityException
+*REMOVED*Microsoft.Identity.Client.MsalManagedIdentityException.ManagedIdentitySource.get -> Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource
+*REMOVED*Microsoft.Identity.Client.MsalManagedIdentityException.MsalManagedIdentityException(string errorCode, string errorMessage, Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource source) -> void
+*REMOVED*Microsoft.Identity.Client.MsalManagedIdentityException.MsalManagedIdentityException(string errorCode, string errorMessage, Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource source, int statusCode) -> void
+*REMOVED*Microsoft.Identity.Client.MsalManagedIdentityException.MsalManagedIdentityException(string errorCode, string errorMessage, System.Exception innerException, Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource source) -> void
+*REMOVED*Microsoft.Identity.Client.MsalManagedIdentityException.MsalManagedIdentityException(string errorCode, string errorMessage, System.Exception innerException, Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource source, int statusCode) -> void
+*REMOVED*Microsoft.Identity.Client.PublicClientApplication.IsBrokerAvailable() -> bool
+*REMOVED*Microsoft.Identity.Client.PublicClientApplicationBuilder.IsBrokerAvailable() -> bool
+*REMOVED*Microsoft.Identity.Client.PublicClientApplicationBuilder.WithKerberosTicketClaim(string servicePrincipalName, Microsoft.Identity.Client.Kerberos.KerberosTicketContainer ticketContainer) -> Microsoft.Identity.Client.PublicClientApplicationBuilder
+*REMOVED*Microsoft.Identity.Client.Region.RegionOutcome.UserProvidedAutodetectionFailed = 2 -> Microsoft.Identity.Client.Region.RegionOutcome
+*REMOVED*Microsoft.Identity.Client.Region.RegionOutcome.UserProvidedInvalid = 3 -> Microsoft.Identity.Client.Region.RegionOutcome
+*REMOVED*Microsoft.Identity.Client.Region.RegionOutcome.UserProvidedValid = 1 -> Microsoft.Identity.Client.Region.RegionOutcome
+*REMOVED*Microsoft.Identity.Client.TelemetryAudienceType
+*REMOVED*Microsoft.Identity.Client.TelemetryAudienceType.PreProduction = 0 -> Microsoft.Identity.Client.TelemetryAudienceType
+*REMOVED*Microsoft.Identity.Client.TelemetryAudienceType.Production = 1 -> Microsoft.Identity.Client.TelemetryAudienceType
+*REMOVED*Microsoft.Identity.Client.TokenCache.TokenCache() -> void
+*REMOVED*Microsoft.Identity.Client.TraceTelemetryConfig
+*REMOVED*Microsoft.Identity.Client.TraceTelemetryConfig.AllowedScopes.get -> System.Collections.Generic.IEnumerable<string>
+*REMOVED*Microsoft.Identity.Client.TraceTelemetryConfig.AudienceType.get -> Microsoft.Identity.Client.TelemetryAudienceType
+*REMOVED*Microsoft.Identity.Client.TraceTelemetryConfig.DispatchAction.get -> System.Action<Microsoft.Identity.Client.ITelemetryEventPayload>
+*REMOVED*Microsoft.Identity.Client.TraceTelemetryConfig.SessionId.get -> string
+*REMOVED*Microsoft.Identity.Client.TraceTelemetryConfig.TraceTelemetryConfig() -> void
+*REMOVED*Microsoft.Identity.Client.WwwAuthenticateParameters.Resource.get -> string
+*REMOVED*Microsoft.Identity.Client.WwwAuthenticateParameters.Resource.set -> void
+*REMOVED*Microsoft.Identity.Client.WwwAuthenticateParameters.Scopes.get -> System.Collections.Generic.IEnumerable<string>
+*REMOVED*Microsoft.Identity.Client.WwwAuthenticateParameters.Scopes.set -> void
+*REMOVED*const Microsoft.Identity.Client.MsalError.MtlsBearerWithoutRegion = "mtls_bearer_without_region" -> string
+*REMOVED*const Microsoft.Identity.Client.MsalError.MtlsPopWithoutRegion = "mtls_pop_without_region" -> string
+*REMOVED*const Microsoft.Identity.Client.MsalError.NetworkNotAvailableError = "network_not_available" -> string
+*REMOVED*const Microsoft.Identity.Client.MsalError.RegionRequiredForMtlsPop = "region_required_for_mtls_pop" -> string
+*REMOVED*const Microsoft.Identity.Client.MsalError.TokenCacheNullError = "token_cache_null" -> string
+*REMOVED*override Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicket.ToString() -> string
+*REMOVED*override Microsoft.Identity.Client.MsalManagedIdentityException.UpdateIsRetryable() -> void
+*REMOVED*static Microsoft.Identity.Client.Advanced.AcquireTokenParameterBuilderExtensions.WithExtraHttpHeaders<T>(this Microsoft.Identity.Client.AbstractAcquireTokenParameterBuilder<T> builder, System.Collections.Generic.IDictionary<string, string> extraHttpHeaders) -> T
+*REMOVED*static Microsoft.Identity.Client.Extensibility.AcquireTokenForClientBuilderExtensions.WithExtraBodyParameters(this Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder builder, System.Collections.Generic.Dictionary<string, System.Func<System.Threading.CancellationToken, System.Threading.Tasks.Task<string>>> extrabodyparams) -> Microsoft.Identity.Client.AcquireTokenForClientParameterBuilder
+*REMOVED*static Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicketManager.FromIdToken(string idToken) -> Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicket
+*REMOVED*static Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicketManager.GetKerberosTicketFromWindowsTicketCache(string servicePrincipalName) -> byte[]
+*REMOVED*static Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicketManager.GetKerberosTicketFromWindowsTicketCache(string servicePrincipalName, long logonId) -> byte[]
+*REMOVED*static Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicketManager.GetKrbCred(Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicket ticket) -> byte[]
+*REMOVED*static Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicketManager.SaveToWindowsTicketCache(Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicket ticket) -> void
+*REMOVED*static Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicketManager.SaveToWindowsTicketCache(Microsoft.Identity.Client.Kerberos.KerberosSupplementalTicket ticket, long logonId) -> void
+*REMOVED*static Microsoft.Identity.Client.ManagedIdentityApplication.GetManagedIdentitySource() -> Microsoft.Identity.Client.ManagedIdentity.ManagedIdentitySource
+*REMOVED*static Microsoft.Identity.Client.WwwAuthenticateParameters.CreateFromResourceResponseAsync(System.Net.Http.HttpClient httpClient, string resourceUri, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Microsoft.Identity.Client.WwwAuthenticateParameters>
+*REMOVED*static Microsoft.Identity.Client.WwwAuthenticateParameters.CreateFromResourceResponseAsync(string resourceUri) -> System.Threading.Tasks.Task<Microsoft.Identity.Client.WwwAuthenticateParameters>
+*REMOVED*static Microsoft.Identity.Client.WwwAuthenticateParameters.CreateFromResourceResponseAsync(string resourceUri, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Microsoft.Identity.Client.WwwAuthenticateParameters>
+*REMOVED*static Microsoft.Identity.Client.WwwAuthenticateParameters.CreateFromResponseHeaders(System.Net.Http.Headers.HttpResponseHeaders httpResponseHeaders, string scheme = "Bearer") -> Microsoft.Identity.Client.WwwAuthenticateParameters
+*REMOVED*static Microsoft.Identity.Client.WwwAuthenticateParameters.CreateFromWwwAuthenticateHeaderValue(string wwwAuthenticateValue) -> Microsoft.Identity.Client.WwwAuthenticateParameters

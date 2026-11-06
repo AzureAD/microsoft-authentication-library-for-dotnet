@@ -16,9 +16,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         public DynamicCertificateClientCredential(
             Func<AssertionRequestOptions, Task<X509Certificate2>> certificateProvider) 
             : base(
-                certificateProvider: certificateProvider, 
-                claimsToSign: null, 
-                appendDefaultClaims: true) 
+                certificateProvider: certificateProvider)
         { 
         }
     }

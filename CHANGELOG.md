@@ -1,3 +1,10 @@
+Unreleased v5
+=============
+
+### Breaking changes
+
+- Removed deprecated and explicitly soft-retired APIs across Core, Broker, Desktop/WinUI3, and Extensions.Msal. See the [complete signature inventory and migration table](docs/v5-deprecated-api-migration.md), including MSAL v2 cache migration, managed-identity capabilities, generic extension rebinding, and retained mobile broker APIs. IWA and ROPC retirement are separate changes and are not included here.
+
 4.91.1
 ======
 

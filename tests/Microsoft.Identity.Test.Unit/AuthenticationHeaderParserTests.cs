@@ -25,7 +25,6 @@ namespace Microsoft.Identity.Test.Unit
         [DataRow("parser")]
         [DataRow("multiScheme")]
         [DataRow("singleScheme")]
-        [DataRow("legacy")]
         public async Task DefaultResourceProbesRemainAnonymousAsync(string api)
         {
             foreach (string challenge in new[] { "NTLM", "Negotiate" })
@@ -47,7 +46,7 @@ namespace Microsoft.Identity.Test.Unit
             using var client = new HttpClient(new HttpClientHandler { UseDefaultCredentials = false });
 
             // Act / Assert
-            foreach (string api in new[] { "parser", "multiScheme", "singleScheme", "legacy" })
+            foreach (string api in new[] { "parser", "multiScheme", "singleScheme" })
             {
                 await AssertProbeAsync(api, challenge, redirectMode: 2, client, expectAuthorization: false)
                     .ConfigureAwait(false);
@@ -58,7 +57,6 @@ namespace Microsoft.Identity.Test.Unit
         [DataRow("parser")]
         [DataRow("multiScheme")]
         [DataRow("singleScheme")]
-        [DataRow("legacy")]
         public async Task CustomClientRetainsExplicitAuthenticationAsync(string api)
         {
             // Arrange
@@ -188,15 +186,7 @@ namespace Microsoft.Identity.Test.Unit
                         : await WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(
                             resourceUri, scheme, httpClient, cancellationToken).ConfigureAwait(false);
                     return new[] { single.AuthenticationScheme };
-                case "legacy":
-#pragma warning disable CS0618 // Verify the obsolete probe uses the same anonymous defaults.
-                    WwwAuthenticateParameters legacy = httpClient is null
-                        ? await WwwAuthenticateParameters.CreateFromResourceResponseAsync(resourceUri, cancellationToken)
-                            .ConfigureAwait(false)
-                        : await WwwAuthenticateParameters.CreateFromResourceResponseAsync(
-                            httpClient, resourceUri, cancellationToken).ConfigureAwait(false);
-#pragma warning restore CS0618
-                    return new[] { legacy.AuthenticationScheme };
+
                 default:
                     throw new ArgumentOutOfRangeException(nameof(api));
             }

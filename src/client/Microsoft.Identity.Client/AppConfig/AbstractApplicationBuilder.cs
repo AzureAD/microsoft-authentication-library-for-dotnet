@@ -36,45 +36,6 @@ namespace Microsoft.Identity.Client
         /// For more details see https://aka.ms/msal-net-custom-instance-metadata
         /// </summary>
         /// <remarks>
-        /// Developers take responsibility for authority validation if they use this method. Should not be used when the authority is not know in advance. 
-        /// Has no effect on ADFS or B2C authorities, only for AAD authorities</remarks>
-        /// <param name="instanceDiscoveryJson"></param>
-        /// <returns></returns>
-        [Obsolete("This method name has a typo, please use WithInstanceDiscoveryMetadata instead", false)]
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public T WithInstanceDicoveryMetadata(string instanceDiscoveryJson)
-        {
-            if (string.IsNullOrEmpty(instanceDiscoveryJson))
-            {
-                throw new ArgumentNullException(instanceDiscoveryJson);
-            }
-
-            try
-            {
-                InstanceDiscoveryResponse instanceDiscovery = JsonHelper.DeserializeFromJson<InstanceDiscoveryResponse>(instanceDiscoveryJson);
-                Config.CustomInstanceDiscoveryMetadata = instanceDiscovery;
-                return this as T;
-            }
-            catch (JsonException ex)
-            {
-                throw new MsalClientException(
-                    MsalError.InvalidUserInstanceMetadata,
-                    MsalErrorMessage.InvalidUserInstanceMetadata,
-                    ex);
-            }
-        }
-
-        /// <summary>
-        /// Allows developers to configure their own valid authorities. A json string similar to https://aka.ms/aad-instance-discovery should be provided.
-        /// MSAL uses this information to: 
-        /// <list type="bullet">
-        /// <item><description>Call REST APIs on the environment specified in the preferred_network</description></item>
-        /// <item><description>Identify an environment under which to save tokens and accounts in the cache</description></item>
-        /// <item><description>Use the environment aliases to match tokens issued to other authorities</description></item>
-        /// </list>
-        /// For more details see https://aka.ms/msal-net-custom-instance-metadata
-        /// </summary>
-        /// <remarks>
         /// Developers take responsibility for authority validation if they use this method. Should not be used when the authority is not known in advance. 
         /// Has no effect on ADFS or B2C authorities, only for AAD authorities</remarks>
         /// <param name="instanceDiscoveryJson"></param>
@@ -99,31 +60,6 @@ namespace Microsoft.Identity.Client
                     MsalErrorMessage.InvalidUserInstanceMetadata,
                     ex);
             }
-        }
-
-        /// <summary>
-        /// Lets an organization setup their own service to handle instance discovery, which enables better caching for microservice/service environments.
-        /// A Uri that returns a response similar to https://aka.ms/aad-instance-discovery should be provided. MSAL uses this information to: 
-        /// <list type="bullet">
-        /// <item><description>Call REST APIs on the environment specified in the preferred_network</description></item>
-        /// <item><description>Identify an environment under which to save tokens and accounts in the cache</description></item>
-        /// <item><description>Use the environment aliases to match tokens issued to other authorities</description></item>
-        /// </list>
-        /// For more details see https://aka.ms/msal-net-custom-instance-metadata
-        /// </summary>
-        /// <remarks>
-        /// Developers take responsibility for authority validation if they use this method. Should not be used when the authority is not know in advance. 
-        /// Has no effect on ADFS or B2C authorities, only for AAD authorities</remarks>
-        /// <param name="instanceDiscoveryUri"></param>
-        /// <returns></returns>
-        [Obsolete("This method name has a typo, please use WithInstanceDiscoveryMetadata instead", false)]
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public T WithInstanceDicoveryMetadata(Uri instanceDiscoveryUri)
-        {
-            Config.CustomInstanceDiscoveryMetadataUri = instanceDiscoveryUri ??
-                throw new ArgumentNullException(nameof(instanceDiscoveryUri));
-
-            return this as T;
         }
 
         /// <summary>
@@ -295,36 +231,6 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Sets Extra Query Parameters for the query string in the HTTP authentication request
-        /// </summary>
-        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority
-        /// as a string of segments of the form <c>key=value</c> separated by an ampersand character.
-        /// The parameter can be null.</param>
-        /// <returns>The builder to chain the .With methods</returns>
-        [Obsolete("This method is deprecated. Please use the WithExtraQueryParameters(IDictionary<string, (string value, bool includeInCacheKey)>) method instead, which provides control over which parameters are included in the cache key.", false)]
-        public T WithExtraQueryParameters(IDictionary<string, string> extraQueryParameters)
-        {
-            return WithExtraQueryParameters(CoreHelpers.ConvertToTupleParameters(extraQueryParameters));
-        }
-
-        /// <summary>
-        /// Sets Extra Query Parameters for the query string in the HTTP authentication request
-        /// </summary>
-        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority.
-        /// The string needs to be properly URL-encoded and ready to send as a string of segments of the form <c>key=value</c> separated by an ampersand character.
-        /// </param>
-        /// <returns></returns>
-        [Obsolete("This method is deprecated. Please use the WithExtraQueryParameters(IDictionary<string, (string value, bool includeInCacheKey)>) method instead, which provides control over which parameters are included in the cache key.", false)]
-        public T WithExtraQueryParameters(string extraQueryParameters)
-        {
-            if (!string.IsNullOrWhiteSpace(extraQueryParameters))
-            {
-                return WithExtraQueryParameters(CoreHelpers.ParseKeyValueList(extraQueryParameters, '&', true, null));
-            }
-            return this as T;
-        }
-
-        /// <summary>
         /// Sets Extra Query Parameters for the query string in the HTTP authentication request with control over which parameters are included in the cache key
         /// </summary>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority, and merged with those added to the request-level WithExtraQueryParameters API.
@@ -395,18 +301,6 @@ namespace Microsoft.Identity.Client
         {
             Config.IsInstanceDiscoveryEnabled = enableInstanceDiscovery;
 
-            return this as T;
-        }
-       
-        /// <summary>
-        /// Generate telemetry aggregation events.
-        /// </summary>
-        /// <param name="telemetryConfig"></param>
-        /// <returns></returns>
-        [Obsolete("Telemetry is sent automatically by MSAL.NET. See https://aka.ms/msal-net-telemetry.", false)]
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public T WithTelemetry(ITelemetryConfig telemetryConfig)
-        {
             return this as T;
         }
 

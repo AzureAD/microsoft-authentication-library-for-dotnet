@@ -1221,23 +1221,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         public static void CheckBuilderCommonMethods<T>(AbstractAcquireTokenParameterBuilder<T> builder) where T : AbstractAcquireTokenParameterBuilder<T>
         {
-#pragma warning disable CS0618 // Type or member is obsolete
-            builder.WithAuthority(AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount, true)
-                .WithAuthority(AzureCloudInstance.AzureChina, AadAuthorityAudience.AzureAdMultipleOrgs, true)
-                .WithAuthority(AzureCloudInstance.AzurePublic, Guid.NewGuid(), true)
-                .WithAuthority(AzureCloudInstance.AzureChina, Guid.NewGuid().ToString("D", CultureInfo.InvariantCulture), true)
-                .WithAuthority(TestConstants.AuthorityCommonTenant, Guid.NewGuid(), true)
-                .WithAuthority(TestConstants.AuthorityCommonTenant, Guid.NewGuid().ToString("D", CultureInfo.InvariantCulture), true)
-                .WithAuthority(TestConstants.AuthorityGuestTenant, true)
-                .WithAdfsAuthority(TestConstants.AuthorityGuestTenant, true)
-                .WithB2CAuthority(TestConstants.B2CAuthority)
+            builder.WithB2CAuthority(TestConstants.B2CAuthority)
                 .WithTenantId(TestConstants.TenantId)
                 .WithExtraQueryParameters(
-                    new Dictionary<string, string>
+                    new Dictionary<string, (string Value, bool IncludeInCacheKey)>
                     {
-                        {"key1", "value1"}
+                        {"key1", ("value1", false)}
                     });
-#pragma warning restore CS0618 // Type or member is obsolete
         }
 
         private Task<IEnumerable<IAccount>> PopulateB2CTokenCacheAsync(string userFlow, PublicClientApplication app)
