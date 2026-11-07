@@ -182,6 +182,14 @@ namespace Microsoft.Identity.Client.OAuth2
                 _oAuth2Client.AddBodyParameter(OAuth2Parameter.FmiPath, _requestParams.FmiPathSuffix);
             }
 
+            if (_requestParams.ExtraBodyParametersSync != null)
+            {
+                foreach (var parameter in _requestParams.ExtraBodyParametersSync)
+                {
+                    _oAuth2Client.AddBodyParameter(parameter);
+                }
+            }
+
             _oAuth2Client.AddHeader(
                 TelemetryConstants.XClientCurrentTelemetry,
                 _serviceBundle.HttpTelemetryManager.GetCurrentRequestHeader(

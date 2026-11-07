@@ -1,0 +1,1 @@
+static Microsoft.Identity.Client.Extensibility.AbstractConfidentialClientAcquireTokenParameterBuilderExtension.WithExtraBodyParameters<T>(this Microsoft.Identity.Client.AbstractConfidentialClientAcquireTokenParameterBuilder<T> builder, System.Collections.Generic.Dictionary<string, string> extraBodyParams) -> T
