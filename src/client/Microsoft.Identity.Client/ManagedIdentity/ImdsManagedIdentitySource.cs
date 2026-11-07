@@ -263,16 +263,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             switch (imdsVersion)
             {
                 case ImdsVersion.V2:
-#if NET462
-                    requestContext.Logger.Info("[Managed Identity] IMDSv2 flow is not supported on .NET Framework 4.6.2. Cryptographic operations required for managed identity authentication are unavailable on this platform. Skipping IMDSv2 probe.");
-                    return (false, "IMDSv2 is not supported on .NET Framework 4.6.2");
-#else
                     apiVersionQueryParam = ImdsV2ManagedIdentitySource.ApiVersionQueryParam;
                     imdsApiVersion = ImdsV2ManagedIdentitySource.ImdsV2ApiVersion;
                     imdsEndpoint = ImdsV2ManagedIdentitySource.CsrMetadataPath;
                     imdsStringHelper = "IMDSv2";
                     break;
-#endif
                 case ImdsVersion.V1:
                     apiVersionQueryParam = ApiVersionQueryParam;
                     imdsApiVersion = ImdsApiVersion;

@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Test.Unit.Helpers
         {
             RSA rsa = null;
 
-#if NET462 || NET472
+#if NET472
             // .NET Framework runs only on Windows, so RSACng (Windows-only) is always available
             rsa = new RSACng();
 #else

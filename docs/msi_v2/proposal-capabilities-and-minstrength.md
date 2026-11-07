@@ -79,7 +79,7 @@ The public source enum drops the separate `ImdsV2 = 8` value; detection reports 
 - **Safe for AKS-on-IMDS:** those nodes are Linux with no TVM/CVM profile, so `IsMtlsPopSupportedByHost` comes back `false`. Azure SDK also checks for AKS via `FEDERATED_TOKEN_FILE` before it ever calls MSAL's MI path — a second safety net.
 - **Future bearer-over-IMDSv2:** today bearer is served by v1 and v2 is only used for PoP, so there's no current bearer-over-v2 path. The shape doesn't block it later — `Bearer` is the floor of the strength range and v1/v2 routing is internal, so it can be wired up without an API change.
 
-### 3. `WithMtlsProofOfPossession(PoPOptions)` — floor assertion
+### 3. `WithMtlsProofOfPossession(PoPOptions)` — floor assertion.
 
 ```csharp
 namespace Microsoft.Identity.Client.AppConfig
@@ -123,7 +123,6 @@ public class AcquireTokenForClientParameterBuilder
 | KeyGuard available | `Software` | Uses KeyGuard (host max, never downgrades). |
 | Software only | `KeyGuard` | **Throws `MsalClientException` at AcquireToken.** |
 | Software only | `Software` | Uses software. ✅ |
-| .NET 4.6.2 | any non-`Bearer` | **Throws.** |
 | any | `Bearer` (default) | No floor; same as parameterless `WithMtlsProofOfPossession()`. |
 
 - `PoPOptions.MinStrength` is a **floor assertion**, never a downgrade dial.
@@ -200,7 +199,7 @@ Feature is internal-only (Azure SDK private chain). No external migration story 
 - [ ] `PoPOptions` class added in `Microsoft.Identity.Client.AppConfig` with `MinStrength` property (default `Bearer`).
 - [ ] `WithMtlsProofOfPossession(PoPOptions)` overload added on `AcquireTokenForManagedIdentityParameterBuilder` and `AcquireTokenForClientParameterBuilder`.
 - [ ] `MsalError.MinStrengthNotMet` thrown when host can't meet floor; error message names host actual strength + required floor.
-- [ ] Tests cover: AKS/Linux host → `IsMtlsPopSupportedByHost = false`; Windows TVM/CVM → KeyGuard tier; KeyGuard host passes floor; software host fails floor; .NET 4.6.2 fails floor; default `Bearer` floor behaves identically to parameterless overload; ConfClient parity.
+- [ ] Tests cover: AKS/Linux host → `IsMtlsPopSupportedByHost = false`; Windows TVM/CVM → KeyGuard tier; KeyGuard host passes floor; software host fails floor; default `Bearer` floor behaves identically to parameterless overload; ConfClient parity.
 
 ## Resolved
 
