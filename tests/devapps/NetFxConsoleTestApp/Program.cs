@@ -66,7 +66,6 @@ namespace NetFx
         private static readonly string s_secretForPoPValidationRequest =
             Environment.GetEnvironmentVariable("POP_VALIDATIONAPI_SECRET");
 
-        private static readonly string s_username = ""; // used for WIA and U/P, cannot be empty on .net core
         private static readonly IEnumerable<string> s_scopes = new[] { "api://51eb3dd6-d8b5-46f3-991d-b1d4870de7de/myaccess", };
 
         private const string GraphAPIEndpoint = "https://graph.microsoft.com/v1.0/me";
@@ -196,7 +195,6 @@ namespace NetFx
 
                 // display menu
                 Console.WriteLine(@$"
-                        1. IWA
                         2. Acquire Token with Username and Password
                         3. Acquire Token with Device Code
                         4. Acquire Token Interactive                         
@@ -222,18 +220,6 @@ namespace NetFx
                 {
                     switch (selection)
                     {
-                        case '1': // acquire token
-#pragma warning disable CS0618 // Type or member is obsolete
-                            var iwaBuilder =
-                                pca.AcquireTokenByIntegratedWindowsAuth(s_scopes)
-#pragma warning restore CS0618 // Type or member is obsolete
-                                .WithUsername(s_username);
-
-                            var result = await iwaBuilder.ExecuteAsync().ConfigureAwait(false);
-
-                            await CallApiAsync(pca, result).ConfigureAwait(false);
-
-                            break;
                         case '2': // acquire token u/p
                             Console.WriteLine("Enter username:");
                             string username = Console.ReadLine();
@@ -241,7 +227,7 @@ namespace NetFx
 #pragma warning disable CS0618 // Type or member is obsolete
                             var upBuilder = pca.AcquireTokenByUsernamePassword(s_scopes, username, password);
 #pragma warning restore CS0618
-                            result = await upBuilder.ExecuteAsync().ConfigureAwait(false);
+                            var result = await upBuilder.ExecuteAsync().ConfigureAwait(false);
 
                             await CallApiAsync(pca, result).ConfigureAwait(false);
 

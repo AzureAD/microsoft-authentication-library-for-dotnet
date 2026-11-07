@@ -76,32 +76,6 @@ namespace Microsoft.Identity.Client
             Func<DeviceCodeResult, Task> deviceCodeResultCallback);
 
         /// <summary>
-        /// <para>
-        /// This API is no longer recommended. If your application requires single sign-on (SSO) with the Windows OS's default account, 
-        /// please transition to using WAM, which provides similar functionality 
-        /// via <see href="https://aka.ms/msal-net-wam">the Windows broker (WAM)</see>.
-        /// WAM does not require any setup for desktop apps to login with the Windows account.
-        /// </para>
-        /// <para>
-        /// Acquires a token non-interactively for the signed-in user in Windows
-        /// via Integrated Windows Authentication.
-        /// The account used in this overrides is pulled from the operating system as the current user principal name.
-        /// This method does not look in the token cache, but stores the result in it. Before calling this method, use other methods 
-        /// such as <see cref="IClientApplicationBase.AcquireTokenSilent(IEnumerable{string}, IAccount)"/> to check the token cache.
-        /// </para>
-        /// </summary>
-        /// <param name="scopes">Scopes requested to access a protected API.</param>
-        /// <returns>A builder enabling you to add optional parameters before executing the token request.</returns>
-        /// <remarks>
-        /// See <see href="https://aka.ms/msal-net-iwa">our documentation</see> for more details.
-        /// </remarks>
-
-        [Obsolete("This API is no longer recommended. For scenarios requiring SSO with the Windows OS's default account, please transition to using WAM.", false)]
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        AcquireTokenByIntegratedWindowsAuthParameterBuilder AcquireTokenByIntegratedWindowsAuth(
-            IEnumerable<string> scopes);
-
-        /// <summary>
         /// Non-interactive request to acquire a token via username and password authentication.
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>

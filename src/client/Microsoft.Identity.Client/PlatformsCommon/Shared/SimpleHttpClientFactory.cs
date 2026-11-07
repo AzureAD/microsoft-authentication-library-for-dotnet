@@ -43,7 +43,6 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
             var httpClient = new HttpClient(new HttpClientHandler()
             {
-                /* important for IWA */
                 UseDefaultCredentials = useDefaultCredentials,
                 AllowAutoRedirect = allowAutoRedirect
             });

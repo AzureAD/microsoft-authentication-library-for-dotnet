@@ -351,11 +351,6 @@ namespace Microsoft.Identity.Client
         public const string ParsingWsTrustResponseFailed = "parsing_wstrust_response_failed";
 
         /// <summary>
-        /// This can occur if there is an configuration issue in the ADFS environment where this is authenticating. See https://aka.ms/msal-net-iwa-troubleshooting for more details
-        /// </summary>
-        public const string IntegratedWindowsAuthenticationFailed = "integrated_windows_authentication_failed";
-
-        /// <summary>
         /// <para>What happens</para>
         /// You can get this error when using <see cref="IPublicClientApplication.AcquireTokenByUsernamePassword(System.Collections.Generic.IEnumerable{string}, string, string)"/>
         /// The user is not recognized as a managed user, or a federated user. Azure AD was not
@@ -394,15 +389,14 @@ namespace Microsoft.Identity.Client
         /// you called <see cref="IPublicClientApplication.AcquireTokenByUsernamePassword(System.Collections.Generic.IEnumerable{string}, string, string)"/>
         /// but you used an authority ending with '/common' or '/consumers' as this requires a tenanted authority or '/organizations'.
         /// <para>Mitigation</para>
-        /// Adjust the authority to the AcquireTokenXX method you use (don't use 'common' or 'consumers' with <see cref="IPublicClientApplication.AcquireTokenByUsernamePassword(System.Collections.Generic.IEnumerable{string}, string, string)"/>
-        /// <see cref="IPublicClientApplication.AcquireTokenByIntegratedWindowsAuth(System.Collections.Generic.IEnumerable{string})"/>
+        /// Adjust the authority to the AcquireTokenXX method you use (don't use 'common' or 'consumers' with <see cref="IPublicClientApplication.AcquireTokenByUsernamePassword(System.Collections.Generic.IEnumerable{string}, string, string)"/>).
         /// </summary>
         public const string InvalidRequest = "invalid_request";
 
         /// <summary>
         /// Cannot access the user from the OS (UWP)
         /// <para>What happens</para>
-        /// You called <see cref="IPublicClientApplication.AcquireTokenByIntegratedWindowsAuth(System.Collections.Generic.IEnumerable{string})"/>, but the domain user
+        /// During username/password authentication, the domain user
         /// name could not be found.
         ///<para>Mitigation</para>
         /// This might be because you need to add more capabilities to your UWP application in the Package.appxmanifest.
@@ -413,7 +407,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Cannot get the user from the OS (UWP)
         /// <para>What happens</para>
-        /// You called <see cref="IPublicClientApplication.AcquireTokenByIntegratedWindowsAuth(System.Collections.Generic.IEnumerable{string})"/>, but the domain user
+        /// During username/password authentication, the domain user
         /// name could not be found.
         ///<para>Mitigation</para>
         /// This might be because you need to add more capabilities to your UWP application in the Package.appxmanifest.
@@ -434,11 +428,6 @@ namespace Microsoft.Identity.Client
         /// None. Inform the user that they took too long to sign-in at the provided URL and enter the provided code.
         /// </summary>
         public const string CodeExpired = "code_expired";
-
-        /// <summary>
-        /// Integrated Windows Auth is only supported for "federated" users
-        /// </summary>
-        public const string IntegratedWindowsAuthNotSupportedForManagedUser = "integrated_windows_auth_not_supported_managed_user";
 
         /// <summary>
         /// On Android, you need to call <c>AcquireTokenInteractiveParameterBuilder.WithParentActivityOrWindow(object)</c> passing
@@ -530,8 +519,8 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Cannot Access User Information or the user is not a user domain.
         /// <para>What happens?</para>
-        /// You tried to use <see cref="IPublicClientApplication.AcquireTokenByIntegratedWindowsAuth(System.Collections.Generic.IEnumerable{string})"/>
-        /// but the user is not a domain user (the machine is not domain or AAD joined)
+        /// During username/password authentication, the user could not be read from the OS
+        /// because the machine is not domain or AAD joined.
         /// </summary>
         public const string CannotAccessUserInformationOrUserNotDomainJoined = "user_information_access_failed";
 

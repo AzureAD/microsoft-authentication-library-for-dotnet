@@ -67,7 +67,7 @@ namespace Microsoft.Identity.Client.WsTrust
         }
 
         public async Task<WsTrustResponse> PerformWsTrustMexExchangeAsync(
-            string federationMetadataUrl, string cloudAudienceUrn, UserAuthType userAuthType, string username, string password, string federationMetadataFilename)
+            string federationMetadataUrl, string cloudAudienceUrn, string username, string password, string federationMetadataFilename)
         {
             MexDocument mexDocument;
 
@@ -86,9 +86,7 @@ namespace Microsoft.Identity.Client.WsTrust
                     ex);
             }
 
-            WsTrustEndpoint wsTrustEndpoint = userAuthType == UserAuthType.IntegratedAuth
-                ? mexDocument.GetWsTrustWindowsTransportEndpoint()
-                : mexDocument.GetWsTrustUsernamePasswordEndpoint();
+            WsTrustEndpoint wsTrustEndpoint = mexDocument.GetWsTrustUsernamePasswordEndpoint();
 
             if (wsTrustEndpoint == null)
             {
@@ -102,7 +100,6 @@ namespace Microsoft.Identity.Client.WsTrust
                 () => "Fetched and parsed MEX. ");
 
             WsTrustResponse wsTrustResponse = await GetWsTrustResponseAsync(
-                userAuthType,
                 cloudAudienceUrn,
                 wsTrustEndpoint,
                 username,
@@ -114,18 +111,15 @@ namespace Microsoft.Identity.Client.WsTrust
         }
 
         internal async Task<WsTrustResponse> GetWsTrustResponseAsync(
-            UserAuthType userAuthType,
             string cloudAudienceUrn,
             WsTrustEndpoint endpoint,
             string username,
             string password)
         {
-            string wsTrustRequestMessage = userAuthType == UserAuthType.IntegratedAuth
-                ? endpoint.BuildTokenRequestMessageWindowsIntegratedAuth(cloudAudienceUrn)
-                : endpoint.BuildTokenRequestMessageUsernamePassword(
-                    cloudAudienceUrn,
-                    username,
-                    password);
+            string wsTrustRequestMessage = endpoint.BuildTokenRequestMessageUsernamePassword(
+                cloudAudienceUrn,
+                username,
+                password);
 
             try
             {

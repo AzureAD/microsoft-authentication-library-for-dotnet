@@ -1163,12 +1163,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 #endif
             CheckBuilderCommonMethods(interactiveBuilder);
 
-#pragma warning disable CS0618 // Type or member is obsolete
-            var iwaBuilder = app.AcquireTokenByIntegratedWindowsAuth(TestConstants.s_scope)
-#pragma warning restore CS0618 // Type or member is obsolete
-               .WithUsername("upn@live.com");
-            CheckBuilderCommonMethods(iwaBuilder);
-
             #pragma warning disable CS0618 // Type or member is obsolete
             var usernamePasswordBuilder = app.AcquireTokenByUsernamePassword(TestConstants.s_scope, "upn@live.com", "");
             CheckBuilderCommonMethods(usernamePasswordBuilder);
@@ -1189,6 +1183,20 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             var byRefreshTokenBuilder = ((IByRefreshToken)app).AcquireTokenByRefreshToken(TestConstants.s_scope, "refreshtoken")
                                   .WithRefreshToken("refreshtoken");
             CheckBuilderCommonMethods(byRefreshTokenBuilder);
+        }
+
+        [TestMethod]
+        public void IntegratedWindowsAuthenticationApiIsRemoved()
+        {
+            // Arrange
+            var assembly = typeof(PublicClientApplication).Assembly;
+
+            // Act / Assert
+            Assert.IsNull(typeof(IPublicClientApplication).GetMethod("AcquireTokenByIntegratedWindowsAuth"));
+            Assert.IsNull(typeof(PublicClientApplication).GetMethod("AcquireTokenByIntegratedWindowsAuth"));
+            Assert.IsNull(assembly.GetType("Microsoft.Identity.Client.AcquireTokenByIntegratedWindowsAuthParameterBuilder"));
+            Assert.IsNull(assembly.GetType("Microsoft.Identity.Client.ApiConfig.Parameters.AcquireTokenByIntegratedWindowsAuthParameters"));
+            Assert.IsNull(assembly.GetType("Microsoft.Identity.Client.Internal.Requests.IntegratedWindowsAuthRequest"));
         }
 
         [TestMethod]

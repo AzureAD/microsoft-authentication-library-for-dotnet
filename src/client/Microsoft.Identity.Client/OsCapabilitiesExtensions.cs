@@ -53,7 +53,6 @@ namespace Microsoft.Identity.Client
         /// Returns false when the program runs in headless OS, for example when SSH-ed into a Linux machine.
         /// Browsers (webviews) and brokers cannot be used if there is no UI support. 
         /// Instead, please use <see cref="PublicClientApplication.AcquireTokenWithDeviceCode(IEnumerable{string}, Func{DeviceCodeResult, Task})"/>
-        /// or <see cref="PublicClientApplication.AcquireTokenByIntegratedWindowsAuth(IEnumerable{string})"/>
         /// </summary>
         public static bool IsUserInteractive(this IPublicClientApplication publicClientApplication)
         {

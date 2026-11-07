@@ -31,7 +31,7 @@ namespace NetCoreTestApp
         // This app will be dynamically set to the multi-tenant app from lab
         private static readonly string s_clientIdForPublicApp = LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).Result.AppId;
 
-        private static readonly string s_username = ""; // used for WIA and U/P, cannot be empty on .net core
+        private static readonly string s_username = ""; // used for U/P, cannot be empty on .net core
 
         // Confidential client app with access to https://graph.microsoft.com/.default
         private static string s_clientIdForConfidentialApp;
@@ -42,7 +42,7 @@ namespace NetCoreTestApp
         private static string s_ccaAuthority;
 
         private static readonly IEnumerable<string> s_scopes = new[] {
-            "user.read", "openid" }; // used for WIA and U/P, can be empty
+            "user.read", "openid" };
 
         private const string GraphAPIEndpoint = "https://graph.microsoft.com/v1.0/me";
 
@@ -145,7 +145,6 @@ namespace NetCoreTestApp
 
                 // display menu
                 Console.WriteLine(@"
-                        1. IWA
                         2. Acquire Token with Username and Password
                         3. Acquire Token with Device Code
                         4. Acquire Token Interactive (via CustomWebUI)
@@ -170,14 +169,6 @@ namespace NetCoreTestApp
                 {
                     switch (selection)
                     {
-                        case 1: // acquire token
-#pragma warning disable CS0618 // Type or member is obsolete
-                            authTask = pca.AcquireTokenByIntegratedWindowsAuth(s_scopes).WithUsername(s_username).ExecuteAsync(CancellationToken.None);
-#pragma warning restore CS0618 // Type or member is obsolete
-                            await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
-
-                            break;
-
                         case 2: // acquire token u/p
                             string password = GetPasswordFromConsole();
 #pragma warning disable CS0618 // Type or member is obsolete

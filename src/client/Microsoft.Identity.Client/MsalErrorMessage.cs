@@ -136,16 +136,12 @@ namespace Microsoft.Identity.Client
         public const string SpecifyAnyUser =
             "If you do not need access token for any specific user, pass userId=UserIdentifier.AnyUser instead of userId=null. ";
 
-        public const string IntegratedAuthFailed =
-            "Integrated authentication failed. You may try an alternative authentication method. ";
-
         public const string DuplicateQueryParameterTemplate = "Duplicate query parameter '{0}' in extraQueryParameters. ";
         public const string DeviceCertificateNotFoundTemplate = "Device Certificate was not found for {0}. ";
         public const string MsalUiRequiredMessage =
             "No account or login hint was passed to the AcquireTokenSilent call. ";
 
         public const string UserMismatchSaveToken = "Returned user identifier does not match the sent user identifier when saving the token to the cache. ";
-        public const string IwaNotSupportedForManagedUser = "Integrated Windows Auth is not supported for managed users. See https://aka.ms/msal-net-iwa for details. ";
         public const string ActivityRequired = "On the Android platform, you have to pass the Activity to the UIParent object. See https://aka.ms/msal-interactive-android for details. ";
         public const string BrokerResponseReturnedError = "Broker response returned an error which does not contain an error or error description. See https://aka.ms/msal-brokers for details. ";
         public const string BrokerResponseError = "Broker response returned error: ";
@@ -162,7 +158,7 @@ namespace Microsoft.Identity.Client
         public const string NoAccountForLoginHint = "You are trying to acquire a token silently using a login hint. No account was found in the token cache having this login hint. ";
         public const string MultipleAccountsForLoginHint = "You are trying to acquire a token silently using a login hint. Multiple accounts were found in the token cache having this login hint. Please choose an account manually an pass it in to AcquireTokenSilently. ";
 
-        public const string UnknownUser = "Could not identify the user logged into the OS. See http://aka.ms/msal-net-iwa for details. ";
+        public const string UnknownUser = "Could not identify the user logged into the OS. Pass an explicit username for username/password authentication. See https://aka.ms/msal-net-ropc for details. ";
 
         public const string HttpRequestUnsuccessful = "Response status code does not indicate success: {0} ({1}). ";
 
@@ -218,7 +214,7 @@ namespace Microsoft.Identity.Client
 
         public const string UnknownUserType = "Unknown User Type";
         public const string ParsingWsTrustResponseFailedDueToConfiguration = "There was an error parsing the WS-Trust response from the endpoint. " +
-            "\nThis may occur if there are issues with your ADFS configuration. See https://aka.ms/msal-net-iwa-troubleshooting for more details." +
+            "\nThis may occur if there are issues with your ADFS configuration. See https://aka.ms/msal-net-ropc for more details." +
             "\nEnable logging to see more details. See https://aka.ms/msal-net-logging.";
 
         public const string InternalErrorCacheEmptyUsername =
@@ -300,7 +296,7 @@ namespace Microsoft.Identity.Client
 
         public const string InteractiveAuthNotSupported =
                 "On .Net Core, interactive authentication is not supported. " +
-                "Consider using Device Code Flow https://aka.ms/msal-net-device-code-flow or Integrated Windows Auth https://aka.ms/msal-net-iwa " +
+                "Consider using Device Code Flow https://aka.ms/msal-net-device-code-flow " +
                 "- you can also implement your own web UI - see https://aka.ms/msal-net-custom-web-ui. ";
 
         public const string CustomWebUiAuthorizationCodeFailed = "CustomWebUi AcquireAuthorizationCode failed. ";

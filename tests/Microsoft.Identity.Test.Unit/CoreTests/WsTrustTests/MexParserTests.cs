@@ -3,10 +3,12 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Xml;
+using System.Xml.Linq;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.WsTrust;
@@ -33,16 +35,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
 
             // Act
             var mexDocument = new MexDocument(responseBody);
-            var wsTrustEndpoint = mexDocument.GetWsTrustWindowsTransportEndpoint();
-
-            // Assert
-            Assert.AreEqual(
-                "https://sts.usystech.net/adfs/services/trust/2005/windowstransport",
-                wsTrustEndpoint.Uri.AbsoluteUri);
-            Assert.AreEqual(WsTrustVersion.WsTrust2005, wsTrustEndpoint.Version);
-
-            // Act
-            wsTrustEndpoint = mexDocument.GetWsTrustUsernamePasswordEndpoint();
+            var wsTrustEndpoint = mexDocument.GetWsTrustUsernamePasswordEndpoint();
 
             // Assert
             Assert.AreEqual("https://sts.usystech.net/adfs/services/trust/2005/usernamemixed", wsTrustEndpoint.Uri.AbsoluteUri);
@@ -60,20 +53,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
                     "http://msft.sts.microsoft.com/adfs/services/trust/2005/usernamemixed")
                 .Replace(
                     "https://msft.sts.microsoft.com/adfs/services/trust/13/usernamemixed",
-                    "http://msft.sts.microsoft.com/adfs/services/trust/13/usernamemixed")
-                .Replace(
-                    "https://msft.sts.microsoft.com/adfs/services/trust/2005/windowstransport",
-                    "http://msft.sts.microsoft.com/adfs/services/trust/2005/windowstransport")
-                .Replace(
-                    "https://msft.sts.microsoft.com/adfs/services/trust/13/windowstransport",
-                    "http://msft.sts.microsoft.com/adfs/services/trust/13/windowstransport");
+                    "http://msft.sts.microsoft.com/adfs/services/trust/13/usernamemixed");
 
             // Act
             var mexDocument = new MexDocument(responseBody);
 
             // Assert
             Assert.IsNull(mexDocument.GetWsTrustUsernamePasswordEndpoint());
-            Assert.IsNull(mexDocument.GetWsTrustWindowsTransportEndpoint());
         }
 
         [TestMethod]
@@ -84,25 +70,35 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
             string responseBody = File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("TestMex.xml"))
                 .Replace(
                     "https://msft.sts.microsoft.com/adfs/services/trust/13/usernamemixed",
-                    "http://msft.sts.microsoft.com/adfs/services/trust/13/usernamemixed")
-                .Replace(
-                    "https://msft.sts.microsoft.com/adfs/services/trust/13/windowstransport",
-                    "http://msft.sts.microsoft.com/adfs/services/trust/13/windowstransport");
+                    "http://msft.sts.microsoft.com/adfs/services/trust/13/usernamemixed");
 
             // Act
             var mexDocument = new MexDocument(responseBody);
             WsTrustEndpoint usernamePasswordEndpoint = mexDocument.GetWsTrustUsernamePasswordEndpoint();
-            WsTrustEndpoint windowsTransportEndpoint = mexDocument.GetWsTrustWindowsTransportEndpoint();
 
             // Assert
             Assert.AreEqual(
                 "https://msft.sts.microsoft.com/adfs/services/trust/2005/usernamemixed",
                 usernamePasswordEndpoint.Uri.AbsoluteUri);
             Assert.AreEqual(WsTrustVersion.WsTrust2005, usernamePasswordEndpoint.Version);
-            Assert.AreEqual(
-                "https://msft.sts.microsoft.com/adfs/services/trust/2005/windowstransport",
-                windowsTransportEndpoint.Uri.AbsoluteUri);
-            Assert.AreEqual(WsTrustVersion.WsTrust2005, windowsTransportEndpoint.Version);
+        }
+
+        [TestMethod]
+        public void UsernamePasswordPolicyIgnoresNegotiateAuthentication()
+        {
+            // Arrange
+            var document = XDocument.Parse(File.ReadAllText(
+                ResourceHelper.GetTestResourceRelativePath("TestMex2005.xml")));
+            XElement usernamePolicy = document.Descendants(XmlNamespace.Sp2005 + "WssUsernameToken10")
+                .First().Ancestors(XmlNamespace.Wsp + "All").First();
+            usernamePolicy.Add(new XElement(XmlNamespace.Http + "NegotiateAuthentication"));
+
+            // Act
+            var endpoint = new MexDocument(document.ToString()).GetWsTrustUsernamePasswordEndpoint();
+
+            // Assert
+            Assert.AreEqual("https://sts.usystech.net/adfs/services/trust/2005/usernamemixed", endpoint.Uri.AbsoluteUri);
+            Assert.AreEqual(WsTrustVersion.WsTrust2005, endpoint.Version);
         }
 
         [TestMethod]

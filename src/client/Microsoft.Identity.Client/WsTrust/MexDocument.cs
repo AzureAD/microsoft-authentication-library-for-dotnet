@@ -15,12 +15,6 @@ namespace Microsoft.Identity.Client.WsTrust
         WsTrust2005
     }
 
-    internal enum UserAuthType
-    {
-        IntegratedAuth,
-        UsernamePassword
-    }
-
     internal class MexDocument
     {
         private const string WsTrustSoapTransport = "http://schemas.xmlsoap.org/soap/http";
@@ -31,7 +25,6 @@ namespace Microsoft.Identity.Client.WsTrust
         {
             public WsTrustVersion Version { get; set; }
             public string Id { get; set; }
-            public UserAuthType AuthType { get; set; }
             public Uri Url { get; set; }
         }
 
@@ -45,17 +38,7 @@ namespace Microsoft.Identity.Client.WsTrust
 
         public WsTrustEndpoint GetWsTrustUsernamePasswordEndpoint()
         {
-            return GetWsTrustEndpoint(UserAuthType.UsernamePassword);
-        }
-
-        public WsTrustEndpoint GetWsTrustWindowsTransportEndpoint()
-        {
-            return GetWsTrustEndpoint(UserAuthType.IntegratedAuth);
-        }
-
-        private WsTrustEndpoint GetWsTrustEndpoint(UserAuthType userAuthType)
-        {
-            MexPolicy policy = SelectPolicy(userAuthType);
+            MexPolicy policy = SelectPolicy();
             if (policy == null)
             {
                 return null;
@@ -64,15 +47,15 @@ namespace Microsoft.Identity.Client.WsTrust
             return new WsTrustEndpoint(policy.Url, policy.Version);
         }
 
-        private MexPolicy SelectPolicy(UserAuthType userAuthType)
+        private MexPolicy SelectPolicy()
         {
             //try ws-trust 1.3 first
             return _policies
                        .Values
-                       .FirstOrDefault(p => p.Url != null && p.AuthType == userAuthType && p.Version == WsTrustVersion.WsTrust13) ??
+                       .FirstOrDefault(p => p.Url != null && p.Version == WsTrustVersion.WsTrust13) ??
                    _policies
                        .Values
-                       .FirstOrDefault(p => p.Url != null && p.AuthType == userAuthType);
+                       .FirstOrDefault(p => p.Url != null);
         }
 
         private void ReadPolicies(XContainer mexDocument)
@@ -91,13 +74,7 @@ namespace Microsoft.Identity.Client.WsTrust
                 foreach (XElement element in all)
                 {
                     XNamespace securityPolicy = XmlNamespace.Sp;
-                    XElement auth = element.Elements(XmlNamespace.Http + "NegotiateAuthentication").FirstOrDefault();
-                    if (auth != null)
-                    {
-                        AddPolicy(policy, UserAuthType.IntegratedAuth);
-                    }
-
-                    auth = element.Elements(securityPolicy + "SignedEncryptedSupportingTokens").FirstOrDefault();
+                    XElement auth = element.Elements(securityPolicy + "SignedEncryptedSupportingTokens").FirstOrDefault();
                     if (auth == null && ((auth = element.Elements(XmlNamespace.Sp2005 + "SignedSupportingTokens").FirstOrDefault()) ==
                                          null))
                     {
@@ -126,7 +103,7 @@ namespace Microsoft.Identity.Client.WsTrust
                     XElement wssUsernameToken10 = wspPolicy2.Elements(securityPolicy + "WssUsernameToken10").FirstOrDefault();
                     if (wssUsernameToken10 != null)
                     {
-                        AddPolicy(policy, UserAuthType.UsernamePassword);
+                        AddPolicy(policy);
                     }
                 }
             }
@@ -257,7 +234,7 @@ namespace Microsoft.Identity.Client.WsTrust
             return xmlElements;
         }
 
-        private void AddPolicy(XElement policy, UserAuthType policyAuthType)
+        private void AddPolicy(XElement policy)
         {
             XElement binding = policy.Descendants(XmlNamespace.Sp + "TransportBinding").FirstOrDefault()
                             ?? policy.Descendants(XmlNamespace.Sp2005 + "TransportBinding").FirstOrDefault();
@@ -267,7 +244,7 @@ namespace Microsoft.Identity.Client.WsTrust
                 XAttribute id = policy.Attribute(XmlNamespace.Wsu + "Id");
                 if (id != null)
                 {
-                    _policies.Add("#" + id.Value, new MexPolicy { Id = id.Value, AuthType = policyAuthType });
+                    _policies.Add("#" + id.Value, new MexPolicy { Id = id.Value });
                 }
             }
         }

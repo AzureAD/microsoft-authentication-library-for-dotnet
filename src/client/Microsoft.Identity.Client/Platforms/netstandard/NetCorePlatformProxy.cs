@@ -68,8 +68,8 @@ namespace Microsoft.Identity.Client.Platforms.netstandard
 
             throw new PlatformNotSupportedException(
                 "MSAL cannot determine the username (UPN) of the currently logged in user." +
-                "For Integrated Windows Authentication and Username/Password flows, please use .WithUsername() before calling ExecuteAsync(). " +
-                "For more details see https://aka.ms/msal-net-iwa");
+                "For the Username/Password flow, pass an explicit username to AcquireTokenByUsernamePassword. " +
+                "For more details see https://aka.ms/msal-net-ropc");
         }
 
         protected override string InternalGetProcessorArchitecture()

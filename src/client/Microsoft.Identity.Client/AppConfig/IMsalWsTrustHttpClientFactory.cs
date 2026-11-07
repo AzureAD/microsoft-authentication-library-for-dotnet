@@ -25,8 +25,8 @@ namespace Microsoft.Identity.Client
         /// MSAL validates and follows redirects itself.
         /// </summary>
         /// <param name="useDefaultCredentials">
-        /// Whether to use the current user's default credentials for server authentication on platforms that
-        /// support Integrated Windows Authentication. When false, the client must not supply server
+        /// Whether to use the current user's default credentials for server authentication where supported.
+        /// When false, the client must not supply server
         /// authentication credentials, including credentials configured by the application.
         /// This does not disable authentication to a configured proxy.
         /// </param>
