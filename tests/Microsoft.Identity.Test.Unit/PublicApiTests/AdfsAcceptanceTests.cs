@@ -33,40 +33,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             await RunAuthCodeFlowAsync(authority, useWithAdfsAuthority: false).ConfigureAwait(false);
         }
-
-        [TestMethod]
-        public async Task AcquireTokenByUsernamePasswordAsync()
-        {
-            Uri authorityUri = new Uri("https://localhost:3001/adfs");
-            using (var httpManager = new MockHttpManager())
-            {
-                var builder = PublicClientApplicationBuilder
-                    .Create(TestConstants.ClientId)
-                    .WithAuthority(authorityUri)
-                    .WithHttpManager(httpManager)
-                    .WithInstanceDiscovery(false)
-                    .WithRedirectUri(TestConstants.RedirectUri);
-
-                var app = builder.Build();
-
-                AddAdfsWithTenantIdMockHandler(httpManager);
-
-                #pragma warning disable CS0618 // Type or member is obsolete
-                var result = await app.AcquireTokenByUsernamePassword(
-                    TestConstants.s_scope,
-                    TestConstants.Username,
-                    TestConstants.PlaceholderCredential)
-                    .WithTenantIdFromAuthority(authorityUri)
-                    .ExecuteAsync()
-                    .ConfigureAwait(false);
-                #pragma warning restore CS0618
-
-                var account = await app.GetAccountAsync(result.Account.HomeAccountId.Identifier).ConfigureAwait(false);
-
-                AssertAdfsResult(result, account);
-            }
-        }
-
         private static async Task RunAuthCodeFlowAsync(string authority, bool useWithAdfsAuthority)
         {
             using (var httpManager = new MockHttpManager())

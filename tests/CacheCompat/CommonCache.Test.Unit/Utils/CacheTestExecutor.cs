@@ -9,6 +9,7 @@ using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 using CommonCache.Test.Common;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CommonCache.Test.Unit.Utils
@@ -33,6 +34,7 @@ namespace CommonCache.Test.Unit.Utils
         {
             Console.WriteLine($"Running {firstProgram} -> {secondProgram}...");
 
+            ValidateSetupPrerequisites(firstProgram);
             CommonCacheTestUtils.DeleteAllTestCaches();
             CommonCacheTestUtils.EnsureCacheFileDirectoryExists();
 
@@ -40,6 +42,23 @@ namespace CommonCache.Test.Unit.Utils
             await ExecuteCacheProgramAsync(secondProgram, false, cancellationToken).ConfigureAwait(false);
 
             PrintCacheInfo();
+        }
+
+        internal void ValidateSetupPrerequisites(CacheProgramType firstProgram)
+        {
+            if (firstProgram != CacheProgramType.MsalV3 ||
+                string.Equals(Environment.GetEnvironmentVariable("MSAL_CACHECOMPAT_DEVICE_CODE"), "1", StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            foreach (var user in _labUsers)
+            {
+                if (!DelegatedTokenFixtureProvider.TryGetRefreshToken(user.ClientId, user.Upn, out _))
+                {
+                    Assert.Inconclusive("Provision MSAL_V5_DELEGATED_TOKEN_FIXTURE for every cache-compatibility client/user pair, or opt in to interactive device-code setup with MSAL_CACHECOMPAT_DEVICE_CODE=1. This live cache scenario has not run.");
+                }
+            }
         }
 
         private async Task ExecuteCacheProgramAsync(CacheProgramType cacheProgramType, bool isFirst, CancellationToken cancellationToken)

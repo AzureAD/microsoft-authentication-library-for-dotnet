@@ -24,7 +24,6 @@ namespace Microsoft.Identity.Client.OAuth2
         public const string Assertion = "assertion";
         public const string RequestedTokenUse = "requested_token_use";
         public const string Username = "username";
-        public const string Password = "password";
         public const string LoginHint = "login_hint"; // login_hint is not standard oauth2 parameter
         public const string CorrelationId = OAuth2Header.CorrelationId;
         public const string State = "state";
@@ -59,7 +58,6 @@ namespace Microsoft.Identity.Client.OAuth2
         public const string Saml11Bearer = "urn:ietf:params:oauth:grant-type:saml1_1-bearer";
         public const string Saml20Bearer = "urn:ietf:params:oauth:grant-type:saml2-bearer";
         public const string JwtBearer = "urn:ietf:params:oauth:grant-type:jwt-bearer";
-        public const string Password = "password";
         public const string DeviceCode = "device_code";
         public const string UserFic = "user_fic";
     }

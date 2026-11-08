@@ -7,7 +7,7 @@ This document looks at defining a strategy for extending how tokens are cached i
 - Allow higher level SDKs to extend the default cache key semantics that all MSALs come with.
 - Non-breaking changes
 - Implementations MUST be consistent across confidential client MSALs
-- `AcquireTokenForClient` (client_credentials) MUST support this mechanism. Other confidential client flows (web app, web api, ROPC) SHOULD support it.
+- `AcquireTokenForClient` (client_credentials) MUST support this mechanism. Other confidential client flows (web app, web api) SHOULD support it.
 
 ## Non-Functional Requirements
 

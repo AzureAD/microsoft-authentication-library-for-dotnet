@@ -56,11 +56,6 @@
             cbxListOsAccounts = new System.Windows.Forms.CheckBox();
             cbxUseWam = new System.Windows.Forms.ComboBox();
             cbxPOP = new System.Windows.Forms.CheckBox();
-            UsernameTxt = new System.Windows.Forms.TextBox();
-            label7 = new System.Windows.Forms.Label();
-            label8 = new System.Windows.Forms.Label();
-            PasswordTxt = new System.Windows.Forms.TextBox();
-            atUsernamePwdBtn = new System.Windows.Forms.Button();
             btnATSperf = new System.Windows.Forms.Button();
             nudAutocancelSeconds = new System.Windows.Forms.NumericUpDown();
             label9 = new System.Windows.Forms.Label();
@@ -344,54 +339,6 @@
             cbxPOP.Text = "With Proof-of-Possesion";
             cbxPOP.UseVisualStyleBackColor = true;
             // 
-            // UsernameTxt
-            // 
-            UsernameTxt.Location = new System.Drawing.Point(85, 148);
-            UsernameTxt.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            UsernameTxt.Name = "UsernameTxt";
-            UsernameTxt.Size = new System.Drawing.Size(154, 23);
-            UsernameTxt.TabIndex = 30;
-            // 
-            // label7
-            // 
-            label7.AutoSize = true;
-            label7.Location = new System.Drawing.Point(10, 152);
-            label7.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            label7.Name = "label7";
-            label7.Size = new System.Drawing.Size(60, 15);
-            label7.TabIndex = 31;
-            label7.Text = "Username";
-            // 
-            // label8
-            // 
-            label8.AutoSize = true;
-            label8.Location = new System.Drawing.Point(247, 151);
-            label8.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            label8.Name = "label8";
-            label8.Size = new System.Drawing.Size(57, 15);
-            label8.TabIndex = 32;
-            label8.Text = "Password";
-            // 
-            // PasswordTxt
-            // 
-            PasswordTxt.Location = new System.Drawing.Point(321, 149);
-            PasswordTxt.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            PasswordTxt.Name = "PasswordTxt";
-            PasswordTxt.Size = new System.Drawing.Size(154, 23);
-            PasswordTxt.TabIndex = 33;
-            PasswordTxt.UseSystemPasswordChar = true;
-            // 
-            // atUsernamePwdBtn
-            // 
-            atUsernamePwdBtn.Location = new System.Drawing.Point(144, 302);
-            atUsernamePwdBtn.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            atUsernamePwdBtn.Name = "atUsernamePwdBtn";
-            atUsernamePwdBtn.Size = new System.Drawing.Size(76, 27);
-            atUsernamePwdBtn.TabIndex = 34;
-            atUsernamePwdBtn.Text = "AT U/P";
-            atUsernamePwdBtn.UseVisualStyleBackColor = true;
-            atUsernamePwdBtn.Click += atUsernamePwdBtn_Click;
-            // 
             // btnATSperf
             // 
             btnATSperf.Location = new System.Drawing.Point(10, 302);
@@ -492,11 +439,6 @@
             Controls.Add(btn_ATSDeviceCodeFlow);
             Controls.Add(cbxWithForceRefresh);
             Controls.Add(cbxMultiCloud2);
-            Controls.Add(atUsernamePwdBtn);
-            Controls.Add(PasswordTxt);
-            Controls.Add(label8);
-            Controls.Add(label7);
-            Controls.Add(UsernameTxt);
             Controls.Add(btnATSperf);
             Controls.Add(label9);
             Controls.Add(nudAutocancelSeconds);
@@ -563,11 +505,6 @@
         private System.Windows.Forms.CheckBox cbxListOsAccounts;
         private System.Windows.Forms.ComboBox cbxUseWam;
         private System.Windows.Forms.CheckBox cbxPOP;
-        private System.Windows.Forms.TextBox UsernameTxt;
-        private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.Label label8;
-        private System.Windows.Forms.TextBox PasswordTxt;
-        private System.Windows.Forms.Button atUsernamePwdBtn;
         private System.Windows.Forms.Button btnATSperf;
         private System.Windows.Forms.NumericUpDown nudAutocancelSeconds;
         private System.Windows.Forms.Label label9;
@@ -580,4 +517,3 @@
         private System.Windows.Forms.Button btn_wia;
     }
 }
-

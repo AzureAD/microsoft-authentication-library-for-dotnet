@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CommonCache.Test.Common;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 
 namespace CommonCache.Test.MsalV2
 {
@@ -67,22 +68,42 @@ namespace CommonCache.Test.MsalV2
                     }
                     catch (MsalUiRequiredException)
                     {
-                        #pragma warning disable CS0618 // Type or memeber is obsolete
-                        var result = await app
-                            .AcquireTokenByUsernamePassword(scopes, labUserData.Upn, labUserData.Password)
-                            .ExecuteAsync(CancellationToken.None)
-                            .ConfigureAwait(false);
-                        #pragma warning restore CS0618
-
-                        if (string.IsNullOrWhiteSpace(result.AccessToken))
+                        AuthenticationResult result;
+                        if (DelegatedTokenFixtureProvider.TryGetRefreshToken(labUserData.ClientId, labUserData.Upn, out string refreshToken))
                         {
-                            results.Add(new CacheExecutorAccountResult(labUserData.Upn, string.Empty, false));
+                            result = await ((IByRefreshToken)app).AcquireTokenByRefreshToken(scopes, refreshToken)
+                                .ExecuteAsync(CancellationToken.None)
+                                .ConfigureAwait(false);
+                        }
+                        else if (string.Equals(Environment.GetEnvironmentVariable("MSAL_CACHECOMPAT_DEVICE_CODE"), "1", StringComparison.Ordinal))
+                        {
+                            result = await app
+                                .AcquireTokenWithDeviceCode(scopes, code =>
+                                {
+                                    Console.WriteLine(code.Message);
+                                    return Task.CompletedTask;
+                                })
+                                .ExecuteAsync(CancellationToken.None)
+                                .ConfigureAwait(false);
                         }
                         else
                         {
-                            Console.WriteLine($"got token for '{result.Account.Username}' without the cache");
-                            results.Add(new CacheExecutorAccountResult(labUserData.Upn, result.Account.Username, false));
+                            throw new InvalidOperationException("Provision MSAL_V5_DELEGATED_TOKEN_FIXTURE for the exact client and user, or explicitly enable device-code setup with MSAL_CACHECOMPAT_DEVICE_CODE=1.");
                         }
+
+                        if (result.Account is null ||
+                            !string.Equals(result.Account.Username, labUserData.Upn, StringComparison.OrdinalIgnoreCase))
+                        {
+                            throw new InvalidOperationException("Delegated setup signed in a different user from the requested cache-compatibility identity.");
+                        }
+
+                        if (string.IsNullOrWhiteSpace(result.AccessToken))
+                        {
+                            throw new InvalidOperationException("Delegated setup did not return an access token.");
+                        }
+
+                        Console.WriteLine($"got token for '{result.Account.Username}' without the cache");
+                        results.Add(new CacheExecutorAccountResult(labUserData.Upn, result.Account.Username, false));
                     }
                 }
 

@@ -2,6 +2,8 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Net;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
@@ -307,7 +309,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        public async Task B2CSomeExceptionAsync()
+        public async Task B2CNonJsonErrorResponseAsync()
         {
 
             using (var httpManager = new MockHttpManager())
@@ -321,21 +323,45 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     app.ServiceBundle,
                                         AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
 
-                // Arrange AcquireTokenWithUsernamePassword
+                // Arrange an interactive authorization-code exchange
+                var response = MockHelpers.CreateSuccessResponseMessage("non json response");
+                response.StatusCode = HttpStatusCode.BadRequest;
+                httpManager.AddSuccessTokenResponseMockHandlerForPost(
+                    TestConstants.B2CLoginAuthority,
+                    responseMessage: response);
+
+                // Act 
+                var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
+                    app.AcquireTokenInteractive(new[] { "user.read" })
+                    .ExecuteAsync())
+                    .ConfigureAwait(false);
+                // Assert
+                Assert.AreEqual(MsalError.NonParsableOAuthError, ex.ErrorCode);
+                Assert.AreEqual(MsalErrorMessage.NonParsableOAuthError, ex.Message);
+                Assert.AreEqual((int)HttpStatusCode.BadRequest, ex.StatusCode);
+                Assert.AreEqual("non json response", ex.ResponseBody);
+            }
+        }
+
+        [TestMethod]
+        public async Task B2CNonJsonSuccessResponseAsync()
+        {
+            // Arrange
+            using (var httpManager = new MockHttpManager())
+            {
+                var app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithAuthority(new Uri(TestConstants.B2CLoginAuthority), true)
+                    .WithHttpManager(httpManager)
+                    .BuildConcrete();
+                MsalMockHelpers.ConfigureMockWebUI(
+                    app.ServiceBundle, AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(
                     TestConstants.B2CLoginAuthority,
                     responseMessage: MockHelpers.CreateSuccessResponseMessage("non json response"));
 
-                // Act 
-#pragma warning disable CS0618 // Type or member is obsolete 
-                var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(() => 
-                    app.AcquireTokenByUsernamePassword(new[] { "user.read" }, "username", "password" ) // no scopes -> no Access Token!
-                    .ExecuteAsync())
-                    .ConfigureAwait(false);
-#pragma warning restore CS0618
-                // Assert
-                Assert.AreEqual(MsalError.JsonParseError, ex.ErrorCode);
-                Assert.AreEqual(MsalErrorMessage.JsonParseErrorMessage, ex.Message);
+                // Act / Assert
+                await Assert.ThrowsAsync<JsonException>(() =>
+                    app.AcquireTokenInteractive(new[] { "user.read" }).ExecuteAsync()).ConfigureAwait(false);
             }
         }
 

@@ -197,7 +197,6 @@ namespace NetFx
                 // display menu
                 Console.WriteLine(@$"
                         1. IWA
-                        2. Acquire Token with Username and Password
                         3. Acquire Token with Device Code
                         4. Acquire Token Interactive                         
                         $. Acquire Token Interactive with login hint
@@ -234,18 +233,7 @@ namespace NetFx
                             await CallApiAsync(pca, result).ConfigureAwait(false);
 
                             break;
-                        case '2': // acquire token u/p
-                            Console.WriteLine("Enter username:");
-                            string username = Console.ReadLine();
-                            string password = GetPasswordFromConsole();
-#pragma warning disable CS0618 // Type or member is obsolete
-                            var upBuilder = pca.AcquireTokenByUsernamePassword(s_scopes, username, password);
-#pragma warning restore CS0618
-                            result = await upBuilder.ExecuteAsync().ConfigureAwait(false);
 
-                            await CallApiAsync(pca, result).ConfigureAwait(false);
-
-                            break;
                         case '3':
                             var deviceCodeBuilder = pca.AcquireTokenWithDeviceCode(
                                 s_scopes,
@@ -644,36 +632,6 @@ namespace NetFx
 
             Console.WriteLine($"{level} {message}");
             Console.ResetColor();
-        }
-
-        private static string GetPasswordFromConsole()
-        {
-            Console.Write("Password: ");
-            string pwd = "";
-
-            while (true)
-            {
-                ConsoleKeyInfo i = Console.ReadKey(true);
-                if (i.Key == ConsoleKey.Enter)
-                {
-                    break;
-                }
-                else if (i.Key == ConsoleKey.Backspace)
-                {
-                    if (pwd.Length > 0)
-                    {
-                        pwd.Remove(pwd.Length - 1);
-                        Console.Write("\b \b");
-                    }
-                }
-                else if (i.KeyChar != '\u0000') // KeyChar == '\u0000' if the key pressed does not correspond to a printable character, e.g. F1, Pause-Break, etc
-                {
-                    pwd += i.KeyChar;
-                    Console.Write("*");
-                }
-            }
-
-            return pwd;
         }
 
         private static Dictionary<string, (string, bool)> GetTestSliceParams()

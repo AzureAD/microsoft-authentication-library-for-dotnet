@@ -147,30 +147,6 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 return await handler.GetAuthorizationUriWithoutPkceAsync(cancellationToken).ConfigureAwait(false);
             }
         }
-
-        public async Task<AuthenticationResult> ExecuteAsync(
-            AcquireTokenCommonParameters commonParameters,
-            AcquireTokenByUsernamePasswordParameters usernamePasswordParameters,
-            CancellationToken cancellationToken)
-        {
-            RequestContext requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, commonParameters.MtlsCertificate, cancellationToken);
-
-            AuthenticationRequestParameters requestParams = await _confidentialClientApplication.CreateRequestParametersAsync(
-                commonParameters,
-                requestContext,
-                _confidentialClientApplication.UserTokenCacheInternal,
-                cancellationToken).ConfigureAwait(false);
-            
-            requestParams.SendX5C = usernamePasswordParameters.SendX5C ?? false;
-
-            var handler = new UsernamePasswordRequest(
-                ServiceBundle,
-                requestParams,
-                usernamePasswordParameters);
-
-            return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
-        }
-
         public async Task<AuthenticationResult> ExecuteAsync(
             AcquireTokenCommonParameters commonParameters,
             AcquireTokenByUserFederatedIdentityCredentialParameters userFicParameters,

@@ -3,3 +3,14 @@ Microsoft.Identity.Client.ITokenCacheSnapshotProvider.CreateSnapshot() -> Micros
 Microsoft.Identity.Client.ITokenCacheSnapshotProvider.RestoreSnapshot(Microsoft.Identity.Client.TokenCacheSnapshot snapshot) -> void
 Microsoft.Identity.Client.TokenCacheSnapshot
 Microsoft.Identity.Client.TokenCacheSnapshot.SerializeMsalV3() -> byte[]
+*REMOVED*Microsoft.Identity.Client.AcquireTokenByUsernameAndPasswordConfidentialParameterBuilder
+*REMOVED*Microsoft.Identity.Client.AcquireTokenByUsernameAndPasswordConfidentialParameterBuilder.WithSendX5C(bool withSendX5C) -> Microsoft.Identity.Client.AcquireTokenByUsernameAndPasswordConfidentialParameterBuilder
+*REMOVED*Microsoft.Identity.Client.AcquireTokenByUsernamePasswordParameterBuilder
+*REMOVED*Microsoft.Identity.Client.AcquireTokenByUsernamePasswordParameterBuilder.WithFederationMetadata(string federationMetadata) -> Microsoft.Identity.Client.AcquireTokenByUsernamePasswordParameterBuilder
+*REMOVED*Microsoft.Identity.Client.AcquireTokenByUsernamePasswordParameterBuilder.WithProofOfPossession(string nonce, System.Net.Http.HttpMethod httpMethod, System.Uri requestUri) -> Microsoft.Identity.Client.AcquireTokenByUsernamePasswordParameterBuilder
+*REMOVED*Microsoft.Identity.Client.IByUsernameAndPassword
+*REMOVED*Microsoft.Identity.Client.IByUsernameAndPassword.AcquireTokenByUsernamePassword(System.Collections.Generic.IEnumerable<string> scopes, string username, string password) -> Microsoft.Identity.Client.AcquireTokenByUsernameAndPasswordConfidentialParameterBuilder
+*REMOVED*Microsoft.Identity.Client.IPublicClientApplication.AcquireTokenByUsernamePassword(System.Collections.Generic.IEnumerable<string> scopes, string username, string password) -> Microsoft.Identity.Client.AcquireTokenByUsernamePasswordParameterBuilder
+*REMOVED*Microsoft.Identity.Client.IPublicClientApplication.AcquireTokenByUsernamePassword(System.Collections.Generic.IEnumerable<string> scopes, string username, System.Security.SecureString password) -> Microsoft.Identity.Client.AcquireTokenByUsernamePasswordParameterBuilder
+*REMOVED*Microsoft.Identity.Client.PublicClientApplication.AcquireTokenByUsernamePassword(System.Collections.Generic.IEnumerable<string> scopes, string username, string password) -> Microsoft.Identity.Client.AcquireTokenByUsernamePasswordParameterBuilder
+*REMOVED*Microsoft.Identity.Client.PublicClientApplication.AcquireTokenByUsernamePassword(System.Collections.Generic.IEnumerable<string> scopes, string username, System.Security.SecureString password) -> Microsoft.Identity.Client.AcquireTokenByUsernamePasswordParameterBuilder

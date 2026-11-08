@@ -294,41 +294,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // Check the algorithm
             Assert.AreEqual("RS256", alg, "The algorithm in the token header should be RS256");
         }
-
-        [RunOn(TargetFrameworks.NetCore, SkipConditions.Linux)]
-        public async Task ROPC_PopTestWithRSAAsync()
-        {
-            var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
-            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
-            string secret = LabResponseHelper.FetchSecretString(app.SecretName, LabResponseHelper.KeyVaultSecretsProviderMsal);
-
-            // Use the lab response app and tenant for consistency instead of mixing configurations
-            var confidentialApp = ConfidentialClientApplicationBuilder
-                .Create(app.AppId)
-                .WithAuthority($"https://login.microsoftonline.com/{user.TenantId}")
-                .WithClientSecret(secret)
-                .WithExperimentalFeatures(true)
-                .Build();
-
-            //RSA provider
-            var popConfig = new PoPAuthenticationConfiguration(new Uri(ProtectedUrl));
-            popConfig.PopCryptoProvider = new RSACertificatePopCryptoProvider(GetCertificate());
-            popConfig.HttpMethod = HttpMethod.Get;
-
-            var result = await (confidentialApp as IByUsernameAndPassword).AcquireTokenByUsernamePassword(s_ropcScope, user.Upn, user.GetOrFetchPassword())
-                .WithSignedHttpRequestProofOfPossession(popConfig)
-                .ExecuteAsync(CancellationToken.None)
-                .ConfigureAwait(false);
-
-            Assert.AreEqual("pop", result.TokenType);
-            PoPValidator.VerifyPoPToken(
-                app.AppId, // Use consistent app ID from lab response
-                ProtectedUrl,
-                HttpMethod.Get,
-                result);
-
-        }
-
         [TestMethod]
         public async Task PopTest_WithCustomClaims_Async()
         {
@@ -727,45 +692,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
 #if NET_CORE
-        [RunOn(SkipConditions.OneBranchBuild | SkipConditions.Linux)]
-        public async Task WamUsernamePasswordRequestWithPOPAsync()
-        {
-            var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserPublicCloud).ConfigureAwait(false);
-            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppPCAClient).ConfigureAwait(false);
-            string[] scopes = { "User.Read" };
-
-            WamLoggerValidator wastestLogger = new WamLoggerValidator();
-
-            IPublicClientApplication pca = PublicClientApplicationBuilder
-               .Create(app.AppId)
-               .WithAuthority(app.Authority, "organizations")
-               .WithLogging(wastestLogger)
-               .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows))
-               .Build();
-
-            Assert.IsTrue(pca.IsProofOfPossessionSupportedByClient(), "Either the broker is not configured or it does not support POP.");
-
-            #pragma warning disable CS0618 // Type or member is obsolete
-            var result = await pca
-                .AcquireTokenByUsernamePassword(
-                    scopes,
-                    user.Upn,
-                    user.GetOrFetchPassword())
-                .WithProofOfPossession("nonce", HttpMethod.Get, new Uri(ProtectedUrl))
-                .ExecuteAsync().ConfigureAwait(false);
-            #pragma warning restore CS0618
-
-            MsalAssert.AssertAuthResult(result, TokenSource.Broker, user.TenantId, scopes, true);
-
-            Assert.IsTrue(wastestLogger.HasLogged);
-
-            PoPValidator.VerifyPoPToken(
-                app.AppId,
-                ProtectedUrl,
-                HttpMethod.Get,
-                result);
-        }
-
         [TestMethod]
         public void CheckPopRuntimeBrokerSupportTest()
         {
