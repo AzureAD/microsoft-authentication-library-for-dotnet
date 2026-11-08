@@ -16,7 +16,6 @@ using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Internal.ClientCredential;
-using Microsoft.Identity.Client.Kerberos;
 using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.ManagedIdentity.V2;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
@@ -74,21 +73,6 @@ namespace Microsoft.Identity.Client
 
         public Func<CoreUIParent, ApplicationConfiguration, ILoggerAdapter, IBroker> BrokerCreatorFunc { get; set; }
         public Func<IWebUIFactory> WebUiFactoryCreator { get; set; }
-
-        /// <summary>
-        /// Service principal name for Kerberos Service Ticket.
-        /// </summary>
-        public string KerberosServicePrincipalName { get; set; } = string.Empty;
-
-        /// <summary>
-        /// Kerberos Service Ticket container to be used.
-        /// </summary>
-        [Obsolete]
-        public KerberosTicketContainer TicketContainer { get; set; } = KerberosTicketContainer.IdToken;
-
-        [Obsolete("Telemetry is sent automatically by MSAL.NET. See https://aka.ms/msal-net-telemetry.")]
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public ITelemetryConfig TelemetryConfig { get; internal set; }
 
         public IHttpManager HttpManager { get; internal set; }
 

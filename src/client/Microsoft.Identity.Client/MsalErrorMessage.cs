@@ -255,7 +255,6 @@ namespace Microsoft.Identity.Client
         public const string ActivityRequiredForParentObjectAndroid = "On Android, you have to specify the current Activity from which the browser pop-up will be displayed using the WithParentActivityOrWindow method. ";
 
         public const string LoggingCallbackAlreadySet = "LoggingCallback has already been set. ";
-        public const string TelemetryCallbackAlreadySet = "TelemetryCallback has already been set. ";
         public const string NoClientIdWasSpecified = "No ClientId was specified. ";
         public const string AdfsNotCurrentlySupportedAuthorityType = "ADFS is not currently a supported authority type. ";
         public const string TenantIdAndAadAuthorityInstanceAreMutuallyExclusive = "TenantId and AadAuthorityAudience are both set, but they're mutually exclusive. ";
@@ -276,9 +275,6 @@ namespace Microsoft.Identity.Client
         {
             return $"Invalid RedirectURI was received ({invalidRedirectUri})  Not parseable into System.Uri class. ";
         }
-
-        public const string TelemetryClassIsObsolete =
-            "Telemetry is now specified per ClientApplication.  See https://aka.ms/msal-net-3-breaking-changes and https://aka.ms/msal-net-application-configuration. ";
 
         public const string LoggingClassIsObsolete =
             "Logging is now specified per ClientApplication.  See https://aka.ms/msal-net-3-breaking-changes and https://aka.ms/msal-net-application-configuration. ";
@@ -306,13 +302,11 @@ namespace Microsoft.Identity.Client
         public const string CustomWebUiAuthorizationCodeFailed = "CustomWebUi AcquireAuthorizationCode failed. ";
 
         public const string TokenCacheJsonSerializerFailedParse = "MSAL deserialization failed to parse the cache contents. First characters of the cache string: {0} \r\nPossible cause: token cache encryption is used via Microsoft.Identity.Web.TokenCache and decryption fails, for example. \r\n Full details of inner exception: {1} ";
-        public const string TokenCacheDictionarySerializerFailedParse = "MSAL V2 Deserialization failed to parse the cache contents. Is this possibly an earlier format needed for DeserializeMsalV3?  (See https://aka.ms/msal-net-3x-cache-breaking-change). ";
         public const string BrokerNotSupportedOnThisPlatform = "Broker is only supported on mobile platforms (Android and iOS). See https://aka.ms/msal-brokers for details. ";
 
         public const string MsalExceptionFailedToParse = "Attempted to deserialize an MsalException but the type was unknown. ";
 
         public const string AdfsDeviceFlowNotSupported = "Device Code Flow is not currently supported for ADFS. ";
-        public const string MatsAndTelemetryCallbackCannotBeConfiguredSimultaneously = "MATS cannot be configured at the same time as a TelemetryCallback is provided. These are mutually exclusive. ";
         public const string AkaMsmsalnet3BreakingChanges = "See https://aka.ms/msal-net-3-breaking-changes. ";
 
         public const string B2CAuthorityHostMisMatch = "The B2C authority host that was used when creating the client application is not the same authority host used in the AcquireToken call. " +
@@ -459,10 +453,9 @@ namespace Microsoft.Identity.Client
         public const string SetCiamAuthorityAtRequestLevelNotSupported = "Setting the CIAM authority (ex. \"{tenantName}.ciamlogin.com\") at the request level is not supported. The CIAM authority must be set during application creation";
         public const string ClaimsChallenge = "The returned error contains a claims challenge. For additional info on how to handle claims related to multifactor authentication, Conditional Access, and incremental consent, see https://aka.ms/msal-conditional-access-claims. If you are using the On-Behalf-Of flow, see https://aka.ms/msal-conditional-access-claims-obo for details.";
         public const string CryptographicError = "A cryptographic exception occurred. Possible cause: the certificate has been disposed. See inner exception for full details.";
-        public const string MtlsPopWithoutRegion = "mTLS Proof-of-Possession does not require a region. When no region is specified, MSAL uses the global mTLS endpoint. Setting a region via .WithAzureRegion(...) is recommended for performance. See https://aka.ms/msal-net-pop for details.";
+
         public const string MtlsCertificateNotProvidedMessage = "mTLS Proof‑of‑Possession requires a certificate for this request. Either configure the application with .WithCertificate(...) or pass a certificate‑bound client‑assertion and chain .WithMtlsProofOfPossession() on the request builder. See https://aka.ms/msal-net-pop for details.";
-        public const string MtlsNotSupportedWithClientClaimsMessage = "mTLS transport (Proof-of-Possession via .WithMtlsProofOfPossession() or Bearer-over-mTLS via CertificateOptions.SendCertificateOverMtls = true) is not supported when the credential is configured via .WithClientClaims(certificate, claimsToSign, ...). Custom client claims require a signed JWT-bearer client assertion, which is not produced in mTLS mode. To use mTLS, configure the application with .WithCertificate(certificate) without .WithClientClaims(...), or use .WithClientAssertion(...) with a signed assertion that carries the binding certificate. See https://aka.ms/msal-net-pop for details.";
-        public const string MtlsBearerWithoutRegion = "Bearer-over-mTLS does not require a region. When no region is specified, MSAL uses the global mTLS endpoint. Setting a region via .WithAzureRegion(...) is recommended for performance. See https://aka.ms/msal-net-pop for details.";
+
         public const string MtlsInvalidAuthorityTypeMessage = "mTLS PoP is only supported for AAD authority type. See https://aka.ms/msal-net-pop for details.";
         public const string MtlsNonTenantedAuthorityNotAllowedMessage = "mTLS authentication requires a tenanted authority. Using 'common', 'organizations', or similar non-tenanted authorities is not allowed. Please provide an authority with a specific tenant ID (e.g., 'https://login.microsoftonline.com/{tenantId}'). See https://aka.ms/msal-net-pop for details.";
         public const string MtlsNotSupportedForManagedIdentityMessage = "IMDSv2 flow is not supported on .NET Framework 4.6.2. Cryptographic operations required for managed identity authentication are unavailable on this platform.";

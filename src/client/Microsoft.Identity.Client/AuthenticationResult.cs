@@ -32,9 +32,9 @@ namespace Microsoft.Identity.Client
         /// <param name="accessToken">Access Token that can be used as a bearer token to access protected web APIs</param>
         /// <param name="account">Account information</param>
         /// <param name="expiresOn">Expiry date-time for the access token</param>
-        /// <param name="extendedExpiresOn">See <see cref="ExtendedExpiresOn"/></param>
+        /// <param name="extendedExpiresOn">Ignored. Extended-lifetime tokens are no longer supported.</param>
         /// <param name="idToken">ID token</param>
-        /// <param name="isExtendedLifeTimeToken">See <see cref="IsExtendedLifeTimeToken"/></param>
+        /// <param name="isExtendedLifeTimeToken">Ignored. Extended-lifetime tokens are no longer supported.</param>
         /// <param name="scopes">Granted scope values as returned by the service</param>
         /// <param name="tenantId">Identifier for the Azure AD tenant from which the token was acquired. Can be <c>null</c></param>
         /// <param name="uniqueId">Unique Id of the account. It can be null. When the <see cref="IdToken"/> is not <c>null</c>, this is its ID, that is its ObjectId claim, or if that claim is <c>null</c>, the Subject claim.</param>
@@ -62,10 +62,6 @@ namespace Microsoft.Identity.Client
             IReadOnlyDictionary<string, string> additionalResponseParameters = null)
         {
             AccessToken = accessToken;
-#pragma warning disable CS0618 // Type or member is obsolete
-            IsExtendedLifeTimeToken = isExtendedLifeTimeToken;
-            ExtendedExpiresOn = extendedExpiresOn;
-#pragma warning restore CS0618 // Type or member is obsolete
             UniqueId = uniqueId;
             ExpiresOn = expiresOn;
             TenantId = tenantId;
@@ -87,9 +83,9 @@ namespace Microsoft.Identity.Client
         /// <param name="accessToken">Access Token that can be used as a bearer token to access protected web APIs</param>
         /// <param name="account">Account information</param>
         /// <param name="expiresOn">Expiry date-time for the access token</param>
-        /// <param name="extendedExpiresOn">See <see cref="ExtendedExpiresOn"/></param>
+        /// <param name="extendedExpiresOn">Ignored. Extended-lifetime tokens are no longer supported.</param>
         /// <param name="idToken">ID token</param>
-        /// <param name="isExtendedLifeTimeToken">See <see cref="IsExtendedLifeTimeToken"/></param>
+        /// <param name="isExtendedLifeTimeToken">Ignored. Extended-lifetime tokens are no longer supported.</param>
         /// <param name="scopes">Granted scope values as returned by the service</param>
         /// <param name="tenantId">Identifier for the Azure AD tenant from which the token was acquired. Can be <c>null</c></param>
         /// <param name="uniqueId">Unique Id of the account. It can be null. When the <see cref="IdToken"/> is not <c>null</c>, this is its ID, that is its ObjectId claim, or if that claim is <c>null</c>, the Subject claim.</param>
@@ -237,11 +233,6 @@ namespace Microsoft.Identity.Client
                 ExpiresOn = msalAccessTokenCacheItem.ExpiresOn;
                 Scopes = msalAccessTokenCacheItem.ScopeSet;
 
-#pragma warning disable CS0618 // Type or member is obsolete
-                ExtendedExpiresOn = msalAccessTokenCacheItem.ExtendedExpiresOn;
-                IsExtendedLifeTimeToken = msalAccessTokenCacheItem.IsExtendedLifeTimeToken;
-#pragma warning restore CS0618 // Type or member is obsolete
-
                 TokenType = msalAccessTokenCacheItem.TokenType;
 
                 if (msalAccessTokenCacheItem.RefreshOn.HasValue)
@@ -257,21 +248,6 @@ namespace Microsoft.Identity.Client
         /// Access Token that can be used as a bearer token to access protected web APIs
         /// </summary>
         public string AccessToken { get; set; }
-
-        /// <summary>
-        /// In case when Azure AD has an outage, to be more resilient, it can return tokens with
-        /// an expiration time, and also with an extended expiration time.
-        /// The tokens are then automatically refreshed by MSAL when the time is more than the
-        /// expiration time, except when ExtendedLifeTimeEnabled is true and the time is less
-        /// than the extended expiration time. This goes in pair with Web APIs middleware which,
-        /// when this extended life time is enabled, can accept slightly expired tokens.
-        /// Client applications accept extended life time tokens only if
-        /// the ExtendedLifeTimeEnabled Boolean is set to true on ClientApplicationBase.
-        /// </summary>
-        /// <remarks>This feature is not in use</remarks>
-        [Obsolete("This feature has been deprecated", false)]
-        [EditorBrowsable(EditorBrowsableState.Never)] // deprecated, this feature is not in use        
-        public bool IsExtendedLifeTimeToken { get; }
 
         /// <summary>
         /// Gets the Unique Id of the account in this <see cref="TenantId" />
@@ -292,14 +268,6 @@ namespace Microsoft.Identity.Client
         /// service.
         /// </summary>
         public DateTimeOffset ExpiresOn { get; set; }
-
-        /// <summary>
-        /// Gets the point in time in which the Access Token returned in the AccessToken property ceases to be valid in MSAL's extended LifeTime.
-        /// This value is calculated based on current UTC time measured locally and the value ext_expiresIn received from the service.
-        /// </summary>
-        [EditorBrowsable(EditorBrowsableState.Never)] // deprecated, this feature is not in use
-        [Obsolete("This feature has been deprecated", false)]
-        public DateTimeOffset ExtendedExpiresOn { get; }
 
         /// <summary>
         /// Gets an identifier for the Azure AD tenant from which the token was acquired. This property will be null if tenant information is

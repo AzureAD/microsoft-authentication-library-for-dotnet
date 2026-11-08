@@ -574,12 +574,10 @@ namespace NetCoreTestApp
                 {
                     try
                     {
-#pragma warning disable CS0618 // Type or member is obsolete
                         Task<AuthenticationResult> authenticationResultTask = Task.Run(() =>
                             AcquireTokenBuilder
-                                .WithAuthority(s_ccaAuthority, true)
+                                .WithTenantIdFromAuthority(new Uri(s_ccaAuthority))
                                 .ExecuteAsync());
-#pragma warning restore CS0618 // Type or member is obsolete
 
                         authenticationResultTask.Wait();
                     }

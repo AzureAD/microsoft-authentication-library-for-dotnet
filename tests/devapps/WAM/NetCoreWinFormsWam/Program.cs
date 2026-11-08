@@ -4,7 +4,6 @@
 using System;
 using System.Windows.Forms;
 using Microsoft.Identity.Client.NativeInterop;
-using Microsoft.Identity.Client.Utils.Windows;
 
 namespace NetDesktopWinForms
 {

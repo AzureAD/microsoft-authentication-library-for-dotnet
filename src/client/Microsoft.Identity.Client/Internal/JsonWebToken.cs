@@ -2,14 +2,11 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
 using System.Security.Cryptography;
-using System.Text.Json;
 
 namespace Microsoft.Identity.Client.Internal
 {
@@ -19,7 +16,6 @@ namespace Microsoft.Identity.Client.Internal
         private const int MaxTokenLength = 65536;
         public const long JwtToAadLifetimeInSeconds = 60 * 10; // Ten minutes
 
-        private readonly IDictionary<string, string> _claimsToSign;
         private readonly string _claimsToSignJson;
         private readonly ICryptographyManager _cryptographyManager;
         private readonly string _clientId;
@@ -31,18 +27,6 @@ namespace Microsoft.Identity.Client.Internal
             _cryptographyManager = cryptographyManager;
             _clientId = clientId;
             _audience = audience;
-        }
-
-        public JsonWebToken(
-             ICryptographyManager cryptographyManager,
-             string clientId,
-             string audience,
-             IDictionary<string, string> claimsToSign,
-             bool appendDefaultClaims = false)
-         : this(cryptographyManager, clientId, audience)
-        {
-            _claimsToSign = claimsToSign;
-            _appendDefaultClaims = appendDefaultClaims;
         }
 
         public JsonWebToken(
@@ -62,10 +46,9 @@ namespace Microsoft.Identity.Client.Internal
             long validFrom = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             long validTo = validFrom + JwtToAadLifetimeInSeconds; // 10 min
 
-            bool hasClaimsFromDictionary = _claimsToSign != null && _claimsToSign.Count > 0;
             bool hasClaimsFromJson = !string.IsNullOrWhiteSpace(_claimsToSignJson);
 
-            if (!hasClaimsFromDictionary && !hasClaimsFromJson)
+            if (!hasClaimsFromJson)
             {
                 return $$"""{"aud":"{{_audience}}","iss":"{{_clientId}}","sub":"{{_clientId}}","nbf":"{{validFrom}}","exp":"{{validTo}}","jti":"{{Guid.NewGuid()}}"}""";
             }
@@ -83,43 +66,14 @@ namespace Microsoft.Identity.Client.Internal
                 payload.Append('{');
             }
 
-            // Handle claims from JSON string
-            if (hasClaimsFromJson)
+            // Remove outer braces from JSON string and append.
+            string jsonClaims = _claimsToSignJson.Trim();
+            if (jsonClaims.StartsWith("{") && jsonClaims.EndsWith("}"))
             {
-                // Remove outer braces from JSON string and append
-                string jsonClaims = _claimsToSignJson.Trim();
-                if (jsonClaims.StartsWith("{") && jsonClaims.EndsWith("}"))
-                {
-                    jsonClaims = jsonClaims.Substring(1, jsonClaims.Length - 2);
-                }
-
-                payload.Append(jsonClaims);
+                jsonClaims = jsonClaims.Substring(1, jsonClaims.Length - 2);
             }
 
-            // Handle claims from dictionary
-            else if (hasClaimsFromDictionary)
-            {
-                using (var stream = new MemoryStream())
-                {
-                    using (var writer = new Utf8JsonWriter(stream))
-                    {
-                        writer.WriteStartObject();
-
-                        foreach (var claim in _claimsToSign)
-                        {
-                            writer.WriteString(claim.Key, claim.Value);
-                        }
-
-                        writer.WriteEndObject();
-                    }
-
-                    var jsonClaims = Encoding.UTF8.GetString(stream.ToArray());
-
-                    //Remove extra brackets from JSON result
-                    payload.Append(jsonClaims.Substring(1, jsonClaims.Length - 2));
-                }
-            }
-
+            payload.Append(jsonClaims);
             payload.Append('}');
 
             return payload.ToString();
