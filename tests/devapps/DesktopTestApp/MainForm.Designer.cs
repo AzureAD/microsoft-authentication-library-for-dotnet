@@ -61,7 +61,6 @@ namespace DesktopTestApp
             this.ciamCheckBox = new System.Windows.Forms.CheckBox();
             this.b2cTestPolicyATS = new System.Windows.Forms.Button();
             this.b2cTestPolicyAT = new System.Windows.Forms.Button();
-            this.ropcB2CAT = new System.Windows.Forms.Button();
             this.b2cSilentCustomDomain = new System.Windows.Forms.Button();
             this.b2cCustomDomain = new System.Windows.Forms.Button();
             this.forceRefreshCheckBox = new System.Windows.Forms.CheckBox();
@@ -74,7 +73,6 @@ namespace DesktopTestApp
             this.IgnoreUserCbx = new System.Windows.Forms.CheckBox();
             this.passwordLabel = new System.Windows.Forms.Label();
             this.userPasswordTextBox = new System.Windows.Forms.TextBox();
-            this.acquireTokenByUPButton = new System.Windows.Forms.Button();
             this.acquireTokenInteractiveAuthority = new System.Windows.Forms.Button();
             this.PiiLoggingLabel = new System.Windows.Forms.Label();
             this.authority = new System.Windows.Forms.TextBox();
@@ -408,7 +406,6 @@ namespace DesktopTestApp
             this.publicClientTabPage.Controls.Add(this.ciamCheckBox);
             this.publicClientTabPage.Controls.Add(this.b2cTestPolicyATS);
             this.publicClientTabPage.Controls.Add(this.b2cTestPolicyAT);
-            this.publicClientTabPage.Controls.Add(this.ropcB2CAT);
             this.publicClientTabPage.Controls.Add(this.b2cSilentCustomDomain);
             this.publicClientTabPage.Controls.Add(this.b2cCustomDomain);
             this.publicClientTabPage.Controls.Add(this.forceRefreshCheckBox);
@@ -421,7 +418,6 @@ namespace DesktopTestApp
             this.publicClientTabPage.Controls.Add(this.IgnoreUserCbx);
             this.publicClientTabPage.Controls.Add(this.passwordLabel);
             this.publicClientTabPage.Controls.Add(this.userPasswordTextBox);
-            this.publicClientTabPage.Controls.Add(this.acquireTokenByUPButton);
             this.publicClientTabPage.Controls.Add(this.acquireTokenInteractiveAuthority);
             this.publicClientTabPage.Controls.Add(this.PiiLoggingLabel);
             this.publicClientTabPage.Controls.Add(this.authority);
@@ -478,15 +474,7 @@ namespace DesktopTestApp
             this.b2cTestPolicyAT.UseVisualStyleBackColor = true;
             this.b2cTestPolicyAT.Click += new System.EventHandler(this.b2cPolicyWithDotLogin_Click);
             // 
-            // ropcB2CAT
             // 
-            this.ropcB2CAT.Location = new System.Drawing.Point(154, 723);
-            this.ropcB2CAT.Name = "ropcB2CAT";
-            this.ropcB2CAT.Size = new System.Drawing.Size(126, 30);
-            this.ropcB2CAT.TabIndex = 46;
-            this.ropcB2CAT.Text = "B2C ROPC";
-            this.ropcB2CAT.UseVisualStyleBackColor = true;
-            this.ropcB2CAT.Click += new System.EventHandler(this.RopcB2CAT_Click);
             // 
             // b2cSilentCustomDomain
             // 
@@ -602,15 +590,7 @@ namespace DesktopTestApp
             this.userPasswordTextBox.Size = new System.Drawing.Size(241, 20);
             this.userPasswordTextBox.TabIndex = 33;
             // 
-            // acquireTokenByUPButton
             // 
-            this.acquireTokenByUPButton.Location = new System.Drawing.Point(207, 582);
-            this.acquireTokenByUPButton.Name = "acquireTokenByUPButton";
-            this.acquireTokenByUPButton.Size = new System.Drawing.Size(240, 29);
-            this.acquireTokenByUPButton.TabIndex = 32;
-            this.acquireTokenByUPButton.Text = "Acquire Token By Username/Password";
-            this.acquireTokenByUPButton.UseVisualStyleBackColor = true;
-            this.acquireTokenByUPButton.Click += new System.EventHandler(this.acquireTokenByUPButton_Click);
             // 
             // acquireTokenInteractiveAuthority
             // 
@@ -829,7 +809,7 @@ namespace DesktopTestApp
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(195, 13);
             this.label6.TabIndex = 5;
-            this.label6.Text = "Login Hint (Username for IWA and U/P)";
+            this.label6.Text = "Login Hint (Username for IWA)";
             // 
             // label4
             // 
@@ -949,7 +929,6 @@ namespace DesktopTestApp
         private Label label4;
         private Label label3;
         private TabControl tabControl1;
-        private Button acquireTokenByUPButton;
         private TextBox userPasswordTextBox;
         private Label passwordLabel;
         private CheckBox IgnoreUserCbx;
@@ -963,7 +942,6 @@ namespace DesktopTestApp
         private CheckBox forceRefreshCheckBox;
         private Button b2cCustomDomain;
         private Button b2cSilentCustomDomain;
-        private Button ropcB2CAT;
         private RadioButton createPromptRadioButton;
         private Button b2cTestPolicyATS;
         private Button b2cTestPolicyAT;

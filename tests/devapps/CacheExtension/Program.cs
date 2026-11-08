@@ -45,12 +45,12 @@ namespace ManualTestApp
             {
                 // Display menu
                 Console.WriteLine($@"
-                        1. Acquire Token using Username and Password - for TEST only, do not use in production!
+                        1. Acquire Token using Device Code
                         2. Acquire Token using Device Code Flow
                         3. Acquire Token Interactive
                         4. Acquire Token Silent
                         5. Display Accounts (reads the cache)
-                        6. Acquire Token U/P and Silent in a loop                        
+                        6. Device Code and Silent in a loop
                         7. Use persistence layer to read / write any data
                         8. Use persistence layer to read / write any data with process-level lock
                         c. Clear cache
@@ -62,11 +62,11 @@ namespace ManualTestApp
                 {
                     switch (selection)
                     {
-                        case '1': //  Acquire Token using Username and Password (requires config)
+                        case '1': // Device Code
 
                             // IMPORTANT: you should ALWAYS try to get a token silently first
 
-                            result = await AcquireTokenROPCAsync(pca).ConfigureAwait(false);
+                            result = await AcquireDelegatedTokenAsync(pca).ConfigureAwait(false);
                             DisplayResult(result);
 
                             break;
@@ -119,7 +119,7 @@ namespace ManualTestApp
                                 Console.WriteLine($"Account for {acc.Username}");
                             }
                             break;
-                        case '6': // U/P and Silent in a loop
+                        case '6': // Device Code and Silent in a loop
                             Console.WriteLine("CTRL-C to stop...");
 
 #pragma warning disable CS0618 // Type or member is obsolete
@@ -135,9 +135,9 @@ namespace ManualTestApp
                             while (true)
                             {
                                 await Task.WhenAll(
-                                    RunRopcAndSilentAsync("PCA_1", pca),
-                                    RunRopcAndSilentAsync("PCA_2", pca2),
-                                    RunRopcAndSilentAsync("PCA_3", pca3)
+                                    RunDeviceCodeAndSilentAsync("PCA_1", pca),
+                                    RunDeviceCodeAndSilentAsync("PCA_2", pca2),
+                                    RunDeviceCodeAndSilentAsync("PCA_3", pca3)
 
                                 ).ConfigureAwait(false);
 
@@ -269,12 +269,12 @@ namespace ManualTestApp
             }
         }
 
-        private static async Task<AuthenticationResult> RunRopcAndSilentAsync(
+        private static async Task<AuthenticationResult> RunDeviceCodeAndSilentAsync(
             string logPrefix,
             IPublicClientApplication pca)
         {
-            Console.WriteLine($"{logPrefix} Acquiring token by ROPC...");
-            var result = await AcquireTokenROPCAsync(pca).ConfigureAwait(false);
+            Console.WriteLine($"{logPrefix} Acquiring token by device code...");
+            var result = await AcquireDelegatedTokenAsync(pca).ConfigureAwait(false);
 
             Console.WriteLine($"{logPrefix} OK. Now getting the accounts");
             var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
@@ -294,23 +294,14 @@ namespace ManualTestApp
             return result;
         }
 
-        private static async Task<AuthenticationResult> AcquireTokenROPCAsync(
+        private static async Task<AuthenticationResult> AcquireDelegatedTokenAsync(
             IPublicClientApplication pca)
         {
-            if (string.IsNullOrEmpty(Config.Username) ||
-                string.IsNullOrEmpty(Config.Password))
+            return await pca.AcquireTokenWithDeviceCode(Config.Scopes, code =>
             {
-                throw new InvalidOperationException("Please configure a username and password!");
-            }
-
-            #pragma warning disable CS0618 // Type or member is obsolete
-            return await pca.AcquireTokenByUsernamePassword(
-                Config.Scopes,
-                Config.Username,
-                Config.Password)
-                .ExecuteAsync()
-                .ConfigureAwait(false);
-            #pragma warning restore CS0618
+                Console.WriteLine(code.Message);
+                return Task.CompletedTask;
+            }).ExecuteAsync().ConfigureAwait(false);
         }
 
         private static void DisplayResult(AuthenticationResult result)

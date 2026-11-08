@@ -344,26 +344,6 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 AssertCurrentTelemetry(requestHandler.ActualRequestMessage, ApiIds.AcquireTokenByRefreshToken, CacheRefreshReason.NotApplicable);
             }
         }
-
-        [TestMethod]
-        public async Task CorrectApiIdSet_UsernamePassword_TestAsync()
-        {
-            using (_harness = CreateTestHarness())
-            {
-                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
-                _harness.HttpManager.AddWsTrustMockHandler();
-                var requestHandler = _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost();
-
-                var pca = CreatePublicClientApp();
-
-#pragma warning disable CS0618 // Type or member is obsolete
-                await pca.AcquireTokenByUsernamePassword(TestConstants.s_scope, "username", TestConstants.PlaceholderCredential)
-                    .ExecuteAsync().ConfigureAwait(false);
-#pragma warning restore CS0618
-                AssertCurrentTelemetry(requestHandler.ActualRequestMessage, ApiIds.AcquireTokenByUsernamePassword, CacheRefreshReason.NotApplicable);
-            }
-        }
-
         [TestMethod]
         public async Task CallerSdkDetailsTestAsync()
         {

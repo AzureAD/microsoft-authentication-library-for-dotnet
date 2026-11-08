@@ -28,13 +28,6 @@ namespace Microsoft.Identity.Client.Internal.Broker
         Task<MsalTokenResponse> AcquireTokenSilentDefaultUserAsync(
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenSilentParameters acquireTokenSilentParameters);
-
-        [Obsolete("This API has been deprecated, use a more secure flow. See https://aka.ms/msal-ropc-migration for migration guidance", false)]
-        [EditorBrowsable(EditorBrowsableState.Never)] // deprecated, this API is no longer supported
-        Task<MsalTokenResponse> AcquireTokenByUsernamePasswordAsync(
-            AuthenticationRequestParameters authenticationRequestParameters,
-            AcquireTokenByUsernamePasswordParameters acquireTokenByUsernamePasswordParameters);
-
         IReadOnlyDictionary<string, string> GetSsoPolicyHeaders();
         /// <summary>
         /// If device auth is required but the broker is not enabled, AAD will

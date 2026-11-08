@@ -396,12 +396,6 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                        null,
                        UiRequiredExceptionClassification.AcquireTokenSilentFailed);
         }
-
-        public Task<MsalTokenResponse> AcquireTokenByUsernamePasswordAsync(AuthenticationRequestParameters authenticationRequestParameters, AcquireTokenByUsernamePasswordParameters acquireTokenByUsernamePasswordParameters)
-        {
-            return Task.FromResult<MsalTokenResponse>(null); // nop
-        }
-
         public IReadOnlyDictionary<string, string> GetSsoPolicyHeaders()
         {
             return CollectionHelpers.GetEmptyDictionary<string, string>();

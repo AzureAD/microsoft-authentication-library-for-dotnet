@@ -1169,11 +1169,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                .WithUsername("upn@live.com");
             CheckBuilderCommonMethods(iwaBuilder);
 
-            #pragma warning disable CS0618 // Type or member is obsolete
-            var usernamePasswordBuilder = app.AcquireTokenByUsernamePassword(TestConstants.s_scope, "upn@live.com", "");
-            CheckBuilderCommonMethods(usernamePasswordBuilder);
-            #pragma warning restore CS0618 // Type or member is obsolete
-
             var deviceCodeBuilder = app.AcquireTokenWithDeviceCode(TestConstants.s_scope, _ => Task.FromResult(0))
                .WithDeviceCodeResultCallback(_ => Task.FromResult(0));
             CheckBuilderCommonMethods(deviceCodeBuilder);
@@ -1189,6 +1184,22 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             var byRefreshTokenBuilder = ((IByRefreshToken)app).AcquireTokenByRefreshToken(TestConstants.s_scope, "refreshtoken")
                                   .WithRefreshToken("refreshtoken");
             CheckBuilderCommonMethods(byRefreshTokenBuilder);
+        }
+
+        [TestMethod]
+        public void UsernamePasswordApisAreRemoved()
+        {
+            // Arrange
+            var assembly = typeof(PublicClientApplication).Assembly;
+
+            // Act / Assert
+            Assert.IsFalse(typeof(IPublicClientApplication).GetMethods().Any(m => m.Name == "AcquireTokenByUsernamePassword"));
+            Assert.IsFalse(typeof(PublicClientApplication).GetMethods().Any(m => m.Name == "AcquireTokenByUsernamePassword"));
+            Assert.IsNull(assembly.GetType("Microsoft.Identity.Client.AcquireTokenByUsernamePasswordParameterBuilder"));
+            Assert.IsNull(assembly.GetType("Microsoft.Identity.Client.AcquireTokenByUsernameAndPasswordConfidentialParameterBuilder"));
+            Assert.IsNull(assembly.GetType("Microsoft.Identity.Client.IByUsernameAndPassword"));
+            Assert.IsNull(assembly.GetType("Microsoft.Identity.Client.Internal.Requests.UsernamePasswordRequest"));
+            Assert.IsFalse(typeof(ConfidentialClientApplication).GetInterfaces().Any(i => i.Name == "IByUsernameAndPassword"));
         }
 
         [TestMethod]

@@ -12,6 +12,8 @@ using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 
+using Microsoft.Identity.Test.Integration.Infrastructure;
+
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
 {
     /// <summary>
@@ -26,61 +28,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     {
         private readonly string[] _ciamScopes = new[] { TestConstants.DefaultGraphScope };
         private const string _ciamRedirectUri = "http://localhost";
-
-        [TestMethod]
-        public async Task ROPC_Ciam_StandardDomains_CompletesSuccessfully()
-        {
-            string authority;
-            //Get lab details
-            var user = await LabResponseHelper.GetUserConfigAsync(KeyVaultSecrets.UserCiam).ConfigureAwait(false);
-            var app = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.MsalAppCiam).ConfigureAwait(false);
-
-            //https://tenantName.ciamlogin.com/
-            authority = string.Format("https://{0}.ciamlogin.com/", user.LabName);
-            await RunCiamRopcTest(authority, user, app).ConfigureAwait(false);
-
-            //https://tenantName.ciamlogin.com/tenantName.onmicrosoft.com
-            authority = string.Format("https://{0}.ciamlogin.com/{1}.onmicrosoft.com", user.LabName, user.LabName);
-            await RunCiamRopcTest(authority, user, app).ConfigureAwait(false);
-
-            //https://tenantName.ciamlogin.com/tenantGuid
-            authority = string.Format("https://{0}.ciamlogin.com/{1}", user.LabName, user.TenantId);
-            await RunCiamRopcTest(authority, user, app).ConfigureAwait(false);
-        }
-
-        private async Task RunCiamRopcTest(string authority, UserConfig user, AppConfig app)
-        {
-            //Acquire tokens
-            var msalPublicClient = PublicClientApplicationBuilder
-                .Create(app.AppId)
-                .WithAuthority(new Uri(authority), false)
-                .WithRedirectUri(_ciamRedirectUri)
-                .Build();
-
-            #pragma warning disable CS0618 // Type or member is obsolete
-            var result = await msalPublicClient
-                .AcquireTokenByUsernamePassword(_ciamScopes, user.Upn, user.GetOrFetchPassword())
-                .ExecuteAsync()
-                .ConfigureAwait(false);
-            #pragma warning restore CS0618
-
-            Assert.IsNotNull(result.AccessToken);
-            Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-            Assert.AreEqual($"{user.LabName}{Constants.CiamAuthorityHostSuffix}".ToLower(), result.Account.Environment);
-
-            //Fetch cached tokens
-            var accounts = await msalPublicClient.GetAccountsAsync().ConfigureAwait(false);
-
-            result = await msalPublicClient
-                .AcquireTokenSilent(_ciamScopes, accounts.FirstOrDefault())
-                .ExecuteAsync()
-                .ConfigureAwait(false);
-
-            Assert.IsNotNull(result.AccessToken);
-            Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
-            Assert.AreEqual($"{user.LabName}{Constants.CiamAuthorityHostSuffix}".ToLower(), result.Account.Environment);
-        }
-
         [RunOn(SkipConditions.OneBranchBuild)]
         public async Task ClientCredentialCiam_WithClientCredentials_ReturnsValidTokens()
         {
@@ -161,12 +108,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithRedirectUri(app.RedirectUri)
                 .Build();
 
-            #pragma warning disable CS0618 // Type or member is obsolete
-            var result = await msalPublicClient
-                .AcquireTokenByUsernamePassword(new[] { app.DefaultScopes }, user.Upn, user.GetOrFetchPassword())
-                .ExecuteAsync()
+            var result = await msalPublicClient.AcquireDelegatedTokenAsync(new[] { app.DefaultScopes }, user.Upn)
                 .ConfigureAwait(false);
-            #pragma warning restore CS0618
 
             Assert.IsNotNull(result.AccessToken);
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);

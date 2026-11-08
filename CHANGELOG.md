@@ -1,3 +1,10 @@
+5.0.0 (unreleased)
+==================
+
+### Breaking changes
+
+- Removed public and confidential-client Resource Owner Password Credentials (ROPC) APIs and all built-in broker password routes. Rebuilding callers must migrate to interactive or broker sign-in, device code where appropriate, or workload identity for genuinely app-only jobs. Existing delegated token caches and silent acquisition remain supported; app-only tokens cannot replace delegated OBO assertions. See the [v5 ROPC migration guide](docs/v5-ropc-migration.md). Telemetry API ID `1003` remains reserved.
+
 4.91.1
 ======
 

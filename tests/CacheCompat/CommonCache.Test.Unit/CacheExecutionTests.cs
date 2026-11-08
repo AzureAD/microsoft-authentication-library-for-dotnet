@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using CommonCache.Test.Common;
@@ -15,7 +14,7 @@ namespace CommonCache.Test.Unit
     [TestClass]
     public class CacheExecutionTests
     {
-        private static readonly List<LabUserData> s_labUsers = new List<LabUserData>();
+        private static readonly Lazy<Task<LabUserData>> s_labUser = new Lazy<Task<LabUserData>>(GetPublicAadUserDataAsync);
 
         private static async Task<LabUserData> GetPublicAadUserDataAsync()
         {
@@ -28,13 +27,6 @@ namespace CommonCache.Test.Unit
               user.TenantId);
         }
 
-        [AssemblyInitialize]
-        public static void AssemblyInit(TestContext testContext)
-        {
-            // TODO: add other users to the mix
-            s_labUsers.Add(GetPublicAadUserDataAsync().GetAwaiter().GetResult());
-        }
-
         [TestMethod]
         [DataRow(CacheProgramType.MsalV3, CacheProgramType.MsalV3, CacheStorageType.MsalV2, DisplayName = "MsalV3->MsalV3 msal v2 cache")]
         [DataRow(CacheProgramType.MsalV3, CacheProgramType.MsalV3, CacheStorageType.MsalV3, DisplayName = "MsalV3->MsalV3 msal v3 cache")]
@@ -43,7 +35,7 @@ namespace CommonCache.Test.Unit
             CacheProgramType silentType,
             CacheStorageType cacheStorageType)
         {
-            var executor = new CacheTestExecutor(s_labUsers, cacheStorageType);
+            var executor = new CacheTestExecutor(new[] { await s_labUser.Value.ConfigureAwait(false) }, cacheStorageType);
             await executor.ExecuteAsync(interactiveType, silentType, CancellationToken.None).ConfigureAwait(false);
         }
       
@@ -55,7 +47,7 @@ namespace CommonCache.Test.Unit
             CacheProgramType silentType,
             CacheStorageType cacheStorageType)
         {
-            var executor = new CacheTestExecutor(s_labUsers, cacheStorageType);
+            var executor = new CacheTestExecutor(new[] { await s_labUser.Value.ConfigureAwait(false) }, cacheStorageType);
             await executor.ExecuteAsync(interactiveType, silentType, CancellationToken.None).ConfigureAwait(false);
         }
     }

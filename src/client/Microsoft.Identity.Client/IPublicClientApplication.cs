@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Security;
 using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client
@@ -100,44 +99,5 @@ namespace Microsoft.Identity.Client
         [EditorBrowsable(EditorBrowsableState.Never)]
         AcquireTokenByIntegratedWindowsAuthParameterBuilder AcquireTokenByIntegratedWindowsAuth(
             IEnumerable<string> scopes);
-
-        /// <summary>
-        /// Non-interactive request to acquire a token via username and password authentication.
-        /// </summary>
-        /// <param name="scopes">Scopes requested to access a protected API</param>
-        /// <param name="username">Identifier of the user application requests token on behalf.
-        /// Generally in UserPrincipalName (UPN) format, e.g. <c>john.doe@contoso.com</c></param>
-        /// <param name="password">User password as a secure string.</param>
-        /// <returns>A builder enabling you to add optional parameters before executing the token request</returns>
-        /// <remarks>
-        /// Available only for .NET Framework and .NET Core applications. See <see href="https://aka.ms/msal-net-up">our documentation</see> for details.       
-        /// .NET no longer recommends using SecureString and MSAL puts the plaintext value of the password on the wire, as required by the OAuth protocol. See <see href="https://docs.microsoft.com/dotnet/api/system.security.securestring?view=net-6.0#remarks">SecureString documentation</see> for details.
-        /// </remarks>
-        [Obsolete("This API has been deprecated, use a more secure flow. See https://aka.ms/msal-ropc-migration for migration guidance", false)]
-        [EditorBrowsable(EditorBrowsableState.Never)] // deprecated, this API is no longer supported
-        AcquireTokenByUsernamePasswordParameterBuilder AcquireTokenByUsernamePassword(
-            IEnumerable<string> scopes,
-            string username,
-            SecureString password);
-
-        /// <summary>
-        /// Acquires a token without user interaction using username and password authentication.
-        /// This method does not look in the token cache, but stores the result in it. Before calling this method, use other methods 
-        /// such as <see cref="IClientApplicationBase.AcquireTokenSilent(IEnumerable{string}, IAccount)"/> to check the token cache.
-        /// </summary>
-        /// <param name="scopes">Scopes requested to access a protected API.</param>
-        /// <param name="username">Identifier of the user application requests token on behalf.
-        /// Generally in UserPrincipalName (UPN) format, e.g. <c>john.doe@contoso.com</c></param>
-        /// <param name="password">User password as a string.</param>
-        /// <returns>A builder enabling you to add optional parameters before executing the token request.</returns>
-        /// <remarks>
-        /// Available only for .NET Framework and .NET Core applications. See <see href="https://aka.ms/msal-net-up">our documentation</see> for details.
-        /// </remarks>
-        [Obsolete("This API has been deprecated, use a more secure flow. See https://aka.ms/msal-ropc-migration for migration guidance", false)]
-        [EditorBrowsable(EditorBrowsableState.Never)] // deprecated, this API is no longer supported
-        AcquireTokenByUsernamePasswordParameterBuilder AcquireTokenByUsernamePassword(
-            IEnumerable<string> scopes,
-            string username,
-            string password);
     }
 }

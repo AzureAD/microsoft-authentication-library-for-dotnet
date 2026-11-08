@@ -16,7 +16,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
             AcquireTokenByAuthorizationCode = 1000,
             AcquireTokenByRefreshToken = 1001,
             AcquireTokenByIntegratedWindowsAuth = 1002,
-            AcquireTokenByUsernamePassword = 1003,
+            // 1003 is reserved for the removed username/password API.
             AcquireTokenForClient = 1004,
             AcquireTokenInteractive = 1005,
             AcquireTokenOnBehalfOf = 1006,
