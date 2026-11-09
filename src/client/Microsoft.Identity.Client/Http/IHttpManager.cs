@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Client.Http
         /// <param name="mtlsCertificate">Certificate used for MTLS authentication.</param>
         /// <param name="validateServerCertificate">Callback to validate the server cert for service fabric managed identity flow.</param>
         /// <param name="cancellationToken"></param>
-        /// <param name="retryPolicy">Retry policy to be used for the request.</param>
+        /// <param name="retryPolicy">Retry policy to be used for the request, or null to send only once.</param>
         /// <param name="retryCount">Number of retries to be attempted in case of retriable status codes.</param>
         /// <param name="allowAutoRedirect">Whether the HTTP client can automatically follow redirects.</param>
         /// <param name="useDefaultCredentials">Whether the HTTP client can use the current user's credentials.</param>

@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 
 namespace Microsoft.Identity.Client
@@ -13,6 +14,9 @@ namespace Microsoft.Identity.Client
     {
         /// <summary>
         /// Enables mTLS Proof-of-Possession for managed identity token acquisition.
+        /// With no attestation provider, MSAL selects the configured
+        /// Windows RDP listener certificate internally for the non-attested protocol.
+        /// The current identity must already have private-key access; MSAL does not create keys or change permissions.
         /// When attestation is required (KeyGuard scenarios), use the Msal.KeyAttestation package
         /// and call .WithAttestationSupport() after this method.
         /// </summary>
@@ -26,7 +30,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Enables mTLS Proof-of-Possession for managed identity token acquisition with additional
-        /// PoP options, such as a minimum required binding strength.
+        /// PoP options, such as a minimum required binding strength or a caller-owned certificate.
         /// When attestation is required (KeyGuard scenarios), use the Msal.KeyAttestation package
         /// and call .WithAttestationSupport() after this method.
         /// </summary>
@@ -35,6 +39,10 @@ namespace Microsoft.Identity.Client
         /// PoP options controlling the request. Use <see cref="PoPOptions.MinStrength"/> to require
         /// a minimum host binding strength; the request fails with
         /// <see cref="MsalError.MinStrengthNotMet"/> when the host cannot meet the floor.
+        /// Set <see cref="PoPOptions.BindingCertificate"/> for the experimental non-attested
+        /// protocol with an explicit caller-owned certificate. Without an explicit certificate,
+        /// omitting the attestation provider selects the configured RDP certificate internally.
+        /// Neither certificate path requires experimental-feature opt-in.
         /// </param>
         /// <returns>The builder to chain .With methods.</returns>
         public static AcquireTokenForManagedIdentityParameterBuilder WithMtlsProofOfPossession(
@@ -70,8 +78,14 @@ namespace Microsoft.Identity.Client
                 MsalError.MtlsNotSupportedForManagedIdentity,
                 MsalErrorMessage.MtlsNotSupportedForManagedIdentityMessage);
 #else
+            if (options.BindingCertificate is not null)
+            {
+                ProvidedCertificateManagedIdentitySource.ValidateCertificate(options.BindingCertificate);
+            }
+
             builder.CommonParameters.IsMtlsPopRequested = true;
             builder.CommonParameters.MtlsPopMinStrength = options.MinStrength;
+            builder.Parameters.ProvidedBindingCertificate = options.BindingCertificate;
             return builder;
 #endif
         }

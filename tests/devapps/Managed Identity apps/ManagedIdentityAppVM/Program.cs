@@ -10,6 +10,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.Identity.Client.KeyAttestation;
+using System.Security.Principal;
 
 internal class Program
 {
@@ -17,6 +18,7 @@ internal class Program
     private static IManagedIdentityApplication s_miApp = null!;
     private static ManagedIdentityId s_currentMiId = ManagedIdentityId.SystemAssigned;
     private static string s_identityLabel = "SAMI";
+    private static IManagedIdentityApplication? s_rdpMiApp;
 
     // Defaults
     private static string s_resource = "https://graph.microsoft.com";
@@ -32,6 +34,7 @@ internal class Program
 
     // Toggle for full token printing (default OFF)
     private static bool s_printFullToken = false;
+    private static bool s_showImdsErrorDetails;
 
     private enum AcquireMode
     {
@@ -42,7 +45,107 @@ internal class Program
 
     private static AcquireMode s_lastMode = AcquireMode.Bearer;
 
-    private static async Task Main()
+    private static async Task<int> Main(string[] args)
+    {
+        try
+        {
+            if (args.Length > 0 && args[args.Length - 1] == "--imds-error-details")
+            {
+                s_showImdsErrorDetails = true;
+                Array.Resize(ref args, args.Length - 1);
+                Console.WriteLine("IMDS error details enabled: service error text may contain identifiers. Review before sharing.");
+            }
+            if (args.Length == 1 && args[0] == "--help")
+            {
+                Console.WriteLine("No arguments: existing interactive MSI tester; N selects the new non-attested RDP-certificate protocol.");
+                Console.WriteLine("--rdp-live <resource> [UAMI client ID]: one live acquisition through the modified MSAL project.");
+                Console.WriteLine("Append --imds-error-details to display service error fields on failure.");
+                Console.WriteLine("Requires Windows and access to the existing RDP key; no PowerShell or permission changes.");
+                return 0;
+            }
+            if (args.Length > 0)
+            {
+                if (args[0] != "--rdp-live" || args.Length is < 2 or > 3 ||
+                    !Uri.TryCreate(args[1], UriKind.Absolute, out _) ||
+                    (args.Length == 3 && (!Guid.TryParse(args[2], out Guid id) || id == Guid.Empty)))
+                {
+                    Error("Usage: --rdp-live <absolute-resource-uri> [UAMI client ID], or no arguments for the interactive tester.");
+                    return 1;
+                }
+                s_resource = NormalizeResource(args[1]);
+                s_currentMiId = args.Length == 3
+                    ? ManagedIdentityId.WithUserAssignedClientId(args[2]) : ManagedIdentityId.SystemAssigned;
+                await AcquireAndReportAsync(AcquireMode.BoundNoAttestation, forceRefresh: false).ConfigureAwait(false);
+                return 0;
+            }
+            await RunInteractiveAsync().ConfigureAwait(false);
+            return 0;
+        }
+        catch (MsalException ex)
+        {
+            ReportMsalError(ex);
+            return 1;
+        }
+        catch (Exception ex)
+        {
+            Error($"Test app failed: {ex.GetType().Name}; HRESULT=0x{ex.HResult:X8}");
+            return 1;
+        }
+        finally
+        {
+            ResetRdpApp();
+        }
+    }
+
+    private static void ReportMsalError(MsalException exception)
+    {
+        Error($"MSAL error: {exception.ErrorCode}: {exception.Message}");
+        if (exception is MsalServiceException serviceError && serviceError.StatusCode > 0)
+        {
+            Console.WriteLine($"HTTP status: {serviceError.StatusCode}");
+            WriteImdsErrorDetails(serviceError);
+        }
+    }
+
+    private static void WriteImdsErrorDetails(MsalServiceException exception)
+    {
+        if (string.IsNullOrWhiteSpace(exception.ResponseBody))
+        {
+            return;
+        }
+        if (!s_showImdsErrorDetails)
+        {
+            Console.WriteLine("Service error details are available. Append --imds-error-details to display them.");
+            return;
+        }
+
+        try
+        {
+            using var document = JsonDocument.Parse(exception.ResponseBody);
+            bool displayed = false;
+            if (document.RootElement.ValueKind == JsonValueKind.Object)
+            {
+                foreach (string field in new[] { "error", "error_description", "message", "correlationId", "correlation_id", "trace_id", "timestamp" })
+                {
+                    if (document.RootElement.TryGetProperty(field, out var value) && value.ValueKind == JsonValueKind.String)
+                    {
+                        Console.WriteLine($"IMDS {field}: {JsonSerializer.Serialize(value.GetString())}");
+                        displayed = true;
+                    }
+                }
+            }
+            if (!displayed)
+            {
+                Console.WriteLine("IMDS returned no recognized error fields; the response body was not displayed.");
+            }
+        }
+        catch (JsonException)
+        {
+            Console.WriteLine("IMDS returned a non-JSON error body; the response body was not displayed.");
+        }
+    }
+
+    private static async Task RunInteractiveAsync()
     {
         Console.Clear();
         WriteTitle("Managed Identity Token Tester");
@@ -145,11 +248,9 @@ internal class Program
                         break;
                 }
             }
-            catch (MsalServiceException ex)
+            catch (MsalException ex)
             {
-                Error("[MSAL Service Error]");
-                Console.WriteLine($"  Code   : {ex.ErrorCode}");
-                Console.WriteLine($"  Message: {ex.Message}");
+                ReportMsalError(ex);
             }
             catch (Exception ex)
             {
@@ -182,7 +283,7 @@ internal class Program
         {
             AcquireMode.Bearer => "Bearer",
             AcquireMode.BoundWithAttestation => "Bound (mTLS PoP + Attestation)",
-            AcquireMode.BoundNoAttestation => "Bound (mTLS PoP, NO Attestation)",
+            AcquireMode.BoundNoAttestation => "Bound (non-attested protocol, MSAL-selected RDP certificate)",
             _ => "Unknown"
         };
 
@@ -198,7 +299,7 @@ internal class Program
         Console.ForegroundColor = ConsoleColor.Green;
         Console.WriteLine("A) Acquire Bearer token");
         Console.WriteLine("P) Acquire Bound token (mTLS PoP) WITH attestation");
-        Console.WriteLine("N) Acquire Bound token (mTLS PoP) WITHOUT attestation");
+        Console.WriteLine("N) Acquire Bound token WITHOUT attestation (new protocol, existing RDP certificate)");
         Console.WriteLine("T) Toggle Force Refresh (persistent)");
         Console.WriteLine("B) Bypass cache on NEXT acquisition (one-shot)");
         Console.WriteLine("F) Toggle Full Token Print");
@@ -217,7 +318,8 @@ internal class Program
         Console.WriteLine("Help:");
         Console.WriteLine(" - A: Get a Bearer token for the current resource.");
         Console.WriteLine(" - P: Get a Bound (mTLS PoP) token WITH attestation support.");
-        Console.WriteLine(" - N: Get a Bound (mTLS PoP) token WITHOUT attestation support (for manual negative-path/cache testing).");
+        Console.WriteLine(" - N: Use the existing RDP key with the new non-attested MSAL protocol (SAMI or UAMI ClientId).");
+        Console.WriteLine("      Acquisition only; no resource TLS. The current Windows identity must have private-key access.");
         Console.WriteLine(" - T: Toggle Force Refresh to bypass cache on every acquisition until turned off.");
         Console.WriteLine(" - B: One-shot bypass; only the NEXT acquisition will bypass cache, then it resets.");
         Console.WriteLine(" - F: Toggle Full Token Print. WARNING: prints the entire token (secret).");
@@ -308,7 +410,31 @@ internal class Program
             .Create(miId)
             .WithLogging(logger, enablePiiLogging: true)
             .Build();
+        ResetRdpApp();
         Success($"Identity set to {s_identityLabel}");
+    }
+
+    private static void ResetRdpApp()
+    {
+        s_rdpMiApp = null;
+    }
+
+    private static IManagedIdentityApplication GetRdpApp()
+    {
+        if (s_rdpMiApp is not null)
+        {
+            return s_rdpMiApp;
+        }
+        if (!OperatingSystem.IsWindows())
+        {
+            throw new PlatformNotSupportedException("RDP certificate discovery requires Windows.");
+        }
+        using var identity = WindowsIdentity.GetCurrent();
+        Info("Execution identity: " + identity.Name);
+        s_rdpMiApp = ManagedIdentityApplicationBuilder.Create(s_currentMiId)
+            .WithLogging(new IdentityLogger(), enablePiiLogging: false)
+            .Build();
+        return s_rdpMiApp;
     }
 
     private static async Task AcquireAndReportAsync(AcquireMode mode, bool forceRefresh)
@@ -319,9 +445,11 @@ internal class Program
 
         Info($"\nAcquiring {mode} token for {s_resource} ...");
 
-        var builder = s_miApp.AcquireTokenForManagedIdentity(s_resource);
+        bool useRdp = mode == AcquireMode.BoundNoAttestation;
+        var app = useRdp ? GetRdpApp() : s_miApp;
+        var builder = app.AcquireTokenForManagedIdentity(s_resource);
 
-        bool bound = mode == AcquireMode.BoundWithAttestation || mode == AcquireMode.BoundNoAttestation;
+        bool bound = useRdp || mode == AcquireMode.BoundWithAttestation;
         bool useAttestation = mode == AcquireMode.BoundWithAttestation;
 
         if (bound)
@@ -342,7 +470,7 @@ internal class Program
         var source = result.AuthenticationResultMetadata?.TokenSource.ToString() ?? "Unknown";
         Console.WriteLine($"  Token source : {source}");
         Console.WriteLine($"  Expires On   : {result.ExpiresOn.UtcDateTime:O} (UTC)");
-        Console.WriteLine($"  Token type   : {mode}");
+        Console.WriteLine($"  Token type   : {result.TokenType}");
 
         if (s_printFullToken)
         {
@@ -355,7 +483,11 @@ internal class Program
             Console.WriteLine($"  Access Token : {preview}");
         }
 
-        if (bound && !string.IsNullOrEmpty(result.AccessToken))
+        if (useRdp)
+        {
+            Console.WriteLine($"  Certificate  : {result.BindingCertificate?.Thumbprint ?? "(not returned)"}");
+        }
+        if (bound && !useRdp && !string.IsNullOrEmpty(result.AccessToken))
         {
             var cnf = TryGetCnfClaim(result.AccessToken);
             if (cnf is not null)

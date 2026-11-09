@@ -11,6 +11,7 @@ using System.Net.Http;
 using System.Security.Authentication;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
@@ -223,7 +224,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
 
-                var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, userAssignedIdentityId, userAssignedId, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
+                var managedIdentityApp = await CreateManagedIdentityAsync(httpManager, userAssignedIdentityId, userAssignedId,
+                    managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
 
                 AddMocksToGetEntraToken(httpManager, userAssignedIdentityId, userAssignedId);
 
@@ -923,56 +925,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         /// <summary>
-        /// Acceptance criterion from #6172: the fix must hold on unattested IMDSv2 flows too. Same SCHANNEL
-        /// recovery, but without .WithAttestationSupport().
-        /// </summary>
-        [TestMethod]
-        public async Task mTLSPop_Unattested_TokenLeg_SchannelFailure_ReMintsBindingAndRetriesOnceAsync()
-        {
-            using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager())
-            {
-                // Arrange
-                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
-
-                var managedIdentityApp = await CreateManagedIdentityAsync(
-                    httpManager,
-                    managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
-
-                // First attempt mints cert A, then the local mTLS handshake fails inside SCHANNEL.
-                string certA = CreateRawCertFromXml("CN=imdsv2-unattested-bad", DateTimeOffset.UtcNow.AddDays(30));
-                string certB = CreateRawCertFromXml("CN=imdsv2-unattested-fresh", DateTimeOffset.UtcNow.AddDays(30));
-
-                httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
-                httpManager.AddMockHandler(MockHelpers.MockCertificateRequestResponse(certificate: certA));
-                var failingTokenHandler = MockHelpers.MockImdsV2EntraTokenRequestResponse(_identityLoggerAdapter);
-                failingTokenHandler.ExceptionToThrow = CreateSchannelTransportException();
-                httpManager.AddMockHandler(failingTokenHandler);
-
-                // Retry: binding is re-minted and IMDS issues cert B, then the token succeeds.
-                AddMocksToGetEntraToken(httpManager, certificateRequestCertificate: certB, withAttestation: false);
-
-                // Act - no attestation.
-                var result = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                    .WithMtlsProofOfPossession()
-                    .ExecuteAsync().ConfigureAwait(false);
-
-                // Assert
-                Assert.IsNotNull(result.AccessToken);
-                Assert.AreEqual(MTLSPoP, result.TokenType);
-                Assert.IsNotNull(result.BindingCertificate);
-                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-
-                // Bound to the re-minted cert B, not the SCHANNEL-rejected cert A.
-                using var expectedFreshCert = new X509Certificate2(Convert.FromBase64String(certB));
-                Assert.AreEqual(expectedFreshCert.Thumbprint, result.BindingCertificate.Thumbprint,
-                    "Token must be bound to the re-minted certificate, not the rejected one.");
-
-                Assert.AreEqual(0, httpManager.QueueSize, "Expected exactly one re-mint and one retry.");
-            }
-        }
-
-        /// <summary>
         /// Builds the exception chain Windows produces when SCHANNEL cannot acquire credentials for the
         /// IMDSv2 binding certificate (stale or inaccessible CNG/KeyGuard private key). The handshake
         /// fails locally, so this is what the delegated TokenClient transport surfaces.
@@ -1006,6 +958,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var ex = await Assert.ThrowsAsync<MsalClientException>(async () =>
                     await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .WithMtlsProofOfPossession()
+                    .WithAttestationSupport()
                     .ExecuteAsync().ConfigureAwait(false)
                 ).ConfigureAwait(false);
 
@@ -1015,7 +968,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
         /// <summary>
         /// mTLS PoP token request should succeed with IMDSv2 even without prior discovery.
-        /// When .WithMtlsProofOfPossession() is used, MSAL routes directly to IMDSv2 (no probing,
+        /// When .WithMtlsProofOfPossession().WithAttestationSupport() is used, MSAL routes directly to IMDSv2 (no probing,
         /// and no fallback to IMDSv1, which does not support mTLS PoP). The presence of mTLS-specific
         /// headers in the request signals to IMDS that it's an mTLS request and IMDS should respond accordingly.
         /// </summary>
@@ -1439,7 +1392,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        [DataRow(true)]  // WithMtlsProofOfPossession
+        [DataRow(true)]  // WithMtlsProofOfPossession + WithAttestationSupport
         [DataRow(false)] // WithRequestOverMtls
         public async Task ImdsV2KillSwitch_MtlsRequest_ThrowsInsteadOfDowngradingToBearer(bool useProofOfPossession)
         {
@@ -1463,7 +1416,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var builder = managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource);
                 builder = useProofOfPossession
-                    ? builder.WithMtlsProofOfPossession()
+                    ? builder.WithMtlsProofOfPossession().WithAttestationSupport()
                     : builder.WithRequestOverMtls();
 
                 // Act
@@ -1515,6 +1468,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var ex = await Assert.ThrowsAsync<MsalClientException>(async () =>
                     await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                         .WithMtlsProofOfPossession(new PoPOptions { MinStrength = MtlsBindingStrength.Software })
+                        .WithAttestationSupport()
                         .ExecuteAsync().ConfigureAwait(false)
                 ).ConfigureAwait(false);
 
@@ -1541,6 +1495,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var ex = await Assert.ThrowsAsync<MsalServiceException>(async () =>
                     await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .WithMtlsProofOfPossession()
+                    .WithAttestationSupport()
                     .ExecuteAsync().ConfigureAwait(false)
                 ).ConfigureAwait(false);
 
@@ -1563,6 +1518,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var ex = await Assert.ThrowsAsync<MsalServiceException>(async () =>
                     await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .WithMtlsProofOfPossession()
+                    .WithAttestationSupport()
                     .ExecuteAsync().ConfigureAwait(false)
                 ).ConfigureAwait(false);
 
@@ -1860,32 +1816,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 // Assert
                 Assert.IsFalse(attestationCalled);
                 Assert.AreEqual(0, httpManager.QueueSize);
-            }
-        }
-
-        [TestMethod]
-        public async Task MtlsPop_NoAttestationProvider_UsesNonAttestedFlow()
-        {
-            using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager())
-            {
-                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
-
-                var mi = await CreateManagedIdentityAsync(httpManager, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
-
-                // Add mocks for successful non-attested flow (CSR + issuecredential + token)
-                // Note: No attestation token in the certificate request
-                AddMocksToGetEntraToken(httpManager, withAttestation: false);
-
-                var result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                    .WithMtlsProofOfPossession()
-                    // Intentionally DO NOT call .WithAttestationProviderForTests(...)
-                    .ExecuteAsync().ConfigureAwait(false);
-
-                Assert.IsNotNull(result);
-                Assert.AreEqual(MTLSPoP, result.TokenType, "Should get mTLS PoP token without attestation provider");
-                Assert.IsNotNull(result.BindingCertificate, "Should have binding certificate even without attestation");
-                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
             }
         }
 
@@ -2401,7 +2331,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var ex = await Assert.ThrowsAsync<MsalClientException>(async () =>
                     await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                        .WithMtlsProofOfPossession() // request PoP on a non-KeyGuard env
+                        .WithMtlsProofOfPossession()
+                        .WithAttestationSupport() // request attested PoP on a non-KeyGuard env
                         .ExecuteAsync().ConfigureAwait(false)
                 ).ConfigureAwait(false);
 
@@ -2410,7 +2341,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        public async Task mTLSPop_AttestationSupport_IsRequired_ToReusePersistedCert()
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task NonAttestedRdpDoesNotReuseAttestedCertificateOrCachedToken(bool forceRefresh)
         {
             if (!ImdsV2TestStoreCleaner.IsWindows)
             {
@@ -2442,71 +2375,58 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.IsNotNull(first.BindingCertificate);
                 Assert.AreEqual(TokenSource.IdentityProvider, first.AuthenticationResultMetadata.TokenSource);
 
-                // (2) Second acquire: NO attestation support + ForceRefresh
-                MockHelpers.AddMocks_AttestedCertMustNotBeReused_ExpectIssueCredential400(httpManager);
+                var app = (ManagedIdentityApplication)mi;
+                Assert.HasCount(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens());
+                Assert.IsFalse(app.ServiceBundle.Config.ExperimentalFeaturesEnabled);
 
-                var ex = await Assert.ThrowsAsync<MsalServiceException>(async () =>
-                    await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                        .WithForceRefresh(true)
-                        .WithMtlsProofOfPossession()
-                        // NOTE: intentionally NOT calling .WithAttestationSupport()
-                        // Earlier cert was attested, so this call should fail.
-                        .ExecuteAsync()
-                        .ConfigureAwait(false)
-                ).ConfigureAwait(false);
+                // Arrange a distinct RDP certificate, without the IMDSv2 test endpoint override.
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, null);
+                using RSA key = RSA.Create(2048);
+                var certificateRequest = new CertificateRequest("CN=Simulated-Rdp-Binding",
+                    key, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+                using var rdpCertificate = certificateRequest.CreateSelfSigned(
+                    DateTimeOffset.UtcNow.AddMinutes(-5), DateTimeOffset.UtcNow.AddDays(2));
+                app.ServiceBundle.PlatformProxy.GetRdpBindingCertificateAsync(
+                    Arg.Any<ILoggerAdapter>(), Arg.Any<CancellationToken>()).Returns(Task.FromResult(rdpCertificate));
+                httpManager.AddMockHandler(new MockHttpMessageHandler
+                {
+                    ExpectedMethod = HttpMethod.Post,
+                    ExpectedUrl = ImdsManagedIdentitySource.DefaultImdsBaseEndpoint + ImdsManagedIdentitySource.ImdsTokenPath,
+                    ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                    {
+                        Content = new StringContent(JsonSerializer.Serialize(new Dictionary<string, object>
+                        {
+                            ["access_token"] = "rdp-token",
+                            ["token_type"] = MTLSPoP,
+                            ["client_id"] = TestConstants.ClientId,
+                            ["resource"] = ManagedIdentityTests.Resource,
+                            ["expires_in"] = 3600
+                        }))
+                    }
+                });
 
-                Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
-                StringAssert.Contains(ex.Message, "Attestation Token is missing");
-            }
-        }
+                // Act
+                var nonAttested = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithMtlsProofOfPossession()
+                    .WithForceRefresh(forceRefresh)
+                    .ExecuteAsync().ConfigureAwait(false);
 
-        [TestMethod]
-        public async Task mTLSPop_AttestationSupport_AffectsTokenCacheKey_NonAttestedRequestDoesNotReuseAttestedTokenFromCache()
-        {
-            if (!ImdsV2TestStoreCleaner.IsWindows)
-            {
-                Assert.Inconclusive("Windows-only: relies on CurrentUser/My persisted cert cache semantics.");
-            }
-
-            using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager())
-            {
-                SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
-
-                // Force KeyGuard provider so attestation support is relevant.
-                var mi = await CreateManagedIdentityAsync(
-                    httpManager,
-                    managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard
-                ).ConfigureAwait(false);
-
-                // (1) First acquire: WITH attestation support (mint cert + token)
-                AddMocksToGetEntraToken(httpManager);
-
-                var first = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                // Assert
+                Assert.AreSame(rdpCertificate, nonAttested.BindingCertificate);
+                Assert.AreNotEqual(first.BindingCertificate.Thumbprint, nonAttested.BindingCertificate.Thumbprint);
+                Assert.AreEqual("rdp-token", nonAttested.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, nonAttested.AuthenticationResultMetadata.TokenSource);
+                Assert.HasCount(2, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens());
+                var attestedAgain = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .WithMtlsProofOfPossession()
                     .WithAttestationSupport()
-                    .ExecuteAsync()
-                    .ConfigureAwait(false);
-
-                Assert.IsNotNull(first);
-                Assert.AreEqual(MTLSPoP, first.TokenType);
-                Assert.IsNotNull(first.BindingCertificate);
-                Assert.AreEqual(TokenSource.IdentityProvider, first.AuthenticationResultMetadata.TokenSource);
-
-                // (2) Second acquire: NO attestation support + ForceRefresh
-                MockHelpers.AddMocks_AttestedCertMustNotBeReused_ExpectIssueCredential400(httpManager);
-
-                var ex = await Assert.ThrowsAsync<MsalServiceException>(async () =>
-                    await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                        .WithMtlsProofOfPossession()
-                        // NOTE: intentionally NOT calling .WithAttestationSupport()
-                        // Earlier cert was attested, so this call should fail.
-                        .ExecuteAsync()
-                        .ConfigureAwait(false)
-                ).ConfigureAwait(false);
-
-                Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
-                StringAssert.Contains(ex.Message, "Attestation Token is missing");
+                    .ExecuteAsync().ConfigureAwait(false);
+                Assert.AreEqual(TokenSource.Cache, attestedAgain.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(first.BindingCertificate.Thumbprint, attestedAgain.BindingCertificate.Thumbprint);
+                Assert.HasCount(2, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens());
+                await app.ServiceBundle.PlatformProxy.Received(1).GetRdpBindingCertificateAsync(
+                    Arg.Any<ILoggerAdapter>(), Arg.Any<CancellationToken>()).ConfigureAwait(false);
+                Assert.AreEqual(0, httpManager.QueueSize);
             }
         }
 
@@ -3109,11 +3029,11 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     httpManager,
                     userAssignedIdentityId,
                     userAssignedId,
-                    certificateRequestCertificate: TestConstants.ValidRawCertificate,
-                    withAttestation: false);
+                    certificateRequestCertificate: TestConstants.ValidRawCertificate);
 
                 var first = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .WithMtlsProofOfPossession()
+                    .WithAttestationSupport()
                     .ExecuteAsync().ConfigureAwait(false);
 
                 Assert.IsNotNull(first);
@@ -3126,6 +3046,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var second = await managedIdentityApp.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .WithMtlsProofOfPossession()
+                    .WithAttestationSupport()
                     .ExecuteAsync().ConfigureAwait(false);
 
                 Assert.IsNotNull(second);
@@ -3337,10 +3258,11 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var mi = await CreateManagedIdentityAsync(httpManager, idKind, idValue, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard)
                     .ConfigureAwait(false);
 
-                AddMocksToGetEntraToken(httpManager, idKind, idValue, certificateRequestCertificate: rawCert, withAttestation: false);
+                AddMocksToGetEntraToken(httpManager, idKind, idValue, certificateRequestCertificate: rawCert);
 
                 var first = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .WithMtlsProofOfPossession()
+                    .WithAttestationSupport()
                     .ExecuteAsync().ConfigureAwait(false);
 
                 Assert.AreEqual(MTLSPoP, first.TokenType, $"[{label}]");
@@ -3348,6 +3270,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var second = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .WithMtlsProofOfPossession()
+                    .WithAttestationSupport()
                     .ExecuteAsync().ConfigureAwait(false);
 
                 Assert.AreEqual(TokenSource.Cache, second.AuthenticationResultMetadata.TokenSource, $"[{label}] cache");

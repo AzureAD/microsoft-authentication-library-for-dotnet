@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Client
         private static readonly Task<string> s_att0 = Task.FromResult("0");
         private static readonly Task<string> s_att1 = Task.FromResult("1");
 
-        private AcquireTokenForManagedIdentityParameters Parameters { get; } = new AcquireTokenForManagedIdentityParameters();
+        internal AcquireTokenForManagedIdentityParameters Parameters { get; } = new AcquireTokenForManagedIdentityParameters();
 
         /// <inheritdoc/>
         internal AcquireTokenForManagedIdentityParameterBuilder(IManagedIdentityApplicationExecutor managedIdentityApplicationExecutor)
@@ -88,6 +88,18 @@ namespace Microsoft.Identity.Client
         internal override Task<AuthenticationResult> ExecuteInternalAsync(CancellationToken cancellationToken)
         {
             ApplyMtlsPopAndAttestation(acquireTokenForManagedIdentityParameters: Parameters, acquireTokenCommonParameters: CommonParameters);
+            Parameters.UseRdpCertificate = CommonParameters.IsMtlsPopRequested && Parameters.ProvidedBindingCertificate is null &&
+                Parameters.AttestationTokenProvider is null;
+            if ((Parameters.ProvidedBindingCertificate is not null || Parameters.UseRdpCertificate) &&
+                CommonParameters.IsMtlsPopRequested)
+            {
+                CommonParameters.CacheKeyComponents["mi_binding_protocol"] = _ => Task.FromResult("provided_certificate_v1");
+            }
+            else
+            {
+                CommonParameters.CacheKeyComponents?.Remove("mi_binding_protocol");
+            }
+
             return ManagedIdentityApplicationExecutor.ExecuteAsync(CommonParameters, Parameters, cancellationToken);
         }
 

@@ -42,6 +42,10 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
 
         internal X509Certificate2 MtlsCertificate { get; set; }
 
+        internal X509Certificate2 ProvidedBindingCertificate { get; set; }
+
+        internal bool UseRdpCertificate { get; set; }
+
         /// <summary>
         /// Optional delegate for obtaining attestation JWT for Credential Guard keys.
         /// Set by the KeyAttestation package via .WithAttestationSupport().

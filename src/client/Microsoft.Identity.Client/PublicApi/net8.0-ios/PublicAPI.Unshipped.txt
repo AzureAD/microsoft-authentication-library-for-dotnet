@@ -3,3 +3,5 @@ Microsoft.Identity.Client.ITokenCacheSnapshotProvider.CreateSnapshot() -> Micros
 Microsoft.Identity.Client.ITokenCacheSnapshotProvider.RestoreSnapshot(Microsoft.Identity.Client.TokenCacheSnapshot snapshot) -> void
 Microsoft.Identity.Client.TokenCacheSnapshot
 Microsoft.Identity.Client.TokenCacheSnapshot.SerializeMsalV3() -> byte[]
+Microsoft.Identity.Client.AppConfig.PoPOptions.BindingCertificate.get -> System.Security.Cryptography.X509Certificates.X509Certificate2
+Microsoft.Identity.Client.AppConfig.PoPOptions.BindingCertificate.set -> void
