@@ -106,10 +106,13 @@ cached by this policy. Such failures can still cause successive acquisitions; co
 does not bound the latency of repeated timeouts or hung callbacks.
 
 No new configuration is required. Coordination is scoped to the existing cache instance, or
-the existing shared in-memory cache when enabled. It does not change cache callbacks, loading,
-serialization, or storage, and it is not a distributed lock. Independently loaded in-memory
-snapshots backed by external persistence may not observe another request's publication and
-can still acquire separately. A successful equivalent single-leg burst needs one acquisition
+the existing shared in-memory cache when enabled. After admission, isolated user-cache sessions
+rehydrate a new private view through the existing callbacks to observe a preceding acquisition's
+publication. Subsequent token, ID-token and account lookups reuse that coherent view; ordinary
+warm-cache hits do not perform this extra hydration. Serialization and storage formats are
+unchanged, and coordination is not a distributed lock. Independent application caches or
+providers that do not expose completed writes can still acquire separately.
+A successful equivalent single-leg burst needs one acquisition
 only when its publication is visible through the existing cache checks; retries and multi-leg
 exchanges can require additional requests. Different authority aliases or scope supersets
 are not guaranteed to coalesce.

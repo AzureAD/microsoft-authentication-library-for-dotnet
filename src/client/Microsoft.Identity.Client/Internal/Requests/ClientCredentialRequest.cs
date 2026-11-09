@@ -103,7 +103,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                             // before the async operation completes, breaking cancellation propagation and causing unbounded SemaphoreSlim convoy.
                             // See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/6053
                             using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-                            return await GetAccessTokenAsync(tokenSource.Token, logger, coalesced: true).ConfigureAwait(false);
+                            return await GetAccessTokenAsync(tokenSource.Token, logger, coalesced: true, isBackgroundRefresh: true).ConfigureAwait(false);
                         }, logger, ServiceBundle, AuthenticationRequestParameters.RequestContext.ApiEvent,
                         AuthenticationRequestParameters.RequestContext.ApiEvent.CallerSdkApiId,
                         AuthenticationRequestParameters.RequestContext.ApiEvent.CallerSdkVersion,
@@ -146,7 +146,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private async Task<AuthenticationResult> GetAccessTokenAsync(
             CancellationToken cancellationToken, 
             ILoggerAdapter logger,
-            bool coalesced = false)
+            bool coalesced = false,
+            bool isBackgroundRefresh = false)
         {
             await ResolveAuthorityAsync().ConfigureAwait(false);
 
@@ -210,6 +211,19 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 {
                     // For non-service exceptions (MsalClientException, etc.), invoke OnCompletion and re-throw
                     await InvokeOnCompletionCallbackAsync(authResult: null, exception: ex, logger).ConfigureAwait(false);
+                    throw;
+                }
+                catch (OperationCanceledException ex) when (
+                    !isBackgroundRefresh &&
+                    ServiceBundle.Config.AppTokenProvider is null &&
+                    cancellationToken.IsCancellationRequested &&
+                    ReferenceEquals(ex, AuthenticationRequestParameters.RequestContext.TokenRequestCancellationException))
+                {
+                    var cancellationException = new MsalClientException(
+                        MsalError.AuthenticationCanceledError,
+                        MsalErrorMessage.AuthenticationCanceled,
+                        ex);
+                    await InvokeOnCompletionCallbackAsync(authResult: null, exception: cancellationException, logger).ConfigureAwait(false);
                     throw;
                 }
             }
@@ -325,7 +339,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 logger.Verbose(() => "[ClientCredentialRequest] Invoking OnCompletion callback.");
                 
-                var tokenEndpoint = await AuthenticationRequestParameters.Authority.GetTokenEndpointAsync(AuthenticationRequestParameters.RequestContext).ConfigureAwait(false);
+                // A canceled in-flight request already resolved its endpoint; notification must not resolve it again.
+                var tokenEndpoint = AuthenticationRequestParameters.RequestContext.ApiEvent.TokenEndpoint ??
+                    await AuthenticationRequestParameters.Authority.GetTokenEndpointAsync(AuthenticationRequestParameters.RequestContext).ConfigureAwait(false);
                 var options = new AssertionRequestOptions(
                     AuthenticationRequestParameters.AppConfig, 
                     tokenEndpoint,

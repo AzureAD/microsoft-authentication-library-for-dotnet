@@ -33,6 +33,175 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
     public class RequestCoalescingTests : TestBase
     {
         [TestMethod]
+        [DoNotParallelize]
+        [DataRow("client", "sync", false)]
+        [DataRow("client", "async", true)]
+        [DataRow("obo", "sync", false)]
+        [DataRow("obo", "async", false)]
+        [DataRow("obo", "sync", true)]
+        [DataRow("obo", "async", true)]
+        [DataRow("long-running", "sync", false)]
+        [DataRow("long-running", "async", false)]
+        [DataRow("long-running", "sync", true)]
+        [DataRow("long-running", "async", true)]
+        [DataRow("silent", "sync", false)]
+        [DataRow("silent", "async", false)]
+        [DataRow("silent", "sync", true)]
+        [DataRow("silent", "async", true)]
+        [DataRow("silent-login-hint", "async", false)]
+        [DataRow("silent-login-hint", "sync", true)]
+        [DataRow("obo", "snapshot", false)]
+        [DataRow("silent", "snapshot", true)]
+        public async Task ExternalCacheMisses_RenewIsolatedReadViewsAfterAdmissionAsync(
+            string flow, string provider, bool proactive)
+        {
+            // Arrange
+            const string setting = TokenCache.DisableCacheReadIsolationSwitch;
+            AppContext.TryGetSwitch(setting, out bool previous);
+            AppContext.SetSwitch(setting, false);
+            try
+            {
+                using var http = new BlockingTokenEndpoint();
+                var backgroundCompleted = new TaskCompletionSource<ExecutionResult>(
+                    TaskCreationOptions.RunContinuationsAsynchronously);
+                var app = ConfidentialClientApplicationBuilder.Create(Guid.NewGuid().ToString())
+                    .WithAuthority(TestConstants.AuthorityTestTenant)
+                    .WithInstanceDiscovery(false)
+                    .WithLegacyCacheCompatibility(false)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithHttpClientFactory(http)
+                    .OnBackgroundTokenRefreshCompleted(result =>
+                    {
+                        backgroundCompleted.TrySetResult(result);
+                        return Task.CompletedTask;
+                    })
+                    .BuildConcrete();
+                var cache = flow == "client" ? app.AppTokenCacheInternal : app.UserTokenCacheInternal;
+                byte[] persisted = null;
+                TokenCacheSnapshot snapshot = null;
+                var readTargets = new ConcurrentDictionary<Guid, ConcurrentQueue<ITokenCacheSerializer>>();
+
+                void Persist()
+                {
+                    if (provider == "snapshot")
+                        Volatile.Write(ref snapshot, ((ITokenCacheSnapshotProvider)cache).CreateSnapshot());
+                    else
+                        Volatile.Write(ref persisted, cache.SerializeMsalV3());
+                }
+
+                void BeforeAccess(TokenCacheNotificationArgs args)
+                {
+                    if (!args.HasStateChanged)
+                    {
+                        readTargets.GetOrAdd(args.CorrelationId, _ => new ConcurrentQueue<ITokenCacheSerializer>())
+                            .Enqueue(args.TokenCache);
+                    }
+                    if (provider == "snapshot")
+                        ((ITokenCacheSnapshotProvider)args.TokenCache).RestoreSnapshot(Volatile.Read(ref snapshot));
+                    else
+                        args.TokenCache.DeserializeMsalV3(Volatile.Read(ref persisted), shouldClearExistingCache: true);
+                }
+
+                void AfterAccess(TokenCacheNotificationArgs args)
+                {
+                    if (args.HasStateChanged)
+                    {
+                        if (provider == "snapshot")
+                            Volatile.Write(ref snapshot, ((ITokenCacheSnapshotProvider)args.TokenCache).CreateSnapshot());
+                        else
+                            Volatile.Write(ref persisted, args.TokenCache.SerializeMsalV3());
+                    }
+                }
+
+                if (provider == "sync")
+                {
+                    cache.SetBeforeAccess(BeforeAccess);
+                    cache.SetAfterAccess(AfterAccess);
+                }
+                else
+                {
+                    cache.SetBeforeAccessAsync(args => { BeforeAccess(args); return Task.CompletedTask; });
+                    cache.SetAfterAccessAsync(args => { AfterAccess(args); return Task.CompletedTask; });
+                }
+
+                var acquire = await CreateAcquisitionAsync(app, flow).ConfigureAwait(false);
+                if (proactive)
+                {
+                    await acquire().ConfigureAwait(false);
+                    TestCommon.UpdateATWithRefreshOn(cache.Accessor);
+                    Persist();
+                }
+                else if (flow == "silent" || flow == "silent-login-hint" || flow == "long-running")
+                {
+                    TokenCacheHelper.ExpireAllAccessTokens(cache);
+                    Persist();
+                }
+                int before = http.Calls;
+                http.Block = true;
+
+                // Act: followers hydrate their own views before the owner publishes.
+                var owner = acquire();
+                await AwaitAsync(http.Entered.Task).ConfigureAwait(false);
+                var waiters = Enumerable.Range(0, 4).Select(_ => acquire()).ToArray();
+                Task<AuthenticationResult> foregroundMiss = null;
+                try
+                {
+                    if (proactive)
+                    {
+                        Assert.AreEqual(TaskStatus.RanToCompletion, owner.Status);
+                        Assert.IsTrue(waiters.All(t => t.Status == TaskStatus.RanToCompletion));
+                        TokenCacheHelper.ExpireAllAccessTokens(cache);
+                        Persist();
+                        foregroundMiss = acquire();
+                        Assert.IsFalse(foregroundMiss.IsCompleted);
+                    }
+                    else
+                    {
+                        Assert.IsTrue(waiters.All(t => !t.IsCompleted));
+                    }
+                    Assert.AreEqual(1, http.Calls - before, "Followers must queue behind the owner.");
+                }
+                finally
+                {
+                    http.Release.TrySetResult(true);
+                }
+                var results = await AwaitAsync(Task.WhenAll(new[] { owner }.Concat(waiters))).ConfigureAwait(false);
+                if (proactive)
+                {
+                    Assert.IsTrue((await AwaitAsync(backgroundCompleted.Task).ConfigureAwait(false)).Successful);
+                    Assert.AreEqual(TokenSource.Cache,
+                        (await AwaitAsync(foregroundMiss).ConfigureAwait(false)).AuthenticationResultMetadata.TokenSource);
+                }
+                var warm = await acquire().ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual(1, http.Calls - before, "Only the owner may acquire a token from ESTS.");
+                Assert.AreEqual(proactive ? 5 : 4, results.Count(r => r.AuthenticationResultMetadata.TokenSource == TokenSource.Cache));
+                Assert.AreEqual(TokenSource.Cache, warm.AuthenticationResultMetadata.TokenSource);
+                Assert.HasCount(1, readTargets[warm.CorrelationId], "Warm hits must not rehydrate their cache session.");
+                if (!proactive)
+                {
+                    foreach (var result in results)
+                    {
+                        var targets = readTargets[result.CorrelationId].ToArray();
+                        Assert.HasCount(flow == "client" ? 1 : 2, targets);
+                        if (flow != "client")
+                        {
+                            Assert.AreNotSame(targets[0], targets[1], "Admission must renew the private view.");
+                            Assert.AreNotSame(cache, targets[1], "Renewal must not bypass private read ownership.");
+                            Assert.IsNotNull(result.IdToken);
+                            Assert.IsNotNull(result.Account.Username);
+                        }
+                    }
+                }
+            }
+            finally
+            {
+                AppContext.SetSwitch(setting, previous);
+            }
+        }
+
+        [TestMethod]
         [DataRow("client", false, false)]
         [DataRow("client", true, false)]
         [DataRow("provider", true, false)]
@@ -1408,7 +1577,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 await app.InitiateLongRunningProcessInWebApi(TestConstants.s_scope,
                     TestConstants.DefaultAccessToken, ref session).ExecuteAsync().ConfigureAwait(false);
             }
-            else if (flow == "silent")
+            else if (flow == "silent" || flow == "silent-login-hint")
             {
                 account = (await app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, "code")
                     .ExecuteAsync().ConfigureAwait(false)).Account;
@@ -1419,6 +1588,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     new UserAssertion(TestConstants.DefaultAccessToken)).ExecuteAsync(),
                 "long-running" => app.AcquireTokenInLongRunningProcess(TestConstants.s_scope, session).ExecuteAsync(),
                 "silent" => app.AcquireTokenSilent(TestConstants.s_scope, account).ExecuteAsync(),
+                "silent-login-hint" => app.AcquireTokenSilent(TestConstants.s_scope, account.Username).ExecuteAsync(),
                 _ => app.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync()
             };
         }

@@ -60,6 +60,8 @@ namespace Microsoft.Identity.Client.Internal
 
         public CancellationToken UserCancellationToken { get; }
 
+        public OperationCanceledException TokenRequestCancellationException { get; set; }
+
         public X509Certificate2 MtlsCertificate { get; }
 
         public bool IsAttestationRequested { get; set; }

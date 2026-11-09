@@ -4,10 +4,16 @@
 #if !ANDROID && !iOS
 using System;
 using System.Linq;
+using System.Net.Http;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Extensibility;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -428,6 +434,337 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         #endregion
 
         #region OnSuccess Integration Tests
+
+        [TestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task AcquireTokenForClient_CanceledDuringHttpRequest_InvokesOnCompletionOnceAndPropagatesCancellation(
+            bool completionThrows)
+        {
+            // Arrange
+            using var harness = CreateTestHarness();
+            harness.HttpManager.AddInstanceDiscoveryMockHandler();
+            using var certificate = CertHelper.CreateTestCert();
+            using var cancellation = new CancellationTokenSource();
+            using var handler = new CancelableTokenRequestHandler();
+            harness.HttpManager.AddMockHandler(handler);
+
+            int providerCount = 0;
+            int completionCount = 0;
+            int serviceFailureCount = 0;
+            ExecutionResult completionResult = null;
+            AssertionRequestOptions completionOptions = null;
+            var completionEntered = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+            var releaseCompletion = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+            var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                .WithAuthority(TestConstants.AuthorityCommonTenant)
+                .WithHttpManager(harness.HttpManager)
+                .WithCertificate(_ =>
+                {
+                    providerCount++;
+                    return Task.FromResult(certificate);
+                }, new CertificateOptions())
+                .OnMsalServiceFailure((_, _) =>
+                {
+                    serviceFailureCount++;
+                    return Task.FromResult(true);
+                })
+                .OnCompletion(async (options, result) =>
+                {
+                    completionCount++;
+                    completionResult = result;
+                    completionOptions = options;
+                    completionEntered.TrySetResult(true);
+                    await releaseCompletion.Task.ConfigureAwait(false);
+                    if (completionThrows)
+                    {
+                        throw new InvalidOperationException("Completion callback failed.");
+                    }
+                })
+                .Build();
+
+            // Act
+            Task<AuthenticationResult> acquisition = app.AcquireTokenForClient(TestConstants.s_scope)
+                .ExecuteAsync(cancellation.Token);
+            try
+            {
+                Assert.AreSame(handler.RequestStarted,
+                    await Task.WhenAny(handler.RequestStarted, acquisition, Task.Delay(TimeSpan.FromSeconds(10))).ConfigureAwait(false),
+                    "The token POST must be in flight before cancellation.");
+                cancellation.Cancel();
+                await Task.WhenAny(completionEntered.Task, acquisition, Task.Delay(TimeSpan.FromSeconds(10))).ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual(1, completionCount, "Cancellation must invoke OnCompletion exactly once.");
+                Assert.IsFalse(acquisition.IsCompleted, "ExecuteAsync must await the completion callback.");
+                releaseCompletion.TrySetResult(true);
+                Assert.AreSame(acquisition,
+                    await Task.WhenAny(acquisition, Task.Delay(TimeSpan.FromSeconds(10))).ConfigureAwait(false));
+                var exception = await Assert.ThrowsAsync<OperationCanceledException>(() => acquisition).ConfigureAwait(false);
+
+                Assert.IsTrue(acquisition.IsCanceled);
+                Assert.AreEqual(1, providerCount);
+                Assert.AreEqual(1, handler.PostCount);
+                Assert.AreEqual(1, completionCount);
+                Assert.AreEqual(0, serviceFailureCount, "Caller cancellation must not enter the service retry callback.");
+                Assert.IsFalse(completionResult.Successful);
+                Assert.IsNull(completionResult.Result);
+                Assert.AreSame(certificate, completionResult.ClientCertificate);
+                Assert.IsInstanceOfType<MsalClientException>(completionResult.Exception);
+                Assert.AreEqual(MsalError.AuthenticationCanceledError, completionResult.Exception.ErrorCode);
+                Assert.AreSame(exception, completionResult.Exception.InnerException);
+                Assert.AreEqual(handler.TokenEndpoint, completionOptions.TokenEndpoint);
+                Assert.IsTrue(certificate.HasPrivateKey);
+                Assert.IsGreaterThan(0, certificate.GetCertHash().Length);
+                using var signingKey = certificate.GetRSAPrivateKey();
+                Assert.IsNotNull(signingKey.SignData(new byte[] { 1, 2, 3 }, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1));
+            }
+            finally
+            {
+                cancellation.Cancel();
+                releaseCompletion.TrySetResult(true);
+                await Task.WhenAny(acquisition, Task.Delay(TimeSpan.FromSeconds(10))).ConfigureAwait(false);
+            }
+        }
+
+        [TestMethod]
+        [DataRow(false, false)]
+        [DataRow(true, false)]
+        [DataRow(false, true)]
+        public async Task AcquireTokenForClient_CanceledBeforeTokenPost_DoesNotInvokeCompletion(
+            bool retryCertificateLoad, bool cancelBeforePost)
+        {
+            // Arrange
+            using var harness = CreateTestHarness();
+            harness.HttpManager.AddInstanceDiscoveryMockHandler();
+            using var certificate = CertHelper.CreateTestCert();
+            using var cancellation = new CancellationTokenSource();
+            var loading = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+            int providerCount = 0;
+            int postCount = 0;
+            int completionCount = 0;
+            int serviceFailureCount = 0;
+            if (retryCertificateLoad)
+            {
+                harness.HttpManager.AddFailureTokenEndpointResponse("invalid_client")
+                    .AdditionalRequestValidation = _ => postCount++;
+            }
+
+            var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                .WithAuthority(TestConstants.AuthorityCommonTenant)
+                .WithHttpManager(harness.HttpManager)
+                .WithCertificate(async options =>
+                {
+                    providerCount++;
+                    if (cancelBeforePost || (retryCertificateLoad && providerCount == 1))
+                    {
+                        return certificate;
+                    }
+
+                    loading.TrySetResult(true);
+                    await Task.Delay(Timeout.Infinite, options.CancellationToken).ConfigureAwait(false);
+                    throw new AssertFailedException("Certificate loading must end through cancellation.");
+                }, new CertificateOptions())
+                .OnMsalServiceFailure((_, _) =>
+                {
+                    serviceFailureCount++;
+                    return Task.FromResult(true);
+                })
+                .OnCompletion((_, _) =>
+                {
+                    completionCount++;
+                    return Task.CompletedTask;
+                })
+                .Build();
+
+            // Act
+            Task<AuthenticationResult> acquisition = app.AcquireTokenForClient(TestConstants.s_scope)
+                .OnBeforeTokenRequest(async data =>
+                {
+                    if (cancelBeforePost)
+                    {
+                        loading.TrySetResult(true);
+                        await Task.Delay(Timeout.Infinite, data.CancellationToken).ConfigureAwait(false);
+                    }
+                })
+                .ExecuteAsync(cancellation.Token);
+            try
+            {
+                Assert.AreSame(loading.Task,
+                    await Task.WhenAny(loading.Task, acquisition, Task.Delay(TimeSpan.FromSeconds(10))).ConfigureAwait(false));
+                cancellation.Cancel();
+                Assert.AreSame(acquisition,
+                    await Task.WhenAny(acquisition, Task.Delay(TimeSpan.FromSeconds(10))).ConfigureAwait(false));
+                await Assert.ThrowsAsync<OperationCanceledException>(() => acquisition).ConfigureAwait(false);
+
+                // Assert
+                Assert.IsTrue(acquisition.IsCanceled);
+                Assert.AreEqual(retryCertificateLoad ? 2 : 1, providerCount);
+                Assert.AreEqual(retryCertificateLoad ? 1 : 0, postCount);
+                Assert.AreEqual(retryCertificateLoad ? 1 : 0, serviceFailureCount);
+                Assert.AreEqual(0, completionCount, "Cancellation before the token POST must not notify completion.");
+            }
+            finally
+            {
+                cancellation.Cancel();
+                await Task.WhenAny(acquisition, Task.Delay(TimeSpan.FromSeconds(10))).ConfigureAwait(false);
+            }
+        }
+
+        [TestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task AcquireTokenForClient_QueuedAppTokenProviderCanceled_DoesNotInvokeCompletion(bool forceRefresh)
+        {
+            // Arrange
+            using var harness = CreateTestHarness();
+            harness.HttpManager.AddInstanceDiscoveryMockHandler();
+            using var cancellation = new CancellationTokenSource();
+            var providerEntered = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+            var releaseProvider = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+            int providerCount = 0;
+            int completionCount = 0;
+            var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                .WithAuthority(TestConstants.AuthorityCommonTenant)
+                .WithHttpManager(harness.HttpManager)
+                .WithAppTokenProvider(async _ =>
+                {
+                    Interlocked.Increment(ref providerCount);
+                    providerEntered.TrySetResult(true);
+                    await releaseProvider.Task.ConfigureAwait(false);
+                    return new AppTokenProviderResult
+                    {
+                        AccessToken = TestConstants.DefaultAccessToken,
+                        ExpiresInSeconds = 3600
+                    };
+                })
+                .OnCompletion((_, _) =>
+                {
+                    Interlocked.Increment(ref completionCount);
+                    return Task.CompletedTask;
+                })
+                .Build();
+            Task<AuthenticationResult> firstCall = app.AcquireTokenForClient(TestConstants.s_scope)
+                .WithForceRefresh(forceRefresh).ExecuteAsync();
+            Task<AuthenticationResult> queuedCall = null;
+
+            try
+            {
+                // Act
+                Assert.AreSame(providerEntered.Task,
+                    await Task.WhenAny(providerEntered.Task, firstCall, Task.Delay(TimeSpan.FromSeconds(10))).ConfigureAwait(false));
+                queuedCall = app.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithForceRefresh(forceRefresh).ExecuteAsync(cancellation.Token);
+                Assert.IsFalse(queuedCall.IsCompleted);
+                cancellation.Cancel();
+                Assert.AreSame(queuedCall,
+                    await Task.WhenAny(queuedCall, Task.Delay(TimeSpan.FromSeconds(10))).ConfigureAwait(false));
+                await Assert.ThrowsAsync<OperationCanceledException>(() => queuedCall).ConfigureAwait(false);
+
+                // Assert
+                Assert.IsTrue(queuedCall.IsCanceled);
+                Assert.AreEqual(1, providerCount, "The queued call must not enter the provider.");
+                Assert.AreEqual(0, completionCount, "Canceling a queued provider call must not notify completion.");
+                releaseProvider.TrySetResult(true);
+                Assert.AreSame(firstCall,
+                    await Task.WhenAny(firstCall, Task.Delay(TimeSpan.FromSeconds(10))).ConfigureAwait(false));
+                Assert.AreEqual(TestConstants.DefaultAccessToken, (await firstCall.ConfigureAwait(false)).AccessToken);
+                Assert.AreEqual(1, completionCount, "The successful first call must still notify completion.");
+            }
+            finally
+            {
+                cancellation.Cancel();
+                releaseProvider.TrySetResult(true);
+                await Task.WhenAny(firstCall, Task.Delay(TimeSpan.FromSeconds(10))).ConfigureAwait(false);
+                if (queuedCall is not null)
+                {
+                    await Task.WhenAny(queuedCall, Task.Delay(TimeSpan.FromSeconds(10))).ConfigureAwait(false);
+                }
+            }
+        }
+
+        [TestMethod]
+        public async Task AcquireTokenForClient_BackgroundHttpRequestCanceled_DoesNotInvokeCompletion()
+        {
+            // Arrange
+            using var harness = CreateTestHarness();
+            harness.HttpManager.AddInstanceDiscoveryMockHandler();
+            using var certificate = CertHelper.CreateTestCert();
+            using var cancellation = new CancellationTokenSource();
+            using var handler = new CancelableTokenRequestHandler();
+            harness.HttpManager.AddMockHandler(handler);
+            int completionCount = 0;
+            var cancellationObserved = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+            var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                .WithAuthority(AzureCloudInstance.AzurePublic, TestConstants.Utid)
+                .WithHttpManager(harness.HttpManager)
+                .WithCertificate(_ => Task.FromResult(certificate), new CertificateOptions())
+                .WithLogging((_, message, _) =>
+                {
+                    if (message.Contains(SilentRequestHelper.ProactiveRefreshCancellationError))
+                    {
+                        cancellationObserved.TrySetResult(true);
+                    }
+                })
+                .OnCompletion((_, _) =>
+                {
+                    Interlocked.Increment(ref completionCount);
+                    return Task.CompletedTask;
+                })
+                .BuildConcrete();
+            TokenCacheHelper.PopulateCache(app.AppTokenCacheInternal.Accessor, addSecondAt: false);
+            TestCommon.UpdateATWithRefreshOn(app.AppTokenCacheInternal.Accessor);
+
+            // Act
+            Task<AuthenticationResult> acquisition = app.AcquireTokenForClient(TestConstants.s_scope)
+                .ExecuteAsync(cancellation.Token);
+            try
+            {
+                Assert.AreSame(acquisition,
+                    await Task.WhenAny(acquisition, Task.Delay(TimeSpan.FromSeconds(10))).ConfigureAwait(false),
+                    "The foreground cache hit must return without waiting for the background token POST.");
+                var result = await acquisition.ConfigureAwait(false);
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+                Assert.AreSame(handler.RequestStarted,
+                    await Task.WhenAny(handler.RequestStarted, Task.Delay(TimeSpan.FromSeconds(10))).ConfigureAwait(false));
+                cancellation.Cancel();
+                Assert.AreSame(cancellationObserved.Task,
+                    await Task.WhenAny(cancellationObserved.Task, Task.Delay(TimeSpan.FromSeconds(10))).ConfigureAwait(false));
+
+                // Assert
+                Assert.AreEqual(0, completionCount, "Neither the cache hit nor the canceled background request should invoke OnCompletion.");
+                Assert.AreEqual(1, handler.PostCount);
+                Assert.IsTrue(certificate.HasPrivateKey);
+            }
+            finally
+            {
+                cancellation.Cancel();
+                await Task.WhenAny(acquisition, Task.Delay(TimeSpan.FromSeconds(10))).ConfigureAwait(false);
+                await Task.WhenAny(cancellationObserved.Task, Task.Delay(TimeSpan.FromSeconds(10))).ConfigureAwait(false);
+            }
+        }
+
+        private sealed class CancelableTokenRequestHandler : MockHttpMessageHandler
+        {
+            private readonly TaskCompletionSource<bool> _requestStarted =
+                new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+            internal Task RequestStarted => _requestStarted.Task;
+            internal int PostCount { get; private set; }
+            internal string TokenEndpoint { get; private set; }
+
+            protected override async Task<HttpResponseMessage> SendAsync(
+                HttpRequestMessage request, CancellationToken cancellationToken)
+            {
+                Assert.AreEqual(HttpMethod.Post, request.Method);
+                StringAssert.EndsWith(request.RequestUri.AbsolutePath, "/token");
+                PostCount++;
+                TokenEndpoint = request.RequestUri.AbsoluteUri;
+                _requestStarted.TrySetResult(true);
+                await Task.Delay(Timeout.Infinite, cancellationToken).ConfigureAwait(false);
+                throw new AssertFailedException("The token request must end through cancellation.");
+            }
+        }
 
         [TestMethod]
         [Description("OnCompletion is invoked with successful result")]

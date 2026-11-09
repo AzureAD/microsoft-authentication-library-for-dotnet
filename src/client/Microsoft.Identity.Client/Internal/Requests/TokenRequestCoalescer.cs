@@ -120,6 +120,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
             MsalAccessTokenCacheItem observedToken,
             CancellationToken cancellationToken)
         {
+            // A preceding owner may have published after this session pinned its initial view.
+            // Renew only at admission; token, ID-token and account lookups then share the new view.
+            _parameters.CacheSessionManager.ResetReadView();
             var cachedToken = await _findToken().ConfigureAwait(false);
             cachedToken = await RequestBase.ValidateCachedAccessTokenAsync(
                 _parameters, cachedToken, nameof(TokenRequestCoalescer)).ConfigureAwait(false);

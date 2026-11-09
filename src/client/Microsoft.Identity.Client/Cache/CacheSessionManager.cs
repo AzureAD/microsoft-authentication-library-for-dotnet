@@ -11,6 +11,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.TelemetryCore.TelemetryClient;
 using Microsoft.Identity.Client.Utils;
 
@@ -20,12 +21,15 @@ namespace Microsoft.Identity.Client.Cache
     /// MSAL should only interact with the cache though this object. It is responsible for firing cache notifications.
     /// Flows should only perform (at most) 2 cache accesses: one to read data and one to write tokens. Reading data multiple times 
     /// (e.g. read all ATs, read all RTs) should not refresh the cache from disk because of performance impact.
+    /// Coalescing admission renews an isolated read view once to observe a preceding acquisition's publication.
     /// Write operations are still the responsibility of TokenCache.
     /// </summary>
     internal class CacheSessionManager : ICacheSessionManager
     {
         private readonly AuthenticationRequestParameters _requestParams;
         private bool _cacheRefreshedForRead = false;
+        private TokenCache _readView;
+        private ITokenCacheInternal ReadCache => _readView ?? TokenCacheInternal;
 
         public CacheSessionManager(
             ITokenCacheInternal tokenCacheInternal,
@@ -40,6 +44,16 @@ namespace Microsoft.Identity.Client.Cache
 
         #region ICacheSessionManager implementation
         public ITokenCacheInternal TokenCacheInternal { get; }
+
+        /// <inheritdoc />
+        public void ResetReadView()
+        {
+            if (_readView is not null)
+            {
+                _readView = null;
+                _cacheRefreshedForRead = false;
+            }
+        }
 
         private bool IsInternalCacheDisabled =>
             CacheOptions.IsDisabledFor(_requestParams.RequestContext.ServiceBundle.Config.AccessorOptions);
@@ -71,12 +85,21 @@ namespace Microsoft.Identity.Client.Cache
             {
                 return null;
             }
-            return await TokenCacheInternal.FindAccessTokenAsync(_requestParams).ConfigureAwait(false);
+            return await ReadCache.FindAccessTokenAsync(_requestParams).ConfigureAwait(false);
         }
 
         public async Task<Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem, Account>> SaveTokenResponseAsync(MsalTokenResponse tokenResponse)
         {
-            var result = await TokenCacheInternal.SaveTokenResponseAsync(_requestParams, tokenResponse).ConfigureAwait(false);
+            Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem, Account> result;
+            try
+            {
+                result = await TokenCacheInternal.SaveTokenResponseAsync(_requestParams, tokenResponse).ConfigureAwait(false);
+            }
+            finally
+            {
+                // Persistence callbacks can fail after the root has already changed.
+                ResetReadView();
+            }
             RequestContext.ApiEvent.CachedAccessTokenCount = GetInternalCacheEntryCountForTelemetry();
             return result;
         }
@@ -88,7 +111,7 @@ namespace Microsoft.Identity.Client.Cache
             {
                 return null;
             }
-            return await TokenCacheInternal.GetAccountAssociatedWithAccessTokenAsync(_requestParams, msalAccessTokenCacheItem).ConfigureAwait(false);
+            return await ReadCache.GetAccountAssociatedWithAccessTokenAsync(_requestParams, msalAccessTokenCacheItem).ConfigureAwait(false);
         }
 
         public async Task<MsalIdTokenCacheItem> GetIdTokenCacheItemAsync(MsalAccessTokenCacheItem accessTokenCacheItem)
@@ -98,7 +121,7 @@ namespace Microsoft.Identity.Client.Cache
             {
                 return null;
             }
-            return TokenCacheInternal.GetIdTokenCacheItem(accessTokenCacheItem);
+            return ReadCache.GetIdTokenCacheItem(accessTokenCacheItem);
         }
 
         public async Task<MsalRefreshTokenCacheItem> FindFamilyRefreshTokenAsync(string familyId)
@@ -114,7 +137,7 @@ namespace Microsoft.Identity.Client.Cache
                 throw new ArgumentNullException(nameof(familyId));
             }
 
-            return await TokenCacheInternal.FindRefreshTokenAsync(_requestParams, familyId).ConfigureAwait(false);
+            return await ReadCache.FindRefreshTokenAsync(_requestParams, familyId).ConfigureAwait(false);
         }
 
         public async Task<MsalRefreshTokenCacheItem> FindRefreshTokenAsync()
@@ -124,7 +147,7 @@ namespace Microsoft.Identity.Client.Cache
             {
                 return null;
             }
-            return await TokenCacheInternal.FindRefreshTokenAsync(_requestParams).ConfigureAwait(false);
+            return await ReadCache.FindRefreshTokenAsync(_requestParams).ConfigureAwait(false);
         }
 
         public async Task<bool?> IsAppFociMemberAsync(string familyId)
@@ -134,7 +157,7 @@ namespace Microsoft.Identity.Client.Cache
             {
                 return null;
             }
-            return await TokenCacheInternal.IsFociMemberAsync(_requestParams, familyId).ConfigureAwait(false);
+            return await ReadCache.IsFociMemberAsync(_requestParams, familyId).ConfigureAwait(false);
         }
 
         public async Task<IEnumerable<IAccount>> GetAccountsAsync()
@@ -144,7 +167,7 @@ namespace Microsoft.Identity.Client.Cache
             {
                 return System.Array.Empty<IAccount>();
             }
-            return await TokenCacheInternal.GetAccountsAsync(_requestParams).ConfigureAwait(false);
+            return await ReadCache.GetAccountsAsync(_requestParams).ConfigureAwait(false);
         }
 
         #endregion
@@ -154,31 +177,56 @@ namespace Microsoft.Identity.Client.Cache
         /// </remarks>
         private async Task RefreshCacheForReadOperationsAsync()
         {
+            PrepareReadView();
+            var refreshCache = ReadCache;
             if (TokenCacheInternal.IsAppSubscribedToSerializationEvents())
             {
                 if (!_cacheRefreshedForRead)
                 {
-                    _requestParams.RequestContext.Logger.Verbose(()=>$"[Cache Session Manager] Entering the cache semaphore. { TokenCacheInternal.Semaphore.GetCurrentCountLogMessage()}");
-                    await TokenCacheInternal.Semaphore.WaitAsync(_requestParams.RequestContext.UserCancellationToken).ConfigureAwait(false);
+                    _requestParams.RequestContext.Logger.Verbose(()=>$"[Cache Session Manager] Entering the cache semaphore. { refreshCache.Semaphore.GetCurrentCountLogMessage()}");
+                    await refreshCache.Semaphore.WaitAsync(_requestParams.RequestContext.UserCancellationToken).ConfigureAwait(false);
                     _requestParams.RequestContext.Logger.Verbose(()=>"[Cache Session Manager] Entered cache semaphore");
 
                     TelemetryData telemetryData = new TelemetryData();
+                    IDisposable readLease = null;
+                    bool exclusiveReadLifecycle = false;
                     try
                     {
                         if (!_cacheRefreshedForRead) // double check locking
                         {
+                            if (_readView != null)
+                            {
+                                // Cover L2-to-L1 publication as well as private deserialization.
+                                if (_readView.BeforeAccess != null || _readView.AfterAccess != null)
+                                {
+                                    await TokenCacheInternal.Semaphore
+                                        .WaitAsync(_requestParams.RequestContext.UserCancellationToken).ConfigureAwait(false);
+                                    exclusiveReadLifecycle = true;
+                                }
+                                else
+                                {
+                                    readLease = await TokenCacheInternal.Semaphore
+                                        .AcquireReadAsync(_requestParams.RequestContext.UserCancellationToken).ConfigureAwait(false);
+                                }
+                            }
+                            // Unkeyed initialization may complete while this read waits for the root lease.
+                            if (_cacheRefreshedForRead)
+                            {
+                                return;
+                            }
+                            using var hydrationScope = _readView?.BeginReadHydration(TokenCacheInternal);
                             string key = CacheKeyFactory.GetKeyFromRequest(_requestParams);
 
                             try
                             {
                                 var args = new TokenCacheNotificationArgs(
-                                  TokenCacheInternal,
+                                  refreshCache,
                                   _requestParams.AppConfig.ClientId,
                                   _requestParams.Account,                                  
                                   hasStateChanged: false,
-                                  isApplicationCache: TokenCacheInternal.IsApplicationCache,
+                                  isApplicationCache: refreshCache.IsApplicationCache,
                                   suggestedCacheKey: key,
-                                  hasTokens: TokenCacheInternal.HasTokensNoLocks(),
+                                  hasTokens: refreshCache.HasTokensNoLocks(),
                                   cancellationToken: _requestParams.RequestContext.UserCancellationToken,
                                   suggestedCacheExpiry: null,
                                   correlationId: _requestParams.RequestContext.CorrelationId, 
@@ -188,21 +236,22 @@ namespace Microsoft.Identity.Client.Cache
                                   piiLoggingEnabled: _requestParams.RequestContext.Logger.PiiLoggingEnabled,
                                   telemetryData: telemetryData);
 
-                                var measureDurationResult = await TokenCacheInternal.OnBeforeAccessAsync(args).MeasureAsync().ConfigureAwait(false);
+                                var measureDurationResult = await refreshCache.OnBeforeAccessAsync(args).MeasureAsync().ConfigureAwait(false);
                                 RequestContext.ApiEvent.DurationInCacheInMs += measureDurationResult.Milliseconds;
+                                _readView?.ValidateReadHydration();
                             }
                             finally
                             {
                                 var measureDurationResult = await StopwatchService.MeasureCodeBlockAsync(async () =>
                                 {
                                     var args = new TokenCacheNotificationArgs(
-                                      TokenCacheInternal,
+                                      refreshCache,
                                       _requestParams.AppConfig.ClientId,
                                       _requestParams.Account,
                                       hasStateChanged: false,
-                                      isApplicationCache: TokenCacheInternal.IsApplicationCache,
+                                      isApplicationCache: refreshCache.IsApplicationCache,
                                       suggestedCacheKey: key,
-                                      hasTokens: TokenCacheInternal.HasTokensNoLocks(),
+                                      hasTokens: refreshCache.HasTokensNoLocks(),
                                       cancellationToken: _requestParams.RequestContext.UserCancellationToken,
                                       suggestedCacheExpiry: null,
                                       correlationId: _requestParams.RequestContext.CorrelationId,
@@ -212,19 +261,34 @@ namespace Microsoft.Identity.Client.Cache
                                       piiLoggingEnabled: _requestParams.RequestContext.Logger.PiiLoggingEnabled,
                                       telemetryData: telemetryData);
 
-                                    await TokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
+                                    await refreshCache.OnAfterAccessAsync(args).ConfigureAwait(false);
                                 }).ConfigureAwait(false);
                                 RequestContext.ApiEvent.DurationInCacheInMs += measureDurationResult.Milliseconds;
 
                             }
 
+                            if (_readView != null)
+                            {
+                                _readView.PublishReadView((TokenCache)TokenCacheInternal);
+                            }
+                            else if (TokenCacheInternal is TokenCache root &&
+                                root.UseIsolatedCacheReads &&
+                                root.Accessor is InMemoryPartitionedUserTokenCacheAccessor)
+                            {
+                                // Whole-cache callbacks keep their original target/lifecycle, but
+                                // subsequent lookups must not follow a later keyed publication.
+                                _readView = root.CreatePinnedReadView();
+                            }
                             _cacheRefreshedForRead = true;
 
                         }
                     }
                     finally
                     {
-                        TokenCacheInternal.Semaphore.Release();
+                        refreshCache.Semaphore.Release();
+                        if (exclusiveReadLifecycle)
+                            TokenCacheInternal.Semaphore.Release();
+                        readLease?.Dispose();
                         _requestParams.RequestContext.Logger.Verbose(()=>"[Cache Session Manager] Released cache semaphore");
                         RequestContext.ApiEvent.CacheLevel = telemetryData.CacheLevel;
                     }
@@ -237,6 +301,22 @@ namespace Microsoft.Identity.Client.Cache
             RequestContext.ApiEvent.CachedAccessTokenCount = GetInternalCacheEntryCountForTelemetry();
         }
 
+        private void PrepareReadView()
+        {
+            if (_cacheRefreshedForRead ||
+                _readView != null ||
+                !(TokenCacheInternal is TokenCache root) ||
+                !root.UseIsolatedCacheReads ||
+                !(root.Accessor is InMemoryPartitionedUserTokenCacheAccessor) ||
+                string.IsNullOrEmpty(CacheKeyFactory.GetKeyFromRequest(_requestParams)) ||
+                !TokenCacheInternal.IsAppSubscribedToSerializationEvents())
+            {
+                return;
+            }
+
+            Interlocked.CompareExchange(ref _readView, root.CreateReadView(), null);
+        }
+
         private int GetInternalCacheEntryCountForTelemetry()
         {
             if (IsInternalCacheDisabled)
@@ -244,7 +324,7 @@ namespace Microsoft.Identity.Client.Cache
                 return 0;
             }
 
-            return TokenCacheInternal.Accessor.EntryCount;
+            return ReadCache.Accessor.EntryCount;
         }
     }
 }
