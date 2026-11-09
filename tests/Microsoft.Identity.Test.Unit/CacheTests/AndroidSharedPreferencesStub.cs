@@ -25,7 +25,7 @@ namespace Android.Content
 
     internal enum FileCreationMode { Private }
 
-    internal sealed class Context
+    public partial class Context
     {
         internal ISharedPreferences GetSharedPreferences(string name, FileCreationMode mode) =>
             throw new NotSupportedException("Unit tests must inject SharedPreferences.");
@@ -49,5 +49,9 @@ namespace Microsoft.Identity.Client.Platforms.Android
     {
         internal const string FailedToCreateSharedPreference = "shared_preference_creation_failed";
         internal const string UserMismatch = Client.MsalError.UserMismatch;
+        internal const string UnresolvableIntentError = "unresolvable_intent";
+        internal const string InvalidRequest = Client.MsalError.InvalidRequest;
+        internal const string AndroidActivityNotFound = "android_activity_not_found";
+        internal const string AuthenticationUiFailedError = Client.MsalError.AuthenticationUiFailedError;
     }
 }
