@@ -785,12 +785,15 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
-        public async Task QueuedCacheResult_BlockedFormatter_DoesNotBlockOtherWaitersAsync()
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task CoalescedResult_BlockedFormatter_DoesNotBlockOtherWaitersAsync(bool blockOwner)
         {
             // Arrange
             using var http = new BlockingTokenEndpoint { Block = true };
             using var cancellation = new CancellationTokenSource(TimeSpan.FromSeconds(30));
             var app = CreateDirectApp(http);
+            Guid ownerCorrelationId = Guid.NewGuid();
             var formatting = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
             var release = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
             int formats = 0;
@@ -800,9 +803,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             operation.GetTokenRequestParams().Returns(new Dictionary<string, string>());
             operation.ValidateCachedTokenAsync(Arg.Any<MsalCacheValidationData>()).Returns(Task.FromResult(true));
             operation.FormatResultAsync(Arg.Any<AuthenticationResult>(), Arg.Any<CancellationToken>())
-                .Returns(async _ =>
+                .Returns(async call =>
                 {
-                    if (Interlocked.Increment(ref formats) == 1)
+                    int invocation = Interlocked.Increment(ref formats);
+                    if (blockOwner ? call.Arg<AuthenticationResult>().CorrelationId == ownerCorrelationId : invocation == 1)
                     {
                         formatting.TrySetResult(true);
                         await release.Task.ConfigureAwait(false);
@@ -810,7 +814,12 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 });
 
             // Act: both followers miss the cache and queue before the owner publishes.
-            var owner = app.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync(cancellation.Token);
+            var ownerRequest = app.AcquireTokenForClient(TestConstants.s_scope).WithCorrelationId(ownerCorrelationId);
+            if (blockOwner)
+            {
+                ownerRequest = ownerRequest.WithAuthenticationOperation(operation);
+            }
+            var owner = ownerRequest.ExecuteAsync(cancellation.Token);
             await AwaitAsync(http.Entered.Task).ConfigureAwait(false);
             var waiters = Enumerable.Range(0, 2).Select(_ => app.AcquireTokenForClient(TestConstants.s_scope)
                 .WithAuthenticationOperation(operation).ExecuteAsync(cancellation.Token)).ToArray();
@@ -819,32 +828,45 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.IsTrue(waiters.All(t => !t.IsCompleted));
                 Assert.AreEqual(1, http.Calls, "Both followers must wait on the owner's admission.");
                 http.Release.TrySetResult(true);
-                await AwaitAsync(owner).ConfigureAwait(false);
+                if (!blockOwner)
+                {
+                    await AwaitAsync(owner).ConfigureAwait(false);
+                }
                 await AwaitAsync(formatting.Task).ConfigureAwait(false);
 
-                // Assert: one queued caller completes while the other's formatter remains suspended.
+                // Assert: queued callers progress independently of the suspended formatter.
                 var completed = await AwaitAsync(Task.WhenAny(waiters)).ConfigureAwait(false);
                 var result = await completed.ConfigureAwait(false);
+                if (blockOwner)
+                {
+                    await AwaitAsync(Task.WhenAll(waiters)).ConfigureAwait(false);
+                    Assert.IsFalse(owner.IsCompleted);
+                }
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
-                Assert.AreEqual(1, waiters.Count(t => t.IsCompleted));
+                Assert.AreEqual(blockOwner ? 2 : 1, waiters.Count(t => t.IsCompleted));
                 Assert.AreEqual(1, http.Calls);
-                Assert.AreEqual((1L, 1L), ReadCoalescingTelemetry(app),
-                    "A suspended formatter must not yet count as a successful coalesced request.");
+                Assert.AreEqual(blockOwner ? (2L, 0L) : (1L, 1L), ReadCoalescingTelemetry(app),
+                    "A suspended formatter must not yet count as a successful request.");
             }
             finally
             {
                 http.Release.TrySetResult(true);
                 release.TrySetResult(true);
-                await Task.WhenAll(waiters).ConfigureAwait(false);
+                await Task.WhenAll(waiters.Append(owner)).ConfigureAwait(false);
             }
 
             var results = await Task.WhenAll(waiters).ConfigureAwait(false);
-            Assert.AreEqual(2, formats);
+            var ownerResult = await owner.ConfigureAwait(false);
+            Assert.AreEqual(blockOwner ? 3 : 2, formats);
+            Assert.AreEqual(TokenSource.IdentityProvider, ownerResult.AuthenticationResultMetadata.TokenSource);
+            Assert.AreEqual(ownerCorrelationId, ownerResult.CorrelationId);
             Assert.IsTrue(results.All(r => r.AuthenticationResultMetadata.TokenSource == TokenSource.Cache));
+            Assert.IsTrue(results.All(r => r.AccessToken == ownerResult.AccessToken));
+            Assert.IsTrue(results.All(r => !ReferenceEquals(r, ownerResult) && r.CorrelationId != ownerCorrelationId));
             Assert.AreNotSame(results[0], results[1]);
             Assert.AreNotEqual(results[0].CorrelationId, results[1].CorrelationId);
             Assert.AreEqual(1, http.Calls);
-            Assert.AreEqual((1L, 0L), ReadCoalescingTelemetry(app));
+            Assert.AreEqual(blockOwner ? (0L, 1L) : (1L, 0L), ReadCoalescingTelemetry(app));
         }
 
         [TestMethod]
@@ -1243,6 +1265,58 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
+        [DataRow(true, 429, false)]
+        [DataRow(true, 503, false)]
+        [DataRow(false, 429, false)]
+        [DataRow(false, 503, false)]
+        [DataRow(true, 503, true)]
+        [DataRow(false, 503, true)]
+        public async Task HttpCallbackServiceFailure_DoesNotSuppressRecoveredAcquisitionAsync(
+            bool failInFactory, int status, bool afterResponse)
+        {
+            // Arrange
+            using var http = new BlockingTokenEndpoint();
+            var failure = new MsalServiceException("callback_failure", "Not an ESTS response", status);
+            bool recovered = false;
+            int factoryCalls = 0;
+            bool ShouldFail() => !recovered && (!afterResponse || factoryCalls > 1);
+            var factory = Substitute.For<IMsalHttpClientFactory>();
+            factory.GetHttpClient().Returns(_ =>
+            {
+                factoryCalls++;
+                if (failInFactory && ShouldFail())
+                {
+                    throw failure;
+                }
+                return http.GetHttpClient();
+            });
+            http.ResponseFactory = () =>
+            {
+                if (ShouldFail())
+                {
+                    throw failure;
+                }
+                return recovered
+                    ? MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage()
+                    : CreateFailureResponse(503);
+            };
+            var app = CreateDirectApp(factory);
+
+            // Act
+            var original = await CaptureServiceFailureAsync(
+                app.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync()).ConfigureAwait(false);
+            recovered = true;
+            var result = await app.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync().ConfigureAwait(false);
+
+            // Assert
+            Assert.AreSame(failure, original);
+            Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+            Assert.AreEqual(afterResponse ? 3 : 2, factoryCalls);
+            Assert.AreEqual(factoryCalls - (failInFactory ? 1 : 0), http.Calls);
+            Assert.IsTrue(TokenRequestCoalescer.GetFailureCache(app.ServiceBundle).IsEmpty());
+        }
+
+        [TestMethod]
         [DataRow("provider")]
         [DataRow("before-request")]
         [DataRow("timeout")]
@@ -1555,7 +1629,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         private static ConfidentialClientApplication CreateDirectApp(
-            BlockingTokenEndpoint http, string clientId = null, bool shared = false)
+            IMsalHttpClientFactory http, string clientId = null, bool shared = false)
         {
             var app = ConfidentialClientApplicationBuilder.Create(clientId ?? Guid.NewGuid().ToString())
                 .WithAuthority(TestConstants.AuthorityTestTenant).WithInstanceDiscovery(false)

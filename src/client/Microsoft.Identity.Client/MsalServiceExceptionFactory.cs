@@ -84,6 +84,15 @@ namespace Microsoft.Identity.Client
             return ex;
         }
 
+        internal static MsalServiceException FromServiceUnavailableResponse(HttpResponse httpResponse, Uri endpoint)
+        {
+            string requestUriScrubbed = $"{endpoint.AbsoluteUri.Split('?')[0]}";
+            return FromHttpResponse(
+                MsalError.ServiceNotAvailable,
+                $"Service is unavailable to process the request. The request Uri is: {requestUriScrubbed} on port {endpoint.Port}",
+                httpResponse);
+        }
+
         private static string GetErrorMessage(string errorMessage, HttpResponse httpResponse, RequestContext context)
         {
             // Using StringBuilder for more efficient string concatenation

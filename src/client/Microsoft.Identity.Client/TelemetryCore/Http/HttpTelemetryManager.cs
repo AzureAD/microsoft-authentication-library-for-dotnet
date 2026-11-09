@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
 
         /// <summary>
         /// Clears only this schema's two aggregate fields when an HTTP request is replayed.
-        /// Older headers and unrecognized formats are left unchanged.
+        /// Empty counter slots, older headers and unrecognized formats are left unchanged.
         /// </summary>
         internal static string ClearCoalescingCounts(string header)
         {
@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
             }
 
             string[] fields = sections[2].Split(',');
-            if (fields.Length != 8)
+            if (fields.Length != 8 || (fields[6].Length == 0 && fields[7].Length == 0))
             {
                 return header;
             }
@@ -76,8 +76,8 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
 
         /// <summary>
         /// Expected format: 5|api_id,cache_info,region_used,region_autodetection,region_outcome|platform_config
-        /// platform_config: is_token_cache_serialized,is_legacy_cache_enabled, token_type, caller_sdk_id, caller_sdk_version, is_managed_cert_used
-        /// Eligible refresh reasons append coalesced_requests,successful_acquisitions from prior operations.
+        /// platform_config: is_token_cache_serialized,is_legacy_cache_enabled,token_type,caller_sdk_id,caller_sdk_version,is_managed_cert_used,coalesced_requests,successful_acquisitions
+        /// Eligible refresh reasons populate counts from prior operations; other reasons retain empty counter slots.
         /// </summary>
         public string GetCurrentRequestHeader(ApiEvent eventInProgress)
         {
@@ -134,6 +134,11 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
                 sb.Append(coalesced.ToString(CultureInfo.InvariantCulture));
                 sb.Append(TelemetryConstants.CommaDelimiter);
                 sb.Append(acquired.ToString(CultureInfo.InvariantCulture));
+            }
+            else
+            {
+                sb.Append(TelemetryConstants.CommaDelimiter);
+                sb.Append(TelemetryConstants.CommaDelimiter);
             }
 
             return sb.ToString();

@@ -45,7 +45,10 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         private PublicClientApplication _app;
 
         [TestMethod]
-        public void CoalescingCounters_AggregateEligibleReasonsAndDrainOnce()
+        [DataRow(CacheRefreshReason.ForceRefreshOrClaims)]
+        [DataRow(CacheRefreshReason.CacheDisabled)]
+        [DataRow(CacheRefreshReason.NotApplicable)]
+        public void CoalescingCounters_AggregateEligibleReasonsAndDrainOnce(CacheRefreshReason bypassReason)
         {
             // Arrange
             var manager = new HttpTelemetryManager();
@@ -57,17 +60,21 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             var apiEvent = new ApiEvent(Guid.NewGuid())
             {
                 ApiId = ApiIds.AcquireTokenForClient,
-                CacheInfo = CacheRefreshReason.ForceRefreshOrClaims,
+                CacheInfo = bypassReason,
                 IsManagedCertUsed = '1'
             };
 
-            // Act / Assert: bypasses must not consume pending counts or extend the header.
+            // Act / Assert: bypasses retain empty counter slots without consuming pending counts.
             Assert.AreEqual(string.Empty, manager.GetCurrentRequestHeader(null));
             string bypassHeader = manager.GetCurrentRequestHeader(apiEvent);
-            Assert.HasCount(6, bypassHeader.Split('|')[2].Split(','));
+            string[] bypassFields = bypassHeader.Split('|')[2].Split(',');
+            Assert.HasCount(8, bypassFields);
+            Assert.AreEqual(string.Empty, bypassFields[6]);
+            Assert.AreEqual(string.Empty, bypassFields[7]);
+            Assert.AreEqual(bypassHeader, HttpTelemetryManager.ClearCoalescingCounts(bypassHeader));
             apiEvent.CacheInfo = CacheRefreshReason.Expired;
             string header = manager.GetCurrentRequestHeader(apiEvent);
-            Assert.AreEqual(bypassHeader.Split('|')[2] + ",3,3", header.Split('|')[2]);
+            Assert.AreEqual(string.Join(",", bypassFields.Take(6)) + ",3,3", header.Split('|')[2]);
             Assert.IsTrue(manager.GetCurrentRequestHeader(apiEvent).EndsWith(",0,0", StringComparison.Ordinal));
 
             manager.RecordCoalescedRequest(CacheRefreshReason.NoCachedAccessToken);
@@ -100,9 +107,11 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         }
 
         [TestMethod]
-        [DataRow(false)]
-        [DataRow(true)]
-        public async Task CoalescingCounters_AreNotRepeatedOnHttpRetriesOrProtocolReplaysAsync(bool httpRetry)
+        [DataRow(false, false)]
+        [DataRow(false, true)]
+        [DataRow(true, false)]
+        [DataRow(true, true)]
+        public async Task CoalescingCounters_AreNotRepeatedOnHttpRetriesOrProtocolReplaysAsync(bool httpRetry, bool includeCounts)
         {
             // Arrange
             using var harness = new MockHttpAndServiceBundle();
@@ -115,10 +124,11 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             var apiEvent = new ApiEvent(Guid.NewGuid())
             {
                 ApiId = ApiIds.AcquireTokenForClient,
-                CacheInfo = CacheRefreshReason.Expired,
+                CacheInfo = includeCounts ? CacheRefreshReason.Expired : CacheRefreshReason.ForceRefreshOrClaims,
                 IsManagedCertUsed = '1'
             };
             string firstHeader = manager.GetCurrentRequestHeader(apiEvent);
+            Assert.HasCount(8, firstHeader.Split('|')[2].Split(','));
             string clearedHeader = manager.GetCurrentRequestHeader(apiEvent);
             var client = new OAuth2Client(harness.ServiceBundle.ApplicationLogger, harness.HttpManager, null);
             client.AddHeader(TelemetryConstants.XClientCurrentTelemetry, firstHeader);
@@ -158,8 +168,9 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 Assert.AreEqual(clearedHeader, retry.ActualRequestMessage.Headers.GetValues(TelemetryConstants.XClientCurrentTelemetry).Single());
             }
             Assert.AreEqual(clearedHeader, replay.ActualRequestMessage.Headers.GetValues(TelemetryConstants.XClientCurrentTelemetry).Single());
-            Assert.IsTrue(manager.GetCurrentRequestHeader(apiEvent).EndsWith(",1,0", StringComparison.Ordinal),
-                "Clearing a replay must not discard counts recorded after the original snapshot.");
+            apiEvent.CacheInfo = CacheRefreshReason.Expired;
+            Assert.IsTrue(manager.GetCurrentRequestHeader(apiEvent).EndsWith(includeCounts ? ",1,0" : ",9,1", StringComparison.Ordinal),
+                "Retries and replays must preserve buffered counts, including snapshots not carried by bypass requests.");
         }
 
         [TestCleanup]
@@ -1013,10 +1024,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             Assert.HasCount(3, telemetryCategories);
             Assert.HasCount(1, telemetryCategories[0].Split(',')); // version
             Assert.HasCount(5, telemetryCategories[1].Split(',')); // api_id, cache_info, region_used, region_source, region_outcome
-            bool hasCoalescingCounts = cacheInfo == CacheRefreshReason.Expired ||
-                cacheInfo == CacheRefreshReason.ProactivelyRefreshed ||
-                cacheInfo == CacheRefreshReason.NoCachedAccessToken;
-            Assert.HasCount(hasCoalescingCounts ? 8 : 6, telemetryCategories[2].Split(',')); // platform_fields
+            Assert.HasCount(8, telemetryCategories[2].Split(',')); // platform_fields
 
             Assert.AreEqual(TelemetryConstants.HttpTelemetrySchemaVersion.ToString(), telemetryCategories[0]); // version
 

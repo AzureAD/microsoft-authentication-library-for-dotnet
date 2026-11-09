@@ -139,7 +139,7 @@ namespace Microsoft.Identity.Client.OAuth2
                 IRetryPolicyFactory retryPolicyFactory = requestContext.ServiceBundle.Config.RetryPolicyFactory;
                 IRetryPolicy effectiveRetryPolicy = retryPolicy ?? retryPolicyFactory.GetRetryPolicy(RequestType.STS);
                 CancellationToken effectiveCancellationToken = cancellationToken ?? requestContext.UserCancellationToken;
-                bool sendingHttpRequest = false;
+                bool isTokenRequest = typeof(T) == typeof(MsalTokenResponse);
                 bool tokenPostStarted = false;
 
                 try
@@ -159,15 +159,14 @@ namespace Microsoft.Identity.Client.OAuth2
                             endpointUri = requestData.RequestUri;
                         }
 
-                        sendingHttpRequest = true;
-                        tokenPostStarted = typeof(T) == typeof(MsalTokenResponse) && !effectiveCancellationToken.IsCancellationRequested;
+                        tokenPostStarted = isTokenRequest && !effectiveCancellationToken.IsCancellationRequested;
                         response = await _httpManager.SendRequestAsync(
                             endpointUri,
                             _headers,
                             body: new FormUrlEncodedContent(_bodyParameters),
                             method: HttpMethod.Post,
                             logger: requestContext.Logger,
-                            doNotThrow: false,
+                            doNotThrow: isTokenRequest,
                             mtlsCertificate: _mtlsCertificate,
                             validateServerCertificate: null,
                             cancellationToken: effectiveCancellationToken,
@@ -176,7 +175,6 @@ namespace Microsoft.Identity.Client.OAuth2
                     }
                     else
                     {
-                        sendingHttpRequest = true;
                         response = await _httpManager.SendRequestAsync(
                             endpointUri,
                             _headers,
@@ -190,14 +188,16 @@ namespace Microsoft.Identity.Client.OAuth2
                             retryPolicy: effectiveRetryPolicy)
                         .ConfigureAwait(false);
                     }
+
+                    if (isTokenRequest && (int)response.StatusCode >= 500 && (int)response.StatusCode < 600)
+                    {
+                        // Only an actual final response establishes token-endpoint failure provenance.
+                        LastHttpServiceException = MsalServiceExceptionFactory.FromServiceUnavailableResponse(response, endpointUri);
+                        throw LastHttpServiceException;
+                    }
                 }
                 catch (Exception ex)
                 {
-                    if (sendingHttpRequest && ex is MsalServiceException serviceException)
-                    {
-                        LastHttpServiceException = serviceException;
-                    }
-
                     if (tokenPostStarted &&
                         ex is OperationCanceledException cancellationException &&
                         effectiveCancellationToken.IsCancellationRequested)

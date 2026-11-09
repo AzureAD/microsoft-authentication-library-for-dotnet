@@ -131,16 +131,19 @@ section of `x-client-current-telemetry`: `coalesced_requests` and `successful_ac
 The first counts successful post-admission cache returns and suppressed proactive refresh
 attempts, even when the active refresh later fails. The second counts successful coordinated
 acquisitions, not individual HTTP attempts. Ordinary warm-cache hits and bypasses do not count.
+The platform section always contains eight comma-delimited fields. Ineligible requests retain
+empty counter slots; eligible requests with no buffered counts emit `0,0`.
 
 Counts are accumulated per application instance across initial expired, proactive, and
 missing-token reasons, then consumed by the next token request with one of those reasons.
 They describe prior operations, not the carrying request's reason, flow, or tenant, and are
 not an exact count of ESTS HTTP calls saved. SDK-managed HTTP retries and protocol replays
-send zero for these two fields rather than repeating a snapshot. Delivery is best-effort:
+replace populated counters with zero rather than repeating a snapshot; empty slots stay empty.
+Delivery is best-effort:
 failed sends, application disposal, or no subsequent eligible request can lose counts.
 No extra requests or persistent storage are introduced. AppTokenProvider operations are
 counted locally but may never traverse MSAL's ESTS HTTP path to report them.
-ESTS must support the two optional trailing fields before they can be used in server-side
+ESTS must support the two new trailing fields before they can be used in server-side
 reporting; ingestion and server-side validation are not part of this SDK implementation.
 
 ### Rollout and rollback
