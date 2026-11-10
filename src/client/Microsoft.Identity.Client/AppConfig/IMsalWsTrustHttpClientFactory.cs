@@ -12,10 +12,6 @@ namespace Microsoft.Identity.Client
     /// Implement this interface on the factory supplied to MSAL to customize MEX and WS-Trust transport.
     /// If the supplied factory does not implement this interface, MSAL uses cached platform-default clients
     /// for these requests instead.
-    /// Experimental non-attested managed identity requests using an automatically selected RDP
-    /// certificate or <see cref="AppConfig.PoPOptions.BindingCertificate"/>
-    /// also require this interface on a custom factory. They call GetHttpClient(false) and reject
-    /// unsupported factories before sending; they do not fall back to platform-default clients.
     /// Other requests continue to use the supplied factory.
     /// Implementations must be thread-safe and reuse clients, keeping different credential configurations
     /// isolated. Configure handlers before their first request; do not modify shared clients or handlers
@@ -27,8 +23,7 @@ namespace Microsoft.Identity.Client
     {
         /// <summary>
         /// Returns a client with automatic redirects disabled and the requested server credential policy.
-        /// MSAL handles any permitted redirects itself. Supplied-certificate managed identity
-        /// requests reject redirects rather than following them.
+        /// MSAL handles any permitted redirects itself.
         /// </summary>
         /// <param name="useDefaultCredentials">
         /// Whether to use the current user's default credentials for server authentication on platforms that

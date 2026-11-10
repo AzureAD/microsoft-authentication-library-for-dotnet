@@ -23,13 +23,18 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         {
             cancellationToken.ThrowIfCancellationRequested();
 #if NET8_0_OR_GREATER
+            if (OperatingSystem.IsLinux())
+            {
+                return LinuxRdpCertificateReader.Read(logger, cancellationToken);
+            }
+
             if (!OperatingSystem.IsWindows())
 #else
             if (!DesktopOsHelper.IsWindows())
 #endif
             {
                 throw new MsalClientException(MsalError.MtlsNotSupportedForManagedIdentity,
-                    "Automatic RDP certificate selection requires Windows.");
+                    "Automatic RDP certificate selection requires Windows or Linux with .NET 8 or later.");
             }
 
             try
@@ -101,7 +106,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     {
                         if (string.Equals(certificate.Thumbprint, thumbprint, StringComparison.OrdinalIgnoreCase))
                         {
-                            ProvidedCertificateManagedIdentitySource.ValidateCertificate(certificate);
+                            EndorsedUnattestedManagedIdentitySource.ValidateCertificate(certificate);
                             return new X509Certificate2(certificate);
                         }
                     }

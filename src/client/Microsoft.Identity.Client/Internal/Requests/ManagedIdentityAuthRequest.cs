@@ -36,10 +36,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
             ManagedIdentityClient managedIdentityClient)
             : base(serviceBundle, authenticationRequestParameters, managedIdentityParameters)
         {
-            _managedIdentityParameters = managedIdentityParameters;
             // A completed builder can be reused while this execution's proactive refresh is pending.
-            _bindingCertificate = managedIdentityParameters.ProvidedBindingCertificate;
-            _useRdpCertificate = managedIdentityParameters.UseRdpCertificate;
+            _managedIdentityParameters = managedIdentityParameters.Clone();
+            _useRdpCertificate = _managedIdentityParameters.UseRdpCertificate;
             _managedIdentityClient = managedIdentityClient;
             _cryptoManager = serviceBundle.PlatformProxy.CryptographyManager;
             _managedIdentityKeyProvider = serviceBundle.PlatformProxy.ManagedIdentityKeyProvider;
@@ -53,26 +52,26 @@ namespace Microsoft.Identity.Client.Internal.Requests
             if (_useRdpCertificate)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                ProvidedCertificateManagedIdentitySource.ValidateRequestOptions(
+                EndorsedUnattestedManagedIdentitySource.ValidateRequestOptions(
                     AuthenticationRequestParameters, _managedIdentityParameters);
                 // Resolve once before cache lookup; proactive refresh retains this same certificate.
                 _bindingCertificate = await ServiceBundle.PlatformProxy
                     .GetRdpBindingCertificateAsync(logger, cancellationToken).ConfigureAwait(false);
                 cancellationToken.ThrowIfCancellationRequested();
-                ProvidedCertificateManagedIdentitySource.ValidateCertificate(_bindingCertificate);
+                EndorsedUnattestedManagedIdentitySource.ValidateCertificate(_bindingCertificate);
             }
 
-            X509Certificate2 suppliedCertificate = _bindingCertificate;
-            if (suppliedCertificate is not null &&
+            X509Certificate2 bindingCertificate = _bindingCertificate;
+            if (bindingCertificate is not null &&
                 (AuthenticationRequestParameters.IsMtlsPopRequested || AuthenticationRequestParameters.PreferMsiV2))
             {
-                ProvidedCertificateManagedIdentitySource.ValidateRequest(
-                    AuthenticationRequestParameters, _managedIdentityParameters, suppliedCertificate);
-                AuthenticationRequestParameters.AuthenticationScheme = new MtlsPopAuthenticationOperation(suppliedCertificate);
+                EndorsedUnattestedManagedIdentitySource.ValidateRequest(
+                    AuthenticationRequestParameters, _managedIdentityParameters, bindingCertificate);
+                AuthenticationRequestParameters.AuthenticationScheme = new MtlsPopAuthenticationOperation(bindingCertificate);
             }
             
             // Prime the scheme before any cache lookup if we already have a binding cert from a prior mint
-            if (AuthenticationRequestParameters.IsMtlsPopRequested && suppliedCertificate is null)
+            if (AuthenticationRequestParameters.IsMtlsPopRequested && bindingCertificate is null)
             {
                 if (_managedIdentityClient.RuntimeMtlsBindingCertificate != null)
                 {
@@ -253,12 +252,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
             if (AuthenticationRequestParameters.IsMtlsPopRequested &&
                 _bindingCertificate is not null)
             {
-                var suppliedCertificateResponse = await ProvidedCertificateManagedIdentitySource
+                var bindingResponse = await EndorsedUnattestedManagedIdentitySource
                     .AcquireTokenAsync(AuthenticationRequestParameters, _managedIdentityParameters, _bindingCertificate, cancellationToken)
                     .ConfigureAwait(false);
-                suppliedCertificateResponse.Scope = AuthenticationRequestParameters.Scope.AsSingleString();
+                bindingResponse.Scope = AuthenticationRequestParameters.Scope.AsSingleString();
                 return await CacheTokenResponseAndCreateAuthenticationResultAsync(
-                    suppliedCertificateResponse, cancellationToken).ConfigureAwait(false);
+                    bindingResponse, cancellationToken).ConfigureAwait(false);
             }
 
             // mTLS PoP and mTLS Bearer are both served exclusively by IMDSv2. Mint the binding certificate, then delegate the

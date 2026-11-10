@@ -72,7 +72,8 @@ namespace Microsoft.Identity.Client.Http
             int retryCount = 0,
             bool allowAutoRedirect = true,
             bool useDefaultCredentials = true,
-            CancellationToken retryDelayCancellationToken = default)
+            CancellationToken retryDelayCancellationToken = default,
+            bool useConfiguredHttpClientFactory = false)
         {
             Exception timeoutException = null;
             HttpResponse response = null;
@@ -98,7 +99,8 @@ namespace Microsoft.Identity.Client.Http
                         validateServerCert, logger,
                         cancellationToken,
                         allowAutoRedirect,
-                        useDefaultCredentials).ConfigureAwait(false);
+                        useDefaultCredentials,
+                        useConfiguredHttpClientFactory).ConfigureAwait(false);
                 }
 
                 if (response.StatusCode == HttpStatusCode.OK)
@@ -146,7 +148,8 @@ namespace Microsoft.Identity.Client.Http
                     retryCount,
                     allowAutoRedirect,
                     useDefaultCredentials,
-                    retryDelayCancellationToken)
+                    retryDelayCancellationToken,
+                    useConfiguredHttpClientFactory)
                     .ConfigureAwait(false);
             }
 
@@ -199,11 +202,17 @@ namespace Microsoft.Identity.Client.Http
             Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> validateServerCert,
             bool allowAutoRedirect,
             bool useDefaultCredentials,
-            ILoggerAdapter logger)
+            ILoggerAdapter logger,
+            bool useConfiguredHttpClientFactory = false)
         {
             if (x509Certificate2 != null && validateServerCert != null)
             {
                 throw new NotImplementedException("Mtls certificate cannot be used with service fabric. A custom http client is used for service fabric managed identity to validate the server certificate.");
+            }
+
+            if (useConfiguredHttpClientFactory)
+            {
+                return _httpClientFactory.GetHttpClient();
             }
 
             if (x509Certificate2 is null &&
@@ -277,7 +286,8 @@ namespace Microsoft.Identity.Client.Http
             ILoggerAdapter logger,
             CancellationToken cancellationToken,
             bool allowAutoRedirect,
-            bool useDefaultCredentials)
+            bool useDefaultCredentials,
+            bool useConfiguredHttpClientFactory)
         {
             using (HttpRequestMessage requestMessage = CreateRequestMessage(endpoint, headers))
             {
@@ -295,7 +305,8 @@ namespace Microsoft.Identity.Client.Http
                     validateServerCert,
                     allowAutoRedirect,
                     useDefaultCredentials,
-                    logger);
+                    logger,
+                    useConfiguredHttpClientFactory);
 
                 try
                 {

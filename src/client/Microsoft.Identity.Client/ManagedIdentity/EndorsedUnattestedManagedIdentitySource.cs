@@ -25,8 +25,8 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
-    // Experimental supplied or locally discovered certificate binding for the IMDS test endpoint.
-    internal static class ProvidedCertificateManagedIdentitySource
+    // Endorsed unattested flow for token binding using the configured RDP certificate.
+    internal static class EndorsedUnattestedManagedIdentitySource
     {
         // Temporary version supported by the test endpoint pending a dedicated API version.
         internal const string ApiVersion = "2018-02-01";
@@ -84,7 +84,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             if (parameters.MtlsPopMinStrength == MtlsBindingStrength.KeyGuard)
             {
                 throw new MsalClientException(MsalError.MinStrengthNotMet,
-                    "The supplied-certificate protocol establishes only Software-strength binding. " +
+                    "The endorsed unattested flow establishes only Software-strength binding. " +
                     "A platform certificate alone does not establish KeyGuard protection.");
             }
 
@@ -93,14 +93,14 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                  parameters.MtlsPopMinStrength != MtlsBindingStrength.Software))
             {
                 throw new MsalClientException("managed_identity_binding_options_invalid",
-                    "The supplied-certificate protocol supports only non-attested mTLS PoP with no floor or the Software floor.");
+                    "The endorsed unattested flow supports only mTLS PoP without attestation, with no floor or the Software floor.");
             }
 
             if (ManagedIdentityClient.GetManagedIdentitySourceNoImds(request.RequestContext.Logger) != ManagedIdentitySource.None ||
                 !string.IsNullOrEmpty(EnvironmentVariables.PodIdentityEndpoint) || EnvironmentVariables.IsImdsV2Disabled)
             {
                 throw new MsalClientException("managed_identity_binding_environment_invalid",
-                    "The supplied-certificate protocol requires the direct Azure VM IMDS endpoint and cannot use endpoint overrides.");
+                    "The endorsed unattested flow requires the direct Azure VM IMDS endpoint and cannot use endpoint overrides.");
             }
 
             if (config.ManagedIdentityId.IdType != ManagedIdentityIdType.SystemAssigned &&
@@ -116,14 +116,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 throw new MsalClientException("managed_identity_binding_options_unsupported",
                     "Claims, client capabilities, and extra query parameters are not defined by this prototype contract.");
             }
-
-            if (config.HttpClientFactory is not null && config.HttpClientFactory is not IMsalWsTrustHttpClientFactory)
-            {
-                throw new MsalClientException("managed_identity_binding_http_client_factory_invalid",
-                    "A custom HTTP client factory for supplied-certificate managed identity requests must implement " +
-                    "IMsalWsTrustHttpClientFactory and return an anonymous client with automatic redirects disabled " +
-                    "from GetHttpClient(false).");
-            }
         }
 
         internal static async Task<MsalTokenResponse> AcquireTokenAsync(
@@ -137,8 +129,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             var context = request.RequestContext;
             // Match the successful test-endpoint PoC without changing the normalized cache resource.
             string wireResource = parameters.Resource + "/.default";
+            string tokenEndpoint = ImdsManagedIdentitySource.DefaultImdsBaseEndpoint + ImdsManagedIdentitySource.ImdsTokenPath;
             var metadataRequest = new ManagedIdentityRequest(HttpMethod.Post,
-                new Uri(ImdsManagedIdentitySource.DefaultImdsBaseEndpoint + ImdsManagedIdentitySource.ImdsTokenPath));
+                new Uri(tokenEndpoint));
             metadataRequest.QueryParameters["api-version"] = ApiVersion;
             metadataRequest.QueryParameters["resource"] = wireResource;
             if (request.AppConfig.ManagedIdentityId.IsUserAssigned)
@@ -156,7 +149,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             catch (CryptographicException ex)
             {
                 throw new MsalClientException(MsalError.CryptographicError,
-                    "The supplied binding key could not sign the IMDS proof.", ex);
+                    "The RDP binding key could not sign the IMDS proof.", ex);
             }
 
             // Replaying a single-use proof during automatic retries is not defined by the draft.
@@ -167,13 +160,21 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 JsonHelper.SerializeToJson(new Dictionary<string, string> { ["req_cnf_proof"] = assertion }),
                 Encoding.UTF8, "application/json"))
             {
+                if (context.ApiEvent is not null)
+                {
+                    context.ApiEvent.TokenEndpoint = tokenEndpoint;
+                }
+
                 try
                 {
+                    // Custom factories own handler policy. Use normal selection rather than
+                    // the WS-Trust route, which can replace an ordinary configured factory.
                     response = await context.ServiceBundle.HttpManager.SendRequestAsync(
                         metadataRequest.ComputeUri(), metadataRequest.Headers, body, HttpMethod.Post,
                         context.Logger, doNotThrow: true, mtlsCertificate: null, validateServerCertificate: null,
                         cancellationToken, retryPolicy: null,
-                        allowAutoRedirect: false, useDefaultCredentials: false)
+                        allowAutoRedirect: false, useDefaultCredentials: false,
+                        useConfiguredHttpClientFactory: request.AppConfig.HttpClientFactory is not null)
                         .ConfigureAwait(false);
                 }
                 catch (HttpRequestException ex)
@@ -181,6 +182,13 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     throw MsalServiceExceptionFactory.CreateManagedIdentityException(
                         MsalError.ManagedIdentityUnreachableNetwork, "The experimental IMDS endpoint could not be reached.",
                         ex, ManagedIdentitySource.Imds, null);
+                }
+                finally
+                {
+                    if (context.ApiEvent is not null)
+                    {
+                        context.ApiEvent.DurationInHttpInMs += context.ServiceBundle.HttpManager.LastRequestDurationInMs;
+                    }
                 }
             }
 

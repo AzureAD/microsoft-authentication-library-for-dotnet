@@ -34,6 +34,8 @@ namespace Microsoft.Identity.Client.Http
         /// <param name="allowAutoRedirect">Whether the HTTP client can automatically follow redirects.</param>
         /// <param name="useDefaultCredentials">Whether the HTTP client can use the current user's credentials.</param>
         /// <param name="retryDelayCancellationToken">Cancellation token observed only while waiting between retries.</param>
+        /// <param name="useConfiguredHttpClientFactory">Use the configured factory's parameterless method;
+        /// its client owns redirect, credential, and handler-retry policy.</param>
         /// <returns></returns>
         Task<HttpResponse> SendRequestAsync(
            Uri endpoint,
@@ -49,6 +51,7 @@ namespace Microsoft.Identity.Client.Http
            int retryCount = 0,
            bool allowAutoRedirect = true,
            bool useDefaultCredentials = true,
-           CancellationToken retryDelayCancellationToken = default);
+           CancellationToken retryDelayCancellationToken = default,
+           bool useConfiguredHttpClientFactory = false);
     }
 }

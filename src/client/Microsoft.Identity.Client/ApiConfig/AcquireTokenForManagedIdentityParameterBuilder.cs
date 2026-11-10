@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.ManagedIdentity;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 
@@ -88,10 +89,16 @@ namespace Microsoft.Identity.Client
         internal override Task<AuthenticationResult> ExecuteInternalAsync(CancellationToken cancellationToken)
         {
             ApplyMtlsPopAndAttestation(acquireTokenForManagedIdentityParameters: Parameters, acquireTokenCommonParameters: CommonParameters);
-            Parameters.UseRdpCertificate = CommonParameters.IsMtlsPopRequested && Parameters.ProvidedBindingCertificate is null &&
+            if (CommonParameters.IsMtlsPopRequested && Parameters.AttestationTokenProvider is not null &&
+                !DesktopOsHelper.IsWindows())
+            {
+                throw new MsalClientException(MsalError.MtlsNotSupportedForManagedIdentity,
+                    "Attested managed identity mTLS PoP requires Windows. Linux supports only the endorsed unattested flow.");
+            }
+
+            Parameters.UseRdpCertificate = CommonParameters.IsMtlsPopRequested &&
                 Parameters.AttestationTokenProvider is null;
-            if ((Parameters.ProvidedBindingCertificate is not null || Parameters.UseRdpCertificate) &&
-                CommonParameters.IsMtlsPopRequested)
+            if (Parameters.UseRdpCertificate)
             {
                 CommonParameters.CacheKeyComponents["mi_binding_protocol"] = _ => Task.FromResult("provided_certificate_v1");
             }

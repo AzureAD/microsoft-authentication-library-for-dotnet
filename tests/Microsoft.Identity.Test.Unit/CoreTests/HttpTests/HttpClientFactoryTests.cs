@@ -126,6 +126,26 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
         }
 
         [TestMethod]
+        public void EndorsedUnattestedDefaultTransportUsesPooledAnonymousRedirectFreeClient()
+        {
+            // Arrange
+            var factory = new SimpleHttpClientFactory();
+            var manager = new HttpManager(factory, disableInternalRetries: false);
+            var logger = Substitute.For<ILoggerAdapter>();
+
+            // Act
+            HttpClient selected = manager.GetHttpClient(
+                null, null, allowAutoRedirect: false, useDefaultCredentials: false, logger);
+            HttpClient repeated = manager.GetHttpClient(
+                null, null, allowAutoRedirect: false, useDefaultCredentials: false, logger);
+
+            // Assert
+            Assert.AreSame(selected, repeated);
+            Assert.AreNotSame(factory.GetHttpClient(), selected);
+            AssertHandlerPolicy(selected, useDefaultCredentials: false, allowAutoRedirect: false);
+        }
+
+        [TestMethod]
         public void WsTrustBypassesUnsupportedFactoryAndCachesSafeClients()
         {
             // Arrange

@@ -40,7 +40,7 @@ internal class Program
     {
         Bearer,
         BoundWithAttestation,
-        BoundNoAttestation
+        EndorsedUnattested
     }
 
     private static AcquireMode s_lastMode = AcquireMode.Bearer;
@@ -57,10 +57,10 @@ internal class Program
             }
             if (args.Length == 1 && args[0] == "--help")
             {
-                Console.WriteLine("No arguments: existing interactive MSI tester; N selects the new non-attested RDP-certificate protocol.");
+                Console.WriteLine("No arguments: existing interactive MSI tester; N selects the endorsed unattested flow for token binding.");
                 Console.WriteLine("--rdp-live <resource> [UAMI client ID]: one live acquisition through the modified MSAL project.");
                 Console.WriteLine("Append --imds-error-details to display service error fields on failure.");
-                Console.WriteLine("Requires Windows and access to the existing RDP key; no PowerShell or permission changes.");
+                Console.WriteLine("Requires Windows RDP or Linux xrdp and access to its existing certificate/key; no permission changes.");
                 return 0;
             }
             if (args.Length > 0)
@@ -75,7 +75,7 @@ internal class Program
                 s_resource = NormalizeResource(args[1]);
                 s_currentMiId = args.Length == 3
                     ? ManagedIdentityId.WithUserAssignedClientId(args[2]) : ManagedIdentityId.SystemAssigned;
-                await AcquireAndReportAsync(AcquireMode.BoundNoAttestation, forceRefresh: false).ConfigureAwait(false);
+                await AcquireAndReportAsync(AcquireMode.EndorsedUnattested, forceRefresh: false).ConfigureAwait(false);
                 return 0;
             }
             await RunInteractiveAsync().ConfigureAwait(false);
@@ -198,8 +198,8 @@ internal class Program
                         break;
 
                     case 'N': // PoP (mTLS-bound) WITHOUT attestation
-                        await AcquireAndReportAsync(mode: AcquireMode.BoundNoAttestation, forceRefresh: s_forceRefresh).ConfigureAwait(false);
-                        s_lastMode = AcquireMode.BoundNoAttestation;
+                        await AcquireAndReportAsync(mode: AcquireMode.EndorsedUnattested, forceRefresh: s_forceRefresh).ConfigureAwait(false);
+                        s_lastMode = AcquireMode.EndorsedUnattested;
                         s_hasLast = true;
                         break;
 
@@ -283,7 +283,7 @@ internal class Program
         {
             AcquireMode.Bearer => "Bearer",
             AcquireMode.BoundWithAttestation => "Bound (mTLS PoP + Attestation)",
-            AcquireMode.BoundNoAttestation => "Bound (non-attested protocol, MSAL-selected RDP certificate)",
+            AcquireMode.EndorsedUnattested => "Bound (endorsed unattested flow, MSAL-selected RDP certificate)",
             _ => "Unknown"
         };
 
@@ -299,7 +299,7 @@ internal class Program
         Console.ForegroundColor = ConsoleColor.Green;
         Console.WriteLine("A) Acquire Bearer token");
         Console.WriteLine("P) Acquire Bound token (mTLS PoP) WITH attestation");
-        Console.WriteLine("N) Acquire Bound token WITHOUT attestation (new protocol, existing RDP certificate)");
+        Console.WriteLine("N) Acquire Bound token using the endorsed unattested flow (existing RDP certificate)");
         Console.WriteLine("T) Toggle Force Refresh (persistent)");
         Console.WriteLine("B) Bypass cache on NEXT acquisition (one-shot)");
         Console.WriteLine("F) Toggle Full Token Print");
@@ -318,8 +318,8 @@ internal class Program
         Console.WriteLine("Help:");
         Console.WriteLine(" - A: Get a Bearer token for the current resource.");
         Console.WriteLine(" - P: Get a Bound (mTLS PoP) token WITH attestation support.");
-        Console.WriteLine(" - N: Use the existing RDP key with the new non-attested MSAL protocol (SAMI or UAMI ClientId).");
-        Console.WriteLine("      Acquisition only; no resource TLS. The current Windows identity must have private-key access.");
+        Console.WriteLine(" - N: Use the existing RDP key with the endorsed unattested flow for token binding (SAMI or UAMI ClientId).");
+        Console.WriteLine("      Acquisition only; no resource TLS. The current identity must have private-key access.");
         Console.WriteLine(" - T: Toggle Force Refresh to bypass cache on every acquisition until turned off.");
         Console.WriteLine(" - B: One-shot bypass; only the NEXT acquisition will bypass cache, then it resets.");
         Console.WriteLine(" - F: Toggle Full Token Print. WARNING: prints the entire token (secret).");
@@ -425,12 +425,15 @@ internal class Program
         {
             return s_rdpMiApp;
         }
-        if (!OperatingSystem.IsWindows())
+        if (OperatingSystem.IsWindows())
         {
-            throw new PlatformNotSupportedException("RDP certificate discovery requires Windows.");
+            using var identity = WindowsIdentity.GetCurrent();
+            Info("Execution identity: " + identity.Name);
         }
-        using var identity = WindowsIdentity.GetCurrent();
-        Info("Execution identity: " + identity.Name);
+        else
+        {
+            Info("Execution identity: " + Environment.UserName);
+        }
         s_rdpMiApp = ManagedIdentityApplicationBuilder.Create(s_currentMiId)
             .WithLogging(new IdentityLogger(), enablePiiLogging: false)
             .Build();
@@ -445,7 +448,7 @@ internal class Program
 
         Info($"\nAcquiring {mode} token for {s_resource} ...");
 
-        bool useRdp = mode == AcquireMode.BoundNoAttestation;
+        bool useRdp = mode == AcquireMode.EndorsedUnattested;
         var app = useRdp ? GetRdpApp() : s_miApp;
         var builder = app.AcquireTokenForManagedIdentity(s_resource);
 
