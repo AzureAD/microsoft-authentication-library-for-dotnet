@@ -973,16 +973,23 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         /// </summary>
         /// <param name="osType">The OS type to return (e.g., "Windows", "Linux").</param>
         /// <param name="securityType">The security profile type (e.g., "TrustedLaunch", "ConfidentialVM"), or null for no profile.</param>
+        /// <param name="azureEnvironment">The Azure cloud environment, or null to omit it.</param>
+        /// <param name="location">The Azure region to return.</param>
         /// <returns>A configured <see cref="MockHttpMessageHandler"/>.</returns>
         internal static MockHttpMessageHandler MockImdsComputeMetadata(
             string osType = "Windows",
-            string securityType = "TrustedLaunch")
+            string securityType = "TrustedLaunch",
+            string azureEnvironment = "AzurePublicCloud",
+            string location = "westus2")
         {
             string securityProfileJson = securityType != null
                 ? $", \"securityProfile\": {{ \"securityType\": \"{securityType}\" }}"
                 : "";
 
-            string body = $"{{ \"osType\": \"{osType}\"{securityProfileJson} }}";
+            string environmentJson = azureEnvironment != null
+                ? $", \"azEnvironment\": \"{azureEnvironment}\""
+                : "";
+            string body = $"{{ \"osType\": \"{osType}\"{securityProfileJson}{environmentJson}, \"location\": \"{location}\" }}";
 
             return new MockHttpMessageHandler()
             {

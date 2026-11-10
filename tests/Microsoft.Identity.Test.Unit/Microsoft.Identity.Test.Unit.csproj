@@ -7,6 +7,8 @@
     <TargetFrameworks>$(TargetFrameworkNet)</TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworkNetDesktop48);$(TargetFrameworkNet)</TargetFrameworks>
     <IsPackable>false</IsPackable>
+    <!-- Linked BrowserTabActivity retains its product CLS annotation; this test assembly is not CLS-compliant. -->
+    <NoWarn>$(NoWarn);CS3021</NoWarn>
 
     <Configurations>Debug;Release;Debug + MobileApps</Configurations>
 
@@ -71,6 +73,24 @@
 
   <ItemGroup>
     <Folder Include="CacheExtension\" />
+    <!-- Exercise the Android accessor with a small SharedPreferences test double on desktop test hosts. -->
+    <Compile Include="..\..\src\client\Microsoft.Identity.Client\Platforms\Android\AndroidTokenCacheAccessor.cs"
+             Link="CacheTests\AndroidTokenCacheAccessor.cs" />
+    <!-- Exercise the Android browser lifecycle with platform test doubles; also build the real Android target. -->
+    <Compile Include="..\..\src\client\Microsoft.Identity.Client\Platforms\Android\SystemWebview\AuthenticationActivity.cs"
+             Link="WebUITests\AuthenticationActivity.cs" />
+    <Compile Include="..\..\src\client\Microsoft.Identity.Client\Platforms\Android\SystemWebview\AndroidConstants.cs"
+             Link="WebUITests\AndroidConstants.cs" />
+    <Compile Include="..\..\src\client\Microsoft.Identity.Client\Platforms\Android\SystemWebview\SystemWebViewRequest.cs"
+             Link="WebUITests\SystemWebViewRequest.cs" />
+    <Compile Include="..\..\src\client\Microsoft.Identity.Client\Platforms\Android\BrowserTabActivity.cs"
+             Link="WebUITests\BrowserTabActivity.cs" />
+    <Compile Include="..\..\src\client\Microsoft.Identity.Client\Platforms\Android\SystemWebview\SystemWebUI.cs"
+             Link="WebUITests\SystemWebUI.cs" />
+    <Compile Include="..\..\src\client\Microsoft.Identity.Client\Platforms\Android\WebviewBase.cs"
+             Link="WebUITests\WebviewBase.cs" />
+    <Compile Include="..\..\src\client\Microsoft.Identity.Client\Platforms\Android\AuthenticationContinuationHelper.cs"
+             Link="WebUITests\AuthenticationContinuationHelper.cs" />
   </ItemGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet)'">
     <DefineConstants>$(DefineConstants);NET_CORE</DefineConstants>

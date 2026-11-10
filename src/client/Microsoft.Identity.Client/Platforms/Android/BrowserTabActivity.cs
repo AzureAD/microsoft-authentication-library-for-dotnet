@@ -5,6 +5,7 @@ using System;
 using Android.App;
 using Android.Content;
 using Android.OS;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Platforms.Android.SystemWebview;
 
 namespace Microsoft.Identity.Client
@@ -28,10 +29,27 @@ namespace Microsoft.Identity.Client
         {
             base.OnCreate(savedInstanceState);
 
-            Intent intent = new Intent(this, typeof (AuthenticationActivity));
-            intent.PutExtra(AndroidConstants.CustomTabRedirect, Intent.DataString);
-            intent.SetFlags(ActivityFlags.ClearTop | ActivityFlags.SingleTop);
+            var request = AuthenticationActivity.PendingRequest;
+            string url = Intent?.DataString;
+            if (request is null)
+            {
+                global::Android.Util.Log.Warn("MSAL", "Ignoring browser redirect without a pending authentication request.");
+                Finish();
+                return;
+            }
+
+            // Reject unbound callbacks before bringing the authentication activity to the foreground.
+            if (!request.IsValidRedirect(url))
+            {
+                request.RequestContext.Logger.Warning("Ignoring browser redirect that does not match the pending authentication request.");
+                Finish();
+                return;
+            }
+
+            Intent intent = request.CreateIntent(this);
+            intent.PutExtra(AndroidConstants.CustomTabRedirect, url);
             StartActivity(intent);
+            Finish();
         }
     }
 }
