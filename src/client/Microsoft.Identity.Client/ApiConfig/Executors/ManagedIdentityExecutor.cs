@@ -33,6 +33,8 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenForManagedIdentityParameters managedIdentityParameters,
             CancellationToken cancellationToken)
         {
+            // The execution and its background refresh must not observe later builder property changes.
+            commonParameters = commonParameters.Clone();
             var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, commonParameters.MtlsCertificate, cancellationToken);
 
             var requestParams = await _managedIdentityApplication.CreateRequestParametersAsync(

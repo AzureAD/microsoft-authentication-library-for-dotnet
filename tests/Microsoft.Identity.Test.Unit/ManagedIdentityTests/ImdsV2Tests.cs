@@ -827,6 +827,47 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         /// <summary>
+        /// Missing-attestation coverage must exercise IMDSv2 certificate issuance, not the RDP proof protocol.
+        /// </summary>
+        [TestMethod]
+        public async Task BearerOverMtls_WithoutAttestation_PreservesIssueCredentialRejectionAsync()
+        {
+            // Arrange
+            using var environment = new EnvVariableContext();
+            using var httpManager = new MockHttpManager();
+            SetEnvironmentVariables(ManagedIdentitySource.Imds, TestConstants.ImdsEndpoint);
+            var app = await CreateManagedIdentityAsync(
+                httpManager, managedIdentityKeyType: ManagedIdentityKeyType.KeyGuard).ConfigureAwait(false);
+            httpManager.AddMockHandler(MockHelpers.MockCsrResponse());
+            var rejection = MockHelpers.MockCertificateRequestResponse();
+            rejection.ResponseMessage = new HttpResponseMessage(HttpStatusCode.BadRequest)
+            {
+                Content = new StringContent(
+                    "{\"error\":\"invalid_request\",\"error_description\":\"Attestation Token is missing / empty in the issue credential request\"}")
+            };
+            rejection.AdditionalRequestValidation = request =>
+            {
+                using var body = JsonDocument.Parse(request.Content.ReadAsStringAsync().GetAwaiter().GetResult());
+                Assert.IsTrue(body.RootElement.TryGetProperty("csr", out _));
+                Assert.IsFalse(body.RootElement.TryGetProperty("req_cnf_proof", out _));
+                Assert.IsTrue(!body.RootElement.TryGetProperty("attestation_token", out var attestation) ||
+                    string.IsNullOrEmpty(attestation.GetString()));
+            };
+            httpManager.AddMockHandler(rejection);
+
+            // Act
+            var error = await Assert.ThrowsAsync<MsalServiceException>(() =>
+                app.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithRequestOverMtls().WithForceRefresh(true).ExecuteAsync()).ConfigureAwait(false);
+
+            // Assert
+            Assert.AreEqual(400, error.StatusCode);
+            StringAssert.Contains(error.Message, "invalid_request");
+            StringAssert.Contains(error.Message, "Attestation Token is missing / empty");
+            Assert.AreEqual(0, httpManager.QueueSize);
+        }
+
+        /// <summary>
         /// Acceptance criterion from #6172: "Retry behavior is identical for mTLS PoP and bearer-over-mTLS."
         /// WithRequestOverMtls() shares SendDelegatedImdsV2TokenRequestAsync with the PoP path, so a SCHANNEL
         /// failure must drive the same evict/re-mint/retry-once behavior. Both attempts fail here, which proves
@@ -2382,7 +2423,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 // Arrange a distinct RDP certificate, without the IMDSv2 test endpoint override.
                 SetEnvironmentVariables(ManagedIdentitySource.Imds, null);
                 using RSA key = RSA.Create(2048);
-                var certificateRequest = new CertificateRequest("CN=Simulated-Rdp-Binding",
+                var certificateRequest = new System.Security.Cryptography.X509Certificates.CertificateRequest("CN=Simulated-Rdp-Binding",
                     key, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
                 using var rdpCertificate = certificateRequest.CreateSelfSigned(
                     DateTimeOffset.UtcNow.AddMinutes(-5), DateTimeOffset.UtcNow.AddDays(2));

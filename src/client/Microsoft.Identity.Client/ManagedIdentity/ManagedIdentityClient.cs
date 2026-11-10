@@ -388,7 +388,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         }
 
         // Determines the host's maximum mTLS binding strength for IMDSv1-only hosts using the
-        // /metadata/instance/compute security profile. mTLS PoP is not supported on .NET
+        // /metadata/instance/compute security profile or a usable configured RDP certificate.
+        // mTLS PoP is not supported on .NET
         // Framework 4.6.2, so the host is reported as None there.
         private static Task<MtlsBindingStrength> DetermineImdsV1BindingStrengthAsync(
             RequestContext requestContext,
@@ -421,9 +422,36 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             // Software (binding available) rather than KeyGuard: the security profile alone does
             // not prove a successful VBS/KeyGuard attestation, and an IMDSv1-only host cannot use
             // the v2 CSR (PoP) flow regardless, so we must not overclaim attestation.
-            return ImdsComputeMetadataManager.IsMtlsPopSupported(computeMetadata)
-                ? MtlsBindingStrength.Software
-                : MtlsBindingStrength.None;
+            if (ImdsComputeMetadataManager.IsMtlsPopSupported(computeMetadata))
+            {
+                return MtlsBindingStrength.Software;
+            }
+
+            bool supportsRdpDiscovery = DesktopOsHelper.IsWindows() &&
+                string.Equals(computeMetadata?.OsType, "Windows", StringComparison.OrdinalIgnoreCase);
+#if NET8_0_OR_GREATER
+            supportsRdpDiscovery |= OperatingSystem.IsLinux() &&
+                string.Equals(computeMetadata?.OsType, "Linux", StringComparison.OrdinalIgnoreCase);
+#endif
+            if (!supportsRdpDiscovery || !string.IsNullOrEmpty(EnvironmentVariables.PodIdentityEndpoint))
+            {
+                return MtlsBindingStrength.None;
+            }
+
+            try
+            {
+                using var certificate = await requestContext.ServiceBundle.PlatformProxy
+                    .GetRdpBindingCertificateAsync(requestContext.Logger, cancellationToken).ConfigureAwait(false);
+                cancellationToken.ThrowIfCancellationRequested();
+                EndorsedUnattestedManagedIdentitySource.ValidateCertificate(certificate);
+                // A usable RDP key supports the unattested protocol, not WS endorsement or KeyGuard.
+                return MtlsBindingStrength.Software;
+            }
+            catch (MsalClientException ex)
+            {
+                requestContext.Logger.Info($"[Managed Identity] RDP binding capability unavailable: {ex.ErrorCode}.");
+                return MtlsBindingStrength.None;
+            }
         }
 #endif
 

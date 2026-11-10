@@ -45,6 +45,9 @@ The app retains the MSAL application for repeat acquisitions. Each execution
 selects the current listener certificate before cache lookup and retains that
 certificate for its result and any proactive refresh. Certificate rotation
 therefore selects a separate cache entry without invalidating earlier results.
+Common request options, including claims, are also captured for the execution.
+Changing claims on a completed builder does not change its queued refresh;
+a new execution still rejects claims unsupported by this protocol.
 
 There is no bring-your-own-certificate option for this managed identity flow.
 MSAL selects the configured RDP/xrdp certificate and returns it through
@@ -75,6 +78,13 @@ of the application's experimental-feature setting.
 The automatically selected certificate uses the experimental Software-strength
 protocol; a KeyGuard minimum is rejected before discovery.
 
+On an IMDSv1 host without the existing Windows TVM/CVM capability signal,
+capability discovery also checks for an accessible, valid RDP/xrdp certificate
+on the supported operating system. A usable certificate reports Software
+strength; missing or inaccessible certificates do not enable that capability.
+Discovery does not create a replacement key, prove WS-backed endorsement, or
+guarantee that a production IMDS endpoint implements this prototype protocol.
+
 No custom HTTP factory is needed for this sample. If configured through
 `WithHttpClientFactory`, the existing `IMsalHttpClientFactory.GetHttpClient()`
 is used without requiring another interface or replacing the client's handlers,
@@ -82,6 +92,8 @@ proxy configuration, or timeout. The custom client must not send server
 authentication credentials, follow redirects, or retry/duplicate proof requests
 in its handler pipeline. Use a separate factory instance for the managed identity
 application if other applications need different handler policies.
+The custom/default factory decision is captured when the application is built;
+reusing its builder cannot change an existing application's transport selection.
 
 Without a custom factory, MSAL uses its pooled anonymous, redirect-free client.
 MSAL sends each signed proof once, with no automatic retry. MEX and WS-Trust keep
@@ -252,9 +264,12 @@ The Linux VM's IMDS compute `securityProfile` reported
 `encryptionAtHost: "false"`, and `securityType: ""`. This was a non-attested
 software-key acquisition, not evidence of hardware-backed key protection.
 The token endpoint itself did not return a `security_profile` field.
-These live runs preceded the later custom-factory, option-snapshot, and diagnostic
-repairs. Those repairs are validated locally; the VM deployment has not been
-updated to the latest local source.
+A follow-up Linux VM run used the repaired SDK, including common-option
+snapshots, captured HTTP-factory selection, equivalent client-ID handling, and
+RDP capability discovery. All 161 focused regression tests passed on that VM.
+The updated app also acquired a Graph `mtls_pop` token from IMDS and returned
+the configured xrdp certificate. The Windows VM has not been rerun with these
+repairs.
 
 The experimental endpoint uses API version `2018-02-01`, JSON `req_cnf_proof`,
 and the resource with `/.default` in both the query and signed proof, matching

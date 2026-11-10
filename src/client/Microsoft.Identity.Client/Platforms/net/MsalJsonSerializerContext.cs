@@ -46,6 +46,7 @@ namespace Microsoft.Identity.Client.Platforms.net
     [JsonSerializable(typeof(ComputeMetadataResponse))]
     [JsonSerializable(typeof(ComputeSecurityProfile))]
     [JsonSerializable(typeof(Dictionary<string, object>))]
+    [JsonSerializable(typeof(Dictionary<string, string>))]
 #if ANDROID
     [JsonSerializable(typeof(Microsoft.Identity.Client.Platforms.Android.Broker.BrokerRequest))]
 #endif

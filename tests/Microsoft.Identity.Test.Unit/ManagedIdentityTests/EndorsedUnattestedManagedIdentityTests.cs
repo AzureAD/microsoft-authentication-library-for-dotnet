@@ -32,6 +32,7 @@ using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
+using ImdsVersion = Microsoft.Identity.Client.ManagedIdentity.V2.ImdsVersion;
 
 namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 {
@@ -288,7 +289,16 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
 
             // Act
-            await request.WithMtlsProofOfPossession().ExecuteAsync().ConfigureAwait(false);
+            request.WithMtlsProofOfPossession();
+            if (attestation && !DesktopOsHelper.IsWindows())
+            {
+                var error = await Assert.ThrowsAsync<MsalClientException>(() =>
+                    request.ExecuteAsync()).ConfigureAwait(false);
+                Assert.AreEqual(MsalError.MtlsNotSupportedForManagedIdentity, error.ErrorCode);
+                await executor.DidNotReceiveWithAnyArgs().ExecuteAsync(default, default, default).ConfigureAwait(false);
+                return;
+            }
+            await request.ExecuteAsync().ConfigureAwait(false);
 
             // Assert
             Assert.AreEqual(!attestation, request.Parameters.UseRdpCertificate);
@@ -299,6 +309,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow("rotation")]
         [DataRow("attestation")]
         [DataRow("strength")]
+        [DataRow("claims")]
         public async Task ProactiveRefreshKeepsExecutionCertificateAndOptionsAsync(string change)
         {
             // Arrange
@@ -345,7 +356,11 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             try
             {
                 served = await request.ExecuteAsync().ConfigureAwait(false);
-                if (change != "rotation")
+                if (change == "claims")
+                {
+                    request.WithClaims("{\"access_token\":{\"test\":{\"essential\":true}}}");
+                }
+                else if (change != "rotation")
                 {
                     request.WithMtlsProofOfPossession(new PoPOptions
                     {
@@ -358,8 +373,17 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                     using var canceled = new CancellationTokenSource();
                     canceled.Cancel();
-                    await Assert.ThrowsAsync<OperationCanceledException>(() =>
-                        request.ExecuteAsync(canceled.Token)).ConfigureAwait(false);
+                    if (change == "attestation" && !DesktopOsHelper.IsWindows())
+                    {
+                        var error = await Assert.ThrowsAsync<MsalClientException>(() =>
+                            request.ExecuteAsync(canceled.Token)).ConfigureAwait(false);
+                        Assert.AreEqual(MsalError.MtlsNotSupportedForManagedIdentity, error.ErrorCode);
+                    }
+                    else
+                    {
+                        await Assert.ThrowsAsync<OperationCanceledException>(() =>
+                            request.ExecuteAsync(canceled.Token)).ConfigureAwait(false);
+                    }
                     Assert.AreEqual(change == "attestation", request.Parameters.AttestationTokenProvider is not null);
                     Assert.AreEqual(change == "strength" ? MtlsBindingStrength.KeyGuard : MtlsBindingStrength.None,
                         request.Parameters.MtlsPopMinStrength);
@@ -395,9 +419,107 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             Assert.AreEqual(stored.Secret, cached.AccessToken);
             Assert.AreSame(_certificate, cached.BindingCertificate);
             VerifyProof(proof, _certificate, userAssigned: false);
+            if (change == "claims")
+            {
+                var error = await Assert.ThrowsAsync<MsalClientException>(() =>
+                    request.ExecuteAsync()).ConfigureAwait(false);
+                Assert.AreEqual("managed_identity_binding_options_unsupported", error.ErrorCode);
+            }
             await platform.Received(3).GetRdpBindingCertificateAsync(
                 Arg.Any<ILoggerAdapter>(), Arg.Any<CancellationToken>()).ConfigureAwait(false);
             Assert.AreEqual(0, http.QueueSize);
+        }
+
+        [TestMethod]
+        [DataRow("N")]
+        [DataRow("D")]
+        [DataRow("B")]
+        [DataRow("P")]
+        public async Task EquivalentUserAssignedClientIdFormatsAreAcceptedAsync(string format)
+        {
+            // Arrange
+            using var http = new MockHttpManager();
+            string requestedClientId = Guid.Parse(ClientId).ToString(format);
+            var app = CreateApp(http, ManagedIdentityId.WithUserAssignedClientId(requestedClientId));
+            var response = AddResponse(http, CreateResponse(), userAssigned: true);
+            // The mock compares raw query values, including URI-escaped braces.
+            response.ExpectedQueryParams["client_id"] =
+                new Uri(Resource + "?client_id=" + requestedClientId).Query.Substring("?client_id=".Length);
+
+            // Act
+            var result = await app.AcquireTokenForManagedIdentity(Resource)
+                .WithMtlsProofOfPossession().ExecuteAsync().ConfigureAwait(false);
+
+            // Assert
+            Assert.AreEqual("simulated-bound-token", result.AccessToken);
+            Assert.AreSame(_certificate, result.BindingCertificate);
+            Assert.AreEqual(0, http.QueueSize);
+        }
+
+        [TestMethod]
+        [DataRow("valid")]
+        [DataRow("missing")]
+        [DataRow("invalid")]
+        [DataRow("canceled")]
+        public async Task ImdsV1CapabilitiesReflectRdpAvailabilityAndAcquisitionAsync(string certificateState)
+        {
+            // Arrange
+            using var http = new MockHttpManager();
+            var app = CreateApp(http, ManagedIdentityId.SystemAssigned);
+            var platform = ConfigureRdpDiscovery(app, _certificate);
+            platform.GetRdpBindingCertificateAsync(Arg.Any<ILoggerAdapter>(), Arg.Any<CancellationToken>())
+                .Returns(_ => certificateState switch
+                {
+                    "valid" => Task.FromResult(new X509Certificate2(_certificate)),
+                    "invalid" => Task.FromResult(new X509Certificate2(_certificate.RawData)),
+                    "canceled" => Task.FromCanceled<X509Certificate2>(new CancellationToken(canceled: true)),
+                    _ => Task.FromException<X509Certificate2>(new MsalClientException(RdpCertificateReader.CertificateUnavailable))
+                });
+            http.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V2));
+            http.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V1));
+            http.AddMockHandler(MockHelpers.MockImdsComputeMetadata(
+                osType: DesktopOsHelper.IsWindows() ? "Windows" : "Linux", securityType: null));
+
+            // Act
+            if (certificateState == "canceled")
+            {
+                await Assert.ThrowsAsync<OperationCanceledException>(() =>
+                    app.GetManagedIdentityCapabilitiesAsync(CancellationToken.None)).ConfigureAwait(false);
+                Assert.AreEqual(0, http.QueueSize);
+                return;
+            }
+            var capabilities = await app.GetManagedIdentityCapabilitiesAsync(CancellationToken.None).ConfigureAwait(false);
+
+            // Assert
+            bool certificateAvailable = certificateState == "valid";
+            Assert.AreEqual(ManagedIdentitySource.Imds, capabilities.Source);
+            Assert.AreEqual(certificateAvailable ? MtlsBindingStrength.Software : MtlsBindingStrength.None,
+                capabilities.MaxSupportedBindingStrength);
+            Assert.AreEqual(certificateAvailable, capabilities.IsMtlsPopSupportedByHost);
+            if (certificateAvailable)
+            {
+                AddResponse(http, CreateResponse());
+                var result = await app.AcquireTokenForManagedIdentity(Resource)
+                    .WithMtlsProofOfPossession(new PoPOptions { MinStrength = MtlsBindingStrength.Software })
+                    .ExecuteAsync().ConfigureAwait(false);
+                using (result.BindingCertificate)
+                {
+                    Assert.AreEqual("mtls_pop", result.TokenType);
+                    Assert.AreEqual(_certificate.Thumbprint, result.BindingCertificate.Thumbprint);
+                }
+            }
+            else
+            {
+                var error = await Assert.ThrowsAsync<MsalClientException>(() =>
+                    app.AcquireTokenForManagedIdentity(Resource).WithMtlsProofOfPossession()
+                        .ExecuteAsync()).ConfigureAwait(false);
+                Assert.AreEqual(certificateState == "missing"
+                    ? RdpCertificateReader.CertificateUnavailable
+                    : "managed_identity_binding_certificate_invalid", error.ErrorCode);
+            }
+            Assert.AreEqual(0, http.QueueSize);
+            await platform.Received(2).GetRdpBindingCertificateAsync(
+                Arg.Any<ILoggerAdapter>(), Arg.Any<CancellationToken>()).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -460,6 +582,11 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
             var app = appBuilder.BuildConcrete();
             ConfigureRdpDiscovery(app, _certificate);
+            // Mutating and rebuilding the application builder must not change the first app's transport decision.
+            var replacementFactory = Substitute.For<IMsalHttpClientFactory>();
+            var secondApp = appBuilder.WithHttpClientFactory(replacementFactory).BuildConcrete();
+            Assert.IsTrue(secondApp.ServiceBundle.UsesCustomHttpClientFactory);
+            Assert.AreEqual(customFactory, app.ServiceBundle.UsesCustomHttpClientFactory);
 
             // Act
             var result = await app.AcquireTokenForManagedIdentity(Resource)
@@ -1031,7 +1158,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             });
 
             // Assert
-            Assert.AreEqual("mtls_pop_and_bearer_exclusive", error.ErrorCode);
+            Assert.AreEqual(bearerFirst && !DesktopOsHelper.IsWindows()
+                ? MsalError.MtlsNotSupportedForManagedIdentity
+                : "mtls_pop_and_bearer_exclusive", error.ErrorCode);
             Assert.IsEmpty(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens());
         }
 
@@ -1062,6 +1191,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             Assert.IsTrue(request.CommonParameters.IsMtlsPopRequested);
 
             request.WithAttestationSupport();
+            if (!DesktopOsHelper.IsWindows())
+            {
+                var error = await Assert.ThrowsAsync<MsalClientException>(() =>
+                    request.ExecuteAsync()).ConfigureAwait(false);
+                Assert.AreEqual(MsalError.MtlsNotSupportedForManagedIdentity, error.ErrorCode);
+                return;
+            }
             await request.ExecuteAsync().ConfigureAwait(false);
             Assert.IsFalse(request.Parameters.UseRdpCertificate);
             Assert.IsFalse(request.CommonParameters.CacheKeyComponents.ContainsKey("mi_binding_protocol"));

@@ -174,7 +174,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                         context.Logger, doNotThrow: true, mtlsCertificate: null, validateServerCertificate: null,
                         cancellationToken, retryPolicy: null,
                         allowAutoRedirect: false, useDefaultCredentials: false,
-                        useConfiguredHttpClientFactory: request.AppConfig.HttpClientFactory is not null)
+                        useConfiguredHttpClientFactory: context.ServiceBundle.UsesCustomHttpClientFactory)
                         .ConfigureAwait(false);
                 }
                 catch (HttpRequestException ex)
@@ -282,7 +282,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     if (string.IsNullOrWhiteSpace(accessToken) || !Guid.TryParse(clientId, out Guid resolvedClientId) ||
                         resolvedClientId == Guid.Empty ||
                         !string.Equals(root.GetProperty("token_type").GetString(), Constants.MtlsPoPTokenType, StringComparison.Ordinal) ||
-                        (identity.IsUserAssigned && !string.Equals(clientId, identity.UserAssignedId, StringComparison.OrdinalIgnoreCase)) ||
+                        (identity.IsUserAssigned &&
+                            (!Guid.TryParse(identity.UserAssignedId, out Guid requestedClientId) || resolvedClientId != requestedClientId)) ||
                         expiresOn <= now || expiresOn > certificateExpiry)
                     {
                         throw new MsalClientException(InvalidResponse,
