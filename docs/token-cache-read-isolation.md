@@ -89,7 +89,13 @@ refresh-token, client and environment filtering). Explicit unkeyed restores take
 precedence over warm state. Failed private callback lifecycles never publish.
 No separate discovery cache or new persistent format is introduced.
 
-Isolation is local to one cache instance. It does not add distributed transactions,
+Request coalescing renews an isolated session's read view after acquiring admission,
+so queued callers can observe the preceding acquisition's completed publication.
+Renewal uses the same hydration, lifecycle coordination and publication rules; it
+does not read tokens directly from the shared root. Subsequent token, ID-token and
+account lookups stay pinned to the renewed view. Ordinary warm hits do not renew.
+
+Isolation itself is local to one cache instance. It does not add distributed transactions,
 refresh single-flight, cross-instance logout coordination, or guarantees about
 late token-endpoint responses. Private hydration still allocates decoded cache
 state; concurrency is not a promise that every warm single-threaded lookup is

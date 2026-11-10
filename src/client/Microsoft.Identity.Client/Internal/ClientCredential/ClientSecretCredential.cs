@@ -16,6 +16,8 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
 
         public AssertionType AssertionType => AssertionType.Secret;
 
+        public bool HasRequestCallback => false;
+
         public ClientSecretCredential(string secret)
         {
             Secret = secret;

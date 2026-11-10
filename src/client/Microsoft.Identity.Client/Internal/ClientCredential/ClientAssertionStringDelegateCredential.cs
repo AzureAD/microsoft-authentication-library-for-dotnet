@@ -28,6 +28,8 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
 
         public AssertionType AssertionType => AssertionType.ClientAssertion;
 
+        public bool HasRequestCallback => true;
+
         public async Task<CredentialMaterial> GetCredentialMaterialAsync(
             CredentialContext context,
             CancellationToken cancellationToken)

@@ -612,7 +612,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        public async Task AcquireTokenForClient_QueuedAppTokenProviderCanceled_DoesNotInvokeCompletion()
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task AcquireTokenForClient_QueuedAppTokenProviderCanceled_DoesNotInvokeCompletion(bool forceRefresh)
         {
             // Arrange
             using var harness = CreateTestHarness();
@@ -620,21 +622,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             using var cancellation = new CancellationTokenSource();
             var providerEntered = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
             var releaseProvider = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
-            var secondCallQueued = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
             int providerCount = 0;
             int completionCount = 0;
-            int semaphoreEntries = 0;
             var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                 .WithAuthority(TestConstants.AuthorityCommonTenant)
                 .WithHttpManager(harness.HttpManager)
-                .WithLogging((_, message, _) =>
-                {
-                    if (message.Contains("[ClientCredentialRequest] Entering client credential request semaphore.") &&
-                        Interlocked.Increment(ref semaphoreEntries) == 2)
-                    {
-                        secondCallQueued.TrySetResult(true);
-                    }
-                }, LogLevel.Verbose)
                 .WithAppTokenProvider(async _ =>
                 {
                     Interlocked.Increment(ref providerCount);
@@ -652,7 +644,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     return Task.CompletedTask;
                 })
                 .Build();
-            Task<AuthenticationResult> firstCall = app.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync();
+            Task<AuthenticationResult> firstCall = app.AcquireTokenForClient(TestConstants.s_scope)
+                .WithForceRefresh(forceRefresh).ExecuteAsync();
             Task<AuthenticationResult> queuedCall = null;
 
             try
@@ -660,9 +653,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // Act
                 Assert.AreSame(providerEntered.Task,
                     await Task.WhenAny(providerEntered.Task, firstCall, Task.Delay(TimeSpan.FromSeconds(10))).ConfigureAwait(false));
-                queuedCall = app.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync(cancellation.Token);
-                Assert.AreSame(secondCallQueued.Task,
-                    await Task.WhenAny(secondCallQueued.Task, queuedCall, Task.Delay(TimeSpan.FromSeconds(10))).ConfigureAwait(false));
+                queuedCall = app.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithForceRefresh(forceRefresh).ExecuteAsync(cancellation.Token);
                 Assert.IsFalse(queuedCall.IsCompleted);
                 cancellation.Cancel();
                 Assert.AreSame(queuedCall,

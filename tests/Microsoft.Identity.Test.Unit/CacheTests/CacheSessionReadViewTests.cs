@@ -62,6 +62,40 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [TestMethod]
+        [DataRow(true, true)]
+        [DataRow(true, false)]
+        [DataRow(false, true)]
+        [DataRow(false, false)]
+        public async Task ResetReadView_RenewsOnlyIsolatedSessionsAndRepinsState(bool isolated, bool knownAccount)
+        {
+            // Arrange
+            SetIsolation(isolated);
+            var cache = CreateCache();
+            byte[] persisted = Blob("before");
+            int reads = 0;
+            cache.SetBeforeAccess(args =>
+            {
+                reads++;
+                args.TokenCache.DeserializeMsalV3(persisted, true);
+            });
+            var session = CreateSession(cache, knownAccount: knownAccount);
+            Assert.AreEqual("before", (await session.GetAccountsAsync().ConfigureAwait(false)).Single().Username);
+
+            // Act
+            persisted = Blob("after");
+            session.ResetReadView();
+            Assert.AreEqual(isolated ? "after" : "before",
+                (await session.GetAccountsAsync().ConfigureAwait(false)).Single().Username);
+            persisted = Blob("another-session");
+            await CreateSession(cache).GetAccountsAsync().ConfigureAwait(false);
+
+            // Assert: later root publication cannot change the renewed private view.
+            Assert.AreEqual(isolated ? "after" : "another-session",
+                (await session.GetAccountsAsync().ConfigureAwait(false)).Single().Username);
+            Assert.AreEqual(isolated ? 3 : 2, reads, "Lookups within a renewed view must not rehydrate again.");
+        }
+
+        [TestMethod]
         public async Task PrivateViewPreservesUnknownJson()
         {
             var cache = CreateCache();

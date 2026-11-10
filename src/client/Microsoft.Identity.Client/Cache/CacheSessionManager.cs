@@ -21,6 +21,7 @@ namespace Microsoft.Identity.Client.Cache
     /// MSAL should only interact with the cache though this object. It is responsible for firing cache notifications.
     /// Flows should only perform (at most) 2 cache accesses: one to read data and one to write tokens. Reading data multiple times 
     /// (e.g. read all ATs, read all RTs) should not refresh the cache from disk because of performance impact.
+    /// Coalescing admission renews an isolated read view once to observe a preceding acquisition's publication.
     /// Write operations are still the responsibility of TokenCache.
     /// </summary>
     internal class CacheSessionManager : ICacheSessionManager
@@ -43,6 +44,16 @@ namespace Microsoft.Identity.Client.Cache
 
         #region ICacheSessionManager implementation
         public ITokenCacheInternal TokenCacheInternal { get; }
+
+        /// <inheritdoc />
+        public void ResetReadView()
+        {
+            if (_readView is not null)
+            {
+                _readView = null;
+                _cacheRefreshedForRead = false;
+            }
+        }
 
         private bool IsInternalCacheDisabled =>
             CacheOptions.IsDisabledFor(_requestParams.RequestContext.ServiceBundle.Config.AccessorOptions);
@@ -86,12 +97,8 @@ namespace Microsoft.Identity.Client.Cache
             }
             finally
             {
-                if (_readView != null)
-                {
-                    // Persistence callbacks can fail after the root has already changed.
-                    _readView = null;
-                    _cacheRefreshedForRead = false;
-                }
+                // Persistence callbacks can fail after the root has already changed.
+                ResetReadView();
             }
             RequestContext.ApiEvent.CachedAccessTokenCount = GetInternalCacheEntryCountForTelemetry();
             return result;
