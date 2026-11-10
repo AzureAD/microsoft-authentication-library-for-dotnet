@@ -21,6 +21,27 @@ The following table lists MSAL.NET versions currently supported and receiving se
 | --------------|--------------|--------|------------|--------|
 | 4.x           | [![NuGet](https://img.shields.io/nuget/v/microsoft.identity.client.svg?style=flat-square&label=nuget&colorB=00b200)](https://www.nuget.org/packages/Microsoft.Identity.Client/)   |Monthly| Active | Not planned.<br/>✅Supported versions: from 4.77.1 to [![NuGet](https://img.shields.io/nuget/v/microsoft.identity.client.svg?style=flat-square&label=nuget&colorB=00b200)](https://www.nuget.org/packages/Microsoft.Identity.Client/)<br/>⚠️Unsupported versions &lt; `4.77.1`.|
 
+### Target frameworks
+
+.NET 8 and .NET 10 are modern .NET build targets. The core library also ships
+`netstandard2.0`, `net462`, and `net472` compatibility assets; Android and iOS
+targets use .NET 10. The .NET 8 asset is retained while downstream SDKs migrate to
+.NET 10. Building from source requires the SDK selected by
+`global.json` and the corresponding workloads when building mobile targets.
+
+.NET 8/9 applications select the `net8.0` asset, and .NET 10 applications select
+`net10.0`. Both modern assets retain managed-identity IMDSv2 mTLS flows,
+family refresh-token error/claims propagation, and WinUI3 integration.
+Managed-identity `WithMtlsProofOfPossession()` and `WithRequestOverMtls()` fail
+immediately in the `netstandard2.0` and `net462` assets. Ordinary managed-identity
+bearer-token acquisition is unchanged; the `net8.0`, `net10.0`, and `net472` mTLS paths remain available.
+Token-cache snapshot APIs remain available
+in the compatibility assets, subject to their existing platform and cache-configuration
+restrictions; they do not require upgrading the application to .NET 10.
+
+The Linux devcontainer uses `LibsAndSamples.portable.slnf`. Windows CI uses
+`LibsAndSamples.sdk.slnf`, which also includes Windows-only samples.
+
 ### Performance perspectives
 
 [Our documentation](https://learn.microsoft.com/entra/msal/dotnet/advanced/performance-testing) describes the approach to performance testing.

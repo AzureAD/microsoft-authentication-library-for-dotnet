@@ -102,12 +102,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
         /// </remarks>
         public static RSA CreateRsaKeyPair()
         {
-#if NET462 || NET472 || NET8_0
-            // Windows-only TFMs (Framework or -windows TFMs): compile CNG path
+#if NET462 || NET472
             return CreateWindowsPersistedRsa();
 
 #else
-            // netstandard2.0 can run anywhere; pick at runtime
+            // Both modern .NET and netstandard2.0 can run on non-Windows hosts.
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 return CreateWindowsPersistedRsa(); // requires CNG package in csproj

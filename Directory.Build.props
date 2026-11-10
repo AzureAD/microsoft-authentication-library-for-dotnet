@@ -11,6 +11,7 @@
     <!-- Projects must set this individually -->
     <IsPackable>false</IsPackable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
   </PropertyGroup>
 
   <PropertyGroup Label="For CI build" Condition="'$(TF_BUILD)' == 'true'">
@@ -28,6 +29,5 @@
          For clarity, without PrivateAssets marked here, anyone consuming Microsoft.Identity.Client
          would also be forced to install these dependencies.  PrivateAssets avoids this problem. -->
     <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" PrivateAssets="All" />
   </ItemGroup>
 </Project>

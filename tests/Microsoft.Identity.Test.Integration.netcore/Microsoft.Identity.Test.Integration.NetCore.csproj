@@ -2,7 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net8</TargetFrameworks>
+    <TargetFramework>net10.0</TargetFramework>
     <IsPackable>false</IsPackable>
     <DefineConstants>$(DefineConstants);NET_CORE</DefineConstants>
     <Configurations>Debug;Release;Debug + MobileApps</Configurations>
@@ -24,18 +24,12 @@
     <PackageReference Include="OpenTelemetry.Exporter.InMemory" />
     <PackageReference Include="Selenium.Support" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" />
-    <!-- This reference is a workaround for a bug in .net46
-    https://stackoverflow.com/questions/45563560/could-not-load-file-or-assembly-system-net-http-version-4-1-1-1-net-standard-->
-    <PackageReference Include="System.Net.Http" />
     <PackageReference Include="Selenium.WebDriver" />
-    <PackageReference Include="System.Security.Cryptography.Cng" />
-    <PackageReference Include="System.Text.Json" />
     <PackageReference Include="coverlet.collector" />
     <!-- Workaround for hitting exception invoking executor 'executor://nunit3testexecutor/': Could not load type 'System.Runtime.Remoting.Channels.IChannel'-->
     <PackageReference Include="NUnit" />
     <PackageReference Include="NUnit3TestAdapter" />
     <PackageReference Include="StrongNamer" />
-    <PackageReference Include="System.Formats.Asn1" />
   </ItemGroup>
 
   <ItemGroup>
