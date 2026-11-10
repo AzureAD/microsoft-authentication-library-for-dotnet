@@ -30,9 +30,12 @@ targets use .NET 10. Building from source requires the SDK selected by
 
 There are no dedicated .NET 8/9 assets. Those applications can resolve the existing
 `netstandard2.0` asset, but it does not preserve all behavior of the former .NET 8
-asset, including non-exportable managed-identity certificate-key attachment,
+asset, including managed-identity IMDSv2 mTLS flows,
 modern family refresh-token error/claims propagation, and WinUI3 integration.
 Upgrade applications that require those modern-runtime behaviors to .NET 10.
+Managed-identity `WithMtlsProofOfPossession()` and `WithRequestOverMtls()` fail
+immediately in the `netstandard2.0` and `net462` assets. Ordinary managed-identity
+bearer-token acquisition is unchanged; the `net10.0` and `net472` mTLS paths remain available.
 Token-cache snapshot APIs remain available
 in the compatibility assets, subject to their existing platform and cache-configuration
 restrictions; they do not require upgrading the application to .NET 10.
