@@ -19,6 +19,14 @@ steps:
     LabApiVersion: $(LabApiVersion)
     Solution: 'LibsAndSamples.sdk.slnf'
 
+- task: PowerShell@2
+  displayName: 'Check managed identity mTLS rejection in the Standard 2.0 asset'
+  inputs:
+    targetType: 'filePath'
+    filePath: 'build/test-managed-identity-netstandard.ps1'
+    arguments: '-BuildConfiguration "$(BuildConfiguration)"'
+    pwsh: true
+
 # The solution's Release|Any CPU configuration skips this app.
 - task: DotNetCoreCLI@2
   displayName: 'Build .NET 10 WAM MAUI app'
