@@ -23,19 +23,18 @@ The following table lists MSAL.NET versions currently supported and receiving se
 
 ### Target frameworks
 
-.NET 10 is the only modern .NET build target. The core library ships
+.NET 8 and .NET 10 are modern .NET build targets. The core library also ships
 `netstandard2.0`, `net462`, and `net472` compatibility assets; Android and iOS
-targets use .NET 10. Building from source requires the SDK selected by
+targets use .NET 10. The .NET 8 asset is retained while downstream SDKs migrate to
+.NET 10. Building from source requires the SDK selected by
 `global.json` and the corresponding workloads when building mobile targets.
 
-There are no dedicated .NET 8/9 assets. Those applications can resolve the existing
-`netstandard2.0` asset, but it does not preserve all behavior of the former .NET 8
-asset, including managed-identity IMDSv2 mTLS flows,
-modern family refresh-token error/claims propagation, and WinUI3 integration.
-Upgrade applications that require those modern-runtime behaviors to .NET 10.
+.NET 8/9 applications select the `net8.0` asset, and .NET 10 applications select
+`net10.0`. Both modern assets retain managed-identity IMDSv2 mTLS flows,
+family refresh-token error/claims propagation, and WinUI3 integration.
 Managed-identity `WithMtlsProofOfPossession()` and `WithRequestOverMtls()` fail
 immediately in the `netstandard2.0` and `net462` assets. Ordinary managed-identity
-bearer-token acquisition is unchanged; the `net10.0` and `net472` mTLS paths remain available.
+bearer-token acquisition is unchanged; the `net8.0`, `net10.0`, and `net472` mTLS paths remain available.
 Token-cache snapshot APIs remain available
 in the compatibility assets, subject to their existing platform and cache-configuration
 restrictions; they do not require upgrading the application to .NET 10.
