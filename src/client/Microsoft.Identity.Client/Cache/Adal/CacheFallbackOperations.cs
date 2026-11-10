@@ -146,7 +146,8 @@ namespace Microsoft.Identity.Client.Cache
             ILegacyCachePersistence legacyCachePersistence,
             string clientId,
             string displayableId,
-            string accountOrUserId)
+            string accountOrUserId,
+            Func<IAccount, string, bool> accountFilter = null)
         {
             try
             {
@@ -155,10 +156,10 @@ namespace Microsoft.Identity.Client.Cache
 
                 if (!string.IsNullOrEmpty(accountOrUserId))
                 {
-                    RemoveEntriesWithMatchingId(clientId, accountOrUserId, adalCache);
+                    RemoveEntriesWithMatchingId(clientId, accountOrUserId, adalCache, accountFilter);
                 }
 
-                RemoveEntriesWithMatchingName(logger, clientId, displayableId, adalCache);
+                RemoveEntriesWithMatchingName(logger, clientId, displayableId, adalCache, accountFilter);
                 legacyCachePersistence.WriteCache(AdalCacheOperations.Serialize(logger, adalCache));
             }
             catch (Exception ex)
@@ -172,7 +173,8 @@ namespace Microsoft.Identity.Client.Cache
             ILoggerAdapter logger,
             string clientId,
             string displayableId,
-            IDictionary<AdalTokenCacheKey, AdalResultWrapper> adalCache)
+            IDictionary<AdalTokenCacheKey, AdalResultWrapper> adalCache,
+            Func<IAccount, string, bool> accountFilter)
         {
             if (string.IsNullOrEmpty(displayableId))
             {
@@ -188,7 +190,8 @@ namespace Microsoft.Identity.Client.Cache
                 string cachedClientId = kvp.Key.ClientId;
 
                 if (string.Equals(displayableId, cachedAccountDisplayableId, StringComparison.OrdinalIgnoreCase) &&
-                    string.Equals(clientId, cachedClientId, StringComparison.OrdinalIgnoreCase))
+                    string.Equals(clientId, cachedClientId, StringComparison.OrdinalIgnoreCase) &&
+                    IsAccountAllowed(kvp, accountFilter))
                 {
                     keysToRemove.Add(kvp.Key);
                 }
@@ -203,7 +206,8 @@ namespace Microsoft.Identity.Client.Cache
         private static void RemoveEntriesWithMatchingId(
             string clientId,
             string accountOrUserId,
-            IDictionary<AdalTokenCacheKey, AdalResultWrapper> adalCache)
+            IDictionary<AdalTokenCacheKey, AdalResultWrapper> adalCache,
+            Func<IAccount, string, bool> accountFilter)
         {
             var keysToRemove = new List<AdalTokenCacheKey>();
 
@@ -217,7 +221,8 @@ namespace Microsoft.Identity.Client.Cache
                     string cachedClientId = kvp.Key.ClientId;
 
                     if (string.Equals(accountOrUserId, cachedAccountId, StringComparison.OrdinalIgnoreCase) &&
-                        string.Equals(clientId, cachedClientId, StringComparison.OrdinalIgnoreCase))
+                        string.Equals(clientId, cachedClientId, StringComparison.OrdinalIgnoreCase) &&
+                        IsAccountAllowed(kvp, accountFilter))
                     {
                         keysToRemove.Add(kvp.Key);
                     }
@@ -235,7 +240,8 @@ namespace Microsoft.Identity.Client.Cache
            ILegacyCachePersistence legacyCachePersistence,
            IEnumerable<string> environmentAliases,
            string clientId,
-           IAccount account)
+           IAccount account,
+           Func<IAccount, string, bool> accountFilter = null)
         {
             try
             {
@@ -274,7 +280,8 @@ namespace Microsoft.Identity.Client.Cache
                     return null;
                 }
 
-                return listToProcess.Select(adalEntry => new MsalRefreshTokenCacheItem(
+                return listToProcess.Where(entry => IsAccountAllowed(entry, accountFilter))
+                    .Select(adalEntry => new MsalRefreshTokenCacheItem(
                       new Uri(adalEntry.Key.Authority).Host,
                       adalEntry.Key.ClientId,
                       adalEntry.Value.RefreshToken,
@@ -290,6 +297,14 @@ namespace Microsoft.Identity.Client.Cache
 
                 return null;
             }
+        }
+
+        private static bool IsAccountAllowed(
+            KeyValuePair<AdalTokenCacheKey, AdalResultWrapper> entry, Func<IAccount, string, bool> accountFilter)
+        {
+            return accountFilter is null || accountFilter(
+                new Account(GetHomeAccountId(entry.Value), entry.Key.DisplayableId, new Uri(entry.Key.Authority).Host),
+                entry.Key.UniqueId);
         }
 
         private static string GetHomeAccountId(AdalResultWrapper adalResultWrapper)

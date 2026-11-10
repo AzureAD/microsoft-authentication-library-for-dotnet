@@ -113,6 +113,7 @@ namespace Microsoft.Identity.Client
             }
 
             Account account = null;
+            IDictionary<string, TenantProfile> tenantProfiles = null;
             if (idToken != null)
             {
                 Debug.Assert(
@@ -144,7 +145,6 @@ namespace Microsoft.Identity.Client
                              wamAccountIds);
 
                 // Add the newly obtained id token to the list of profiles.
-                IDictionary<string, TenantProfile> tenantProfiles = null;
                 if (msalIdTokenCacheItem.TenantId != null)
                 {
                     if (CacheOptions.IsDisabledFor(ServiceBundle.Config.AccessorOptions))
@@ -158,7 +158,9 @@ namespace Microsoft.Identity.Client
                     }
                     else
                     {
-                        tenantProfiles = await GetTenantProfilesAsync(requestParams, homeAccountId).ConfigureAwait(false);
+                        tenantProfiles = UseIsolatedCacheReads && requestParams.AuthorityInfo.CanBeTenanted && homeAccountId != null
+                            ? new Dictionary<string, TenantProfile>()
+                            : await GetTenantProfilesAsync(requestParams, homeAccountId).ConfigureAwait(false);
                         if (tenantProfiles != null)
                         {
                             tenantProfiles[msalIdTokenCacheItem.TenantId] = new TenantProfile(msalIdTokenCacheItem);
@@ -220,6 +222,17 @@ namespace Microsoft.Identity.Client
                         requestParams.RequestContext.ApiEvent.DurationInCacheInMs += measuredResultDuration.Milliseconds;
                     }
 
+                    if (UseIsolatedCacheReads && tenantProfiles != null)
+                    {
+                        // Private reads do not populate the root; collect profiles after write-side hydration.
+                        var persistedProfiles = await GetTenantProfilesAsync(requestParams, homeAccountId).ConfigureAwait(false);
+                        foreach (var profile in persistedProfiles)
+                        {
+                            if (profile.Key != msalIdTokenCacheItem.TenantId)
+                                tenantProfiles[profile.Key] = profile.Value;
+                        }
+                    }
+
                     // Don't cache access tokens from broker
                     if (ShouldCacheAccessToken(msalAccessTokenCacheItem, response.TokenSource))
                     {
@@ -230,6 +243,7 @@ namespace Microsoft.Identity.Client
                             tenantId,
                             msalAccessTokenCacheItem.ScopeSet,
                             msalAccessTokenCacheItem.HomeAccountId,
+                            msalAccessTokenCacheItem.RawClientInfo,
                             msalAccessTokenCacheItem.TokenType,
                             msalAccessTokenCacheItem.AdditionalCacheKeyComponents);
 
@@ -675,8 +689,8 @@ namespace Microsoft.Identity.Client
                 requestParams.ApiId != ApiEvent.ApiIds.AcquireTokenForUserAssignedManagedIdentity &&
                 !ApiEvent.IsOnBehalfOfRequest(requestParams.ApiId))
             {
-                tokenCacheItems.FilterWithLogging(item => item.HomeAccountId.Equals(
-                                requestParams.Account.HomeAccountId?.Identifier, StringComparison.OrdinalIgnoreCase),
+                tokenCacheItems.FilterWithLogging(item => item.MatchesHomeAccountId(
+                                requestParams.Account.HomeAccountId?.Identifier),
                                 requestParams.RequestContext.Logger,
                                 "Filtering AT by home account id");
             }
@@ -768,6 +782,8 @@ namespace Microsoft.Identity.Client
                                      requestParams.RequestContext)
                             .ConfigureAwait(false);
 
+            FilterAmbiguousAccountIdentities(tokenCacheItems, instanceMetadata.Aliases, logger);
+
             // In case we're sharing the cache with an MSAL that does not implement environment aliasing,
             // it's possible (but unlikely), that we have multiple ATs from the same alias family.
             // To overcome some of these use cases, try to filter just by preferred cache alias
@@ -791,6 +807,17 @@ namespace Microsoft.Identity.Client
                 item => instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(item.Environment),
                 requestParams.RequestContext.Logger,
                 $"Filtering AT by environment");
+        }
+
+        private void FilterAmbiguousAccountIdentities<T>(
+            List<T> items, IEnumerable<string> environments, ILoggerAdapter logger) where T : MsalCacheItemBase
+        {
+            if (items.Count > 0 && Accessor is ILegacyCacheIdentityFilter identityFilter)
+            {
+                var accountFilter = identityFilter.GetAccountFilter(environments);
+                items.FilterWithLogging(item => accountFilter(item.HomeAccountId), logger,
+                    "Filtering ambiguous Android identities across the lookup environments");
+            }
         }
 
         private static MsalAccessTokenCacheItem FilterTokensByPopKeyId(MsalAccessTokenCacheItem item, AuthenticationRequestParameters authenticationRequest)
@@ -885,6 +912,7 @@ namespace Microsoft.Identity.Client
                     FilterRefreshTokensByAdditionalKeyComponents(refreshTokens, requestParams);
                 }
 
+                IEnumerable<string> lookupEnvironments = null;
                 if (!requestParams.AppConfig.MultiCloudSupportEnabled)
                 {
                     var metadata =
@@ -894,10 +922,13 @@ namespace Microsoft.Identity.Client
                         requestParams.RequestContext)
                     .ConfigureAwait(false);
                     var aliases = metadata.Aliases;
+                    lookupEnvironments = aliases;
 
                     refreshTokens.RemoveAll(
                         item => !aliases.ContainsOrdinalIgnoreCase(item.Environment));
                 }
+
+                FilterAmbiguousAccountIdentities(refreshTokens, lookupEnvironments, requestParams.RequestContext.Logger);
 
                 requestParams.RequestContext.Logger.Info(() => "[FindRefreshTokenAsync] Refresh token found in the cache? - " + (refreshTokens.Count != 0));
 
@@ -925,12 +956,28 @@ namespace Microsoft.Identity.Client
                   .ConfigureAwait(false);
                 var aliases = metadata.Aliases;
 
-                return CacheFallbackOperations.GetRefreshToken(
+                var identityFilter = Accessor as ILegacyCacheIdentityFilter;
+                var accountFilter = identityFilter?.GetLegacyAccountFilter(aliases);
+                if (accountFilter?.Invoke(requestParams.Account, null) == false)
+                {
+                    requestParams.RequestContext.Logger.Warning("Skipping ADAL refresh for an ambiguous Android account.");
+                    return null;
+                }
+
+                var refreshToken = CacheFallbackOperations.GetRefreshToken(
                     requestParams.RequestContext.Logger,
                     LegacyCachePersistence,
                     aliases,
                     requestParams.AppConfig.ClientId,
-                    requestParams.Account);
+                    requestParams.Account,
+                    accountFilter);
+
+                if (refreshToken is not null && identityFilter is not null)
+                {
+                    refreshToken.IsAndroidCacheItem = true;
+                }
+
+                return refreshToken;
             }
 
             return null;
@@ -955,8 +1002,8 @@ namespace Microsoft.Identity.Client
             }
             else
             {
-                cacheItems.FilterWithLogging(item => item.HomeAccountId.Equals(
-                                requestParams.Account.HomeAccountId?.Identifier, StringComparison.OrdinalIgnoreCase),
+                cacheItems.FilterWithLogging(item => item.MatchesHomeAccountId(
+                                requestParams.Account.HomeAccountId?.Identifier),
                                 requestParams.RequestContext.Logger,
                                 "Filtering RT by home account id");
             }
@@ -1033,6 +1080,13 @@ namespace Microsoft.Identity.Client
             var refreshTokenCacheItems = Accessor.GetAllRefreshTokens(partitionKey);
             var accountCacheItems = Accessor.GetAllAccounts(partitionKey);
 
+            if (!string.IsNullOrEmpty(requestParameters.HomeAccountId))
+            {
+                accountCacheItems.FilterWithLogging(item => !item.IsAndroidSubject ||
+                    item.MatchesHomeAccountId(requestParameters.HomeAccountId), logger,
+                    "[GetAccounts] Filtering Android subject accounts by accountID");
+            }
+
             if (filterByClientId)
             {
                 refreshTokenCacheItems.FilterWithLogging(item =>
@@ -1083,6 +1137,10 @@ namespace Microsoft.Identity.Client
                     true);
             }
 
+            var lookupEnvironments = requestParameters.AppConfig.MultiCloudSupportEnabled ? null : instanceMetadata.Aliases;
+            FilterAmbiguousAccountIdentities(refreshTokenCacheItems, lookupEnvironments, logger);
+            FilterAmbiguousAccountIdentities(accountCacheItems, lookupEnvironments, logger);
+
             logger.Verbose(() => $"[GetAccounts] Found {refreshTokenCacheItems.Count} RTs and {accountCacheItems.Count} accounts in MSAL cache after environment filtering. ");
 
             IDictionary<string, Account> clientInfoToAccountMap = new Dictionary<string, Account>();
@@ -1109,13 +1167,19 @@ namespace Microsoft.Identity.Client
                 }
             }
 
+            var legacyAccountFilter = IsLegacyAdalCacheEnabled(requestParameters)
+                ? (Accessor as ILegacyCacheIdentityFilter)?.GetLegacyAccountFilter(instanceMetadata.Aliases)
+                : null;
+
             if (IsLegacyAdalCacheEnabled(requestParameters))
             {
                 UpdateMapWithAdalAccountsWithClientInfo(
                     environment,
                     instanceMetadata.Aliases,
                     adalUsersResult,
-                    clientInfoToAccountMap);
+                    clientInfoToAccountMap,
+                    legacyAccountFilter,
+                    logger);
             }
 
             // Add WAM accounts stored in MSAL's cache - for which we do not have an RT
@@ -1149,7 +1213,9 @@ namespace Microsoft.Identity.Client
                 UpdateWithAdalAccountsWithoutClientInfo(environment,
                  instanceMetadata.Aliases,
                  adalUsersResult,
-                 accounts);
+                 accounts,
+                 legacyAccountFilter,
+                 logger);
             }
 
             if (!string.IsNullOrEmpty(requestParameters.HomeAccountId))
@@ -1168,7 +1234,9 @@ namespace Microsoft.Identity.Client
           string envFromRequest,
           IEnumerable<string> envAliases,
           AdalUsersForMsal adalUsers,
-          IDictionary<string, Account> clientInfoToAccountMap)
+          IDictionary<string, Account> clientInfoToAccountMap,
+          Func<IAccount, string, bool> accountFilter,
+          ILoggerAdapter logger)
         {
             foreach (KeyValuePair<string, AdalUserInfo> pair in adalUsers?.GetUsersWithClientInfo(envAliases))
             {
@@ -1177,8 +1245,15 @@ namespace Microsoft.Identity.Client
 
                 if (!clientInfoToAccountMap.ContainsKey(accountIdentifier))
                 {
-                    clientInfoToAccountMap[accountIdentifier] = new Account(
+                    var account = new Account(
                             accountIdentifier, pair.Value.DisplayableId, envFromRequest, null);
+                    if (accountFilter?.Invoke(account, pair.Value.UniqueId) == false)
+                    {
+                        logger.Warning("Ignoring an ADAL account with an ambiguous Android identity.");
+                        continue;
+                    }
+
+                    clientInfoToAccountMap[accountIdentifier] = account;
                 }
             }
         }
@@ -1187,7 +1262,9 @@ namespace Microsoft.Identity.Client
             string envFromRequest,
             IEnumerable<string> envAliases,
             AdalUsersForMsal adalUsers,
-            List<IAccount> accounts)
+            List<IAccount> accounts,
+            Func<IAccount, string, bool> accountFilter,
+            ILoggerAdapter logger)
         {
             var uniqueUserNames = accounts.Select(a => a.Username).Distinct().ToList();
 
@@ -1195,7 +1272,14 @@ namespace Microsoft.Identity.Client
             {
                 if (!string.IsNullOrEmpty(user.DisplayableId) && !uniqueUserNames.Contains(user.DisplayableId))
                 {
-                    accounts.Add(new Account(null, user.DisplayableId, envFromRequest, null));
+                    var account = new Account(null, user.DisplayableId, envFromRequest, null);
+                    if (accountFilter?.Invoke(account, user.UniqueId) == false)
+                    {
+                        logger.Warning("Ignoring an ADAL account with an ambiguous Android identity.");
+                        continue;
+                    }
+
+                    accounts.Add(account);
                     uniqueUserNames.Add(user.DisplayableId);
                 }
             }
@@ -1225,6 +1309,7 @@ namespace Microsoft.Identity.Client
             var idTokenCacheItems = Accessor.GetAllIdTokens(homeAccountId);
             FilterTokensByClientId(idTokenCacheItems);
 
+            IEnumerable<string> lookupEnvironments = null;
             if (!requestParameters.AppConfig.MultiCloudSupportEnabled)
             {
                 ISet<string> allEnvironmentsInCache = new HashSet<string>(
@@ -1242,8 +1327,11 @@ namespace Microsoft.Identity.Client
                     allEnvironmentsInCache,
                     requestParameters.RequestContext).ConfigureAwait(false);
 
+                lookupEnvironments = instanceMetadata.Aliases;
                 idTokenCacheItems.RemoveAll(idToken => !instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(idToken.Environment));
             }
+
+            FilterAmbiguousAccountIdentities(idTokenCacheItems, lookupEnvironments, requestParameters.RequestContext.Logger);
 
             // some accessors might not support partitioning, so make sure to filter by home account id
             idTokenCacheItems.RemoveAll(idToken => !homeAccountId.Equals(idToken.HomeAccountId));
@@ -1272,7 +1360,10 @@ namespace Microsoft.Identity.Client
                         msalAccessTokenCacheItem.TenantId,
                         msalAccessTokenCacheItem.HomeAccountId,
                         account?.AccountSource,
-                        account?.Username));
+                        account?.Username)
+                {
+                    RawClientInfo = msalAccessTokenCacheItem.RawClientInfo
+                });
 
             return new Account(
                 msalAccessTokenCacheItem.HomeAccountId,
@@ -1392,16 +1483,27 @@ namespace Microsoft.Identity.Client
                         await tokenCacheInternal.OnBeforeWriteAsync(args).ConfigureAwait(false);
                     }
 
+                    var accountFilter = IsLegacyAdalCacheEnabled(requestParameters)
+                        ? (Accessor as ILegacyCacheIdentityFilter)?.GetLegacyAccountFilter(null)
+                        : null;
                     RemoveAccountInternal(account, requestParameters.RequestContext);
 
                     if (IsLegacyAdalCacheEnabled(requestParameters))
                     {
-                        CacheFallbackOperations.RemoveAdalUser(
-                           requestParameters.RequestContext.Logger,
-                           LegacyCachePersistence,
-                           ClientId,
-                           account?.Username,
-                           cacheKey);
+                        if (accountFilter?.Invoke(account, null) == false)
+                        {
+                            requestParameters.RequestContext.Logger.Warning("Skipping ADAL removal for an ambiguous Android account.");
+                        }
+                        else
+                        {
+                            CacheFallbackOperations.RemoveAdalUser(
+                               requestParameters.RequestContext.Logger,
+                               LegacyCachePersistence,
+                               ClientId,
+                               account?.Username,
+                               cacheKey,
+                               accountFilter);
+                        }
                     }
                 }
                 finally
@@ -1471,12 +1573,19 @@ namespace Microsoft.Identity.Client
 
             ILoggerAdapter logger = requestContext.Logger;
 
+            // Removal spans environments, so preserve every side of a mixed identity across them.
+            if ((Accessor as ILegacyCacheIdentityFilter)?.GetAccountFilter(null)(partitionKey) == false)
+            {
+                logger.Warning("Skipping removal of an ambiguous Android account; clear the cache and sign in again.");
+                return;
+            }
+
             var refreshTokens = Accessor.GetAllRefreshTokens(partitionKey, logger);
-            refreshTokens.RemoveAll(item => !item.HomeAccountId.Equals(partitionKey, StringComparison.OrdinalIgnoreCase));
+            refreshTokens.RemoveAll(item => !item.MatchesHomeAccountId(partitionKey));
             RemoveRefreshTokens(refreshTokens, logger, out bool filterByClientId);
 
             var accessTokens = Accessor.GetAllAccessTokens(partitionKey, logger);
-            accessTokens.RemoveAll(item => !item.HomeAccountId.Equals(partitionKey, StringComparison.OrdinalIgnoreCase));
+            accessTokens.RemoveAll(item => !item.MatchesHomeAccountId(partitionKey));
             RemoveAccessTokens(accessTokens, logger, filterByClientId);
 
             RemoveIdTokens(partitionKey, logger, filterByClientId);
@@ -1526,7 +1635,7 @@ namespace Microsoft.Identity.Client
         private int RemoveIdTokens(string partitionKey, ILoggerAdapter logger, bool filterByClientId)
         {
             var idTokens = Accessor.GetAllIdTokens(partitionKey);
-            idTokens.RemoveAll(item => !item.HomeAccountId.Equals(partitionKey, StringComparison.OrdinalIgnoreCase));
+            idTokens.RemoveAll(item => !item.MatchesHomeAccountId(partitionKey));
             if (filterByClientId)
             {
                 FilterTokensByClientId(idTokens);
@@ -1547,7 +1656,7 @@ namespace Microsoft.Identity.Client
             if (account != null)
             {
                 var accounts = Accessor.GetAllAccounts(account.HomeAccountId.Identifier);
-                accounts.RemoveAll(item => !(item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase) &&
+                accounts.RemoveAll(item => !(item.MatchesHomeAccountId(account.HomeAccountId.Identifier) &&
                                    item.PreferredUsername.Equals(account.Username, StringComparison.OrdinalIgnoreCase)));
 
                 foreach (MsalAccountCacheItem accountCacheItem in accounts)
