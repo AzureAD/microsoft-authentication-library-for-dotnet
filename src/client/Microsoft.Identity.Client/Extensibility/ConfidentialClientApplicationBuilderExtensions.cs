@@ -35,13 +35,15 @@ namespace Microsoft.Identity.Client.Extensibility
 
         /// <summary>
         /// Configures an async callback to provide the client credential certificate dynamically.
-        /// The callback is invoked before each token acquisition request to the identity provider (including retries).
+        /// By default, the callback is invoked before each token acquisition request to the identity provider (including retries).
         /// This enables scenarios such as certificate rotation and dynamic certificate selection based on application context.
         /// </summary>
         /// <param name="builder">The confidential client application builder.</param>
         /// <param name="certificateProvider">
         /// An async callback that provides the certificate based on the application configuration.
-        /// Called before each network request to acquire a token.
+        /// Called before each network request to acquire a token, or before cache lookup for
+        /// <see cref="IConfidentialClientApplication.AcquireTokenForClient(System.Collections.Generic.IEnumerable{string})"/>
+        /// when <see cref="CertificateOptions.AssociateTokensWithCertificate"/> is enabled.
         /// Must return a valid <see cref="X509Certificate2"/> with a private key.</param>
         /// <param name="certificateOptions">Configuration options for the certificate handling.</param>
         /// <returns>The builder to chain additional configuration calls.</returns>
@@ -54,7 +56,13 @@ namespace Microsoft.Identity.Client.Extensibility
         /// <para>Use this overload when the certificate or private-key handle is managed externally and may rotate or become invalid.
         /// The callback should return the current usable certificate and private-key handle for each network token request.</para>
         /// <para>This method cannot be used together with <see cref="ConfidentialClientApplicationBuilder.WithCertificate(X509Certificate2)"/>.</para>
-        /// <para>The callback is not invoked when tokens are retrieved from cache, only for network calls.</para>
+        /// <para>By default, the callback is not invoked when tokens are retrieved from cache, only for network calls.
+        /// When <see cref="CertificateOptions.AssociateTokensWithCertificate"/> is enabled for
+        /// <see cref="IConfidentialClientApplication.AcquireTokenForClient(System.Collections.Generic.IEnumerable{string})"/>,
+        /// the callback runs before cache lookup. The selected certificate's serial number partitions the token cache,
+        /// and that certificate is used for the initial network attempt. When <c>OnMsalServiceFailure</c>
+        /// requests a retry, the provider is invoked again and the cache association is updated to match
+        /// the certificate used by the retry. Tokens are cached under the successful attempt's certificate.</para>
         /// <para>For mTLS transport, return the same certificate object instance while its private-key handle remains usable.
         /// After reacquiring the private-key handle, return a new certificate object instance even when the certificate
         /// thumbprint is unchanged. This allows MSAL to create a new transport handler for the refreshed handle.</para>
