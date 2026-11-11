@@ -95,6 +95,11 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             result = knownMetadataProvider.GetMetadata(
                 "login.windows-ppe.net", new[] { "login.windows-ppe.net", "sts.windows-ppe.net", "login.microsoft-ppe.com" }, _logger);
             Assert.IsNotNull(result);
+            Assert.AreEqual("login.windows-ppe.net", result.PreferredNetwork);
+            Assert.AreEqual("login.windows-ppe.net", result.PreferredCache);
+            CollectionAssert.AreEquivalent(
+                new[] { "login.windows-ppe.net", "sts.windows-ppe.net", "login.microsoft-ppe.com" },
+                result.Aliases);
 
             result = knownMetadataProvider.GetMetadata(
                LoginMicrosoftOnlineCom, new[] { "login.windows.net", "bogus", "login.partner.microsoftonline.cn" }, _logger);
