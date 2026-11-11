@@ -1203,6 +1203,64 @@ namespace Microsoft.Identity.Test.Unit
         [TestMethod]
         [DataRow(false)]
         [DataRow(true)]
+        public async Task DynamicCertificate_AssociateTokensWithCertificate_ReusedMtlsBuilderAsync(bool forceRefresh)
+        {
+            // Arrange
+            using (var harness = CreateTestHarness())
+            {
+                var firstCertificate = CertHelper.GetOrCreateTestCert();
+                var secondCertificate = CertHelper.GetOrCreateTestCert(regenerateCert: true);
+                var currentCertificate = firstCertificate;
+                int providerCalls = 0;
+                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithAuthority(TestConstants.AuthorityTenant)
+                    .WithHttpManager(harness.HttpManager)
+                    .WithCertificate(_ =>
+                    {
+                        providerCalls++;
+                        return Task.FromResult(currentCertificate);
+                    }, new CertificateOptions
+                    {
+                        AssociateTokensWithCertificate = true,
+                        SendCertificateOverMtls = true
+                    })
+                    .BuildConcrete();
+                var request = app.AcquireTokenForClient(TestConstants.s_scope);
+
+                // Act
+                for (int step = 0; step < 4; step++)
+                {
+                    currentCertificate = step == 1 || step == 2 ? secondCertificate : firstCertificate;
+                    bool expectNetwork = step < 2;
+                    if (expectNetwork)
+                    {
+                        var handler = CreateTokenResponseHttpHandlerWithX5CValidation(
+                            clientCredentialFlow: true,
+                            expectedX5C: Convert.ToBase64String(currentCertificate.RawData));
+                        handler.ExpectedMtlsBindingCertificate = currentCertificate;
+                        harness.HttpManager.AddMockHandler(handler);
+                    }
+
+                    var result = await request.WithForceRefresh(forceRefresh && step == 1)
+                        .ExecuteAsync().ConfigureAwait(false);
+
+                    // Assert
+                    Assert.AreEqual(expectNetwork ? TokenSource.IdentityProvider : TokenSource.Cache,
+                        result.AuthenticationResultMetadata.TokenSource);
+                    Assert.AreEqual(step + 1, providerCalls);
+                    var expectedSerialNumbers = step == 0
+                        ? new[] { firstCertificate.SerialNumber }
+                        : new[] { firstCertificate.SerialNumber, secondCertificate.SerialNumber };
+                    CollectionAssert.AreEquivalent(expectedSerialNumbers, app.AppTokenCacheInternal.Accessor
+                        .GetAllAccessTokens()
+                        .Select(entry => entry.AdditionalCacheKeyComponents[Constants.CertSerialNumber]).ToArray());
+                }
+            }
+        }
+
+        [TestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
         public async Task DynamicCertificate_AssociateTokensWithCertificate_FailurePreservesCacheAsync(bool returnNull)
         {
             // Arrange
