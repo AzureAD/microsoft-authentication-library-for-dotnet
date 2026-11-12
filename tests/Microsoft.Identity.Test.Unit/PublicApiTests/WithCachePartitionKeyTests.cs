@@ -121,6 +121,27 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
+        public void WithCachePartitionKey_ThrowsOnReservedClientClaimsKey()
+        {
+            // Arrange
+            var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                .WithClientSecret(TestConstants.ClientSecret)
+                .BuildConcrete();
+
+            var builder = app.AcquireTokenForClient(TestConstants.s_scope);
+
+            // Act
+            ArgumentException exception = AssertException.Throws<ArgumentException>(
+                () => builder.WithCachePartitionKey("client_claims", "value"));
+
+            // Assert
+            Assert.AreEqual("key", exception.ParamName);
+            Assert.Contains("reserved", exception.Message);
+            Assert.IsNull(GetCommonParameters(builder).CacheKeyComponents);
+        }
+
+        [TestMethod]
         public void WithCachePartitionKey_PartitionRefreshToken_StickyAcrossChainedCalls()
         {
             // Arrange

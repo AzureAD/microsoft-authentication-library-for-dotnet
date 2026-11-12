@@ -24,6 +24,8 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
 {
     internal class AcquireTokenCommonParameters
     {
+        internal const string ClientClaimsCacheKey = "client_claims";
+
         public ApiEvent.ApiIds ApiId { get; set; } = ApiEvent.ApiIds.None;
         public Guid CorrelationId { get; set; }
         public Guid UserProvidedCorrelationId { get; set; }
