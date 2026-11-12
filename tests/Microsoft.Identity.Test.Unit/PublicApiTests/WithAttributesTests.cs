@@ -19,7 +19,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         private readonly string[] _scope = new[] { "api://AzureFMITokenExchange/.default" };
 
         [TestMethod]
-        public async Task WithAttributes_AddsAttributeToRequestBody_Async()
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task WithAttributes_AddsAttributeToRequestBody_Async(bool enableExperimentalFeatures)
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -29,7 +31,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(httpManager)
-                    .WithExperimentalFeatures(true)
+                    .WithExperimentalFeatures(enableExperimentalFeatures)
                     .BuildConcrete();
 
                 httpManager.AddInstanceDiscoveryMockHandler();
@@ -68,7 +70,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithAuthority("https://login.microsoftonline.com/", TenantId)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(httpManager)
-                    .WithExperimentalFeatures(true)
                     .BuildConcrete();
 
                 httpManager.AddInstanceDiscoveryMockHandler();
@@ -78,7 +79,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // Add expected query parameter - FIXED to match what we're sending
                 handler.ExpectedPostData = new Dictionary<string, string>
                 {
-                    { OAuth2Parameter.Attributes, "attribute1" }  
+                    { OAuth2Parameter.Attributes, "attribute1" }
                 };
 
                 // Act - First request with attribute1
@@ -90,6 +91,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // Assert - Token from IdP
                 Assert.AreEqual("token_with_attribute1", result1.AccessToken);
                 Assert.AreEqual(TokenSource.IdentityProvider, result1.AuthenticationResultMetadata.TokenSource);
+                Assert.HasCount(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens());
 
                 // Act - Second request with same attribute1 (should hit cache)
                 var result2 = await app.AcquireTokenForClient(_scope)
@@ -100,6 +102,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // Assert - Token from cache
                 Assert.AreEqual("token_with_attribute1", result2.AccessToken);
                 Assert.AreEqual(TokenSource.Cache, result2.AuthenticationResultMetadata.TokenSource);
+                Assert.HasCount(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens());
 
                 // Arrange - Add mock for different attribute
                 var handlerSecond = httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(
@@ -137,7 +140,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(httpManager)
-                    .WithExperimentalFeatures(true)
                     .BuildConcrete();
 
                 // Act & Assert - Null attribute should throw
@@ -180,7 +182,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithAuthority("https://login.microsoftonline.com/", TenantId)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(httpManager)
-                    .WithExperimentalFeatures(true)
                     .BuildConcrete();
 
                 httpManager.AddInstanceDiscoveryMockHandler();
