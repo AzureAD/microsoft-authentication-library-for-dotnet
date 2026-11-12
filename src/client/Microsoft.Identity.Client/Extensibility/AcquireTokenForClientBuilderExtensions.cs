@@ -2,13 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.OAuth2;
 
 namespace Microsoft.Identity.Client.Extensibility
@@ -36,27 +30,11 @@ namespace Microsoft.Identity.Client.Extensibility
             {
                 throw new ArgumentNullException(nameof(keyId));
             }
-
             builder.ValidateUseOfExperimentalFeature();
             builder.CommonParameters.AuthenticationOperation = new ExternalBoundTokenScheme(keyId, expectedTokenTypeFromAad);
 
             return builder;
         }
 
-        /// <summary>
-        /// Add extra body parameters to the token request. These parameters are added to the cache key to associate these parameters with the acquired token.
-        /// </summary>
-        /// <param name="builder"></param>
-        /// <param name="extrabodyparams">List of additional body parameters</param>
-        /// <returns></returns>
-        [EditorBrowsable(EditorBrowsableState.Never)] // Soft deprecate; prefer the generic overload on AbstractConfidentialClientAcquireTokenParameterBuilderExtension that also supports OBO and AuthorizationCode.
-        public static AcquireTokenForClientParameterBuilder WithExtraBodyParameters(
-            this AcquireTokenForClientParameterBuilder builder, 
-            Dictionary<string, Func<CancellationToken, Task<string>>> extrabodyparams)
-        {
-            AbstractConfidentialClientAcquireTokenParameterBuilderExtension
-                .WithExtraBodyParameters<AcquireTokenForClientParameterBuilder>(builder, extrabodyparams);
-            return builder;
-        }
     }
 }

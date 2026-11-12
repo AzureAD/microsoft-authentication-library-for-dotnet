@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Runtime.Serialization;
 
 namespace Microsoft.Identity.Client.Extensions.Msal
 {
@@ -18,7 +17,6 @@ namespace Microsoft.Identity.Client.Extensions.Msal
         public MsalCachePersistenceException()
         {
         }
-
         /// <summary>
         /// 
         /// </summary>
@@ -36,14 +34,5 @@ namespace Microsoft.Identity.Client.Extensions.Msal
         {
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="info"></param>
-        /// <param name="context"></param>
-        [Obsolete]
-        protected MsalCachePersistenceException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
-        }
     }
 }

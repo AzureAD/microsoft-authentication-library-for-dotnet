@@ -30,34 +30,6 @@ namespace Microsoft.Identity.Client
                                                                               StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
-        /// Resource for which to request scopes.
-        /// This is the App ID URI of the API that returned the WWW-Authenticate header.
-        /// </summary>
-        /// <remarks>
-        /// Clients that perform resource validation (e.g. by comparing the host part of the resource against a list of known good hosts), 
-        /// can still use the indexer to retrieve the raw value of the resource / scope.
-        /// 
-        /// If a resource is used, add "/.default" to it to transform it into a scope, e.g. "https://graph.microsoft.com/.default" is the OAuth2 scope for "https://graph.microsoft.com" resource.
-        /// MSAL only works with scopes.
-        /// </remarks>
-        [Obsolete("The client apps should know which App ID URI it requests scopes for.", true)]
-        public string Resource { get; set; }
-
-        /// <summary>
-        /// Scopes to request.
-        /// If it's not provided by the web API, it's computed from the Resource.
-        /// </summary>
-        /// <remarks>
-        /// Clients that perform resource validation (e.g. by comparing the host part of the resource against a list of known good hosts), 
-        /// can still use the indexer to retrieve the raw value of the resource / scope. 
-        /// 
-        /// If a resource is used, add "/.default" to it to transform it into a scope, e.g. "https://graph.microsoft.com/.default" is the OAuth2 scope for "https://graph.microsoft.com" resource.
-        /// MSAL only works with scopes.
-        /// </remarks>
-        [Obsolete("The client apps should know which scopes to request for.", true)]
-        public IEnumerable<string> Scopes { get; set; }
-
-        /// <summary>
         /// Authority from which to request an access token.
         /// </summary>
         public string Authority { get; set; }
@@ -111,100 +83,6 @@ namespace Microsoft.Identity.Client
         public string GetTenantId() => Instance.Authority
                                                .CreateAuthority(Authority, validateAuthority: true)?
                                                .TenantId;
-        #region Obsolete Api
-        /// <summary>
-        /// Create the authenticate parameters by attempting to call the resource unauthenticated, and analyzing the response.
-        /// </summary>
-        /// <param name="resourceUri">URI of the resource.</param>
-        /// <returns>WWW-Authenticate Parameters extracted from response to the unauthenticated call.</returns>
-        [System.ComponentModel.EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete("This api is now obsolete and has been replaced with CreateFromAuthenticationResponseAsync(...)")]
-        public static Task<WwwAuthenticateParameters> CreateFromResourceResponseAsync(string resourceUri)
-        {
-            return CreateFromResourceResponseAsync(resourceUri, default);
-        }
-
-        /// <summary>
-        /// Create the authenticate parameters by attempting to call the resource unauthenticated, and analyzing the response.
-        /// </summary>
-        /// <param name="resourceUri">URI of the resource.</param>
-        /// <param name="cancellationToken">The cancellation token to cancel operation.</param>
-        /// <returns>WWW-Authenticate Parameters extracted from response to the unauthenticated call.</returns>
-        [System.ComponentModel.EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete("This api is now obsolete and has been replaced with CreateFromAuthenticationResponseAsync(...)")]
-        public static Task<WwwAuthenticateParameters> CreateFromResourceResponseAsync(string resourceUri, CancellationToken cancellationToken = default)
-        {
-            return CreateFromResourceResponseAsync(AuthenticationHeaderParser.GetHttpClient(), resourceUri, cancellationToken);
-        }
-
-        /// <summary>
-        /// Create the authenticate parameters by attempting to call the resource unauthenticated, and analyzing the response.
-        /// </summary>
-        /// <param name="httpClient">Instance of <see cref="HttpClient"/> to make the request with.</param>
-        /// <param name="resourceUri">URI of the resource.</param>
-        /// <param name="cancellationToken">The cancellation token to cancel operation.</param>
-        /// <returns>WWW-Authenticate Parameters extracted from response to the unauthenticated call.</returns>
-        [System.ComponentModel.EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete("This api is now obsolete and has been replaced with replaced with CreateFromAuthenticationResponseAsync(HttpResponseHeaders, string)")]
-        public static async Task<WwwAuthenticateParameters> CreateFromResourceResponseAsync(HttpClient httpClient, string resourceUri, CancellationToken cancellationToken = default)
-        {
-            if (httpClient is null)
-            {
-                throw new ArgumentNullException(nameof(httpClient));
-            }
-            if (string.IsNullOrWhiteSpace(resourceUri))
-            {
-                throw new ArgumentNullException(nameof(resourceUri));
-            }
-
-            // call this endpoint and see what the header says and return that
-            HttpResponseMessage httpResponseMessage = await httpClient.GetAsync(resourceUri, cancellationToken).ConfigureAwait(false);
-            var wwwAuthParam = CreateFromResponseHeaders(httpResponseMessage.Headers);
-            return wwwAuthParam;
-        }
-
-        /// <summary>
-        /// Create WWW-Authenticate parameters from the HttpResponseHeaders.
-        /// </summary>
-        /// <param name="httpResponseHeaders">HttpResponseHeaders.</param>
-        /// <param name="scheme">Authentication scheme. Default is "Bearer".</param>
-        /// <returns>The parameters requested by the web API.</returns>
-        /// <remarks>Currently it only supports the Bearer scheme</remarks>
-        [System.ComponentModel.EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete("This api is now obsolete and has been replaced with CreateFromAuthenticationHeaders(...)")]
-        public static WwwAuthenticateParameters CreateFromResponseHeaders(
-            HttpResponseHeaders httpResponseHeaders,
-            string scheme = "Bearer")
-        {
-            if (httpResponseHeaders.WwwAuthenticate.Any())
-            {
-                AuthenticationHeaderValue headerValue = httpResponseHeaders.WwwAuthenticate.FirstOrDefault(v => string.Equals(v.Scheme, scheme, StringComparison.OrdinalIgnoreCase));
-
-                if (headerValue != null)
-                {
-                    string wwwAuthenticateValue = headerValue.Parameter;
-                    var parameters = CreateFromWwwAuthenticateHeaderValue(wwwAuthenticateValue);
-                    parameters.AuthenticationScheme = scheme;
-                    return parameters;
-                }
-            }
-
-            return CreateWwwAuthenticateParameters(new Dictionary<string, string>(), string.Empty);
-        }
-
-        /// <summary>
-        /// Creates parameters from the WWW-Authenticate string.
-        /// </summary>
-        /// <param name="wwwAuthenticateValue">String contained in a WWW-Authenticate header.</param>
-        /// <returns>The parameters requested by the web API.</returns>
-        [System.ComponentModel.EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete("This api is now obsolete and should not be used.")]
-        public static WwwAuthenticateParameters CreateFromWwwAuthenticateHeaderValue(string wwwAuthenticateValue)
-        {
-            return CreateFromWwwAuthenticationHeaderValue(wwwAuthenticateValue, string.Empty);
-        }
-        #endregion Obsolete Api
-
         #region Single Scheme Api
         /// <summary>
         /// Create the authenticate parameters by attempting to call the resource unauthenticated, and analyzing the response.
