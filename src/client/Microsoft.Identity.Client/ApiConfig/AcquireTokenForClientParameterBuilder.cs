@@ -144,6 +144,7 @@ namespace Microsoft.Identity.Client
         /// <remarks>
         /// The attribute value is included in the cache key, so different attribute values will result in different cache entries.
         /// This ensures that tokens with different attributes are not confused with each other.
+        /// This method does not require experimental features to be enabled. Attribute issuance remains subject to identity provider configuration.
         /// </remarks>
         public AcquireTokenForClientParameterBuilder WithAttributes(string attributeJson)
         {
@@ -156,8 +157,12 @@ namespace Microsoft.Identity.Client
                 { OAuth2Parameter.Attributes, _ => Task.FromResult(attributeJson) }
             };
 
-            AbstractConfidentialClientAcquireTokenParameterBuilderExtension
-                .WithExtraBodyParameters<AcquireTokenForClientParameterBuilder>(this, extraBodyParams);
+            this.OnBeforeTokenRequest(data =>
+            {
+                data.BodyParameters.Add(OAuth2Parameter.Attributes, attributeJson);
+                return Task.CompletedTask;
+            });
+            this.WithAdditionalCacheKeyComponents(extraBodyParams);
 
             return this;
         }
