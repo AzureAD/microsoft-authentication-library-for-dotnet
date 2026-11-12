@@ -48,9 +48,17 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             Certificate = certificate;
         }
 
-        public async Task<CredentialMaterial> GetCredentialMaterialAsync(
+        public Task<CredentialMaterial> GetCredentialMaterialAsync(
             CredentialContext context,
             CancellationToken cancellationToken)
+        {
+            return GetCredentialMaterialWithCertificateAsync(context, cancellationToken, certificate: null);
+        }
+
+        internal async Task<CredentialMaterial> GetCredentialMaterialWithCertificateAsync(
+            CredentialContext context,
+            CancellationToken cancellationToken,
+            X509Certificate2 certificate)
         {
             context.Logger.Verbose(() => $"[CertificateAndClaimsClientCredential] Mode={context.Mode}");
 
@@ -62,7 +70,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             // any future subclass that needs different mTLS-mode behaviour (e.g. additional
             // token-request headers) must update the resolver short-circuit, not just override
             // here, or those additions will be silently dropped at runtime.
-            X509Certificate2 certificate = await ResolveCertificateAsync(context, cancellationToken)
+            certificate ??= await ResolveCertificateAsync(context, cancellationToken)
                 .ConfigureAwait(false);
 
             if (context.Mode == CredentialTransportProtocol.Mtls)
@@ -134,7 +142,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         /// <see cref="MsalError.MtlsCertificateNotProvided"/>; otherwise as
         /// <see cref="MsalError.InvalidClientAssertion"/>.
         /// </exception>
-        private async Task<X509Certificate2> ResolveCertificateAsync(
+        internal async Task<X509Certificate2> ResolveCertificateAsync(
             CredentialContext context,
             CancellationToken cancellationToken)
         {
