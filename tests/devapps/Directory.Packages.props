@@ -7,6 +7,6 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Update="Microsoft.VisualStudio.Threading.Analyzers" Version="17.*" PrivateAssets="All" />
-    <PackageReference Update="Microsoft.CodeAnalysis.NetAnalyzers" Version="*" PrivateAssets="All" />
+    <PackageReference Update="Microsoft.CodeAnalysis.NetAnalyzers" Version="8.0.0" PrivateAssets="All" />
   </ItemGroup>
 </Project>
