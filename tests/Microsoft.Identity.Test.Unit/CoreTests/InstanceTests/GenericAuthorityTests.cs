@@ -11,6 +11,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Instance.Oidc;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
@@ -22,6 +23,109 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
     [TestClass]
     public class GenericAuthorityTests : TestBase
     {
+        [TestMethod]
+        public async Task OidcDiscovery_QueuedLookup_CanBeCancelledAsync()
+        {
+            using (var harness = CreateTestHarness())
+            using (var cancellation = new CancellationTokenSource())
+            {
+                string authority = $"https://login.microsoftonline.com/{Guid.NewGuid():D}/v2.0";
+                var handler = new BlockingOidcHandler
+                {
+                    ExpectedMethod = HttpMethod.Get,
+                    ExpectedUrl = $"{authority}/{Constants.WellKnownOpenIdConfigurationPath}",
+                    ResponseMessage = MockHelpers.CreateSuccessResponseMessage(TestConstants.GetOidcResponse(authority))
+                };
+                harness.HttpManager.AddMockHandler(handler);
+                var ownerContext = new RequestContext(harness.ServiceBundle, Guid.NewGuid(), null);
+                var queuedContext = new RequestContext(harness.ServiceBundle, Guid.NewGuid(), null, cancellation.Token);
+                Task<OidcMetadata> owner = OidcRetrieverWithCache.GetOidcAsync(authority, ownerContext);
+
+                try
+                {
+                    await handler.Entered.Task.ConfigureAwait(false);
+                    Task<OidcMetadata> queued = OidcRetrieverWithCache.GetOidcAsync(authority, queuedContext);
+                    Assert.IsFalse(queued.IsCompleted);
+
+                    cancellation.Cancel();
+                    Task completed = await Task.WhenAny(queued, Task.Delay(TimeSpan.FromSeconds(5))).ConfigureAwait(false);
+                    Assert.AreSame(queued, completed, "Cancellation must not wait for the active discovery request.");
+                    await Assert.ThrowsAsync<OperationCanceledException>(async () =>
+                        await queued.ConfigureAwait(false)).ConfigureAwait(false);
+                    Assert.IsFalse(owner.IsCompleted);
+                }
+                finally
+                {
+                    handler.Release.TrySetResult(true);
+                    await owner.ConfigureAwait(false);
+                }
+
+                OidcMetadata cached = await OidcRetrieverWithCache.GetOidcAsync(authority, ownerContext).ConfigureAwait(false);
+                Assert.AreEqual(authority, cached.Issuer);
+            }
+        }
+
+        [TestMethod]
+        public async Task OidcDiscovery_BlockedAuthority_DoesNotBlockOtherAuthoritiesAsync()
+        {
+            using (var harness = CreateTestHarness())
+            {
+                string blockedAuthority = $"https://login.microsoftonline.com/{Guid.NewGuid():D}/v2.0";
+                string otherAuthority = $"https://login.microsoftonline.com/{Guid.NewGuid():D}/v2.0";
+                var handler = new BlockingOidcHandler
+                {
+                    ExpectedMethod = HttpMethod.Get,
+                    ExpectedUrl = $"{blockedAuthority}/{Constants.WellKnownOpenIdConfigurationPath}",
+                    ResponseMessage = MockHelpers.CreateSuccessResponseMessage(TestConstants.GetOidcResponse(blockedAuthority))
+                };
+                harness.HttpManager.AddMockHandler(handler);
+                harness.HttpManager.AddMockHandler(CreateOidcHttpHandler(
+                    $"{otherAuthority}/{Constants.WellKnownOpenIdConfigurationPath}", otherAuthority));
+                var context = new RequestContext(harness.ServiceBundle, Guid.NewGuid(), null);
+                Task<OidcMetadata> blocked = OidcRetrieverWithCache.GetOidcAsync(blockedAuthority, context);
+                Task<OidcMetadata> sameAuthority = null;
+
+                try
+                {
+                    await handler.Entered.Task.ConfigureAwait(false);
+                    sameAuthority = OidcRetrieverWithCache.GetOidcAsync(blockedAuthority, context);
+                    Assert.IsFalse(sameAuthority.IsCompleted);
+
+                    Task<OidcMetadata> independent = OidcRetrieverWithCache.GetOidcAsync(otherAuthority, context);
+                    Task completed = await Task.WhenAny(independent, Task.Delay(TimeSpan.FromSeconds(5))).ConfigureAwait(false);
+
+                    Assert.AreSame(independent, completed, "Different authorities must not share a discovery lock.");
+                    Assert.AreEqual(otherAuthority, (await independent.ConfigureAwait(false)).Issuer);
+                    Assert.IsFalse(blocked.IsCompleted);
+                    Assert.IsFalse(sameAuthority.IsCompleted);
+                }
+                finally
+                {
+                    handler.Release.TrySetResult(true);
+                    await blocked.ConfigureAwait(false);
+                    if (sameAuthority is not null)
+                    {
+                        await sameAuthority.ConfigureAwait(false);
+                    }
+                }
+
+                Assert.AreSame(await blocked.ConfigureAwait(false), await sameAuthority.ConfigureAwait(false));
+            }
+        }
+
+        private sealed class BlockingOidcHandler : MockHttpMessageHandler
+        {
+            internal TaskCompletionSource<bool> Entered { get; } = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+            internal TaskCompletionSource<bool> Release { get; } = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+            protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+            {
+                Entered.TrySetResult(true);
+                await Release.Task.ConfigureAwait(false);
+                return await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
+            }
+        }
+
         [TestMethod]
         [DataRow(true)]
         [DataRow(false)]

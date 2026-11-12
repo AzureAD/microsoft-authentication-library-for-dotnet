@@ -151,7 +151,131 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 appCacheAccess.AssertAccessCounts(1, 1);
                 userCacheAccess.AssertAccessCounts(0, 0);
             }
-        }        
+        }
+
+        [TestMethod]
+        [TestCategory(TestCategories.Regression)]
+        [WorkItem(6093)] // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/6093
+        [DataRow("jwt")]
+        [DataRow("opaque")]
+        [DataRow("jwe")]
+        public async Task ClientCreds_WithDomainAuthority_ResolvesTenantIdFromOidcMetadata_Async(string tokenFormat)
+        {
+            string tenantDomain = $"tenant-{Guid.NewGuid():N}.onmicrosoft.com";
+            string authority = $"https://login.microsoftonline.com/{tenantDomain}/";
+            string oidcAuthority = $"https://login.microsoftonline.com/{TestConstants.AadTenantId}/v2.0";
+            string oidcMetadataEndpoint = $"{authority.TrimEnd('/')}/v2.0/{Constants.WellKnownOpenIdConfigurationPath}";
+            string accessToken = tokenFormat switch
+            {
+                "jwt" => CreateAccessTokenWithTenantId("00000000-0000-0000-0000-000000000001"),
+                "jwe" => "header.encrypted.encrypted.encrypted.signature",
+                _ => "opaque-access-token"
+            };
+
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler(authority);
+
+                ConfidentialClientApplication app =
+                    ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                              .WithAuthority(authority)
+                                                              .WithClientSecret(TestConstants.ClientSecret)
+                                                              .WithHttpManager(httpManager)
+                                                              .BuildConcrete();
+
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(token: accessToken);
+                httpManager.AddMockHandler(new MockHttpMessageHandler
+                {
+                    ExpectedMethod = HttpMethod.Get,
+                    ExpectedUrl = oidcMetadataEndpoint,
+                    ResponseMessage = MockHelpers.CreateSuccessResponseMessage(TestConstants.GetOidcResponse(oidcAuthority))
+                });
+
+                AuthenticationResult result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                    .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+
+                Assert.AreEqual(TestConstants.AadTenantId, result.TenantId);
+                Assert.AreEqual(tenantDomain, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().TenantId);
+
+                AuthenticationResult cachedResult = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                    .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+
+                Assert.AreEqual(TestConstants.AadTenantId, cachedResult.TenantId);
+                Assert.AreEqual(TokenSource.Cache, cachedResult.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+
+        [TestMethod]
+        public async Task ClientCreds_WithDomainAuthority_PersistedTokenCache_DoesNotFetchMetadataAsync()
+        {
+            string tenantDomain = $"tenant-{Guid.NewGuid():N}.onmicrosoft.com";
+            string authority = $"https://{TestConstants.ProductionPrefCacheEnvironment}/{tenantDomain}/";
+
+            using (var httpManager = new MockHttpManager())
+            {
+                var originalApp = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithAuthority(authority)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithInstanceDiscovery(false)
+                    .WithHttpManager(httpManager)
+                    .BuildConcrete();
+                originalApp.AppTokenCacheInternal.Accessor.SaveAccessToken(
+                    TokenCacheHelper.CreateAccessTokenItem(tenant: tenantDomain, homeAccountId: null));
+                byte[] persistedCache = ((ITokenCacheSerializer)originalApp.AppTokenCache).SerializeMsalV3();
+
+                var restoredApp = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithAuthority(authority)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithInstanceDiscovery(false)
+                    .WithHttpManager(httpManager)
+                    .BuildConcrete();
+                ((ITokenCacheSerializer)restoredApp.AppTokenCache).DeserializeMsalV3(persistedCache);
+
+                for (int attempt = 0; attempt < 2; attempt++)
+                {
+                    AuthenticationResult result = await restoredApp.AcquireTokenForClient(TestConstants.s_scope)
+                        .ExecuteAsync().ConfigureAwait(false);
+
+                    Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+                    Assert.IsNull(result.TenantId);
+                }
+            }
+        }
+
+        [TestMethod]
+        public async Task ClientCreds_WithDomainAuthority_AppTokenProvider_KeepsTenantIdConsistentAsync()
+        {
+            string authority = $"https://login.microsoftonline.com/tenant-{Guid.NewGuid():N}.onmicrosoft.com/";
+            int providerCalls = 0;
+            using (var httpManager = new MockHttpManager())
+            {
+                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithAuthority(authority)
+                    .WithInstanceDiscovery(false)
+                    .WithHttpManager(httpManager)
+                    .WithAppTokenProvider(_ =>
+                    {
+                        providerCalls++;
+                        return Task.FromResult(new AppTokenProviderResult
+                        {
+                            AccessToken = "provider-token",
+                            ExpiresInSeconds = 3600
+                        });
+                    })
+                    .BuildConcrete();
+
+                AuthenticationResult initialResult = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync().ConfigureAwait(false);
+                AuthenticationResult cachedResult = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNull(initialResult.TenantId);
+                Assert.IsNull(cachedResult.TenantId);
+                Assert.AreEqual(initialResult.AccessToken, cachedResult.AccessToken);
+                Assert.AreEqual(TokenSource.Cache, cachedResult.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(1, providerCalls);
+            }
+        }
 
         [TestMethod]
         [TestCategory(TestCategories.Regression)]
@@ -2433,6 +2557,14 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             var cryptoMgr = new CommonCryptographyManager();
             return cryptoMgr.CreateSha256HashHex(token);
+        }
+
+        private static string CreateAccessTokenWithTenantId(string tenantId)
+        {
+            string header = Base64UrlHelpers.Encode("{\"alg\":\"none\"}");
+            string payload = Base64UrlHelpers.Encode($"{{\"tid\":\"{tenantId}\"}}");
+
+            return $"{header}.{payload}.signature";
         }
     }
 }
