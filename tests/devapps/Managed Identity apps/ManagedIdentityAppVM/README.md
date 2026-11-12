@@ -8,7 +8,7 @@ synthetic certificate generator, HTTP transport, or loopback resource server.
 |---|---|
 | A | Existing bearer flow |
 | P | Existing Windows-only mTLS PoP flow with attestation |
-| N | Endorsed unattested flow for token binding using the RDP certificate selected internally by MSAL |
+| N | Unattested workload token binding, with automatic RDP/xrdp endorsement when available |
 
 Identity selection, resource selection, force refresh, and cache-repeat controls
 remain available. N supports SAMI or a UAMI client ID. All modes use the existing
@@ -17,14 +17,15 @@ Full tokens are secrets; do not share that output.
 
 ## Endorsed unattested flow for token binding
 
-**Implementation status:** "endorsed unattested" names the intended flow.
-The IMDS-side check against the RDP certificate in the WS container document
-is not implemented yet; current acquisition does not establish WS-backed
-endorsement. See [Pending IMDS endorsement check](#pending-imds-endorsement-check).
+**Implementation status:** this prototype implements the two-key request contract.
+Interoperability requires the matching IMDS implementation and, for endorsement,
+a matching host-published RDP certificate registration. Local certificate discovery
+alone does not establish endorsement or hardware-backed key protection.
 
 The parameterless request without
-`WithAttestationSupport()` makes MSAL locate the configured Windows RDP listener
-certificate or Linux xrdp TLS certificate. Linux support requires .NET 8 or later.
+`WithAttestationSupport()` makes MSAL create or reuse a workload binding certificate
+and locate an optional Windows RDP listener or Linux xrdp endorsement certificate.
+Linux support requires .NET 8 or later.
 The app does not load or pass a certificate:
 
 ```csharp
@@ -37,21 +38,25 @@ var result = await app.AcquireTokenForManagedIdentity("https://graph.microsoft.c
 ```
 
 No `WithExperimentalFeatures(true)` or `WithAttestationSupport()` call is needed for N.
-MSAL owns RDP certificate discovery, proof signing,
+MSAL owns workload-key creation, RDP certificate discovery, proof and endorsement signing,
 the IMDS request, response handling, token caching, and returning
 `AuthenticationResult.BindingCertificate`. The flow uses MSAL's existing HTTP
 client configuration without introducing feature-specific proxy settings.
 The app retains the MSAL application for repeat acquisitions. Each execution
-selects the current listener certificate before cache lookup and retains that
-certificate for its result and any proactive refresh. Certificate rotation
-therefore selects a separate cache entry without invalidating earlier results.
+selects the current endorsement certificate before cache lookup. Cache entries
+are separated by workload binding certificate, endorsement certificate (or its
+absence), identity, and requested binding-strength floor. Endorsement rotation
+therefore requires a fresh acquisition without changing the workload binding key.
+Each execution retains both certificates for any queued proactive refresh.
+MSAL reuses its workload certificate per application, rotating it when less than
+one day remains in its 30-day lifetime, without disposing caller-held certificates.
 Common request options, including claims, are also captured for the execution.
 Changing claims on a completed builder does not change its queued refresh;
 a new execution still rejects claims unsupported by this protocol.
 
 There is no bring-your-own-certificate option for this managed identity flow.
-MSAL selects the configured RDP/xrdp certificate and returns it through
-`AuthenticationResult.BindingCertificate`. The selected certificate remains
+MSAL returns the workload certificate, never the RDP/xrdp endorsement certificate,
+through `AuthenticationResult.BindingCertificate`. The workload certificate remains
 usable through the returned result and any queued proactive refresh.
 
 On Windows, automatic discovery reads the RDP-Tcp listener's configured thumbprint
@@ -66,23 +71,27 @@ Configured paths must be absolute; duplicate settings and environment-variable
 paths fail explicitly rather than depending on a different daemon environment.
 The certificate must match an accessible, unencrypted RSA private key.
 MSAL does not install xrdp or assume that every Linux VM has an RDP certificate.
-An SSH login key is not an X.509 binding certificate.
+An SSH login key is not an X.509 endorsement certificate.
 
-Both platforms require an accessible RSA private key. Missing configuration, a
-missing/invalid certificate, or insufficient access throws `MsalClientException`: MSAL does
-not generate a replacement key, change permissions, or fall back to bearer.
+When an RDP/xrdp certificate is found, it requires an accessible RSA private key.
+If the listener/configuration or certificate is absent, MSAL logs that absence and
+uses its own workload binding certificate without endorsement. Invalid configuration,
+an invalid certificate, an inaccessible or mismatched private key, and other access
+failures throw `MsalClientException`; these are not treated as absence.
+MSAL does not provision RDP, replace its keys, change permissions, or fall back to bearer.
 The existing Windows attested flow is unchanged when `WithAttestationSupport()` is used.
 Attested PoP and bearer-over-mTLS remain Windows-only and fail explicitly on Linux.
 The endorsed unattested flow selects the RDP certificate regardless
 of the application's experimental-feature setting.
-The automatically selected certificate uses the experimental Software-strength
-protocol; a KeyGuard minimum is rejected before discovery.
+Both endorsed and unendorsed requests use the experimental Software-strength
+protocol; a KeyGuard minimum is rejected before discovery. Endorsement is an IMDS
+admission check, not a stronger binding-strength claim.
 
 On an IMDSv1 host without the existing Windows TVM/CVM capability signal,
-capability discovery also checks for an accessible, valid RDP/xrdp certificate
-on the supported operating system. A usable certificate reports Software
-strength; missing or inaccessible certificates do not enable that capability.
-Discovery does not create a replacement key, prove WS-backed endorsement, or
+capability discovery also checks RDP/xrdp availability on the supported operating
+system. A usable certificate or its confirmed absence reports Software strength;
+access or validation failures do not enable that capability.
+Discovery does not create a workload key, prove WS-backed endorsement, or
 guarantee that a production IMDS endpoint implements this prototype protocol.
 
 No custom HTTP factory is needed for this sample. If configured through
@@ -107,15 +116,14 @@ operation. There is no separate public MSAL API called a "proof request."
 The precise term is **the IMDS token request containing the signed certificate
 proof**.
 
-MSAL selects the configured Windows RDP or Linux xrdp certificate, validates it
-and its RSA private-key access, and checks the certificate-specific token cache.
-If discovery or validation fails, it throws `MsalClientException` without
-generating or selecting a replacement key. There is no BYOC option or bearer
-fallback. A usable cache hit can be returned without a foreground IMDS request;
-MSAL may still queue a proactive refresh.
+MSAL creates or reuses its own workload binding certificate and discovers the
+optional RDP/xrdp endorsement certificate. Confirmed absence selects unendorsed
+binding; access and validation failures remain explicit errors. There is no
+BYOC option or bearer fallback. A cache hit for the same binding and endorsement
+context can return without a foreground IMDS request; MSAL may queue a proactive refresh.
 
 When a token must be acquired, MSAL creates a short-lived JWT and signs it with
-the selected certificate's private key using RS256. The JWT header includes
+the workload binding private key using RS256. The JWT header includes
 `alg: "RS256"`, `typ: "JWT"`, and `x5c` containing the public certificate.
 Its payload contains:
 
@@ -135,49 +143,46 @@ local IMDS endpoint. A UAMI acquisition also includes its `client_id` in the
 query string:
 
 ```http
-POST /metadata/identity/oauth2/token?api-version=2018-02-01&resource=https%3A%2F%2Fgraph.microsoft.com%2F.default HTTP/1.1
+POST /metadata/identity/oauth2/token?api-version=2018-02-01&resource=https%3A%2F%2Fgraph.microsoft.com%2F.default&withMinStrength=1 HTTP/1.1
 Host: 169.254.169.254
 Metadata: true
 Content-Type: application/json
 
 {
-  "req_cnf_proof": "<JWT signed with the configured RDP/xrdp private key>"
+  "req_cnf_proof": "<compact JWT signed with the workload binding key>",
+  "endorsement_certificate": "<standard-base64 DER RDP/xrdp public certificate>",
+  "endorsement_signature": "<standard-base64 detached signature>"
 }
 ```
 
-The signature demonstrates: **"I can use this certificate's private key, and I
-am requesting a token bound to this certificate."** The public certificate lets
-IMDS verify the signature. The private key is used locally for signing and is
-never placed in the request. This proves possession of the signing key, not
-hardware protection or attestation.
+The inner signature proves possession of the workload binding key. The detached
+endorsement is RSA-PKCS1-v1_5-SHA256 over the UTF-8 bytes of the exact completed
+compact JWT, including its inner signature. It is not a signature over the JSON
+body or decoded JWT payload. Both private keys remain local.
 
-### Pending IMDS endorsement check
+If no RDP/xrdp certificate is found, the body contains only `req_cnf_proof` and
+MSAL sends `withMinStrength=0`. With an endorsement it sends `1`. This query
+parameter is independent of `PoPOptions.MinStrength`, which remains a
+key-protection floor. No new public option is needed for automatic selection.
 
-MSAL sends IMDS a signed `req_cnf_proof` using the selected certificate's private
-key. This proof lets IMDS verify that the caller can use the corresponding
-private key.
+### IMDS endorsement admission
 
-**For this non-attested flow, IMDS currently takes the submitted binding key at
-face value.** Proof of possession alone does not establish that the submitted
-certificate is the RDP certificate recorded for that VM.
+The matching IMDS contract compares the supplied endorsement certificate's SHA-1
+thumbprint with the requesting container's host-published certificate registration,
+then verifies the detached signature. ESTS continues validating the inner proof.
+The SHA-1 registration lookup is distinct from the workload binding certificate's
+SHA-256 `cnf["x5t#S256"]`.
 
-The planned additional validation for the RDP path would happen inside IMDS.
-The WS container document already includes the VM's RDP certificate, so IMDS
-would read that certificate from the document and check the submitted binding
-certificate against that record. This would add verification against the VM's
-recorded certificate to the existing proof-of-possession mechanism.
+Only query values `0` and `1` are defined. A supplied endorsement must validate
+regardless of that value. A required but missing endorsement, invalid/incomplete
+endorsement, or missing/mismatched registration returns HTTP 400; registration
+lookup failure returns HTTP 503. MSAL surfaces failures without replaying the
+proof, dropping endorsement, or switching to bearer.
 
-**That additional WS-based certificate validation in IMDS is not implemented
-yet.** Selecting the RDP certificate in MSAL does not, by itself, perform that
-server-side check.
-
-Until that IMDS change is implemented, successful token acquisition demonstrates
-the current possession-proof flow, not completed WS-backed endorsement. The
-Linux xrdp test likewise does not establish endorsement through a WS document.
-Verification against the recorded certificate would not itself establish
-hardware-backed key protection.
-This pending server-side work does not introduce a requirement for MSAL to use
-`IMsalWsTrustHttpClientFactory`.
+This admission gate adds no token-strength claim and does not establish
+hardware-backed protection. It requires no WS-Trust-specific HTTP factory.
+The server demo bypasses bound-token caching and renewal; that demo behavior does
+not disable MSAL's existing token cache or proactive refresh.
 
 ### Why an ordinary HTTP factory is sufficient
 
@@ -200,16 +205,16 @@ and request options, including while its proactive refresh is pending.
 
 ### Token acquisition is not a downstream mTLS call
 
-On success, IMDS returns an `mtls_pop` token and MSAL returns the selected
+On success, IMDS returns an `mtls_pop` token with numeric `expires_in`, and MSAL returns the workload
 certificate through `AuthenticationResult.BindingCertificate`. Using that token
 at a downstream API is a separate step, requiring the resource's supported
 certificate-bound authentication protocol and access to the matching private key.
 Successful acquisition alone does not demonstrate resource-side acceptance or
 rejection without the matching certificate.
 
-The wire example describes the IMDS test-endpoint contract exercised by this
-prototype. It does not establish production protocol compatibility, WS-backed
-endorsement, or hardware-backed binding.
+The wire example describes the prototype contract. Its implementation does not
+establish production compatibility, successful host-registration validation, or
+hardware-backed binding; those require independent end-to-end evidence.
 
 ## Run
 
@@ -235,7 +240,11 @@ The framework-dependent app requires .NET 8. An existing private runtime can
 launch it with `dotnet.exe ManagedIdentityAppVM.dll` and the same arguments.
 The app does not elevate itself or change certificate/key permissions.
 
-## Verified behavior and limits
+## Earlier protocol evidence and current limits
+
+The runs below predate the two-key endorsement contract. They used the RDP/xrdp
+certificate as the binding certificate and do not validate the updated request,
+separate workload key, or host-registration admission.
 
 A live run on November 7, 2026 acquired a Graph `mtls_pop` token through an earlier
 explicit-certificate prototype under SYSTEM, saved it to the cache, and retained the supplied RDP

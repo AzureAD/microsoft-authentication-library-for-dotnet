@@ -2453,7 +2453,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .ExecuteAsync().ConfigureAwait(false);
 
                 // Assert
-                Assert.AreSame(rdpCertificate, nonAttested.BindingCertificate);
+                Assert.AreSame(app.ManagedIdentityClient.GetOrCreateUnattestedBindingCertificate(CancellationToken.None),
+                    nonAttested.BindingCertificate);
+                Assert.AreNotEqual(rdpCertificate.Thumbprint, nonAttested.BindingCertificate.Thumbprint);
                 Assert.AreNotEqual(first.BindingCertificate.Thumbprint, nonAttested.BindingCertificate.Thumbprint);
                 Assert.AreEqual("rdp-token", nonAttested.AccessToken);
                 Assert.AreEqual(TokenSource.IdentityProvider, nonAttested.AuthenticationResultMetadata.TokenSource);

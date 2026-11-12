@@ -60,7 +60,7 @@ internal class Program
                 Console.WriteLine("No arguments: existing interactive MSI tester; N selects the endorsed unattested flow for token binding.");
                 Console.WriteLine("--rdp-live <resource> [UAMI client ID]: one live acquisition through the modified MSAL project.");
                 Console.WriteLine("Append --imds-error-details to display service error fields on failure.");
-                Console.WriteLine("Requires Windows RDP or Linux xrdp and access to its existing certificate/key; no permission changes.");
+                Console.WriteLine("Uses a workload binding key, endorsed by RDP/xrdp when found; no endorsement-key permission changes.");
                 return 0;
             }
             if (args.Length > 0)
@@ -283,7 +283,7 @@ internal class Program
         {
             AcquireMode.Bearer => "Bearer",
             AcquireMode.BoundWithAttestation => "Bound (mTLS PoP + Attestation)",
-            AcquireMode.EndorsedUnattested => "Bound (endorsed unattested flow, MSAL-selected RDP certificate)",
+            AcquireMode.EndorsedUnattested => "Bound (workload key, optional RDP endorsement)",
             _ => "Unknown"
         };
 
@@ -299,7 +299,7 @@ internal class Program
         Console.ForegroundColor = ConsoleColor.Green;
         Console.WriteLine("A) Acquire Bearer token");
         Console.WriteLine("P) Acquire Bound token (mTLS PoP) WITH attestation");
-        Console.WriteLine("N) Acquire Bound token using the endorsed unattested flow (existing RDP certificate)");
+        Console.WriteLine("N) Acquire Bound token using a workload key with optional RDP endorsement");
         Console.WriteLine("T) Toggle Force Refresh (persistent)");
         Console.WriteLine("B) Bypass cache on NEXT acquisition (one-shot)");
         Console.WriteLine("F) Toggle Full Token Print");
@@ -318,7 +318,7 @@ internal class Program
         Console.WriteLine("Help:");
         Console.WriteLine(" - A: Get a Bearer token for the current resource.");
         Console.WriteLine(" - P: Get a Bound (mTLS PoP) token WITH attestation support.");
-        Console.WriteLine(" - N: Use the existing RDP key with the endorsed unattested flow for token binding (SAMI or UAMI ClientId).");
+        Console.WriteLine(" - N: Bind to a workload key; use RDP/xrdp endorsement when found (SAMI or UAMI ClientId).");
         Console.WriteLine("      Acquisition only; no resource TLS. The current identity must have private-key access.");
         Console.WriteLine(" - T: Toggle Force Refresh to bypass cache on every acquisition until turned off.");
         Console.WriteLine(" - B: One-shot bypass; only the NEXT acquisition will bypass cache, then it resets.");

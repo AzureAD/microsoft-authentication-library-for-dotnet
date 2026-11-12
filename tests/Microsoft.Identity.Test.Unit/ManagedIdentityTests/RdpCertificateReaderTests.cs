@@ -69,7 +69,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 }, Substitute.For<ILoggerAdapter>()));
 
             // Assert
-            Assert.AreEqual(RdpCertificateReader.CertificateUnavailable, error.ErrorCode);
+            Assert.AreEqual(string.IsNullOrEmpty(thumbprint)
+                ? RdpCertificateReader.CertificateNotFound : RdpCertificateReader.CertificateUnavailable, error.ErrorCode);
             Assert.IsFalse(read);
         }
 
@@ -88,7 +89,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     Substitute.For<ILoggerAdapter>()));
 
             // Assert
-            Assert.AreEqual(RdpCertificateReader.CertificateUnavailable, error.ErrorCode);
+            Assert.AreEqual(RdpCertificateReader.CertificateNotFound, error.ErrorCode);
         }
 
         [TestMethod]

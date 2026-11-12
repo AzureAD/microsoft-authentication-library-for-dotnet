@@ -24,6 +24,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private readonly AcquireTokenForManagedIdentityParameters _managedIdentityParameters;
         private readonly bool _useRdpCertificate;
         private X509Certificate2 _bindingCertificate;
+        private X509Certificate2 _endorsementCertificate;
         private readonly ManagedIdentityClient _managedIdentityClient;
         private static readonly SemaphoreSlim s_semaphoreSlim = new SemaphoreSlim(1, 1);
         private readonly ICryptographyManager _cryptoManager;
@@ -54,11 +55,20 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 cancellationToken.ThrowIfCancellationRequested();
                 EndorsedUnattestedManagedIdentitySource.ValidateRequestOptions(
                     AuthenticationRequestParameters, _managedIdentityParameters);
-                // Resolve once before cache lookup; proactive refresh retains this same certificate.
-                _bindingCertificate = await ServiceBundle.PlatformProxy
-                    .GetRdpBindingCertificateAsync(logger, cancellationToken).ConfigureAwait(false);
+                try
+                {
+                    _endorsementCertificate = await ServiceBundle.PlatformProxy
+                        .GetRdpBindingCertificateAsync(logger, cancellationToken).ConfigureAwait(false);
+                    EndorsedUnattestedManagedIdentitySource.ValidateCertificate(_endorsementCertificate);
+                }
+                catch (MsalClientException ex) when (ex.ErrorCode == EndorsedUnattestedManagedIdentitySource.RdpCertificateNotFound)
+                {
+                    logger.Info("[ManagedIdentity] No RDP certificate found; using unendorsed workload binding.");
+                }
                 cancellationToken.ThrowIfCancellationRequested();
-                EndorsedUnattestedManagedIdentitySource.ValidateCertificate(_bindingCertificate);
+                _bindingCertificate = _managedIdentityClient.GetOrCreateUnattestedBindingCertificate(cancellationToken);
+                string endorsementId = _endorsementCertificate?.ComputeX5tS256KeyId() ?? "none";
+                AuthenticationRequestParameters.CacheKeyComponents["mi_endorsement"] = endorsementId;
             }
 
             X509Certificate2 bindingCertificate = _bindingCertificate;
@@ -253,7 +263,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 _bindingCertificate is not null)
             {
                 var bindingResponse = await EndorsedUnattestedManagedIdentitySource
-                    .AcquireTokenAsync(AuthenticationRequestParameters, _managedIdentityParameters, _bindingCertificate, cancellationToken)
+                    .AcquireTokenAsync(AuthenticationRequestParameters, _managedIdentityParameters,
+                        _bindingCertificate, _endorsementCertificate, cancellationToken)
                     .ConfigureAwait(false);
                 bindingResponse.Scope = AuthenticationRequestParameters.Scope.AsSingleString();
                 return await CacheTokenResponseAndCreateAuthenticationResultAsync(

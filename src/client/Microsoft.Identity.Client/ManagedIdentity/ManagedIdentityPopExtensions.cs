@@ -15,9 +15,11 @@ namespace Microsoft.Identity.Client
         /// Enables mTLS Proof-of-Possession for managed identity token acquisition.
         /// With no attestation provider, MSAL selects the configured
         /// Windows RDP listener certificate, or the Linux xrdp TLS certificate on .NET 8 or later,
-        /// internally for the endorsed unattested flow for token binding.
-        /// The current identity must already have private-key access; MSAL does not create keys or change permissions.
-        /// Discovery or certificate validation failures throw <see cref="MsalClientException"/>; no alternative key is selected.
+        /// to endorse a proof signed by a separate MSAL-created workload binding key.
+        /// If no RDP/xrdp certificate is found, the request uses unendorsed workload binding.
+        /// An existing endorsement key requires private-key access; MSAL does not change its permissions.
+        /// Access or certificate validation failures throw <see cref="MsalClientException"/>.
+        /// A rejected endorsement is never retried without endorsement.
         /// When attestation is required (KeyGuard scenarios), use the Msal.KeyAttestation package
         /// and call .WithAttestationSupport() after this method.
         /// </summary>
@@ -40,7 +42,8 @@ namespace Microsoft.Identity.Client
         /// PoP options controlling the request. Use <see cref="PoPOptions.MinStrength"/> to require
         /// a minimum host binding strength; the request fails with
         /// <see cref="MsalError.MinStrengthNotMet"/> when the host cannot meet the floor.
-        /// Omitting the attestation provider selects the configured RDP certificate internally.
+        /// Omitting the attestation provider uses an MSAL-created workload binding certificate,
+        /// with RDP/xrdp endorsement when a configured certificate is found.
         /// Automatic certificate selection does not require experimental-feature opt-in.
         /// </param>
         /// <returns>The builder to chain .With methods.</returns>

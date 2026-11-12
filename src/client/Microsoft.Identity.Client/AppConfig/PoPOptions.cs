@@ -18,8 +18,9 @@ namespace Microsoft.Identity.Client.AppConfig
         /// Gets or sets the minimum binding strength the host must be able to produce for the
         /// request to succeed. This is a <b>floor assertion</b>, not a downgrade selector.
         /// The existing IMDSv2 acquisition flow uses the host's maximum binding strength.
-        /// The endorsed unattested flow selects the configured RDP certificate
-        /// and supports Software strength only.
+        /// The unattested flow creates a workload binding certificate and supports Software
+        /// strength only. An available RDP certificate endorses the proof but does not
+        /// establish stronger key protection.
         /// The request fails when the selected protocol cannot meet this floor.
         /// </summary>
         /// <value>

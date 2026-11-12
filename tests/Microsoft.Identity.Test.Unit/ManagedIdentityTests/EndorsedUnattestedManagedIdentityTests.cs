@@ -73,7 +73,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow(true, false)]
         [DataRow(false, true)]
         [DataRow(true, true)]
-        public async Task ActualMsalRequestSignsProofAndReturnsOriginalCertificateAsync(bool userAssigned, bool includeDefaultSuffix)
+        public async Task ActualMsalRequestSeparatesBindingAndEndorsementKeysAsync(bool userAssigned, bool includeDefaultSuffix)
         {
             // Arrange
             using var http = new MockHttpManager();
@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.IsNull(message.Headers.Authorization);
                 Assert.AreEqual("application/json", message.Content.Headers.ContentType.MediaType);
                 using var body = JsonDocument.Parse(message.Content.ReadAsStringAsync().GetAwaiter().GetResult());
-                Assert.AreEqual(1, body.RootElement.EnumerateObject().Count());
+                VerifyEndorsement(body.RootElement, _certificate);
                 Assert.IsFalse(body.RootElement.TryGetProperty("client_assertion", out _));
                 firstProof = body.RootElement.GetProperty("req_cnf_proof").GetString();
                 VerifyProof(firstProof, _certificate, userAssigned);
@@ -105,8 +105,11 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             Assert.AreEqual("mtls_pop", first.TokenType);
             Assert.AreEqual(Resource, first.Scopes.Single());
             Assert.AreEqual(Resource, cached.Scopes.Single());
-            Assert.AreSame(_certificate, first.BindingCertificate);
-            Assert.AreSame(_certificate, cached.BindingCertificate);
+            AssertBindingCertificate(app, first);
+            AssertBindingCertificate(app, cached);
+            using var firstHeader = JsonDocument.Parse(Decode(firstProof.Split('.')[0]));
+            Assert.AreEqual(Convert.ToBase64String(first.BindingCertificate.RawData),
+                firstHeader.RootElement.GetProperty("x5c")[0].GetString());
             Assert.AreEqual(TokenSource.Cache, cached.AuthenticationResultMetadata.TokenSource);
             Assert.HasCount(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens());
             Assert.AreEqual(0, http.QueueSize);
@@ -116,7 +119,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             refreshHandler.AdditionalRequestValidation = message =>
             {
                 using var body = JsonDocument.Parse(message.Content.ReadAsStringAsync().GetAwaiter().GetResult());
-                Assert.AreEqual(1, body.RootElement.EnumerateObject().Count());
+                VerifyEndorsement(body.RootElement, _certificate);
                 Assert.IsFalse(body.RootElement.TryGetProperty("client_assertion", out _));
                 string proof = body.RootElement.GetProperty("req_cnf_proof").GetString();
                 Assert.AreNotEqual(firstProof, proof);
@@ -125,7 +128,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             var refreshed = await app.AcquireTokenForManagedIdentity(inputResource)
                 .WithMtlsProofOfPossession()
                 .WithForceRefresh(true).ExecuteAsync().ConfigureAwait(false);
-            Assert.AreSame(_certificate, refreshed.BindingCertificate);
+            AssertBindingCertificate(app, refreshed);
             Assert.AreEqual("refreshed-token", refreshed.AccessToken);
             Assert.HasCount(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens());
             using RSA privateKey = _certificate.GetRSAPrivateKey();
@@ -157,11 +160,11 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
             // Assert
             Assert.IsFalse(app.ServiceBundle.Config.ExperimentalFeaturesEnabled);
-            Assert.AreSame(_certificate, first.BindingCertificate);
-            Assert.AreSame(_certificate, cached.BindingCertificate);
+            AssertBindingCertificate(app, first);
+            AssertBindingCertificate(app, cached);
             Assert.AreEqual(TokenSource.Cache, cached.AuthenticationResultMetadata.TokenSource);
             Assert.HasCount(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens());
-            Assert.AreEqual(_certificate.ComputeX5tS256KeyId(), app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().KeyId);
+            Assert.AreEqual(first.BindingCertificate.ComputeX5tS256KeyId(), app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().KeyId);
             await platform.Received(2).GetRdpBindingCertificateAsync(
                 Arg.Any<ILoggerAdapter>(), Arg.Any<CancellationToken>()).ConfigureAwait(false);
             Assert.AreEqual(0, http.QueueSize);
@@ -183,6 +186,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 using var body = JsonDocument.Parse(message.Content.ReadAsStringAsync().GetAwaiter().GetResult());
                 VerifyProof(body.RootElement.GetProperty("req_cnf_proof").GetString(), rotated, false);
+                VerifyEndorsement(body.RootElement, rotated);
             };
             var request = app.AcquireTokenForManagedIdentity(Resource).WithMtlsProofOfPossession();
 
@@ -192,9 +196,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             var cached = await request.ExecuteAsync().ConfigureAwait(false);
 
             // Assert
-            Assert.AreSame(_certificate, first.BindingCertificate);
-            Assert.AreSame(rotated, second.BindingCertificate);
-            Assert.AreSame(rotated, cached.BindingCertificate);
+            AssertBindingCertificate(app, first);
+            Assert.AreSame(first.BindingCertificate, second.BindingCertificate);
+            Assert.AreSame(first.BindingCertificate, cached.BindingCertificate);
             Assert.AreEqual("rotated-certificate", cached.AccessToken);
             Assert.AreEqual(TokenSource.Cache, cached.AuthenticationResultMetadata.TokenSource);
             Assert.HasCount(2, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens());
@@ -219,6 +223,53 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             // Assert
             Assert.AreSame(failure, error);
             Assert.IsEmpty(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens());
+            Assert.AreEqual(0, http.QueueSize);
+        }
+
+        [TestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task MissingRdpCertificateUsesUnendorsedBindingAndSeparateCachePartitionAsync(bool userAssigned)
+        {
+            // Arrange
+            using var http = new MockHttpManager();
+            var app = CreateApp(http, userAssigned
+                ? ManagedIdentityId.WithUserAssignedClientId(ClientId) : ManagedIdentityId.SystemAssigned);
+            var platform = ConfigureRdpDiscovery(app, _certificate);
+            platform.GetRdpBindingCertificateAsync(Arg.Any<ILoggerAdapter>(), Arg.Any<CancellationToken>())
+                .Returns(Task.FromException<X509Certificate2>(new MsalClientException(RdpCertificateReader.CertificateNotFound)));
+            AddResponse(http, CreateResponse("unendorsed"), userAssigned, endorsed: false)
+                .AdditionalRequestValidation = message =>
+                {
+                    Assert.Contains("withMinStrength=0", message.RequestUri.Query);
+                    using var body = JsonDocument.Parse(message.Content.ReadAsStringAsync().GetAwaiter().GetResult());
+                    Assert.AreEqual(1, body.RootElement.EnumerateObject().Count());
+                    VerifyProof(body.RootElement.GetProperty("req_cnf_proof").GetString(), _certificate, userAssigned);
+                };
+            var request = app.AcquireTokenForManagedIdentity(Resource).WithMtlsProofOfPossession();
+
+            // Act
+            var unendorsed = await request.ExecuteAsync().ConfigureAwait(false);
+            var cached = await request.ExecuteAsync().ConfigureAwait(false);
+            Assert.AreEqual(TokenSource.Cache, cached.AuthenticationResultMetadata.TokenSource);
+            AssertBindingCertificate(app, unendorsed);
+            Assert.AreEqual("mtls_pop", unendorsed.TokenType);
+            Assert.HasCount(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens());
+            platform.GetRdpBindingCertificateAsync(Arg.Any<ILoggerAdapter>(), Arg.Any<CancellationToken>())
+                .Returns(Task.FromResult(_certificate));
+            AddResponse(http, CreateResponse("endorsed"), userAssigned).AdditionalRequestValidation = message =>
+            {
+                Assert.Contains("withMinStrength=1", message.RequestUri.Query);
+                using var body = JsonDocument.Parse(message.Content.ReadAsStringAsync().GetAwaiter().GetResult());
+                VerifyEndorsement(body.RootElement, _certificate);
+            };
+            var endorsed = await request.ExecuteAsync().ConfigureAwait(false);
+
+            // Assert
+            Assert.AreEqual(TokenSource.IdentityProvider, endorsed.AuthenticationResultMetadata.TokenSource);
+            Assert.AreEqual("endorsed", endorsed.AccessToken);
+            Assert.AreSame(unendorsed.BindingCertificate, endorsed.BindingCertificate);
+            Assert.HasCount(2, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens());
             Assert.AreEqual(0, http.QueueSize);
         }
 
@@ -341,6 +392,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 using var body = JsonDocument.Parse(message.Content.ReadAsStringAsync().GetAwaiter().GetResult());
                 proof = body.RootElement.GetProperty("req_cnf_proof").GetString();
+                VerifyEndorsement(body.RootElement, _certificate);
                 using var payload = JsonDocument.Parse(Decode(proof.Split('.')[1]));
                 signingKeyId = payload.RootElement.GetProperty("cnf").GetProperty("x5t#S256").GetString();
                 refresh.ResponseMessage.Content = new StringContent(
@@ -409,15 +461,15 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             var stored = app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single();
             Assert.AreEqual(TokenSource.Cache, served.AuthenticationResultMetadata.TokenSource);
             Assert.AreEqual("initial-token", served.AccessToken);
-            Assert.AreSame(_certificate, served.BindingCertificate);
-            Assert.AreEqual(_certificate.ComputeX5tS256KeyId(), stored.KeyId);
+            AssertBindingCertificate(app, served);
+            Assert.AreEqual(served.BindingCertificate.ComputeX5tS256KeyId(), stored.KeyId);
             Assert.AreEqual(signingKeyId, stored.KeyId, "The cached key must match the certificate that signed the proof.");
             Assert.AreEqual("refreshed-for-" + signingKeyId, stored.Secret);
             Assert.AreEqual(stored.Secret, background.Result.AccessToken);
-            Assert.AreSame(_certificate, background.Result.BindingCertificate);
+            Assert.AreSame(served.BindingCertificate, background.Result.BindingCertificate);
             Assert.AreEqual(TokenSource.Cache, cached.AuthenticationResultMetadata.TokenSource);
             Assert.AreEqual(stored.Secret, cached.AccessToken);
-            Assert.AreSame(_certificate, cached.BindingCertificate);
+            Assert.AreSame(served.BindingCertificate, cached.BindingCertificate);
             VerifyProof(proof, _certificate, userAssigned: false);
             if (change == "claims")
             {
@@ -452,7 +504,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
             // Assert
             Assert.AreEqual("simulated-bound-token", result.AccessToken);
-            Assert.AreSame(_certificate, result.BindingCertificate);
+            AssertBindingCertificate(app, result);
             Assert.AreEqual(0, http.QueueSize);
         }
 
@@ -473,7 +525,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     "valid" => Task.FromResult(new X509Certificate2(_certificate)),
                     "invalid" => Task.FromResult(new X509Certificate2(_certificate.RawData)),
                     "canceled" => Task.FromCanceled<X509Certificate2>(new CancellationToken(canceled: true)),
-                    _ => Task.FromException<X509Certificate2>(new MsalClientException(RdpCertificateReader.CertificateUnavailable))
+                    _ => Task.FromException<X509Certificate2>(new MsalClientException(RdpCertificateReader.CertificateNotFound))
                 });
             http.AddMockHandler(MockHelpers.MockImdsProbeFailure(ImdsVersion.V2));
             http.AddMockHandler(MockHelpers.MockImdsProbe(ImdsVersion.V1));
@@ -491,21 +543,21 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             var capabilities = await app.GetManagedIdentityCapabilitiesAsync(CancellationToken.None).ConfigureAwait(false);
 
             // Assert
-            bool certificateAvailable = certificateState == "valid";
+            bool certificateAvailable = certificateState is "valid" or "missing";
             Assert.AreEqual(ManagedIdentitySource.Imds, capabilities.Source);
             Assert.AreEqual(certificateAvailable ? MtlsBindingStrength.Software : MtlsBindingStrength.None,
                 capabilities.MaxSupportedBindingStrength);
             Assert.AreEqual(certificateAvailable, capabilities.IsMtlsPopSupportedByHost);
             if (certificateAvailable)
             {
-                AddResponse(http, CreateResponse());
+                AddResponse(http, CreateResponse(), endorsed: certificateState == "valid");
                 var result = await app.AcquireTokenForManagedIdentity(Resource)
                     .WithMtlsProofOfPossession(new PoPOptions { MinStrength = MtlsBindingStrength.Software })
                     .ExecuteAsync().ConfigureAwait(false);
                 using (result.BindingCertificate)
                 {
                     Assert.AreEqual("mtls_pop", result.TokenType);
-                    Assert.AreEqual(_certificate.Thumbprint, result.BindingCertificate.Thumbprint);
+                    AssertBindingCertificate(app, result);
                 }
             }
             else
@@ -513,9 +565,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var error = await Assert.ThrowsAsync<MsalClientException>(() =>
                     app.AcquireTokenForManagedIdentity(Resource).WithMtlsProofOfPossession()
                         .ExecuteAsync()).ConfigureAwait(false);
-                Assert.AreEqual(certificateState == "missing"
-                    ? RdpCertificateReader.CertificateUnavailable
-                    : "managed_identity_binding_certificate_invalid", error.ErrorCode);
+                Assert.AreEqual("managed_identity_binding_certificate_invalid", error.ErrorCode);
             }
             Assert.AreEqual(0, http.QueueSize);
             await platform.Received(2).GetRdpBindingCertificateAsync(
@@ -553,7 +603,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 .WithMtlsProofOfPossession().ExecuteAsync().ConfigureAwait(false);
 
             // Assert
-            Assert.AreSame(_certificate, result.BindingCertificate);
+            AssertBindingCertificate(app, result);
             Assert.AreEqual("simulated-bound-token", result.AccessToken);
             factory.Received(1).GetHttpClient();
             fallback.DidNotReceive().GetHttpClient(false);
@@ -593,7 +643,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 .WithMtlsProofOfPossession().ExecuteAsync().ConfigureAwait(false);
 
             // Assert
-            Assert.AreSame(_certificate, result.BindingCertificate);
+            AssertBindingCertificate(app, result);
             Assert.AreSame(manager, app.ServiceBundle.HttpManager);
             factory.DidNotReceive().GetHttpClient();
             await manager.Received(1).SendRequestAsync(
@@ -708,7 +758,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 .WithMtlsProofOfPossession();
             if (status == 200)
             {
-                Assert.AreSame(_certificate, (await acquisition.ExecuteAsync().ConfigureAwait(false)).BindingCertificate);
+                AssertBindingCertificate(app, await acquisition.ExecuteAsync().ConfigureAwait(false));
                 Assert.HasCount(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens());
                 var cached = await acquisition.ExecuteAsync().ConfigureAwait(false);
                 Assert.AreEqual(TokenSource.Cache, cached.AuthenticationResultMetadata.TokenSource);
@@ -831,7 +881,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     body["expires_on"] = DateTimeOffset.UtcNow.AddHours(1).ToUnixTimeSeconds();
                     break;
                 case "past_certificate":
-                    body["expires_in"] = 3 * 24 * 3600;
+                    body["expires_in"] = 31 * 24 * 3600;
                     break;
                 case "malformed_client_id":
                     body["client_id"] = "not-a-guid";
@@ -891,7 +941,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
             // Assert
             Assert.AreEqual("opaque-not-a-jwt", result.AccessToken);
-            Assert.AreSame(_certificate, result.BindingCertificate);
+            AssertBindingCertificate(app, result);
             Assert.IsTrue(result.ExpiresOn > before.AddSeconds(86394));
             Assert.IsTrue(result.ExpiresOn <= DateTimeOffset.UtcNow.AddSeconds(86399));
             Assert.AreEqual(result.ExpiresOn, cached.ExpiresOn);
@@ -979,8 +1029,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             // Assert
             Assert.AreEqual("first-token", first.AccessToken);
             Assert.AreEqual("second-token", second.AccessToken);
-            Assert.AreSame(firstCertificate, first.BindingCertificate);
-            Assert.AreSame(secondCertificate, second.BindingCertificate);
+            AssertBindingCertificate(app, first);
+            Assert.AreSame(first.BindingCertificate, second.BindingCertificate);
             Assert.HasCount(2, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens());
             var cachedFirst = await firstRequest.ExecuteAsync().ConfigureAwait(false);
             var cachedSecond = await secondRequest.ExecuteAsync().ConfigureAwait(false);
@@ -988,8 +1038,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             Assert.AreEqual(TokenSource.Cache, cachedSecond.AuthenticationResultMetadata.TokenSource);
             Assert.AreEqual(first.AccessToken, cachedFirst.AccessToken);
             Assert.AreEqual(second.AccessToken, cachedSecond.AccessToken);
-            Assert.AreSame(firstCertificate, cachedFirst.BindingCertificate);
-            Assert.AreSame(secondCertificate, cachedSecond.BindingCertificate);
+            Assert.AreSame(first.BindingCertificate, cachedFirst.BindingCertificate);
+            Assert.AreSame(second.BindingCertificate, cachedSecond.BindingCertificate);
             Assert.HasCount(2, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens());
             Assert.AreEqual(0, http.QueueSize);
         }
@@ -1020,8 +1070,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             Assert.HasCount(2, firstApp.AppTokenCacheInternal.Accessor.GetAllAccessTokens());
             Assert.AreEqual("first-partition", first.AccessToken);
             Assert.AreEqual("second-partition", second.AccessToken);
-            Assert.AreSame(_certificate, first.BindingCertificate);
-            Assert.AreSame(_certificate, second.BindingCertificate);
+            AssertBindingCertificate(firstApp, first);
+            AssertBindingCertificate(secondApp, second);
             var cached = await firstApp.AcquireTokenForManagedIdentity(Resource)
                 .WithMtlsProofOfPossession().ExecuteAsync().ConfigureAwait(false);
             Assert.AreEqual(TokenSource.Cache, cached.AuthenticationResultMetadata.TokenSource);
@@ -1063,6 +1113,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow(400)]
         [DataRow(404)]
         [DataRow(500)]
+        [DataRow(503)]
         public async Task EndpointFailureNeverFallsBackOrReplaysProofAsync(int status)
         {
             // Arrange
@@ -1075,6 +1126,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 ["error_description"] = description
             });
             handler.ResponseMessage.StatusCode = (HttpStatusCode)status;
+            handler.AdditionalRequestValidation = message =>
+            {
+                using var proofBody = JsonDocument.Parse(message.Content.ReadAsStringAsync().GetAwaiter().GetResult());
+                VerifyEndorsement(proofBody.RootElement, _certificate);
+                Assert.Contains("withMinStrength=1", message.RequestUri.Query);
+            };
             handler.ResponseMessage.Headers.Add("x-ms-request-id", "simulated-request-id");
 
             // Act
@@ -1086,7 +1143,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, error.ErrorCode);
             Assert.AreEqual(status, error.StatusCode);
             Assert.AreEqual(ManagedIdentitySource.Imds.ToString(), error.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
-            Assert.AreEqual(status is 404 or 500, error.IsRetryable);
+            Assert.AreEqual(status is 404 or 500 or 503, error.IsRetryable);
             Assert.AreEqual("simulated-request-id", error.Headers.GetValues("x-ms-request-id").Single());
             using var body = JsonDocument.Parse(error.ResponseBody);
             Assert.AreEqual("invalid_scope", body.RootElement.GetProperty("error").GetString());
@@ -1299,7 +1356,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             var cachedBound = await app.AcquireTokenForManagedIdentity(Resource)
                 .WithMtlsProofOfPossession().ExecuteAsync().ConfigureAwait(false);
             Assert.AreEqual("bound-token", cachedBound.AccessToken);
-            Assert.AreSame(_certificate, cachedBound.BindingCertificate);
+            AssertBindingCertificate(app, cachedBound);
             Assert.AreEqual(TokenSource.Cache, cachedBound.AuthenticationResultMetadata.TokenSource);
             Assert.HasCount(2, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens());
         }
@@ -1345,9 +1402,14 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         private static MockHttpMessageHandler AddResponse(MockHttpManager http, Dictionary<string, object> body,
-            bool userAssigned = false)
+            bool userAssigned = false, bool endorsed = true)
         {
-            var query = new Dictionary<string, string> { ["resource"] = "https://resource.example/.default", ["api-version"] = "2018-02-01" };
+            var query = new Dictionary<string, string>
+            {
+                ["resource"] = "https://resource.example/.default",
+                ["api-version"] = "2018-02-01",
+                ["withminstrength"] = endorsed ? "1" : "0"
+            };
             if (userAssigned)
             {
                 query["client_id"] = ClientId;
@@ -1372,17 +1434,40 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             Assert.HasCount(3, parts);
             using var header = JsonDocument.Parse(Decode(parts[0]));
             Assert.AreEqual("RS256", header.RootElement.GetProperty("alg").GetString());
-            Assert.AreEqual(Convert.ToBase64String(certificate.RawData), header.RootElement.GetProperty("x5c")[0].GetString());
+            using var binding = new X509Certificate2(Convert.FromBase64String(header.RootElement.GetProperty("x5c")[0].GetString()));
+            CollectionAssert.AreNotEqual(certificate.GetPublicKey(), binding.GetPublicKey(),
+                "The workload proof must not use the endorsement key.");
             using var payload = JsonDocument.Parse(Decode(parts[1]));
             var claims = payload.RootElement;
             Assert.AreEqual(EndorsedUnattestedManagedIdentitySource.ProofAudience, claims.GetProperty("aud").GetString());
             Assert.AreEqual("https://resource.example/.default", claims.GetProperty("resource").GetString());
             Assert.AreEqual(userAssigned ? ClientId : "system_assigned", claims.GetProperty("managed_identity").GetString());
-            Assert.AreEqual(certificate.ComputeX5tS256KeyId(), claims.GetProperty("cnf").GetProperty("x5t#S256").GetString());
+            Assert.AreEqual(binding.ComputeX5tS256KeyId(), claims.GetProperty("cnf").GetProperty("x5t#S256").GetString());
             Assert.AreEqual(60L, claims.GetProperty("exp").GetInt64() - claims.GetProperty("iat").GetInt64());
-            using RSA publicKey = certificate.GetRSAPublicKey();
+            using RSA publicKey = binding.GetRSAPublicKey();
             Assert.IsTrue(publicKey.VerifyData(Encoding.ASCII.GetBytes(parts[0] + "." + parts[1]),
                 Decode(parts[2]), HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1));
+        }
+
+        private static void AssertBindingCertificate(ManagedIdentityApplication app, AuthenticationResult result)
+        {
+            Assert.AreSame(app.ManagedIdentityClient.GetOrCreateUnattestedBindingCertificate(CancellationToken.None),
+                result.BindingCertificate);
+        }
+
+        private static void VerifyEndorsement(JsonElement body, X509Certificate2 certificate)
+        {
+            Assert.AreEqual(3, body.EnumerateObject().Count());
+            Assert.AreEqual(Convert.ToBase64String(certificate.RawData), body.GetProperty("endorsement_certificate").GetString());
+            string proof = body.GetProperty("req_cnf_proof").GetString();
+            byte[] signature = Convert.FromBase64String(body.GetProperty("endorsement_signature").GetString());
+            using RSA key = certificate.GetRSAPublicKey();
+            Assert.IsTrue(key.VerifyData(Encoding.UTF8.GetBytes(proof), signature,
+                HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1));
+            Assert.IsFalse(key.VerifyData(Encoding.UTF8.GetBytes(proof + "x"), signature,
+                HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1));
+            Assert.IsFalse(key.VerifyData(Decode(proof.Split('.')[1]), signature,
+                HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1));
         }
 
         private static byte[] Decode(string value)

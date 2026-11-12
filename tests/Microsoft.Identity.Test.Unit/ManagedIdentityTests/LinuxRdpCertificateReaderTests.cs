@@ -113,7 +113,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [TestMethod]
         [DataRow(false)]
         [DataRow(true)]
-        public void MissingOrInaccessibleConfigurationFailsWithoutFallback(bool accessDenied)
+        public void MissingConfigurationIsDistinctFromAccessFailure(bool accessDenied)
         {
             // Arrange
             Exception failure = accessDenied ? new UnauthorizedAccessException() : new FileNotFoundException();
@@ -128,9 +128,34 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 }, Substitute.For<ILoggerAdapter>(), CancellationToken.None));
 
             // Assert
-            Assert.AreEqual(RdpCertificateReader.CertificateUnavailable, error.ErrorCode);
+            Assert.AreEqual(accessDenied ? RdpCertificateReader.CertificateUnavailable : RdpCertificateReader.CertificateNotFound,
+                error.ErrorCode);
             Assert.AreSame(failure, error.InnerException);
             Assert.AreEqual(1, reads);
+        }
+
+        [TestMethod]
+        public void MissingConfiguredCertificateIsReportedAsAbsentBeforeReadingKey()
+        {
+            // Arrange
+            int reads = 0;
+
+            // Act
+            var error = Assert.ThrowsExactly<MsalClientException>(() =>
+                LinuxRdpCertificateReader.Read(path =>
+                {
+                    reads++;
+                    if (path == LinuxRdpCertificateReader.ConfigurationPath)
+                    {
+                        return "[Globals]";
+                    }
+                    Assert.AreEqual("/etc/xrdp/cert.pem", path);
+                    throw new FileNotFoundException();
+                }, Substitute.For<ILoggerAdapter>(), CancellationToken.None));
+
+            // Assert
+            Assert.AreEqual(RdpCertificateReader.CertificateNotFound, error.ErrorCode);
+            Assert.AreEqual(2, reads);
         }
 
         [TestMethod]

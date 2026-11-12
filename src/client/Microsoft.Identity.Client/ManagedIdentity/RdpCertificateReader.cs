@@ -18,6 +18,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
     internal static class RdpCertificateReader
     {
         internal const string CertificateUnavailable = "managed_identity_rdp_certificate_unavailable";
+        internal const string CertificateNotFound = EndorsedUnattestedManagedIdentitySource.RdpCertificateNotFound;
 
         internal static X509Certificate2 Read(ILoggerAdapter logger, CancellationToken cancellationToken)
         {
@@ -43,6 +44,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     "SELECT SSLCertificateSHA1Hash FROM Win32_TSGeneralSetting WHERE TerminalName = 'RDP-tcp'");
                 searcher.Options.Timeout = TimeSpan.FromSeconds(30);
                 using var listeners = searcher.Get();
+                if (listeners.Count == 0)
+                {
+                    throw new MsalClientException(CertificateNotFound, "No RDP-Tcp listener was found.");
+                }
                 if (listeners.Count != 1)
                 {
                     throw new MsalClientException(CertificateUnavailable,
@@ -68,6 +73,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     return store.Certificates;
                 }, logger);
             }
+            catch (ManagementException ex) when (ex.ErrorCode == ManagementStatus.InvalidNamespace ||
+                ex.ErrorCode == ManagementStatus.InvalidClass || ex.ErrorCode == ManagementStatus.NotFound)
+            {
+                throw new MsalClientException(CertificateNotFound, "No RDP listener configuration was found.", ex);
+            }
             catch (Exception ex) when (ex is ManagementException || ex is COMException ||
                 ex is UnauthorizedAccessException || ex is SecurityException || ex is CryptographicException)
             {
@@ -81,6 +91,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             string thumbprint, Func<string, X509Certificate2Collection> readStore, ILoggerAdapter logger)
         {
             thumbprint = string.Concat((thumbprint ?? string.Empty).Where(c => !char.IsWhiteSpace(c)));
+            if (thumbprint.Length == 0)
+            {
+                throw new MsalClientException(CertificateNotFound, "The RDP-Tcp listener has no configured certificate.");
+            }
             if (thumbprint.Length != 40 || !thumbprint.All(Uri.IsHexDigit))
             {
                 throw new MsalClientException(CertificateUnavailable,
@@ -120,8 +134,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 }
             }
 
-            throw new MsalClientException(CertificateUnavailable,
-                "The configured RDP listener certificate was not found. No alternative binding key was created.");
+            throw new MsalClientException(CertificateNotFound,
+                "The configured RDP listener certificate was not found.");
         }
     }
 }

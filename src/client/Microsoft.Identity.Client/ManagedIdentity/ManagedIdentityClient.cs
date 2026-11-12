@@ -34,6 +34,24 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         // Holds the most recently minted mTLS binding certificate for this application instance.
         private X509Certificate2 _runtimeMtlsBindingCertificate;
         internal X509Certificate2 RuntimeMtlsBindingCertificate => Volatile.Read(ref _runtimeMtlsBindingCertificate);
+        private readonly object _unattestedBindingLock = new object();
+        private X509Certificate2 _unattestedBindingCertificate;
+
+        internal X509Certificate2 GetOrCreateUnattestedBindingCertificate(CancellationToken cancellationToken)
+        {
+            lock (_unattestedBindingLock)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                if (_unattestedBindingCertificate is null ||
+                    _unattestedBindingCertificate.NotAfter.ToUniversalTime() <= DateTime.UtcNow.AddDays(1))
+                {
+                    // Retain old certificates for results and proactive refreshes that still use them.
+                    _unattestedBindingCertificate = UnattestedBindingCertificate.Create();
+                }
+
+                return _unattestedBindingCertificate;
+            }
+        }
 
         internal static void ResetSourceForTest()
         {
@@ -445,6 +463,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 cancellationToken.ThrowIfCancellationRequested();
                 EndorsedUnattestedManagedIdentitySource.ValidateCertificate(certificate);
                 // A usable RDP key supports the unattested protocol, not WS endorsement or KeyGuard.
+                return MtlsBindingStrength.Software;
+            }
+            catch (MsalClientException ex) when (ex.ErrorCode == EndorsedUnattestedManagedIdentitySource.RdpCertificateNotFound)
+            {
+                requestContext.Logger.Info("[Managed Identity] No RDP certificate found; unendorsed Software binding is available.");
                 return MtlsBindingStrength.Software;
             }
             catch (MsalClientException ex)

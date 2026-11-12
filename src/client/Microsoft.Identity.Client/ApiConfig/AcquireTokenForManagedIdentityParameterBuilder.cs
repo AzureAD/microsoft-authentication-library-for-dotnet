@@ -100,7 +100,7 @@ namespace Microsoft.Identity.Client
                 Parameters.AttestationTokenProvider is null;
             if (Parameters.UseRdpCertificate)
             {
-                CommonParameters.CacheKeyComponents["mi_binding_protocol"] = _ => Task.FromResult("provided_certificate_v1");
+                CommonParameters.CacheKeyComponents["mi_binding_protocol"] = _ => Task.FromResult("workload_endorsement_v2");
             }
             else
             {

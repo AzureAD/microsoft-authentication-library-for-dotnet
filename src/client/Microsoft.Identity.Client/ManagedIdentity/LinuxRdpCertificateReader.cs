@@ -26,6 +26,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             Func<string, string> readFile, ILoggerAdapter logger, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
+            bool readingKey = false;
             try
             {
                 var paths = GetCertificatePaths(readFile(ConfigurationPath));
@@ -33,11 +34,17 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 logger.Info("[ManagedIdentity] Selecting the configured xrdp TLS certificate.");
                 string certificatePem = readFile(paths.Certificate);
                 cancellationToken.ThrowIfCancellationRequested();
+                readingKey = true;
                 string keyPem = readFile(paths.Key);
                 cancellationToken.ThrowIfCancellationRequested();
                 using var certificate = X509Certificate2.CreateFromPem(certificatePem, keyPem);
                 EndorsedUnattestedManagedIdentitySource.ValidateCertificate(certificate);
                 return new X509Certificate2(certificate);
+            }
+            catch (Exception ex) when (!readingKey && (ex is FileNotFoundException || ex is DirectoryNotFoundException))
+            {
+                throw new MsalClientException(RdpCertificateReader.CertificateNotFound,
+                    "No xrdp configuration or configured certificate was found.", ex);
             }
             catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException ||
                 ex is SecurityException || ex is CryptographicException || ex is ArgumentException)

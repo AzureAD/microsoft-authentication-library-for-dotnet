@@ -25,13 +25,14 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
-    // Endorsed unattested flow for token binding using the configured RDP certificate.
+    // Workload token binding with optional endorsement by the configured RDP certificate.
     internal static class EndorsedUnattestedManagedIdentitySource
     {
         // Temporary version supported by the test endpoint pending a dedicated API version.
         internal const string ApiVersion = "2018-02-01";
         internal const string ProofAudience = "http://169.254.169.254/metadata/identity/oauth2";
         internal const string InvalidResponse = "managed_identity_binding_response_invalid";
+        internal const string RdpCertificateNotFound = "managed_identity_rdp_certificate_not_found";
 
         internal static void ValidateCertificate(X509Certificate2 certificate)
         {
@@ -122,10 +123,15 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             AuthenticationRequestParameters request,
             AcquireTokenForManagedIdentityParameters parameters,
             X509Certificate2 certificate,
+            X509Certificate2 endorsementCertificate,
             CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             ValidateRequest(request, parameters, certificate);
+            if (endorsementCertificate is not null)
+            {
+                ValidateCertificate(endorsementCertificate);
+            }
             var context = request.RequestContext;
             // Match the successful test-endpoint PoC without changing the normalized cache resource.
             string wireResource = parameters.Resource + "/.default";
@@ -134,6 +140,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 new Uri(tokenEndpoint));
             metadataRequest.QueryParameters["api-version"] = ApiVersion;
             metadataRequest.QueryParameters["resource"] = wireResource;
+            metadataRequest.QueryParameters["withMinStrength"] = endorsementCertificate is null ? "0" : "1";
             if (request.AppConfig.ManagedIdentityId.IsUserAssigned)
             {
                 metadataRequest.QueryParameters["client_id"] = request.AppConfig.ManagedIdentityId.UserAssignedId;
@@ -142,14 +149,24 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             metadataRequest.Headers[OAuth2Header.XMsCorrelationId] = context.CorrelationId.ToString();
 
             string assertion;
+            var proofBody = new Dictionary<string, string>();
             try
             {
                 assertion = CreateProof(request, wireResource, certificate);
+                proofBody["req_cnf_proof"] = assertion;
+                if (endorsementCertificate is not null)
+                {
+                    using RSA endorsementKey = endorsementCertificate.GetRSAPrivateKey();
+                    proofBody["endorsement_certificate"] = Convert.ToBase64String(endorsementCertificate.RawData);
+                    proofBody["endorsement_signature"] = Convert.ToBase64String(
+                        endorsementKey.SignData(Encoding.UTF8.GetBytes(assertion),
+                            HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1));
+                }
             }
             catch (CryptographicException ex)
             {
                 throw new MsalClientException(MsalError.CryptographicError,
-                    "The RDP binding key could not sign the IMDS proof.", ex);
+                    "The workload proof or its RDP endorsement could not be signed.", ex);
             }
 
             // Replaying a single-use proof during automatic retries is not defined by the draft.
@@ -157,7 +174,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             HttpResponse response;
             DateTimeOffset requestStartedAt = DateTimeOffset.UtcNow;
             using (var body = new StringContent(
-                JsonHelper.SerializeToJson(new Dictionary<string, string> { ["req_cnf_proof"] = assertion }),
+                JsonHelper.SerializeToJson(proofBody),
                 Encoding.UTF8, "application/json"))
             {
                 if (context.ApiEvent is not null)
