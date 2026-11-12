@@ -30,6 +30,73 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
         private readonly TestDefaultRetryPolicy _stsRetryPolicy = new TestDefaultRetryPolicy(RequestType.STS);
 
         [TestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task NullRetryPolicySendsOnceWithoutChangingManagerRetryBehaviorAsync(bool timeout)
+        {
+            // Arrange
+            using var manager = new MockHttpManager();
+            int attempts = 0;
+            manager.AddMockHandler(new MockHttpMessageHandler
+            {
+                ExpectedMethod = HttpMethod.Post,
+                AdditionalRequestValidation = _ =>
+                {
+                    attempts++;
+                    if (timeout)
+                    {
+                        throw new TaskCanceledException("Simulated timeout.");
+                    }
+                },
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.ServiceUnavailable)
+            });
+            using var body = new StringContent("single-use-proof");
+            var logger = Substitute.For<ILoggerAdapter>();
+
+            // Act
+            Task<HttpResponse> request = manager.SendRequestAsync(
+                new Uri("https://resource.example"), null, body, HttpMethod.Post, logger,
+                doNotThrow: true, mtlsCertificate: null, validateServerCert: null,
+                cancellationToken: CancellationToken.None, retryPolicy: null);
+            if (timeout)
+            {
+                var exception = await Assert.ThrowsAsync<MsalServiceException>(() => request).ConfigureAwait(false);
+                Assert.AreEqual(MsalError.RequestTimeout, exception.ErrorCode);
+            }
+            else
+            {
+                Assert.AreEqual(HttpStatusCode.ServiceUnavailable, (await request.ConfigureAwait(false)).StatusCode);
+            }
+
+            // Assert
+            Assert.AreEqual(1, attempts);
+            Assert.AreEqual(0, manager.QueueSize);
+
+            // A subsequent ordinary request on the same manager must still use its policy.
+            var policy = Substitute.For<IRetryPolicy>();
+            policy.PauseForRetryAsync(Arg.Any<HttpResponse>(), Arg.Any<Exception>(), Arg.Any<int>(),
+                Arg.Any<ILoggerAdapter>(), Arg.Any<CancellationToken>()).Returns(Task.FromResult(true));
+            manager.AddMockHandler(new MockHttpMessageHandler
+            {
+                ExpectedMethod = HttpMethod.Get,
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.ServiceUnavailable)
+            });
+            manager.AddMockHandler(new MockHttpMessageHandler
+            {
+                ExpectedMethod = HttpMethod.Get,
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+            });
+            var response = await manager.SendRequestAsync(
+                new Uri("https://resource.example"), null, null, HttpMethod.Get, logger,
+                doNotThrow: true, mtlsCertificate: null, validateServerCert: null,
+                cancellationToken: CancellationToken.None, retryPolicy: policy).ConfigureAwait(false);
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+            await policy.Received(1).PauseForRetryAsync(Arg.Any<HttpResponse>(), Arg.Any<Exception>(), 0,
+                logger, CancellationToken.None).ConfigureAwait(false);
+            Assert.AreEqual(0, manager.QueueSize);
+        }
+
+        [TestMethod]
         public async Task HttpManagerPreservesRetryDelayCancellationAcrossRetriesAsync()
         {
             // Arrange

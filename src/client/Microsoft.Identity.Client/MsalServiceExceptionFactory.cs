@@ -191,21 +191,14 @@ namespace Microsoft.Identity.Client
             string errorMessage,
             Exception innerException,
             ManagedIdentitySource managedIdentitySource,
-            int? statusCode)
+            int? statusCode,
+            HttpResponse httpResponse = null)
         {
             MsalException exception;
 
             if (statusCode.HasValue)
             {
                 exception = new MsalServiceException(errorCode, errorMessage, (int)statusCode, innerException);
-
-                var isRetryable = statusCode switch
-                {
-                    404 or 408 or 429 or 500 or 503 or 504 => true,
-                    _ => false,
-                };
-
-                exception.IsRetryable = isRetryable;
             }
             else if (innerException != null)
             {
@@ -214,6 +207,20 @@ namespace Microsoft.Identity.Client
             else
             {
                 exception = new MsalServiceException(errorCode, errorMessage);
+            }
+
+            if (httpResponse is not null && exception is MsalServiceException serviceException)
+            {
+                SetHttpExceptionData(serviceException, httpResponse);
+            }
+
+            if (statusCode.HasValue)
+            {
+                exception.IsRetryable = statusCode switch
+                {
+                    404 or 408 or 429 or 500 or 503 or 504 => true,
+                    _ => false,
+                };
             }
 
             exception = DecorateExceptionWithManagedIdentitySource(exception, managedIdentitySource);

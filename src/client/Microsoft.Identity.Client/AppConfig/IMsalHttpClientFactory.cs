@@ -15,7 +15,13 @@ namespace Microsoft.Identity.Client
     /// If your app uses Integrated Windows Authentication, ensure <see cref="HttpClientHandler.UseDefaultCredentials"/> is set to true.
     /// For federation metadata (MEX) and WS-Trust requests, implement <see cref="IMsalWsTrustHttpClientFactory"/>
     /// as well. Otherwise, MSAL uses cached platform-default clients for these requests, without the supplied
-    /// factory's custom proxy, certificates, handlers, or timeout settings. Other requests are unaffected.
+    /// factory's custom proxy, certificates, handlers, or timeout settings.
+    /// The unattested managed identity flow uses this factory for its workload proof and optional RDP endorsement.
+    /// For those requests, configure the returned client not to follow redirects or send server
+    /// authentication credentials, and do not install handlers that retry or duplicate proof requests.
+    /// MSAL preserves the supplied client's handler configuration and uses <see cref="GetHttpClient"/>,
+    /// even when the factory also implements a specialized HTTP factory interface.
+    /// Other requests are unaffected.
     /// </remarks>
     public interface IMsalHttpClientFactory
     {

@@ -104,35 +104,36 @@ namespace Microsoft.Identity.Test.E2E
         }
 
         /// <summary>
-        /// Tests that an mTLS PoP request without Credential Guard attestation is rejected.
+        /// Tests that IMDSv2 certificate issuance without Credential Guard attestation is rejected.
         /// </summary>
         [RunOnAzureDevOps]
         [TestCategory("MI_E2E_ImdsV2_Attested")]
         [TestMethod]
-        [DataRow(null /*SAMI*/, null, DisplayName = "AcquireToken_OnImdsV2_MtlsPoP_WithoutAttestation_IsRejected-SAMI")]
-        [DataRow(UamiClientId, "clientid", DisplayName = "AcquireToken_OnImdsV2_MtlsPoP_WithoutAttestation_IsRejected-UAMI-ClientId")]
-        public async Task AcquireToken_OnImdsV2_MtlsPoP_WithoutAttestation_IsRejected(string id, string idType)
+        [DataRow(null /*SAMI*/, null, DisplayName = "AcquireToken_OnImdsV2_RequestOverMtls_WithoutAttestation_IsRejected-SAMI")]
+        [DataRow(UamiClientId, "clientid", DisplayName = "AcquireToken_OnImdsV2_RequestOverMtls_WithoutAttestation_IsRejected-UAMI-ClientId")]
+        public async Task AcquireToken_OnImdsV2_RequestOverMtls_WithoutAttestation_IsRejected(string id, string idType)
         {
-        if (!OperatingSystem.IsWindows())
-        {
-            Assert.Inconclusive("Credential Guard attestation is only available on Windows.");
-        }
+            if (!OperatingSystem.IsWindows())
+            {
+                Assert.Inconclusive("Credential Guard attestation is only available on Windows.");
+            }
 
-        var mi = BuildMi(id, idType);
+            var mi = BuildMi(id, idType);
 
-        // Act
-        MsalServiceException exception = await Assert.ThrowsAsync<MsalServiceException>(async () =>
-            await mi.AcquireTokenForManagedIdentity(GraphResource)
-                .WithMtlsProofOfPossession()
-                .ExecuteAsync()
-                .ConfigureAwait(false)).ConfigureAwait(false);
+            // Keep this negative test on IMDSv2 certificate issuance. Parameterless PoP now selects RDP.
+            MsalServiceException exception = await Assert.ThrowsAsync<MsalServiceException>(async () =>
+                await mi.AcquireTokenForManagedIdentity(GraphResource)
+                    .WithRequestOverMtls()
+                    .WithForceRefresh(true)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false)).ConfigureAwait(false);
 
-        // Assert
-        Assert.AreEqual(400, exception.StatusCode);
-        Assert.IsTrue(exception.Message.Contains("invalid_request", StringComparison.Ordinal));
-        Assert.IsTrue(exception.Message.Contains(
-            "Attestation Token is missing / empty in the issue credential request",
-            StringComparison.Ordinal));
+            // Assert
+            Assert.AreEqual(400, exception.StatusCode);
+            Assert.IsTrue(exception.Message.Contains("invalid_request", StringComparison.Ordinal));
+            Assert.IsTrue(exception.Message.Contains(
+                "Attestation Token is missing / empty in the issue credential request",
+                StringComparison.Ordinal));
         }
 
         /// <summary>

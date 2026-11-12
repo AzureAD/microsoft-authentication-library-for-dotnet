@@ -16,9 +16,12 @@ namespace Microsoft.Identity.Client.AppConfig
     {
         /// <summary>
         /// Gets or sets the minimum binding strength the host must be able to produce for the
-        /// request to succeed. This is a <b>floor assertion</b>, not a downgrade selector: MSAL
-        /// always uses the host's maximum binding strength, and the request fails when the host
-        /// cannot meet this floor.
+        /// request to succeed. This is a <b>floor assertion</b>, not a downgrade selector.
+        /// The existing IMDSv2 acquisition flow uses the host's maximum binding strength.
+        /// The unattested flow creates a workload binding certificate and supports Software
+        /// strength only. An available RDP certificate endorses the proof but does not
+        /// establish stronger key protection.
+        /// The request fails when the selected protocol cannot meet this floor.
         /// </summary>
         /// <value>
         /// The minimum required <see cref="MtlsBindingStrength"/>. The default is
