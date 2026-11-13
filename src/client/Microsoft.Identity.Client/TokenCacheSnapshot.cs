@@ -61,6 +61,22 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Gets the total number of access-token, refresh-token, ID-token, account,
+        /// and application-metadata records stored in this snapshot.
+        /// </summary>
+        /// <remarks>
+        /// Includes expired token records that remain stored, for both application and user caches.
+        /// Unknown top-level cache sections are not counted. This is a record count, not a memory-size measurement.
+        /// The count reflects the cache state captured when this snapshot was created.
+        /// </remarks>
+        public long CacheRecordCount =>
+            (long)_state.AccessTokens.Count +
+            _state.RefreshTokens.Count +
+            _state.IdTokens.Count +
+            _state.Accounts.Count +
+            _state.AppMetadata.Count;
+
+        /// <summary>
         /// Serializes this snapshot in the existing MSAL V3 format for persistent storage.
         /// </summary>
         /// <returns>A newly allocated serialized payload.</returns>

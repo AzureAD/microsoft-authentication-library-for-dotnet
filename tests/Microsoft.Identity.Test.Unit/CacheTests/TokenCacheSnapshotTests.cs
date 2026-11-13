@@ -221,6 +221,84 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
+        public void SnapshotCacheRecordCountIncludesExpiredRecordsAndAllRecordTypes(bool applicationCache)
+        {
+            // Arrange
+            var source = CreateCache(applicationCache);
+            Populate(source, applicationCache);
+            var time = DateTimeOffset.FromUnixTimeSeconds(0);
+            source.Accessor.SaveAccessToken(new MsalAccessTokenCacheItem(
+                "environment", "snapshot-tests", "expired-scope", "tenant", "synthetic-expired-access-token",
+                time, time.AddHours(1), time.AddHours(2), null, "account"));
+
+            // Act
+            var snapshot = ((ITokenCacheSnapshotProvider)source).CreateSnapshot();
+
+            // Assert
+            Assert.AreEqual(applicationCache ? 3L : 6L, snapshot.CacheRecordCount);
+        }
+
+        [TestMethod]
+        public void SnapshotCacheRecordCountIncludesEachRecordTypeWithoutAccessTokens()
+        {
+            // Arrange
+            var source = CreateCache(false);
+            Populate(source, false);
+            var accessor = source.Accessor;
+            var provider = (ITokenCacheSnapshotProvider)source;
+            accessor.DeleteAccessToken(accessor.GetAllAccessTokens().Single());
+
+            // Act
+            var withoutAccessTokens = provider.CreateSnapshot();
+            accessor.DeleteRefreshToken(accessor.GetAllRefreshTokens().Single());
+            var idTokenAndSupportingRecords = provider.CreateSnapshot();
+            accessor.DeleteIdToken(accessor.GetAllIdTokens().Single());
+            var accountsAndMetadataOnly = provider.CreateSnapshot();
+            accessor.DeleteAccount(accessor.GetAllAccounts().Single());
+            var metadataOnly = provider.CreateSnapshot();
+
+            // Assert
+            Assert.AreEqual(4L, withoutAccessTokens.CacheRecordCount);
+            Assert.AreEqual(3L, idTokenAndSupportingRecords.CacheRecordCount);
+            Assert.AreEqual(2L, accountsAndMetadataOnly.CacheRecordCount);
+            Assert.AreEqual(1L, metadataOnly.CacheRecordCount);
+        }
+
+        [TestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        public void SnapshotCacheRecordCountIsIsolatedFromSourceAndRestoredCaches(bool applicationCache)
+        {
+            // Arrange
+            var source = CreateCache(applicationCache);
+            var provider = (ITokenCacheSnapshotProvider)source;
+            var emptySnapshot = provider.CreateSnapshot();
+            Populate(source, applicationCache);
+            var snapshot = provider.CreateSnapshot();
+            var destination = CreateCache(applicationCache);
+
+            // Act
+            Populate(source, applicationCache, "other-tenant");
+            var grownSnapshot = provider.CreateSnapshot();
+            ((ITokenCacheSnapshotProvider)destination).RestoreSnapshot(snapshot);
+            Populate(destination, applicationCache, "restored-tenant");
+            var restoredSnapshot = ((ITokenCacheSnapshotProvider)destination).CreateSnapshot();
+            source.DeserializeMsalV3(null, shouldClearExistingCache: true);
+            destination.DeserializeMsalV3(null, shouldClearExistingCache: true);
+
+            // Assert
+            Assert.AreEqual(0L, emptySnapshot.CacheRecordCount);
+            Assert.AreEqual(applicationCache ? 2L : 5L, snapshot.CacheRecordCount);
+            Assert.AreEqual(applicationCache ? 3L : 8L, grownSnapshot.CacheRecordCount);
+            Assert.AreEqual(applicationCache ? 3L : 8L, restoredSnapshot.CacheRecordCount);
+            // Clearing tokens preserves application metadata.
+            Assert.AreEqual(1L, provider.CreateSnapshot().CacheRecordCount);
+            Assert.AreEqual(1L, ((ITokenCacheSnapshotProvider)destination).CreateSnapshot().CacheRecordCount);
+        }
+
+        [TestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
         public void SnapshotPreservesV3State(bool applicationCache)
         {
             // Arrange
@@ -344,6 +422,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             ((ITokenCacheSnapshotProvider)destination).RestoreSnapshot(snapshot);
 
             // Assert
+            Assert.AreEqual(2L, snapshot.CacheRecordCount);
             AssertJsonEqual(source.SerializeMsalV3(), legacy.SerializeMsalV3());
             AssertJsonEqual(source.SerializeMsalV3(), destination.SerializeMsalV3());
         }
@@ -367,6 +446,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             var second = snapshot.Restore(CreateCache(false).Accessor);
 
             // Assert
+            Assert.AreEqual(0L, snapshot.CacheRecordCount);
             Assert.AreEqual("original", second["future"]["nested"][0]["value"].GetValue<string>());
             AssertJsonEqual(expected, snapshot.SerializeMsalV3());
         }
