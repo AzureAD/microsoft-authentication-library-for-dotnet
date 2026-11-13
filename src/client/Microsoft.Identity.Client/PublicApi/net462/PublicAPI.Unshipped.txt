@@ -1,3 +1,4 @@
 Microsoft.Identity.Client.AuthenticationResult.CertificateThumbprint256.get -> string
 Microsoft.Identity.Client.AuthenticationResult.CertificateThumbprint256.set -> void
+Microsoft.Identity.Client.TokenCacheSnapshot.AccessTokenCount.get -> int
 Microsoft.Identity.Client.TokenCacheSnapshot.CacheRecordCount.get -> long
