@@ -136,7 +136,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
             catch (Exception ex)
             {
                 apiEvent.ApiErrorCode = ex.GetType().Name;
-                AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
+
+                if (ex is OperationCanceledException && cancellationToken.IsCancellationRequested)
+                {
+                    AuthenticationRequestParameters.RequestContext.Logger.Info("Token acquisition was canceled.");
+                }
+                else
+                {
+                    AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
+                }
 
                 // Compute the total duration once so the value on the synthesized metadata matches the
                 // value logged to OpenTelemetry (the stopwatch keeps running, so re-reading it drifts).
