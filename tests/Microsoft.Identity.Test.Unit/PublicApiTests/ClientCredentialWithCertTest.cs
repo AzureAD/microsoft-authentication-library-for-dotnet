@@ -1114,6 +1114,311 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
+        [DataRow(true, false)]
+        [DataRow(false, false)]
+        [DataRow(true, true)]
+        public async Task DynamicCertificate_AssociateTokensWithCertificate_RotationAsync(
+            bool associateTokens, bool sendCertificateOverMtls)
+        {
+            // Arrange
+            using (var harness = CreateTestHarness())
+            {
+                if (!sendCertificateOverMtls)
+                {
+                    harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                }
+
+                var firstCertificate = CertHelper.GetOrCreateTestCert();
+                var secondCertificate = CertHelper.GetOrCreateTestCert(regenerateCert: true);
+                var currentCertificate = firstCertificate;
+                int providerCalls = 0;
+                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithAuthority(TestConstants.AuthorityTenant)
+                    .WithHttpManager(harness.HttpManager)
+                    .WithCertificate(options =>
+                    {
+                        providerCalls++;
+                        return Task.FromResult(currentCertificate);
+                    }, new CertificateOptions
+                    {
+                        AssociateTokensWithCertificate = associateTokens,
+                        SendCertificateOverMtls = sendCertificateOverMtls
+                    })
+                    .BuildConcrete();
+
+                void AssertCache(int expectedCount)
+                {
+                    var entries = app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().ToArray();
+                    Assert.HasCount(expectedCount, entries);
+                    foreach (var entry in entries)
+                    {
+                        Assert.AreEqual("resource", entry.AdditionalCacheKeyComponents["resource"]);
+                    }
+
+                    if (associateTokens)
+                    {
+                        var expectedSerialNumbers = expectedCount == 1
+                            ? new[] { firstCertificate.SerialNumber }
+                            : new[] { firstCertificate.SerialNumber, secondCertificate.SerialNumber };
+                        CollectionAssert.AreEquivalent(expectedSerialNumbers, entries
+                            .Select(e => e.AdditionalCacheKeyComponents[Constants.CertSerialNumber]).ToArray());
+                    }
+                    else
+                    {
+                        Assert.IsFalse(entries.Single().AdditionalCacheKeyComponents.ContainsKey(Constants.CertSerialNumber));
+                    }
+                }
+
+                // Act
+                for (int step = 0; step < 4; step++)
+                {
+                    currentCertificate = step == 2 ? secondCertificate : firstCertificate;
+                    bool expectNetwork = step == 0 || (step == 2 && associateTokens);
+                    if (expectNetwork)
+                    {
+                        var handler = CreateTokenResponseHttpHandlerWithX5CValidation(
+                            clientCredentialFlow: true,
+                            expectedX5C: Convert.ToBase64String(currentCertificate.RawData));
+                        if (sendCertificateOverMtls)
+                        {
+                            handler.ExpectedMtlsBindingCertificate = currentCertificate;
+                        }
+                        harness.HttpManager.AddMockHandler(handler);
+                    }
+
+                    var result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                        .WithSendX5C(true)
+                        .WithCachePartitionKey("resource", "resource")
+                        .ExecuteAsync().ConfigureAwait(false);
+
+                    // Assert
+                    Assert.AreEqual(expectNetwork ? TokenSource.IdentityProvider : TokenSource.Cache,
+                        result.AuthenticationResultMetadata.TokenSource);
+                    Assert.AreEqual(associateTokens || sendCertificateOverMtls ? step + 1 : 1, providerCalls);
+                    AssertCache(associateTokens && step >= 2 ? 2 : 1);
+                }
+            }
+        }
+
+        [TestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task DynamicCertificate_AssociateTokensWithCertificate_ReusedMtlsBuilderAsync(bool forceRefresh)
+        {
+            // Arrange
+            using (var harness = CreateTestHarness())
+            {
+                var firstCertificate = CertHelper.GetOrCreateTestCert();
+                var secondCertificate = CertHelper.GetOrCreateTestCert(regenerateCert: true);
+                var currentCertificate = firstCertificate;
+                int providerCalls = 0;
+                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithAuthority(TestConstants.AuthorityTenant)
+                    .WithHttpManager(harness.HttpManager)
+                    .WithCertificate(_ =>
+                    {
+                        providerCalls++;
+                        return Task.FromResult(currentCertificate);
+                    }, new CertificateOptions
+                    {
+                        AssociateTokensWithCertificate = true,
+                        SendCertificateOverMtls = true
+                    })
+                    .BuildConcrete();
+                var request = app.AcquireTokenForClient(TestConstants.s_scope);
+
+                // Act
+                for (int step = 0; step < 4; step++)
+                {
+                    currentCertificate = step == 1 || step == 2 ? secondCertificate : firstCertificate;
+                    bool expectNetwork = step < 2;
+                    if (expectNetwork)
+                    {
+                        var handler = CreateTokenResponseHttpHandlerWithX5CValidation(
+                            clientCredentialFlow: true,
+                            expectedX5C: Convert.ToBase64String(currentCertificate.RawData));
+                        handler.ExpectedMtlsBindingCertificate = currentCertificate;
+                        harness.HttpManager.AddMockHandler(handler);
+                    }
+
+                    var result = await request.WithForceRefresh(forceRefresh && step == 1)
+                        .ExecuteAsync().ConfigureAwait(false);
+
+                    // Assert
+                    Assert.AreEqual(expectNetwork ? TokenSource.IdentityProvider : TokenSource.Cache,
+                        result.AuthenticationResultMetadata.TokenSource);
+                    Assert.AreEqual(step + 1, providerCalls);
+                    var expectedSerialNumbers = step == 0
+                        ? new[] { firstCertificate.SerialNumber }
+                        : new[] { firstCertificate.SerialNumber, secondCertificate.SerialNumber };
+                    CollectionAssert.AreEquivalent(expectedSerialNumbers, app.AppTokenCacheInternal.Accessor
+                        .GetAllAccessTokens()
+                        .Select(entry => entry.AdditionalCacheKeyComponents[Constants.CertSerialNumber]).ToArray());
+                }
+            }
+        }
+
+        [TestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task DynamicCertificate_AssociateTokensWithCertificate_FailurePreservesCacheAsync(bool returnNull)
+        {
+            // Arrange
+            using (var harness = CreateTestHarness())
+            {
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                var firstCertificate = CertHelper.GetOrCreateTestCert();
+                var currentCertificate = firstCertificate;
+                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithAuthority(TestConstants.AuthorityTenant)
+                    .WithHttpManager(harness.HttpManager)
+                    .WithCertificate(_ => Task.FromResult(currentCertificate),
+                        new CertificateOptions { AssociateTokensWithCertificate = true })
+                    .BuildConcrete();
+                harness.HttpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                var original = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync().ConfigureAwait(false);
+                var originalEntry = app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single();
+                Assert.AreEqual(firstCertificate.SerialNumber,
+                    originalEntry.AdditionalCacheKeyComponents[Constants.CertSerialNumber]);
+
+                currentCertificate = returnNull ? null : CertHelper.GetOrCreateTestCert(regenerateCert: true);
+                if (!returnNull)
+                {
+                    harness.HttpManager.AddFailureTokenEndpointResponse("invalid_client", TestConstants.AuthorityTenant);
+                }
+
+                // Act
+                if (returnNull)
+                {
+                    var exception = await Assert.ThrowsAsync<MsalClientException>(() =>
+                        app.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync()).ConfigureAwait(false);
+                    Assert.AreEqual(MsalError.InvalidClientAssertion, exception.ErrorCode);
+                }
+                else
+                {
+                    await Assert.ThrowsAsync<MsalServiceException>(() =>
+                        app.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync()).ConfigureAwait(false);
+                }
+
+                // Assert
+                Assert.AreSame(originalEntry, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single());
+                Assert.AreEqual(firstCertificate.SerialNumber,
+                    originalEntry.AdditionalCacheKeyComponents[Constants.CertSerialNumber]);
+
+                currentCertificate = firstCertificate;
+                var cached = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync().ConfigureAwait(false);
+                Assert.AreEqual(TokenSource.Cache, cached.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(original.AccessToken, cached.AccessToken);
+                Assert.HasCount(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens());
+            }
+        }
+
+        [TestMethod]
+        [DataRow(false, false)]
+        [DataRow(true, false)]
+        [DataRow(false, true)]
+        public async Task DynamicCertificate_AssociateTokensWithCertificate_RetryRotatesCertificateAsync(
+            bool sendCertificateOverMtls, bool mtlsPop)
+        {
+            // Arrange
+            using (var harness = CreateTestHarness())
+            {
+                if (!sendCertificateOverMtls && !mtlsPop)
+                {
+                    harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                }
+                var firstCertificate = CertHelper.GetOrCreateTestCert();
+                var secondCertificate = CertHelper.GetOrCreateTestCert(regenerateCert: true);
+                var currentCertificate = firstCertificate;
+                int providerCalls = 0;
+                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithAuthority(TestConstants.AuthorityTenant)
+                    .WithHttpManager(harness.HttpManager)
+                    .WithCertificate(_ =>
+                    {
+                        providerCalls++;
+                        return Task.FromResult(currentCertificate);
+                    }, new CertificateOptions
+                    {
+                        AssociateTokensWithCertificate = true,
+                        SendCertificateOverMtls = sendCertificateOverMtls
+                    })
+                    .OnMsalServiceFailure((_, result) =>
+                    {
+                        Assert.AreSame(firstCertificate, result.ClientCertificate);
+                        currentCertificate = secondCertificate;
+                        return Task.FromResult(true);
+                    })
+                    .BuildConcrete();
+
+                MockHttpMessageHandler CreateHandler(X509Certificate2 certificate)
+                {
+                    var handler = mtlsPop
+                        ? new MockHttpMessageHandler { ExpectedMethod = HttpMethod.Post }
+                        : CreateTokenResponseHttpHandlerWithX5CValidation(
+                            clientCredentialFlow: true, expectedX5C: Convert.ToBase64String(certificate.RawData));
+                    handler.ResponseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage(
+                        tokenType: mtlsPop ? "mtls_pop" : "Bearer");
+                    if (sendCertificateOverMtls || mtlsPop)
+                    {
+                        handler.ExpectedMtlsBindingCertificate = certificate;
+                    }
+                    return handler;
+                }
+
+                AcquireTokenForClientParameterBuilder CreateRequest(bool forceRefresh = false)
+                {
+                    var request = app.AcquireTokenForClient(TestConstants.s_scope)
+                        .WithSendX5C(true).WithForceRefresh(forceRefresh);
+                    return mtlsPop ? request.WithMtlsProofOfPossession() : request;
+                }
+
+                harness.HttpManager.AddMockHandler(CreateHandler(firstCertificate));
+                await CreateRequest().ExecuteAsync().ConfigureAwait(false);
+                var originalEntry = app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single();
+                Assert.AreEqual(firstCertificate.SerialNumber,
+                    originalEntry.AdditionalCacheKeyComponents[Constants.CertSerialNumber]);
+
+                var failure = harness.HttpManager.AddFailureTokenEndpointResponse("invalid_client", TestConstants.AuthorityTenant);
+                failure.ExpectedUrl = null;
+                var failedAttemptValidation = CreateHandler(firstCertificate);
+                failure.AdditionalRequestValidation = failedAttemptValidation.AdditionalRequestValidation;
+                failure.ExpectedMtlsBindingCertificate = failedAttemptValidation.ExpectedMtlsBindingCertificate;
+                var success = CreateHandler(secondCertificate);
+                harness.HttpManager.AddMockHandler(success);
+
+                // Act
+                var refreshed = await CreateRequest(forceRefresh: true).ExecuteAsync().ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual(3, providerCalls);
+                if (mtlsPop)
+                {
+                    Assert.AreSame(secondCertificate, refreshed.BindingCertificate);
+                }
+                Assert.AreSame(originalEntry, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens()
+                    .Single(entry => entry.AdditionalCacheKeyComponents[Constants.CertSerialNumber]
+                        == firstCertificate.SerialNumber));
+                var serialNumbers = app.AppTokenCacheInternal.Accessor.GetAllAccessTokens()
+                    .Select(entry => entry.AdditionalCacheKeyComponents[Constants.CertSerialNumber]).ToArray();
+                CollectionAssert.AreEquivalent(
+                    new[] { firstCertificate.SerialNumber, secondCertificate.SerialNumber }, serialNumbers);
+
+                var result = await CreateRequest().ExecuteAsync().ConfigureAwait(false);
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(4, providerCalls);
+                currentCertificate = firstCertificate;
+                result = await CreateRequest().ExecuteAsync().ConfigureAwait(false);
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(5, providerCalls);
+                Assert.HasCount(2, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens());
+            }
+        }
+
+        [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
         public async Task EnsureDefaultCacheKeyBehaviorWhenCertSerialNumberIsNotUsedTestAsync(bool useCertificateOptions)

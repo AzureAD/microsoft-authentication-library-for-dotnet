@@ -73,9 +73,19 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
 
             var context = BuildContext(requestParams, tokenEndpoint);
 
-            CredentialMaterial material = await credential
-                .GetCredentialMaterialAsync(context, cancellationToken)
-                .ConfigureAwait(false);
+            CredentialMaterial material;
+            if (credential is DynamicCertificateClientCredential certificateCredential
+                && requestParams.CertificateForCacheAssociation is not null)
+            {
+                material = await certificateCredential.GetCredentialMaterialWithCertificateAsync(
+                    context, cancellationToken, requestParams.CertificateForCacheAssociation)
+                    .ConfigureAwait(false);
+            }
+            else
+            {
+                material = await credential.GetCredentialMaterialAsync(context, cancellationToken)
+                    .ConfigureAwait(false);
+            }
 
             Debug.Assert(material != null, $"Credential '{credential.GetType().Name}' returned null CredentialMaterial.");
             Debug.Assert(material.TokenRequestParameters != null, $"Credential '{credential.GetType().Name}' returned null TokenRequestParameters.");
@@ -86,7 +96,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             return material;
         }
 
-        private static CredentialContext BuildContext(
+        internal static CredentialContext BuildContext(
             AuthenticationRequestParameters requestParams,
             string tokenEndpoint)
         {

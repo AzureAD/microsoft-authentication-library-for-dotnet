@@ -161,6 +161,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public SortedList<string, string> CacheKeyComponents {get; private set; }
 
+        internal X509Certificate2 CertificateForCacheAssociation { get; private set; }
+
+        internal void AssociateTokenWithCertificate(X509Certificate2 certificate)
+        {
+            CertificateForCacheAssociation = certificate;
+            CacheKeyComponents ??= new SortedList<string, string>(StringComparer.Ordinal);
+            CacheKeyComponents[Constants.CertSerialNumber] = certificate.SerialNumber;
+        }
+
         public bool PartitionRefreshToken { get; private set; }
 
         #region TODO REMOVE FROM HERE AND USE FROM SPECIFIC REQUEST PARAMETERS

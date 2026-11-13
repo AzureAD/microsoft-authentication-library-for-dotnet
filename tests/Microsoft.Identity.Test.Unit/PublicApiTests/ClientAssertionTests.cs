@@ -17,6 +17,7 @@ using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.ClientCredential;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Integration.Infrastructure;
@@ -476,6 +477,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     Assert.IsNotNull(result.BindingCertificate, "BindingCertificate should be present.");
                     Assert.AreEqual(cert.Thumbprint, result.BindingCertificate.Thumbprint,
                         "BindingCertificate must match the cert passed to WithCertificate().");
+                    Assert.AreEqual(cert.ComputeSha256Thumbprint(), result.CertificateThumbprint256);
 
                     // Second token acquisition - should retrieve from cache
                     AuthenticationResult secondResult = await app.AcquireTokenForClient(TestConstants.s_scope)
@@ -491,6 +493,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     Assert.IsNotNull(secondResult.BindingCertificate);
                     Assert.AreEqual(result.BindingCertificate.Thumbprint,
                         secondResult.BindingCertificate.Thumbprint);
+                    Assert.IsNull(secondResult.CertificateThumbprint256);
                 }
             }
         }

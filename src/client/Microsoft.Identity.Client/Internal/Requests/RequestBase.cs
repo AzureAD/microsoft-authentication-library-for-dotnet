@@ -523,6 +523,17 @@ namespace Microsoft.Identity.Client.Internal.Requests
             authResult.RefreshToken = AuthenticationRequestParameters.AppConfig.IsConfidentialClient
                 ? msalTokenResponse.RefreshToken
                 : null;
+
+            bool tokenFromAppProvider = AuthenticationRequestParameters.ApiId == ApiEvent.ApiIds.AcquireTokenForClient &&
+                AuthenticationRequestParameters.AppConfig.AppTokenProvider is not null;
+            if (atItem is not null && msalTokenResponse.TokenSource == TokenSource.IdentityProvider && !tokenFromAppProvider)
+            {
+                // TLS captures its certificate before a dynamic provider can rotate during assertion resolution.
+                var authenticationCertificate = AuthenticationRequestParameters.MtlsCertificate ??
+                    AuthenticationRequestParameters.ResolvedCertificate;
+                authResult.CertificateThumbprint256 = authenticationCertificate?.ComputeSha256Thumbprint();
+            }
+
             return authResult;
         }
 
