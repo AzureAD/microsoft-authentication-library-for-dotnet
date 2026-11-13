@@ -915,6 +915,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         ct.ThrowIfCancellationRequested();
                         return await Task.FromResult(TestConstants.DefaultClientAssertion).ConfigureAwait(false);
                     })
+                .WithInstanceDiscovery(false)
                 .WithLogging(
                     (level, message, _) =>
                     {
@@ -967,6 +968,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                         return TestConstants.DefaultClientAssertion;
                     })
+                .WithInstanceDiscovery(false)
                 .WithLogging(
                     (level, message, _) =>
                     {
