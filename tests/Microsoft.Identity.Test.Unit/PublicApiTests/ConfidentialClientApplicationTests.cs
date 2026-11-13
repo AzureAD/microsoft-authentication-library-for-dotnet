@@ -900,6 +900,104 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
+        public async Task AcquireToken_WhenCallerCancels_LogsInfoAndNotErrorAsync()
+        {
+            // Arrange
+            var logs = new List<(LogLevel Level, string Message)>();
+            using var cts = new CancellationTokenSource();
+
+            var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                .WithClientAssertion(
+                    async ct =>
+                    {
+                        // the caller cancels while the token acquisition is in progress
+                        cts.Cancel();
+                        ct.ThrowIfCancellationRequested();
+                        return await Task.FromResult(TestConstants.DefaultClientAssertion).ConfigureAwait(false);
+                    })
+                .WithInstanceDiscovery(false)
+                .WithLogging(
+                    (level, message, _) =>
+                    {
+                        lock (logs)
+                        {
+                            logs.Add((level, message));
+                        }
+                    },
+                    LogLevel.Info)
+                .BuildConcrete();
+
+            // Act
+            await AssertException.TaskThrowsAsync<OperationCanceledException>(
+                () => app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                    .ExecuteAsync(cts.Token)).ConfigureAwait(false);
+
+            // Assert
+            // Note: the default /common authority logs an unrelated Error for client credentials,
+            // so look specifically for the exception being logged at Error level.
+            lock (logs)
+            {
+                Assert.IsFalse(
+                    logs.Any(l => l.Level == LogLevel.Error && l.Message.Contains(nameof(OperationCanceledException))),
+                    "A cancellation requested by the caller should not be logged as an error.");
+                Assert.IsTrue(
+                    logs.Any(l => l.Level == LogLevel.Info && l.Message.Contains("Token acquisition was canceled.")),
+                    "A cancellation requested by the caller should be logged at Info level.");
+            }
+        }
+
+        [TestMethod]
+        public async Task AcquireToken_WhenCancellationNotRequestedByCaller_StillLogsErrorAsync()
+        {
+            // Arrange
+            var logs = new List<(LogLevel Level, string Message)>();
+            using var cts = new CancellationTokenSource();
+
+            var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                .WithClientAssertion(
+                    async ct =>
+                    {
+                        await Task.Yield();
+
+                        // an OperationCanceledException that the caller did NOT request
+                        // (e.g. an internal timeout) must still be treated as a failure
+                        if (!ct.IsCancellationRequested)
+                        {
+                            throw new OperationCanceledException("Canceled by something other than the caller.");
+                        }
+
+                        return TestConstants.DefaultClientAssertion;
+                    })
+                .WithInstanceDiscovery(false)
+                .WithLogging(
+                    (level, message, _) =>
+                    {
+                        lock (logs)
+                        {
+                            logs.Add((level, message));
+                        }
+                    },
+                    LogLevel.Info)
+                .BuildConcrete();
+
+            // Act
+            await AssertException.TaskThrowsAsync<OperationCanceledException>(
+                () => app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                    .ExecuteAsync(cts.Token)).ConfigureAwait(false);
+
+            // Assert
+            lock (logs)
+            {
+                Assert.IsTrue(
+                    logs.Any(l => l.Level == LogLevel.Error && l.Message.Contains(nameof(OperationCanceledException))),
+                    "A cancellation that was not requested by the caller should still be logged as an error.");
+                Assert.IsFalse(
+                    logs.Any(l => l.Message.Contains("Token acquisition was canceled.")),
+                    "The Info-level cancellation message should only be used when the caller requested cancellation.");
+            }
+        }
+
+        [TestMethod]
         public async Task SignedAssertionWithSingleClientCapabilityTestAsync()
         {
             using (var httpManager = new MockHttpManager())
