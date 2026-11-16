@@ -28,7 +28,6 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'Installing .NET 8 mobile workloads failed.' }
 
     $properties = @(
-        '-p:TargetFrameworks=net8.0-android%3Bnet8.0-ios',
         '-p:INCLUDE_MOBILE_AND_LEGACY_TFM=true',
         '-p:MobileTargetFrameworkVersion=8.0',
         "-p:BaseIntermediateOutputPath=$(Join-Path $WorkingDirectory 'obj')\",

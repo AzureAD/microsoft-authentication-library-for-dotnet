@@ -31,6 +31,7 @@
     <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworkNetDesktop462);$(TargetFrameworkNetDesktop472);$(TargetFrameworkNetStandard);$(TargetFrameworkNetIos);$(TargetFrameworkNetAndroid);$(TargetFrameworkNet8);$(TargetFrameworkNet10)</TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('OSX'))">$(TargetFrameworkNetStandard);$(TargetFrameworkNetIos);$(TargetFrameworkNetAndroid);$(TargetFrameworkNet8);$(TargetFrameworkNet10)</TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Linux')) Or '$(NetCoreOnly)' !='' ">$(TargetFrameworkNetStandard);$(TargetFrameworkNet8);$(TargetFrameworkNet10)</TargetFrameworks>
+    <TargetFrameworks Condition="'$(MobileTargetFrameworkVersion)' == '8.0' And '$(INCLUDE_MOBILE_AND_LEGACY_TFM)' != ''">$(TargetFrameworkNetAndroid);$(TargetFrameworkNetIos)</TargetFrameworks>
   </PropertyGroup>
 
   <PropertyGroup Label="NuGet and AssemblyInfo metadata">
