@@ -27,3 +27,14 @@ steps:
       /p:NoBuild=${{ parameters.NoBuild }}
       /p:IncludeSymbols=true
       /p:Configuration=${{ parameters.BuildConfiguration }}
+
+- ${{ if eq(parameters.AssemblyName, 'Microsoft.Identity.Client') }}:
+  - task: PowerShell@2
+    displayName: 'Combine and validate .NET 8/.NET 10 mobile package assets'
+    inputs:
+      targetType: filePath
+      filePath: '${{ parameters.ProjectRootPath }}/../../build/merge-net8-mobile-packages.ps1'
+      arguments: >
+        -ProjectDirectory "${{ parameters.ProjectRootPath }}/${{ parameters.AssemblyName }}"
+        -BuildConfiguration "${{ parameters.BuildConfiguration }}"
+      pwsh: true

@@ -11,8 +11,14 @@
 
   <!-- Mobile targets are disabled by default to speed up dev box -->
   <PropertyGroup Condition="'$(INCLUDE_MOBILE_AND_LEGACY_TFM)' != ''">
-    <TargetFrameworkNetAndroid>net10.0-android</TargetFrameworkNetAndroid>
-    <TargetFrameworkNetIos>net10.0-ios</TargetFrameworkNetIos>
+    <MobileTargetFrameworkVersion Condition="'$(MobileTargetFrameworkVersion)' == ''">10.0</MobileTargetFrameworkVersion>
+    <TargetFrameworkNetAndroid>net$(MobileTargetFrameworkVersion)-android</TargetFrameworkNetAndroid>
+    <TargetFrameworkNetIos>net$(MobileTargetFrameworkVersion)-ios</TargetFrameworkNetIos>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(MobileTargetFrameworkVersion)' == '8.0'">
+    <TargetPlatformVersion Condition="'$(TargetFramework)' == '$(TargetFrameworkNetAndroid)'">34.0</TargetPlatformVersion>
+    <TargetPlatformVersion Condition="'$(TargetFramework)' == '$(TargetFrameworkNetIos)'">18.0</TargetPlatformVersion>
   </PropertyGroup>
 
   <!-- mobile SDK constraints -->

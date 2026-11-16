@@ -39,6 +39,25 @@ steps:
       /p:LabApiVersion=$(LabApiVersion)
       /p:RunCodeAnalysis=false
 
+- template: template-build-net8-mobile.yaml
+  parameters:
+    BuildConfiguration: '$(BuildConfiguration)'
+    MicrosoftIdentityClientVersion: '$(MicrosoftIdentityClientVersion)'
+
+- task: PowerShell@2
+  displayName: 'Test side-by-side mobile package composition'
+  inputs:
+    targetType: filePath
+    filePath: 'build/test-mobile-package-merge.ps1'
+    pwsh: true
+
+- task: CopyFiles@2
+  displayName: 'Stage .NET 8 mobile compatibility packages'
+  inputs:
+    SourceFolder: 'artifacts/net8-mobile'
+    Contents: '*nupkg'
+    TargetFolder: '$(build.artifactstagingdirectory)/net8-mobile'
+
 - task: CopyFiles@2
   displayName: 'Stage MSAL src'
   inputs:

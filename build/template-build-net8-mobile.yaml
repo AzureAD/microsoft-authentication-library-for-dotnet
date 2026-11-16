@@ -1,0 +1,45 @@
+parameters:
+  RepositoryRoot: '$(Build.SourcesDirectory)'
+  BuildConfiguration: 'Release'
+  MicrosoftIdentityClientVersion: ''
+
+steps:
+- task: UseDotNet@2
+  displayName: 'Install the .NET 8 compatibility build SDK'
+  inputs:
+    version: 8.x
+
+- task: PowerShell@2
+  displayName: 'Build and pack .NET 8 Android/iOS compatibility assets'
+  inputs:
+    targetType: filePath
+    filePath: '${{ parameters.RepositoryRoot }}/build/build-net8-mobile.ps1'
+    arguments: >
+      -RepositoryRoot "${{ parameters.RepositoryRoot }}"
+      -WorkingDirectory "$(Agent.TempDirectory)/msal-net8-mobile"
+      -BuildConfiguration "${{ parameters.BuildConfiguration }}"
+      -MicrosoftIdentityClientVersion "${{ parameters.MicrosoftIdentityClientVersion }}"
+    pwsh: true
+
+- task: UseDotNet@2
+  displayName: 'Restore the .NET 10 build SDK selection'
+  inputs:
+    version: 10.x
+
+- task: PowerShell@2
+  displayName: 'Pack and validate all side-by-side mobile assets'
+  inputs:
+    targetType: inline
+    pwsh: true
+    script: |
+      $ErrorActionPreference = 'Stop'
+      $root = '${{ parameters.RepositoryRoot }}'
+      $project = Join-Path $root 'src/client/Microsoft.Identity.Client/Microsoft.Identity.Client.csproj'
+      $properties = @('-p:INCLUDE_MOBILE_AND_LEGACY_TFM=true', '-p:IncludeSymbols=true')
+      $version = '${{ parameters.MicrosoftIdentityClientVersion }}'
+      if ($version) { $properties += "-p:MicrosoftIdentityClientVersion=$version" }
+      & dotnet pack $project --no-build --configuration '${{ parameters.BuildConfiguration }}' @properties
+      if ($LASTEXITCODE -ne 0) { throw 'Packing the modern core assets failed.' }
+      & (Join-Path $root 'build/merge-net8-mobile-packages.ps1') `
+          -ProjectDirectory (Split-Path $project -Parent) `
+          -BuildConfiguration '${{ parameters.BuildConfiguration }}'

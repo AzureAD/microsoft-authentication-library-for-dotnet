@@ -24,10 +24,22 @@ The following table lists MSAL.NET versions currently supported and receiving se
 ### Target frameworks
 
 .NET 8 and .NET 10 are modern .NET build targets. The core library also ships
-`netstandard2.0`, `net462`, and `net472` compatibility assets; Android and iOS
-targets use .NET 10. The .NET 8 asset is retained while downstream SDKs migrate to
+`netstandard2.0`, `net462`, and `net472` compatibility assets. Android and iOS
+packages retain .NET 8 assets alongside .NET 10 assets. The .NET 8 assets are retained while downstream SDKs migrate to
 .NET 10. Building from source requires the SDK selected by
 `global.json` and the corresponding workloads when building mobile targets.
+
+Mobile release builds additionally require the .NET 8 SDK and its Android/iOS
+workloads. `build/build-net8-mobile.ps1` builds the same core sources using an
+isolated .NET 8 SDK workspace and intermediate directory. Windows continues to
+build the .NET 10 assets normally. Before final package signing,
+`build/merge-net8-mobile-packages.ps1` combines the compatibility assets and
+dependency groups into the core `.nupkg` and `.snupkg`, using the staged binaries
+so binary signatures are preserved. The packaging gate checks NuGet's asset
+selection for .NET 8/9 mobile consumers and the presence of both .NET 10 mobile
+assets. Intermediate compatibility packages are excluded from final package publication.
+This packaging compatibility does not extend the support lifecycle of the
+underlying mobile workloads.
 
 .NET 8/9 applications select the `net8.0` asset, and .NET 10 applications select
 `net10.0`. Both modern assets retain managed-identity IMDSv2 mTLS flows,

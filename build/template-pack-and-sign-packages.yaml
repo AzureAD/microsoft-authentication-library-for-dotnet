@@ -16,6 +16,13 @@ steps:
     Contents: '**\*'
     TargetFolder: $(Build.SourcesDirectory)\src\client
 
+- task: CopyFiles@2
+  displayName: 'Restore .NET 8 mobile compatibility packages'
+  inputs:
+    SourceFolder: '$(build.artifactstagingdirectory)\drop\net8-mobile'
+    Contents: '*nupkg'
+    TargetFolder: '$(Build.SourcesDirectory)\artifacts\net8-mobile'
+
 # Required by legacy signing; install before selecting the build SDK.
 - task: UseDotNet@2
   displayName: 'Install legacy signing SDK 2.x'

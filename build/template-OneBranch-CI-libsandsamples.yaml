@@ -100,3 +100,9 @@ steps:
       /p:SourceLinkCreate=true
       /p:ContinousIntegrationBuild=true
       /p:PipelineType=${{ parameters.PipelineType }}
+
+- template: template-build-net8-mobile.yaml
+  parameters:
+    RepositoryRoot: '$(SourceDir)'
+    BuildConfiguration: '${{ parameters.BuildConfiguration }}'
+    MicrosoftIdentityClientVersion: '${{ parameters.MicrosoftIdentityClientVersion }}'
