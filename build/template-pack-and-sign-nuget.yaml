@@ -26,6 +26,7 @@ steps:
       /t:pack
       /p:NoBuild=${{ parameters.NoBuild }}
       /p:IncludeSymbols=true
+      /p:INCLUDE_MOBILE_AND_LEGACY_TFM=true
       /p:Configuration=${{ parameters.BuildConfiguration }}
 
 - ${{ if eq(parameters.AssemblyName, 'Microsoft.Identity.Client') }}:

@@ -59,6 +59,7 @@ steps:
       restore $(SourceDir)src/client/Microsoft.Identity.Client/Microsoft.Identity.Client.csproj
       restore $(SourceDir)src/client/Microsoft.Identity.Client.Broker/Microsoft.Identity.Client.Broker.csproj
       --configfile $(SourceDir)NuGet.config
+      /p:INCLUDE_MOBILE_AND_LEGACY_TFM=true
 
 - task: PowerShell@2
   displayName: Install MAUI
@@ -81,6 +82,7 @@ steps:
     arguments: >
       ${{ parameters.Solution }}
       /t:restore
+      /p:INCLUDE_MOBILE_AND_LEGACY_TFM=true
       /p:Platform="${{ parameters.BuildPlatform }}"
       /p:Configuration="${{ parameters.BuildConfiguration }}"
 
@@ -92,6 +94,7 @@ steps:
     arguments: >
       ${{ parameters.Solution }}
       /m
+      /p:INCLUDE_MOBILE_AND_LEGACY_TFM=true
       /p:Platform="${{ parameters.BuildPlatform }}"
       /p:Configuration="${{ parameters.BuildConfiguration }}"
       /p:RunCodeAnalysis=false

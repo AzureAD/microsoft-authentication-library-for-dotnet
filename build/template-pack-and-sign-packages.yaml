@@ -51,6 +51,7 @@ steps:
     arguments: >
       LibsAndSamples.sdk.slnf
       /t:restore
+      /p:INCLUDE_MOBILE_AND_LEGACY_TFM=true
       /p:Platform="any cpu"
       /p:Configuration=Release
 
