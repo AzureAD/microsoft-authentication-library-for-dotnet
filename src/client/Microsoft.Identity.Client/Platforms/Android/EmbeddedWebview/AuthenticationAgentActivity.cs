@@ -68,6 +68,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
             if (Build.VERSION.SdkInt >= BuildVersionCodes.R) // API 30+
             {
                 // Enable edge-to-edge
+#pragma warning disable CA1422 // Preserve legacy target-SDK and three-button navigation behavior.
                 Window.SetDecorFitsSystemWindows(false);
                 
                 // For API 35+, ensure proper edge-to-edge behavior
@@ -77,6 +78,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
                     Window.SetStatusBarColor(global::Android.Graphics.Color.Transparent);
                     Window.SetNavigationBarColor(global::Android.Graphics.Color.Transparent);
                 }
+#pragma warning restore CA1422
             }
 #endif
         }

@@ -1,4 +1,4 @@
-﻿# KeyGuard Attestation Proof‑of‑Concept
+# KeyGuard Attestation Proof‑of‑Concept
 
 > **Goal**  Demonstrate how to create a KeyGuard‑protected RSA key on Windows, attest it with Azure **Microsoft Azure Attestation** (MAA), receive a JWT, and prove the key can still perform cryptographic operations.
 
@@ -10,7 +10,7 @@
 |-------------|-------|
 | Windows **Server 2022** with TPM 2.0 (KeyGuard is Windows‑only; Linux/macOS not supported) | The demo queries TPM logs & AK certs. |
 | KeyGuard with **Virtualisation‑Based Security (VBS)** | Must be enabled (see below) and the **Windows Security Service** running. |
-| .NET 8 SDK + Visual Studio 2022 | Any recent SDK capable of building **C# 12**. |
+| .NET 10 SDK (10.0.403 or later) | Use the SDK selected by `global.json`. |
 | `AttestationClientLib.dll` | Native library shipped by the KeyGuard team. Place it next to the executable. |
 | Access to an MAA instance | This sample uses the **EUS2 shared test endpoint**: `Replace with your own.` |
 
@@ -52,7 +52,7 @@ dotnet restore    # make sure your *NuGet.Config* points to the https://msazure.
 dotnet build -c Release
 
 # Output
-./bin/Release/net8.0/KeyGuardDemo.exe
+./bin/Release/net10.0/KeyGuardDemo.exe
 ```
 
 The project contains two assemblies:
@@ -67,7 +67,7 @@ The project contains two assemblies:
 ## 3️⃣ Run
 
 ```bash
-cd bin/Release/net8.0
+cd bin/Release/net10.0
 KeyGuardDemo.exe
 ```
 

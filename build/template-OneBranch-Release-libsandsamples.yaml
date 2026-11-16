@@ -13,7 +13,7 @@ steps:
 
 - template: template-OneBranch-CI-libsandsamples.yaml
   parameters:
-    Solution: 'microsoft-authentication-library-for-dotnet/LibsAndSamples.sln'
+    Solution: 'microsoft-authentication-library-for-dotnet/LibsAndSamples.sdk.slnf'
     MicrosoftIdentityClientVersion: $(MicrosoftIdentityClientVersion) #Default MSAL package version
     LabApiVersion: $(LabApiVersion) #Lab.Api package version
     MsalSourceDir: $(MsalSourceDir) #Default MSAL root directory

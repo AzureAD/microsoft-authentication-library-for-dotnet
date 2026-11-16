@@ -63,7 +63,9 @@ steps:
   displayName: 'Copy Files to: $(Build.ArtifactStagingDirectory)\packages'
   inputs:
     SourceFolder: '$(Build.SourcesDirectory)\$(MsalSourceDir)'
-    Contents: '**\*nupkg'
+    Contents: |
+      **\*nupkg
+      !artifacts\net8-mobile\**
     TargetFolder: '$(Build.ArtifactStagingDirectory)\packages'
     flattenFolders: true
 

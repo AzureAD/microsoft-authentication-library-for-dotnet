@@ -122,14 +122,24 @@ steps:
     DBUS_SESSION_BUS_ADDRESS: $(SetDbusSession.dbusSessionAddress)
 
 - task: UseDotNet@2
-  displayName: 'Use the latest .NET 8'
+  displayName: 'Use the latest .NET 10'
   inputs:
-    version: 8.x
+    version: 10.x
 
 - task: CmdLine@2
   displayName: 'Clear local NuGet cache'
   inputs:
     script: 'nuget locals all -clear'
+
+- task: DotNetCoreCLI@2
+  displayName: 'Test portable managed identity RSA on .NET 10'
+  inputs:
+    command: 'test'
+    projects: 'tests/Microsoft.Identity.Test.Unit/Microsoft.Identity.Test.Unit.csproj'
+    arguments: >
+      --configuration ${{ parameters.BuildConfiguration }}
+      --framework net10.0
+      --filter FullyQualifiedName~InMemoryManagedIdentityKeyProviderTests
 
 - task: DotNetCoreCLI@2
   displayName: 'Wotnet workload restore'
@@ -147,7 +157,7 @@ steps:
     configuration: ${{ parameters.BuildConfiguration }}
 
 - script: |
-    dotnet test **/Microsoft.Identity.Test.Integration.netcore/Microsoft.Identity.Test.Integration.NetCore.csproj -l "console;verbosity=detailed"
+    dotnet test **/Microsoft.Identity.Test.Integration.netcore/Microsoft.Identity.Test.Integration.NetCore.csproj --framework net10.0 -l "console;verbosity=detailed"
   displayName: 'Run Integration tests .NET'
   env:
     CERTIFICATE_LOCATION: $(generateLabCert.certDir)

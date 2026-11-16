@@ -15,6 +15,7 @@ namespace Microsoft.Identity.Client
         /// Enables mTLS Proof-of-Possession for managed identity token acquisition.
         /// When attestation is required (KeyGuard scenarios), use the Msal.KeyAttestation package
         /// and call .WithAttestationSupport() after this method.
+        /// Not supported by the .NET Framework 4.6.2 or .NET Standard 2.0 assets.
         /// </summary>
         /// <param name="builder">The AcquireTokenForManagedIdentityParameterBuilder instance.</param>
         /// <returns>The builder to chain .With methods.</returns>
@@ -29,6 +30,7 @@ namespace Microsoft.Identity.Client
         /// PoP options, such as a minimum required binding strength.
         /// When attestation is required (KeyGuard scenarios), use the Msal.KeyAttestation package
         /// and call .WithAttestationSupport() after this method.
+        /// Not supported by the .NET Framework 4.6.2 or .NET Standard 2.0 assets.
         /// </summary>
         /// <param name="builder">The AcquireTokenForManagedIdentityParameterBuilder instance.</param>
         /// <param name="options">
@@ -65,7 +67,7 @@ namespace Microsoft.Identity.Client
                     MsalErrorMessage.MtlsNotSupportedForNonWindowsMessage);
             }
 
-#if NET462
+#if NET462 || NETSTANDARD2_0
             throw new MsalClientException(
                 MsalError.MtlsNotSupportedForManagedIdentity,
                 MsalErrorMessage.MtlsNotSupportedForManagedIdentityMessage);
@@ -84,6 +86,7 @@ namespace Microsoft.Identity.Client
         /// Requires Windows Credential Guard (VBS) to be enabled on the host.
         /// When attestation is required, call <c>.WithAttestationSupport()</c> (from the
         /// <c>Microsoft.Identity.Client.KeyAttestation</c> package) after this method.
+        /// Not supported by the .NET Framework 4.6.2 or .NET Standard 2.0 assets.
         /// </summary>
         /// <param name="builder">The AcquireTokenForManagedIdentityParameterBuilder instance.</param>
         /// <returns>The builder to chain .With methods.</returns>
@@ -109,7 +112,7 @@ namespace Microsoft.Identity.Client
                     MsalErrorMessage.MtlsNotSupportedForNonWindowsMessage);
             }
 
-#if NET462
+#if NET462 || NETSTANDARD2_0
             throw new MsalClientException(
                 MsalError.MtlsNotSupportedForManagedIdentity,
                 MsalErrorMessage.MtlsNotSupportedForManagedIdentityMessage);

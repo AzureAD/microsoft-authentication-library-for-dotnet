@@ -16,9 +16,26 @@ steps:
     search_root: '${{ parameters.ProjectRootPath }}\${{ parameters.AssemblyName }}'
   condition: and(succeeded(), eq(variables['PipelineType'], 'OneBranch'))
 
-- task: VSBuild@1
+- task: DotNetCoreCLI@2
   displayName: 'Pack ${{ parameters.ProjectPath }}'
   inputs:
-    solution: '${{ parameters.ProjectRootPath }}\${{ parameters.AssemblyName }}\${{ parameters.AssemblyName }}.csproj'
-    msbuildArgs: '/t:pack /p:nobuild=${{parameters.NoBuild}} /p:IncludeSymbols=true'
-    configuration: ${{ parameters.BuildConfiguration }}
+    command: 'custom'
+    custom: 'msbuild'
+    arguments: >
+      "${{ parameters.ProjectRootPath }}\${{ parameters.AssemblyName }}\${{ parameters.AssemblyName }}.csproj"
+      /t:pack
+      /p:NoBuild=${{ parameters.NoBuild }}
+      /p:IncludeSymbols=true
+      /p:INCLUDE_MOBILE_AND_LEGACY_TFM=true
+      /p:Configuration=${{ parameters.BuildConfiguration }}
+
+- ${{ if eq(parameters.AssemblyName, 'Microsoft.Identity.Client') }}:
+  - task: PowerShell@2
+    displayName: 'Combine and validate .NET 8/.NET 10 mobile package assets'
+    inputs:
+      targetType: filePath
+      filePath: '${{ parameters.ProjectRootPath }}/../../build/merge-net8-mobile-packages.ps1'
+      arguments: >
+        -ProjectDirectory "${{ parameters.ProjectRootPath }}/${{ parameters.AssemblyName }}"
+        -BuildConfiguration "${{ parameters.BuildConfiguration }}"
+      pwsh: true

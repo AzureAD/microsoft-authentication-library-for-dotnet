@@ -12,7 +12,7 @@
                 "ms-dotnettools.csdevkit"
             ],
             "settings": {
-                "dotnet.defaultSolution": "LibsAndSamples.sdk.slnf",
+                "dotnet.defaultSolution": "LibsAndSamples.portable.slnf",
                 "omnisharp.enableRoslynAnalyzers": true,
                 "omnisharp.enableEditorConfigSupport": true,
                 "omnisharp.enableImportCompletion": true
@@ -27,7 +27,7 @@
     "features": {
       "ghcr.io/devcontainers/features/dotnet:2": {
         // This needs to line up with global.json
-        "version": "8.0.404"
+        "version": "10.0.403"
       }
     }
   }

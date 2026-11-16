@@ -11,7 +11,7 @@ steps:
 
 - template: template-OneBranch-CI-libsandsamples.yaml
   parameters:
-    Solution: '${{ parameters.MsalSourceDir }}LibsAndSamples.sln'
+    Solution: '${{ parameters.MsalSourceDir }}LibsAndSamples.sdk.slnf'
     MsalSourceDir: '${{ parameters.MsalSourceDir }}'
     PipelineType: $(PipelineType)
 

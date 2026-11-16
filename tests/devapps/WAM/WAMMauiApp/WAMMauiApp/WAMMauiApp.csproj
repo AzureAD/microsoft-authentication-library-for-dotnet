@@ -1,11 +1,13 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-    <TargetFrameworks>net8.0-windows10.0.19041.0</TargetFrameworks>
+    <TargetFrameworks>net10.0-windows10.0.19041.0</TargetFrameworks>
 		<OutputType>Exe</OutputType>
 		<RootNamespace>WAMMauiApp</RootNamespace>
+		<UseMaui>true</UseMaui>
 		<SingleProject>true</SingleProject>
 		<ImplicitUsings>enable</ImplicitUsings>
+		<SignAssembly>false</SignAssembly>
 
 		<!-- Display name -->
 		<ApplicationTitle>WAMMauiApp</ApplicationTitle>
@@ -42,9 +44,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\..\..\..\..\src\client\Microsoft.Identity.Client.Desktop\Microsoft.Identity.Client.Desktop.csproj" />
+	  <ProjectReference Include="..\..\..\..\..\src\client\Microsoft.Identity.Client.Broker\Microsoft.Identity.Client.Broker.csproj" />
 	  <ProjectReference Include="..\..\..\..\..\src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
-    <PackageReference Include="Microsoft.Maui.Controls" Version="8.0.83" />
+    <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
 	</ItemGroup>
 
 </Project>

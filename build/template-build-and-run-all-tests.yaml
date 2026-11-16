@@ -37,6 +37,22 @@ stages:
     # Bootstrap the build
     - template: template-build-and-prep-automation.yaml
 
+  - job: 'BuildPortableSolution'
+    pool:
+        vmImage: 'ubuntu-22.04'
+    steps:
+    - task: UseDotNet@2
+      displayName: 'Use .NET 10 for portable solution'
+      inputs:
+        version: 10.x
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Restore and build the Linux devcontainer solution'
+      inputs:
+        command: 'build'
+        projects: 'LibsAndSamples.portable.slnf'
+        arguments: '--configuration $(BuildConfiguration)'
+
 # ──────────────────────────────────────────────
 # Stage 2 — Mac Build (independent, no artifact dependency)
 # ──────────────────────────────────────────────
@@ -103,7 +119,7 @@ stages:
         minimumExpectedTests: '1'
 
 # ──────────────────────────────────────────────
-# Stage 4 — Unit Tests (.NET 8)
+# Unit Tests (.NET 8)
 # ──────────────────────────────────────────────
 - stage: UnitTestsNet8
   displayName: 'Unit Tests .NET 8'
@@ -123,11 +139,49 @@ stages:
     steps:
     - template: template-desktop-test-setup.yaml
 
+    - task: UseDotNet@2
+      displayName: 'Use .NET 8 runtime for retained-target tests'
+      inputs:
+        packageType: runtime
+        version: 8.x
+
     - task: VSTest@2
       displayName: 'Run unit tests .NET 8'
       inputs:
         testSelector: 'testAssemblies'
         testAssemblyVer2: '**\Microsoft.Identity.Test.Unit\bin\**\net8.0\Microsoft.Identity.Test.Unit.dll'
+        searchFolder: '$(System.DefaultWorkingDirectory)'
+        runInParallel: true
+        codeCoverageEnabled: false
+        failOnMinTestsNotRun: true
+        minimumExpectedTests: '1'
+
+# ──────────────────────────────────────────────
+# Unit Tests (.NET 10)
+# ──────────────────────────────────────────────
+- stage: UnitTestsNet10
+  displayName: 'Unit Tests .NET 10'
+  dependsOn: Build
+  jobs:
+
+  - job: 'RunUnitTestsNet10'
+    pool:
+        vmImage: 'windows-2022'
+        demands:
+        - msbuild
+        - visualstudio
+    variables:
+        runCodesignValidationInjection: false
+        Codeql.SkipTaskAutoInjection: true
+
+    steps:
+    - template: template-desktop-test-setup.yaml
+
+    - task: VSTest@2
+      displayName: 'Run unit tests .NET 10'
+      inputs:
+        testSelector: 'testAssemblies'
+        testAssemblyVer2: '**\Microsoft.Identity.Test.Unit\bin\**\net10.0\Microsoft.Identity.Test.Unit.dll'
         searchFolder: '$(System.DefaultWorkingDirectory)'
         runInParallel: true
         codeCoverageEnabled: true
@@ -141,7 +195,7 @@ stages:
         checkCoverage: '$(CodeCoverageGateEnabled)'
         coverageFailOption: 'build'
         coverageType: 'lines'
-        allowCoverageVariance: false 
+        allowCoverageVariance: false
         coverageVariance: 0.01
         treat0of0as100: true
         coverageUpperThreshold: '90'
@@ -226,14 +280,14 @@ stages:
         minimumExpectedTests: '1'
 
 # ──────────────────────────────────────────────
-# Stage 7 — Desktop Integration Tests .NET 8 (Windows)
+# Desktop Integration Tests .NET 10 (Windows)
 # ──────────────────────────────────────────────
-- stage: IntegrationTestsNet8
-  displayName: 'Integration Tests .NET 8'
+- stage: IntegrationTestsNet10
+  displayName: 'Integration Tests .NET 10'
   dependsOn: Build
   jobs:
 
-  - job: 'RunIntegrationTestsNet8'
+  - job: 'RunIntegrationTestsNet10'
     pool:
         vmImage: 'windows-2022'
         demands:
@@ -247,10 +301,10 @@ stages:
     - template: template-desktop-test-setup.yaml
 
     - task: VSTest@2
-      displayName: 'Run integration tests .NET 8'
+      displayName: 'Run integration tests .NET 10'
       inputs:
         testSelector: 'testAssemblies'
-        testAssemblyVer2: '**\Microsoft.Identity.Test.Integration.netcore\bin\**\Microsoft.Identity.Test.Integration.NetCore.dll'
+        testAssemblyVer2: '**\Microsoft.Identity.Test.Integration.netcore\bin\**\net10.0\Microsoft.Identity.Test.Integration.NetCore.dll'
         searchFolder: '$(System.DefaultWorkingDirectory)'
         rerunFailedTests: true
         rerunMaxAttempts: '3'
@@ -298,7 +352,7 @@ stages:
     - template: template-run-mi-e2e-azurearc.yaml
       parameters:
         BuildConfiguration: 'Release'
-        TargetFramework: 'net8.0'
+        TargetFramework: 'net10.0'
 
 # ──────────────────────────────────────────────
 # Stage 10 — MI E2E Tests – VM / IMDS
@@ -318,7 +372,7 @@ stages:
     - template: template-run-mi-e2e-imds.yaml
       parameters:
         BuildConfiguration: 'Release'
-        TargetFramework:   'net8.0'
+        TargetFramework:   'net10.0'
 
 # ──────────────────────────────────────────────
 # Stage 11 — MI E2E Tests – VM / IMDS V2
@@ -338,7 +392,7 @@ stages:
     - template: template-run-mi-e2e-imdsv2.yaml
       parameters:
         BuildConfiguration: 'Release'
-        TargetFramework:   'net8.0'
+        TargetFramework:   'net10.0'
 
 # ──────────────────────────────────────────────
 # Stage 12 — SNI mTLS E2E – non-exportable VBS key
@@ -358,7 +412,7 @@ stages:
     - template: template-run-sni-mtls-e2e.yaml
       parameters:
         BuildConfiguration: 'Release'
-        TargetFramework: 'net8.0'
+        TargetFramework: 'net10.0'
 
 # ──────────────────────────────────────────────
 # Stage 13 — Deploy & Test Managed Identity WebApp (Easy Auth)
@@ -384,4 +438,4 @@ stages:
     - template: template-deploy-managed-identity-webapp-and-test.yaml
       parameters:
         BuildConfiguration: 'Release'
-        TargetFramework:   'net8.0'
+        TargetFramework:   'net10.0'

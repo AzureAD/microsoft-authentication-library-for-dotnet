@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Client
         /// or the system default browser. If the broker (WAM, Authenticator, Company Portal) is configured, 
         /// this setting is only used when the broker is not installed.
         /// 
-        /// On .NET, including net8-windows, app developers must reference Microsoft.Identity.Client.Desktop
+        /// On .NET, including net10-windows, app developers must reference Microsoft.Identity.Client.Desktop
         /// and call PublicClientApplicationBuilder.WithDesktopFeatures() to enable the embedded web browser.
         /// 
         /// </summary>
