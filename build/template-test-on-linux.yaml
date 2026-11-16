@@ -126,6 +126,13 @@ steps:
   inputs:
     version: 8.x
 
+- task: DotNetCoreCLI@2
+  displayName: 'Test managed identity RSA platform selection on .NET 8'
+  inputs:
+    command: 'test'
+    projects: 'tests/Microsoft.Identity.Test.Unit/Microsoft.Identity.Test.Unit.csproj'
+    arguments: '--configuration ${{ parameters.BuildConfiguration }} --framework net8.0 --filter FullyQualifiedName~InMemoryManagedIdentityKeyProviderTests'
+
 - task: CmdLine@2
   displayName: 'Clear local NuGet cache'
   inputs:
