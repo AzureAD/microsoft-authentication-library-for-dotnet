@@ -374,7 +374,11 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             foreach (Signature signature in packageInfo.Signatures)
             {
                 byte[] rawCert = signature.ToByteArray();
+#if NET9_0_OR_GREATER
                 X509Certificate2 x509Certificate = X509CertificateLoader.LoadCertificate(rawCert);
+#else
+                X509Certificate2 x509Certificate = new X509Certificate2(rawCert);
+#endif
                 certificates.Add(x509Certificate);
             }
 #pragma warning restore CS0618 // Type or member is obsolete
