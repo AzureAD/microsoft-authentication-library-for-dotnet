@@ -35,6 +35,7 @@ steps:
     projects: 'tests\devapps\WAM\WAMMauiApp\WAMMauiApp\WAMMauiApp.csproj'
     arguments: >
       --configuration "$(BuildConfiguration)"
+      /p:INCLUDE_MOBILE_AND_LEGACY_TFM=true
       /p:MicrosoftIdentityClientVersion=$(MicrosoftIdentityClientVersion)
       /p:LabApiVersion=$(LabApiVersion)
       /p:RunCodeAnalysis=false
