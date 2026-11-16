@@ -59,6 +59,26 @@ function New-Fixture($Name, $CompatibilityVersion = '1.2.3', [switch]$MissingIos
 }
 
 try {
+    $core = Join-Path $PSScriptRoot '..\src\client\Microsoft.Identity.Client'
+    $intermediate = Join-Path $core 'obj'
+    New-Item -ItemType Directory -Path $intermediate -Force | Out-Null
+    $oldJar = Join-Path $intermediate "sdk10-intermediate-$([Guid]::NewGuid().ToString('N')).jar"
+    New-Item -ItemType File -Path $oldJar | Out-Null
+    try {
+        $evaluation = & dotnet msbuild (Join-Path $core 'Microsoft.Identity.Client.csproj') -nologo `
+            -getItem:None -p:TargetFramework=net8.0 -p:INCLUDE_MOBILE_AND_LEGACY_TFM=true `
+            -p:MobileTargetFrameworkVersion=8.0 "-p:BaseIntermediateOutputPath=$root\obj\"
+        if ($LASTEXITCODE -ne 0) { throw 'Evaluating compatibility build inputs failed.' }
+        $inputs = ($evaluation | ConvertFrom-Json).Items.None
+        if ($inputs | Where-Object { $_.FullPath -eq [IO.Path]::GetFullPath($oldJar) }) {
+            throw 'SDK 10 intermediates must not become SDK 8 source inputs.'
+        }
+        Write-Host 'Passed: compatibility builds exclude the existing SDK 10 intermediate tree.'
+    }
+    finally {
+        Remove-Item -LiteralPath $oldJar
+    }
+
     $project = New-Fixture 'valid'
     & (Join-Path $PSScriptRoot 'merge-net8-mobile-packages.ps1') -ProjectDirectory $project
     & (Join-Path $PSScriptRoot 'merge-net8-mobile-packages.ps1') -ProjectDirectory $project

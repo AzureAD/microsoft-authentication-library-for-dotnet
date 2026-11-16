@@ -19,6 +19,8 @@
   <PropertyGroup Condition="'$(MobileTargetFrameworkVersion)' == '8.0'">
     <TargetPlatformVersion Condition="'$(TargetFramework)' == '$(TargetFrameworkNetAndroid)'">34.0</TargetPlatformVersion>
     <TargetPlatformVersion Condition="'$(TargetFramework)' == '$(TargetFrameworkNetIos)'">18.0</TargetPlatformVersion>
+    <!-- Keep SDK 10 intermediates excluded when SDK 8 uses an external intermediate directory. -->
+    <DefaultItemExcludes>$(DefaultItemExcludes);$(MSBuildProjectDirectory)\obj\**\*</DefaultItemExcludes>
   </PropertyGroup>
 
   <!-- mobile SDK constraints -->
