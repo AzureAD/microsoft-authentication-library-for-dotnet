@@ -4,7 +4,8 @@
     <TargetFrameworkNetDesktop48>net48</TargetFrameworkNetDesktop48>
     <TargetFrameworkNet>net8.0</TargetFrameworkNet>
 
-    <TargetFrameworks>$(TargetFrameworkNetDesktop48);$(TargetFrameworkNet)</TargetFrameworks>
+    <TargetFrameworks>$(TargetFrameworkNet)</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworkNetDesktop48);$(TargetFrameworkNet)</TargetFrameworks>
     <IsPackable>false</IsPackable>
     <!-- Linked BrowserTabActivity retains its product CLS annotation; this test assembly is not CLS-compliant. -->
     <NoWarn>$(NoWarn);CS3021</NoWarn>
