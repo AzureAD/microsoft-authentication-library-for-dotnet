@@ -6,12 +6,13 @@ using System.Net.Http;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// Creates HTTP clients for federation metadata (MEX) and WS-Trust requests.
+    /// Creates HTTP clients with explicit redirect and server-credential policies.
     /// </summary>
     /// <remarks>
     /// Implement this interface on the factory supplied to MSAL to customize MEX and WS-Trust transport.
     /// If the supplied factory does not implement this interface, MSAL uses cached platform-default clients
-    /// for these requests instead. Other requests continue to use the supplied factory.
+    /// for these requests instead.
+    /// Other requests continue to use the supplied factory.
     /// Implementations must be thread-safe and reuse clients, keeping different credential configurations
     /// isolated. Configure handlers before their first request; do not modify shared clients or handlers
     /// when this method is called. MSAL does not dispose the returned clients.
@@ -22,7 +23,7 @@ namespace Microsoft.Identity.Client
     {
         /// <summary>
         /// Returns a client with automatic redirects disabled and the requested server credential policy.
-        /// MSAL validates and follows redirects itself.
+        /// MSAL handles any permitted redirects itself.
         /// </summary>
         /// <param name="useDefaultCredentials">
         /// Whether to use the current user's default credentials for server authentication on platforms that

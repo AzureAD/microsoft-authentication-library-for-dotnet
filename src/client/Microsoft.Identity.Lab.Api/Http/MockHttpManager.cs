@@ -129,6 +129,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         /// <param name="allowAutoRedirect">Whether the HTTP client can automatically follow redirects.</param>
         /// <param name="useDefaultCredentials">Whether the HTTP client can use the current user's credentials.</param>
         /// <param name="retryDelayCancellationToken">The cancellation token for retry delays.</param>
+        /// <param name="useConfiguredHttpClientFactory">Whether to use the configured factory's parameterless method.</param>
         public Task<HttpResponse> SendRequestAsync(
             Uri endpoint,
             IDictionary<string, string> headers,
@@ -143,7 +144,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             int retryCount = 0,
             bool allowAutoRedirect = true,
             bool useDefaultCredentials = true,
-            CancellationToken retryDelayCancellationToken = default)
+            CancellationToken retryDelayCancellationToken = default,
+            bool useConfiguredHttpClientFactory = false)
         {
             return _httpManager.SendRequestAsync(
                 endpoint,
@@ -158,7 +160,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 retryCount,
                 allowAutoRedirect,
                 useDefaultCredentials,
-                retryDelayCancellationToken);
+                retryDelayCancellationToken,
+                useConfiguredHttpClientFactory);
         }
     }
 

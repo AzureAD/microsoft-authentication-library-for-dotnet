@@ -21,6 +21,7 @@ namespace Microsoft.Identity.Client.Internal
         /// </summary>
         ILoggerAdapter ApplicationLogger { get; }
         IHttpManager HttpManager { get; }
+        bool UsesCustomHttpClientFactory { get; }
         IInstanceDiscoveryManager InstanceDiscoveryManager { get; }
         IPlatformProxy PlatformProxy { get; }
         IWsTrustWebRequestManager WsTrustWebRequestManager { get; }
