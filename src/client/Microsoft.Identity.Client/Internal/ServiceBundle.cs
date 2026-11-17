@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Client.Internal
         {
             Config = config;
 
-            ApplicationLogger = LoggerHelper.CreateLogger(Guid.Empty, config);
+            ApplicationLogger = LoggerHelper.CreateApplicationLogger(config);
 
             PlatformProxy = config.PlatformProxy ?? PlatformProxyFactory.CreatePlatformProxy(ApplicationLogger);
 

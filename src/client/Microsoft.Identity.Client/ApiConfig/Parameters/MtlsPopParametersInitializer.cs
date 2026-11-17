@@ -51,7 +51,11 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
             IServiceBundle serviceBundle,
             CancellationToken ct)
         {
-            if (tokenParameters.MtlsCertificate != null)
+            // A reused builder retains MtlsCertificate from its previous execution.
+            bool refreshDynamicCertificate = serviceBundle.Config.CertificateOptions?.SendCertificateOverMtls == true
+                && serviceBundle.Config.CertificateOptions.AssociateTokensWithCertificate
+                && serviceBundle.Config.ClientCredential is DynamicCertificateClientCredential;
+            if (tokenParameters.MtlsCertificate is not null && !refreshDynamicCertificate)
             {
                 return;
             }
@@ -208,7 +212,8 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
                 authority: canonicalAuthority,
                 tenantId: tenantId,
                 correlationId: p.CorrelationId,
-                logger: serviceBundle.ApplicationLogger);
+                logger: serviceBundle.ApplicationLogger,
+                otelTagsEnricher: p.OtelTagsEnricher);
         }
 
         private static AssertionRequestOptions CreateAssertionRequestOptions(
@@ -224,6 +229,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
                 CancellationToken = ct,
                 ClientAssertionFmiPath = p.ClientAssertionFmiPath,
                 CorrelationId = p.CorrelationId,
+                OtelTagsEnricher = p.OtelTagsEnricher,
 
                 // Best-effort context. IMPORTANT: use AbsoluteUri, not Uri.Authority (host only).
                 TokenEndpoint = serviceBundle.Config.Authority.AuthorityInfo.CanonicalAuthority.AbsoluteUri

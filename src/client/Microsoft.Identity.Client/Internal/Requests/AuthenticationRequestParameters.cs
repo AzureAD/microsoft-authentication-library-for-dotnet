@@ -123,6 +123,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         }
 
         public bool IsMtlsPopRequested => _commonParameters.IsMtlsPopRequested;
+        public bool PreferMsiV2 => _commonParameters.PreferMsiV2;
         public MtlsBindingStrength MtlsPopMinStrength => _commonParameters.MtlsPopMinStrength;
         public bool? SendOfflineAccessScope => _commonParameters.SendOfflineAccessScope;
 
@@ -159,6 +160,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public IEnumerable<string> PersistedCacheParameters => _commonParameters.AdditionalCacheParameters;
 
         public SortedList<string, string> CacheKeyComponents {get; private set; }
+
+        internal X509Certificate2 CertificateForCacheAssociation { get; private set; }
+
+        internal void AssociateTokenWithCertificate(X509Certificate2 certificate)
+        {
+            CertificateForCacheAssociation = certificate;
+            CacheKeyComponents ??= new SortedList<string, string>(StringComparer.Ordinal);
+            CacheKeyComponents[Constants.CertSerialNumber] = certificate.SerialNumber;
+        }
 
         public bool PartitionRefreshToken { get; private set; }
 
@@ -226,7 +236,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             var logger = RequestContext.Logger;
 
-            if (logger.IsLoggingEnabled(LogLevel.Info))
+            if (logger.IsInfoOrVerboseEnabled())
             {
 
                 // Create PII enabled string builder
@@ -274,7 +284,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 builder.AppendLine("FMI Path: " + FmiPathSuffix);
                 builder.AppendLine("Credential FMI Path: " + ClientAssertionFmiPath);
 
-                logger.InfoPii(messageWithPii, builder.ToString());
+                logger.InfoOrVerbosePii(messageWithPii, builder.ToString());
             }
         }
     }

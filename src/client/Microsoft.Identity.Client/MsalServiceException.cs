@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Net;
 using System.Net.Http.Headers;
@@ -214,9 +215,13 @@ namespace Microsoft.Identity.Client
         public string SubErrorForLogging { get; internal set; }
 
         /// <summary>
-        /// A list of STS-specific error codes that can help in diagnostics.
+        /// The list of STS-specific error codes returned by the token service (for example the
+        /// numeric <c>AADSTS</c> codes such as <c>50076</c>, <c>50079</c>) that refine
+        /// <see cref="MsalException.ErrorCode"/>. Values are emitted by the service and may change
+        /// without notice; intended for diagnostics and logging — do not branch production behavior
+        /// on this value. Returns <see langword="null"/> when the service did not supply error codes.
         /// </summary>
-        internal string[] ErrorCodes { get; set; }
+        public IReadOnlyList<string> ErrorCodesForLogging { get; internal set; }
 
         /// <summary>
         /// As per discussion with Evo, AAD 

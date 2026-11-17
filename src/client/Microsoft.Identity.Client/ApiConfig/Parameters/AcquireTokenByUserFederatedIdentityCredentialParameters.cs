@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         /// <inheritdoc/>
         public void LogParameters(ILoggerAdapter logger)
         {
-            if (logger.IsLoggingEnabled(LogLevel.Info))
+            if (logger.IsInfoOrVerboseEnabled())
             {
                 // PII-enabled message: includes actual Username and UserObjectId values
                 var builder = new StringBuilder();
@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
                 builder.AppendLine("UserObjectId set: " + UserObjectId.HasValue);
                 builder.AppendLine("Assertion set: " + !string.IsNullOrEmpty(Assertion));
 
-                logger.InfoPii(messageWithPii, builder.ToString());
+                logger.InfoOrVerbosePii(messageWithPii, builder.ToString());
             }
         }
     }

@@ -48,6 +48,14 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string ManagedIdentitySource = "ManagedIdentitySource";
 
+        /// <summary>
+        /// A key on <see cref="System.Exception.Data"/> under which MSAL stores the
+        /// <see cref="AuthenticationResultMetadata"/> captured when a token acquisition fails with a
+        /// non-<see cref="MsalException"/>. Lets downstream consumers surface token-acquisition diagnostics
+        /// even though the originating exception is re-thrown unchanged.
+        /// </summary>
+        public const string AuthenticationResultMetadataKey = "MsalAuthenticationResultMetadata";
+
         private string _errorCode;
 
         /// <summary>

@@ -1,0 +1,71 @@
+parameters:
+  BuildConfiguration: 'Release'
+  TargetFramework: 'net8.0'
+
+steps:
+
+- task: UseDotNet@2
+  displayName: 'Install .NET SDK 8.0.418'
+  inputs:
+    packageType: 'sdk'
+    version: '8.0.418'
+    includePreviewVersions: false
+    performMultiLevelLookup: true
+
+- task: DotNetCoreCLI@2
+  displayName: Restore SNI mTLS E2E project
+  inputs:
+    command: restore
+    projects: tests/Microsoft.Identity.Test.E2E.SniMtls/Microsoft.Identity.Test.E2E.SniMtls.csproj
+    restoreArguments: >
+      /p:RestoreTargetFrameworks=${{ parameters.TargetFramework }}
+      /p:INCLUDE_MOBILE_AND_LEGACY_TFM=
+- task: DotNetCoreCLI@2
+  displayName: Build SNI mTLS E2E project
+  inputs:
+    command: build
+    projects: tests/Microsoft.Identity.Test.E2E.SniMtls/Microsoft.Identity.Test.E2E.SniMtls.csproj
+    arguments: >
+      --configuration ${{ parameters.BuildConfiguration }}
+      --framework ${{ parameters.TargetFramework }}
+      /p:INCLUDE_MOBILE_AND_LEGACY_TFM=
+
+- task: PowerShell@2
+  displayName: Check SNI certificate expiration
+  inputs:
+    targetType: inline
+    script: |
+      $warningDays = 60
+      $certificate = Get-ChildItem -Path Cert:\LocalMachine\My |
+        Where-Object {
+          $_.GetNameInfo([System.Security.Cryptography.X509Certificates.X509NameType]::SimpleName, $false) -eq 'LabAuth.MSIDLab.com' -and
+          $_.HasPrivateKey
+        } |
+        Sort-Object -Property NotBefore -Descending |
+        Select-Object -First 1
+
+      if ($null -eq $certificate) {
+        Write-Host "##vso[task.logissue type=warning]SNI certificate CN=LabAuth.MSIDLab.com was not found in LocalMachine\My."
+        return
+      }
+
+      $daysRemaining = [Math]::Floor(
+        ($certificate.NotAfter.ToUniversalTime() - [DateTime]::UtcNow).TotalDays)
+
+      if ($daysRemaining -le $warningDays) {
+        Write-Host "##vso[task.logissue type=warning]SNI certificate CN=LabAuth.MSIDLab.com expires in $daysRemaining day(s) on $($certificate.NotAfter.ToUniversalTime().ToString('u')). Rotate it within the 60-day window."
+      }
+
+- task: VSTest@2
+  displayName: Run SNI mTLS E2E test with non-exportable VBS key
+  inputs:
+    testSelector: testAssemblies
+    testAssemblyVer2: '**/Microsoft.Identity.Test.E2E.SniMtls/bin/${{ parameters.BuildConfiguration }}/**/Microsoft.Identity.Test.E2E.SniMtls.dll'
+    searchFolder: '$(System.DefaultWorkingDirectory)'
+    runTestsInIsolation: true
+    rerunFailedTests: true
+    rerunMaxAttempts: '3'
+    runInParallel: false
+    failOnMinTestsNotRun: true
+    minimumExpectedTests: '2'
+    testFiltercriteria: 'TestCategory=SNI_MTLS_E2E_NonExportableVbs'

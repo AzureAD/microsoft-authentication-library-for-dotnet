@@ -29,6 +29,8 @@ namespace Microsoft.Identity.Client.Internal
 
         public CancellationToken UserCancellationToken { get; }
 
+        public OperationCanceledException TokenRequestCancellationException { get; set; }
+
         public X509Certificate2 MtlsCertificate { get; }
 
         public bool IsAttestationRequested { get; set; }
@@ -38,7 +40,7 @@ namespace Microsoft.Identity.Client.Internal
         public RequestContext(IServiceBundle serviceBundle, Guid correlationId, X509Certificate2 mtlsCertificate, CancellationToken cancellationToken = default)
         {
             ServiceBundle = serviceBundle ?? throw new ArgumentNullException(nameof(serviceBundle));
-            Logger = LoggerHelper.CreateLogger(correlationId, ServiceBundle.Config);
+            Logger = LoggerHelper.CreateLogger(correlationId, ServiceBundle.Config, ServiceBundle.ApplicationLogger.IsReducedLoggingEnabled);
             CorrelationId = correlationId;
             UserCancellationToken = cancellationToken;
             IsMtlsRequested = mtlsCertificate != null;

@@ -28,6 +28,13 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public bool IsMtlsPopRequested { get; set; }
 
         /// <summary>
+        /// When true, MSAL uses the full IMDSv2 attested flow (mTLS connection to ESTS via a
+        /// Credential Guard–issued certificate) but requests <c>token_type=bearer</c> from the
+        /// token endpoint, returning a standard bearer token with no binding certificate.
+        /// </summary>
+        public bool PreferMsiV2 { get; set; }
+
+        /// <summary>
         /// The minimum mTLS binding strength the host must support for the request to succeed.
         /// Defaults to <see cref="MtlsBindingStrength.None"/> (no floor).
         /// </summary>
@@ -38,15 +45,15 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         /// <summary>
         /// Optional delegate for obtaining attestation JWT for Credential Guard keys.
         /// Set by the KeyAttestation package via .WithAttestationSupport().
-        /// Signature: (endpoint, keyHandle, clientId, keyId, logger, cancellationToken) → JWT or null.
+        /// Signature: (endpoint, keyHandle, clientIdMetadata, keyId, logger, cancellationToken) → JWT or null.
         /// </summary>
         public Func<string, SafeHandle, string, string, ILoggerAdapter, CancellationToken, Task<string>> AttestationTokenProvider { get; set; }
 
         public void LogParameters(ILoggerAdapter logger)
         {
-            if (logger.IsLoggingEnabled(LogLevel.Info))
+            if (logger.IsInfoOrVerboseEnabled())
             {
-                logger.Info(
+                logger.InfoOrVerbose(
                     $"""
                      === AcquireTokenForManagedIdentityParameters ===
                      ForceRefresh: {ForceRefresh}
@@ -54,6 +61,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
                      Claims: {!string.IsNullOrEmpty(Claims)}
                      RevokedTokenHash: {!string.IsNullOrEmpty(RevokedTokenHash)}
                      IsMtlsPopRequested: {IsMtlsPopRequested}
+                     PreferMsiV2: {PreferMsiV2}
                      MtlsPopMinStrength: {MtlsPopMinStrength}
                      """);
             }

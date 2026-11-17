@@ -549,7 +549,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithAuthority(AzureCloudInstance.AzurePublic, TestConstants.Utid)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(harness.HttpManager)
-                    .WithExperimentalFeatures()
                     .OnBackgroundTokenRefreshCompleted(r => { capturedResult = r; return Task.CompletedTask; })
                     .BuildConcrete();
                 TokenCacheHelper.PopulateCache(app.AppTokenCacheInternal.Accessor, addSecondAt: false);
@@ -565,6 +564,14 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsTrue(capturedResult.Successful);
                 Assert.IsNotNull(capturedResult.Result);
                 Assert.IsNotNull(capturedResult.Result.AuthenticationResultMetadata);
+
+                // The proactive-refresh result must carry the same metadata a foreground refresh
+                // would. Assert the deterministically backfilled fields (DurationTotalInMs is flaky under a
+                // sub-millisecond mock round-trip).
+                AuthenticationResultMetadata metadata = capturedResult.Result.AuthenticationResultMetadata;
+                Assert.AreEqual(CacheRefreshReason.ProactivelyRefreshed, metadata.CacheRefreshReason);
+                Assert.IsFalse(string.IsNullOrEmpty(metadata.TokenEndpoint), "TokenEndpoint must be populated on a proactive-refresh result.");
+                Assert.AreEqual(TokenSource.IdentityProvider, metadata.TokenSource);
             }
         }
 
@@ -579,7 +586,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithAuthority(AzureCloudInstance.AzurePublic, TestConstants.Utid)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(harness.HttpManager)
-                    .WithExperimentalFeatures()
                     .OnBackgroundTokenRefreshCompleted(r => { capturedResult = r; return Task.CompletedTask; })
                     .BuildConcrete();
                 TokenCacheHelper.PopulateCache(app.AppTokenCacheInternal.Accessor, addSecondAt: false);
@@ -614,7 +620,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 .WithAuthority(AzureCloudInstance.AzurePublic, TestConstants.Utid)
                 .WithClientSecret(TestConstants.ClientSecret)
                 .WithHttpManager(harness.HttpManager)
-                .WithExperimentalFeatures()
                 .WithLogging(LocalLogCallback)
                 .OnBackgroundTokenRefreshCompleted(r => { capturedResult = r; return Task.CompletedTask; })
                 .BuildConcrete();

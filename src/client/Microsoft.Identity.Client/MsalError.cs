@@ -566,6 +566,18 @@ namespace Microsoft.Identity.Client
         public const string NonHttpsRedirectNotSupported = "non_https_redirect_failed";
 
         /// <summary>
+        /// A credential-bearing WS-Trust redirect targeted a different origin.
+        /// <para>Mitigation</para>Configure the federation service to keep credential-bearing redirects on the original HTTPS origin.
+        /// </summary>
+        public const string WsTrustCrossOriginRedirectNotSupported = "wstrust_cross_origin_redirect_failed";
+
+        /// <summary>
+        /// The HTTP request exceeded the maximum number of redirects.
+        /// <para>Mitigation</para>Correct the redirect loop in the federation service configuration.
+        /// </summary>
+        public const string TooManyRedirects = "too_many_redirects";
+
+        /// <summary>
         /// The request could not be performed because the network is down.
         /// <para>Mitigation [App development]</para> In the application you could either inform the user that there are network issues
         /// or retry later
@@ -582,7 +594,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// The cloud (authority URL host) defined at the application level cannot be different than the cloud at the request level.
         /// <para>What happens?</para>You did not define an authority at the application level, so it defaults to the public cloud (login.microsoft.com), but the authority at the request level is for a different cloud. Only the tenant can be changed at the request level.
-        /// <para>Mitigation</para>Add .WithAuthority("https://login.windows-ppe.net/common) at the application level and specify the tenant at the request level: .WithAuthority("https://login.windows-ppe.net/1234-567-890-12345678). 
+        /// <para>Mitigation</para>Configure the same authority host at the application and request levels. Only the tenant can differ.
         /// </summary>
         public const string AuthorityHostMismatch = "authority_host_mismatch";
 

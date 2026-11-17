@@ -35,13 +35,15 @@ namespace Microsoft.Identity.Client.Extensibility
 
         /// <summary>
         /// Configures an async callback to provide the client credential certificate dynamically.
-        /// The callback is invoked before each token acquisition request to the identity provider (including retries).
+        /// By default, the callback is invoked before each token acquisition request to the identity provider (including retries).
         /// This enables scenarios such as certificate rotation and dynamic certificate selection based on application context.
         /// </summary>
         /// <param name="builder">The confidential client application builder.</param>
         /// <param name="certificateProvider">
         /// An async callback that provides the certificate based on the application configuration.
-        /// Called before each network request to acquire a token.
+        /// Called before each network request to acquire a token, or before cache lookup for
+        /// <see cref="IConfidentialClientApplication.AcquireTokenForClient(System.Collections.Generic.IEnumerable{string})"/>
+        /// when <see cref="CertificateOptions.AssociateTokensWithCertificate"/> is enabled.
         /// Must return a valid <see cref="X509Certificate2"/> with a private key.</param>
         /// <param name="certificateOptions">Configuration options for the certificate handling.</param>
         /// <returns>The builder to chain additional configuration calls.</returns>
@@ -51,8 +53,19 @@ namespace Microsoft.Identity.Client.Extensibility
         /// and this method are configured.
         /// </exception>
         /// <remarks>
+        /// <para>Use this overload when the certificate or private-key handle is managed externally and may rotate or become invalid.
+        /// The callback should return the current usable certificate and private-key handle for each network token request.</para>
         /// <para>This method cannot be used together with <see cref="ConfidentialClientApplicationBuilder.WithCertificate(X509Certificate2)"/>.</para>
-        /// <para>The callback is not invoked when tokens are retrieved from cache, only for network calls.</para>
+        /// <para>By default, the callback is not invoked when tokens are retrieved from cache, only for network calls.
+        /// When <see cref="CertificateOptions.AssociateTokensWithCertificate"/> is enabled for
+        /// <see cref="IConfidentialClientApplication.AcquireTokenForClient(System.Collections.Generic.IEnumerable{string})"/>,
+        /// the callback runs before cache lookup. The selected certificate's serial number partitions the token cache,
+        /// and that certificate is used for the initial network attempt. When <c>OnMsalServiceFailure</c>
+        /// requests a retry, the provider is invoked again and the cache association is updated to match
+        /// the certificate used by the retry. Tokens are cached under the successful attempt's certificate.</para>
+        /// <para>For mTLS transport, return the same certificate object instance while its private-key handle remains usable.
+        /// After reacquiring the private-key handle, return a new certificate object instance even when the certificate
+        /// thumbprint is unchanged. This allows MSAL to create a new transport handler for the refreshed handle.</para>
         /// <para>The certificate returned by the callback will be used to sign the client assertion (JWT) for that token request.</para>
         /// <para>The callback can perform async operations such as fetching certificates from Azure Key Vault or other secret management systems.</para>
         /// <para>See https://aka.ms/msal-net-client-credentials for more details on client credentials.</para>
@@ -62,8 +75,6 @@ namespace Microsoft.Identity.Client.Extensibility
             Func<AssertionRequestOptions, Task<X509Certificate2>> certificateProvider, 
             CertificateOptions certificateOptions)
         {
-            builder.ValidateUseOfExperimentalFeature();
-
             if (certificateProvider == null)
             {
                 throw new ArgumentNullException(nameof(certificateProvider));
@@ -125,8 +136,6 @@ namespace Microsoft.Identity.Client.Extensibility
             this ConfidentialClientApplicationBuilder builder,
             Func<AssertionRequestOptions, ExecutionResult, Task<bool>> onMsalServiceFailure)
         {
-            builder.ValidateUseOfExperimentalFeature();
-
             if (onMsalServiceFailure == null)
                 throw new ArgumentNullException(nameof(onMsalServiceFailure));
 
@@ -151,6 +160,14 @@ namespace Microsoft.Identity.Client.Extensibility
         /// <remarks>
         /// <para>This callback is invoked for both successful and failed token acquisitions. Check <see cref="ExecutionResult.Successful"/> to determine the outcome.</para>
         /// <para>This callback is only invoked for network token acquisition attempts, not when tokens are retrieved from cache.</para>
+        /// <para>When the caller cancels an in-flight foreground token HTTP request sent by MSAL, MSAL awaits this callback once before
+        /// propagating the original cancellation. The callback receives <see cref="ExecutionResult.Successful"/> set to
+        /// <c>false</c> and a <see cref="MsalClientException"/> with error code <see cref="MsalError.AuthenticationCanceledError"/>
+        /// and the original cancellation exception as its inner exception.</para>
+        /// <para>This cancellation notification does not apply before the token HTTP request starts (including certificate loading and
+        /// before-token-request callbacks), to <see cref="WithAppTokenProvider"/>, or to proactive background refresh. The callback is not
+        /// guaranteed for failures before token acquisition or unexpected non-MSAL exceptions. Certificate ownership
+        /// remains with the application; this notification does not establish that other requests have finished using a certificate.</para>
         /// <para>If multiple calls to <c>OnCompletion</c> are made, only the last configured callback will be used.</para>
         /// <para>Exceptions thrown by this callback will be caught and logged internally to prevent disruption of the authentication flow.</para>
         /// <para>The callback is invoked on the same thread/context as the token acquisition request.</para>
@@ -179,8 +196,6 @@ namespace Microsoft.Identity.Client.Extensibility
             this ConfidentialClientApplicationBuilder builder,
             Func<AssertionRequestOptions, ExecutionResult, Task> onCompletion)
         {
-            builder.ValidateUseOfExperimentalFeature();
-
             if (onCompletion == null)
             {
                 throw new ArgumentNullException(nameof(onCompletion));
@@ -212,8 +227,6 @@ namespace Microsoft.Identity.Client.Extensibility
             this ConfidentialClientApplicationBuilder builder,
             Func<ExecutionResult, Task> onBackgroundTokenRefreshCompleted)
         {
-            builder.ValidateUseOfExperimentalFeature();
-
             if (onBackgroundTokenRefreshCompleted == null)
             {
                 throw new ArgumentNullException(nameof(onBackgroundTokenRefreshCompleted));

@@ -66,5 +66,25 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         [JsonProperty("client_id")]
         public string ClientId { get; set; }
 
+        /// <summary>
+        /// The object id of the user-assigned managed identity that issued the token, if the endpoint echoes it back.
+        /// </summary>
+        [JsonProperty("object_id")]
+        public string ObjectId { get; set; }
+
+        [JsonProperty("msi_res_id")]
+        public string ResourceIdMsi { get; set; }
+
+        [JsonProperty("mi_res_id")]
+        public string ResourceIdMi { get; set; }
+
+        /// <summary>
+        /// The Azure resource id of the user-assigned managed identity that issued the token, if the endpoint echoes it back.
+        /// Prefers the "msi_res_id" spelling that Azure Arc returns and falls back to "mi_res_id", so the value is
+        /// deterministic regardless of the order the two fields appear in the JSON response.
+        /// </summary>
+        [JsonIgnore]
+        public string ResourceId => ResourceIdMsi ?? ResourceIdMi;
+
     }
 }

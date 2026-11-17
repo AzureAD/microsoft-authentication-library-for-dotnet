@@ -252,7 +252,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         public static async Task<(bool success, string failureReason)> ProbeImdsEndpointAsync(
             RequestContext requestContext,
             ImdsVersion imdsVersion,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            CancellationToken retryDelayCancellationToken)
         {
             string apiVersionQueryParam;
             string imdsApiVersion;
@@ -308,7 +309,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     mtlsCertificate: null,
                     validateServerCertificate: null,
                     cancellationToken: cancellationToken,
-                    retryPolicy: retryPolicy)
+                    retryPolicy: retryPolicy,
+                    retryDelayCancellationToken: retryDelayCancellationToken)
                 .ConfigureAwait(false);
             }
             catch (Exception ex) when (ex is not OperationCanceledException)

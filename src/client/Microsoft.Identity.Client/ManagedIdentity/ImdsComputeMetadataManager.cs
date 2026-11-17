@@ -26,7 +26,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         internal static async Task<ComputeMetadataResponse> GetComputeMetadataAsync(
             IHttpManager httpManager,
             ILoggerAdapter logger,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            CancellationToken retryDelayCancellationToken)
         {
             var headers = new Dictionary<string, string>
             {
@@ -53,7 +54,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     mtlsCertificate: null,
                     validateServerCertificate: null,
                     cancellationToken: cancellationToken,
-                    retryPolicy: new ImdsRetryPolicy())
+                    retryPolicy: new ImdsRetryPolicy(),
+                    retryDelayCancellationToken: retryDelayCancellationToken)
                     .ConfigureAwait(false);
 
                 if (response is null || response.StatusCode != HttpStatusCode.OK)
@@ -70,6 +72,37 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 logger.Info($"[Managed Identity] IMDS compute metadata request failed with exception: {ex.Message}");
                 return null;
             }
+        }
+
+        internal static string ResolveAttestationEndpoint(
+            string azureEnvironment,
+            string location,
+            string imdsAttestationEndpoint,
+            ILoggerAdapter logger)
+        {
+            if (string.Equals(azureEnvironment, "AzurePublicCloud", StringComparison.OrdinalIgnoreCase))
+            {
+                return $"https://{location}.attestation.microsoft.com";
+            }
+
+            if (string.Equals(azureEnvironment, "AzureUSGovernmentCloud", StringComparison.OrdinalIgnoreCase))
+            {
+                return $"https://{location}.attestation.microsoftonline.us";
+            }
+
+            if (string.Equals(azureEnvironment, "AzureChinaCloud", StringComparison.OrdinalIgnoreCase))
+            {
+                return $"https://{location}.attestation.partner.microsoftonline.cn";
+            }
+
+            if (string.Equals(azureEnvironment, "AzureBleuCloud", StringComparison.OrdinalIgnoreCase))
+            {
+                return $"https://{location}.attestation.sovcloud-identity.fr";
+            }
+
+            logger.Info("[Managed Identity] Azure environment is missing or unsupported. " +
+                "Using the IMDS-provided attestation endpoint.");
+            return imdsAttestationEndpoint;
         }
 
         /// <summary>

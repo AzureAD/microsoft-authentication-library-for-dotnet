@@ -49,7 +49,6 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             // Act
             var app = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
-                .WithExperimentalFeatures()
                 .WithCertificate(certificateProvider, _certificateOptions)
                 .BuildConcrete();
 
@@ -66,7 +65,6 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             var ex = Assert.Throws<ArgumentNullException>(() =>
                 ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
-                    .WithExperimentalFeatures()
                     .WithCertificate((Func<AssertionRequestOptions, Task<X509Certificate2>>) null, null)
                     .Build());
 
@@ -95,7 +93,6 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             // Act
             var app = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
-                .WithExperimentalFeatures()
                 .WithCertificate(firstProvider, _certificateOptions)
                 .WithCertificate(secondProvider, _certificateOptions)
                 .BuildConcrete();
@@ -117,7 +114,6 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             // Act
             var app = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
-                .WithExperimentalFeatures()
                 .WithCertificate(certificateProvider, certificateOptions)
                 .BuildConcrete();
 
@@ -137,7 +133,6 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             // Act
             var app = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
-                .WithExperimentalFeatures()
                 .WithCertificate(certificateProvider, certificateOptions)
                 .BuildConcrete();
 
@@ -156,7 +151,6 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             // Act
             var app = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
-                .WithExperimentalFeatures()
                 .WithCertificate(certificateProvider, null)
                 .BuildConcrete();
 
@@ -176,7 +170,6 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             // Act
             var app = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
-                .WithExperimentalFeatures()
                 .WithCertificate(certificateProvider, certificateOptions)
                 .BuildConcrete();
 
@@ -197,7 +190,6 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             // Act
             var app = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
-                .WithExperimentalFeatures()
                 .WithCertificate(certificateProvider, certificateOptions)
                 .BuildConcrete();
 
@@ -222,7 +214,6 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             // Act
             var app = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
-                .WithExperimentalFeatures()
                 .WithCertificate(certificateProvider, certificateOptions)
                 .BuildConcrete();
 
@@ -247,7 +238,6 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             // Act
             var app = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
-                .WithExperimentalFeatures()
                 .WithClientSecret(TestConstants.ClientSecret)
                 .OnMsalServiceFailure(onMsalServiceFailureCallback)
                 .BuildConcrete();
@@ -263,7 +253,6 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             var ex = Assert.Throws<ArgumentNullException>(() =>
                 ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
-                    .WithExperimentalFeatures()
                     .WithClientSecret(TestConstants.ClientSecret)
                     .OnMsalServiceFailure(null)
                     .Build());
@@ -284,7 +273,6 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             // Act
             var app = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
-                .WithExperimentalFeatures()
                 .WithClientSecret(TestConstants.ClientSecret)
                 .OnCompletion(onSuccessCallback)
                 .BuildConcrete();
@@ -300,7 +288,6 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             var ex = Assert.Throws<ArgumentNullException>(() =>
                 ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
-                    .WithExperimentalFeatures()
                     .WithClientSecret(TestConstants.ClientSecret)
                     .OnCompletion(null)
                     .Build());
@@ -387,7 +374,6 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             // Act
             var app = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
-                .WithExperimentalFeatures()
                 .WithCertificate(certificateProvider, _certificateOptions)
                 .OnMsalServiceFailure(onMsalServiceFailure)
                 .OnCompletion(onSuccess)
@@ -411,7 +397,6 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             // Act - Order: OnCompletion, OnMsalServiceFailure, Certificate
             var app1 = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
-                .WithExperimentalFeatures()
                 .OnCompletion(onSuccess)
                 .OnMsalServiceFailure(onMsalServiceFailure)
                 .WithCertificate(certificateProvider, _certificateOptions)
@@ -420,7 +405,6 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             // Act - Order: OnMsalServiceFailure, Certificate, OnCompletion
             var app2 = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
-                .WithExperimentalFeatures()
                 .OnMsalServiceFailure(onMsalServiceFailure)
                 .WithCertificate(certificateProvider, _certificateOptions)
                 .OnCompletion(onSuccess)
@@ -453,7 +437,6 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             // Act
             var app = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
-                .WithExperimentalFeatures()
                 .WithAuthority(TestConstants.AadAuthorityWithTestTenantId)
                 .WithCertificate(certificateProvider, _certificateOptions)
                 .BuildConcrete();

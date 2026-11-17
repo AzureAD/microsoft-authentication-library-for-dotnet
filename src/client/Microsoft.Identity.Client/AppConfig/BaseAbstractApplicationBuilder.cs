@@ -57,6 +57,9 @@ namespace Microsoft.Identity.Client
         /// the httpClient had the possibility of throwing an exception stating "Properties can only be modified before sending the first request".
         /// MSAL's httpClient will no longer throw this exception after 4.19.0 (https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/releases/tag/4.19.0)
         /// see (https://aka.ms/msal-httpclient-info) for more information.
+        /// For federation metadata (MEX) and WS-Trust requests, the factory must also implement
+        /// <see cref="IMsalWsTrustHttpClientFactory"/>. Otherwise, MSAL uses cached platform-default
+        /// clients for those requests instead of the supplied factory.
         /// </remarks>
         /// <returns>The builder to chain the .With methods</returns>
         public T WithHttpClientFactory(IMsalHttpClientFactory httpClientFactory)
@@ -80,6 +83,9 @@ namespace Microsoft.Identity.Client
         /// MSAL's httpClient will no longer throw this exception after 4.19.0 (https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/releases/tag/4.19.0)
         /// see (https://aka.ms/msal-httpclient-info) for more information.
         /// If you only want to configure the retryOnceOn5xx parameter, set httpClientFactory to null and MSAL will use the default http client.
+        /// For federation metadata (MEX) and WS-Trust requests, the factory must also implement
+        /// <see cref="IMsalWsTrustHttpClientFactory"/>. Otherwise, MSAL uses cached platform-default
+        /// clients for those requests instead of the supplied factory.
         /// </remarks>
         /// <returns>The builder to chain the .With methods</returns>
         public T WithHttpClientFactory(IMsalHttpClientFactory httpClientFactory, bool retryOnceOn5xx)

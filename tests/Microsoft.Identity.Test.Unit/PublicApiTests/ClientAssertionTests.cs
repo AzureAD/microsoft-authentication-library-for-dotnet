@@ -17,6 +17,7 @@ using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.ClientCredential;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Integration.Infrastructure;
@@ -61,6 +62,71 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 Assert.IsNotNull(result);
                 Assert.IsFalse(handler.ActualRequestPostData.ContainsKey("claims"));
+            }
+        }
+
+        [TestMethod]
+        public async Task SignedAssertionDelegateClientCredential_ForwardsOtelTagsEnricher()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                Action<ExecutionResult, IList<KeyValuePair<string, object>>> enricher =
+                    (executionResult, tags) => tags.Add(new KeyValuePair<string, object>("k", "v"));
+
+                Action<ExecutionResult, IList<KeyValuePair<string, object>>> capturedEnricher = null;
+
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithHttpManager(httpManager)
+                    .WithClientAssertion(async (AssertionRequestOptions options) =>
+                    {
+                        // The enricher configured on the outer request must be forwarded to the
+                        // assertion callback so a callback that acquires the assertion via an inner
+                        // token request (e.g. a Federated Identity Credential) can enrich it identically.
+                        capturedEnricher = options.OtelTagsEnricher;
+                        return await Task.FromResult("dummy_assertion").ConfigureAwait(false);
+                    })
+                    .BuildConcrete();
+
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithOtelTagsEnricher(enricher)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.AreSame(enricher, capturedEnricher, "OtelTagsEnricher should be forwarded to the assertion callback.");
+            }
+        }
+
+        [TestMethod]
+        public async Task SignedAssertionDelegateClientCredential_NoEnricher_LeavesOtelTagsEnricherNull()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                bool enricherWasNull = false;
+
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithHttpManager(httpManager)
+                    .WithClientAssertion(async (AssertionRequestOptions options) =>
+                    {
+                        enricherWasNull = options.OtelTagsEnricher == null;
+                        return await Task.FromResult("dummy_assertion").ConfigureAwait(false);
+                    })
+                    .BuildConcrete();
+
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsTrue(enricherWasNull, "OtelTagsEnricher should be null when no enricher is configured.");
             }
         }
 
@@ -411,6 +477,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     Assert.IsNotNull(result.BindingCertificate, "BindingCertificate should be present.");
                     Assert.AreEqual(cert.Thumbprint, result.BindingCertificate.Thumbprint,
                         "BindingCertificate must match the cert passed to WithCertificate().");
+                    Assert.AreEqual(cert.ComputeSha256Thumbprint(), result.CertificateThumbprint256);
 
                     // Second token acquisition - should retrieve from cache
                     AuthenticationResult secondResult = await app.AcquireTokenForClient(TestConstants.s_scope)
@@ -426,6 +493,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     Assert.IsNotNull(secondResult.BindingCertificate);
                     Assert.AreEqual(result.BindingCertificate.Thumbprint,
                         secondResult.BindingCertificate.Thumbprint);
+                    Assert.IsNull(secondResult.CertificateThumbprint256);
                 }
             }
         }

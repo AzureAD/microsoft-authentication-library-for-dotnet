@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
 namespace Microsoft.Identity.Client.Internal.ClientCredential
@@ -58,6 +59,13 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         /// <summary>Correlation ID for end-to-end request tracing.</summary>
         public Guid CorrelationId { get; init; }
 
+        /// <summary>
+        /// OpenTelemetry tags enricher from the outer request (set via <c>WithOtelTagsEnricher</c>), forwarded to
+        /// the client-assertion callback so a callback that acquires the assertion via an inner token request
+        /// (e.g. a Federated Identity Credential) can enrich the inner acquisition's metrics identically. May be null.
+        /// </summary>
+        public Action<ExecutionResult, IList<KeyValuePair<string, object>>> OtelTagsEnricher { get; init; }
+
         /// <summary>Logger for credential resolution diagnostics.</summary>
         public ILoggerAdapter Logger { get; init; }
 
@@ -83,7 +91,8 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             string authority,
             string tenantId,
             Guid correlationId,
-            ILoggerAdapter logger)
+            ILoggerAdapter logger,
+            Action<ExecutionResult, IList<KeyValuePair<string, object>>> otelTagsEnricher = null)
         {
             return new CredentialContext
             {
@@ -101,6 +110,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                 TenantId = tenantId,
                 CorrelationId = correlationId,
                 Logger = logger,
+                OtelTagsEnricher = otelTagsEnricher,
             };
         }
 
@@ -120,7 +130,8 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                 TenantId = TenantId,
                 CorrelationId = CorrelationId,
                 ClientAssertionFmiPath = ClientAssertionFmiPath,
-                CancellationToken = cancellationToken
+                CancellationToken = cancellationToken,
+                OtelTagsEnricher = OtelTagsEnricher
             };
         }
     }

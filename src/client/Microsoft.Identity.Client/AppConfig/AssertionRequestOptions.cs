@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using Microsoft.Identity.Client.Extensibility;
 
 namespace Microsoft.Identity.Client
 {
@@ -85,5 +86,14 @@ namespace Microsoft.Identity.Client
         /// to downstream token requests (e.g., Managed Identity) for coherent end-to-end tracing.
         /// </summary>
         public Guid CorrelationId { get; set; }
+
+        /// <summary>
+        /// The OpenTelemetry tags enricher configured on the outer request via <c>WithOtelTagsEnricher</c>, if any.
+        /// When the client-assertion callback acquires the assertion by issuing another token request
+        /// (e.g. via <c>ITokenAcquirer.GetTokenForAppAsync</c> for a Federated Identity Credential), forward this
+        /// delegate to that inner request so the inner acquisition's metrics carry the same enrichment tags as the
+        /// outer request. Null when no enricher was configured.
+        /// </summary>
+        public Action<ExecutionResult, IList<KeyValuePair<string, object>>> OtelTagsEnricher { get; set; }
     }
 }

@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
@@ -221,11 +222,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
             await ResolveAuthorityAsync().ConfigureAwait(false);
 
             _managedIdentityParameters.IsMtlsPopRequested = AuthenticationRequestParameters.IsMtlsPopRequested;
+            _managedIdentityParameters.PreferMsiV2 = AuthenticationRequestParameters.PreferMsiV2;
 
-            // mTLS PoP is served exclusively by IMDSv2. Mint the binding certificate, then delegate the
+            // mTLS PoP and mTLS Bearer are both served exclusively by IMDSv2. Mint the binding certificate, then delegate the
             // token leg to MSAL's internal TokenClient exchange (the same path CCA uses) so client-capability
             // (CP1) merge and ESTS error handling are inherited rather than re-implemented in a bespoke MI token POST.
-            if (AuthenticationRequestParameters.IsMtlsPopRequested)
+            if (AuthenticationRequestParameters.IsMtlsPopRequested || AuthenticationRequestParameters.PreferMsiV2)
             {
                 return await SendDelegatedImdsV2TokenRequestAsync(logger, cancellationToken).ConfigureAwait(false);
             }
@@ -242,9 +244,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
         }
 
         // Mints the IMDSv2 binding cert, then delegates the token request to MSAL's internal TokenClient
-        // (the same exchange path CCA uses). Re-mints the binding and retries once when ESTS-R rejects the
-        // bound cert (invalid_client) or the local mTLS handshake fails (SCHANNEL). The minted cert is
-        // injected as the mTLS transport cert and the mtls_pop scheme is applied so the result is cert-bound.
+        // (the same exchange path CCA uses). Force refresh re-mints the binding before the token request.
+        // The request also re-mints and retries once when ESTS-R rejects the bound cert (invalid_client)
+        // or the local mTLS handshake fails (SCHANNEL). The minted cert is injected as the mTLS transport
+        // cert and the mtls_pop scheme is applied so the result is cert-bound.
         private async Task<AuthenticationResult> SendDelegatedImdsV2TokenRequestAsync(
             ILoggerAdapter logger,
             CancellationToken cancellationToken)
@@ -256,12 +259,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             try
             {
-                msalTokenResponse = await DelegateImdsV2TokenLegAsync(resource, forceRemint: false, cancellationToken)
+                msalTokenResponse = await DelegateImdsV2TokenLegAsync(
+                    resource,
+                    forceRemint: _managedIdentityParameters.ForceRefresh,
+                    cancellationToken)
                     .ConfigureAwait(false);
             }
-            catch (MsalServiceException ex) when (
-                string.Equals(ex.ErrorCode, MsalError.InvalidClient, StringComparison.OrdinalIgnoreCase) ||
-                ImdsV2ManagedIdentitySource.IsSchanelFailure(ex))
+            catch (Exception ex) when (ShouldRemintImdsV2Binding(ex))
             {
                 logger.Info("[ManagedIdentityRequest] mTLS binding rejected (invalid_client/SCHANNEL); re-minting binding certificate and retrying once.");
                 msalTokenResponse = await DelegateImdsV2TokenLegAsync(resource, forceRemint: true, cancellationToken)
@@ -273,6 +277,25 @@ namespace Microsoft.Identity.Client.Internal.Requests
             msalTokenResponse.Scope = AuthenticationRequestParameters.Scope.AsSingleString();
 
             return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse, cancellationToken).ConfigureAwait(false);
+        }
+
+        // A SCHANNEL handshake failure means the cached binding cert is unusable (its KeyGuard key was
+        // re-minted underneath it), so the cert must be evicted rather than retried as-is. It can arrive
+        // wrapped or raw depending on the path, hence the chain walk in IsSchannelFailure.
+        private static bool ShouldRemintImdsV2Binding(Exception ex)
+        {
+            if (ex is OperationCanceledException)
+            {
+                return false;
+            }
+
+            if (ex is MsalServiceException serviceException &&
+                string.Equals(serviceException.ErrorCode, MsalError.InvalidClient, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            return ImdsV2ManagedIdentitySource.IsSchannelFailure(ex);
         }
 
         private async Task<MsalTokenResponse> DelegateImdsV2TokenLegAsync(
@@ -288,14 +311,21 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     cancellationToken)
                 .ConfigureAwait(false);
 
-            // Inject the IMDS-minted cert as the request mTLS transport cert and apply the mtls_pop scheme
-            // so TokenClient emits token_type=mtls_pop and the resulting token is bound to the certificate.
+            // Inject the IMDS-minted cert as the request mTLS transport cert.
+            // For PoP: apply the mtls_pop scheme so TokenClient emits token_type=mtls_pop and the
+            // resulting token is bound to the certificate.
+            // For Bearer: inject the cert only for the mTLS channel (no PoP scheme); the resulting
+            // token is a standard bearer token with no binding certificate.
             AuthenticationRequestParameters.MtlsCertificate = binding.Certificate;
-            AuthenticationRequestParameters.AuthenticationScheme =
-                new MtlsPopAuthenticationOperation(binding.Certificate);
+            bool preferMsiV2 = AuthenticationRequestParameters.PreferMsiV2;
+            if (!preferMsiV2)
+            {
+                AuthenticationRequestParameters.AuthenticationScheme =
+                    new MtlsPopAuthenticationOperation(binding.Certificate);
 
-            // Remember the cert so subsequent cache lookups compute the same x5t#S256 cache key.
-            _managedIdentityClient.SetRuntimeMtlsBindingCertificate(binding.Certificate);
+                // Remember the cert so subsequent cache lookups compute the same x5t#S256 cache key.
+                _managedIdentityClient.SetRuntimeMtlsBindingCertificate(binding.Certificate);
+            }
 
             // grant_type is not added by TokenClient; client_id overrides AppConfig.ClientId
             // (the SAMI placeholder) with the canonical GUID from the binding. Server-issued claims and
@@ -306,17 +336,57 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 [OAuth2Parameter.ClientId] = binding.ClientId
             };
 
+            // For mTLS Bearer, explicitly request token_type=bearer so ESTS returns a standard
+            // bearer token (no cnf claim, no binding certificate).
+            if (preferMsiV2)
+            {
+                bodyParameters[OAuth2Parameter.TokenType] = Constants.BearerTokenType;
+            }
+
             string tokenEndpoint = binding.Endpoint.TrimEnd('/') + ImdsV2ManagedIdentitySource.AcquireEntraTokenPath;
             string scopeOverride = resource.TrimEnd('/') + "/.default";
 
             var tokenClient = new TokenClient(AuthenticationRequestParameters);
 
-            return await tokenClient.SendTokenRequestAsync(
-                bodyParameters,
-                scopeOverride: scopeOverride,
-                tokenEndpointOverride: tokenEndpoint,
-                cancellationToken: cancellationToken)
-                .ConfigureAwait(false);
+            try
+            {
+                return await tokenClient.SendTokenRequestAsync(
+                    bodyParameters,
+                    scopeOverride: scopeOverride,
+                    tokenEndpointOverride: tokenEndpoint,
+                    cancellationToken: cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            catch (Exception ex) when (IsUnwrappedNonMsalFailure(ex))
+            {
+                // The bespoke MI token path normalized transport failures via
+                // AbstractManagedIdentity.HandleException; TokenClient does not. Without this, callers stop
+                // receiving MsalServiceException and the re-mint filter above no longer matches (issue #6172).
+                // Error codes mirror HandleException. The original exception is preserved as the inner one so
+                // SCHANNEL detection can still walk the chain.
+                string errorCode = ex switch
+                {
+                    HttpRequestException => MsalError.ManagedIdentityUnreachableNetwork,
+                    FormatException => MsalError.InvalidManagedIdentityEndpoint,
+                    _ => MsalError.ManagedIdentityRequestFailed
+                };
+
+                throw MsalServiceExceptionFactory.CreateManagedIdentityException(
+                    errorCode,
+                    ex.Message,
+                    ex,
+                    ManagedIdentitySource.Imds,
+                    null);
+            }
+        }
+
+        // Exceptions MSAL already owns pass through untouched so service errors (for example invalid_client)
+        // keep their error codes, and cancellation is never converted. Deliberately broader than
+        // HandleException's gate, which rewrapped MsalClientException as the generic managed_identity_request_failed;
+        // keeping the more specific client-side code is strictly more diagnosable.
+        private static bool IsUnwrappedNonMsalFailure(Exception ex)
+        {
+            return ex is not MsalException && ex is not OperationCanceledException;
         }
 
         private async Task<MsalAccessTokenCacheItem> GetCachedAccessTokenAsync()

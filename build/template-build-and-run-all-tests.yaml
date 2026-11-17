@@ -47,7 +47,7 @@ stages:
 
   - job: 'BuilMacConsoleAppWithBroker'
     pool:
-        vmImage: macOS-14
+        vmImage: macOS-15
 
     variables:
         runCodesignValidationInjection: false
@@ -336,6 +336,52 @@ stages:
 
     steps:
     - template: template-run-mi-e2e-imdsv2.yaml
+      parameters:
+        BuildConfiguration: 'Release'
+        TargetFramework:   'net8.0'
+
+# ──────────────────────────────────────────────
+# Stage 12 — SNI mTLS E2E – non-exportable VBS key
+# ──────────────────────────────────────────────
+- stage: SniMtlsE2E
+  displayName: 'SNI mTLS E2E – Non-exportable VBS key'
+  dependsOn: [] # Builds from source — no dependency on Build stage
+  jobs:
+
+  - job: 'RunSniMtlsE2EWithNonExportableVbsKey'
+    displayName: 'SNI mTLS E2E – Non-exportable VBS key'
+    pool:
+      name: 'MISEManagedIdentity'
+    condition: and(succeeded(), eq(variables['RunSniMtlsE2EVmTests'], 'true'))
+
+    steps:
+    - template: template-run-sni-mtls-e2e.yaml
+      parameters:
+        BuildConfiguration: 'Release'
+        TargetFramework: 'net8.0'
+
+# ──────────────────────────────────────────────
+# Stage 13 — Deploy & Test Managed Identity WebApp (Easy Auth)
+# ──────────────────────────────────────────────
+- stage: DeployAndTestManagedIdentityWebApp
+  displayName: 'Deploy & Test MI WebApp (Easy Auth)'
+  dependsOn: [] # Builds from source — no dependency on Build stage
+  jobs:
+
+  - job: 'DeployAndTestManagedIdentityWebApp'
+    displayName: 'Deploy ManagedIdentityWebApi and verify Easy Auth-protected endpoint'
+    pool:
+        vmImage: 'windows-2022'
+        demands:
+        - msbuild
+        - visualstudio
+    variables:
+        runCodesignValidationInjection: false
+        Codeql.SkipTaskAutoInjection: true
+    condition: and(succeeded(), eq(variables['RunManagedIdentityWebAppDeploy'], 'true'))
+
+    steps:
+    - template: template-deploy-managed-identity-webapp-and-test.yaml
       parameters:
         BuildConfiguration: 'Release'
         TargetFramework:   'net8.0'

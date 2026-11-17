@@ -16,7 +16,8 @@ namespace Microsoft.Identity.Test.E2E
     ///
     /// Flow:
     ///   Leg 1 — MSI acquires an mTLS PoP token for api://AzureADTokenExchange
-    ///   Leg 2 — ConfApp uses the Leg 1 token as a ClientSignedAssertion to obtain a bearer token
+    ///   Leg 2 — ConfApp uses the Leg 1 token as a ClientSignedAssertion to obtain either a bearer token
+    ///           or an mTLS PoP token, toggled by .WithMtlsProofOfPossession() on the Leg 2 request
     ///
     /// These tests run on the MSALMSIV2 pool (IMDSv2 + Credential Guard).
     /// </summary>
@@ -47,9 +48,10 @@ namespace Microsoft.Identity.Test.E2E
 
         private static IConfidentialClientApplication BuildConfApp(AuthenticationResult leg1Result)
         {
-            // For bearer Leg 2: pass the binding certificate to prove possession of the
-            // Leg 1 mTLS PoP token, but do not call .WithMtlsProofOfPossession() on the
-            // AcquireTokenForClient request — that keeps the final token as Bearer.
+            // Pass the Leg 1 binding certificate on the assertion so Leg 2 can prove possession of the
+            // Leg 1 mTLS PoP token. The Leg 2 token type is chosen on the request, not here:
+            //   - without .WithMtlsProofOfPossession() on AcquireTokenForClient  -> Bearer
+            //   - with    .WithMtlsProofOfPossession() on AcquireTokenForClient  -> mtls_pop
             return ConfidentialClientApplicationBuilder
                 .Create(FicConfAppClientId)
                 .WithAuthority(FicConfAppAuthority)
@@ -63,22 +65,16 @@ namespace Microsoft.Identity.Test.E2E
         }
 
         /// <summary>
-        /// MSI Leg 1 → ConfApp Leg 2 bearer token.
-        /// Verifies the full FIC two-leg exchange produces a valid bearer token.
+        /// Leg 1 — MSI acquires an mTLS PoP token for api://AzureADTokenExchange using Credential Guard attestation.
+        /// Shared by the Bearer and mTLS PoP Leg 2 tests. The returned BindingCertificate is what Leg 2 uses to
+        /// prove possession. Marks the test inconclusive when Credential Guard is unavailable.
         /// </summary>
-        [RunOnAzureDevOps]
-        [TestCategory("MI_E2E_ImdsV2")]
-        [TestMethod]
-        [DataRow(null, DisplayName = "FicTwoLeg_Bearer_SAMI")] //SAMI Object ID ("11a5d2ba-f08b-4e99-9361-2a07b4bf7af9")
-        [DataRow(UamiClientId, DisplayName = "FicTwoLeg_Bearer_UAMI-ClientId")]
-        public async Task AcquireToken_OnImdsV2_FicTwoLeg_BearerToken_Succeeds(string uamiClientId)
+        private static async Task<AuthenticationResult> AcquireLeg1MtlsPopTokenAsync(string uamiClientId)
         {
             if (!OperatingSystem.IsWindows())
             {
                 Assert.Inconclusive("Credential Guard attestation is only available on Windows.");
             }
-
-            // --- Leg 1: MSI acquires mTLS PoP token for api://AzureADTokenExchange ---
 
             var msiApp = BuildMsi(uamiClientId);
 
@@ -95,12 +91,12 @@ namespace Microsoft.Identity.Test.E2E
             catch (MsalClientException ex) when (ex.ErrorCode == "credential_guard_not_available")
             {
                 Assert.Inconclusive("Credential Guard is not available on this machine.");
-                return;
+                throw; // unreachable: Assert.Inconclusive always throws
             }
             catch (System.Security.Cryptography.CryptographicException ex)
             {
                 Assert.Inconclusive($"Cryptographic operation failed. Credential Guard may not be properly configured: {ex.Message}");
-                return;
+                throw; // unreachable: Assert.Inconclusive always throws
             }
 
             Assert.IsFalse(string.IsNullOrEmpty(leg1Result.AccessToken),
@@ -111,6 +107,24 @@ namespace Microsoft.Identity.Test.E2E
                 "Leg 1: BindingCertificate must not be null — required for FIC Leg 2.");
             Assert.AreEqual(TokenSource.IdentityProvider, leg1Result.AuthenticationResultMetadata.TokenSource,
                 "Leg 1: First call must hit the MSI endpoint.");
+
+            return leg1Result;
+        }
+
+        /// <summary>
+        /// MSI Leg 1 → ConfApp Leg 2 bearer token.
+        /// Verifies the full FIC two-leg exchange produces a valid bearer token.
+        /// </summary>
+        [RunOnAzureDevOps]
+        [TestCategory("MI_E2E_ImdsV2")]
+        [TestMethod]
+        [DataRow(null, DisplayName = "FicTwoLeg_Bearer_SAMI")] //SAMI Object ID ("11a5d2ba-f08b-4e99-9361-2a07b4bf7af9")
+        [DataRow(UamiClientId, DisplayName = "FicTwoLeg_Bearer_UAMI-ClientId")]
+        public async Task AcquireToken_OnImdsV2_FicTwoLeg_BearerToken_Succeeds(string uamiClientId)
+        {
+            // --- Leg 1: MSI acquires an mTLS PoP token for api://AzureADTokenExchange ---
+
+            AuthenticationResult leg1Result = await AcquireLeg1MtlsPopTokenAsync(uamiClientId).ConfigureAwait(false);
 
             // --- Leg 2: ConfApp exchanges Leg 1 token for a bearer token ---
 
@@ -127,6 +141,9 @@ namespace Microsoft.Identity.Test.E2E
                 string.Equals(leg2Result.TokenType, "Bearer", StringComparison.OrdinalIgnoreCase),
                 $"Leg 2: Expected Bearer token type, got '{leg2Result.TokenType}'.");
 
+            Assert.AreEqual(TokenSource.IdentityProvider, leg2Result.AuthenticationResultMetadata.TokenSource,
+                "Leg 2: First call must hit the identity provider so the cache check below is meaningful.");
+
             // --- Cache hit verification ---
 
             var leg2Cached = await confApp
@@ -138,6 +155,59 @@ namespace Microsoft.Identity.Test.E2E
                 "Leg 2: Second call should be served from cache.");
             Assert.AreEqual(leg2Result.AccessToken, leg2Cached.AccessToken,
                 "Leg 2: Cached token should match original.");
+        }
+
+        /// <summary>
+        /// MSI Leg 1 → ConfApp Leg 2 mTLS PoP token.
+        /// Same two-leg exchange as the bearer test, but Leg 2 calls .WithMtlsProofOfPossession(),
+        /// so the final token is an mTLS PoP token bound to a certificate instead of a bearer token.
+        /// </summary>
+        [RunOnAzureDevOps]
+        [TestCategory("MI_E2E_ImdsV2")]
+        [TestMethod]
+        [DataRow(null, DisplayName = "FicTwoLeg_MtlsPop_SAMI")] //SAMI Object ID ("11a5d2ba-f08b-4e99-9361-2a07b4bf7af9")
+        [DataRow(UamiClientId, DisplayName = "FicTwoLeg_MtlsPop_UAMI-ClientId")]
+        public async Task AcquireToken_OnImdsV2_FicTwoLeg_MtlsPopToken_Succeeds(string uamiClientId)
+        {
+            // --- Leg 1: MSI acquires an mTLS PoP token for api://AzureADTokenExchange ---
+
+            AuthenticationResult leg1Result = await AcquireLeg1MtlsPopTokenAsync(uamiClientId).ConfigureAwait(false);
+
+            // --- Leg 2: ConfApp exchanges the Leg 1 token for an mTLS PoP token ---
+            // The only difference from the bearer flow is .WithMtlsProofOfPossession() on the Leg 2 request.
+
+            var confApp = BuildConfApp(leg1Result);
+
+            var leg2Result = await confApp
+                .AcquireTokenForClient(new[] { GraphScope })
+                .WithMtlsProofOfPossession()
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            Assert.IsFalse(string.IsNullOrEmpty(leg2Result.AccessToken),
+                "Leg 2: AccessToken should not be empty.");
+            Assert.AreEqual("mtls_pop", leg2Result.TokenType,
+                "Leg 2: TokenType must be 'mtls_pop' when .WithMtlsProofOfPossession() is used.");
+            Assert.IsNotNull(leg2Result.BindingCertificate,
+                "Leg 2: BindingCertificate must not be null for an mTLS PoP token.");
+
+            Assert.AreEqual(TokenSource.IdentityProvider, leg2Result.AuthenticationResultMetadata.TokenSource,
+                "Leg 2: First call must hit the identity provider so the cache check below is meaningful.");
+
+            // --- Cache hit verification (same request shape hits the same cache entry) ---
+
+            var leg2Cached = await confApp
+                .AcquireTokenForClient(new[] { GraphScope })
+                .WithMtlsProofOfPossession()
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            Assert.AreEqual(TokenSource.Cache, leg2Cached.AuthenticationResultMetadata.TokenSource,
+                "Leg 2: Second call should be served from cache.");
+            Assert.AreEqual(leg2Result.AccessToken, leg2Cached.AccessToken,
+                "Leg 2: Cached token should match original.");
+            Assert.IsNotNull(leg2Cached.BindingCertificate,
+                "Leg 2: Cached mTLS PoP token must retain its BindingCertificate.");
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Net.Sockets;
@@ -10,6 +11,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser;
 using Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
@@ -133,6 +135,157 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             Assert.IsTrue(completed, "Listener did not complete within timeout.");
             Assert.StartsWith($"http://localhost:{port}/TestPath/", listenTask.Result.RequestUri.ToString(), "Request URI should include the custom path");
         }
+
+        [TestMethod]
+        [DataRow(null, false)]
+        [DataRow("", false)]
+        [DataRow("false", false)]
+        [DataRow("0", false)]
+        [DataRow("yes", false)]
+        [DataRow(" true ", false)]
+        [DataRow("true", true)]
+        [DataRow("TRUE", true)]
+        [DataRow("TrUe", true)]
+        [DataRow("1", true)]
+        [DoNotParallelize]
+        public async Task PortForwarding_EnvironmentVariableControlsListenerPrefixes_Async(string value, bool enabled)
+        {
+            // Arrange
+            const string EnvVariable = "MSAL_ALLOW_SYSTEM_BROWSER_PORT_FORWARDING";
+            string previousValue = Environment.GetEnvironmentVariable(EnvVariable);
+            try
+            {
+                Environment.SetEnvironmentVariable(EnvVariable, value);
+                bool expectWildcard = enabled && DesktopOsHelper.IsLinux();
+                int port = FindFreeLocalhostPort();
+                List<string> listenerUrls = new();
+                HttpListenerInterceptor listenerInterceptor = new(Substitute.For<ILoggerAdapter>());
+                using CancellationTokenSource cts = new();
+                listenerInterceptor.TestBeforeGetContext = () => cts.Cancel();
+                listenerInterceptor.TestBeforeStart = url =>
+                {
+                    listenerUrls.Add(url);
+                    if (!expectWildcard || url == $"http://*:{port}/")
+                    {
+                        cts.Cancel();
+                        cts.Token.ThrowIfCancellationRequested();
+                    }
+                };
+
+                // Act
+                await AssertException.TaskThrowsAsync<OperationCanceledException>(
+                    () => listenerInterceptor.ListenToSingleRequestAndRespondAsync(
+                        port,
+                        string.Empty,
+                        (_) => new MessageAndHttpCode(HttpStatusCode.OK, "OK"),
+                        cts.Token))
+                    .ConfigureAwait(false);
+
+                // Assert
+                if (expectWildcard)
+                {
+                    CollectionAssert.Contains(listenerUrls, $"http://*:{port}/");
+                }
+                else
+                {
+                    CollectionAssert.AreEqual(new[] { $"http://localhost:{port}/" }, listenerUrls);
+                }
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable(EnvVariable, previousValue);
+            }
+        }
+
+#if NET_CORE
+        [TestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task PortForwarding_PreservesOnlyIpv6Localhost_Async(bool localhostResolvesToIpv6)
+        {
+            if (!OperatingSystem.IsLinux())
+            {
+                Assert.Inconclusive("Wildcard HttpListener behavior is verified on Linux.");
+            }
+
+            // Arrange
+            using CancellationTokenSource cts = new();
+            int port = FindFreeLocalhostPort();
+            List<string> listenerUrls = new();
+            HttpListenerInterceptor listenerInterceptor = new(
+                Substitute.For<ILoggerAdapter>(),
+                allowPortForwarding: true,
+                localhostResolvesToIpv6: () => localhostResolvesToIpv6);
+
+            listenerInterceptor.TestBeforeStart = url =>
+            {
+                listenerUrls.Add(url);
+                if (url == $"http://*:{port}/TestPath/")
+                {
+                    cts.Cancel();
+                    cts.Token.ThrowIfCancellationRequested();
+                }
+            };
+
+            // Act
+            await AssertException.TaskThrowsAsync<OperationCanceledException>(
+                () => listenerInterceptor.ListenToSingleRequestAndRespondAsync(
+                    port,
+                    "/TestPath/",
+                    (_) => new MessageAndHttpCode(HttpStatusCode.OK, "OK"),
+                    cts.Token))
+                .ConfigureAwait(false);
+
+            // Assert
+            CollectionAssert.AreEqual(
+                localhostResolvesToIpv6 ? new[]
+                {
+                    $"http://localhost:{port}/TestPath/",
+                    $"http://*:{port}/TestPath/"
+                } : new[] { $"http://*:{port}/TestPath/" },
+                listenerUrls);
+        }
+
+        [TestMethod]
+        [DoNotParallelize]
+        public async Task PortForwarding_AcceptsIpv4ForwardedCallback_Async()
+        {
+            if (!OperatingSystem.IsLinux())
+            {
+                Assert.Inconclusive("Wildcard HttpListener behavior is verified on Linux.");
+            }
+
+            // Arrange
+            using EnvVariableContext envVariableContext = new();
+            Environment.SetEnvironmentVariable("MSAL_ALLOW_SYSTEM_BROWSER_PORT_FORWARDING", "true");
+            int port = FindFreeLocalhostPort();
+            using CancellationTokenSource cts = new(TimeSpan.FromSeconds(10));
+            HttpListenerInterceptor listenerInterceptor = new(Substitute.For<ILoggerAdapter>());
+
+            Task<AuthorizationResponse> listenTask = listenerInterceptor.ListenToSingleRequestAndRespondAsync(
+                port,
+                string.Empty,
+                (_) => new MessageAndHttpCode(HttpStatusCode.OK, "OK"),
+                cts.Token);
+
+            using HttpClient httpClient = new();
+            using HttpRequestMessage request = new(HttpMethod.Post, $"http://127.0.0.1:{port}/");
+            request.Headers.Host = $"localhost:{port}";
+            request.Content = new StringContent(
+                "code=test_code&state=test_state",
+                System.Text.Encoding.UTF8,
+                "application/x-www-form-urlencoded");
+
+            // Act
+            using HttpResponseMessage response = await httpClient.SendAsync(request, cts.Token).ConfigureAwait(false);
+            AuthorizationResponse authorizationResponse = await listenTask.ConfigureAwait(false);
+
+            // Assert
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+            Assert.AreEqual("localhost", authorizationResponse.RequestUri.Host);
+            Assert.IsTrue(authorizationResponse.IsFormPost);
+        }
+#endif
 
         /// <summary>
         /// Ensures the HTTP listener is ready by checking the port binding.

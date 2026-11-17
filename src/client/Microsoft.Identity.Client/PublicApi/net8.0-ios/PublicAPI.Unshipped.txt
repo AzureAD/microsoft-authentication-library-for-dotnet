@@ -1,0 +1,2 @@
+Microsoft.Identity.Client.AuthenticationResult.CertificateThumbprint256.get -> string
+Microsoft.Identity.Client.AuthenticationResult.CertificateThumbprint256.set -> void

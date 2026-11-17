@@ -52,11 +52,12 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Specifies if the client application should ignore access tokens when reading the token cache. 
+        /// Specifies if the client application should ignore access tokens when reading the token cache.
         /// New tokens will still be written to the application token cache.
+        /// For MSI v2 mTLS requests, this also bypasses the cached binding certificate and mints a new certificate.
         /// By default the token is taken from the application token cache (forceRefresh=false)
         /// </summary>
-        /// <param name="forceRefresh">If <c>true</c>, the request will ignore cached access tokens on read, but will still write them to the cache once obtained from the Identity Provider. The default is <c>false</c>
+        /// <param name="forceRefresh">If <c>true</c>, the request will ignore cached access tokens on read, but will still write them to the cache once obtained from the Identity Provider. For MSI v2 mTLS requests, the cached binding certificate is also bypassed. The default is <c>false</c>
         /// </param>
         /// <remarks>
         /// Do not use this flag except in well understood cases. Identity Providers will throttle clients that issue too many similar token requests.
@@ -106,6 +107,7 @@ namespace Microsoft.Identity.Client
             AcquireTokenForManagedIdentityParameters acquireTokenForManagedIdentityParameters)
         {
             acquireTokenForManagedIdentityParameters.IsMtlsPopRequested = acquireTokenCommonParameters.IsMtlsPopRequested;
+            acquireTokenForManagedIdentityParameters.PreferMsiV2 = acquireTokenCommonParameters.PreferMsiV2;
             acquireTokenForManagedIdentityParameters.MtlsPopMinStrength = acquireTokenCommonParameters.MtlsPopMinStrength;
             acquireTokenForManagedIdentityParameters.AttestationTokenProvider = acquireTokenCommonParameters.AttestationTokenProvider;
 
@@ -132,6 +134,18 @@ namespace Microsoft.Identity.Client
                 {
                     acquireTokenCommonParameters.CacheKeyComponents.Remove(MiMinStrengthCacheKeyComponent);
                 }
+            }
+
+            // mTLS-bearer requests also need a cache key component so they are stored separately from
+            // plain IMDSv1 bearer tokens and from mTLS PoP tokens for the same resource.
+            if (acquireTokenCommonParameters.PreferMsiV2)
+            {
+                acquireTokenCommonParameters.CacheKeyComponents ??=
+                    new SortedList<string, Func<CancellationToken, Task<string>>>();
+
+                const string MtlsBearerKey = "mtls_bearer";
+                acquireTokenCommonParameters.CacheKeyComponents[MtlsBearerKey] =
+                    _ => acquireTokenCommonParameters.AttestationTokenProvider != null ? s_att1 : s_att0;
             }
         }
     }

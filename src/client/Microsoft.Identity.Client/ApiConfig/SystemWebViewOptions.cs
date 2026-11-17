@@ -66,7 +66,7 @@ namespace Microsoft.Identity.Client
 
         internal void LogParameters(ILoggerAdapter logger)
         {
-            logger.Info($"DefaultBrowserOptions configured. HidePrivacyPrompt {iOSHidePrivacyPrompt}");
+            logger.InfoOrVerbose(() => $"DefaultBrowserOptions configured. HidePrivacyPrompt {iOSHidePrivacyPrompt}");
 
             if (logger.IsLoggingEnabled(LogLevel.Verbose))
             {

@@ -445,6 +445,60 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
         [TestMethod]
         [DeploymentItem(@"Resources\TestMex.xml")]
+        public async Task FederatedUsernamePasswordInjectedHttpEndpointIsRejectedBeforeRequestTestAsync()
+        {
+            // Arrange
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+                AddMockHandlerDefaultUserRealmDiscovery(httpManager);
+
+                string federationMetadata = File.ReadAllText(
+                    ResourceHelper.GetTestResourceRelativePath("TestMex.xml"))
+                    .Replace(
+                        "https://msft.sts.microsoft.com/adfs/services/trust/2005/usernamemixed",
+                        "http://msft.sts.microsoft.com/adfs/services/trust/2005/usernamemixed")
+                    .Replace(
+                        "https://msft.sts.microsoft.com/adfs/services/trust/13/usernamemixed",
+                        "http://msft.sts.microsoft.com/adfs/services/trust/13/usernamemixed");
+
+                MockHttpMessageHandler wsTrustHandler = httpManager.AddMockHandler(
+                    new MockHttpMessageHandler
+                    {
+                        ExpectedUrl = "http://msft.sts.microsoft.com/adfs/services/trust/13/usernamemixed",
+                        ExpectedMethod = HttpMethod.Post,
+                        ResponseMessage = new HttpResponseMessage(HttpStatusCode.NotFound)
+                        {
+                            Content = new StringContent("not found")
+                        }
+                    });
+
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                    .WithHttpManager(httpManager)
+                    .BuildConcrete();
+
+                // Act
+#pragma warning disable CS0618 // Type or member is obsolete
+                MsalClientException exception = await AssertException.TaskThrowsAsync<MsalClientException>(
+                    () => app.AcquireTokenByUsernamePassword(
+                        TestConstants.s_scope,
+                        TestConstants.s_user.Username,
+                        _password)
+                        .WithFederationMetadata(federationMetadata)
+                        .ExecuteAsync(CancellationToken.None))
+                    .ConfigureAwait(false);
+#pragma warning restore CS0618
+
+                // Assert
+                Assert.AreEqual(MsalError.WsTrustEndpointNotFoundInMetadataDocument, exception.ErrorCode);
+                Assert.IsNull(wsTrustHandler.ActualRequestMessage);
+                httpManager.ClearQueue();
+            }
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"Resources\TestMex.xml")]
         public async Task MexEndpointFailsToResolveTestAsync()
         {
             using (var httpManager = new MockHttpManager())

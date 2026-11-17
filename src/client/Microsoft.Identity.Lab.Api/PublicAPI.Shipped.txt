@@ -14,6 +14,7 @@ const Microsoft.Identity.Test.Common.TestCategories.UnifiedSchemaValidation = "U
 const Microsoft.Identity.Test.LabInfrastructure.KeyVaultInstance.MsalTeam = "https://id4skeyvault.vault.azure.net/" -> string
 const Microsoft.Identity.Test.LabInfrastructure.KeyVaultInstance.MSIDLab = "https://msidlabs.vault.azure.net" -> string
 const Microsoft.Identity.Test.LabInfrastructure.KeyVaultSecrets.AppAdfsNativeClient = "App-AdfsNativeClient-Config" -> string
+const Microsoft.Identity.Test.LabInfrastructure.KeyVaultSecrets.AppOBOService = "MSAL-APP-TodoListService-JSON" -> string
 const Microsoft.Identity.Test.LabInfrastructure.KeyVaultSecrets.AppPCAClient = "App-PCAClient-Config" -> string
 const Microsoft.Identity.Test.LabInfrastructure.KeyVaultSecrets.AppS2S = "App-S2S-Config" -> string
 const Microsoft.Identity.Test.LabInfrastructure.KeyVaultSecrets.AppWebApi = "App-WebApi-Config" -> string
@@ -505,4 +506,3 @@ static readonly Microsoft.Identity.Test.Unit.TestConstants.s_extraHttpHeader -> 
 static readonly Microsoft.Identity.Test.Unit.TestConstants.s_graphScopes -> string[]
 static readonly Microsoft.Identity.Test.Unit.TestConstants.s_scopeForAnotherResource -> System.Collections.Generic.SortedSet<string>
 static readonly Microsoft.Identity.Test.Unit.TestConstants.s_userIdentifier -> string
-const Microsoft.Identity.Test.LabInfrastructure.KeyVaultSecrets.AppOBOService = "MSAL-APP-TodoListService-JSON" -> string

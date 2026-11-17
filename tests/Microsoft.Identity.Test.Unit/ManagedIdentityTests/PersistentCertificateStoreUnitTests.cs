@@ -2,12 +2,13 @@
 // Licensed under the MIT License.
 
 using System;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Sockets;
-using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Security.Authentication;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
@@ -755,26 +756,47 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        public void IsSchanelFailure_ReturnsTrue_For_SocketException_10054_Chain()
+        public void IsSchannelFailure_ReturnsTrue_For_SocketException_10054_Chain()
         {
-            // Build exception chain like your logs
+            // Arrange - build the exception chain seen in production logs
             var sock = new SocketException(10054);
             var io = new IOException("Unable to write data to the transport connection: An existing connection was forcibly closed by the remote host.", sock);
             var http = new HttpRequestException("An error occurred while sending the request.", io);
-
-            // ErrorCode must be managed_identity_unreachable_network for the catch filter,
-            // but the private method only checks ToString() content.
             var msal = new MsalServiceException(MsalError.ManagedIdentityUnreachableNetwork, "An error occurred while sending the request.", http);
 
-            // Invoke private static bool IsSchanelFailure(MsalServiceException ex)
-            var mi = typeof(ImdsV2ManagedIdentitySource)
-                .GetMethod("IsSchanelFailure", BindingFlags.NonPublic | BindingFlags.Static);
+            // Act
+            bool result = ImdsV2ManagedIdentitySource.IsSchannelFailure(msal);
 
-            Assert.IsNotNull(mi, "Could not find IsSchanelFailure via reflection.");
-
-            var result = (bool)mi.Invoke(null, new object[] { msal });
-
+            // Assert
             Assert.IsTrue(result, "Expected 10054 chain to be detected as SCHANNEL failure.");
+        }
+
+        [TestMethod]
+        public void IsSchannelFailure_ReturnsTrue_For_RawTransportChain_WithoutMsalWrapper()
+        {
+            // Arrange - the shape the delegated TokenClient path produces: no MsalServiceException wrapper.
+            var win32 = new Win32Exception(unchecked((int)0x8009030D), "The credentials supplied to the package were not recognized");
+            var auth = new AuthenticationException("Authentication failed.", win32);
+            var http = new HttpRequestException("The SSL connection could not be established.", auth);
+
+            // Act
+            bool result = ImdsV2ManagedIdentitySource.IsSchannelFailure(http);
+
+            // Assert
+            Assert.IsTrue(result, "Expected a raw SCHANNEL transport chain to be detected without an MsalServiceException wrapper.");
+        }
+
+        [TestMethod]
+        public void IsSchannelFailure_ReturnsFalse_For_UnrelatedNetworkFailure()
+        {
+            // Arrange - a generic connectivity failure with no SCHANNEL signature.
+            var http = new HttpRequestException("Name or service not known.", new IOException("boom"));
+
+            // Act
+            bool result = ImdsV2ManagedIdentitySource.IsSchannelFailure(http);
+
+            // Assert
+            Assert.IsFalse(result, "Unrelated network failures must not be classified as SCHANNEL failures.");
         }
 
         private static X509Certificate2 CreateSelfSignedCert(TimeSpan lifetime, string subjectCn = "CN=RemoveBadCertTest")

@@ -46,6 +46,9 @@ namespace Microsoft.Identity.Client.Platforms.net
     [JsonSerializable(typeof(ComputeMetadataResponse))]
     [JsonSerializable(typeof(ComputeSecurityProfile))]
     [JsonSerializable(typeof(Dictionary<string, object>))]
+#if ANDROID
+    [JsonSerializable(typeof(Microsoft.Identity.Client.Platforms.Android.Broker.BrokerRequest))]
+#endif
     [JsonSourceGenerationOptions]
     internal partial class MsalJsonSerializerContext : JsonSerializerContext
     {

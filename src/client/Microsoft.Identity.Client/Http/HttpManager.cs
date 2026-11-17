@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http.Retry;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.PlatformsCommon.Factories;
 
 namespace Microsoft.Identity.Client.Http
 {
@@ -30,6 +31,9 @@ namespace Microsoft.Identity.Client.Http
     {
         protected readonly IMsalHttpClientFactory _httpClientFactory;
         private readonly bool _disableInternalRetries;
+        private readonly Lazy<IMsalWsTrustHttpClientFactory> _defaultWsTrustHttpClientFactory =
+            new Lazy<IMsalWsTrustHttpClientFactory>(() =>
+                (IMsalWsTrustHttpClientFactory)PlatformProxyFactory.CreatePlatformProxy(null).CreateDefaultHttpClientFactory());
         public long LastRequestDurationInMs { get; private set; }
 
         /// <summary>
@@ -65,7 +69,10 @@ namespace Microsoft.Identity.Client.Http
             Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> validateServerCert,
             CancellationToken cancellationToken,
             IRetryPolicy retryPolicy,
-            int retryCount = 0)
+            int retryCount = 0,
+            bool allowAutoRedirect = true,
+            bool useDefaultCredentials = true,
+            CancellationToken retryDelayCancellationToken = default)
         {
             Exception timeoutException = null;
             HttpResponse response = null;
@@ -89,7 +96,9 @@ namespace Microsoft.Identity.Client.Http
                         method,
                         bindingCertificate,
                         validateServerCert, logger,
-                        cancellationToken).ConfigureAwait(false);
+                        cancellationToken,
+                        allowAutoRedirect,
+                        useDefaultCredentials).ConfigureAwait(false);
                 }
 
                 if (response.StatusCode == HttpStatusCode.OK)
@@ -112,8 +121,14 @@ namespace Microsoft.Identity.Client.Http
                 logger.Error("The HTTP request failed. " + exception.Message);
                 timeoutException = exception;
             }
-            
-            while (!_disableInternalRetries && await retryPolicy.PauseForRetryAsync(response, timeoutException, retryCount, logger).ConfigureAwait(false))
+
+            while (!_disableInternalRetries &&
+                await retryPolicy.PauseForRetryAsync(
+                    response,
+                    timeoutException,
+                    retryCount,
+                    logger,
+                    retryDelayCancellationToken).ConfigureAwait(false))
             {
                 retryCount++;
 
@@ -128,7 +143,10 @@ namespace Microsoft.Identity.Client.Http
                     validateServerCert,
                     cancellationToken,
                     retryPolicy,
-                    retryCount) // Pass the updated retry count
+                    retryCount,
+                    allowAutoRedirect,
+                    useDefaultCredentials,
+                    retryDelayCancellationToken)
                     .ConfigureAwait(false);
             }
 
@@ -176,11 +194,29 @@ namespace Microsoft.Identity.Client.Http
             return response;
         }
 
-        private HttpClient GetHttpClient(X509Certificate2 x509Certificate2, Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> validateServerCert)
+        internal /* internal for test only */ HttpClient GetHttpClient(
+            X509Certificate2 x509Certificate2,
+            Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> validateServerCert,
+            bool allowAutoRedirect,
+            bool useDefaultCredentials,
+            ILoggerAdapter logger)
         {
             if (x509Certificate2 != null && validateServerCert != null)
             {
                 throw new NotImplementedException("Mtls certificate cannot be used with service fabric. A custom http client is used for service fabric managed identity to validate the server certificate.");
+            }
+
+            if (x509Certificate2 is null &&
+                validateServerCert is null &&
+                !allowAutoRedirect)
+            {
+                if (_httpClientFactory is IMsalWsTrustHttpClientFactory wsTrustHttpClientFactory)
+                {
+                    return wsTrustHttpClientFactory.GetHttpClient(useDefaultCredentials);
+                }
+
+                logger.Warning(MsalErrorMessage.CustomHttpClientFactoryWsTrustFallback);
+                return _defaultWsTrustHttpClientFactory.Value.GetHttpClient(useDefaultCredentials);
             }
 
             if (validateServerCert != null)
@@ -239,7 +275,9 @@ namespace Microsoft.Identity.Client.Http
             X509Certificate2 bindingCertificate,
             Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> validateServerCert,
             ILoggerAdapter logger,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken,
+            bool allowAutoRedirect,
+            bool useDefaultCredentials)
         {
             using (HttpRequestMessage requestMessage = CreateRequestMessage(endpoint, headers))
             {
@@ -252,7 +290,12 @@ namespace Microsoft.Identity.Client.Http
 
                 Stopwatch sw = Stopwatch.StartNew();
 
-                HttpClient client = GetHttpClient(bindingCertificate, validateServerCert);
+                HttpClient client = GetHttpClient(
+                    bindingCertificate,
+                    validateServerCert,
+                    allowAutoRedirect,
+                    useDefaultCredentials,
+                    logger);
 
                 try
                 {
@@ -300,7 +343,8 @@ namespace Microsoft.Identity.Client.Http
             {
                 Headers = response.Headers,
                 Body = body,
-                StatusCode = response.StatusCode
+                StatusCode = response.StatusCode,
+                RequestUri = response.RequestMessage?.RequestUri
             };
         }
 

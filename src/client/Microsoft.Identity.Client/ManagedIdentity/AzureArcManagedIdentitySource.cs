@@ -63,20 +63,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             base(requestContext, ManagedIdentitySource.AzureArc)
         {
             _endpoint = endpoint;
-
-            if (requestContext.ServiceBundle.Config.ManagedIdentityId.IsUserAssigned)
-            {
-                string errorMessage = string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityUserAssignedNotSupported, AzureArc);
-
-                var exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
-                    MsalError.UserAssignedManagedIdentityNotSupported, 
-                    errorMessage, 
-                    null, 
-                    ManagedIdentitySource.AzureArc, 
-                    null);
-
-                throw exception;
-            }
         }
 
         protected override Task<ManagedIdentityRequest> CreateRequestAsync(string resource)
@@ -86,6 +72,26 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             request.Headers.Add("Metadata", "true");
             request.QueryParameters["api-version"] = ArcApiVersion;
             request.QueryParameters["resource"] = resource;
+
+            switch (_requestContext.ServiceBundle.Config.ManagedIdentityId.IdType)
+            {
+                case AppConfig.ManagedIdentityIdType.ClientId:
+                    _requestContext.Logger.Info("[Managed Identity] Adding user assigned client id to the request.");
+                    request.QueryParameters[Constants.ManagedIdentityClientId] = _requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId;
+                    break;
+
+                case AppConfig.ManagedIdentityIdType.ResourceId:
+                    _requestContext.Logger.Info("[Managed Identity] Adding user assigned resource id to the request.");
+                    // Azure Arc honors the IMDS "msi_res_id" spelling for the resource-id selector; the
+                    // "mi_res_id" spelling is silently ignored and returns the system-assigned identity.
+                    request.QueryParameters[Constants.ManagedIdentityResourceIdImds] = _requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId;
+                    break;
+
+                case AppConfig.ManagedIdentityIdType.ObjectId:
+                    _requestContext.Logger.Info("[Managed Identity] Adding user assigned object id to the request.");
+                    request.QueryParameters[Constants.ManagedIdentityObjectId] = _requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId;
+                    break;
+            }
 
             return Task.FromResult(request);
         }
@@ -133,17 +139,67 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                          body: null,
                          method: System.Net.Http.HttpMethod.Get,
                          logger: _requestContext.Logger,
-                         doNotThrow: false,
+                         doNotThrow: true,
                          mtlsCertificate: null,
                          validateServerCertificate: null,
                          cancellationToken: cancellationToken,
                          retryPolicy: retryPolicy)
                     .ConfigureAwait(false);
-
-                return await base.HandleResponseAsync(parameters, response, cancellationToken).ConfigureAwait(false);
             }
 
-            return await base.HandleResponseAsync(parameters, response, cancellationToken).ConfigureAwait(false);
+            ManagedIdentityResponse managedIdentityResponse =
+                await base.HandleResponseAsync(parameters, response, cancellationToken).ConfigureAwait(false);
+
+            VerifyUserAssignedIdentityWasHonored(managedIdentityResponse);
+
+            return managedIdentityResponse;
+        }
+
+        // Azure Arc user-assigned managed identity is a preview capability. A legacy Arc agent
+        // ignores the client_id / object_id / msi_res_id selector and silently returns the machine's
+        // system-assigned identity. An agent that honors the request echoes the selected identity
+        // back in the token response. When the caller asked for a user-assigned identity but the
+        // response does not confirm it, fail closed so the caller never receives a token for a
+        // different identity than the one requested.
+        private void VerifyUserAssignedIdentityWasHonored(ManagedIdentityResponse managedIdentityResponse)
+        {
+            var managedIdentityId = _requestContext.ServiceBundle.Config.ManagedIdentityId;
+
+            if (!managedIdentityId.IsUserAssigned)
+            {
+                return;
+            }
+
+            string echoedIdentity;
+            switch (managedIdentityId.IdType)
+            {
+                case AppConfig.ManagedIdentityIdType.ClientId:
+                    echoedIdentity = managedIdentityResponse.ClientId;
+                    break;
+                case AppConfig.ManagedIdentityIdType.ResourceId:
+                    echoedIdentity = managedIdentityResponse.ResourceId;
+                    break;
+                case AppConfig.ManagedIdentityIdType.ObjectId:
+                    echoedIdentity = managedIdentityResponse.ObjectId;
+                    break;
+                default:
+                    echoedIdentity = null;
+                    break;
+            }
+
+            // Compare identifiers case-insensitively: client_id / object_id are GUIDs, and an ARM
+            // resource id (msi_res_id) can legitimately differ in segment casing.
+            if (string.IsNullOrEmpty(echoedIdentity) ||
+                !string.Equals(echoedIdentity, managedIdentityId.UserAssignedId, StringComparison.OrdinalIgnoreCase))
+            {
+                _requestContext.Logger.Error(
+                    "[Managed Identity] Azure Arc did not confirm the requested user-assigned identity in the token response. " +
+                    "The agent likely does not support user-assigned managed identity and returned the system-assigned identity.");
+
+                throw CreateManagedIdentityException(
+                    MsalError.UserAssignedManagedIdentityNotSupported,
+                    string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityUserAssignedNotSupported, AzureArc));
+            }
         }
 
         private void ValidateSplitChallenge(string[] splitChallenge)
