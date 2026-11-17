@@ -157,12 +157,8 @@ namespace Microsoft.Identity.Client
                 { OAuth2Parameter.Attributes, _ => Task.FromResult(attributeJson) }
             };
 
-            this.OnBeforeTokenRequest(data =>
-            {
-                data.BodyParameters.Add(OAuth2Parameter.Attributes, attributeJson);
-                return Task.CompletedTask;
-            });
-            this.WithAdditionalCacheKeyComponents(extraBodyParams);
+            AbstractConfidentialClientAcquireTokenParameterBuilderExtension
+                .WithExtraBodyParameters<AcquireTokenForClientParameterBuilder>(this, extraBodyParams);
 
             return this;
         }
