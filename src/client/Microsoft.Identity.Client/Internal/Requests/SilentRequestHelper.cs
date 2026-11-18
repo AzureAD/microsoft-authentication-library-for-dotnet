@@ -268,7 +268,6 @@ namespace Microsoft.Identity.Client.Internal
             Random random = Random.Shared;
             return TimeSpan.FromSeconds(random.Next(-Constants.DefaultJitterRangeInSeconds, Constants.DefaultJitterRangeInSeconds));
         }
-    }
 #else
         // Random.Shared (thread-safe) is unavailable before .NET 6. This shared instance is not thread-safe:
         // concurrent calls can corrupt its state, after which it may always return 0 (no jitter). It is kept
@@ -281,4 +280,5 @@ namespace Microsoft.Identity.Client.Internal
             return TimeSpan.FromSeconds(random.Next(-Constants.DefaultJitterRangeInSeconds, Constants.DefaultJitterRangeInSeconds));
         }
 #endif
+    }
 }

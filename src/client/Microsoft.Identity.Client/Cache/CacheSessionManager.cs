@@ -262,7 +262,7 @@ namespace Microsoft.Identity.Client.Cache
                                         // MsalAccessTokenCacheItems to determine the earliest refresh time for L2 cache proactive refresh. Cost is paid
                                         // even in non-L2 scenarios due to the complexity of avoiding this check. Ideally it should be calculated only
                                         // for L2 cache promotion scenarios.
-                                        SuggestedRefreshOn = TokenCache.CalculateSuggestedRefreshOn(TokenCacheInternal.Accessor, key),
+                                        SuggestedRefreshOn = TokenCache.CalculateSuggestedRefreshOn(refreshCache.Accessor, key),
                                     };
 
                                     await refreshCache.OnAfterAccessAsync(args).ConfigureAwait(false);
