@@ -17,6 +17,7 @@ using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Http.Retry;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2.Throttling;
+using Microsoft.Identity.Client.Platforms.Features.OpenTelemetry;
 using Microsoft.Identity.Client.RP;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
@@ -26,6 +27,8 @@ using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Unit.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
+using OpenTelemetry;
+using OpenTelemetry.Metrics;
 
 namespace Microsoft.Identity.Test.Unit.RequestsTests
 {
@@ -941,15 +944,25 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
-        [DataRow("client", 429, 1)]
-        [DataRow("client", 503, 2)]
-        [DataRow("obo", 429, 1)]
-        [DataRow("obo", 503, 2)]
-        [DataRow("long-running", 503, 2)]
-        [DataRow("silent", 503, 2)]
-        public async Task DirectServiceFailureBurst_ThrottlesFollowers_UntilExpirationAsync(string flow, int status, int attempts)
+        [DoNotParallelize]
+        [DataRow("client", 429, 1, true)]
+        [DataRow("client", 503, 2, true)]
+        [DataRow("client", 429, 1, false)]
+        [DataRow("client", 503, 2, false)]
+        [DataRow("obo", 429, 1, true)]
+        [DataRow("obo", 503, 2, true)]
+        [DataRow("long-running", 503, 2, true)]
+        [DataRow("silent", 503, 2, true)]
+        public async Task DirectServiceFailureBurst_ThrottlesFollowers_UntilExpirationAsync(
+            string flow, int status, int attempts, bool includeErrorCodes)
         {
             // Arrange
+            string[] expectedCodes = includeErrorCodes ? new[] { "90033", "90036" } : null;
+            var metrics = new List<Metric>();
+            using var meterProvider = Sdk.CreateMeterProviderBuilder()
+                .AddMeter(OtelInstrumentation.MeterName)
+                .AddInMemoryExporter(metrics)
+                .Build();
             using var http = new BlockingTokenEndpoint();
             var app = CreateDirectApp(http);
             string publishedCorrelationId = null;
@@ -968,7 +981,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             }
             int before = http.Calls;
             http.Block = true;
-            http.ResponseFactory = () => CreateFailureResponse(status);
+            http.ResponseFactory = () => CreateFailureResponse(status, includeErrorCodes: includeErrorCodes);
 
             // Act
             var owner = acquire();
@@ -980,6 +993,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
             // Assert
             Assert.IsNotInstanceOfType<MsalThrottledServiceException>(original);
+            CollectionAssert.AreEqual(expectedCodes, original.ErrorCodesForLogging?.ToArray());
             Assert.IsFalse(string.IsNullOrWhiteSpace(original.CorrelationId));
             if (flow == "client")
             {
@@ -993,11 +1007,14 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.IsInstanceOfType<MsalThrottledServiceException>(failure);
                 var throttled = (MsalThrottledServiceException)failure;
                 Assert.AreSame(original, throttled.OriginalServiceException);
+                CollectionAssert.AreEqual(expectedCodes, throttled.ErrorCodesForLogging?.ToArray());
+                Assert.AreEqual(original.ErrorCode, throttled.ErrorCode);
                 Assert.AreEqual(original.ResponseBody, throttled.ResponseBody);
                 Assert.AreSame(original.Headers, throttled.Headers);
                 Assert.AreEqual(original.CorrelationId, throttled.CorrelationId);
                 Assert.AreEqual(status, throttled.StatusCode);
             }
+            AssertFailureTelemetry(meterProvider, metrics, 9, expectedCodes?.FirstOrDefault() ?? string.Empty);
             var cache = TokenRequestCoalescer.GetFailureCache(app.ServiceBundle);
             Assert.HasCount(1, cache.CacheForTest);
             var entry = cache.CacheForTest.Single();
@@ -1072,13 +1089,22 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
-        [DataRow("client")]
-        [DataRow("obo")]
-        [DataRow("long-running")]
-        [DataRow("silent")]
-        public async Task ProactiveServiceFailure_PreservesUsableToken_AndThrottlesFurtherRefreshesAsync(string flow)
+        [DoNotParallelize]
+        [DataRow("client", true)]
+        [DataRow("client", false)]
+        [DataRow("obo", true)]
+        [DataRow("long-running", true)]
+        [DataRow("silent", true)]
+        public async Task ProactiveServiceFailure_PreservesUsableToken_AndThrottlesFurtherRefreshesAsync(
+            string flow, bool includeErrorCodes)
         {
             // Arrange
+            string[] expectedCodes = includeErrorCodes ? new[] { "90033", "90036" } : null;
+            var metrics = new List<Metric>();
+            using var meterProvider = Sdk.CreateMeterProviderBuilder()
+                .AddMeter(OtelInstrumentation.MeterName)
+                .AddInMemoryExporter(metrics)
+                .Build();
             using var http = new BlockingTokenEndpoint();
             var app = CreateDirectApp(http);
             var completed = new TaskCompletionSource<ExecutionResult>(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -1093,7 +1119,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             var tokenCache = flow == "client" ? app.AppTokenCacheInternal : app.UserTokenCacheInternal;
             TestCommon.UpdateATWithRefreshOn(tokenCache.Accessor);
             http.Block = true;
-            http.ResponseFactory = () => CreateFailureResponse(503);
+            http.ResponseFactory = () => CreateFailureResponse(503, includeErrorCodes: includeErrorCodes);
 
             // Act
             var usable = await acquire().ConfigureAwait(false);
@@ -1113,8 +1139,12 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             Assert.IsFalse(secondRefresh.Successful);
             Assert.IsInstanceOfType<MsalThrottledServiceException>(secondRefresh.Exception);
             Assert.IsInstanceOfType<MsalThrottledServiceException>(foreground);
+            CollectionAssert.AreEqual(expectedCodes, ((MsalServiceException)firstRefresh.Exception).ErrorCodesForLogging?.ToArray());
+            CollectionAssert.AreEqual(expectedCodes, ((MsalServiceException)secondRefresh.Exception).ErrorCodesForLogging?.ToArray());
+            CollectionAssert.AreEqual(expectedCodes, foreground.ErrorCodesForLogging?.ToArray());
             Assert.AreEqual(2, http.Calls - before, "Only one proactive HTTP/retry cycle may run.");
             Assert.HasCount(1, TokenRequestCoalescer.GetFailureCache(app.ServiceBundle).CacheForTest);
+            AssertFailureTelemetry(meterProvider, metrics, 3, expectedCodes?.FirstOrDefault() ?? string.Empty);
         }
 
         [TestMethod]
@@ -1243,7 +1273,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             {
                 ResponseFactory = () =>
                 {
-                    var response = CreateFailureResponse(503);
+                    var response = CreateFailureResponse(503, includeErrorCodes: true);
                     response.Headers.RetryAfter = new RetryConditionHeaderValue(TimeSpan.FromSeconds(120));
                     return response;
                 }
@@ -1261,6 +1291,9 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             Assert.IsInstanceOfType<MsalThrottledServiceException>(second);
             Assert.IsInstanceOfType<MsalThrottledServiceException>(bypass);
             Assert.AreSame(first, ((MsalThrottledServiceException)second).OriginalServiceException);
+            CollectionAssert.AreEqual(new[] { "90033", "90036" }, first.ErrorCodesForLogging?.ToArray());
+            CollectionAssert.AreEqual(first.ErrorCodesForLogging?.ToArray(), second.ErrorCodesForLogging?.ToArray());
+            CollectionAssert.AreEqual(first.ErrorCodesForLogging?.ToArray(), bypass.ErrorCodesForLogging?.ToArray());
             Assert.IsTrue(TokenRequestCoalescer.GetFailureCache(app.ServiceBundle).IsEmpty());
         }
 
@@ -1667,13 +1700,35 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             };
         }
 
-        private static HttpResponseMessage CreateFailureResponse(int status, string error = "temporarily_unavailable", bool claims = false)
+        private static HttpResponseMessage CreateFailureResponse(
+            int status, string error = "temporarily_unavailable", bool claims = false, bool includeErrorCodes = false)
         {
             return new HttpResponseMessage((HttpStatusCode)status)
             {
                 Content = new StringContent("{\"error\":\"" + error + "\",\"error_description\":\"test failure\"" +
+                    (includeErrorCodes ? ",\"error_codes\":[90033,90036]" : "") +
                     (claims ? ",\"claims\":\"challenge\"" : "") + "}")
             };
+        }
+
+        private static void AssertFailureTelemetry(
+            MeterProvider meterProvider, List<Metric> metrics, long expectedCount, string expectedCode)
+        {
+            meterProvider.ForceFlush();
+            var failureMetric = metrics.First(metric => metric.Name == MsalMetricsCatalog.FailureCounterName);
+            long count = 0;
+            foreach (var point in failureMetric.GetMetricPoints())
+            {
+                var tags = new Dictionary<string, object>();
+                foreach (var tag in point.Tags)
+                {
+                    tags[tag.Key] = tag.Value;
+                }
+                Assert.IsTrue(tags.ContainsKey(TelemetryConstants.RawStsErrorCode));
+                Assert.AreEqual(expectedCode, tags[TelemetryConstants.RawStsErrorCode]);
+                count += point.GetSumLong();
+            }
+            Assert.AreEqual(expectedCount, count);
         }
 
         private static Task<MsalServiceException> CaptureServiceFailureAsync(Task<AuthenticationResult> request) =>

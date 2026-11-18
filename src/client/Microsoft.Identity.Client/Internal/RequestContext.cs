@@ -27,17 +27,19 @@ namespace Microsoft.Identity.Client.Internal
         /// </summary>
         public ApiEvent ApiEvent
         {
-            get => _operationApiEvent.Value ?? _apiEvent;
+            get => _operationApiEvent?.Value ?? _apiEvent;
             set => _apiEvent = value;
         }
 
         private ApiEvent _apiEvent;
-        private readonly AsyncLocal<ApiEvent> _operationApiEvent = new AsyncLocal<ApiEvent>();
+        private AsyncLocal<ApiEvent> _operationApiEvent;
 
         internal IDisposable UseApiEvent(ApiEvent apiEvent)
         {
-            var scope = new ApiEventScope(this, _operationApiEvent.Value);
-            _operationApiEvent.Value = apiEvent;
+            var operationApiEvent = LazyInitializer.EnsureInitialized(
+                ref _operationApiEvent, () => new AsyncLocal<ApiEvent>());
+            var scope = new ApiEventScope(this, operationApiEvent.Value);
+            operationApiEvent.Value = apiEvent;
             return scope;
         }
 

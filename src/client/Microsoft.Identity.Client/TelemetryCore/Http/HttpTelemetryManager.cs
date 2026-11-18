@@ -51,7 +51,9 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
         /// </summary>
         internal static string ClearCoalescingCounts(string header)
         {
-            if (string.IsNullOrEmpty(header) || header.EndsWith(",0,0", StringComparison.Ordinal))
+            if (string.IsNullOrEmpty(header) ||
+                header.EndsWith(",,", StringComparison.Ordinal) ||
+                header.EndsWith(",0,0", StringComparison.Ordinal))
             {
                 return header;
             }

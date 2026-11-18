@@ -44,6 +44,26 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         private MockHttpAndServiceBundle _harness;
         private PublicClientApplication _app;
 
+#if NET8_0_OR_GREATER
+        [TestMethod]
+        public void ClearCoalescingCounts_EmptySlotsDoNotAllocate()
+        {
+            // Arrange
+            string header = new HttpTelemetryManager().GetCurrentRequestHeader(
+                new ApiEvent(Guid.NewGuid()) { CacheInfo = CacheRefreshReason.ForceRefreshOrClaims });
+            HttpTelemetryManager.ClearCoalescingCounts(header);
+
+            // Act
+            long before = GC.GetAllocatedBytesForCurrentThread();
+            string cleared = HttpTelemetryManager.ClearCoalescingCounts(header);
+            long allocated = GC.GetAllocatedBytesForCurrentThread() - before;
+
+            // Assert
+            Assert.AreSame(header, cleared);
+            Assert.AreEqual(0L, allocated);
+        }
+#endif
+
         [TestMethod]
         [DataRow(CacheRefreshReason.ForceRefreshOrClaims)]
         [DataRow(CacheRefreshReason.CacheDisabled)]

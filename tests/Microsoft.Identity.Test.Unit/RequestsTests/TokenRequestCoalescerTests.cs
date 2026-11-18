@@ -29,6 +29,78 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
     [TestClass]
     public class TokenRequestCoalescerTests : TestBase
     {
+#if NET8_0_OR_GREATER
+        [TestMethod]
+        public void BackgroundTelemetryState_IsAllocatedOnlyOnFirstUse()
+        {
+            // Arrange
+            var service = TestCommon.CreateDefaultServiceBundle();
+            using (new RequestContext(service, Guid.NewGuid(), null).UseApiEvent(null))
+            {
+            }
+            var context = new RequestContext(service, Guid.NewGuid(), null);
+            long before = GC.GetAllocatedBytesForCurrentThread();
+            var slot = new AsyncLocal<ApiEvent>();
+            long slotAllocation = GC.GetAllocatedBytesForCurrentThread() - before;
+            GC.KeepAlive(slot);
+
+            long AllocateScope()
+            {
+                long start = GC.GetAllocatedBytesForCurrentThread();
+                // A null value avoids ExecutionContext allocations, isolating the slot and scope.
+                using (context.UseApiEvent(null))
+                {
+                }
+                return GC.GetAllocatedBytesForCurrentThread() - start;
+            }
+
+            // Act
+            long firstScope = AllocateScope();
+            long secondScope = AllocateScope();
+
+            // Assert
+            Assert.AreEqual(slotAllocation, firstScope - secondScope,
+                "Only first use should allocate an AsyncLocal; foreground construction must not preallocate it.");
+        }
+#endif
+
+        [TestMethod]
+        public async Task BackgroundTelemetryScopes_IsolateConcurrentOperationsAndRestoreNestedEventsAsync()
+        {
+            // Arrange
+            var service = TestCommon.CreateDefaultServiceBundle();
+            var foreground = new ApiEvent(Guid.NewGuid());
+            var context = new RequestContext(service, Guid.NewGuid(), null) { ApiEvent = foreground };
+            var firstEntered = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+            var secondEntered = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+            Task RunOperation(TaskCompletionSource<bool> entered, Task<bool> otherEntered) => Task.Run(async () =>
+            {
+                var background = new ApiEvent(Guid.NewGuid());
+                var nested = new ApiEvent(Guid.NewGuid());
+                using (context.UseApiEvent(background))
+                {
+                    entered.TrySetResult(true);
+                    await AwaitAsync(otherEntered).ConfigureAwait(false);
+                    Assert.AreSame(background, context.ApiEvent);
+                    using (context.UseApiEvent(nested))
+                    {
+                        await Task.Yield();
+                        Assert.AreSame(nested, context.ApiEvent);
+                    }
+                    Assert.AreSame(background, context.ApiEvent);
+                }
+                Assert.AreSame(foreground, context.ApiEvent);
+            });
+
+            // Act
+            var first = RunOperation(firstEntered, secondEntered.Task);
+            var second = RunOperation(secondEntered, firstEntered.Task);
+            await Task.WhenAll(first, second).ConfigureAwait(false);
+
+            // Assert
+            Assert.AreSame(foreground, context.ApiEvent);
+        }
+
         [TestMethod]
         [DataRow("scope-order", false)]
         [DataRow("shared-cache", false)]
@@ -92,6 +164,68 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             var contender = new TokenRequestCoalescer(CreateParameters(true), difference == "flow" ? "other-flow" : "flow",
                 () => throw new AssertFailedException("Admission must not read the cache."),
                 (_, _) => throw new AssertFailedException("Admission must not create results."));
+
+            // Act / Assert
+            using var held = owner.TryEnter();
+            Assert.IsNotNull(held);
+            using var admitted = contender.TryEnter();
+            Assert.AreEqual(independent, admitted is not null);
+        }
+
+        [TestMethod]
+        [DataRow(0, "none", false)]
+        [DataRow(0, "scope", true)]
+        [DataRow(0, "query", true)]
+        [DataRow(1, "none", false)]
+        [DataRow(1, "scope", true)]
+        [DataRow(1, "query", true)]
+        [DataRow(1, "query-value", true)]
+        [DataRow(2, "none", false)]
+        [DataRow(2, "scope", true)]
+        [DataRow(2, "query", true)]
+        [DataRow(2, "query-value", true)]
+        public void Admission_CanonicalizesSmallScopeAndQueryCollections(int count, string difference, bool independent)
+        {
+            // Arrange
+            var service = TestCommon.CreateDefaultServiceBundle();
+            var cache = new TokenCache(service, false);
+            TokenRequestCoalescer CreateCoalescer(bool other)
+            {
+                var scopes = new List<string>();
+                var query = new Dictionary<string, string>();
+                for (int i = 0; i < count; i++)
+                {
+                    int index = other ? count - i - 1 : i;
+                    scopes.Add("scope" + index);
+                    query.Add("query" + index, "value" + index);
+                }
+                if (other && difference == "scope")
+                {
+                    scopes.Add("other");
+                }
+                if (other && difference == "query")
+                {
+                    query.Add("other", "value");
+                }
+                if (other && difference == "query-value")
+                {
+                    query["query0"] = "other";
+                }
+                var common = new AcquireTokenCommonParameters
+                {
+                    ApiId = ApiEvent.ApiIds.AcquireTokenForClient,
+                    Scopes = scopes,
+                    ExtraQueryParameters = query
+                };
+                var context = new RequestContext(service, Guid.NewGuid(), null) { ApiEvent = new ApiEvent(Guid.NewGuid()) };
+                var parameters = new AuthenticationRequestParameters(
+                    service, cache, common, context, Authority.CreateAuthority(TestConstants.AuthorityTestTenant));
+                return new TokenRequestCoalescer(parameters, "flow",
+                    () => throw new AssertFailedException("Admission must not read the cache."),
+                    (_, _) => throw new AssertFailedException("Admission must not create results."));
+            }
+            var owner = CreateCoalescer(false);
+            var contender = CreateCoalescer(true);
 
             // Act / Assert
             using var held = owner.TryEnter();
@@ -218,6 +352,32 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             Assert.AreEqual(independent, admitted is not null);
             Assert.AreEqual(kind == "certificate" || kind == "assertion" || kind == "signed-assertion",
                 firstCredential.HasRequestCallback);
+        }
+
+        [TestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task AlreadyCanceledCaller_DoesNotReadCacheOrAcquireAndLeavesGateAvailableAsync(bool gateBusy)
+        {
+            // Arrange
+            var service = TestCommon.CreateDefaultServiceBundle();
+            var parameters = TestCommon.CreateAuthenticationRequestParameters(service);
+            var coalescer = new TokenRequestCoalescer(parameters, "flow",
+                () => throw new AssertFailedException("A canceled caller must not read the cache."),
+                (_, _) => throw new AssertFailedException("A canceled caller must not create results."));
+            using var held = gateBusy ? coalescer.TryEnter() : null;
+            using var cancellation = new CancellationTokenSource();
+            cancellation.Cancel();
+
+            // Act
+            await Assert.ThrowsAsync<OperationCanceledException>(() => coalescer.ExecuteAsync(
+                () => throw new AssertFailedException("A canceled caller must not acquire a token."),
+                cancellation.Token)).ConfigureAwait(false);
+            held?.Dispose();
+
+            // Assert
+            using var admitted = coalescer.TryEnter();
+            Assert.IsNotNull(admitted);
         }
 
         [TestMethod]

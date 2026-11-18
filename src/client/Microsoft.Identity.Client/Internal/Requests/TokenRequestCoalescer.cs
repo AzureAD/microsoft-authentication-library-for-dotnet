@@ -68,7 +68,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
             Func<Task<AuthenticationResult>> acquire,
             CancellationToken cancellationToken)
         {
-            using (var admission = await _pool.EnterAsync(_key, cancellationToken).ConfigureAwait(false))
+            cancellationToken.ThrowIfCancellationRequested();
+            using (var admission = _pool.TryEnter(_key) ??
+                await _pool.EnterAsync(_key, cancellationToken).ConfigureAwait(false))
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 return await ExecuteUnderGateAsync(acquire, null, cancellationToken, admission).ConfigureAwait(false);
@@ -250,7 +252,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
             Add(parameters.AuthorityManager.OriginalAuthority.AuthorityInfo.CanonicalAuthority.AbsoluteUri.ToLowerInvariant());
             Add(parameters.AppConfig.ClientId);
             Add(CacheKeyFactory.GetKeyFromRequest(parameters));
-            foreach (string scope in parameters.Scope.OrderBy(s => s, StringComparer.Ordinal))
+            IEnumerable<string> scopes = parameters.Scope.Count > 1
+                ? parameters.Scope.OrderBy(s => s, StringComparer.Ordinal)
+                : parameters.Scope;
+            foreach (string scope in scopes)
             {
                 Add(scope);
             }
@@ -275,7 +280,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
             }
             Add(null);
-            foreach (var parameter in parameters.ExtraQueryParameters.OrderBy(p => p.Key, StringComparer.Ordinal))
+            IEnumerable<KeyValuePair<string, string>> queryParameters = parameters.ExtraQueryParameters.Count > 1
+                ? parameters.ExtraQueryParameters.OrderBy(p => p.Key, StringComparer.Ordinal)
+                : parameters.ExtraQueryParameters;
+            foreach (var parameter in queryParameters)
             {
                 Add(parameter.Key);
                 Add(parameter.Value);

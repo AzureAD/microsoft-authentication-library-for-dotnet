@@ -97,7 +97,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 if (cachedAccessToken != null)
                 {
-                    authResult = await CreateAuthenticationResultFromCacheAsync(cachedAccessToken, cancellationToken).ConfigureAwait(false);
+                    var cachedIdToken = await CacheManager.GetIdTokenCacheItemAsync(cachedAccessToken).ConfigureAwait(false);
+                    var account = await CacheManager.GetAccountAssociatedWithAccessTokenAsync(cachedAccessToken).ConfigureAwait(false);
+                    authResult = await CreateAuthenticationResultFromCacheAsync(
+                        cachedAccessToken, cachedIdToken, account, cancellationToken).ConfigureAwait(false);
                 }
                 else
                 {
@@ -184,17 +187,25 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             var cachedIdToken = await CacheManager.GetIdTokenCacheItemAsync(cachedAccessToken).ConfigureAwait(false);
             var account = await CacheManager.GetAccountAssociatedWithAccessTokenAsync(cachedAccessToken).ConfigureAwait(false);
+            return await CreateAuthenticationResultFromCacheAsync(
+                cachedAccessToken, cachedIdToken, account, cancellationToken).ConfigureAwait(false);
+        }
+
+        private Task<AuthenticationResult> CreateAuthenticationResultFromCacheAsync(
+            MsalAccessTokenCacheItem cachedAccessToken, MsalIdTokenCacheItem cachedIdToken,
+            Account account, CancellationToken cancellationToken)
+        {
             AuthenticationRequestParameters.RequestContext.Logger.Info(
                 () => "[OBO Request] Found a valid access token in the cache. ID token also found? " + (cachedIdToken != null));
             AuthenticationRequestParameters.RequestContext.ApiEvent.IsAccessTokenCacheHit = true;
             Metrics.IncrementTotalAccessTokensFromCache();
-            return await AuthenticationResult.CreateAsync(
+            return AuthenticationResult.CreateAsync(
                 cachedAccessToken, cachedIdToken,
                 AuthenticationRequestParameters.AuthenticationScheme,
                 AuthenticationRequestParameters.RequestContext.CorrelationId,
                 TokenSource.Cache, AuthenticationRequestParameters.RequestContext.ApiEvent, account,
                 spaAuthCode: null, additionalResponseParameters: null,
-                cancellationToken: cancellationToken).ConfigureAwait(false);
+                cancellationToken: cancellationToken);
         }
 
         private async Task<AuthenticationResult> RefreshRtOrFetchNewAccessTokenAsync(CancellationToken cancellationToken)
