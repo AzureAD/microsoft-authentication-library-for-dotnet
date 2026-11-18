@@ -150,7 +150,9 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        public async Task MtlsPop_WithDynamicCertificate_SuccessAsync()
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task MtlsPop_WithDynamicCertificate_SuccessAsync(bool associateTokensWithCertificate)
         {
             const string region = "eastus";
             int providerCallCount = 0;
@@ -175,7 +177,7 @@ namespace Microsoft.Identity.Test.Unit
                                 Interlocked.Increment(ref providerCallCount);
                                 return Task.FromResult(s_testCertificate);
                             },
-                            new CertificateOptions())
+                            new CertificateOptions { AssociateTokensWithCertificate = associateTokensWithCertificate })
                         .WithAuthority($"https://login.microsoftonline.com/123456-1234-2345-1234561234")
                         .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
                         .WithHttpManager(httpManager)
@@ -201,6 +203,20 @@ namespace Microsoft.Identity.Test.Unit
                     // the credential roundtrip. This locks in the single-invocation principle
                     // from issue #5943.
                     Assert.AreEqual(1, providerCallCount, "The certificate provider must be invoked exactly once per mTLS PoP token request (#5943 principle). If this assertion fails with count=2, the resolver short-circuit in CredentialMaterialResolver.ResolveAsync is no longer reusing the preflight-resolved certificate on requestParams.MtlsCertificate.");
+
+                    var entries = app.AppTokenCacheInternal.Accessor.GetAllAccessTokens();
+                    Assert.HasCount(1, entries);
+                    if (associateTokensWithCertificate)
+                    {
+                        Assert.AreEqual(s_testCertificate.SerialNumber,
+                            entries[0].AdditionalCacheKeyComponents[Constants.CertSerialNumber]);
+                    }
+
+                    var cached = await app.AcquireTokenForClient(TestConstants.s_scope)
+                        .WithMtlsProofOfPossession().ExecuteAsync().ConfigureAwait(false);
+                    Assert.AreEqual(TokenSource.Cache, cached.AuthenticationResultMetadata.TokenSource);
+                    Assert.AreEqual(2, providerCallCount);
+                    Assert.HasCount(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens());
                 }
             }
         }

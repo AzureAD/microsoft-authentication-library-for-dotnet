@@ -349,6 +349,51 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         [TestMethod]
         [DataRow(false)]
         [DataRow(true)]
+        public async Task CertificateAcquisition_CoalescesAndReturnsThumbprintOnlyForOwnerAsync(bool dynamicCertificate)
+        {
+            // Arrange
+            using var http = new BlockingTokenEndpoint { Block = true };
+            var certificate = CertHelper.GetOrCreateTestCert();
+            var builder = ConfidentialClientApplicationBuilder.Create(Guid.NewGuid().ToString())
+                .WithAuthority(TestConstants.AuthorityTestTenant).WithInstanceDiscovery(false)
+                .WithHttpClientFactory(http);
+            if (dynamicCertificate)
+            {
+                builder.WithCertificate(_ => Task.FromResult(certificate),
+                    new CertificateOptions { AssociateTokensWithCertificate = true });
+            }
+            else
+            {
+                builder.WithCertificate(certificate);
+            }
+            var app = builder.BuildConcrete();
+            Task<AuthenticationResult> Acquire() => app.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync();
+
+            // Act
+            var owner = Acquire();
+            await AwaitAsync(http.Entered.Task).ConfigureAwait(false);
+            var waiters = Enumerable.Range(0, 4).Select(_ => Acquire()).ToArray();
+            http.Release.TrySetResult(true);
+            var ownerResult = await AwaitAsync(owner).ConfigureAwait(false);
+            var waiterResults = await AwaitAsync(Task.WhenAll(waiters)).ConfigureAwait(false);
+            var warm = await AwaitAsync(Acquire()).ConfigureAwait(false);
+
+            // Assert
+            Assert.AreEqual(1, http.Calls);
+            Assert.AreEqual(TokenSource.IdentityProvider, ownerResult.AuthenticationResultMetadata.TokenSource);
+            Assert.IsNotNull(ownerResult.CertificateThumbprint256);
+            foreach (var result in waiterResults)
+            {
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+                Assert.IsNull(result.CertificateThumbprint256);
+            }
+            Assert.AreEqual(TokenSource.Cache, warm.AuthenticationResultMetadata.TokenSource);
+            Assert.IsNull(warm.CertificateThumbprint256);
+        }
+
+        [TestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
         public async Task CoalescingTelemetry_ReportsBurstOnNextRequestAsync(bool expired)
         {
             // Arrange
