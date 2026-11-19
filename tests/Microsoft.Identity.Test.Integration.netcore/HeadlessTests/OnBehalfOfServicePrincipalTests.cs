@@ -1,14 +1,15 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Integration.Infrastructure;
-using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -18,16 +19,16 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     [Ignore]
     public class OnBehalfOfServicePrincipalTests
     {
-        //The following client ids are for applications that are within Lab PPE tenant
-        private const string OBOClientPpeClientID = "8ba9f044-e8fe-41ae-811b-04adfd9704cb";
-        private const string OBOServicePpeClientID = "8a446462-93a1-41ea-8c94-3dbcab79db34";
-        private const string OBOServiceDownStreamApiPpeClientID = "1e999007-0c4f-4242-9ca1-8e33397236a9";
-        private const string PPEAuthenticationAuthority = "https://login.windows-ppe.net/19eea2f8-e17a-470f-954d-d897c47f311c";
+        private const string OboClientTseClientId = "31bb6a4c-e472-47d1-897d-9e3a1bdc751f";
+        private const string OboServiceTseClientId = "482c55e1-578e-4a1e-bb06-b3cfde53e14b";
+        private const string OboServiceDownstreamApiTseClientId = "b0b1e288-5d87-49f7-8ba5-164304157c9c";
+        private const string TseAuthenticationAuthority = "https://login.microsoftonline.com/d8d14ca6-f1fa-41c1-ae95-0db6258ec0a0";
+        private const string TseCertificateUriSan = "urn:/eid1/c/pub/t/Me_N-B6jSkuT5F9XHpElWg/a/TGq7MXLk0UeJfZ46G9x1Hw";
 
         /// <summary>
         /// Client -> Middletier -> RP
         /// This is OBO for SP without RT support.
-        /// Currently this is supported only by 1p, i.e. Client (3P) -> Middletier (1p) -> RP (1p)
+        /// The middle-tier and downstream API use 1p apps.
         /// </summary>
         /// <remarks>
         /// For details see https://aadwiki.windows-int.net/index.php?title=App_OBO_aka._Service_Principal_OBO, which explains
@@ -38,16 +39,15 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             //An explanation of the OBO for service principal scenario can be found here https://aadwiki.windows-int.net/index.php?title=App_OBO_aka._Service_Principal_OBO
 
-            var appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
-            var cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
+            using var cert = FindTseCertificate();
 
-            IReadOnlyList<string> middleTierApiScopes = new List<string>() { OBOServicePpeClientID + "/.default" };
-            IReadOnlyList<string> downstreamApiScopes = new List<string>() { OBOServiceDownStreamApiPpeClientID + "/.default" };
+            IReadOnlyList<string> middleTierApiScopes = new List<string>() { OboServiceTseClientId + "/.default" };
+            IReadOnlyList<string> downstreamApiScopes = new List<string>() { OboServiceDownstreamApiTseClientId + "/.default" };
 
             var clientConfidentialApp = ConfidentialClientApplicationBuilder
-                                    .Create(OBOClientPpeClientID)
-                                    .WithAuthority(PPEAuthenticationAuthority)
-                                    .WithCertificate(cert)
+                                    .Create(OboClientTseClientId)
+                                    .WithAuthority(TseAuthenticationAuthority)
+                                    .WithCertificate(cert, sendX5C: true)
                                     .WithTestLogging()
                                     .Build();
 
@@ -61,9 +61,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             string atHash = userAssertion.AssertionHash;
 
             var middletierServiceApp = ConfidentialClientApplicationBuilder
-                .Create(OBOServicePpeClientID)
-                .WithAuthority(PPEAuthenticationAuthority)
-                .WithCertificate(cert)
+                .Create(OboServiceTseClientId)
+                .WithAuthority(TseAuthenticationAuthority)
+                .WithCertificate(cert, sendX5C: true)
                 .Build();
             var userCacheRecorder = middletierServiceApp.UserTokenCache.RecordAccess();
 
@@ -103,23 +103,22 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             //An explanation of the OBO for service principal scenario can be found here https://aadwiki.windows-int.net/index.php?title=App_OBO_aka._Service_Principal_OBO
 
-            var appConfig = await LabResponseHelper.GetAppConfigAsync(KeyVaultSecrets.AppS2S).ConfigureAwait(false);
-            var cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
+            using var cert = FindTseCertificate();
 
-            IReadOnlyList<string> middleTierApiScopes = new List<string>() { OBOServicePpeClientID + "/.default" };
-            IReadOnlyList<string> downstreamApiScopes = new List<string>() { OBOServiceDownStreamApiPpeClientID + "/.default" };
+            IReadOnlyList<string> middleTierApiScopes = new List<string>() { OboServiceTseClientId + "/.default" };
+            IReadOnlyList<string> downstreamApiScopes = new List<string>() { OboServiceDownstreamApiTseClientId + "/.default" };
 
             var clientConfidentialApp = ConfidentialClientApplicationBuilder
-                                    .Create(OBOClientPpeClientID)
-                                    .WithAuthority(PPEAuthenticationAuthority)
-                                    .WithCertificate(cert)
+                                    .Create(OboClientTseClientId)
+                                    .WithAuthority(TseAuthenticationAuthority)
+                                    .WithCertificate(cert, sendX5C: true)
                                     .WithTestLogging()
                                     .Build();
 
             var middletierServiceApp = ConfidentialClientApplicationBuilder
-                                    .Create(OBOServicePpeClientID)
-                                    .WithAuthority(PPEAuthenticationAuthority)
-                                    .WithCertificate(cert)
+                                    .Create(OboServiceTseClientId)
+                                    .WithAuthority(TseAuthenticationAuthority)
+                                    .WithCertificate(cert, sendX5C: true)
                                     .BuildConcrete();
             var userCacheRecorder = middletierServiceApp.UserTokenCache.RecordAccess();
 
@@ -185,6 +184,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .ConfigureAwait(false);
 
             Assert.AreEqual(TokenSource.Cache, authenticationResult.AuthenticationResultMetadata.TokenSource);
+        }
+
+        private static X509Certificate2 FindTseCertificate()
+        {
+            return TseCertificateHelper.FindCertificate(new Uri(TseCertificateUriSan));
         }
     }
 }

@@ -1,0 +1,27 @@
+steps:
+- task: AzureKeyVault@2
+  displayName: 'Download TSE lab certificate'
+  inputs:
+    azureSubscription: 'sc-tme-labauth-keyvault'
+    KeyVaultName: 'id4stselabauth-tme'
+    SecretsFilter: 'LabAuthTse'
+
+- powershell: |
+    $ErrorActionPreference = 'Stop'
+    $bytes = [Convert]::FromBase64String($env:LAB_AUTH_TSE)
+    $certificates = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2Collection
+    $flags = [System.Security.Cryptography.X509Certificates.X509KeyStorageFlags]::MachineKeySet -bor [System.Security.Cryptography.X509Certificates.X509KeyStorageFlags]::PersistKeySet
+    $certificates.Import($bytes, $null, $flags)
+    $store = New-Object System.Security.Cryptography.X509Certificates.X509Store 'My', 'LocalMachine'
+    try {
+        $store.Open([System.Security.Cryptography.X509Certificates.OpenFlags]::ReadWrite)
+        $store.AddRange($certificates)
+    } finally {
+        $store.Dispose()
+        foreach ($certificate in $certificates) {
+            $certificate.Dispose()
+        }
+    }
+  env:
+    LAB_AUTH_TSE: $(LabAuthTse)
+  displayName: 'Install TSE lab certificate in LocalMachine/My'

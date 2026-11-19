@@ -246,6 +246,8 @@ stages:
     steps:
     - template: template-desktop-test-setup.yaml
 
+    - template: template-install-tse-certificate.yaml
+
     - task: VSTest@2
       displayName: 'Run integration tests .NET 8'
       inputs:
