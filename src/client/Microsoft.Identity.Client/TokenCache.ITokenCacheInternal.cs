@@ -49,7 +49,8 @@ namespace Microsoft.Identity.Client
                 logger.Info("[SaveTokenResponseAsync] ID Token not present in response. ");
             }
 
-            var tenantId = TokenResponseHelper.GetTenantId(idToken, requestParams);
+            var tenantId = CacheKeyFactory.GetGenericOidcAppRealm(requestParams) ??
+                TokenResponseHelper.GetTenantId(idToken, requestParams);
             string username = TokenResponseHelper.GetUsernameFromIdToken(idToken);
             string homeAccountId = TokenResponseHelper.GetHomeAccountId(requestParams, response, idToken);
 
@@ -646,7 +647,8 @@ namespace Microsoft.Identity.Client
             List<MsalAccessTokenCacheItem> tokenCacheItems,
             AuthenticationRequestParameters requestParams)
         {
-            string requestTenantId = requestParams.Authority.TenantId;
+            string requestTenantId = CacheKeyFactory.GetGenericOidcAppRealm(requestParams) ??
+                requestParams.Authority.TenantId;
             bool filterByTenantId = true;
 
             if (ApiEvent.IsOnBehalfOfRequest(requestParams.ApiId))
