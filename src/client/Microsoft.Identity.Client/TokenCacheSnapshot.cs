@@ -23,6 +23,7 @@ namespace Microsoft.Identity.Client
     public sealed class TokenCacheSnapshot
     {
         private readonly CacheSerializationContract _state;
+        private readonly long _unknownNodesEstimatedSize;
         internal bool IsApplicationCache { get; }
 
         internal TokenCacheSnapshot(
@@ -31,7 +32,8 @@ namespace Microsoft.Identity.Client
             bool isApplicationCache)
         {
             IsApplicationCache = isApplicationCache;
-            _state = new CacheSerializationContract(CloneUnknownNodes(unknownNodes, detachFromOriginalDocument: true));
+            _state = new CacheSerializationContract(CloneUnknownNodes(
+                unknownNodes, detachFromOriginalDocument: true, out _unknownNodesEstimatedSize));
 
             foreach (var item in accessor.GetAllAccessTokens())
             {
@@ -69,6 +71,22 @@ namespace Microsoft.Identity.Client
             return _state.ToJsonString().ToByteArray();
         }
 
+        /// <summary>
+        /// Estimates the managed memory retained by this snapshot, in bytes.
+        /// </summary>
+        /// <remarks>
+        /// This estimate is intended for cache admission and eviction accounting, not as a hard
+        /// memory limit. Actual memory depends on the runtime, architecture, sharing, and cache
+        /// contents. It excludes cache-provider overhead, temporary allocations, and working caches.
+        /// The estimate may overcount or undercount actual memory and may change between MSAL versions.
+        /// This method examines the snapshot's entries and scopes and does not serialize the cache.
+        /// </remarks>
+        /// <returns>An approximate size in bytes.</returns>
+        public long EstimateSizeInBytes()
+        {
+            return TokenCacheSnapshotSizeEstimator.Estimate(_state, _unknownNodesEstimatedSize);
+        }
+
         internal IDictionary<string, JsonNode> Restore(ITokenCacheAccessor accessor)
         {
             accessor.Clear();
@@ -99,15 +117,32 @@ namespace Microsoft.Identity.Client
             IDictionary<string, JsonNode> nodes,
             bool detachFromOriginalDocument = false)
         {
+            return CloneUnknownNodes(nodes, detachFromOriginalDocument, out _);
+        }
+
+        private static IDictionary<string, JsonNode> CloneUnknownNodes(
+            IDictionary<string, JsonNode> nodes,
+            bool detachFromOriginalDocument,
+            out long estimatedSize)
+        {
+            estimatedSize = 0;
             var copy = new Dictionary<string, JsonNode>(StringComparer.Ordinal);
             if (nodes is not null)
             {
                 foreach (var pair in nodes)
                 {
                     // A JsonNode clone can retain the complete source document, not just this subtree.
-                    var node = detachFromOriginalDocument && pair.Value is not null
-                        ? JsonNode.Parse(pair.Value.ToJsonString(), pair.Value.Options)
-                        : CloneNode(pair.Value);
+                    JsonNode node;
+                    if (detachFromOriginalDocument)
+                    {
+                        string json = pair.Value?.ToJsonString();
+                        node = json is null ? null : JsonNode.Parse(json, pair.Value.Options);
+                        estimatedSize += TokenCacheSnapshotSizeEstimator.EstimateUnknownNode(pair.Key, json);
+                    }
+                    else
+                    {
+                        node = CloneNode(pair.Value);
+                    }
                     copy.Add(pair.Key, node);
                 }
             }
