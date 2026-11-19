@@ -169,10 +169,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                RefreshOn,
                TokenType,
                OboCacheKey,
-               AdditionalCacheKeyComponents)
-            {
-                GenericOidcAuthority = GenericOidcAuthority
-            };
+               AdditionalCacheKeyComponents);
 
             return newAtItem;
         }
@@ -263,8 +260,6 @@ namespace Microsoft.Identity.Client.Cache.Items
         /// </summary>
         internal string OboCacheKey { get; set; }
 
-        internal string GenericOidcAuthority { get; set; }
-
         /// <summary>
         /// Used when the token is bound to a public / private key pair which is identified by a key id (kid). 
         /// Currently used by PoP tokens
@@ -319,7 +314,6 @@ namespace Microsoft.Identity.Client.Cache.Items
                 RawClientInfo = RawClientInfo ?? "",
                 HomeAccountId = HomeAccountId ?? "",
                 OboCacheKey = string.IsNullOrEmpty(OboCacheKey) ? null : OboCacheKey,
-                GenericOidcAuthority = GenericOidcAuthority,
                 CredentialType = CredentialType ?? "",
                 AdditionalFieldsJson = AdditionalFieldsJson,
                 AdditionalCacheKeyComponents = AdditionalCacheKeyComponents is null ? null :
@@ -388,7 +382,6 @@ namespace Microsoft.Identity.Client.Cache.Items
 
             item.PersistedCacheParameters = persistedCacheParameters;
             item.OboCacheKey = oboCacheKey;
-            item.GenericOidcAuthority = JsonHelper.ExtractExistingOrDefault<string>(j, StorageJsonKeys.GenericOidcAuthority);
             item.PopulateFieldsFromJObject(j);
 
             item.InitCacheKey();
@@ -404,7 +397,6 @@ namespace Microsoft.Identity.Client.Cache.Items
             SetItemIfValueNotNull(json, StorageJsonKeys.Realm, TenantId);
             SetItemIfValueNotNull(json, StorageJsonKeys.Target, ScopeString);
             SetItemIfValueNotNull(json, StorageJsonKeys.UserAssertionHash, OboCacheKey);
-            SetItemIfValueNotNull(json, StorageJsonKeys.GenericOidcAuthority, GenericOidcAuthority);
             SetItemIfValueNotNull(json, StorageJsonKeys.CachedAt, DateTimeHelpers.DateTimeToUnixTimestamp(CachedAt));
             SetItemIfValueNotNull(json, StorageJsonKeys.ExpiresOn, DateTimeHelpers.DateTimeToUnixTimestamp(ExpiresOn));
             SetItemIfValueNotNull(json, StorageJsonKeys.ExtendedExpiresOn, extExpiresUnixTimestamp);

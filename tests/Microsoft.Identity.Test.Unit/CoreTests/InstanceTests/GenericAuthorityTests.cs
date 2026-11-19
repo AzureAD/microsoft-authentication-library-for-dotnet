@@ -95,7 +95,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 const string TokenB = "synthetic-token-from-realm-b";
                 var scopes = new[] { "api" };
                 var serializedCache = new Dictionary<string, byte[]>(StringComparer.Ordinal);
-                var suggestedKeys = new Dictionary<string, string>(StringComparer.Ordinal);
 
                 ConfidentialClientApplication CreateApp(string authority, string clientSecret)
                 {
@@ -114,7 +113,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     {
                         app.AppTokenCache.SetBeforeAccess(args =>
                         {
-                            suggestedKeys[authority] = args.SuggestedCacheKey;
                             serializedCache.TryGetValue(args.SuggestedCacheKey, out byte[] bytes);
                             args.TokenCache.DeserializeMsalV3(bytes, shouldClearExistingCache: true);
                         });
@@ -171,15 +169,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     var resultB = await appB.AcquireTokenForClient(scopes).ExecuteAsync().ConfigureAwait(false);
 
                     // Assert
-                    TestContext.WriteLine(
-                        $"B token: {resultB.AccessToken}; source: {resultB.AuthenticationResultMetadata.TokenSource}; " +
-                        $"unconsumed B HTTP responses: {httpManager.QueueSize}");
-                    if (!useSharedCache)
-                    {
-                        TestContext.WriteLine(
-                            $"SuggestedCacheKey A: {suggestedKeys[AuthorityA]}; B: {suggestedKeys[authorityB]}");
-                    }
-
                     Assert.AreEqual(TokenB, resultB.AccessToken,
                         "A request for issuer B must not return issuer A's cached token.");
                     Assert.AreEqual(TokenSource.IdentityProvider, resultB.AuthenticationResultMetadata.TokenSource);
@@ -219,11 +208,11 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         }
 
         [TestMethod]
-        [DataRow(null)]
+        [DataRow("identity.example")]
         [DataRow("https://identity.example/realm-b")]
         [DataRow("https://identity.example/Realm-a")]
         [DataRow("https://identity.example:8443/realm-a")]
-        public async Task ClientCredential_UnassociatedOrDifferentAuthorityToken_IsNotReused_Async(string cachedAuthority)
+        public async Task ClientCredential_LegacyOrDifferentEnvironmentToken_IsNotReused_Async(string cachedEnvironment)
         {
             // Arrange
             const string Authority = "https://identity.example/realm-a";
@@ -242,7 +231,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 await app.AcquireTokenForClient(scopes).ExecuteAsync().ConfigureAwait(false);
 
                 var cachedToken = app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single();
-                cachedToken.GenericOidcAuthority = cachedAuthority;
+                app.AppTokenCacheInternal.Accessor.Clear();
+                cachedToken.Environment = cachedEnvironment;
                 app.AppTokenCacheInternal.Accessor.SaveAccessToken(
                     MsalAccessTokenCacheItem.FromJsonString(cachedToken.ToJsonString()));
                 httpManager.AddMockHandler(new MockHttpMessageHandler
@@ -258,7 +248,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 // Assert
                 Assert.AreEqual(TokenSource.IdentityProvider, refreshed.AuthenticationResultMetadata.TokenSource);
                 Assert.AreEqual("synthetic-refreshed-token", refreshed.AccessToken);
-                Assert.AreEqual(Authority, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().GenericOidcAuthority);
+                Assert.AreEqual(Authority,
+                    app.AppTokenCacheInternal.Accessor.GetAllAccessTokens()
+                        .Single(item => item.Secret == refreshed.AccessToken).Environment);
 
                 // Act
                 var cached = await app.AcquireTokenForClient(scopes).ExecuteAsync().ConfigureAwait(false);

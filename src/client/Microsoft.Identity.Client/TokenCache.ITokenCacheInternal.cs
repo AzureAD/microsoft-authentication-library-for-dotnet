@@ -83,10 +83,7 @@ namespace Microsoft.Identity.Client
                         requestParams.AuthenticationScheme.KeyId,
                         CacheKeyFactory.GetOboKey(requestParams.LongRunningOboCacheKey, requestParams.UserAssertion),
                         requestParams.PersistedCacheParameters,
-                        requestParams.CacheKeyComponents)
-                    {
-                        GenericOidcAuthority = genericOidcAuthority
-                    };
+                        requestParams.CacheKeyComponents);
             }
 
             if (!string.IsNullOrEmpty(response.RefreshToken))
@@ -508,10 +505,8 @@ namespace Microsoft.Identity.Client
             string genericOidcAuthority = GetGenericOidcAppAuthority(requestParams);
             if (genericOidcAuthority is not null)
             {
-                // Legacy entries without an authority association are not safe to reuse.
                 accessTokens.FilterWithLogging(
-                    item => string.Equals(item.GenericOidcAuthority, genericOidcAuthority, StringComparison.Ordinal) &&
-                        string.Equals(item.Environment, genericOidcAuthority, StringComparison.Ordinal),
+                    item => string.Equals(item.Environment, genericOidcAuthority, StringComparison.Ordinal),
                     logger,
                     "Filtering AT by generic OIDC authority");
             }

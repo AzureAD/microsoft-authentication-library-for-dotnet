@@ -60,7 +60,7 @@ non-default port, rather than only the hostname. Issuer paths remain
 case-sensitive. Network discovery and `Account.Environment` continue to use
 hostnames.
 
-Existing tokens without this authority association are not reused; the first
+Existing tokens with hostname-only environments are not reused; the first
 acquisition fetches a new token. External `SuggestedCacheKey` values are
 unchanged, so one serialized partition can contain tokens for multiple
 authorities, isolated by their cache environments. Upgrade all readers of a

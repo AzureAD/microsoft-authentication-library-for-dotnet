@@ -202,9 +202,9 @@ namespace Microsoft.Identity.Client
                 msalIdTokenCacheItem?.HomeAccountId;
             string environment = msalAccessTokenCacheItem?.Environment ??
                 msalIdTokenCacheItem?.Environment;
-            if (msalAccessTokenCacheItem?.GenericOidcAuthority is not null)
+            if (environment is not null && environment.StartsWith("https://", StringComparison.Ordinal))
             {
-                environment = new Uri(msalAccessTokenCacheItem.GenericOidcAuthority).Host;
+                environment = new Uri(environment).Host;
             }
 
             ClaimsPrincipal = msalIdTokenCacheItem?.IdToken.ClaimsPrincipal;

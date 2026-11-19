@@ -10,7 +10,6 @@ namespace Microsoft.Identity.Client.Cache
         public const string HomeAccountId = "home_account_id";
         public const string Environment = "environment";
         public const string Realm = "realm";
-        public const string GenericOidcAuthority = "generic_oidc_authority";
         public const string LocalAccountId = "local_account_id";
         public const string Username = "username";
         public const string AuthorityType = "authority_type";
