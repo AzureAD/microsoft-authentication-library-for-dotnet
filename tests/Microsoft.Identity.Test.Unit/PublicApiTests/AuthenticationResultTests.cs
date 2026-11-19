@@ -30,14 +30,15 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 .GetProperties()
                 .Where(p => p.GetCustomAttribute(typeof(ObsoleteAttribute)) == null)
                 .Where(p => p.SetMethod == null || p.SetMethod.IsPublic)
-                .Where(p => p.Name != nameof(AuthenticationResult.BindingCertificate));
+                .Where(p => p.Name != nameof(AuthenticationResult.BindingCertificate) &&
+                    p.Name != nameof(AuthenticationResult.CertificateThumbprint256));
 
             // +2 for the 2 obsolete ExtendedExpires* props that are deliberately
             // not represented in the ctor.
             Assert.AreEqual(
                 ctorParameters.Length,
                 classProperties.Count() + 2,
-                "The <for-test> constructor should include all public-settable or read-only properties of AuthenticationResult (except BindingCertificate and the obsolete ExtendedExpires* pair).");
+                "The <for-test> constructor should include all public-settable or read-only properties of AuthenticationResult (except BindingCertificate, CertificateThumbprint256, and the obsolete ExtendedExpires* pair).");
         }
 
         [TestMethod]
@@ -247,6 +248,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // SPA / mTLS extras
                 nameof(AuthenticationResult.SpaAuthCode),
                 nameof(AuthenticationResult.BindingCertificate),
+                nameof(AuthenticationResult.CertificateThumbprint256),
 
                 // ancillary data
                 nameof(AuthenticationResult.AdditionalResponseParameters),
