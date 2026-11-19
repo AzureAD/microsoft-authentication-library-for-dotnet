@@ -389,13 +389,13 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         // Determines the host's maximum mTLS binding strength for IMDSv1-only hosts using the
         // /metadata/instance/compute security profile. mTLS PoP is not supported on .NET
-        // Framework 4.6.2, so the host is reported as None there.
+        // Framework 4.6.2 and the .NET Standard 2.0 asset, so the host is reported as None there.
         private static Task<MtlsBindingStrength> DetermineImdsV1BindingStrengthAsync(
             RequestContext requestContext,
             CancellationToken cancellationToken,
             CancellationToken retryDelayCancellationToken)
         {
-#if NET462
+#if NET462 || NETSTANDARD
             return Task.FromResult(MtlsBindingStrength.None);
 #else
             return DetermineImdsV1BindingStrengthCoreAsync(
@@ -405,7 +405,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 #endif
         }
 
-#if !NET462
+#if !NET462 && !NETSTANDARD
         private static async Task<MtlsBindingStrength> DetermineImdsV1BindingStrengthCoreAsync(
             RequestContext requestContext,
             CancellationToken cancellationToken,
@@ -429,21 +429,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         // Determines the IMDSv2 host's maximum mTLS binding strength. The host supports at least
         // Software binding (the v2 CSR flow binds a token to a key); if the platform can produce a
-        // VBS-isolated KeyGuard key it supports the stronger, attested KeyGuard tier. mTLS PoP is
-        // unavailable on .NET Framework 4.6.2, so the host is reported as None there.
-        private static Task<MtlsBindingStrength> DetermineImdsV2BindingStrengthAsync(
-            RequestContext requestContext,
-            CancellationToken cancellationToken)
-        {
-#if NET462
-            return Task.FromResult(MtlsBindingStrength.None);
-#else
-            return DetermineImdsV2BindingStrengthCoreAsync(requestContext, cancellationToken);
-#endif
-        }
-
-#if !NET462
-        private static async Task<MtlsBindingStrength> DetermineImdsV2BindingStrengthCoreAsync(
+        // VBS-isolated KeyGuard key it supports the stronger, attested KeyGuard tier.
+        // Called only after a successful IMDSv2 probe.
+        private static async Task<MtlsBindingStrength> DetermineImdsV2BindingStrengthAsync(
             RequestContext requestContext,
             CancellationToken cancellationToken)
         {
@@ -474,7 +462,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 ? MtlsBindingStrength.KeyGuard
                 : MtlsBindingStrength.Software;
         }
-#endif
 
         /// <summary>
         /// Detects the managed identity source based on the availability of environment variables.
