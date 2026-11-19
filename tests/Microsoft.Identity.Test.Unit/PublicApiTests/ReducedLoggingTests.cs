@@ -290,7 +290,19 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(firstResult.AccessToken, cachedResult.AccessToken);
                 Assert.AreEqual(firstResult.ExpiresOn, cachedResult.ExpiresOn);
                 Assert.HasCount(reduced ? 2 : 8, entries.Where(e => e.EventLogLevel == EventLogLevel.Informational).ToList());
-                Assert.HasCount(4, entries.Where(e => e.EventLogLevel == EventLogLevel.LogAlways).ToList());
+                Assert.HasCount(2, entries.Where(e => e.EventLogLevel == EventLogLevel.LogAlways).ToList());
+                string[] cacheCountMessages =
+                {
+                    "[Internal cache] Total number of cache partitions found while getting access tokens: 1",
+                    "[FindAccessTokenAsync] Discovered 1 access tokens in cache using partition key:"
+                };
+                foreach (string message in cacheCountMessages)
+                {
+                    var matching = entries.Where(e => e.Message.Contains(message)).ToList();
+                    Assert.HasCount(threshold == LogLevel.Verbose ? 1 : 0, matching, message);
+                    Assert.IsTrue(matching.All(e => e.EventLogLevel == EventLogLevel.Verbose), message);
+                }
+
                 string[] routineMessages =
                 {
                     "with assembly version",

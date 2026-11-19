@@ -197,7 +197,11 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         public virtual List<MsalAccessTokenCacheItem> GetAllAccessTokens(string partitionKey = null, ILoggerAdapter requestlogger = null)
         {
             ILoggerAdapter logger = requestlogger ?? _logger;
-            logger.Always($"[Internal cache] Total number of cache partitions found while getting access tokens: {AccessTokenCacheDictionary.Count}");
+            if (logger.IsLoggingEnabled(LogLevel.Verbose))
+            {
+                // ConcurrentDictionary.Count acquires all locks; avoid it unless the diagnostic is enabled.
+                logger.Log(LogLevel.Verbose, string.Empty, $"[Internal cache] Total number of cache partitions found while getting access tokens: {AccessTokenCacheDictionary.Count}");
+            }
             if (string.IsNullOrEmpty(partitionKey))
             {
                 return AccessTokenCacheDictionary.SelectMany(dict => dict.Value).Select(kv => kv.Value).ToList();

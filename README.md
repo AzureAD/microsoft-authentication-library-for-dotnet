@@ -27,6 +27,15 @@ The following table lists MSAL.NET versions currently supported and receiving se
 
 View some of the historical performance benchmark results in [our dashboard](https://azuread.github.io/microsoft-authentication-library-for-dotnet/benchmarks/).
 
+### Cache-count diagnostics
+
+The application token-cache partition count and the number of access tokens
+discovered during a cache lookup are logged at Verbose (Debug in
+Microsoft.Extensions.Logging), rather than Always. This applies regardless of
+the reduced logging setting. Enable Verbose/Debug when collecting these counts.
+When Verbose is disabled, the application-cache diagnostic does not evaluate
+the partition count, avoiding the global dictionary locks required to compute it.
+
 ### Reduced logging (opt-in)
 
 MSAL moves selected routine Information messages to Verbose (Debug in
