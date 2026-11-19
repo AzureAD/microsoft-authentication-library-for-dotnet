@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
@@ -21,6 +22,37 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         private static (InMemoryManagedIdentityKeyProvider keyProvider, ILoggerAdapter logger) CreateKeyProviderAndLogger()
         {
             return (new InMemoryManagedIdentityKeyProvider(), Substitute.For<ILoggerAdapter>());
+        }
+
+        [TestMethod]
+        public void CreateRsaKeyPair_UsesHostPlatform()
+        {
+            // Arrange
+            bool isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+
+            // Act
+            using RSA rsa = InMemoryManagedIdentityKeyProvider.CreateRsaKeyPair();
+            try
+            {
+                // Assert
+                Assert.IsGreaterThanOrEqualTo(Constants.RsaKeySize, rsa.KeySize);
+                if (isWindows)
+                {
+                    Assert.IsInstanceOfType<RSACng>(rsa);
+                    Assert.IsFalse(((RSACng)rsa).Key.IsEphemeral, "Schannel requires a persisted key.");
+                }
+                else
+                {
+                    Assert.IsFalse(rsa is RSACng, "Non-Windows hosts must use portable RSA.");
+                }
+            }
+            finally
+            {
+                if (isWindows && rsa is RSACng cng)
+                {
+                    cng.Key.Delete();
+                }
+            }
         }
 
         [TestMethod]
