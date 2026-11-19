@@ -260,7 +260,7 @@ namespace Microsoft.Identity.Client.Cache
 
                             }
 
-                            if (_readView != null)
+                            if (_readView != null && !refreshCache.IsApplicationCache)
                             {
                                 _readView.PublishReadView((TokenCache)TokenCacheInternal);
                             }
@@ -300,7 +300,8 @@ namespace Microsoft.Identity.Client.Cache
                 _readView != null ||
                 !(TokenCacheInternal is TokenCache root) ||
                 !root.UseIsolatedCacheReads ||
-                !(root.Accessor is InMemoryPartitionedUserTokenCacheAccessor) ||
+                (!(root.Accessor is InMemoryPartitionedUserTokenCacheAccessor) &&
+                    !(root.IsAppTokenCache && root.Accessor is InMemoryPartitionedAppTokenCacheAccessor)) ||
                 string.IsNullOrEmpty(CacheKeyFactory.GetKeyFromRequest(_requestParams)) ||
                 !TokenCacheInternal.IsAppSubscribedToSerializationEvents())
             {
