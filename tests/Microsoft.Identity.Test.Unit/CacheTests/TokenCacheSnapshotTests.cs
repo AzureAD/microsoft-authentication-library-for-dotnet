@@ -39,6 +39,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 new SortedList<string, string> { ["partition"] = "one" })
             {
                 AdditionalFieldsJson = "{\"future_item\":{\"values\":[1,2]}}",
+                GenericOidcAuthority = "https://identity.example/realm-a",
                 IsExtendedLifeTimeToken = true
             };
             source.AddAdditionalCacheParameters(new Dictionary<string, string> { ["extra"] = "value" });
@@ -46,6 +47,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             {
                 nameof(source.TenantId),
                 nameof(source.OboCacheKey),
+                nameof(source.GenericOidcAuthority),
                 nameof(source.KeyId),
                 nameof(source.TokenType),
                 nameof(source.ScopeSet),

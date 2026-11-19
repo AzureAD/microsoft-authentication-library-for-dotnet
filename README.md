@@ -52,6 +52,20 @@ used through Microsoft.Identity.Web or MISE. It applies to MSAL applications in
 the process, not just one consuming SDK, and does not change logs emitted by
 those other libraries. Enable Verbose/Debug to see the demoted diagnostics.
 
+### Generic OIDC application-token caching
+
+For `WithOidcAuthority` and `AcquireTokenForClient`, the cached access token's
+`environment` contains the normalized authority URI, including its path and
+non-default port, rather than only the hostname. Issuer paths remain
+case-sensitive. Network discovery and `Account.Environment` continue to use
+hostnames.
+
+Existing tokens without this authority association are not reused; the first
+acquisition fetches a new token. External `SuggestedCacheKey` values are
+unchanged, so one serialized partition can contain tokens for multiple
+authorities, isolated by their cache environments. Upgrade all readers of a
+shared cache; downgrading does not retain the new isolation behavior.
+
 ## Support SLA
 
 MSAL.NET became Generally Available with MSAL.NET 3.0.8. Since MSAL.NET moved to version 4:

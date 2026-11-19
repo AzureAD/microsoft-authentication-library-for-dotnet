@@ -202,6 +202,10 @@ namespace Microsoft.Identity.Client
                 msalIdTokenCacheItem?.HomeAccountId;
             string environment = msalAccessTokenCacheItem?.Environment ??
                 msalIdTokenCacheItem?.Environment;
+            if (msalAccessTokenCacheItem?.GenericOidcAuthority is not null)
+            {
+                environment = new Uri(msalAccessTokenCacheItem.GenericOidcAuthority).Host;
+            }
 
             ClaimsPrincipal = msalIdTokenCacheItem?.IdToken.ClaimsPrincipal;
 

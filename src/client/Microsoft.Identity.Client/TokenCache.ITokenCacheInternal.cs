@@ -68,13 +68,14 @@ namespace Microsoft.Identity.Client
             // so that the PreferredNetwork environment is up to date.
             InstanceDiscoveryMetadataEntry instanceDiscoveryMetadata =
                 await requestParams.AuthorityManager.GetInstanceDiscoveryEntryAsync().ConfigureAwait(false);
+            string genericOidcAuthority = GetGenericOidcAppAuthority(requestParams);
 
             #region Create Cache Objects
             if (!string.IsNullOrEmpty(response.AccessToken))
             {
                 msalAccessTokenCacheItem =
                     new MsalAccessTokenCacheItem(
-                        instanceDiscoveryMetadata.PreferredCache,
+                        genericOidcAuthority ?? instanceDiscoveryMetadata.PreferredCache,
                         requestParams.AppConfig.ClientId,
                         response,
                         tenantId,
@@ -82,7 +83,10 @@ namespace Microsoft.Identity.Client
                         requestParams.AuthenticationScheme.KeyId,
                         CacheKeyFactory.GetOboKey(requestParams.LongRunningOboCacheKey, requestParams.UserAssertion),
                         requestParams.PersistedCacheParameters,
-                        requestParams.CacheKeyComponents);
+                        requestParams.CacheKeyComponents)
+                    {
+                        GenericOidcAuthority = genericOidcAuthority
+                    };
             }
 
             if (!string.IsNullOrEmpty(response.RefreshToken))
@@ -239,7 +243,7 @@ namespace Microsoft.Identity.Client
                         logger.Info("[SaveTokenResponseAsync] Saving AT in cache and removing overlapping ATs...");
                         DeleteAccessTokensWithIntersectingScopes(
                             requestParams,
-                            instanceDiscoveryMetadata.Aliases,
+                            genericOidcAuthority is null ? instanceDiscoveryMetadata.Aliases : new[] { genericOidcAuthority },
                             tenantId,
                             msalAccessTokenCacheItem.ScopeSet,
                             msalAccessTokenCacheItem.HomeAccountId,
@@ -501,9 +505,23 @@ namespace Microsoft.Identity.Client
             }
 
             FilterTokensByHomeAccountTenantOrAssertion(accessTokens, requestParams);
+            string genericOidcAuthority = GetGenericOidcAppAuthority(requestParams);
+            if (genericOidcAuthority is not null)
+            {
+                // Legacy entries without an authority association are not safe to reuse.
+                accessTokens.FilterWithLogging(
+                    item => string.Equals(item.GenericOidcAuthority, genericOidcAuthority, StringComparison.Ordinal) &&
+                        string.Equals(item.Environment, genericOidcAuthority, StringComparison.Ordinal),
+                    logger,
+                    "Filtering AT by generic OIDC authority");
+            }
+
             FilterTokensByTokenType(accessTokens, requestParams);
             FilterTokensByScopes(accessTokens, requestParams);
-            accessTokens = await FilterTokensByEnvironmentAsync(accessTokens, requestParams).ConfigureAwait(false);
+            if (genericOidcAuthority is null)
+            {
+                accessTokens = await FilterTokensByEnvironmentAsync(accessTokens, requestParams).ConfigureAwait(false);
+            }
             FilterTokensByClientId(accessTokens);
             FilterTokensByAdditionalKeyComponents(accessTokens, requestParams);
 
@@ -528,6 +546,23 @@ namespace Microsoft.Identity.Client
             requestParams.RequestContext.ApiEvent.CacheInfo = cacheInfoTelemetry;
 
             return msalAccessTokenCacheItem;
+        }
+
+        private static string GetGenericOidcAppAuthority(AuthenticationRequestParameters requestParams)
+        {
+            var authorityInfo = requestParams.AuthorityManager.OriginalAuthority.AuthorityInfo;
+            if (requestParams.ApiId != ApiEvent.ApiIds.AcquireTokenForClient ||
+                authorityInfo.AuthorityType != AuthorityType.Generic)
+            {
+                return null;
+            }
+
+            var authority = new UriBuilder(authorityInfo.CanonicalAuthority)
+            {
+                Path = authorityInfo.CanonicalAuthority.AbsolutePath.TrimEnd('/'),
+                Fragment = string.Empty
+            };
+            return authority.Uri.AbsoluteUri;
         }
 
         // Symmetric filter for AdditionalCacheKeyComponents (GH #5963):
