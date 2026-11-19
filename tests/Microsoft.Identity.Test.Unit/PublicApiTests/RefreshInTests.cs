@@ -237,25 +237,29 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        public void JitterIsAddedToRefreshOn()
+        public void JitterIsRandomAndWithinRange()
         {
-            var at = TokenCacheHelper.CreateAccessTokenItem();
-            var refreshOnFromCache = DateTimeOffset.UtcNow - TimeSpan.FromMinutes(10);
-            at = TokenCacheHelper.WithRefreshOn(at, refreshOnFromCache);
-
-            List<DateTimeOffset?> refreshOnWithJitterList = new List<DateTimeOffset?>();
+            var jitters = new List<TimeSpan>();
             for (int i = 1; i <= 10; i++)
             {
-                SilentRequestHelper.NeedsRefresh(at, out DateTimeOffset? refreshOnWithJitter);
-                refreshOnWithJitterList.Add(refreshOnWithJitter);
+                TimeSpan jitter = SilentRequestHelper.NextRefreshJitter();
+                jitters.Add(jitter);
 
-                Assert.IsTrue(refreshOnWithJitter.HasValue);
-                CoreAssert.IsWithinRange(
-                    refreshOnFromCache, 
-                    refreshOnWithJitter.Value, 
-                    TimeSpan.FromSeconds(Constants.DefaultJitterRangeInSeconds));
+                Assert.IsTrue(Math.Abs(jitter.TotalSeconds) <= Constants.DefaultJitterRangeInSeconds);
             }
-            Assert.IsGreaterThanOrEqualTo(8, refreshOnWithJitterList.Distinct().Count(), "Jitter is random, so we can only have 1-2 identical values");
+            Assert.IsGreaterThanOrEqualTo(8, jitters.Distinct().Count(), "Jitter is random, so we can only have 1-2 identical values");
+        }
+
+        [TestMethod]
+        public void NeedsRefreshAppliesJitterToRefreshOn()
+        {
+            var at = TokenCacheHelper.WithRefreshOn(
+                TokenCacheHelper.CreateAccessTokenItem(),
+                DateTimeOffset.UtcNow - TimeSpan.FromMinutes(1));
+
+            Assert.IsTrue(SilentRequestHelper.NeedsRefresh(at, TimeSpan.Zero));
+            Assert.IsFalse(SilentRequestHelper.NeedsRefresh(at, TimeSpan.FromMinutes(2)));
+            Assert.IsTrue(SilentRequestHelper.NeedsRefresh(at, TimeSpan.FromMinutes(-2)));
         }
 
         [TestMethod]

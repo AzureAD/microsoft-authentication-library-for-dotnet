@@ -1858,6 +1858,54 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
+        public async Task ConfidentialClientSuggestedRefreshOnAndJitterAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                              .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                              .WithClientSecret(TestConstants.ClientSecret)
+                                                              .WithHttpManager(httpManager)
+                                                              .BuildConcrete();
+
+                InMemoryTokenCache cache = new InMemoryTokenCache();
+                cache.Bind(app.AppTokenCache);
+
+                var jitters = new List<TimeSpan>();
+                DateTimeOffset? suggestedRefreshOn = null;
+                var tokenCache = (TokenCache)app.AppTokenCache;
+                tokenCache.BeforeAccess += args => jitters.Add(args.RefreshJitter);
+                tokenCache.AfterAccess += args =>
+                {
+                    jitters.Add(args.RefreshJitter);
+                    if (args.HasStateChanged)
+                    {
+                        suggestedRefreshOn = args.SuggestedRefreshOn;
+                    }
+                };
+
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(expiresIn: "3600");
+                await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // One request: read and write notifications share a single jitter within the configured range.
+                Assert.IsTrue(jitters.Count >= 2);
+                Assert.AreEqual(1, jitters.Distinct().Count());
+                Assert.IsTrue(Math.Abs(jitters[0].TotalSeconds) <= 300);
+
+                // No refresh_in in the response: refresh is due when MSAL stops serving the token.
+                Assert.IsTrue(suggestedRefreshOn.HasValue);
+                CoreAssert.IsWithinRange(
+                    DateTimeOffset.UtcNow + TimeSpan.FromSeconds(3600) - TimeSpan.FromMinutes(5),
+                    suggestedRefreshOn.Value,
+                    TimeSpan.FromSeconds(5));
+            }
+        }
+
+        [TestMethod]
         public async Task ConfidentialClientSuggestedExpiryAsync()
         {
             using (var httpManager = new MockHttpManager())

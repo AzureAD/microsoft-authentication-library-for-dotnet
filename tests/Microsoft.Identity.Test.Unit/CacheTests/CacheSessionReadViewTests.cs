@@ -62,6 +62,24 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [TestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task SuggestedRefreshOnDescribesTheHydratedPartition(bool isolated)
+        {
+            SetIsolation(isolated);
+            var refreshOn = DateTimeOffset.UtcNow.AddMinutes(30);
+            var cache = CreateCache();
+            DateTimeOffset? suggestedRefreshOn = null;
+            ((TokenCache)cache).SetBeforeAccess(args =>
+                args.TokenCache.DeserializeMsalV3(BlobWithAccessToken(refreshOn), true));
+            ((TokenCache)cache).SetAfterAccess(args => suggestedRefreshOn = args.SuggestedRefreshOn);
+
+            await CreateSession(cache).GetAccountsAsync().ConfigureAwait(false);
+
+            Assert.AreEqual(refreshOn.ToUnixTimeSeconds(), suggestedRefreshOn?.ToUnixTimeSeconds());
+        }
+
+        [TestMethod]
         public async Task PrivateViewPreservesUnknownJson()
         {
             var cache = CreateCache();
@@ -1355,6 +1373,20 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 "\"RefreshToken\":{\"synthetic-rt\":{\"home_account_id\":\"" + HomeId +
                 "\",\"environment\":\"login.microsoftonline.com\",\"client_id\":\"" + ClientId +
                 "\",\"credential_type\":\"RefreshToken\",\"secret\":\"synthetic\"}},\"future_node\":{\"value\":42}}");
+        }
+
+        private static byte[] BlobWithAccessToken(DateTimeOffset refreshOn)
+        {
+            var now = DateTimeOffset.UtcNow;
+            string json = Encoding.UTF8.GetString(Blob("before"));
+            return Encoding.UTF8.GetBytes(json.Insert(1,
+                "\"AccessToken\":{\"synthetic-at\":{\"home_account_id\":\"" + HomeId +
+                "\",\"environment\":\"login.microsoftonline.com\",\"client_id\":\"" + ClientId +
+                "\",\"credential_type\":\"AccessToken\",\"secret\":\"synthetic\",\"realm\":\"11111111-1111-1111-1111-111111111111\"," +
+                "\"target\":\"scope\",\"cached_at\":\"" + now.ToUnixTimeSeconds() +
+                "\",\"expires_on\":\"" + now.AddHours(1).ToUnixTimeSeconds() +
+                "\",\"extended_expires_on\":\"" + now.AddHours(2).ToUnixTimeSeconds() +
+                "\",\"refresh_on\":\"" + refreshOn.ToUnixTimeSeconds() + "\"}},"));
         }
 
         private static async Task ExpectUnsupported(Func<Task> action, string reason)

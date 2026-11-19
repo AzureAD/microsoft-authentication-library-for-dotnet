@@ -73,19 +73,12 @@ namespace Microsoft.Identity.Client.Internal
             return dict;
         }
 
-        internal static bool NeedsRefresh(MsalAccessTokenCacheItem oldAccessToken)
+        /// <summary>
+        /// True if the access token's refresh time, plus the request's jitter, has passed.
+        /// </summary>
+        internal static bool NeedsRefresh(MsalAccessTokenCacheItem oldAccessToken, TimeSpan jitter)
         {
-            return NeedsRefresh(oldAccessToken, out _);
-        }
-
-        internal static bool NeedsRefresh(MsalAccessTokenCacheItem oldAccessToken, out DateTimeOffset? refreshOnWithJitter)
-        {
-            refreshOnWithJitter = GetRefreshOnWithJitter(oldAccessToken);
-            if (refreshOnWithJitter.HasValue && refreshOnWithJitter.Value < DateTimeOffset.UtcNow)
-            {
-                return true;
-            }
-            return false;
+            return oldAccessToken.RefreshOn.HasValue && oldAccessToken.RefreshOn.Value + jitter < DateTimeOffset.UtcNow;
         }
 
         /// <summary>
@@ -268,17 +261,24 @@ namespace Microsoft.Identity.Client.Internal
                 platform, apiEvent, httpStatusCode, logger, extraTags);
         }
 
-        private static Random s_random = new Random();
-        private static DateTimeOffset? GetRefreshOnWithJitter(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
+#if NET6_0_OR_GREATER
+        internal static TimeSpan NextRefreshJitter()
         {
-            if (msalAccessTokenCacheItem.RefreshOn.HasValue)
-            {
-                int jitter = s_random.Next(-Constants.DefaultJitterRangeInSeconds, Constants.DefaultJitterRangeInSeconds);
-                var refreshOnWithJitter = msalAccessTokenCacheItem.RefreshOn.Value + TimeSpan.FromSeconds(jitter);
-                return refreshOnWithJitter;
-            }
-            
-            return null;           
+            // Thread-safe without locking.
+            Random random = Random.Shared;
+            return TimeSpan.FromSeconds(random.Next(-Constants.DefaultJitterRangeInSeconds, Constants.DefaultJitterRangeInSeconds));
         }
+#else
+        // Random.Shared (thread-safe) is unavailable before .NET 6. This shared instance is not thread-safe:
+        // concurrent calls can corrupt its state, after which it may always return 0 (no jitter). It is kept
+        // unlocked to match existing behavior and avoid serializing every request on a lock.
+        private static Random s_random = new Random();
+
+        internal static TimeSpan NextRefreshJitter()
+        {
+            Random random = s_random;
+            return TimeSpan.FromSeconds(random.Next(-Constants.DefaultJitterRangeInSeconds, Constants.DefaultJitterRangeInSeconds));
+        }
+#endif
     }
 }

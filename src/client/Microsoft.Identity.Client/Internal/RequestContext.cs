@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Logger;
+using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
@@ -36,6 +37,12 @@ namespace Microsoft.Identity.Client.Internal
         public bool IsAttestationRequested { get; set; }
         
         public bool IsMtlsRequested { get; set; }
+
+        /// <summary>
+        /// Proactive refresh jitter, drawn once per request so that MSAL and the cache notification callbacks
+        /// agree on when the request's tokens are due for refresh.
+        /// </summary>
+        public TimeSpan RefreshJitter { get; init; } = SilentRequestHelper.NextRefreshJitter();
 
         public RequestContext(IServiceBundle serviceBundle, Guid correlationId, X509Certificate2 mtlsCertificate, CancellationToken cancellationToken = default)
         {

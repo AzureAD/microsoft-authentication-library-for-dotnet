@@ -97,7 +97,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                 }
                 else
                 {
-                    var shouldRefresh = SilentRequestHelper.NeedsRefresh(cachedAccessTokenItem);
+                    var shouldRefresh = SilentRequestHelper.NeedsRefresh(cachedAccessTokenItem, AuthenticationRequestParameters.RequestContext.RefreshJitter);
 
                     // If needed, refreshes token in the background
                     if (shouldRefresh)

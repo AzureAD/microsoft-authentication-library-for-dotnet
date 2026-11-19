@@ -210,7 +210,10 @@ namespace Microsoft.Identity.Client
                             requestScopes: requestParams.Scope,
                             requestTenantId: requestParams.AuthorityManager.OriginalAuthority.TenantId,
                             identityLogger: requestParams.RequestContext.Logger.IdentityLogger,
-                            piiLoggingEnabled: requestParams.RequestContext.Logger.PiiLoggingEnabled);
+                            piiLoggingEnabled: requestParams.RequestContext.Logger.PiiLoggingEnabled)
+                        {
+                            RefreshJitter = requestParams.RequestContext.RefreshJitter,
+                        };
 
                         var measuredResultDuration = await StopwatchService.MeasureCodeBlockAsync(async () =>
                         {
@@ -298,7 +301,16 @@ namespace Microsoft.Identity.Client
                             requestScopes: requestParams.Scope,
                             requestTenantId: requestParams.AuthorityManager.OriginalAuthority.TenantId,
                             identityLogger: requestParams.RequestContext.Logger.IdentityLogger,
-                            piiLoggingEnabled: requestParams.RequestContext.Logger.PiiLoggingEnabled);
+                            piiLoggingEnabled: requestParams.RequestContext.Logger.PiiLoggingEnabled)
+                        {
+                            RefreshJitter = requestParams.RequestContext.RefreshJitter,
+                            // Performs an O(n) walk of MsalAccessTokenCacheItems to determine the earliest refresh time for L2 cache proactive refresh.
+                            // Cost is paid even in non-L2 scenarios due to the complexity of avoiding this check. Ideally it should be calculated only
+                            // for L2 cache promotion scenarios.
+                            SuggestedRefreshOn = CalculateSuggestedRefreshOn(
+                                Accessor,
+                                CacheKeyFactory.GetInternalPartitionKeyFromResponse(requestParams, homeAccountId)),
+                        };
 
                         var measuredTimeDuration = await tokenCacheInternal.OnAfterAccessAsync(args).MeasureAsync().ConfigureAwait(false);
                         requestParams.RequestContext.ApiEvent.DurationInCacheInMs += measuredTimeDuration.Milliseconds;
@@ -453,6 +465,21 @@ namespace Microsoft.Identity.Client
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Earliest unjittered refresh time across the partition's access tokens; for tokens without
+        /// <see cref="MsalAccessTokenCacheItem.RefreshOn"/>, the time they stop being served (expiry minus buffer).
+        /// </summary>
+        internal static DateTimeOffset? CalculateSuggestedRefreshOn(ITokenCacheAccessor accessor, string partitionKey)
+        {
+            var accessTokens = accessor.GetAllAccessTokens(partitionKey);
+            if (accessTokens.Count == 0)
+            {
+                return null;
+            }
+
+            return accessTokens.Min(at => at.RefreshOn ?? at.ExpiresOn - Constants.AccessTokenExpirationBuffer);
         }
 
         private void MergeWamAccountIds(MsalAccountCacheItem msalAccountCacheItem)
