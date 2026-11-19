@@ -17,7 +17,7 @@ namespace Microsoft.Identity.Client.Http
         {
             get
             {
-                var headers = new Dictionary<string, string>();
+                var headers = new Dictionary<string, string>(System.StringComparer.OrdinalIgnoreCase);
 
                 if (Headers != null)
                 {
