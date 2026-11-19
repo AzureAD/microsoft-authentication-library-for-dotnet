@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
@@ -346,6 +347,69 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             // Assert
             AssertJsonEqual(source.SerializeMsalV3(), legacy.SerializeMsalV3());
             AssertJsonEqual(source.SerializeMsalV3(), destination.SerializeMsalV3());
+        }
+
+        [TestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        public void UnknownFieldsSurviveSnapshotRestoreAndTokenUpdate(bool applicationCache)
+        {
+            // Arrange
+            var source = CreateCache(applicationCache);
+            Populate(source, applicationCache);
+            var json = JsonNode.Parse(source.SerializeMsalV3());
+            json["future"] = JsonNode.Parse("{\"nested\":[null,true,false,1.25,123456789012345678901234567890,{\"value\":\"preserved\"}]}");
+            json["future_null"] = null;
+            json["AccessToken"].AsObject().First().Value["future_item"] =
+                JsonNode.Parse("{\"nested\":[null,{\"value\":\"item\"}]}");
+            source.DeserializeMsalV3(Encoding.UTF8.GetBytes(json.ToJsonString()), true);
+            var snapshot = ((ITokenCacheSnapshotProvider)source).CreateSnapshot();
+            var destination = CreateCache(applicationCache);
+
+            // Act
+            ((ITokenCacheSnapshotProvider)destination).RestoreSnapshot(snapshot);
+            var token = destination.Accessor.GetAllAccessTokens().Single();
+            token.Secret = "updated-token";
+            destination.Accessor.SaveAccessToken(token);
+            var result = JsonNode.Parse(destination.SerializeMsalV3());
+
+            // Assert
+            JsonTestUtils.AssertJsonDeepEquals(json["future"].ToJsonString(), result["future"].ToJsonString());
+            Assert.IsTrue(result.AsObject().ContainsKey("future_null"));
+            Assert.IsNull(result["future_null"]);
+            JsonTestUtils.AssertJsonDeepEquals(
+                json["AccessToken"].AsObject().First().Value["future_item"].ToJsonString(),
+                result["AccessToken"].AsObject().First().Value["future_item"].ToJsonString());
+            Assert.AreEqual("updated-token", result["AccessToken"].AsObject().First().Value["secret"].GetValue<string>());
+        }
+
+        [TestMethod]
+        [DataRow("{\"nested\":[{\"value\":\"preserved\"}]}")]
+        [DataRow("[{\"value\":\"preserved\"}]")]
+        [DataRow("\"preserved\"")]
+        public void SnapshotUnknownNodesDoNotRetainUnrelatedJson(string unknownJson)
+        {
+            // Arrange
+            string unrelated = new string('x', 8192);
+            var root = JsonNode.Parse("{\"known\":\"" + unrelated + "\",\"future\":" + unknownJson + "}");
+            var unknown = new Dictionary<string, JsonNode> { ["future"] = root["future"] };
+
+            // Act
+            var snapshot = new TokenCacheSnapshot(CreateCache(true).Accessor, unknown, true);
+            var state = (CacheSerializationContract)typeof(TokenCacheSnapshot)
+                .GetField("_state", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(snapshot);
+            var node = state.UnknownNodes["future"];
+            while (node is not JsonValue)
+            {
+                node = node is JsonObject obj ? obj.First().Value : node.AsArray()[0];
+            }
+            var element = node.GetValue<JsonElement>();
+            var document = (JsonDocument)typeof(JsonElement)
+                .GetField("_parent", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(element);
+
+            // Assert
+            Assert.IsLessThan(unrelated.Length, document.RootElement.GetRawText().Length);
+            JsonTestUtils.AssertJsonDeepEquals(unknownJson, state.UnknownNodes["future"].ToJsonString());
         }
 
         [TestMethod]
