@@ -13,6 +13,7 @@ using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Logger;
+using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2.Throttling;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
@@ -403,6 +404,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             {
                 Trace.WriteLine("1. Setup an app ");
                 ConfidentialClientApplication app = SetupCca(harness);
+                var completed = new TaskCompletionSource<ExecutionResult>(TaskCreationOptions.RunContinuationsAsynchronously);
+                app.ServiceBundle.Config.OnBackgroundTokenRefreshCompleted = refresh =>
+                {
+                    completed.TrySetResult(refresh);
+                    return Task.CompletedTask;
+                };
 
                 Trace.WriteLine("2. Configure AT so that it shows it needs to be refreshed");
 
@@ -421,19 +428,51 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // Assert
                 Assert.IsNotNull(result, "ClientCredentials should still succeeds even though AAD is unavailable");
-                TestCommon.YieldTillSatisfied(() => harness.HttpManager.QueueSize == 0);
+                Assert.AreSame(completed.Task,
+                    await Task.WhenAny(completed.Task, Task.Delay(TimeSpan.FromSeconds(10))).ConfigureAwait(false));
+                var failedRefresh = await completed.Task.ConfigureAwait(false);
+                Assert.IsFalse(failedRefresh.Successful);
+                Assert.IsInstanceOfType<MsalServiceException>(failedRefresh.Exception);
                 Assert.AreEqual(0, harness.HttpManager.QueueSize);
                 cacheAccess.WaitTo_AssertAcessCounts(1, 0); // the refresh failed, no new data is written to the cache
 
-                // Now let AAD respond with tokens
+                // A usable token is still returned, but throttling prevents another HTTP refresh.
+                completed = new TaskCompletionSource<ExecutionResult>(TaskCreationOptions.RunContinuationsAsynchronously);
+                result = await app.AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+                Assert.AreSame(completed.Task,
+                    await Task.WhenAny(completed.Task, Task.Delay(TimeSpan.FromSeconds(10))).ConfigureAwait(false));
+                var throttledRefresh = await completed.Task.ConfigureAwait(false);
+                Assert.IsFalse(throttledRefresh.Successful);
+                Assert.IsInstanceOfType<MsalThrottledServiceException>(throttledRefresh.Exception);
+                Assert.AreSame(failedRefresh.Exception,
+                    ((MsalThrottledServiceException)throttledRefresh.Exception).OriginalServiceException);
+                cacheAccess.AssertAccessCounts(2, 0);
+
+                // Expire the throttle deterministically before allowing a successful refresh.
+                var failureCache = TokenRequestCoalescer.GetFailureCache(app.ServiceBundle);
+                Assert.HasCount(1, failureCache.CacheForTest);
+                var entry = failureCache.CacheForTest.Single();
+                failureCache.CacheForTest[entry.Key] = new ThrottlingCacheEntry(
+                    (MsalServiceException)failedRefresh.Exception,
+                    DateTimeOffset.UtcNow.AddMinutes(-2), DateTimeOffset.UtcNow.AddMinutes(-1));
+                completed = new TaskCompletionSource<ExecutionResult>(TaskCreationOptions.RunContinuationsAsynchronously);
                 harness.HttpManager.AddTokenResponse(TokenResponseType.Valid_ClientCredentials);
 
                 result = await app.AcquireTokenForClient(TestConstants.s_scope)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
                 Assert.IsNotNull(result);
-
-                cacheAccess.WaitTo_AssertAcessCounts(2, 1); // new tokens written to cache
+                Assert.AreSame(completed.Task,
+                    await Task.WhenAny(completed.Task, Task.Delay(TimeSpan.FromSeconds(10))).ConfigureAwait(false));
+                var recoveredRefresh = await completed.Task.ConfigureAwait(false);
+                Assert.IsTrue(recoveredRefresh.Successful);
+                Assert.AreEqual(TokenSource.IdentityProvider, recoveredRefresh.Result.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(0, harness.HttpManager.QueueSize);
+                Assert.IsTrue(failureCache.IsEmpty());
+                cacheAccess.AssertAccessCounts(3, 1); // new tokens written to cache
             }
         }
 
@@ -527,6 +566,16 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 .ConfigureAwait(false);
 
             Assert.IsTrue(TestCommon.YieldTillSatisfied(() => wasErrorLogged));
+            Assert.AreEqual(0, harness.HttpManager.QueueSize,
+                "Background refresh must still enter the existing instance-discovery path.");
+
+            // Cancellation must release admission so a later cache miss can acquire normally.
+            TestCommon.UpdateATWithRefreshOn(app.AppTokenCacheInternal.Accessor, expired: true);
+            harness.HttpManager.AddAllMocks(TokenResponseType.Valid_ClientCredentials);
+            var recovery = app.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync();
+            Assert.AreSame(recovery, await Task.WhenAny(recovery, Task.Delay(TimeSpan.FromSeconds(10))).ConfigureAwait(false));
+            Assert.AreEqual(TokenSource.IdentityProvider,
+                (await recovery.ConfigureAwait(false)).AuthenticationResultMetadata.TokenSource);
 
             void LocalLogCallback(LogLevel level, string message, bool containsPii)
             {

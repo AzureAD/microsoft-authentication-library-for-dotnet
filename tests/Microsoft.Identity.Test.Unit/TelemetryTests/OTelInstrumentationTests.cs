@@ -12,8 +12,10 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Extensibility;
+using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.OAuth2.Throttling;
 using Microsoft.Identity.Client.Platforms.Features.OpenTelemetry;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Test.Common;
@@ -545,32 +547,39 @@ namespace Microsoft.Identity.Test.Unit
                 _harness.HttpManager.AddTokenResponse(TokenResponseType.Invalid_AADUnavailable503);
 
                 // Act
-                AuthenticationResult result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
-                    .WithExtraQueryParameters(extraQueryParams)
-                    .ExecuteAsync()
-                    .ConfigureAwait(false);
+                var failedRefresh = await AcquireCachedTokenAndWaitForRefreshAsync().ConfigureAwait(false);
 
                 // Assert
-                Assert.IsNotNull(result, "ClientCredentials should still succeeds even though AAD is unavailable");
-                TestCommon.YieldTillSatisfied(() => _harness.HttpManager.QueueSize == 0);
+                Assert.IsFalse(failedRefresh.Successful);
+                Assert.IsInstanceOfType<MsalServiceException>(failedRefresh.Exception);
+                Assert.AreEqual(503, ((MsalServiceException)failedRefresh.Exception).StatusCode);
                 Assert.AreEqual(0, _harness.HttpManager.QueueSize);
                 cacheAccess.WaitTo_AssertAcessCounts(1, 0); // the refresh failed, no new data is written to the cache
 
-                // Now let AAD respond with tokens
+                // A healthy endpoint must not be retried until the local failure throttle expires.
                 _harness.HttpManager.AddTokenResponse(TokenResponseType.Valid_ClientCredentials);
+                var throttledRefresh = await AcquireCachedTokenAndWaitForRefreshAsync().ConfigureAwait(false);
+                Assert.IsFalse(throttledRefresh.Successful);
+                Assert.IsInstanceOfType<MsalThrottledServiceException>(throttledRefresh.Exception);
+                Assert.AreSame(failedRefresh.Exception,
+                    ((MsalThrottledServiceException)throttledRefresh.Exception).OriginalServiceException);
+                Assert.AreEqual(1, _harness.HttpManager.QueueSize);
+                cacheAccess.AssertAccessCounts(2, 0);
 
-                result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
-                    .WithExtraQueryParameters(extraQueryParams)
-                    .ExecuteAsync()
-                    .ConfigureAwait(false);
-                Assert.IsNotNull(result);
-
-                cacheAccess.WaitTo_AssertAcessCounts(2, 1); // new tokens written to cache
-
-                Thread.Sleep(1000);
+                var failureCache = TokenRequestCoalescer.GetFailureCache(_cca.ServiceBundle);
+                var entry = failureCache.CacheForTest.Single();
+                failureCache.CacheForTest[entry.Key] = new ThrottlingCacheEntry(
+                    (MsalServiceException)failedRefresh.Exception,
+                    DateTimeOffset.UtcNow.AddMinutes(-2), DateTimeOffset.UtcNow.AddMinutes(-1));
+                var recoveredRefresh = await AcquireCachedTokenAndWaitForRefreshAsync().ConfigureAwait(false);
+                Assert.IsTrue(recoveredRefresh.Successful);
+                Assert.AreEqual(TokenSource.IdentityProvider, recoveredRefresh.Result.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(0, _harness.HttpManager.QueueSize);
+                Assert.IsTrue(failureCache.IsEmpty());
+                cacheAccess.AssertAccessCounts(3, 1);
 
                 s_meterProvider.ForceFlush();
-                VerifyMetrics(6, _exportedMetrics, 3, 1);
+                VerifyMetrics(6, _exportedMetrics, 4, 2);
             }
         }
 
@@ -598,32 +607,39 @@ namespace Microsoft.Identity.Test.Unit
                 _harness.HttpManager.AddTokenResponse(TokenResponseType.Invalid_AADUnavailable503);
 
                 // Act
-                AuthenticationResult result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
-                    .WithExtraQueryParameters(extraQueryParams)
-                    .ExecuteAsync()
-                    .ConfigureAwait(false);
+                var failedRefresh = await AcquireCachedTokenAndWaitForRefreshAsync().ConfigureAwait(false);
 
                 // Assert
-                Assert.IsNotNull(result, "ClientCredentials should still succeeds even though AAD is unavailable");
-                TestCommon.YieldTillSatisfied(() => _harness.HttpManager.QueueSize == 0);
+                Assert.IsFalse(failedRefresh.Successful);
+                Assert.IsInstanceOfType<MsalServiceException>(failedRefresh.Exception);
+                Assert.AreEqual(503, ((MsalServiceException)failedRefresh.Exception).StatusCode);
                 Assert.AreEqual(0, _harness.HttpManager.QueueSize);
                 cacheAccess.WaitTo_AssertAcessCounts(1, 0); // the refresh failed, no new data is written to the cache
 
-                // Now let AAD respond with tokens
+                // A healthy endpoint must not be retried until the local failure throttle expires.
                 _harness.HttpManager.AddTokenResponse(TokenResponseType.Valid_ClientCredentials);
+                var throttledRefresh = await AcquireCachedTokenAndWaitForRefreshAsync().ConfigureAwait(false);
+                Assert.IsFalse(throttledRefresh.Successful);
+                Assert.IsInstanceOfType<MsalThrottledServiceException>(throttledRefresh.Exception);
+                Assert.AreSame(failedRefresh.Exception,
+                    ((MsalThrottledServiceException)throttledRefresh.Exception).OriginalServiceException);
+                Assert.AreEqual(1, _harness.HttpManager.QueueSize);
+                cacheAccess.AssertAccessCounts(2, 0);
 
-                result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
-                    .WithExtraQueryParameters(extraQueryParams)
-                    .ExecuteAsync()
-                    .ConfigureAwait(false);
-                Assert.IsNotNull(result);
-
-                cacheAccess.WaitTo_AssertAcessCounts(2, 1); // new tokens written to cache
-
-                Thread.Sleep(1000);
+                var failureCache = TokenRequestCoalescer.GetFailureCache(_cca.ServiceBundle);
+                var entry = failureCache.CacheForTest.Single();
+                failureCache.CacheForTest[entry.Key] = new ThrottlingCacheEntry(
+                    (MsalServiceException)failedRefresh.Exception,
+                    DateTimeOffset.UtcNow.AddMinutes(-2), DateTimeOffset.UtcNow.AddMinutes(-1));
+                var recoveredRefresh = await AcquireCachedTokenAndWaitForRefreshAsync().ConfigureAwait(false);
+                Assert.IsTrue(recoveredRefresh.Successful);
+                Assert.AreEqual(TokenSource.IdentityProvider, recoveredRefresh.Result.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(0, _harness.HttpManager.QueueSize);
+                Assert.IsTrue(failureCache.IsEmpty());
+                cacheAccess.AssertAccessCounts(3, 1);
 
                 s_meterProvider.ForceFlush();
-                VerifyMetrics(6, _exportedMetrics, 3, 1);
+                VerifyMetrics(6, _exportedMetrics, 4, 2);
 
                 // MsalTotalDurationV2.1A should have no Succeeded=false point from the background path —
                 // background failures call LogBackgroundFailureMetrics, which does not record total duration
@@ -690,6 +706,25 @@ namespace Microsoft.Identity.Test.Unit
                 CollectionAssert.DoesNotContain(metricNames, "MsalDurationInHttpV2.1A",
                     "MsalDurationInHttpV2.1A must not be emitted when MSAL_ENABLE_EXTENDED_TOKEN_METRICS is unset.");
             }
+        }
+
+        private async Task<ExecutionResult> AcquireCachedTokenAndWaitForRefreshAsync()
+        {
+            var completed = new TaskCompletionSource<ExecutionResult>(TaskCreationOptions.RunContinuationsAsynchronously);
+            _cca.ServiceBundle.Config.OnBackgroundTokenRefreshCompleted = refresh =>
+            {
+                completed.TrySetResult(refresh);
+                return Task.CompletedTask;
+            };
+
+            var result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
+                .WithExtraQueryParameters(extraQueryParams)
+                .ExecuteAsync().ConfigureAwait(false);
+            Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+            Assert.AreSame(completed.Task,
+                await Task.WhenAny(completed.Task, Task.Delay(TimeSpan.FromSeconds(10))).ConfigureAwait(false),
+                "The background refresh did not complete.");
+            return await completed.Task.ConfigureAwait(false);
         }
 
         private async Task AcquireTokenSuccessAsync(bool withExtension = false)

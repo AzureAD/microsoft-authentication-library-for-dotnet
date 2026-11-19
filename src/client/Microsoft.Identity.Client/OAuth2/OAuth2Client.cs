@@ -14,6 +14,8 @@ using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Instance.Oidc;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.TelemetryCore;
+using Microsoft.Identity.Client.TelemetryCore.Http;
 using Microsoft.Identity.Client.Utils;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client.Http.Retry;
@@ -38,6 +40,7 @@ namespace Microsoft.Identity.Client.OAuth2
         private readonly IDictionary<string, string> _bodyParameters = new Dictionary<string, string>();
         private readonly IHttpManager _httpManager;
         private readonly X509Certificate2 _mtlsCertificate;
+        internal MsalServiceException LastHttpServiceException { get; private set; }
 
         public OAuth2Client(ILoggerAdapter logger, IHttpManager httpManager, X509Certificate2 mtlsCertificate)
         {
@@ -121,6 +124,7 @@ namespace Microsoft.Identity.Client.OAuth2
             CancellationToken? cancellationToken = null,
             IRetryPolicy retryPolicy = null)
         {
+            LastHttpServiceException = null;
             //Requests that are replayed by PKeyAuth do not need to have headers added because they already exist
             if (addCommonHeaders)
             {
@@ -135,6 +139,7 @@ namespace Microsoft.Identity.Client.OAuth2
                 IRetryPolicyFactory retryPolicyFactory = requestContext.ServiceBundle.Config.RetryPolicyFactory;
                 IRetryPolicy effectiveRetryPolicy = retryPolicy ?? retryPolicyFactory.GetRetryPolicy(RequestType.STS);
                 CancellationToken effectiveCancellationToken = cancellationToken ?? requestContext.UserCancellationToken;
+                bool isTokenRequest = typeof(T) == typeof(MsalTokenResponse);
                 bool tokenPostStarted = false;
 
                 try
@@ -154,14 +159,14 @@ namespace Microsoft.Identity.Client.OAuth2
                             endpointUri = requestData.RequestUri;
                         }
 
-                        tokenPostStarted = typeof(T) == typeof(MsalTokenResponse) && !effectiveCancellationToken.IsCancellationRequested;
+                        tokenPostStarted = isTokenRequest && !effectiveCancellationToken.IsCancellationRequested;
                         response = await _httpManager.SendRequestAsync(
                             endpointUri,
                             _headers,
                             body: new FormUrlEncodedContent(_bodyParameters),
                             method: HttpMethod.Post,
                             logger: requestContext.Logger,
-                            doNotThrow: false,
+                            doNotThrow: isTokenRequest,
                             mtlsCertificate: _mtlsCertificate,
                             validateServerCertificate: null,
                             cancellationToken: effectiveCancellationToken,
@@ -182,6 +187,13 @@ namespace Microsoft.Identity.Client.OAuth2
                             cancellationToken: effectiveCancellationToken,
                             retryPolicy: effectiveRetryPolicy)
                         .ConfigureAwait(false);
+                    }
+
+                    if (isTokenRequest && (int)response.StatusCode >= 500 && (int)response.StatusCode < 600)
+                    {
+                        // Only an actual final response establishes token-endpoint failure provenance.
+                        LastHttpServiceException = MsalServiceExceptionFactory.FromServiceUnavailableResponse(response, endpointUri);
+                        throw LastHttpServiceException;
                     }
                 }
                 catch (Exception ex)
@@ -216,6 +228,15 @@ namespace Microsoft.Identity.Client.OAuth2
 
                     throw;
                 }
+                finally
+                {
+                    // PKeyAuth and other protocol replays reuse this client's headers.
+                    if (_headers.TryGetValue(TelemetryConstants.XClientCurrentTelemetry, out string telemetry))
+                    {
+                        _headers[TelemetryConstants.XClientCurrentTelemetry] =
+                            HttpTelemetryManager.ClearCoalescingCounts(telemetry);
+                    }
+                }
             }
 
             if (requestContext.ApiEvent != null)
@@ -249,7 +270,15 @@ namespace Microsoft.Identity.Client.OAuth2
                 }
             }
 
-            return CreateResponse<T>(response, requestContext);
+            try
+            {
+                return CreateResponse<T>(response, requestContext);
+            }
+            catch (MsalServiceException ex)
+            {
+                LastHttpServiceException = ex;
+                throw;
+            }
         }
 
         internal void AddBodyParameter(KeyValuePair<string, string> kvp)

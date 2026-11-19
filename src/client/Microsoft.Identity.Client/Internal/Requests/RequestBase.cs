@@ -508,6 +508,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 #if !MOBILE
             atItem?.AddAdditionalCacheParameters(clientInfoFromServer?.AdditionalResponseParameters);
 #endif
+            // The token is published; result formatting is caller-local.
+            AuthenticationRequestParameters.ReleaseCoalescingAdmission?.Invoke(null);
             var authResult = await AuthenticationResult.CreateAsync(
                 atItem,
                 idtItem,

@@ -23,9 +23,42 @@ namespace Microsoft.Identity.Client.Internal
         public IServiceBundle ServiceBundle { get; }
 
         /// <summary>
-        /// One and only one ApiEvent is associated with each request.
+        /// Foreground and proactive background operations own separate telemetry events.
         /// </summary>
-        public ApiEvent ApiEvent { get; set; }
+        public ApiEvent ApiEvent
+        {
+            get => _operationApiEvent?.Value ?? _apiEvent;
+            set => _apiEvent = value;
+        }
+
+        private ApiEvent _apiEvent;
+        private AsyncLocal<ApiEvent> _operationApiEvent;
+
+        internal IDisposable UseApiEvent(ApiEvent apiEvent)
+        {
+            var operationApiEvent = LazyInitializer.EnsureInitialized(
+                ref _operationApiEvent, () => new AsyncLocal<ApiEvent>());
+            var scope = new ApiEventScope(this, operationApiEvent.Value);
+            operationApiEvent.Value = apiEvent;
+            return scope;
+        }
+
+        private sealed class ApiEventScope : IDisposable
+        {
+            private readonly RequestContext _context;
+            private readonly ApiEvent _previous;
+
+            internal ApiEventScope(RequestContext context, ApiEvent previous)
+            {
+                _context = context;
+                _previous = previous;
+            }
+
+            public void Dispose()
+            {
+                _context._operationApiEvent.Value = _previous;
+            }
+        }
 
         public CancellationToken UserCancellationToken { get; }
 

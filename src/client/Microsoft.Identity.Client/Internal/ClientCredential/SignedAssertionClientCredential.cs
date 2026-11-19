@@ -16,6 +16,8 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
 
         public AssertionType AssertionType => AssertionType.ClientAssertion;
 
+        public bool HasRequestCallback => false;
+
         public SignedAssertionClientCredential(string signedAssertion)
         {
             _signedAssertion = signedAssertion;

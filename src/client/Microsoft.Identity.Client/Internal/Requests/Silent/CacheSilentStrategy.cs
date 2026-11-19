@@ -93,7 +93,11 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
             {
                 if (cachedAccessTokenItem == null)
                 {
-                    authResult = await RefreshRtOrFailAsync(cancellationToken).ConfigureAwait(false);
+                    var coalescer = CreateCoalescer();
+                    authResult = coalescer is null
+                        ? await RefreshRtOrFailAsync(cancellationToken).ConfigureAwait(false)
+                        : await coalescer.ExecuteAsync(
+                            () => RefreshRtOrFailAsync(cancellationToken), cancellationToken).ConfigureAwait(false);
                 }
                 else
                 {
@@ -117,7 +121,9 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                         }, logger, ServiceBundle, AuthenticationRequestParameters.RequestContext.ApiEvent,
                         AuthenticationRequestParameters.RequestContext.ApiEvent.CallerSdkApiId,
                         AuthenticationRequestParameters.RequestContext.ApiEvent.CallerSdkVersion,
-                        AuthenticationRequestParameters.OtelTagsEnricher);
+                        AuthenticationRequestParameters.OtelTagsEnricher,
+                        CreateCoalescer(),
+                        cancellationToken);
                     }
                 }
 
@@ -136,6 +142,25 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                 logger.Warning("Failed to refresh the RT and cannot use existing AT (expired or missing). ");
                 throw;
             }
+        }
+
+        private TokenRequestCoalescer CreateCoalescer()
+        {
+            if (!ServiceBundle.Config.IsConfidentialClient ||
+                _silentParameters.ForceRefresh || !string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
+            {
+                return null;
+            }
+
+            return new TokenRequestCoalescer(
+                AuthenticationRequestParameters, nameof(CacheSilentStrategy),
+                CacheManager.FindAccessTokenAsync,
+                (token, cancellationToken) =>
+                {
+                    AuthenticationRequestParameters.RequestContext.ApiEvent.IsAccessTokenCacheHit = true;
+                    Metrics.IncrementTotalAccessTokensFromCache();
+                    return CreateAuthenticationResultAsync(token, cancellationToken);
+                });
         }
 
         private void ThrowIfCurrentBrokerAccount()
