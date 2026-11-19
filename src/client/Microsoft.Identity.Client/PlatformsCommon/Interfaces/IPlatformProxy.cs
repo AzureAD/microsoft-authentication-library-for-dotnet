@@ -1,9 +1,12 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Security.Cryptography.X509Certificates;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.TelemetryCore.OpenTelemetry;
@@ -113,5 +116,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
         IMsalHttpClientFactory CreateDefaultHttpClientFactory();
 
         IManagedIdentityKeyProvider ManagedIdentityKeyProvider { get; }
+
+        Task<X509Certificate2> GetRdpBindingCertificateAsync(ILoggerAdapter logger, CancellationToken cancellationToken);
     }
 }

@@ -85,6 +85,11 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         /// </summary>
         public Func<string, SafeHandle, string, string, ILoggerAdapter, CancellationToken, Task<string>> AttestationTokenProvider { get; set; }
 
+        internal AcquireTokenCommonParameters Clone()
+        {
+            return (AcquireTokenCommonParameters)MemberwiseClone();
+        }
+
         /// <summary>
         /// This tries to see if the token request should be done over mTLS or over normal HTTP 
         /// and set the correct parameters
