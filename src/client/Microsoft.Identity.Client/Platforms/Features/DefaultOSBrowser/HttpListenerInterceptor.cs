@@ -108,20 +108,28 @@ namespace Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser
                     TryStopListening(httpListener);
                 }))
                 {
-                    TestBeforeGetContext?.Invoke();
-                    HttpListenerContext context = await httpListener.GetContextAsync()
-                        .ConfigureAwait(false);
+                    while (true)
+                    {
+                        TestBeforeGetContext?.Invoke();
+                        HttpListenerContext context = await httpListener.GetContextAsync()
+                            .ConfigureAwait(false);
 
-                    cancellationToken.ThrowIfCancellationRequested();
+                        cancellationToken.ThrowIfCancellationRequested();
 
-                    // Get the authorization response - either from query string (GET) or POST body (form_post)
-                    AuthorizationResponse authResponse = await GetAuthorizationResponseAsync(context).ConfigureAwait(false);
+                        AuthorizationResponse authResponse = await GetAuthorizationResponseAsync(context).ConfigureAwait(false);
+                        MessageAndHttpCode messageAndCode = authResponse is null
+                            ? new MessageAndHttpCode(HttpStatusCode.BadRequest, string.Empty)
+                            : responseProducer(authResponse);
+                        Respond(messageAndCode, context);
 
-                    Respond(responseProducer, context, authResponse);
-                    _logger.Verbose(()=>"HttpListner received a message on " + urlToListenTo);
+                        if (messageAndCode.HttpCode == HttpStatusCode.BadRequest)
+                        {
+                            continue;
+                        }
 
-                    // Return the authorization response
-                    return authResponse;
+                        _logger.Verbose(() => "HttpListner received a message on " + urlToListenTo);
+                        return authResponse;
+                    }
                 }
             }
             // If cancellation is requested before GetContextAsync is called, then either 
@@ -172,14 +180,8 @@ namespace Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser
                 }
             }
             
-            // Security: We requested form_post, so receiving GET with query params is a security violation
-            _logger.Error($"[HttpListener] Security violation: Expected POST request with form_post, but received {context.Request.HttpMethod}. " +
-                         "The authorization server did not honor response_mode=form_post, which exposes the authorization code in the URL.");
-            
-            throw new MsalClientException(
-                MsalError.AuthenticationFailed,
-                $"Expected POST request for form_post response mode, but received {context.Request.HttpMethod}. " +
-                "This is a security issue as the authorization code is exposed in the URL query parameters and browser history.");
+            _logger.Warning("[HttpListener] Ignoring a request without a form_post response body.");
+            return null;
         }
 
         private static void TryStopListening(HttpListener httpListener)
@@ -193,9 +195,8 @@ namespace Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser
             }
         }
 
-        private void Respond(Func<AuthorizationResponse, MessageAndHttpCode> responseProducer, HttpListenerContext context, AuthorizationResponse authResponse)
+        private void Respond(MessageAndHttpCode messageAndCode, HttpListenerContext context)
         {
-            MessageAndHttpCode messageAndCode = responseProducer(authResponse);
             _logger.Info(() => "Processing a response message to the browser. HttpStatus:" + messageAndCode.HttpCode);
 
             switch (messageAndCode.HttpCode)
@@ -205,6 +206,8 @@ namespace Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser
                     context.Response.RedirectLocation = messageAndCode.Message;
                     break;
                 case HttpStatusCode.OK:
+                case HttpStatusCode.BadRequest:
+                    context.Response.StatusCode = (int)messageAndCode.HttpCode;
                     byte[] buffer = System.Text.Encoding.UTF8.GetBytes(messageAndCode.Message);
                     context.Response.ContentLength64 = buffer.Length;
                     context.Response.OutputStream.Write(buffer, 0, buffer.Length);

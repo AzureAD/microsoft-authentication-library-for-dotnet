@@ -253,7 +253,7 @@ namespace Microsoft.Identity.Client.Internal
 
         private void VerifyAuthorizationResult(AuthorizationResult authorizationResult, string originalState)
         {
-            if (authorizationResult.Status == AuthorizationStatus.Success &&
+            if ((authorizationResult.Status == AuthorizationStatus.Success || authorizationResult.IsErrorResponse) &&
                 originalState != null &&
                 !originalState.Equals(authorizationResult.State,
                     StringComparison.OrdinalIgnoreCase))
