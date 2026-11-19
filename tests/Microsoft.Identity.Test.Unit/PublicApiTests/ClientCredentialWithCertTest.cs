@@ -311,6 +311,44 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
+        [TestMethod]
+        [Description("Regression test for #6282: nbf and exp in the certificate client assertion are JSON numbers per RFC 7519")]
+        public async Task CertificateClientAssertion_NbfAndExpAreJsonNumbersAsync()
+        {
+            using (var harness = CreateTestHarness())
+            {
+                // Arrange
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                var certificate = CertHelper.GetOrCreateTestCert();
+
+                var cca = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithAuthority("https://login.microsoftonline.com/tid")
+                    .WithHttpManager(harness.HttpManager)
+                    .WithCertificate(certificate)
+                    .Build();
+
+                string encodedJwt = null;
+                var handler = harness.HttpManager.AddTokenResponse(TokenResponseType.Valid_ClientCredentials);
+                handler.AdditionalRequestValidation = (r) =>
+                {
+                    var requestContent = r.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                    var formsData = CoreHelpers.ParseKeyValueList(requestContent, '&', true, null);
+                    Assert.IsTrue(formsData.TryGetValue("client_assertion", out encodedJwt), "Missing client_assertion from request");
+                };
+
+                // Act
+                AuthenticationResult result = await cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.IsNotNull(result.AccessToken);
+                Assert.IsNotNull(encodedJwt);
+                AssertNbfAndExpAreJsonNumbers(encodedJwt);
+            }
+        }
+
         private JwtSecurityToken ValidateClientAssertion(HttpRequestMessage request, string expectedX5cValue, bool validateStandardClaims )
         {
             var requestContent = request.Content.ReadAsStringAsync().GetAwaiter().GetResult();
@@ -342,6 +380,7 @@ namespace Microsoft.Identity.Test.Unit
             long nbf = long.Parse(assertionJwt.Claims.Single(c => c.Type == "nbf").Value);
             DateTimeOffset actualNbfDate = DateTimeOffset.FromUnixTimeSeconds(nbf);
             CoreAssert.IsWithinRange(DateTimeOffset.Now, actualNbfDate, TimeSpan.FromSeconds(5));
+            AssertNbfAndExpAreJsonNumbers(encodedJwt);
 
             var x5c = assertionJwt.Header.FirstOrDefault(header => header.Key == "x5c");
 
@@ -635,6 +674,8 @@ namespace Microsoft.Identity.Test.Unit
                     DateTimeOffset.Now + TimeSpan.FromSeconds(JsonWebToken.JwtToAadLifetimeInSeconds),
                     expDate,
                     tolerance);
+
+                AssertNbfAndExpAreJsonNumbers(assertion);
             }
 
             if (addExtraClaims)
@@ -784,6 +825,18 @@ namespace Microsoft.Identity.Test.Unit
 
                 Pkcs1SigningAttempts++;
                 return base.SignWithCertificate(message, certificate, signaturePadding);
+            }
+        }
+
+        // RFC 7519 sections 4.1.4 and 4.1.5: "exp" and "nbf" MUST be JSON numbers (NumericDate), not strings.
+        private static void AssertNbfAndExpAreJsonNumbers(string encodedJwt)
+        {
+            string payloadJson = Base64UrlHelpers.Decode(encodedJwt.Split('.')[1]);
+
+            using (JsonDocument payload = JsonDocument.Parse(payloadJson))
+            {
+                Assert.AreEqual(JsonValueKind.Number, payload.RootElement.GetProperty("nbf").ValueKind, "nbf must be a JSON number");
+                Assert.AreEqual(JsonValueKind.Number, payload.RootElement.GetProperty("exp").ValueKind, "exp must be a JSON number");
             }
         }
 
