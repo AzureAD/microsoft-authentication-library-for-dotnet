@@ -16,7 +16,12 @@ namespace Microsoft.Identity.Client.Instance.Oidc
     internal static class OidcRetrieverWithCache
     {
         private static readonly ConcurrentDictionary<string, OidcMetadata> s_cache = new();
-        private static readonly SemaphoreSlim s_lockOidcRetrieval = new SemaphoreSlim(1);
+        private static readonly ConcurrentDictionary<string, SemaphoreSlim> s_retrievalLocks = new();
+
+        internal static bool TryGetCachedOidc(string authority, out OidcMetadata configuration)
+        {
+            return s_cache.TryGetValue(authority, out configuration);
+        }
 
         public static async Task<OidcMetadata> GetOidcAsync(
             string authority,
@@ -28,7 +33,8 @@ namespace Microsoft.Identity.Client.Instance.Oidc
                 return configuration;
             }
 
-            await s_lockOidcRetrieval.WaitAsync().ConfigureAwait(false);
+            SemaphoreSlim retrievalLock = s_retrievalLocks.GetOrAdd(authority, _ => new SemaphoreSlim(1, 1));
+            await retrievalLock.WaitAsync(requestContext.UserCancellationToken).ConfigureAwait(false);
 
             Uri oidcMetadataEndpoint = null;
             try
@@ -58,6 +64,10 @@ namespace Microsoft.Identity.Client.Instance.Oidc
 
                 return configuration;
             }
+            catch (OperationCanceledException) when (requestContext.UserCancellationToken.IsCancellationRequested)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
                 requestContext.Logger.Error($"[OIDC Discovery] Failed to retrieve OpenID configuration from the OpenID endpoint {authority + Constants.WellKnownOpenIdConfigurationPath} due to {ex}");
@@ -72,7 +82,7 @@ namespace Microsoft.Identity.Client.Instance.Oidc
             }
             finally
             {
-                s_lockOidcRetrieval.Release();
+                retrievalLock.Release();
             }
         }
 
