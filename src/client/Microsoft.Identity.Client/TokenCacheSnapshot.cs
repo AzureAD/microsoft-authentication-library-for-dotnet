@@ -23,6 +23,7 @@ namespace Microsoft.Identity.Client
     public sealed class TokenCacheSnapshot
     {
         private readonly CacheSerializationContract _state;
+        private readonly long _unknownNodesEstimatedSize;
         internal bool IsApplicationCache { get; }
 
         internal TokenCacheSnapshot(
@@ -67,6 +68,22 @@ namespace Microsoft.Identity.Client
         public byte[] SerializeMsalV3()
         {
             return _state.ToJsonString().ToByteArray();
+        }
+
+        /// <summary>
+        /// Estimates the managed memory retained by this snapshot, in bytes.
+        /// </summary>
+        /// <remarks>
+        /// This estimate is intended for cache admission and eviction accounting, not as a hard
+        /// memory limit. Actual memory depends on the runtime, architecture, sharing, and cache
+        /// contents. It excludes cache-provider overhead, temporary allocations, and working caches.
+        /// The estimate may overcount or undercount actual memory and may change between MSAL versions.
+        /// This method examines the snapshot's entries and scopes and does not serialize the cache.
+        /// </remarks>
+        /// <returns>An approximate size in bytes.</returns>
+        public long EstimateSizeInBytes()
+        {
+            return TokenCacheSnapshotSizeEstimator.Estimate(_state, _unknownNodesEstimatedSize);
         }
 
         internal IDictionary<string, JsonNode> Restore(ITokenCacheAccessor accessor)

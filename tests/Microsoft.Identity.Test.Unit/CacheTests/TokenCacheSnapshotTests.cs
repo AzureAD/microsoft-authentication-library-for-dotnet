@@ -372,6 +372,170 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [TestMethod]
+        [DataRow("access")]
+        [DataRow("refresh")]
+        [DataRow("id")]
+        [DataRow("account")]
+        [DataRow("metadata")]
+        public void SnapshotSizeAccountsForVariableLengthEntries(string kind)
+        {
+            // Arrange
+            var source = CreateCache(false);
+            Populate(source, false);
+            var provider = (ITokenCacheSnapshotProvider)source;
+            var original = provider.CreateSnapshot();
+            long originalSize = original.EstimateSizeInBytes();
+            const int ExtraCharacters = 4096;
+            string value = new string('x', ExtraCharacters);
+
+            switch (kind)
+            {
+                case "access":
+                    var access = source.Accessor.GetAllAccessTokens().Single();
+                    access.Secret += value;
+                    source.Accessor.SaveAccessToken(access);
+                    break;
+                case "refresh":
+                    var refresh = source.Accessor.GetAllRefreshTokens().Single();
+                    refresh.Secret += value;
+                    source.Accessor.SaveRefreshToken(refresh);
+                    break;
+                case "id":
+                    var id = source.Accessor.GetAllIdTokens().Single();
+                    id.Secret += value;
+                    source.Accessor.SaveIdToken(id);
+                    break;
+                case "account":
+                    var account = source.Accessor.GetAllAccounts().Single();
+                    account.WamAccountIds["app"] += value;
+                    source.Accessor.SaveAccount(account);
+                    break;
+                case "metadata":
+                    source.Accessor.SaveAppMetadata(new MsalAppMetadataCacheItem("snapshot-tests", "environment", value));
+                    break;
+            }
+
+            // Act
+            var updated = provider.CreateSnapshot();
+
+            // Assert
+            Assert.IsGreaterThan(0, originalSize);
+            Assert.IsGreaterThanOrEqualTo(originalSize + 2 * ExtraCharacters, updated.EstimateSizeInBytes());
+            Assert.AreEqual(originalSize, original.EstimateSizeInBytes());
+        }
+
+        [TestMethod]
+        public void SnapshotSizeAccountsForUnknownStructureWithoutChangingSnapshot()
+        {
+            // Arrange
+            var source = CreateCache(true);
+            Populate(source, true);
+            var smallNodes = new Dictionary<string, JsonNode>
+            {
+                ["future"] = JsonNode.Parse("{\"value\":\"[{:,,}]\"}"),
+                ["future_null"] = null
+            };
+            var largeNodes = new Dictionary<string, JsonNode>
+            {
+                ["future"] = JsonNode.Parse("{\"value\":[" + string.Join(",", Enumerable.Repeat("{\"a\":true}", 100)) + "]}"),
+                ["future_null"] = null
+            };
+            var small = new TokenCacheSnapshot(source.Accessor, smallNodes, true);
+            var large = new TokenCacheSnapshot(source.Accessor, largeNodes, true);
+            byte[] expected = large.SerializeMsalV3();
+
+            // Act
+            long estimatedSize = large.EstimateSizeInBytes();
+            large.Restore(CreateCache(true).Accessor);
+
+            // Assert
+            Assert.IsGreaterThan(small.EstimateSizeInBytes(), estimatedSize);
+            Assert.AreEqual(estimatedSize, large.EstimateSizeInBytes());
+            AssertJsonEqual(expected, large.SerializeMsalV3());
+        }
+
+        [TestMethod]
+        public void SnapshotSizeDoesNotTreatQuotedJsonCharactersAsStructure()
+        {
+            // Arrange
+            var source = CreateCache(true);
+            var plain = new Dictionary<string, JsonNode>
+            {
+                ["future"] = new JsonObject { ["value"] = "slash\\\"aaaaaaaa" }
+            };
+            var punctuation = new Dictionary<string, JsonNode>
+            {
+                ["future"] = new JsonObject { ["value"] = "slash\\\"[{:,,}]_" }
+            };
+
+            // Act
+            long plainSize = new TokenCacheSnapshot(source.Accessor, plain, true).EstimateSizeInBytes();
+            long punctuationSize = new TokenCacheSnapshot(source.Accessor, punctuation, true).EstimateSizeInBytes();
+
+            // Assert
+            Assert.AreEqual(plainSize, punctuationSize);
+        }
+
+        [TestMethod]
+        [DataRow("additional-fields")]
+        [DataRow("key-extensions")]
+        [DataRow("persisted-parameters")]
+        public void SnapshotSizeAccountsForVariableAccessTokenMetadata(string kind)
+        {
+            // Arrange
+            var source = CreateCache(true);
+            Populate(source, true);
+            var provider = (ITokenCacheSnapshotProvider)source;
+            long originalSize = provider.CreateSnapshot().EstimateSizeInBytes();
+            var access = source.Accessor.GetAllAccessTokens().Single();
+            string value = new string('x', 4096);
+            switch (kind)
+            {
+                case "additional-fields":
+                    access.AdditionalFieldsJson = "{\"future\":\"" + value + "\"}";
+                    break;
+                case "key-extensions":
+                    access.AdditionalCacheKeyComponents["partition"] += value;
+                    break;
+                case "persisted-parameters":
+                    access.PersistedCacheParameters["extra"] += value;
+                    break;
+            }
+
+            // Act
+            long updatedSize = provider.CreateSnapshot().EstimateSizeInBytes();
+
+            // Assert
+            Assert.IsGreaterThan(originalSize + 4096, updatedSize);
+        }
+
+        [TestMethod]
+        public void SnapshotSizeAccountsForRepeatedScopes()
+        {
+            // Arrange
+            const int ScopeCount = 512;
+            var time = DateTimeOffset.FromUnixTimeSeconds(1800000000);
+            var source = CreateCache(true);
+            var single = new MsalAccessTokenCacheItem(
+                "environment", "snapshot-tests", "x", "tenant", "token",
+                time, time.AddHours(1), time.AddHours(1), null, "account");
+            source.Accessor.SaveAccessToken(single);
+            var provider = (ITokenCacheSnapshotProvider)source;
+            long singleSize = provider.CreateSnapshot().EstimateSizeInBytes();
+            source.Accessor.Clear();
+            var repeated = new MsalAccessTokenCacheItem(
+                "environment", "snapshot-tests", string.Join(" ", Enumerable.Repeat("x", ScopeCount)),
+                "tenant", "token", time, time.AddHours(1), time.AddHours(1), null, "account");
+            source.Accessor.SaveAccessToken(repeated);
+
+            // Act
+            long repeatedSize = provider.CreateSnapshot().EstimateSizeInBytes();
+
+            // Assert
+            Assert.IsGreaterThan(singleSize + ScopeCount * 32, repeatedSize);
+        }
+
+        [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
         public void RestoreRetainsDestinationMetadataLikeV3(bool applicationCache)

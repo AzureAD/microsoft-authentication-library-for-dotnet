@@ -1,3 +1,4 @@
 static Microsoft.Identity.Client.Extensibility.AbstractConfidentialClientAcquireTokenParameterBuilderExtension.WithExtraBodyParameters<T>(this Microsoft.Identity.Client.AbstractConfidentialClientAcquireTokenParameterBuilder<T> builder, System.Collections.Generic.Dictionary<string, string> extraBodyParams) -> T
 Microsoft.Identity.Client.AuthenticationResult.CertificateThumbprint256.get -> string
 Microsoft.Identity.Client.AuthenticationResult.CertificateThumbprint256.set -> void
+Microsoft.Identity.Client.TokenCacheSnapshot.EstimateSizeInBytes() -> long
