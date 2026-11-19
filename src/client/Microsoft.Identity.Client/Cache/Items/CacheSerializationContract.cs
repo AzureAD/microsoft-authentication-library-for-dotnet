@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using Microsoft.Identity.Client.Utils;
 using JObject = System.Text.Json.Nodes.JsonObject;
 using JToken = System.Text.Json.Nodes.JsonNode;
 
@@ -47,7 +48,8 @@ namespace Microsoft.Identity.Client.Cache.Items
             UnknownNodes = unknownNodes ?? new Dictionary<string, JToken>();
         }
 
-        internal static CacheSerializationContract FromJsonString(string json)
+        internal static CacheSerializationContract FromJsonString(
+            string json, string caseSensitiveClientId = null, string caseSensitiveEnvironment = null)
         {
             var root = JsonNode.Parse(json, documentOptions: new JsonDocumentOptions
             {
@@ -64,7 +66,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                 {
                     if (elem != null)
                     {
-                        var item = MsalAccessTokenCacheItem.FromJObject(elem);
+                        var item = MsalAccessTokenCacheItem.FromJObject(elem, RequiresExactClientId(elem));
                         contract.AccessTokens[item.CacheKey] = item;
                     }
                 }
@@ -77,7 +79,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                 {
                     if (elem != null)
                     {
-                        var item = MsalRefreshTokenCacheItem.FromJObject(elem);
+                        var item = MsalRefreshTokenCacheItem.FromJObject(elem, RequiresExactClientId(elem));
                         contract.RefreshTokens[item.CacheKey] = item;
                     }
                 }
@@ -90,7 +92,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                 {
                     if (elem != null)
                     {
-                        var item = MsalIdTokenCacheItem.FromJObject(elem);
+                        var item = MsalIdTokenCacheItem.FromJObject(elem, RequiresExactClientId(elem));
                         contract.IdTokens[item.CacheKey] = item;
                     }
                 }
@@ -116,13 +118,22 @@ namespace Microsoft.Identity.Client.Cache.Items
                 {
                     if (elem != null)
                     {
-                        var item = MsalAppMetadataCacheItem.FromJObject(elem);
+                        var item = MsalAppMetadataCacheItem.FromJObject(elem, RequiresExactClientId(elem));
                         contract.AppMetadata[item.CacheKey] = item;
                     }
                 }
             }
 
             return contract;
+
+            bool RequiresExactClientId(JObject item)
+            {
+                return caseSensitiveClientId is not null &&
+                    string.Equals(JsonHelper.GetExistingOrEmptyString(item, StorageJsonKeys.ClientId),
+                        caseSensitiveClientId, StringComparison.OrdinalIgnoreCase) &&
+                    string.Equals(JsonHelper.GetExistingOrEmptyString(item, StorageJsonKeys.Environment),
+                        caseSensitiveEnvironment, StringComparison.OrdinalIgnoreCase);
+            }
 
             // private method for enumerating collection
             static IEnumerable<JsonObject> GetElement(JsonObject root, string key)

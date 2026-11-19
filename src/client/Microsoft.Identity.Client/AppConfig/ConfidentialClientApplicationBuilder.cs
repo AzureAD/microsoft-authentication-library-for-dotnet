@@ -450,6 +450,12 @@ namespace Microsoft.Identity.Client
         /// <remarks>
         /// Do not use this method with Entra ID authorities (e.g. https://login.microsoftonline.com/common).
         /// Use WithAuthority(string) instead.
+        /// Generic OIDC client identifiers are case-sensitive, including in the token cache.
+        /// MSALv3 deserialization re-keys existing entries using their stored client identifiers.
+        /// Upgrade all applications sharing an OIDC cache together, or isolate their caches:
+        /// older MSAL versions can still merge identifiers that differ only by case.
+        /// Legacy native-cache ID tokens for another client are ignored. Acquire a fresh token
+        /// to repopulate missing ID-token claims after upgrading.
         /// </remarks>
         public ConfidentialClientApplicationBuilder WithOidcAuthority(string authorityUri)
         {

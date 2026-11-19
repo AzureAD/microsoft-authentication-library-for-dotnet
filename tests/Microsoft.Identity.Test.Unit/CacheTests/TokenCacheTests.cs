@@ -46,6 +46,40 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [TestMethod]
+        [DataRow(true, "HighClient", false, true)]
+        [DataRow(true, "highclient", false, false)]
+        [DataRow(false, "highclient", false, true)]
+        [DataRow(false, "highclient", true, false)]
+        [DataRow(false, "OtherClient", false, false)]
+        [DataRow(true, null, false, false)]
+        public void GetIdTokenCacheItem_ValidatesClientIdentity(
+            bool genericAuthority, string idTokenClientId, bool caseSensitiveEntry, bool expectedMatch)
+        {
+            // Arrange
+            var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(null, clientId: "HighClient");
+            if (genericAuthority)
+            {
+                serviceBundle.Config.Authority = Authority.CreateAuthority(
+                    AuthorityInfo.FromGenericAuthority("https://oidc.example"));
+            }
+
+            var accessor = Substitute.For<ITokenCacheAccessor>();
+            ITokenCacheInternal cache = new TokenCache(serviceBundle, false) { Accessor = accessor };
+            var accessToken = TokenCacheHelper.CreateAccessTokenItem();
+            var idToken = idTokenClientId is null
+                ? null
+                : new MsalIdTokenCacheItem("oidc.example", idTokenClientId, "id-token", null, _homeAccountId,
+                    "tenant", isClientIdCaseSensitive: caseSensitiveEntry);
+            accessor.GetIdToken(accessToken).Returns(idToken);
+
+            // Act
+            var result = cache.GetIdTokenCacheItem(accessToken);
+
+            // Assert
+            Assert.AreSame(expectedMatch ? idToken : null, result);
+        }
+
+        [TestMethod]
         [DataRow(true, true, true)]
         [DataRow(true, false, false)]
         [DataRow(false, true, false)]

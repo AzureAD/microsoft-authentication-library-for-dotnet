@@ -30,6 +30,67 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         private static readonly string[] s_scopes = { "api.read" };
 
         [TestMethod]
+        [DataRow("HighClient", "highclient")]
+        [DataRow("highclient", "highclient")]
+        public async Task AndroidLegacyOidcAccessToken_DoesNotReturnAnotherClientsIdTokenAsync(
+            string legacyClientId, string currentClientId)
+        {
+            // Arrange
+            using var http = new MockHttpManager();
+            var legacyApp = CreateApplication(http, true, legacyClientId);
+            var legacyCache = (TokenCache)legacyApp.UserTokenCacheInternal;
+            var stores = new Dictionary<string, Dictionary<string, object>>(StringComparer.Ordinal);
+            legacyCache.Accessor = CreateAccessor(stores);
+            var legacyResult = await SignInAsync(legacyApp, http, "same-user", username: "legacy@example.test")
+                .ConfigureAwait(false);
+            var accessTokenJson = LegacyJson(legacyCache.Accessor.GetAllAccessTokens().Single());
+            accessTokenJson[StorageJsonKeys.Target] = "legacy.read";
+            var refreshTokenJson = LegacyJson(legacyCache.Accessor.GetAllRefreshTokens().Single());
+            var idTokenJson = LegacyJson(legacyCache.Accessor.GetAllIdTokens().Single());
+            var account = legacyCache.Accessor.GetAllAccounts().Single();
+            legacyCache.Accessor.Clear();
+            legacyCache.Accessor.SaveAccessToken(MsalAccessTokenCacheItem.FromJObject(accessTokenJson));
+            legacyCache.Accessor.SaveRefreshToken(MsalRefreshTokenCacheItem.FromJObject(refreshTokenJson));
+            legacyCache.Accessor.SaveIdToken(MsalIdTokenCacheItem.FromJObject(idTokenJson));
+            legacyCache.Accessor.SaveAccount(account);
+
+            var currentApp = CreateApplication(http, true, currentClientId, discoveryAlreadyCached: true);
+            var currentCache = (TokenCache)currentApp.UserTokenCacheInternal;
+            currentCache.Accessor = CreateAccessor(stores);
+            var currentResult = await SignInAsync(currentApp, http, "same-user", username: "current@example.test")
+                .ConfigureAwait(false);
+            Assert.HasCount(2, currentCache.Accessor.GetAllAccessTokens());
+            Assert.AreEqual(currentClientId, currentCache.Accessor.GetAllIdTokens().Single().ClientId);
+
+            // Act
+            legacyCache.Accessor = CreateAccessor(stores);
+            var result = await legacyApp.AcquireTokenSilent(new[] { "legacy.read" }, legacyResult.Account)
+                .ExecuteAsync().ConfigureAwait(false);
+
+            // Assert
+            Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+            Assert.AreEqual(legacyResult.AccessToken, result.AccessToken);
+            Assert.HasCount(2, legacyCache.Accessor.GetAllAccessTokens());
+            if (string.Equals(legacyClientId, currentClientId, StringComparison.Ordinal))
+            {
+                Assert.AreEqual(currentResult.IdToken, result.IdToken);
+                Assert.AreEqual("current@example.test", result.ClaimsPrincipal.FindFirst("preferred_username").Value);
+            }
+            else
+            {
+                Assert.IsNull(result.IdToken);
+                Assert.IsNull(result.ClaimsPrincipal);
+            }
+
+            static JsonObject LegacyJson(MsalCacheItemBase item)
+            {
+                var json = item.ToJObject();
+                json.Remove(StorageJsonKeys.ClientIdCaseSensitive);
+                return json;
+            }
+        }
+
+        [TestMethod]
         [DataRow(false, false, false)]
         [DataRow(true, false, false)]
         [DataRow(false, true, false)]
@@ -649,18 +710,23 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             });
         }
 
-        private static PublicClientApplication CreateApplication(MockHttpManager http, bool genericAuthority)
+        private static PublicClientApplication CreateApplication(
+            MockHttpManager http, bool genericAuthority, string clientId = TestConstants.ClientId,
+            bool discoveryAlreadyCached = false)
         {
-            var builder = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+            var builder = PublicClientApplicationBuilder.Create(clientId)
                 .WithHttpManager(http).WithRedirectUri(TestConstants.RedirectUri).WithInstanceDiscovery(false);
             if (genericAuthority)
             {
                 builder.WithExperimentalFeatures().WithOidcAuthority(Authority);
-                http.AddMockHandler(new MockHttpMessageHandler
+                if (!discoveryAlreadyCached)
                 {
-                    ExpectedMethod = HttpMethod.Get,
-                    ResponseMessage = MockHelpers.CreateSuccessResponseMessage(TestConstants.GetOidcResponse(Authority))
-                });
+                    http.AddMockHandler(new MockHttpMessageHandler
+                    {
+                        ExpectedMethod = HttpMethod.Get,
+                        ResponseMessage = MockHelpers.CreateSuccessResponseMessage(TestConstants.GetOidcResponse(Authority))
+                    });
+                }
             }
             else
             {
@@ -678,14 +744,15 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             http.AddMockHandler(new MockHttpMessageHandler
             {
                 ExpectedMethod = HttpMethod.Post,
-                ResponseMessage = CreateTokenResponse(subject, true, clientInfo: clientInfo, username: username)
+                ResponseMessage = CreateTokenResponse(subject, true, clientInfo: clientInfo, username: username,
+                    clientId: app.AppConfig.ClientId)
             });
             return await app.AcquireTokenInteractive(s_scopes).ExecuteAsync().ConfigureAwait(false);
         }
 
         private static HttpResponseMessage CreateTokenResponse(
             string subject, bool includeIdToken, bool refreshed = false, string clientInfo = null, bool emptyIdToken = false,
-            string username = null)
+            string username = null, string clientId = null)
         {
             var response = new JsonObject
             {
@@ -707,7 +774,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     ["sub"] = subject,
                     ["preferred_username"] = username ?? subject + "@example.test",
                     ["iss"] = Authority,
-                    ["aud"] = TestConstants.ClientId
+                    ["aud"] = clientId ?? TestConstants.ClientId
                 };
                 response["id_token"] = Base64UrlHelpers.Encode("{\"alg\":\"none\"}") + "." +
                     Base64UrlHelpers.Encode(claims.ToJsonString()) + ".";
