@@ -23,14 +23,16 @@ namespace Microsoft.Identity.Client.Cache.Items
             string clientId,
             MsalTokenResponse response,
             string tenantId,
-            string homeAccountId)
+            string homeAccountId,
+            bool isClientIdCaseSensitive = false)
             : this(
                 preferredCacheEnv,
                 clientId,
                 response.IdToken,
                 response.ClientInfo,
                 homeAccountId,
-                tenantId)
+                tenantId,
+                isClientIdCaseSensitive)
         {
         }
 
@@ -40,12 +42,14 @@ namespace Microsoft.Identity.Client.Cache.Items
             string secret,
             string rawClientInfo,
             string homeAccountId,
-            string tenantId)
+            string tenantId,
+            bool isClientIdCaseSensitive = false)
             : this()
         {
             Environment = preferredCacheEnv;
             TenantId = tenantId;
             ClientId = clientId;
+            IsClientIdCaseSensitive = isClientIdCaseSensitive;
             Secret = secret;
             RawClientInfo = rawClientInfo;
             HomeAccountId = homeAccountId;
@@ -57,6 +61,7 @@ namespace Microsoft.Identity.Client.Cache.Items
         internal void InitCacheKey()
         {
             CacheKey = MsalCacheKeys.GetCredentialKey(
+                IsClientIdCaseSensitive,
                 HomeAccountId,
                 Environment,
                 StorageJsonValues.CredentialTypeIdToken,
@@ -71,9 +76,9 @@ namespace Microsoft.Identity.Client.Cache.Items
         {
             string iOSAccount = MsalCacheKeys.GetiOSAccountKey(HomeAccountId, Environment);
 
-            string iOSGeneric = MsalCacheKeys.GetiOSGenericKey(StorageJsonValues.CredentialTypeIdToken, ClientId, TenantId);
+            string iOSGeneric = MsalCacheKeys.GetiOSGenericKey(IsClientIdCaseSensitive, StorageJsonValues.CredentialTypeIdToken, ClientId, TenantId);
 
-            string iOSService = MsalCacheKeys.GetiOSServiceKey(StorageJsonValues.CredentialTypeIdToken, ClientId, TenantId, scopes: null);
+            string iOSService = MsalCacheKeys.GetiOSServiceKey(IsClientIdCaseSensitive, StorageJsonValues.CredentialTypeIdToken, ClientId, TenantId, scopes: null);
 
             int iOSType = (int)MsalCacheKeys.iOSCredentialAttrType.IdToken;
 
@@ -95,7 +100,7 @@ namespace Microsoft.Identity.Client.Cache.Items
         {
             return new MsalIdTokenCacheItem(
                 Environment ?? "", ClientId ?? "", Secret ?? "",
-                RawClientInfo ?? "", HomeAccountId ?? "", TenantId ?? "")
+                RawClientInfo ?? "", HomeAccountId ?? "", TenantId ?? "", IsClientIdCaseSensitive)
             {
                 CredentialType = CredentialType ?? "",
                 AdditionalFieldsJson = AdditionalFieldsJson
@@ -112,7 +117,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             return FromJObject(JsonHelper.ParseIntoJsonObject(json));
         }
 
-        internal static MsalIdTokenCacheItem FromJObject(JObject j)
+        internal static MsalIdTokenCacheItem FromJObject(JObject j, bool isClientIdCaseSensitive = false)
         {
             var item = new MsalIdTokenCacheItem
             {
@@ -120,6 +125,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             };
 
             item.PopulateFieldsFromJObject(j);
+            item.IsClientIdCaseSensitive |= isClientIdCaseSensitive;
             item.InitCacheKey();
 
             return item;

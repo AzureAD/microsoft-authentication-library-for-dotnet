@@ -33,10 +33,11 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             // Arrange
             var time = DateTimeOffset.FromUnixTimeSeconds(1800000000);
             var source = new MsalAccessTokenCacheItem(
-                "environment", "snapshot-tests", "scope-a scope-b", "tenant", "synthetic-access-token",
+                "environment", "Snapshot-Tests", "scope-a scope-b", "tenant", "synthetic-access-token",
                 time, time.AddHours(1), time.AddHours(2), "client-info", "account",
                 "key", time.AddMinutes(30), "pop", "obo",
-                new SortedList<string, string> { ["partition"] = "one" })
+                new SortedList<string, string> { ["partition"] = "one" },
+                isClientIdCaseSensitive: true)
             {
                 AdditionalFieldsJson = "{\"future_item\":{\"values\":[1,2]}}",
                 IsExtendedLifeTimeToken = true
@@ -61,6 +62,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 nameof(source.iOSCacheKey),
                 nameof(source.CredentialType),
                 nameof(source.ClientId),
+                nameof(source.IsClientIdCaseSensitive),
                 nameof(source.Secret),
                 nameof(source.HomeAccountId),
                 nameof(source.Environment),
@@ -84,9 +86,10 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             // Arrange
             var source = new MsalRefreshTokenCacheItem(
-                "environment", "snapshot-tests", "synthetic-refresh-token", "client-info",
+                "environment", "Snapshot-Tests", "synthetic-refresh-token", "client-info",
                 familyToken ? "1" : "", "account",
-                familyToken ? null : new SortedList<string, string> { ["partition"] = "one" })
+                familyToken ? null : new SortedList<string, string> { ["partition"] = "one" },
+                isClientIdCaseSensitive: true)
             {
                 OboCacheKey = "obo",
                 AdditionalFieldsJson = "{\"future_item\":{\"values\":[1,2]}}"
@@ -101,6 +104,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 nameof(source.iOSCacheKey),
                 nameof(source.CredentialType),
                 nameof(source.ClientId),
+                nameof(source.IsClientIdCaseSensitive),
                 nameof(source.Secret),
                 nameof(source.HomeAccountId),
                 nameof(source.Environment),
@@ -122,10 +126,10 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             // Arrange
             var source = new MsalIdTokenCacheItem(
-                "environment", "snapshot-tests",
+                "environment", "Snapshot-Tests",
                 "header." + Base64UrlHelpers.Encode(
                     "{\"sub\":\"subject\",\"tid\":\"tenant\",\"name\":\"Test User\",\"preferred_username\":\"user@example.com\"}"),
-                "client-info", "account", "tenant")
+                "client-info", "account", "tenant", isClientIdCaseSensitive: true)
             {
                 AdditionalFieldsJson = "{\"future_item\":{\"values\":[1,2]}}"
             };
@@ -137,6 +141,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 nameof(source.iOSCacheKey),
                 nameof(source.CredentialType),
                 nameof(source.ClientId),
+                nameof(source.IsClientIdCaseSensitive),
                 nameof(source.Secret),
                 nameof(source.HomeAccountId),
                 nameof(source.Environment),
@@ -197,13 +202,14 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         public void AppMetadataSnapshotCloneAccountsForEveryInstanceMember()
         {
             // Arrange
-            var source = new MsalAppMetadataCacheItem("snapshot-tests", "environment", "1")
+            var source = new MsalAppMetadataCacheItem("Snapshot-Tests", "environment", "1", isClientIdCaseSensitive: true)
             {
                 AdditionalFieldsJson = "{\"future_item\":{\"values\":[1,2]}}"
             };
             var expectedProperties = new[]
             {
                 nameof(source.ClientId),
+                nameof(source.IsClientIdCaseSensitive),
                 nameof(source.Environment),
                 nameof(source.FamilyId),
                 nameof(source.CacheKey),

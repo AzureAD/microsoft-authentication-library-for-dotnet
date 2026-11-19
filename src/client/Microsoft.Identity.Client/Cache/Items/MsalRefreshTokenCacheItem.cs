@@ -23,7 +23,8 @@ namespace Microsoft.Identity.Client.Cache.Items
             string clientId,
             MsalTokenResponse response,
             string homeAccountId,
-            SortedList<string, string> cacheKeyComponents = null)
+            SortedList<string, string> cacheKeyComponents = null,
+            bool isClientIdCaseSensitive = false)
             : this(
                   preferredCacheEnv,
                   clientId,
@@ -31,7 +32,8 @@ namespace Microsoft.Identity.Client.Cache.Items
                   response.ClientInfo,
                   response.FamilyId,
                   homeAccountId,
-                  cacheKeyComponents)
+                  cacheKeyComponents,
+                  isClientIdCaseSensitive)
         {
         }
 
@@ -42,10 +44,12 @@ namespace Microsoft.Identity.Client.Cache.Items
             string rawClientInfo,
             string familyId,
             string homeAccountId,
-            SortedList<string, string> cacheKeyComponents = null)
+            SortedList<string, string> cacheKeyComponents = null,
+            bool isClientIdCaseSensitive = false)
             : this()
         {
             ClientId = clientId;
+            IsClientIdCaseSensitive = isClientIdCaseSensitive;
             Environment = preferredCacheEnv;
             Secret = secret;
             RawClientInfo = rawClientInfo;
@@ -78,6 +82,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                 // in the ToLowerInvariant() call inside GetCredentialKey, keeping
                 // cache key casing consistent with the AT partition pattern.
                 key = MsalCacheKeys.GetCredentialKey(
+                       IsClientIdCaseSensitive,
                        HomeAccountId,
                        Environment,
                        StorageJsonValues.CredentialTypeRefreshToken,
@@ -89,6 +94,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             else
             {
                 key = MsalCacheKeys.GetCredentialKey(
+                       IsClientIdCaseSensitive,
                        HomeAccountId,
                        Environment,
                        StorageJsonValues.CredentialTypeRefreshToken,
@@ -109,6 +115,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                 : null;
 
             return MsalCacheKeys.GetCredentialKey(
+                IsClientIdCaseSensitive,
                 piiEnabled ? HomeAccountId : HomeAccountId?.GetHashCode().ToString(),
                 Environment,
                 StorageJsonValues.CredentialTypeRefreshToken,
@@ -141,7 +148,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                 return $"{StorageJsonValues.CredentialTypeRefreshToken}{MsalCacheKeys.CacheKeyDelimiter}{FamilyId}{MsalCacheKeys.CacheKeyDelimiter}".ToLowerInvariant();
             }
 
-            return MsalCacheKeys.GetiOSGenericKey(StorageJsonValues.CredentialTypeRefreshToken, ClientId, tenantId: null);
+            return MsalCacheKeys.GetiOSGenericKey(IsClientIdCaseSensitive, StorageJsonValues.CredentialTypeRefreshToken, ClientId, tenantId: null);
 
         }
 
@@ -156,6 +163,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             if (AdditionalCacheKeyComponents != null && AdditionalCacheKeyComponents.Count > 0)
             {
                 return MsalCacheKeys.GetiOSServiceKey(
+                    IsClientIdCaseSensitive,
                     StorageJsonValues.CredentialTypeRefreshToken,
                     ClientId,
                     tenantId: null,
@@ -163,7 +171,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                     CoreHelpers.ComputeAccessTokenExtCacheKey(AdditionalCacheKeyComponents));
             }
 
-            return MsalCacheKeys.GetiOSServiceKey(StorageJsonValues.CredentialTypeRefreshToken, ClientId, tenantId: null, scopes: null);
+            return MsalCacheKeys.GetiOSServiceKey(IsClientIdCaseSensitive, StorageJsonValues.CredentialTypeRefreshToken, ClientId, tenantId: null, scopes: null);
         }
 
         #endregion
@@ -201,7 +209,8 @@ namespace Microsoft.Identity.Client.Cache.Items
                 Environment ?? "", ClientId ?? "", Secret ?? "",
                 RawClientInfo ?? "", FamilyId ?? "", HomeAccountId ?? "",
                 AdditionalCacheKeyComponents is null ? null :
-                    new SortedList<string, string>(AdditionalCacheKeyComponents))
+                    new SortedList<string, string>(AdditionalCacheKeyComponents),
+                IsClientIdCaseSensitive)
             {
                 OboCacheKey = OboCacheKey ?? "",
                 CredentialType = CredentialType ?? "",
@@ -219,7 +228,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             return FromJObject(JsonHelper.ParseIntoJsonObject(json));
         }
 
-        internal static MsalRefreshTokenCacheItem FromJObject(JObject j)
+        internal static MsalRefreshTokenCacheItem FromJObject(JObject j, bool isClientIdCaseSensitive = false)
         {
             var item = new MsalRefreshTokenCacheItem();
             item.FamilyId = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.FamilyId);
@@ -232,6 +241,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             }
 
             item.PopulateFieldsFromJObject(j);
+            item.IsClientIdCaseSensitive |= isClientIdCaseSensitive;
             item.InitCacheKey();
 
             return item;

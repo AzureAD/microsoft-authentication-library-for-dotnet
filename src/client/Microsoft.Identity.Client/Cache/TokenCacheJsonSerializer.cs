@@ -12,10 +12,14 @@ namespace Microsoft.Identity.Client.Cache
     internal class TokenCacheJsonSerializer : ITokenCacheSerializable
     {
         private readonly ITokenCacheAccessor _accessor;
+        private readonly string _caseSensitiveClientId;
+        private readonly string _caseSensitiveEnvironment;
 
-        public TokenCacheJsonSerializer(ITokenCacheAccessor accessor)
+        public TokenCacheJsonSerializer(ITokenCacheAccessor accessor, string caseSensitiveClientId = null, string caseSensitiveEnvironment = null)
         {
             _accessor = accessor;
+            _caseSensitiveClientId = caseSensitiveClientId;
+            _caseSensitiveEnvironment = caseSensitiveEnvironment;
         }
 
         public byte[] Serialize(IDictionary<string, JToken> unknownNodes)
@@ -56,7 +60,8 @@ namespace Microsoft.Identity.Client.Cache
             string cacheAsString = CoreHelpers.ByteArrayToString(bytes);
             try
             {
-                cache = CacheSerializationContract.FromJsonString(cacheAsString);
+                // Re-key legacy OIDC records using their stored client ID before inserting them.
+                cache = CacheSerializationContract.FromJsonString(cacheAsString, _caseSensitiveClientId, _caseSensitiveEnvironment);
             }
             catch (Exception ex)
             {

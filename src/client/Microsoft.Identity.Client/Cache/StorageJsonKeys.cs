@@ -21,6 +21,7 @@ namespace Microsoft.Identity.Client.Cache
         public const string AvatarUrl = "avatar_url";
         public const string CredentialType = "credential_type";
         public const string ClientId = "client_id";
+        public const string ClientIdCaseSensitive = "client_id_case_sensitive";
         public const string Secret = "secret";
         public const string Target = "target";
         public const string CachedAt = "cached_at";

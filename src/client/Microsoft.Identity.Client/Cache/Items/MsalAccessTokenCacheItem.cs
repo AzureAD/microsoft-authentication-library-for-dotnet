@@ -33,7 +33,8 @@ namespace Microsoft.Identity.Client.Cache.Items
             string keyId = null,
             string oboCacheKey = null,
             IEnumerable<string> persistedCacheParameters = null,
-            SortedList<string, string> cacheKeyComponents = null)
+            SortedList<string, string> cacheKeyComponents = null,
+            bool isClientIdCaseSensitive = false)
             : this(
                 scopes: ScopeHelper.OrderScopesAlphabetically(response.Scope), // order scopes to avoid cache duplication. This is not in the hot path.
                 cachedAt: DateTimeOffset.UtcNow,
@@ -46,6 +47,7 @@ namespace Microsoft.Identity.Client.Cache.Items
         {
             Environment = preferredCacheEnv;
             ClientId = clientId;
+            IsClientIdCaseSensitive = isClientIdCaseSensitive;
             Secret = response.AccessToken;
             RawClientInfo = response.ClientInfo;
             HomeAccountId = homeAccountId;
@@ -108,11 +110,13 @@ namespace Microsoft.Identity.Client.Cache.Items
             DateTimeOffset? refreshOn = null,
             string tokenType = StorageJsonValues.TokenTypeBearer,
             string oboCacheKey = null,
-            SortedList<string, string> cacheKeyComponents = null)
+            SortedList<string, string> cacheKeyComponents = null,
+            bool isClientIdCaseSensitive = false)
             : this(scopes, cachedAt, expiresOn, extendedExpiresOn, refreshOn, tenantId, keyId, tokenType)
         {
             Environment = preferredCacheEnv;
             ClientId = clientId;
+            IsClientIdCaseSensitive = isClientIdCaseSensitive;
             Secret = secret;
             RawClientInfo = rawClientInfo;
             HomeAccountId = homeAccountId;
@@ -169,7 +173,8 @@ namespace Microsoft.Identity.Client.Cache.Items
                RefreshOn,
                TokenType,
                OboCacheKey,
-               AdditionalCacheKeyComponents);
+               AdditionalCacheKeyComponents,
+               IsClientIdCaseSensitive);
 
             return newAtItem;
         }
@@ -209,6 +214,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             }
 
             CacheKey = MsalCacheKeys.GetCredentialKey(
+                IsClientIdCaseSensitive,
                 HomeAccountId,
                 Environment,
                 _credentialDescriptor,
@@ -223,6 +229,7 @@ namespace Microsoft.Identity.Client.Cache.Items
         internal string ToLogString(bool piiEnabled = false)
         {
             return MsalCacheKeys.GetCredentialKey(
+                IsClientIdCaseSensitive,
                 piiEnabled ? HomeAccountId : HomeAccountId?.GetHashCode().ToString(),
                 Environment,
                 _credentialDescriptor,
@@ -238,9 +245,9 @@ namespace Microsoft.Identity.Client.Cache.Items
         {
             string iOSAccount = MsalCacheKeys.GetiOSAccountKey(HomeAccountId, Environment);
 
-            string iOSService = MsalCacheKeys.GetiOSServiceKey(_credentialDescriptor, ClientId, TenantId, ScopeString, _extraKeyParts);
+            string iOSService = MsalCacheKeys.GetiOSServiceKey(IsClientIdCaseSensitive, _credentialDescriptor, ClientId, TenantId, ScopeString, _extraKeyParts);
 
-            string iOSGeneric = MsalCacheKeys.GetiOSGenericKey(_credentialDescriptor, ClientId, TenantId);
+            string iOSGeneric = MsalCacheKeys.GetiOSGenericKey(IsClientIdCaseSensitive, _credentialDescriptor, ClientId, TenantId);
 
             int iOSType = (int)MsalCacheKeys.iOSCredentialAttrType.AccessToken;
 
@@ -310,6 +317,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             {
                 Environment = Environment ?? "",
                 ClientId = ClientId ?? "",
+                IsClientIdCaseSensitive = IsClientIdCaseSensitive,
                 Secret = Secret ?? "",
                 RawClientInfo = RawClientInfo ?? "",
                 HomeAccountId = HomeAccountId ?? "",
@@ -342,7 +350,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             return FromJObject(JsonHelper.ParseIntoJsonObject(json));
         }
 
-        internal static MsalAccessTokenCacheItem FromJObject(JObject j)
+        internal static MsalAccessTokenCacheItem FromJObject(JObject j, bool isClientIdCaseSensitive = false)
         {
             long cachedAtUnixTimestamp = JsonHelper.ExtractParsedIntOrZero(j, StorageJsonKeys.CachedAt);
             long expiresOnUnixTimestamp = JsonHelper.ExtractParsedIntOrZero(j, StorageJsonKeys.ExpiresOn);
@@ -383,6 +391,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             item.PersistedCacheParameters = persistedCacheParameters;
             item.OboCacheKey = oboCacheKey;
             item.PopulateFieldsFromJObject(j);
+            item.IsClientIdCaseSensitive |= isClientIdCaseSensitive;
 
             item.InitCacheKey();
 
@@ -438,7 +447,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         internal MsalIdTokenCacheItem GetIdTokenItem()
         {
-            return new MsalIdTokenCacheItem(Environment, ClientId, Secret, RawClientInfo, HomeAccountId, TenantId);
+            return new MsalIdTokenCacheItem(Environment, ClientId, Secret, RawClientInfo, HomeAccountId, TenantId, IsClientIdCaseSensitive);
         }
 
         internal bool IsExpiredWithBuffer()

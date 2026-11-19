@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Linq;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.OAuth2;
@@ -14,6 +15,74 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
     [TestClass]
     public class MsalTokenCacheKeysTests : TestBase
     {
+        [TestMethod]
+        public void LegacyOidcMigration_PreservesUnrelatedCacheEntries()
+        {
+            // Arrange
+            var response = new MsalTokenResponse { Scope = "user.read", AccessToken = "access-token", TokenType = "Bearer" };
+            var oidc = new MsalAccessTokenCacheItem("oidc.example", "HighClient", response, "tenant", "user");
+            var otherAuthority = new MsalAccessTokenCacheItem("login.microsoftonline.com", "HighClient", response, "tenant", "user");
+            var otherClient = new MsalAccessTokenCacheItem("oidc.example", "OtherClient", response, "tenant", "user");
+            var cache = new CacheSerializationContract(null);
+            foreach (var item in new[] { oidc, otherAuthority, otherClient })
+            {
+                cache.AccessTokens.Add(item.CacheKey, item);
+            }
+
+            // Act
+            var restored = CacheSerializationContract.FromJsonString(cache.ToJsonString(), "highclient", "oidc.example");
+
+            // Assert
+            Assert.HasCount(3, restored.AccessTokens);
+            Assert.IsTrue(restored.AccessTokens.ContainsKey(otherAuthority.CacheKey));
+            Assert.IsFalse(restored.AccessTokens[otherAuthority.CacheKey].IsClientIdCaseSensitive);
+            Assert.IsTrue(restored.AccessTokens.ContainsKey(otherClient.CacheKey));
+            Assert.IsFalse(restored.AccessTokens[otherClient.CacheKey].IsClientIdCaseSensitive);
+            Assert.IsFalse(restored.AccessTokens.ContainsKey(oidc.CacheKey));
+            Assert.IsTrue(restored.AccessTokens.Values.Single(
+                item => item.Environment == "oidc.example" && item.ClientId == "HighClient").IsClientIdCaseSensitive);
+        }
+
+        [TestMethod]
+        public void CaseSensitiveClientKeys_SurviveSerialization()
+        {
+            // Arrange
+            var response = new MsalTokenResponse { Scope = "user.read", AccessToken = "access-token", TokenType = "Bearer" };
+            var upperAccess = new MsalAccessTokenCacheItem("issuer", "HighClient", response, "tenant", "user", isClientIdCaseSensitive: true);
+            var lowerAccess = new MsalAccessTokenCacheItem("issuer", "highclient", response, "tenant", "user", isClientIdCaseSensitive: true);
+            var upperRefresh = new MsalRefreshTokenCacheItem("issuer", "HighClient", "refresh-token", null, null, "user", isClientIdCaseSensitive: true);
+            var lowerRefresh = new MsalRefreshTokenCacheItem("issuer", "highclient", "refresh-token", null, null, "user", isClientIdCaseSensitive: true);
+            var upperId = new MsalIdTokenCacheItem("issuer", "HighClient", "id-token", null, "user", "tenant", isClientIdCaseSensitive: true);
+            var lowerId = new MsalIdTokenCacheItem("issuer", "highclient", "id-token", null, "user", "tenant", isClientIdCaseSensitive: true);
+            var upperMetadata = new MsalAppMetadataCacheItem("HighClient", "issuer", null, isClientIdCaseSensitive: true);
+            var lowerMetadata = new MsalAppMetadataCacheItem("highclient", "issuer", null, isClientIdCaseSensitive: true);
+
+            // Act
+            var restoredAccess = MsalAccessTokenCacheItem.FromJsonString(upperAccess.ToJsonString());
+            var restoredRefresh = MsalRefreshTokenCacheItem.FromJsonString(upperRefresh.ToJsonString());
+            var restoredId = MsalIdTokenCacheItem.FromJsonString(upperId.ToJsonString());
+            var restoredMetadata = MsalAppMetadataCacheItem.FromJsonString(upperMetadata.ToJsonString());
+
+            // Assert
+            AssertKeys(upperAccess.CacheKey, lowerAccess.CacheKey, restoredAccess.CacheKey, lowerAccess.iOSCacheKey, restoredAccess.iOSCacheKey);
+            AssertKeys(upperRefresh.CacheKey, lowerRefresh.CacheKey, restoredRefresh.CacheKey, lowerRefresh.iOSCacheKey, restoredRefresh.iOSCacheKey);
+            AssertKeys(upperId.CacheKey, lowerId.CacheKey, restoredId.CacheKey, lowerId.iOSCacheKey, restoredId.iOSCacheKey);
+            AssertKeys(upperMetadata.CacheKey, lowerMetadata.CacheKey, restoredMetadata.CacheKey, lowerMetadata.iOSCacheKey, restoredMetadata.iOSCacheKey, compareGeneric: false);
+            Assert.AreEqual(upperId.CacheKey, restoredAccess.GetIdTokenItem().CacheKey);
+
+            static void AssertKeys(string expectedKey, string otherKey, string restoredKey,
+                IiOSKey otherIosKey, IiOSKey restoredIosKey, bool compareGeneric = true)
+            {
+                Assert.AreEqual(expectedKey, restoredKey);
+                Assert.AreNotEqual(otherKey, restoredKey);
+                Assert.AreNotEqual(otherIosKey.iOSService, restoredIosKey.iOSService);
+                if (compareGeneric)
+                {
+                    Assert.AreNotEqual(otherIosKey.iOSGeneric, restoredIosKey.iOSGeneric);
+                }
+            }
+        }
+
         [TestMethod]
         public void MsalAccessTokenCacheKey()
         {
