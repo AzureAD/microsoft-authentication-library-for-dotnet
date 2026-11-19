@@ -55,16 +55,21 @@ those other libraries. Enable Verbose/Debug to see the demoted diagnostics.
 ### Generic OIDC application-token caching
 
 For `WithOidcAuthority` and `AcquireTokenForClient`, the cached access token's
-`environment` contains the normalized authority URI, including its path and
-non-default port, rather than only the hostname. Issuer paths remain
-case-sensitive. Network discovery and `Account.Environment` continue to use
-hostnames.
+`environment` remains the hostname. The first authority-path segment is stored
+as the lowercase `realm`, after the client ID in the token-entry key. For
+example, `https://identity.example/realm-a` produces
+`-identity.example-accesstoken-my-client-realm-a-api` for client `my-client`
+and scope `api`. Authorities without a path retain an empty realm.
 
-Existing tokens with hostname-only environments are not reused; the first
-acquisition fetches a new token. External `SuggestedCacheKey` values are
-unchanged, so one serialized partition can contain tokens for multiple
-authorities, isolated by their cache environments. Upgrade all readers of a
-shared cache; downgrading does not retain the new isolation behavior.
+The realm also appears in `AuthenticationResult.TenantId` and the external
+`SuggestedCacheKey`, so existing path-based authorities require token
+reacquisition. `Account.Environment` remains the hostname; user flows are
+unchanged. Upgrade all shared-cache readers; downgrading loses realm isolation.
+
+This first-segment identity does not distinguish path case, different ports,
+queries, or deeper paths sharing the same first segment. For example,
+`/realms/realm-a` and `/realms/realm-b` both use realm `realms`. Do not share a
+client ID, scopes, and cache between independent issuers with these identities.
 
 ## Support SLA
 

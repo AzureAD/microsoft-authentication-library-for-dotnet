@@ -71,6 +71,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 Assert.IsNotNull(result);
                 Assert.IsNotNull(result.AccessToken);
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+                var cachedToken = ((ConfidentialClientApplication)app)
+                    .AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single();
+                Assert.AreEqual("demo.duendesoftware.com", cachedToken.Environment);
+                Assert.AreEqual(string.Empty, cachedToken.TenantId);
+                Assert.AreEqual(
+                    $"-demo.duendesoftware.com-accesstoken-{TestConstants.ClientId}--api",
+                    cachedToken.CacheKey);
             }
         }
       
@@ -79,11 +86,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [DataRow(false, "https://identity.example/realm-b")]
         [DataRow(true, "https://other-identity.example/realm-b")]
         [DataRow(false, "https://other-identity.example/realm-b")]
-        [DataRow(true, "https://identity.example/Realm-a")]
-        [DataRow(false, "https://identity.example/Realm-a")]
-        [DataRow(true, "https://identity.example:8443/realm-a")]
-        [DataRow(false, "https://identity.example:8443/realm-a")]
-        public async Task ClientCredential_DifferentOidcIssuers_DoNotShareTokens_Async(
+        public async Task ClientCredential_DifferentOidcRealms_DoNotShareTokens_Async(
             bool useSharedCache,
             string authorityB)
         {
@@ -94,9 +97,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 const string TokenA = "synthetic-token-from-realm-a";
                 const string TokenB = "synthetic-token-from-realm-b";
                 var scopes = new[] { "api" };
-                var serializedCache = new Dictionary<string, byte[]>(StringComparer.Ordinal);
+                byte[] serializedCache = null;
 
-                ConfidentialClientApplication CreateApp(string authority, string clientSecret)
+                ConfidentialClientApplication CreateApp(string authority, string clientSecret, string realm)
                 {
                     var builder = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                         .WithHttpManager(httpManager)
@@ -113,14 +116,14 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     {
                         app.AppTokenCache.SetBeforeAccess(args =>
                         {
-                            serializedCache.TryGetValue(args.SuggestedCacheKey, out byte[] bytes);
-                            args.TokenCache.DeserializeMsalV3(bytes, shouldClearExistingCache: true);
+                            Assert.AreEqual($"{TestConstants.ClientId}_{realm}_AppTokenCache", args.SuggestedCacheKey);
+                            args.TokenCache.DeserializeMsalV3(serializedCache, shouldClearExistingCache: true);
                         });
                         app.AppTokenCache.SetAfterAccess(args =>
                         {
                             if (args.HasStateChanged)
                             {
-                                serializedCache[args.SuggestedCacheKey] = args.TokenCache.SerializeMsalV3();
+                                serializedCache = args.TokenCache.SerializeMsalV3();
                             }
                         });
                     }
@@ -147,8 +150,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     });
                 }
 
-                var appA = CreateApp(AuthorityA, "synthetic-secret-a");
-                var appB = CreateApp(authorityB, "synthetic-secret-b");
+                var appA = CreateApp(AuthorityA, "synthetic-secret-a", "realm-a");
+                var appB = CreateApp(authorityB, "synthetic-secret-b", "realm-b");
 
                 try
                 {
@@ -161,7 +164,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     Assert.AreEqual(TokenSource.IdentityProvider, resultA.AuthenticationResultMetadata.TokenSource);
                     Assert.HasCount(1, appA.AppTokenCacheInternal.Accessor.GetAllAccessTokens());
                     Assert.AreEqual(TokenA, appA.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().Secret);
-                    Assert.AreEqual(AuthorityA, appA.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().Environment);
+                    var entryA = appA.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single();
+                    Assert.AreEqual("identity.example", entryA.Environment);
+                    Assert.AreEqual("realm-a", entryA.TenantId);
+                    Assert.AreEqual("realm-a", resultA.TenantId);
+                    Assert.AreEqual(
+                        $"-identity.example-accesstoken-{TestConstants.ClientId}-realm-a-api",
+                        entryA.CacheKey);
                     Assert.AreEqual(0, httpManager.QueueSize);
 
                     // Act
@@ -175,10 +184,16 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     Assert.AreEqual(0, httpManager.QueueSize, "Issuer B's discovery and token responses must be consumed.");
                     Assert.IsTrue(appB.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Any(item => item.Secret == TokenB));
                     Assert.HasCount(2, appB.AppTokenCacheInternal.Accessor.GetAllAccessTokens());
-                    Assert.AreEqual(authorityB,
-                        appB.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single(item => item.Secret == TokenB).Environment);
-                    Assert.AreEqual(AuthorityA,
-                        appB.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single(item => item.Secret == TokenA).Environment);
+                    var entryB = appB.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single(item => item.Secret == TokenB);
+                    Assert.AreEqual(new Uri(authorityB).Host, entryB.Environment);
+                    Assert.AreEqual("realm-b", entryB.TenantId);
+                    Assert.AreEqual("realm-b", resultB.TenantId);
+                    Assert.AreEqual(
+                        $"-{new Uri(authorityB).Host}-accesstoken-{TestConstants.ClientId}-realm-b-api",
+                        entryB.CacheKey);
+                    entryA = appB.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single(item => item.Secret == TokenA);
+                    Assert.AreEqual("identity.example", entryA.Environment);
+                    Assert.AreEqual("realm-a", entryA.TenantId);
 
                     // Act
                     var cachedA = await appA.AcquireTokenForClient(scopes).ExecuteAsync().ConfigureAwait(false);
@@ -208,11 +223,12 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         }
 
         [TestMethod]
-        [DataRow("identity.example")]
-        [DataRow("https://identity.example/realm-b")]
-        [DataRow("https://identity.example/Realm-a")]
-        [DataRow("https://identity.example:8443/realm-a")]
-        public async Task ClientCredential_LegacyOrDifferentEnvironmentToken_IsNotReused_Async(string cachedEnvironment)
+        [DataRow("identity.example", null)]
+        [DataRow("identity.example", "realm-b")]
+        [DataRow("other-identity.example", "realm-a")]
+        [DataRow("https://identity.example/realm-a", null)]
+        public async Task ClientCredential_LegacyOrDifferentRealmToken_IsNotReused_Async(
+            string cachedEnvironment, string cachedRealm)
         {
             // Arrange
             const string Authority = "https://identity.example/realm-a";
@@ -232,7 +248,17 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
                 var cachedToken = app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single();
                 app.AppTokenCacheInternal.Accessor.Clear();
-                cachedToken.Environment = cachedEnvironment;
+                cachedToken = new MsalAccessTokenCacheItem(
+                    cachedEnvironment,
+                    cachedToken.ClientId,
+                    cachedToken.ScopeString,
+                    cachedRealm,
+                    cachedToken.Secret,
+                    cachedToken.CachedAt,
+                    cachedToken.ExpiresOn,
+                    cachedToken.ExtendedExpiresOn,
+                    cachedToken.RawClientInfo,
+                    cachedToken.HomeAccountId);
                 app.AppTokenCacheInternal.Accessor.SaveAccessToken(
                     MsalAccessTokenCacheItem.FromJsonString(cachedToken.ToJsonString()));
                 httpManager.AddMockHandler(new MockHttpMessageHandler
@@ -248,9 +274,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 // Assert
                 Assert.AreEqual(TokenSource.IdentityProvider, refreshed.AuthenticationResultMetadata.TokenSource);
                 Assert.AreEqual("synthetic-refreshed-token", refreshed.AccessToken);
-                Assert.AreEqual(Authority,
-                    app.AppTokenCacheInternal.Accessor.GetAllAccessTokens()
-                        .Single(item => item.Secret == refreshed.AccessToken).Environment);
+                var refreshedEntry = app.AppTokenCacheInternal.Accessor.GetAllAccessTokens()
+                    .Single(item => item.Secret == refreshed.AccessToken);
+                Assert.AreEqual("identity.example", refreshedEntry.Environment);
+                Assert.AreEqual("realm-a", refreshedEntry.TenantId);
+                Assert.AreEqual(
+                    $"-identity.example-accesstoken-{TestConstants.ClientId}-realm-a-api",
+                    refreshedEntry.CacheKey);
 
                 // Act
                 var cached = await app.AcquireTokenForClient(scopes).ExecuteAsync().ConfigureAwait(false);
@@ -264,7 +294,10 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [TestMethod]
         [DataRow("https://IDENTITY.example:443/realm-a/")]
         [DataRow("https://identity.example/realm-a")]
-        public async Task ClientCredential_EquivalentOidcAuthorities_ReuseToken_Async(string equivalentAuthority)
+        [DataRow("https://identity.example/Realm-A")]
+        [DataRow("https://identity.example/realm-a/nested")]
+        [DataRow("https://identity.example:8443/realm-a")]
+        public async Task ClientCredential_SameOidcCacheIdentity_ReuseToken_Async(string equivalentAuthority)
         {
             // Arrange
             const string Authority = "https://identity.example/realm-a";
@@ -295,7 +328,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 Assert.AreEqual(TokenSource.IdentityProvider, first.AuthenticationResultMetadata.TokenSource);
                 Assert.AreEqual("identity.example", first.Account.Environment);
                 Assert.HasCount(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens());
-                Assert.AreEqual(Authority, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().Environment);
+                Assert.AreEqual("identity.example", app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().Environment);
+                Assert.AreEqual("realm-a", app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().TenantId);
+                Assert.AreEqual("realm-a", first.TenantId);
 
                 // Act
                 var cached = await equivalentApp.AcquireTokenForClient(scopes).ExecuteAsync().ConfigureAwait(false);
@@ -304,6 +339,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 Assert.AreEqual(TokenSource.Cache, cached.AuthenticationResultMetadata.TokenSource);
                 Assert.AreEqual(first.AccessToken, cached.AccessToken);
                 Assert.AreEqual("identity.example", cached.Account.Environment);
+                Assert.AreEqual("realm-a", cached.TenantId);
                 Assert.HasCount(1, equivalentApp.AppTokenCacheInternal.Accessor.GetAllAccessTokens());
             }
         }

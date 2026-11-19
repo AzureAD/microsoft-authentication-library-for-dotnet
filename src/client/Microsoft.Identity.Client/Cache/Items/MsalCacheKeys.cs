@@ -26,7 +26,6 @@ namespace Microsoft.Identity.Client.Cache.Keys
             stringBuilder.Append(homeAccountId ?? "");
             stringBuilder.Append(CacheKeyDelimiter);
 
-            int environmentOffset = stringBuilder.Length;
             stringBuilder.Append(environment); // guaranteed not null
             stringBuilder.Append(CacheKeyDelimiter);
 
@@ -47,16 +46,7 @@ namespace Microsoft.Identity.Client.Cache.Keys
                 stringBuilder.Append(additionalKey);
             }
 
-            string key = stringBuilder.ToString();
-            if (environment is not null && environment.StartsWith("https://", StringComparison.Ordinal))
-            {
-                // Generic OIDC cache environments contain a URI with a case-sensitive path.
-                return key.Substring(0, environmentOffset).ToLowerInvariant() +
-                    environment +
-                    key.Substring(environmentOffset + environment.Length).ToLowerInvariant();
-            }
-
-            return key.ToLowerInvariant();
+            return stringBuilder.ToString().ToLowerInvariant();
         }
 
         public static string GetiOSAccountKey(string homeAccountId, string environment)
