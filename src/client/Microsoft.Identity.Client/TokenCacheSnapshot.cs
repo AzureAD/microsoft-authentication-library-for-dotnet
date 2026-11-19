@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Client
             bool isApplicationCache)
         {
             IsApplicationCache = isApplicationCache;
-            _state = new CacheSerializationContract(CloneUnknownNodes(unknownNodes));
+            _state = new CacheSerializationContract(CloneUnknownNodes(unknownNodes, detachFromOriginalDocument: true));
 
             foreach (var item in accessor.GetAllAccessTokens())
             {
@@ -95,14 +95,20 @@ namespace Microsoft.Identity.Client
             return CloneUnknownNodes(_state.UnknownNodes);
         }
 
-        internal static IDictionary<string, JsonNode> CloneUnknownNodes(IDictionary<string, JsonNode> nodes)
+        internal static IDictionary<string, JsonNode> CloneUnknownNodes(
+            IDictionary<string, JsonNode> nodes,
+            bool detachFromOriginalDocument = false)
         {
             var copy = new Dictionary<string, JsonNode>(StringComparer.Ordinal);
             if (nodes is not null)
             {
                 foreach (var pair in nodes)
                 {
-                    copy.Add(pair.Key, CloneNode(pair.Value));
+                    // A JsonNode clone can retain the complete source document, not just this subtree.
+                    var node = detachFromOriginalDocument && pair.Value is not null
+                        ? JsonNode.Parse(pair.Value.ToJsonString(), pair.Value.Options)
+                        : CloneNode(pair.Value);
+                    copy.Add(pair.Key, node);
                 }
             }
             return copy;
