@@ -9,9 +9,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser;
 using Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
+using Microsoft.Identity.Client.UI;
+using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
@@ -22,47 +26,42 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
     public class HttpListenerInterceptorTests
     {
         [TestMethod]
-        public async Task HttpListenerRejectsGetRequestAsync()
+        [DataRow("GET")]
+        [DataRow("POST")]
+        public async Task HttpListenerRejectsNonFormPostRequestsAsync(string method)
         {
-            HttpListenerInterceptor listenerInterceptor = new HttpListenerInterceptor(
-                Substitute.For<ILoggerAdapter>());
-
+            var listenerInterceptor = new HttpListenerInterceptor(Substitute.For<ILoggerAdapter>());
             int port = FindFreeLocalhostPort();
-
-            // Start the listener in the background
+            using var cancellation = new CancellationTokenSource(TimeSpan.FromSeconds(10));
             Task<AuthorizationResponse> listenTask = listenerInterceptor.ListenToSingleRequestAndRespondAsync(
-                port,
-                string.Empty,
-                (_) => { return new MessageAndHttpCode(HttpStatusCode.OK, "OK"); },
-                CancellationToken.None);
+                port, string.Empty, _ => new MessageAndHttpCode(HttpStatusCode.OK, "OK"), cancellation.Token);
 
-            // Give listener more time to start accepting connections
-            await Task.Delay(500).ConfigureAwait(false);
-
-            // Issue an HTTP GET request (should be rejected for security)
-            // We don't care if the HTTP client throws - we care that the listener rejects it
             try
             {
-                await SendMessageToPortAsync(port, string.Empty).ConfigureAwait(false);
+                using var httpClient = new HttpClient(new HttpClientHandler { UseProxy = false });
+                string uri = $"http://localhost:{port}/";
+                using var request = new HttpRequestMessage(new HttpMethod(method), uri);
+                using HttpResponseMessage rejection = await httpClient.SendAsync(
+                    request, cancellation.Token).ConfigureAwait(false);
+
+                Assert.AreEqual(HttpStatusCode.BadRequest, rejection.StatusCode);
+                Assert.IsFalse(listenTask.IsCompleted);
+
+                using var content = new StringContent(
+                    "code=auth_code&state=expected_state",
+                    System.Text.Encoding.UTF8,
+                    "application/x-www-form-urlencoded");
+                using HttpResponseMessage response = await httpClient.PostAsync(
+                    uri, content, cancellation.Token).ConfigureAwait(false);
+                AuthorizationResponse callback = await listenTask.ConfigureAwait(false);
+
+                Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+                Assert.IsTrue(callback.IsFormPost);
             }
-            catch
+            finally
             {
-                // The HTTP client may throw if the listener closes the connection
-                // This is expected and fine - we'll verify the listener's behavior
+                cancellation.Cancel();
             }
-
-            // Wait for the listener to complete or fault (without throwing)
-            await Task.WhenAny(listenTask, Task.Delay(5000)).ConfigureAwait(false);
-
-            // Assert - should throw security exception
-            Assert.IsTrue(listenTask.IsCompleted, "Listener task should complete within timeout");
-            Assert.IsTrue(listenTask.IsFaulted, "GET request should cause the task to fault");
-            Assert.IsNotNull(listenTask.Exception, "Exception should be captured");
-            Assert.IsInstanceOfType(listenTask.Exception.InnerException, typeof(MsalClientException));
-            
-            var msalEx = (MsalClientException)listenTask.Exception.InnerException;
-            Assert.AreEqual(MsalError.AuthenticationFailed, msalEx.ErrorCode);
-            Assert.Contains("Expected POST request", msalEx.Message, "Error message should explain POST is required");
         }
 
         [TestMethod]
@@ -370,11 +369,69 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
                          "Request URI should not contain query parameters when using form_post");
         }
 
-        private async Task SendMessageToPortAsync(int port, string path)
+        [TestMethod]
+        [DataRow(null, false)]
+        [DataRow("incorrect_state", false)]
+        [DataRow("incorrect_state", true)]
+        public async Task HttpListener_RejectsInvalidStateAndContinuesAsync(string state, bool cancelWaiting)
         {
-            using (HttpClient httpClient = new HttpClient())
+            var logger = Substitute.For<ILoggerAdapter>();
+            var listenerInterceptor = new HttpListenerInterceptor(logger);
+            var webUi = new DefaultOsBrowserWebUi(
+                Substitute.For<IPlatformProxy>(), logger, null, listenerInterceptor);
+            var requestContext = new RequestContext(TestCommon.CreateDefaultServiceBundle(), Guid.NewGuid(), null);
+            int port = FindFreeLocalhostPort();
+            string uri = $"http://localhost:{port}/";
+            using var cancellation = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+            Task<AuthorizationResult> authorizationTask = webUi.AcquireAuthorizationAsync(
+                new Uri("https://login.microsoftonline.com/common/oauth2/v2.0/authorize?state=expected_state"),
+                new Uri(uri),
+                requestContext,
+                cancellation.Token);
+
+            try
             {
-                await httpClient.GetAsync(GetLocalhostUriWithParams(port, path)).ConfigureAwait(false);
+                using var httpClient = new HttpClient(new HttpClientHandler { UseProxy = false });
+                string errorData = "error=access_denied&error_description=" +
+                    Uri.EscapeDataString("<b>must_not_be_reflected</b>");
+                if (state is not null)
+                {
+                    errorData += "&state=" + Uri.EscapeDataString(state);
+                }
+
+                using var errorContent = new StringContent(
+                    errorData, System.Text.Encoding.UTF8, "application/x-www-form-urlencoded");
+                using HttpResponseMessage rejection = await httpClient.PostAsync(
+                    uri, errorContent, cancellation.Token).ConfigureAwait(false);
+
+                Assert.AreEqual(HttpStatusCode.BadRequest, rejection.StatusCode);
+                Assert.AreEqual(string.Empty, await rejection.Content.ReadAsStringAsync().ConfigureAwait(false));
+                Assert.IsFalse(authorizationTask.IsCompleted);
+
+                if (cancelWaiting)
+                {
+                    cancellation.Cancel();
+                    await AssertException.TaskThrowsAsync<OperationCanceledException>(
+                        () => authorizationTask).ConfigureAwait(false);
+                    return;
+                }
+
+                using var successContent = new StringContent(
+                    "code=auth_code&state=expected_state",
+                    System.Text.Encoding.UTF8,
+                    "application/x-www-form-urlencoded");
+                using HttpResponseMessage response = await httpClient.PostAsync(
+                    uri, successContent, cancellation.Token).ConfigureAwait(false);
+                AuthorizationResult result = await authorizationTask.ConfigureAwait(false);
+
+                Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+                Assert.AreEqual(AuthorizationStatus.Success, result.Status);
+                Assert.AreEqual("auth_code", result.Code);
+                Assert.AreEqual("expected_state", result.State);
+            }
+            finally
+            {
+                cancellation.Cancel();
             }
         }
 
@@ -388,16 +445,6 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
                     : $"http://localhost:{port}/{path}/";
                 await httpClient.PostAsync(uri, content).ConfigureAwait(false);
             }
-        }
-
-        private static string GetLocalhostUriWithParams(int port, string path)
-        {
-            if (string.IsNullOrEmpty(path))
-            {
-                return "http://localhost:" + port + "/?param1=val1";
-            }
-
-            return "http://localhost:" + port + "/" + path + "/?param1=val1";
         }
 
         private static int FindFreeLocalhostPort()
