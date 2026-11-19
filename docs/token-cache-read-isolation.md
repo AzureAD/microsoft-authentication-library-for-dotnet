@@ -29,7 +29,7 @@ lifecycle remains sequential. Async-only read lifecycles can overlap by default.
 This preserves synchronous file-provider coordination without serializing
 async-only distributed-cache reads. Async registration alone does not make a
 provider's shared state thread safe.
-Public clients, application-token caches, native-platform accessors,
+Public clients, application-token caches unless opted in as described below, native-platform accessors,
 disabled internal caches, legacy-enabled caches,
 and caches with synchronization disabled retain their existing behavior.
 Whole-cache/no-key operations retain original-root callbacks under their exclusive
@@ -111,3 +111,34 @@ of overlapping reads can increase backend load even when request latency improve
 If compatibility or capacity regresses, enable the rollback switch and recreate
 the application, normally by restarting the process. Do not retry a partially
 executed callback automatically against the shared cache.
+
+## Application-token cache opt-in
+
+Before constructing the application, set:
+
+```csharp
+AppContext.SetSwitch("Microsoft.Identity.Client.EnableAppCacheReadIsolation", true);
+```
+
+The application must enable cache synchronization and disable legacy cache
+compatibility (for example, using `.WithLegacyCacheCompatibility(false)` on the
+builder). MSAL's builder defaults to legacy compatibility enabled, so the switch
+alone does not activate this optimization. The same serializer requirements
+above apply: each read must fully hydrate `args.TokenCache`, and asynchronous read
+callbacks must support overlap.
+Callbacks that capture the original cache, load it only once, or use legacy
+deserialization are not compatible.
+
+For application-token reads, successful private hydration is not published to
+the original cache. Serializing the original cache outside the callback therefore
+does not necessarily return the last-read partition. Writes continue to hydrate,
+update and persist the original cache under its existing exclusive semaphore.
+The original cache may still retain state from writes. Synchronous read callbacks
+remain sequential, and writes remain coordinated with read callback lifecycles.
+In `BeforeAccess`, `HasTokens` describes the initially empty private cache,
+not any tokens already in the original cache; after hydration, `AfterAccess`
+describes the private cache contents.
+
+The opt-in is off by default. To revert it, set the switch to `false` before
+constructing the application. The existing `DisableCacheReadIsolation` switch
+also disables this opt-in.
