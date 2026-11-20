@@ -241,7 +241,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             return driver.FindElement(By.Id(id));
         }
 
-        public static void PerformLogin(this IWebDriver driver, UserConfig user, Prompt prompt, bool withLoginHint = false, bool adfsOnly = false)
+        public static void PerformLogin(this IWebDriver driver, UserConfig user, Prompt prompt, bool withLoginHint = false, bool adfsOnly = false, bool isDeviceCodeFlow = false)
         {
             UserInformationFieldIds fields = new UserInformationFieldIds(user);
 
@@ -251,7 +251,30 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             EnterPassword(driver, user, fields);
 
             HandleConsent(driver, user, fields, prompt);
+            if (isDeviceCodeFlow)
+            {
+                // Restrict approval to test-initiated device-code flows; the helper detects the optional UI.
+                HandleDeviceCodeApprovalIfPresent(driver);
+            }
+
             HandleStaySignedIn(driver);
+        }
+
+        internal static void HandleDeviceCodeApprovalIfPresent(IWebDriver driver)
+        {
+            var approvalScreen = driver.WaitForElementToBeVisibleAndEnabled(
+                By.Id("appConfirmRemoteConnectTitle"),
+                waitTime: ShortExplicitTimespan,
+                ignoreFailures: true);
+
+            if (approvalScreen is null)
+            {
+                Trace.WriteLine("Device-code approval screen not shown");
+                return;
+            }
+
+            Trace.WriteLine("Approving the device-code sign-in initiated by this test");
+            driver.WaitForElementToBeVisibleAndEnabled(By.Id("idBtn_Approve")).Click();
         }
 
         private static void HandlePrompt(IWebDriver driver, string id)
@@ -381,7 +404,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
                         ByIds(fields.AADSignInButtonId, continueId));
                     continueBtn?.Click();
 
-                    seleniumDriver.PerformLogin(user, Prompt.SelectAccount, false, isAdfs);
+                    seleniumDriver.PerformLogin(user, Prompt.SelectAccount, false, isAdfs, isDeviceCodeFlow: true);
                     Thread.Sleep(1000); // allow the browser to redirect
 
                     seleniumDriver?.SaveScreenshot(testContext, "device_code_end");

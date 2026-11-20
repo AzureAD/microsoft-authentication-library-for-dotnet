@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client
@@ -21,8 +20,7 @@ namespace Microsoft.Identity.Client
             }
             string url = uri.AbsoluteUri;
 
-            url = url.Replace("&", "^&");
-            Process.Start(new ProcessStartInfo("cmd", $"/c start microsoft-edge:{url}") { CreateNoWindow = true });
+            OpenEdgeBrowserOnWindows(url);
             await Task.FromResult(0).ConfigureAwait(false);
         }
 
@@ -39,8 +37,7 @@ namespace Microsoft.Identity.Client
 
             string url = uri.AbsoluteUri;
 
-            url = url.Replace("&", "^&");
-            Process.Start(new ProcessStartInfo("cmd", $"/c start msedge {url}") { CreateNoWindow = true });
+            OpenEdgeBrowserOnWindows(url);
             await Task.FromResult(0).ConfigureAwait(false);
         }
     }

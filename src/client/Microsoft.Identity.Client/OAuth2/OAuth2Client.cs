@@ -135,6 +135,7 @@ namespace Microsoft.Identity.Client.OAuth2
                 IRetryPolicyFactory retryPolicyFactory = requestContext.ServiceBundle.Config.RetryPolicyFactory;
                 IRetryPolicy effectiveRetryPolicy = retryPolicy ?? retryPolicyFactory.GetRetryPolicy(RequestType.STS);
                 CancellationToken effectiveCancellationToken = cancellationToken ?? requestContext.UserCancellationToken;
+                bool tokenPostStarted = false;
 
                 try
                 {
@@ -153,6 +154,7 @@ namespace Microsoft.Identity.Client.OAuth2
                             endpointUri = requestData.RequestUri;
                         }
 
+                        tokenPostStarted = typeof(T) == typeof(MsalTokenResponse) && !effectiveCancellationToken.IsCancellationRequested;
                         response = await _httpManager.SendRequestAsync(
                             endpointUri,
                             _headers,
@@ -184,6 +186,14 @@ namespace Microsoft.Identity.Client.OAuth2
                 }
                 catch (Exception ex)
                 {
+                    if (tokenPostStarted &&
+                        ex is OperationCanceledException cancellationException &&
+                        effectiveCancellationToken.IsCancellationRequested)
+                    {
+                        // Retain the transport exception, not cancellation from credential or pre-request callbacks.
+                        requestContext.TokenRequestCancellationException = cancellationException;
+                    }
+
                     if (requestContext.ApiEvent != null)
                     {
                         requestContext.ApiEvent.DurationInHttpInMs += _httpManager.LastRequestDurationInMs;

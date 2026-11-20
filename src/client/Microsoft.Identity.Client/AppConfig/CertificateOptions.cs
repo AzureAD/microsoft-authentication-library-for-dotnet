@@ -20,6 +20,12 @@ namespace Microsoft.Identity.Client.AppConfig
         /// Gets or sets a value indicating if the application tokens acquired from Azure AD are associated with the certificate serial number.
         /// This property when set, allow you to associate the tokens acquired from Azure AD with the certificate serial number. 
         /// This can be used to partition the cache by certificate. Tokens acquired with one certificate will not be accessible to another certificate with a different serial number.
+        /// For <see cref="IConfidentialClientApplication.AcquireTokenForClient(System.Collections.Generic.IEnumerable{string})"/>
+        /// with a dynamic certificate provider, the provider is invoked before cache lookup, including on cache hits.
+        /// The selected certificate is reused for the initial network attempt. When a service-failure callback
+        /// requests a retry, the provider is invoked again and the cache partition is updated to match that attempt's
+        /// certificate. A different serial number causes a cache miss unless
+        /// a matching token is already cached for that certificate.
         /// <remarks>Set this property to <see langword="true"/> to indicate that the tokens acquired from Azure AD are associated with the certificate serial number,
         /// by default it is set to <see langword="false"/> /></remarks>
         /// </summary>

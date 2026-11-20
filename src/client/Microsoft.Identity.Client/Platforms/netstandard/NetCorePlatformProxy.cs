@@ -169,21 +169,7 @@ namespace Microsoft.Identity.Client.Platforms.netstandard
         {
             if (DesktopOsHelper.IsWindows())
             {
-                try
-                {
-                    var psi = new ProcessStartInfo
-                    {
-                        FileName = url,
-                        UseShellExecute = true
-                    };
-                    Process.Start(psi);
-                }
-                catch
-                {
-                    // hack because of this: https://github.com/dotnet/corefx/issues/10361
-                    url = url.Replace("&", "^&");
-                    Process.Start(new ProcessStartInfo("cmd", $"/c start msedge {url}") { CreateNoWindow = true });
-                }
+                SystemWebViewOptions.OpenDefaultBrowserOnWindows(url);
             }
             else if (DesktopOsHelper.IsLinux())
             {

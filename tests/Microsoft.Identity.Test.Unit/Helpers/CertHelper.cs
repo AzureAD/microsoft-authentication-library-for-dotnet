@@ -37,7 +37,10 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
             return x509Certificate2;
         }
 
-        private static X509Certificate2 CreateTestCert(KnownTestCertType knownTestCertType = KnownTestCertType.RSA)
+        /// <summary>
+        /// Creates an uncached certificate that the caller owns and must dispose.
+        /// </summary>
+        internal static X509Certificate2 CreateTestCert(KnownTestCertType knownTestCertType = KnownTestCertType.RSA)
         {
             switch (knownTestCertType)
             {
