@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
@@ -302,6 +303,79 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 Assert.IsNotNull(authResult);
                 Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+
+        [TestMethod]
+        [DataRow("v")]
+        [DataRow("override")]
+        public async Task SynchronousExtraBodyParameters_ExplicitCachePartitionKey_TakesPrecedence(string partitionValue)
+        {
+            // Arrange
+            using var httpManager = new MockHttpManager();
+            var app = ConfidentialClientApplicationBuilder.Create(_clientId)
+                .WithAuthority("https://login.microsoftonline.com/", _tenantId)
+                .WithClientSecret("ClientSecret")
+                .WithHttpManager(httpManager)
+                .WithExperimentalFeatures(true)
+                .BuildConcrete();
+            httpManager.AddInstanceDiscoveryMockHandler();
+            httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(
+                expectedPostData: new Dictionary<string, string> { { "k", "v" } });
+
+            // Act
+            var result = await app.AcquireTokenForClient(new[] { _scope })
+                .WithExtraBodyParameters(new Dictionary<string, string> { { "k", "v" } })
+                .WithCachePartitionKey("k", partitionValue, partitionRefreshToken: true)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            // Assert
+            Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+            var cachedToken = app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single();
+            Assert.AreEqual(partitionValue, cachedToken.AdditionalCacheKeyComponents["k"]);
+
+            result = await app.AcquireTokenForClient(new[] { _scope })
+                .WithExtraBodyParameters(new Dictionary<string, Func<CancellationToken, Task<string>>>
+                {
+                    { "k", _ => Task.FromResult("v") }
+                })
+                .WithCachePartitionKey("k", partitionValue, partitionRefreshToken: true)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+            cachedToken = app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single();
+            Assert.AreEqual(partitionValue, cachedToken.AdditionalCacheKeyComponents["k"]);
+        }
+
+        [TestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        public void ExtraBodyParameters_DuplicateBodyKey_Throws(bool synchronous)
+        {
+            // Arrange
+            var app = ConfidentialClientApplicationBuilder.Create(_clientId)
+                .WithClientSecret("ClientSecret")
+                .WithExperimentalFeatures(true)
+                .BuildConcrete();
+            var builder = app.AcquireTokenForClient(new[] { _scope });
+
+            // Act and Assert
+            if (synchronous)
+            {
+                var parameters = new Dictionary<string, string> { { "k", "v" } };
+                builder.WithExtraBodyParameters(parameters);
+                Assert.Throws<ArgumentException>(() => builder.WithExtraBodyParameters(parameters));
+            }
+            else
+            {
+                var parameters = new Dictionary<string, Func<CancellationToken, Task<string>>>
+                {
+                    { "k", _ => Task.FromResult("v") }
+                };
+                builder.WithExtraBodyParameters(parameters);
+                Assert.Throws<ArgumentException>(() => builder.WithExtraBodyParameters(parameters));
             }
         }
 
