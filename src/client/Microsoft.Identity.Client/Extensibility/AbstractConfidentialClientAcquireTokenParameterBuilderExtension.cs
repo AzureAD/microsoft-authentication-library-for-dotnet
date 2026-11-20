@@ -168,7 +168,7 @@ namespace Microsoft.Identity.Client.Extensibility
         /// Add synchronous extra body parameters to the token request. These parameters are added to the cache key
         /// to associate these parameters with the acquired token. Works for confidential client flows
         /// (AcquireTokenForClient, AcquireTokenOnBehalfOf, AcquireTokenByAuthorizationCode).
-        /// Explicit cache partition keys take precedence over these cache key values without changing the request body.
+        /// Calling WithCachePartitionKey after this method overrides the matching cache key value without changing the request body.
         /// </summary>
         /// <typeparam name="T">The concrete confidential client builder type.</typeparam>
         /// <param name="builder">The builder to chain options to.</param>

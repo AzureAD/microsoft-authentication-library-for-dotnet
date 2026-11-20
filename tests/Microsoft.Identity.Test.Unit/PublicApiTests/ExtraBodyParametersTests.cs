@@ -352,6 +352,130 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
+        public async Task SynchronousExtraBodyParameters_QueryCacheKeyCollision_Throws(bool queryFirst)
+        {
+            // Arrange
+            using var httpManager = new MockHttpManager();
+            var app = ConfidentialClientApplicationBuilder.Create(_clientId)
+                .WithAuthority("https://login.microsoftonline.com/", _tenantId)
+                .WithClientSecret("ClientSecret")
+                .WithHttpManager(httpManager)
+                .WithExperimentalFeatures(true)
+                .BuildConcrete();
+            var query = new Dictionary<string, (string Value, bool IncludeInCacheKey)>
+            {
+                { "k", ("q", true) }
+            };
+            httpManager.AddInstanceDiscoveryMockHandler();
+            httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+            await app.AcquireTokenForClient(new[] { _scope })
+                .WithExtraQueryParameters(query)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+            Assert.AreEqual("q", app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().AdditionalCacheKeyComponents["k"]);
+
+            // Act and Assert
+            foreach (string bodyValue in new[] { "v1", "v2" })
+            {
+                await Assert.ThrowsAsync<ArgumentException>(async () =>
+                {
+                    var builder = app.AcquireTokenForClient(new[] { _scope });
+                    var body = new Dictionary<string, string> { { "k", bodyValue } };
+                    if (queryFirst)
+                    {
+                        builder.WithExtraQueryParameters(query).WithExtraBodyParameters(body);
+                    }
+                    else
+                    {
+                        builder.WithExtraBodyParameters(body).WithExtraQueryParameters(query);
+                    }
+
+                    await builder.ExecuteAsync().ConfigureAwait(false);
+                }).ConfigureAwait(false);
+                Assert.AreEqual("q", app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().AdditionalCacheKeyComponents["k"]);
+            }
+        }
+
+        [TestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        public async Task ExtraBodyParameters_MixedSyncAsyncDuplicate_Throws(bool synchronousFirst)
+        {
+            // Arrange
+            using var httpManager = new MockHttpManager();
+            var app = ConfidentialClientApplicationBuilder.Create(_clientId)
+                .WithAuthority("https://login.microsoftonline.com/", _tenantId)
+                .WithClientSecret("ClientSecret")
+                .WithHttpManager(httpManager)
+                .WithExperimentalFeatures(true)
+                .BuildConcrete();
+            var syncBody = new Dictionary<string, string> { { "k", "sync" } };
+            var asyncBody = new Dictionary<string, Func<CancellationToken, Task<string>>>
+            {
+                { "k", _ => Task.FromResult("async") }
+            };
+            httpManager.AddInstanceDiscoveryMockHandler();
+            httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(
+                expectedPostData: new Dictionary<string, string> { { "k", "async" } });
+            await app.AcquireTokenForClient(new[] { _scope })
+                .WithExtraBodyParameters(asyncBody)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+            Assert.AreEqual("async", app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().AdditionalCacheKeyComponents["k"]);
+
+            // Act and Assert
+            await Assert.ThrowsAsync<ArgumentException>(async () =>
+            {
+                var builder = app.AcquireTokenForClient(new[] { _scope });
+                if (synchronousFirst)
+                {
+                    builder.WithExtraBodyParameters(syncBody).WithExtraBodyParameters(asyncBody);
+                }
+                else
+                {
+                    builder.WithExtraBodyParameters(asyncBody).WithExtraBodyParameters(syncBody);
+                }
+
+                await builder.ExecuteAsync().ConfigureAwait(false);
+            }).ConfigureAwait(false);
+            Assert.AreEqual("async", app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().AdditionalCacheKeyComponents["k"]);
+        }
+
+        [TestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        public void ExtraBodyParameters_ConflictingSources_CannotBeHiddenByPartitionOverride(bool queryCollision)
+        {
+            // Arrange
+            var app = ConfidentialClientApplicationBuilder.Create(_clientId)
+                .WithClientSecret("ClientSecret")
+                .WithExperimentalFeatures(true)
+                .BuildConcrete();
+            var builder = app.AcquireTokenForClient(new[] { _scope })
+                .WithExtraBodyParameters(new Dictionary<string, string> { { "k", "sync" } });
+            if (queryCollision)
+            {
+                builder.WithExtraQueryParameters(new Dictionary<string, (string Value, bool IncludeInCacheKey)>
+                {
+                    { "k", ("q", true) }
+                });
+            }
+            else
+            {
+                builder.WithExtraBodyParameters(new Dictionary<string, Func<CancellationToken, Task<string>>>
+                {
+                    { "k", _ => Task.FromResult("async") }
+                });
+            }
+
+            // Act and Assert
+            Assert.Throws<ArgumentException>(() => builder.WithCachePartitionKey("k", "override"));
+            Assert.AreEqual("sync", builder.CommonParameters.SyncCacheKeyComponents["k"]);
+        }
+
+        [TestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
         public void ExtraBodyParameters_DuplicateBodyKey_Throws(bool synchronous)
         {
             // Arrange

@@ -77,11 +77,7 @@ namespace Microsoft.Identity.Client
 
                 foreach (var kvp in commonParameters.SyncCacheKeyComponents)
                 {
-                    // Preserve explicit cache partition overrides, as the async overload does.
-                    if (!cacheKeyComponentsWithSyncValues.ContainsKey(kvp.Key))
-                    {
-                        cacheKeyComponentsWithSyncValues.Add(kvp.Key, kvp.Value);
-                    }
+                    cacheKeyComponentsWithSyncValues.Add(kvp.Key, kvp.Value);
                 }
 
                 cacheKeyComponents = cacheKeyComponentsWithSyncValues;
