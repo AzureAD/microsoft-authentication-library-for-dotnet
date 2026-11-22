@@ -79,6 +79,7 @@ namespace Microsoft.Identity.Client.Extensibility
         /// Sends <paramref name="attributeTokens"/> as the <c>attribute_tokens</c> body parameter
         /// and includes them in the cache key. Null/empty/whitespace entries are ignored;
         /// a null or empty collection is a no-op.
+        /// This method does not require experimental features to be enabled.
         /// </summary>
         /// <typeparam name="T">The concrete confidential client builder type.</typeparam>
         /// <param name="builder">The builder to chain options to.</param>
@@ -103,11 +104,6 @@ namespace Microsoft.Identity.Client.Extensibility
         /// </para>
         /// </remarks>
         /// <exception cref="ArgumentException">Thrown when any token contains embedded whitespace.</exception>
-        /// <exception cref="MsalClientException">
-        /// Thrown when the application was not configured to allow experimental features
-        /// (this method transitively calls <see cref="WithExtraBodyParameters{T}"/>, which requires
-        /// experimental features to be enabled via <c>WithExperimentalFeatures()</c> on the application builder).
-        /// </exception>
         public static T WithAttributeTokens<T>(
             this AbstractConfidentialClientAcquireTokenParameterBuilder<T> builder,
             IEnumerable<string> attributeTokens)
@@ -168,6 +164,7 @@ namespace Microsoft.Identity.Client.Extensibility
         /// Add extra body parameters to the token request. These parameters are added to the cache key
         /// to associate these parameters with the acquired token. Works for confidential client flows
         /// (AcquireTokenForClient, AcquireTokenOnBehalfOf, AcquireTokenByAuthorizationCode).
+        /// This method does not require experimental features to be enabled.
         /// </summary>
         /// <typeparam name="T">The concrete confidential client builder type.</typeparam>
         /// <param name="builder">The builder to chain options to.</param>
@@ -178,8 +175,6 @@ namespace Microsoft.Identity.Client.Extensibility
             Dictionary<string, Func<CancellationToken, Task<string>>> extraBodyParams)
             where T : AbstractConfidentialClientAcquireTokenParameterBuilder<T>
         {
-            builder.ValidateUseOfExperimentalFeature();
-
             if (extraBodyParams == null || extraBodyParams.Count == 0)
             {
                 return (T)builder;
