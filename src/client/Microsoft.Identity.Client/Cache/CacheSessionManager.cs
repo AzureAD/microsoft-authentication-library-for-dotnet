@@ -227,7 +227,10 @@ namespace Microsoft.Identity.Client.Cache
                                   requestTenantId: _requestParams.AuthorityManager.OriginalAuthority.TenantId,
                                   identityLogger: _requestParams.RequestContext.Logger.IdentityLogger,
                                   piiLoggingEnabled: _requestParams.RequestContext.Logger.PiiLoggingEnabled,
-                                  telemetryData: telemetryData);
+                                  telemetryData: telemetryData)
+                                {
+                                    RefreshJitter = RequestContext.RefreshJitter,
+                                };
 
                                 var measureDurationResult = await refreshCache.OnBeforeAccessAsync(args).MeasureAsync().ConfigureAwait(false);
                                 RequestContext.ApiEvent.DurationInCacheInMs += measureDurationResult.Milliseconds;
@@ -252,7 +255,15 @@ namespace Microsoft.Identity.Client.Cache
                                       requestTenantId: _requestParams.AuthorityManager.OriginalAuthority.TenantId,
                                       identityLogger: _requestParams.RequestContext.Logger.IdentityLogger,
                                       piiLoggingEnabled: _requestParams.RequestContext.Logger.PiiLoggingEnabled,
-                                      telemetryData: telemetryData);
+                                      telemetryData: telemetryData)
+                                    {
+                                        RefreshJitter = RequestContext.RefreshJitter,
+                                        // Lets the provider keep its local copy's refresh time current after loading from L2. Performs an O(n) walk of
+                                        // MsalAccessTokenCacheItems to determine the earliest refresh time for L2 cache proactive refresh. Cost is paid
+                                        // even in non-L2 scenarios due to the complexity of avoiding this check. Ideally it should be calculated only
+                                        // for L2 cache promotion scenarios.
+                                        SuggestedRefreshOn = TokenCache.CalculateSuggestedRefreshOn(refreshCache.Accessor, key),
+                                    };
 
                                     await refreshCache.OnAfterAccessAsync(args).ConfigureAwait(false);
                                 }).ConfigureAwait(false);

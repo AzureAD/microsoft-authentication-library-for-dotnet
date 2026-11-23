@@ -115,7 +115,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 try
                 {
-                    var proactivelyRefresh = SilentRequestHelper.NeedsRefresh(cachedAccessTokenItem);
+                    var proactivelyRefresh = SilentRequestHelper.NeedsRefresh(cachedAccessTokenItem, AuthenticationRequestParameters.RequestContext.RefreshJitter);
 
                     // If needed, refreshes token in the background
                     if (proactivelyRefresh)

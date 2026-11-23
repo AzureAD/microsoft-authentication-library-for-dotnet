@@ -242,6 +242,25 @@ namespace Microsoft.Identity.Client
         public DateTimeOffset? SuggestedCacheExpiry { get; }
 
         /// <summary>
+        /// Earliest time at which an access token in the cache node is due for proactive refresh, before jitter is applied.
+        /// For tokens without a refresh time, this is the time MSAL stops using them (expiry minus a buffer).
+        /// </summary>
+        /// <remarks>
+        /// Set on the <code>OnAfterAccess</code> delegate. Store it with the cache node. On a later read, if
+        /// <code>SuggestedRefreshOn + RefreshJitter</code> has passed, read the node from the distributed (L2) cache rather than
+        /// a local copy: MSAL will refresh the token in that request, and another instance may already have stored a newer one.
+        /// <code>null</code> when the node has no access tokens or MSAL did not compute it.
+        /// </remarks>
+        public DateTimeOffset? SuggestedRefreshOn { get; internal set; }
+
+        /// <summary>
+        /// Proactive refresh jitter for this request. MSAL refreshes an access token when its refresh time plus this value
+        /// has passed. Drawn once per request, so it is the same in every notification of that request.
+        /// </summary>
+        /// <remarks>Compare <code>SuggestedRefreshOn + RefreshJitter</code> with the current time in <code>OnBeforeAccess</code>.</remarks>
+        public TimeSpan RefreshJitter { get; internal set; }
+
+        /// <summary>
         /// Identity Logger provided at the time of application creation Via WithLogging(IIdentityLogger, bool)/>
         /// Calling the log function will automatically add MSAL formatting to the message. For details see https://aka.ms/msal-net-logging
         /// </summary>
