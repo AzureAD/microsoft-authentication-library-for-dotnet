@@ -10,14 +10,12 @@ namespace Microsoft.Identity.Client.Cache.Items
     {
         internal string CredentialType { get; set; }
         public string ClientId { get; set; }
-        internal bool IsClientIdCaseSensitive { get; set; }
         public string Secret { get; set; }
 
         internal override void PopulateFieldsFromJObject(JObject j)
         {
             CredentialType = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.CredentialType);
             ClientId = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.ClientId);
-            IsClientIdCaseSensitive = JsonHelper.ExtractExistingOrDefault<bool>(j, StorageJsonKeys.ClientIdCaseSensitive);
             Secret = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.Secret);
 
             // Important: this MUST be last, since it will extract the AdditionalFieldsJson
@@ -30,10 +28,6 @@ namespace Microsoft.Identity.Client.Cache.Items
             var json = base.ToJObject();
 
             SetItemIfValueNotNull(json, StorageJsonKeys.ClientId, ClientId);
-            if (IsClientIdCaseSensitive)
-            {
-                json[StorageJsonKeys.ClientIdCaseSensitive] = true;
-            }
             SetItemIfValueNotNull(json, StorageJsonKeys.Secret, Secret);
             SetItemIfValueNotNull(json, StorageJsonKeys.CredentialType, CredentialType);
 

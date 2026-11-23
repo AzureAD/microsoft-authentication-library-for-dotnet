@@ -24,7 +24,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         string _expectedExternalCacheKey => $"{_clientId}_{_tenantId}_{_expectedParameterHash}_AppTokenCache";
 
         [TestMethod]
-        public async Task ValidateExtraBodyParameters()
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task ValidateExtraBodyParameters(bool enableExperimentalFeatures)
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -49,7 +51,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                             .WithAuthority("https://login.microsoftonline.com/", _tenantId)
                             .WithClientSecret("ClientSecret")
                             .WithHttpManager(httpManager)
-                            .WithExperimentalFeatures(true) // Enable experimental features to use WithExtraBodyParameters
+                            .WithExperimentalFeatures(enableExperimentalFeatures)
                             .BuildConcrete();
 
                 //Recording test data for Asserts
@@ -71,7 +73,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 var authResult = await confidentialApp.AcquireTokenForClient(new[] { _scope })
                                                         .WithFmiPath("SomeFmiPath/FmiCredentialPath") //Sets fmi path in client credential request.
-                                                        .WithExtraBodyParameters(extraBodyParams) //Sets attributes in client credential request.
+                                                        .WithExtraBodyParameters<AcquireTokenForClientParameterBuilder>(extraBodyParams)
                                                         .ExecuteAsync()
                                                         .ConfigureAwait(false);
 
@@ -141,7 +143,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                             .WithAuthority("https://login.microsoftonline.com/", tenantId)
                             .WithClientSecret("ClientSecret")
                             .WithHttpManager(httpManager)
-                            .WithExperimentalFeatures(true) // Enable experimental features to use WithExtraBodyParameters
                             .BuildConcrete();
 
                 //Recording test data for Asserts
@@ -255,7 +256,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                             .WithAuthority("https://login.microsoftonline.com/", _tenantId)
                             .WithClientSecret("ClientSecret")
                             .WithHttpManager(httpManager)
-                            .WithExperimentalFeatures(true) // Enable experimental features to use WithExtraBodyParameters
                             .BuildConcrete();
 
                 // Act & Assert

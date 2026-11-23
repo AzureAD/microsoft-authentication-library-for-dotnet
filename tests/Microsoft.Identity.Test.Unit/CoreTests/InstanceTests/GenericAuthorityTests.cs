@@ -78,16 +78,10 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         }
       
         [TestMethod]
-        [DataRow("HighClient", "highclient", false, false)]
-        [DataRow("highclient", "HighClient", false, false)]
-        [DataRow("HighClient", "highclient", true, false)]
-        [DataRow("highclient", "HighClient", true, false)]
-        [DataRow("HighClient", "highclient", false, true)]
-        [DataRow("highclient", "HighClient", false, true)]
-        [DataRow("HighClient", "highclient", true, true)]
-        [DataRow("highclient", "HighClient", true, true)]
+        [DataRow("HighClient", "highclient", false)]
+        [DataRow("highclient", "HighClient", true)]
         public async Task CaseDistinctClients_SharedUserCache_RemainsIsolatedAsync(
-            string firstClientId, string secondClientId, bool legacyCache, bool isolatedReads)
+            string firstClientId, string secondClientId, bool isolatedReads)
         {
             // Arrange
             using var httpManager = new MockHttpManager();
@@ -104,7 +98,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
             // Assert
             AssertCache("first-token");
-            if (legacyCache)
+            if (!isolatedReads)
             {
                 var json = JsonNode.Parse(Encoding.UTF8.GetString(sharedCache)).AsObject();
                 foreach (string type in new[] { "AccessToken", "RefreshToken", "IdToken", "AppMetadata" })
@@ -113,7 +107,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     {
                         foreach (var entry in items.ToArray())
                         {
-                            entry.Value.AsObject().Remove(StorageJsonKeys.ClientIdCaseSensitive);
                             items.Remove(entry.Key);
                             items[entry.Key.ToLowerInvariant()] = entry.Value;
                         }

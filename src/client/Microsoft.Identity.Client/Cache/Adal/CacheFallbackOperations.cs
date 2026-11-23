@@ -105,7 +105,7 @@ namespace Microsoft.Identity.Client.Cache
 
                 // filter by client id
                 dictionary.Where(p =>
-                        p.Key.ClientId.Equals(clientId, StringComparison.OrdinalIgnoreCase) &&
+                        p.Key.ClientId.Equals(clientId, StringComparison.Ordinal) &&
                         !string.IsNullOrEmpty(p.Key.Authority))
                         .ToList()
                         .ForEach(kvp =>
@@ -190,7 +190,7 @@ namespace Microsoft.Identity.Client.Cache
                 string cachedClientId = kvp.Key.ClientId;
 
                 if (string.Equals(displayableId, cachedAccountDisplayableId, StringComparison.OrdinalIgnoreCase) &&
-                    string.Equals(clientId, cachedClientId, StringComparison.OrdinalIgnoreCase) &&
+                    string.Equals(clientId, cachedClientId, StringComparison.Ordinal) &&
                     IsAccountAllowed(kvp, accountFilter))
                 {
                     keysToRemove.Add(kvp.Key);
@@ -221,7 +221,7 @@ namespace Microsoft.Identity.Client.Cache
                     string cachedClientId = kvp.Key.ClientId;
 
                     if (string.Equals(accountOrUserId, cachedAccountId, StringComparison.OrdinalIgnoreCase) &&
-                        string.Equals(clientId, cachedClientId, StringComparison.OrdinalIgnoreCase) &&
+                        string.Equals(clientId, cachedClientId, StringComparison.Ordinal) &&
                         IsAccountAllowed(kvp, accountFilter))
                     {
                         keysToRemove.Add(kvp.Key);
@@ -250,7 +250,7 @@ namespace Microsoft.Identity.Client.Cache
 
                 IEnumerable<KeyValuePair<AdalTokenCacheKey, AdalResultWrapper>> listToProcess =
                     dictionary.Where(p =>
-                        p.Key.ClientId.Equals(clientId, StringComparison.OrdinalIgnoreCase) &&
+                        p.Key.ClientId.Equals(clientId, StringComparison.Ordinal) &&
                         environmentAliases.Contains(new Uri(p.Key.Authority).Host));
 
                 bool filtered = false;

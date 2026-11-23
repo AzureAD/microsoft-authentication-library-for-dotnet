@@ -83,18 +83,17 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 #region SaveItem
         public void SaveAccessToken(MsalAccessTokenCacheItem item)
         {
-            IiOSKey key = item.iOSCacheKey;
-            Save(key, item.ToJsonString());
+            SaveCredential(item, item.iOSCacheKey, MsalAccessTokenCacheItem.FromJsonString);
         }
 
         public void SaveRefreshToken(MsalRefreshTokenCacheItem item)
         {
-            Save(item.iOSCacheKey, item.ToJsonString());
+            SaveCredential(item, item.iOSCacheKey, MsalRefreshTokenCacheItem.FromJsonString);
         }
 
         public void SaveIdToken(MsalIdTokenCacheItem item)
         {
-            Save(item.iOSCacheKey, item.ToJsonString());
+            SaveCredential(item, item.iOSCacheKey, MsalIdTokenCacheItem.FromJsonString);
         }
 
         public void SaveAccount(MsalAccountCacheItem item)
@@ -107,7 +106,10 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         public MsalIdTokenCacheItem GetIdToken(MsalAccessTokenCacheItem accessTokenCacheItem)
         {
             var idTokenItem = accessTokenCacheItem.GetIdTokenItem();
-            return MsalIdTokenCacheItem.FromJsonString(GetPayload(idTokenItem.iOSCacheKey));
+            var cached = MsalIdTokenCacheItem.FromJsonString(GetPayload(idTokenItem.iOSCacheKey)) ??
+                ReadLegacy(idTokenItem, idTokenItem.iOSCacheKey, MsalIdTokenCacheItem.FromJsonString, out _);
+            return cached is not null && string.Equals(cached.ClientId, idTokenItem.ClientId, StringComparison.Ordinal)
+                ? cached : null;
         }
 
         public MsalAccountCacheItem GetAccount(MsalAccountCacheItem accountCacheItem)
@@ -119,17 +121,17 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 #region DeleteItem
         public void DeleteAccessToken(MsalAccessTokenCacheItem item)
         {
-            Remove(item.iOSCacheKey);
+            DeleteCredential(item, item.iOSCacheKey, MsalAccessTokenCacheItem.FromJsonString);
         }
 
         public void DeleteRefreshToken(MsalRefreshTokenCacheItem item)
         {
-            Remove(item.iOSCacheKey);
+            DeleteCredential(item, item.iOSCacheKey, MsalRefreshTokenCacheItem.FromJsonString);
         }
 
         public void DeleteIdToken(MsalIdTokenCacheItem item)
         {
-            Remove(item.iOSCacheKey);
+            DeleteCredential(item, item.iOSCacheKey, MsalIdTokenCacheItem.FromJsonString);
         }
 
         public void DeleteAccount(MsalAccountCacheItem item)
@@ -232,6 +234,45 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             }
 
             return res;
+        }
+
+        private T ReadLegacy<T>(T query, IiOSKey key, Func<string, T> deserialize, out IiOSKey legacyKey)
+            where T : MsalCredentialCacheItemBase
+        {
+            legacyKey = new IosKey(key.iOSAccount, key.iOSService.ToLowerInvariant(),
+                key.iOSGeneric.ToLowerInvariant(), key.iOSType);
+            if (string.Equals(key.iOSService, legacyKey.iOSService, StringComparison.Ordinal))
+            {
+                return null;
+            }
+            var item = deserialize(GetPayload(legacyKey));
+            return item is not null &&
+                string.Equals(item.ClientId, query.ClientId, StringComparison.Ordinal) &&
+                item.MatchesAccountIdentity(query.HomeAccountId, query.RawClientInfo) &&
+                (query is not MsalRefreshTokenCacheItem refreshToken ||
+                    item is MsalRefreshTokenCacheItem cachedRefreshToken &&
+                    string.Equals(cachedRefreshToken.OboCacheKey ?? "", refreshToken.OboCacheKey ?? "", StringComparison.Ordinal))
+                ? item : null;
+        }
+
+        private void SaveCredential<T>(T item, IiOSKey key, Func<string, T> deserialize)
+            where T : MsalCredentialCacheItemBase
+        {
+            if (Save(key, item.ToJObject().ToString()) == SecStatusCode.Success &&
+                ReadLegacy(item, key, deserialize, out IiOSKey legacyKey) is not null)
+            {
+                Remove(legacyKey);
+            }
+        }
+
+        private void DeleteCredential<T>(T item, IiOSKey key, Func<string, T> deserialize)
+            where T : MsalCredentialCacheItemBase
+        {
+            Remove(key);
+            if (ReadLegacy(item, key, deserialize, out IiOSKey legacyKey) is not null)
+            {
+                Remove(legacyKey);
+            }
         }
 
         private SecStatusCode Save(IiOSKey key, string payload)

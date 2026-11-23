@@ -20,6 +20,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Client ID (also known as App ID) of the application as registered in the
         /// application registration portal (https://aka.ms/msal-net-register-app)
+        /// Client IDs are case-sensitive, including in token-cache lookups.
         /// </summary>
         public string ClientId { get; set; }
 

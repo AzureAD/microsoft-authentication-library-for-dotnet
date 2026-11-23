@@ -110,6 +110,10 @@ namespace Microsoft.Identity.Client.Platforms.Android
 
             var editor = storage.Preferences.Edit();
             editor.PutString(storage.Key, item.ToJObject().ToString());
+            if (ReadLegacy(item, cacheKey, store, deserialize, out string legacyKey) is not null)
+            {
+                editor.Remove(legacyKey);
+            }
             editor.Apply();
         }
         #endregion
@@ -117,30 +121,35 @@ namespace Microsoft.Identity.Client.Platforms.Android
         #region DeleteItem
         public void DeleteAccessToken(MsalAccessTokenCacheItem item)
         {
-            Delete(item, item.CacheKey, _accessTokenSharedPreference);
+            Delete(item, item.CacheKey, _accessTokenSharedPreference, MsalAccessTokenCacheItem.FromJsonString);
         }
 
         public void DeleteRefreshToken(MsalRefreshTokenCacheItem item)
         {
-            Delete(item, item.CacheKey, _refreshTokenSharedPreference);
+            Delete(item, item.CacheKey, _refreshTokenSharedPreference, MsalRefreshTokenCacheItem.FromJsonString);
         }
 
         public void DeleteIdToken(MsalIdTokenCacheItem item)
         {
-            Delete(item, item.CacheKey, _idTokenSharedPreference);
+            Delete(item, item.CacheKey, _idTokenSharedPreference, MsalIdTokenCacheItem.FromJsonString);
         }
 
         public void DeleteAccount(MsalAccountCacheItem item)
         {
-            Delete(item, item.CacheKey, _accountSharedPreference);
+            Delete(item, item.CacheKey, _accountSharedPreference, MsalAccountCacheItem.FromJsonString);
 
         }
 
-        private static void Delete(MsalCacheItemBase item, string cacheKey, (ISharedPreferences Legacy, ISharedPreferences Subject) store)
+        private static void Delete<T>(T item, string cacheKey,
+            (ISharedPreferences Legacy, ISharedPreferences Subject) store, Func<string, T> deserialize) where T : MsalCacheItemBase
         {
             var storage = GetStorage(item, cacheKey, store);
             var editor = storage.Preferences.Edit();
             editor.Remove(storage.Key);
+            if (ReadLegacy(item, cacheKey, store, deserialize, out string legacyKey) is not null)
+            {
+                editor.Remove(legacyKey);
+            }
             editor.Apply();
         }
 
@@ -320,7 +329,8 @@ namespace Microsoft.Identity.Client.Platforms.Android
         {
             var storage = GetStorage(query, cacheKey, store);
             var item = Read(storage.Preferences.GetString(storage.Key, null), deserialize);
-            if (item is not null && (!item.MatchesAccountIdentity(query.HomeAccountId, query.RawClientInfo) ||
+            item ??= ReadLegacy(query, cacheKey, store, deserialize, out _);
+            if (item is not null && (!MatchesIdentity(item, query) ||
                 GetAmbiguousIdentities().Contains(GetIdentityKey(item))))
             {
                 _requestContext?.Logger.Warning("Ignoring an Android cache record with a different or ambiguous identity.");
@@ -329,6 +339,29 @@ namespace Microsoft.Identity.Client.Platforms.Android
 
             return item;
         }
+
+        private static T ReadLegacy<T>(MsalCacheItemBase query, string cacheKey,
+            (ISharedPreferences Legacy, ISharedPreferences Subject) store, Func<string, T> deserialize,
+            out string legacyKey) where T : MsalCacheItemBase
+        {
+            var storage = GetStorage(query, cacheKey.ToLowerInvariant(), store);
+            legacyKey = storage.Key;
+            if (string.Equals(cacheKey, cacheKey.ToLowerInvariant(), StringComparison.Ordinal))
+            {
+                return null;
+            }
+            var item = Read(storage.Preferences.GetString(storage.Key, null), deserialize);
+            return item is not null && MatchesIdentity(item, query) ? item : null;
+        }
+
+        private static bool MatchesIdentity(MsalCacheItemBase item, MsalCacheItemBase query) =>
+            item.MatchesAccountIdentity(query.HomeAccountId, query.RawClientInfo) &&
+            (query is not MsalCredentialCacheItemBase credential ||
+                item is MsalCredentialCacheItemBase cached &&
+                string.Equals(cached.ClientId, credential.ClientId, StringComparison.Ordinal)) &&
+            (query is not MsalRefreshTokenCacheItem refreshToken ||
+                item is MsalRefreshTokenCacheItem cachedRefreshToken &&
+                string.Equals(cachedRefreshToken.OboCacheKey ?? "", refreshToken.OboCacheKey ?? "", StringComparison.Ordinal));
 
         private static T Read<T>(string json, Func<string, T> deserialize) where T : MsalCacheItemBase
         {

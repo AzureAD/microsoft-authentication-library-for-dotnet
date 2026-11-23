@@ -82,8 +82,7 @@ namespace Microsoft.Identity.Client
                         requestParams.AuthenticationScheme.KeyId,
                         CacheKeyFactory.GetOboKey(requestParams.LongRunningOboCacheKey, requestParams.UserAssertion),
                         requestParams.PersistedCacheParameters,
-                        requestParams.CacheKeyComponents,
-                        isClientIdCaseSensitive: IsClientIdCaseSensitive);
+                        requestParams.CacheKeyComponents);
             }
 
             if (!string.IsNullOrEmpty(response.RefreshToken))
@@ -102,8 +101,7 @@ namespace Microsoft.Identity.Client
                                     requestParams.AppConfig.ClientId,
                                     response,
                                     homeAccountId,
-                                    requestParams.PartitionRefreshToken ? requestParams.CacheKeyComponents : null,
-                                    isClientIdCaseSensitive: IsClientIdCaseSensitive)
+                                    requestParams.PartitionRefreshToken ? requestParams.CacheKeyComponents : null)
                 {
                     OboCacheKey = CacheKeyFactory.GetOboKey(requestParams.LongRunningOboCacheKey, requestParams.UserAssertion),
                 };
@@ -132,8 +130,7 @@ namespace Microsoft.Identity.Client
                     requestParams.AppConfig.ClientId,
                     response,
                     tenantId,
-                    homeAccountId,
-                    isClientIdCaseSensitive: IsClientIdCaseSensitive);
+                    homeAccountId);
 
                 Dictionary<string, string> wamAccountIds = TokenResponseHelper.GetWamAccountIds(requestParams, response);
                 string accountSource = requestParams.ApiId == ApiEvent.ApiIds.AcquireTokenByDeviceCode ? "device_code_flow" : null;
@@ -1019,7 +1016,7 @@ namespace Microsoft.Identity.Client
                     "Filtering RT by family id");
 
             // Entra family tokens are shared; generic OIDC credentials still require an exact client.
-            if (IsClientIdCaseSensitive || string.IsNullOrEmpty(familyId))
+            if (IsGenericAuthority || string.IsNullOrEmpty(familyId))
             {
                 cacheItems.FilterWithLogging(item => MatchesClientId(item),
                             requestParams.RequestContext.Logger,
@@ -1046,7 +1043,7 @@ namespace Microsoft.Identity.Client
 
             var appMetadata =
                 instanceMetadata.Aliases
-                .Select(env => Accessor.GetAppMetadata(new MsalAppMetadataCacheItem(ClientId, env, null, IsClientIdCaseSensitive)))
+                .Select(env => Accessor.GetAppMetadata(new MsalAppMetadataCacheItem(ClientId, env, null)))
                 .FirstOrDefault(item => item != null);
 
             // From a FOCI perspective, an app has 3 states - in the family, not in the family or unknown
@@ -1072,7 +1069,7 @@ namespace Microsoft.Identity.Client
             var environment = requestParameters.AuthorityInfo.Host;
 
             // Generic OIDC does not share Entra's family-based account enumeration.
-            bool filterByClientId = IsClientIdCaseSensitive ||
+            bool filterByClientId = IsGenericAuthority ||
                 !(requestParameters.AppConfig.IsPublicClient && _featureFlags.IsFociEnabled);
 
             // this will either be the home account ID or null, it can never be OBO assertion or tenant ID
@@ -1607,7 +1604,7 @@ namespace Microsoft.Identity.Client
         {
             // To maintain backward compatibility with other MSALs, filter all credentials by clientID if
             // FOCI is disabled or if an FRT is not present
-            filterByClientId = IsClientIdCaseSensitive || !_featureFlags.IsFociEnabled || !FrtExists(refreshTokens);
+            filterByClientId = IsGenericAuthority || !_featureFlags.IsFociEnabled || !FrtExists(refreshTokens);
 
             // Delete all credentials associated with this IAccount
             if (filterByClientId)

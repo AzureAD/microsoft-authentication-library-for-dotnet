@@ -47,6 +47,11 @@ namespace Microsoft.Identity.Client
         /// <param name="options">Public client applications configuration options</param>
         /// <returns>A <see cref="PublicClientApplicationBuilder"/> from which to set more
         /// parameters, and to create a public client application instance</returns>
+        /// <remarks>
+        /// Client IDs are case-sensitive for all authorities, including in the token cache.
+        /// Use consistent casing across acquisitions. Upgrade applications sharing a cache
+        /// together, or isolate their caches: older MSAL versions lowercase client IDs in cache keys.
+        /// </remarks>
         public static PublicClientApplicationBuilder CreateWithApplicationOptions(PublicClientApplicationOptions options)
         {
             var config = new ApplicationConfiguration(MsalClientType.PublicClient);
@@ -227,12 +232,6 @@ namespace Microsoft.Identity.Client
         /// Experimental on public clients.
         /// Do not use this method with Entra ID authorities (e.g. https://login.microsoftonline.com/common).
         /// Use WithAuthority(string) instead.
-        /// Generic OIDC client identifiers are case-sensitive, including in the token cache.
-        /// MSALv3 deserialization re-keys existing entries using their stored client identifiers.
-        /// Upgrade all applications sharing an OIDC cache together, or isolate their caches:
-        /// older MSAL versions can still merge identifiers that differ only by case.
-        /// Legacy native-cache ID tokens for another client are ignored. Acquire a fresh token
-        /// to repopulate missing ID-token claims after upgrading.
         /// </remarks>
         public PublicClientApplicationBuilder WithOidcAuthority(string authorityUri) 
         {

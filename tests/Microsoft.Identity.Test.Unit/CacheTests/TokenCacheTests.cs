@@ -46,14 +46,13 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [TestMethod]
-        [DataRow(true, "HighClient", false, true)]
-        [DataRow(true, "highclient", false, false)]
-        [DataRow(false, "highclient", false, true)]
-        [DataRow(false, "highclient", true, false)]
-        [DataRow(false, "OtherClient", false, false)]
-        [DataRow(true, null, false, false)]
+        [DataRow(true, "HighClient", true)]
+        [DataRow(true, "highclient", false)]
+        [DataRow(false, "highclient", false)]
+        [DataRow(false, "HighClient", true)]
+        [DataRow(true, null, false)]
         public void GetIdTokenCacheItem_ValidatesClientIdentity(
-            bool genericAuthority, string idTokenClientId, bool caseSensitiveEntry, bool expectedMatch)
+            bool genericAuthority, string idTokenClientId, bool expectedMatch)
         {
             // Arrange
             var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(null, clientId: "HighClient");
@@ -69,7 +68,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             var idToken = idTokenClientId is null
                 ? null
                 : new MsalIdTokenCacheItem("oidc.example", idTokenClientId, "id-token", null, _homeAccountId,
-                    "tenant", isClientIdCaseSensitive: caseSensitiveEntry);
+                    "tenant");
             accessor.GetIdToken(accessToken).Returns(idToken);
 
             // Act
@@ -77,6 +76,50 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             // Assert
             Assert.AreSame(expectedMatch ? idToken : null, result);
+        }
+
+        [TestMethod]
+        [DataRow("https://login.microsoftonline.com/contoso.com", false)]
+        [DataRow("https://fs.contoso.com/adfs", false)]
+        [DataRow("https://oidc.example", true)]
+        public async Task CaseDistinctClientIds_SelectOnlyTheirOwnRefreshTokenAsync(string authorityUrl, bool genericAuthority)
+        {
+            // Arrange
+            const string upperClientId = "ABCDEF12-1234-1234-1234-ABCDEF123456";
+            string lowerClientId = upperClientId.ToLowerInvariant();
+            var upperBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(null, clientId: upperClientId);
+            var lowerBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(null, clientId: lowerClientId);
+            var authority = genericAuthority
+                ? Authority.CreateAuthority(AuthorityInfo.FromGenericAuthority(authorityUrl))
+                : Authority.CreateAuthority(authorityUrl);
+            upperBundle.Config.Authority = authority;
+            lowerBundle.Config.Authority = authority;
+            AddHostToInstanceCache(upperBundle, authority.AuthorityInfo.Host);
+            AddHostToInstanceCache(lowerBundle, authority.AuthorityInfo.Host);
+            ITokenCacheInternal upperCache = new TokenCache(upperBundle, false);
+            ITokenCacheInternal lowerCache = new TokenCache(lowerBundle, false) { Accessor = upperCache.Accessor };
+            var upperToken = new MsalRefreshTokenCacheItem(
+                authority.AuthorityInfo.Host, upperClientId, "upper-token", _clientInfo, null, _homeAccountId);
+            var lowerToken = new MsalRefreshTokenCacheItem(
+                authority.AuthorityInfo.Host, lowerClientId, "lower-token", _clientInfo, null, _homeAccountId);
+            upperCache.Accessor.SaveRefreshToken(upperToken);
+            upperCache.Accessor.SaveRefreshToken(lowerToken);
+            var upperRequest = TestCommon.CreateAuthenticationRequestParameters(
+                upperBundle, authority: authority, apiID: ApiEvent.ApiIds.AcquireTokenSilent);
+            var lowerRequest = TestCommon.CreateAuthenticationRequestParameters(
+                lowerBundle, authority: authority, apiID: ApiEvent.ApiIds.AcquireTokenSilent);
+            upperRequest.Account = new Account(_homeAccountId, TestConstants.DisplayableId, authority.AuthorityInfo.Host);
+            lowerRequest.Account = upperRequest.Account;
+
+            // Act
+            var upperResult = await upperCache.FindRefreshTokenAsync(upperRequest).ConfigureAwait(false);
+            var lowerResult = await lowerCache.FindRefreshTokenAsync(lowerRequest).ConfigureAwait(false);
+
+            // Assert
+            Assert.AreNotEqual(upperToken.CacheKey, lowerToken.CacheKey);
+            Assert.HasCount(2, upperCache.Accessor.GetAllRefreshTokens());
+            Assert.AreEqual("upper-token", upperResult.Secret);
+            Assert.AreEqual("lower-token", lowerResult.Secret);
         }
 
         [TestMethod]

@@ -21,19 +21,6 @@ namespace Microsoft.Identity.Client.Cache.Keys
             string scopes, 
             params string[] additionalKeys /* for extensibility */)
         {
-            return GetCredentialKey(false, homeAccountId, environment, keyDescriptor, clientId, tenantId, scopes, additionalKeys);
-        }
-
-        internal static string GetCredentialKey(
-            bool isClientIdCaseSensitive,
-            string homeAccountId,
-            string environment,
-            string keyDescriptor,
-            string clientId,
-            string tenantId,
-            string scopes,
-            params string[] additionalKeys)
-        {
             var stringBuilder = new StringBuilder();
 
             stringBuilder.Append(homeAccountId ?? "");
@@ -60,7 +47,7 @@ namespace Microsoft.Identity.Client.Cache.Keys
                 stringBuilder.Append(additionalKey);
             }
 
-            return NormalizeKey(stringBuilder, clientIdOffset, clientId, isClientIdCaseSensitive);
+            return NormalizeKey(stringBuilder, clientIdOffset, clientId);
         }
 
         public static string GetiOSAccountKey(string homeAccountId, string environment)
@@ -79,17 +66,6 @@ namespace Microsoft.Identity.Client.Cache.Keys
             string keyDescriptor, 
             string clientId, 
             string tenantId, 
-            string scopes,
-            params string[] extraKeyParts)
-        {
-            return GetiOSServiceKey(false, keyDescriptor, clientId, tenantId, scopes, extraKeyParts);
-        }
-
-        internal static string GetiOSServiceKey(
-            bool isClientIdCaseSensitive,
-            string keyDescriptor,
-            string clientId,
-            string tenantId,
             string scopes,
             params string[] extraKeyParts)
         {
@@ -113,15 +89,10 @@ namespace Microsoft.Identity.Client.Cache.Keys
                 stringBuilder.Append(additionalKey);
             }
 
-            return NormalizeKey(stringBuilder, clientIdOffset, clientId, isClientIdCaseSensitive);
+            return NormalizeKey(stringBuilder, clientIdOffset, clientId);
         }
 
         public static string GetiOSGenericKey(string keyDescriptor, string clientId, string tenantId)
-        {
-            return GetiOSGenericKey(false, keyDescriptor, clientId, tenantId);
-        }
-
-        internal static string GetiOSGenericKey(bool isClientIdCaseSensitive, string keyDescriptor, string clientId, string tenantId)
         {
             var stringBuilder = new StringBuilder();
 
@@ -134,12 +105,12 @@ namespace Microsoft.Identity.Client.Cache.Keys
 
             stringBuilder.Append(tenantId ?? "");
 
-            return NormalizeKey(stringBuilder, clientIdOffset, clientId, isClientIdCaseSensitive);
+            return NormalizeKey(stringBuilder, clientIdOffset, clientId);
         }
 
-        private static string NormalizeKey(StringBuilder key, int clientIdOffset, string clientId, bool isClientIdCaseSensitive)
+        private static string NormalizeKey(StringBuilder key, int clientIdOffset, string clientId)
         {
-            if (!isClientIdCaseSensitive || string.IsNullOrEmpty(clientId))
+            if (string.IsNullOrEmpty(clientId))
             {
                 return key.ToString().ToLowerInvariant();
             }

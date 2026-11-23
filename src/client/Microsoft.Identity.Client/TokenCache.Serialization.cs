@@ -100,10 +100,7 @@ namespace Microsoft.Identity.Client
                     RecordCompleteHydration(shouldClearExistingCache, shouldClearExistingCache);
                     return;
                 }
-                _unknownNodes = new TokenCacheJsonSerializer(Accessor,
-                    IsClientIdCaseSensitive ? ClientId : null,
-                    IsClientIdCaseSensitive ? ServiceBundle.Config.Authority.AuthorityInfo.Host : null)
-                    .Deserialize(msalV3State, shouldClearExistingCache);
+                _unknownNodes = new TokenCacheJsonSerializer(Accessor).Deserialize(msalV3State, shouldClearExistingCache);
                 RecordCompleteHydration(shouldClearExistingCache, replaceUnknown: true);
             }
         }

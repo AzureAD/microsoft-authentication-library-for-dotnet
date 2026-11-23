@@ -52,14 +52,11 @@ namespace Microsoft.Identity.Client
 
         internal string ClientId => ServiceBundle.Config.ClientId;
 
-        private bool IsClientIdCaseSensitive => ServiceBundle.Config.Authority?.AuthorityInfo.AuthorityType == AuthorityType.Generic;
+        private bool IsGenericAuthority => ServiceBundle.Config.Authority?.AuthorityInfo.AuthorityType == AuthorityType.Generic;
 
         private bool MatchesClientId(MsalCredentialCacheItemBase item)
         {
-            return string.Equals(item.ClientId, ClientId,
-                IsClientIdCaseSensitive || item.IsClientIdCaseSensitive
-                    ? StringComparison.Ordinal
-                    : StringComparison.OrdinalIgnoreCase);
+            return string.Equals(item.ClientId, ClientId, StringComparison.Ordinal);
         }
 
         ITokenCacheAccessor ITokenCacheInternal.Accessor => Accessor;
@@ -134,7 +131,7 @@ namespace Microsoft.Identity.Client
         {
             if (_featureFlags.IsFociEnabled)
             {
-                var metadataCacheItem = new MsalAppMetadataCacheItem(clientId, environment, familyId, IsClientIdCaseSensitive);
+                var metadataCacheItem = new MsalAppMetadataCacheItem(clientId, environment, familyId);
                 Accessor.SaveAppMetadata(metadataCacheItem);
             }
         }
@@ -243,7 +240,7 @@ namespace Microsoft.Identity.Client
             bool homeAccIdMatch = rtItem.MatchesAccountIdentity(account.HomeAccountId, account.RawClientInfo) &&
                 account.MatchesAccountIdentity(rtItem.HomeAccountId, rtItem.RawClientInfo);
             bool clientIdMatch =
-                (!IsClientIdCaseSensitive && rtItem.IsFRT) || // Entra family tokens are shared across clients.
+                (!IsGenericAuthority && rtItem.IsFRT) || // Entra family tokens are shared across clients.
                 MatchesClientId(rtItem);
 
             return homeAccIdMatch && clientIdMatch;

@@ -18,10 +18,9 @@ namespace Microsoft.Identity.Client.Cache.Items
     /// </summary>
     internal class MsalAppMetadataCacheItem : MsalItemWithAdditionalFields, IEquatable<MsalAppMetadataCacheItem>
     {
-        public MsalAppMetadataCacheItem(string clientId, string preferredCacheEnv, string familyId, bool isClientIdCaseSensitive = false)
+        public MsalAppMetadataCacheItem(string clientId, string preferredCacheEnv, string familyId)
         {
             ClientId = clientId;
-            IsClientIdCaseSensitive = isClientIdCaseSensitive;
             Environment = preferredCacheEnv;
             FamilyId = familyId;
 
@@ -31,7 +30,7 @@ namespace Microsoft.Identity.Client.Cache.Items
         private void InitCacheKey()
         {
             CacheKey = $"{StorageJsonKeys.AppMetadata}{MsalCacheKeys.CacheKeyDelimiter}{Environment}{MsalCacheKeys.CacheKeyDelimiter}".ToLowerInvariant() +
-                (IsClientIdCaseSensitive ? ClientId : ClientId?.ToLowerInvariant());
+                ClientId;
 
             iOSCacheKeyLazy = new Lazy<IiOSKey>(InitiOSKey);
         }
@@ -41,7 +40,7 @@ namespace Microsoft.Identity.Client.Cache.Items
         private IiOSKey InitiOSKey()
         {
             string iOSService = $"{StorageJsonValues.AppMetadata}{MsalCacheKeys.CacheKeyDelimiter}".ToLowerInvariant() +
-                (IsClientIdCaseSensitive ? ClientId : ClientId?.ToLowerInvariant());
+                ClientId;
 
             string iOSGeneric = "1";
 
@@ -56,7 +55,6 @@ namespace Microsoft.Identity.Client.Cache.Items
 
     /// <remarks>mandatory</remarks>
     public string ClientId { get; }
-        internal bool IsClientIdCaseSensitive { get; }
 
         /// <remarks>mandatory</remarks>
 
@@ -75,7 +73,7 @@ namespace Microsoft.Identity.Client.Cache.Items
         internal MsalAppMetadataCacheItem CloneForSnapshot()
         {
             return new MsalAppMetadataCacheItem(
-                ClientId ?? "", Environment ?? "", FamilyId ?? "", IsClientIdCaseSensitive)
+                ClientId ?? "", Environment ?? "", FamilyId ?? "")
             {
                 AdditionalFieldsJson = AdditionalFieldsJson
             };
@@ -91,14 +89,13 @@ namespace Microsoft.Identity.Client.Cache.Items
             return FromJObject(JsonHelper.ParseIntoJsonObject(json));
         }
 
-        internal static MsalAppMetadataCacheItem FromJObject(JObject j, bool isClientIdCaseSensitive = false)
+        internal static MsalAppMetadataCacheItem FromJObject(JObject j)
         {
             string clientId = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.ClientId);
             string environment = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.Environment);
             string familyId = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.FamilyId);
-            bool storedCaseSensitivity = JsonHelper.ExtractExistingOrDefault<bool>(j, StorageJsonKeys.ClientIdCaseSensitive);
 
-            var item = new MsalAppMetadataCacheItem(clientId, environment, familyId, isClientIdCaseSensitive || storedCaseSensitivity);
+            var item = new MsalAppMetadataCacheItem(clientId, environment, familyId);
 
             item.PopulateFieldsFromJObject(j);
 
@@ -119,10 +116,6 @@ namespace Microsoft.Identity.Client.Cache.Items
 
             SetItemIfValueNotNull(json, StorageJsonKeys.Environment, Environment);
             SetItemIfValueNotNull(json, StorageJsonKeys.ClientId, ClientId);
-            if (IsClientIdCaseSensitive)
-            {
-                json[StorageJsonKeys.ClientIdCaseSensitive] = true;
-            }
             SetItemIfValueNotNull(json, StorageJsonKeys.FamilyId, FamilyId);
 
             return json;
@@ -134,7 +127,6 @@ namespace Microsoft.Identity.Client.Cache.Items
         {
             var hashCode = -1793347351;
             hashCode = (hashCode * -1521134295) + EqualityComparer<string>.Default.GetHashCode(ClientId);
-            hashCode = (hashCode * -1521134295) + IsClientIdCaseSensitive.GetHashCode();
             hashCode = (hashCode * -1521134295) + EqualityComparer<string>.Default.GetHashCode(Environment);
             hashCode = (hashCode * -1521134295) + EqualityComparer<string>.Default.GetHashCode(FamilyId);
             hashCode = (hashCode * -1521134295) + EqualityComparer<string>.Default.GetHashCode(AdditionalFieldsJson);
@@ -145,7 +137,6 @@ namespace Microsoft.Identity.Client.Cache.Items
         public bool Equals(MsalAppMetadataCacheItem other)
         {
             return ClientId == other.ClientId &&
-                   IsClientIdCaseSensitive == other.IsClientIdCaseSensitive &&
                    Environment == other.Environment &&
                    FamilyId == other.FamilyId &&
                    base.AdditionalFieldsJson == other.AdditionalFieldsJson;
