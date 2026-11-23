@@ -136,11 +136,7 @@ flowchart TD
 
     P1{"Windows OS?"}
     P1 -->|No| E1["❌ MtlsNotSupportedForManagedIdentity<br/>MtlsNotSupportedForNonWindowsMessage"]
-    P1 -->|Yes| P2
-
-    P2{".NET Framework 4.6.2?"}
-    P2 -->|Yes| E2["❌ MtlsNotSupportedForManagedIdentity<br/>MtlsNotSupportedForManagedIdentityMessage"]
-    P2 -->|No| P3
+    P1 -->|Yes| P3
 
     P3{"IMDSv2 available?"}
     P3 -->|No| E3["❌ MtlsPopTokenNotSupportedinImdsV1<br/>(IMDS returned 404 on /getplatformmetadata)"]
@@ -156,7 +152,6 @@ flowchart TD
     P5 -->|Success| Success["✅ mtls_pop token returned"]
 
     style E1 fill:#e74c3c,color:#fff
-    style E2 fill:#e74c3c,color:#fff
     style E3 fill:#e74c3c,color:#fff
     style E4 fill:#e74c3c,color:#fff
     style Success fill:#27ae60,color:#fff

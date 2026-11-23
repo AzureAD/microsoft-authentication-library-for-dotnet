@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup Label="Targets required for unit tests to run">
-    <TargetFrameworkNetDesktop462>net462</TargetFrameworkNetDesktop462>
     <TargetFrameworkNetDesktop472>net472</TargetFrameworkNetDesktop472>
     <TargetFrameworkNetStandard>netstandard2.0</TargetFrameworkNetStandard>
     <TargetFrameworkNet>net8.0</TargetFrameworkNet>
@@ -21,7 +20,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworkNetDesktop462);$(TargetFrameworkNetDesktop472);$(TargetFrameworkNetStandard);$(TargetFrameworkNetIos);$(TargetFrameworkNetAndroid);$(TargetFrameworkNet);</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworkNetDesktop472);$(TargetFrameworkNetStandard);$(TargetFrameworkNetIos);$(TargetFrameworkNetAndroid);$(TargetFrameworkNet);</TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('OSX'))">$(TargetFrameworkNetStandard);$(TargetFrameworkNetIos);$(TargetFrameworkNetAndroid);$(TargetFrameworkNet)</TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Linux')) Or '$(NetCoreOnly)' !='' ">$(TargetFrameworkNetStandard);$(TargetFrameworkNet)</TargetFrameworks>
   </PropertyGroup>
@@ -53,7 +52,7 @@
   <PropertyGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetAndroid)'">
     <NoWarn>$(NoWarn);CS3009</NoWarn>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop462)' or '$(TargetFramework)' == '$(TargetFrameworkNetDesktop472)'">
+  <PropertyGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop472)'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(APPCENTER_BUILD)' != ''">
@@ -96,14 +95,14 @@
     <PackageReference Include="System.Diagnostics.DiagnosticSource" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop462)' or '$(TargetFramework)' == '$(TargetFrameworkNetDesktop472)'">
+  <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop472)'">
     <Compile Include="$(PathToMsalSources)\Platforms\Features\OpenTelemetry\**\*.cs" />
     <PackageReference Include="System.Diagnostics.DiagnosticSource" />
     <PackageReference Include="System.Formats.Asn1" />
     <PackageReference Include="System.Text.Json" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop462)' or '$(TargetFramework)' == '$(TargetFrameworkNetDesktop472)'">
+  <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop472)'">
     <Compile Include="$(PathToMsalSources)\Platforms\netdesktop\**\*.cs" LinkBase="Platforms\netdesktop" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DefaultOSBrowser\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\WinFormsLegacyWebUi\**\*.cs" />
@@ -140,11 +139,6 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.IdentityModel.Abstractions" />
-  </ItemGroup>
-
-  <!-- System.ValueTuple is in-box starting with .NET Framework 4.7; only net462 needs the package. -->
-  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop462)'">
-    <PackageReference Include="System.ValueTuple" />
   </ItemGroup>
 
   <!-- Suppress transitive System.ValueTuple from System.Formats.Asn1 on net472+, where it is in-box

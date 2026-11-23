@@ -18,8 +18,7 @@ namespace Microsoft.Identity.Client.AppConfig
     {
         /// <summary>
         /// No key binding is available, so the host cannot perform mTLS Proof-of-Possession. This
-        /// is the floor of the range (for example, on .NET Framework 4.6.2, which does not support
-        /// PoP).
+        /// is the floor of the range for hosts without key-binding capability.
         /// </summary>
         None = 0,
 

@@ -145,7 +145,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
                 // Attach the private key and return a new certificate instance
                 return certificate.CopyWithPrivateKey(privateKey);
 #else
-                // .NET Framework 4.6.2 and .NET Standard 2.0 - manual private key attachment
+                // .NET Standard 2.0 - manual private key attachment
                 return AttachPrivateKeyToOlderFrameworks(certificate, privateKey);
 #endif
             }
@@ -157,8 +157,8 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
 #if !NET8_0_OR_GREATER && !NET472
         /// <summary>
-        /// Attaches a private key to a certificate for older .NET Framework versions.
-        /// This method uses RSACryptoServiceProvider for .NET Framework 4.6.2 and .NET Standard 2.0.
+        /// Attaches a private key to a certificate for .NET Standard 2.0.
+        /// This method uses RSACryptoServiceProvider.
         /// </summary>
         /// <param name="certificate">The certificate without private key</param>
         /// <param name="privateKey">The RSA private key to attach</param>

@@ -4,6 +4,7 @@ Unreleased v5
 ### Breaking changes
 
 - Removed deprecated and explicitly soft-retired APIs across Core, Broker, Desktop/WinUI3, and Extensions.Msal. See the [complete signature inventory and migration table](docs/v5-deprecated-api-migration.md), including MSAL v2 cache migration, managed-identity capabilities, generic extension rebinding, and retained mobile broker APIs. IWA and ROPC retirement are separate changes and are not included here.
+- Removed the .NET Framework 4.6.2 (`net462`) target from `Microsoft.Identity.Client`, `Microsoft.Identity.Client.Broker`, and `Microsoft.Identity.Client.Desktop`. The minimum supported .NET Framework version for v5 is now 4.7.2 (`net472`); retarget applications before upgrading. Other target frameworks and existing 4.x releases are unchanged.
 
 4.91.1
 ======

@@ -63,11 +63,11 @@ Here is what happens inside MSAL when you call `WithMtlsProofOfPossession()`:
 
 ### Step 1 — Platform check
 
-MSAL immediately validates that:
-- You are running on **Windows** (Linux is not yet supported)
-- You are on **.NET Core / .NET 5+** (not .NET Framework 4.6.2)
+MSAL immediately validates that you are running on **Windows** (Linux is not yet supported).
+If this check fails, a `MsalClientException` is thrown before any network calls are made.
 
-If either check fails, a `MsalClientException` is thrown before any network calls are made.
+Use a supported MSAL.NET target framework. For v5, .NET Framework applications must
+target **4.7.2 or later**; there is no separate downlevel-framework check in this API.
 
 ### Step 2 — Token cache check
 
@@ -306,7 +306,7 @@ timed-out discovery result is not cached, so a later call can retry.
 | Constraint | Detail |
 |---|---|
 | **OS** | Windows only. Throws `MtlsNotSupportedForManagedIdentity` on Linux/Mac. |
-| **Framework** | .NET Core / .NET 5+ only. Not supported on .NET Framework 4.6.2. |
+| **Framework** | Use a supported MSAL.NET target framework. The minimum .NET Framework version for v5 is 4.7.2. |
 | **IMDS version** | Requires IMDSv2. If the VM only has IMDSv1, throws `MtlsPopTokenNotSupportedinImdsV1`. |
 | **Key type** | KeyGuard RSA key required. Throws error code `mtls_pop_requires_keyguard` if not available (hardcoded string — not yet a constant in `MsalError`). |
 | **Mixed usage** | Non-mTLS PoP calls in a process where IMDSv2 is cached transparently use IMDSv1 for that request; subsequent PoP calls still route to IMDSv2. |
@@ -318,7 +318,7 @@ timed-out discovery result is not cached, so a later call can retry.
 
 | Error code | What it means | How to fix |
 |---|---|---|
-| `MtlsNotSupportedForManagedIdentity` | You're on a non-Windows OS or .NET 4.6.2 | Run on Windows with .NET 5+ |
+| `MtlsNotSupportedForManagedIdentity` | You're on a non-Windows OS | Run on Windows with a supported MSAL.NET target framework |
 | `MtlsPopTokenNotSupportedinImdsV1` | Your VM only supports IMDSv1 | Ensure the VM image supports IMDSv2 |
 | `mtls_pop_requires_keyguard` | The managed identity key is not a KeyGuard key (hardcoded string — not yet a constant in `MsalError`) | Use a VM/VMSS with KeyGuard support enabled |
 | `MtlsCertificateNotProvided` | (CCA path) No certificate was found for binding | Pass a certificate via `.WithCertificate(cert, sendX5C: true)` |
