@@ -1,0 +1,4 @@
+
+*REMOVED*Microsoft.Identity.Client.Extensions.Msal.MsalCacheHelper.Clear() -> void
+*REMOVED*Microsoft.Identity.Client.Extensions.Msal.MsalCachePersistenceException.MsalCachePersistenceException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
+*REMOVED*Microsoft.Identity.Client.Extensions.Msal.StorageCreationPropertiesBuilder.StorageCreationPropertiesBuilder(string cacheFileName, string cacheDirectory, string clientId) -> void

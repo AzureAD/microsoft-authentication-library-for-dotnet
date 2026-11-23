@@ -62,17 +62,6 @@ namespace Microsoft.Identity.Client
         private readonly OptionalSemaphoreSlim _semaphoreSlim;
         OptionalSemaphoreSlim ITokenCacheInternal.Semaphore => _semaphoreSlim;
 
-        /// <summary>
-        /// Constructor of a token cache. This constructor is left for compatibility with MSAL 2.x.
-        /// The recommended way to get a cache is by using <see cref="IClientApplicationBase.UserTokenCache"/>
-        /// and <c>IConfidentialClientApplication.AppTokenCache</c> once the app is created.
-        /// </summary>
-        [Obsolete("The recommended way to get a cache is by using IClientApplicationBase.UserTokenCache or IClientApplicationBase.AppTokenCache")]
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public TokenCache() : this((IServiceBundle)null, false)
-        {
-        }
-
         internal TokenCache(
             IServiceBundle serviceBundle, 
             bool isApplicationTokenCache,

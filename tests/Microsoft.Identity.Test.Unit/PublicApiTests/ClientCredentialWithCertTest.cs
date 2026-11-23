@@ -200,19 +200,12 @@ namespace Microsoft.Identity.Test.Unit
 
                 if (appFlag.HasValue)
                 {
-#pragma warning disable CS0618 // Type or member is obsolete
-                    appBuilder = appBuilder.WithClientClaims(
-                        certificate,
-                        claimsToSign,
-                        sendX5C: appFlag.Value); // app flag
+                    appBuilder = appBuilder.WithCertificate(certificate, sendX5C: appFlag.Value); // app flag
                 }
                 else
                 {
-                    appBuilder = appBuilder.WithClientClaims(
-                        certificate,
-                        claimsToSign); // no app flag
+                    appBuilder = appBuilder.WithCertificate(certificate, sendX5C: false); // no app flag
                 }
-#pragma warning restore CS0618 // Type or member is obsolete
 
                 var app = appBuilder.BuildConcrete();
 
@@ -221,6 +214,7 @@ namespace Microsoft.Identity.Test.Unit
                     true, expectX5c ? exportedCertificate : null));
 
                 var builder = app.AcquireTokenForClient(TestConstants.s_scope);
+                builder.WithExtraClientAssertionClaims(JsonSerializer.Serialize(claimsToSign));
 
                 if (requestFlag != null)
                 {
@@ -250,14 +244,11 @@ namespace Microsoft.Identity.Test.Unit
                     
                 };
 
-#pragma warning disable CS0618 // Type or member is obsolete
                 var cca = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
                     .WithAuthority("https://login.microsoftonline.com/tid")    
-                    .WithHttpManager(harness.HttpManager)                    
-                    .WithClientClaims(certificate, extraAssertionContent, mergeWithDefaultClaims: true, sendX5C: true) // x5c can also be enabled on the request
+                    .WithHttpManager(harness.HttpManager).WithCertificate(certificate, sendX5C: true) // x5c can also be enabled on the request
                     .Build();
-#pragma warning restore CS0618 // Type or member is obsolete
 
                 // Checks the client assertion for x5c and for expiration
                 var handler = harness.HttpManager.AddTokenResponse(TokenResponseType.Valid_ClientCredentials);
@@ -265,6 +256,7 @@ namespace Microsoft.Identity.Test.Unit
 
                 AuthenticationResult result = await cca.AcquireTokenForClient(TestConstants.s_scope)
                     .WithSendX5C(true) // x5c can also be enabled here on the request
+                    .WithExtraClientAssertionClaims(JsonSerializer.Serialize(extraAssertionContent))
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -287,14 +279,11 @@ namespace Microsoft.Identity.Test.Unit
                     { "iss", "issuer_override" }
                 };
 
-#pragma warning disable CS0618 // Type or member is obsolete
                 var cca = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
                     .WithAuthority("https://login.microsoftonline.com/tid")
-                    .WithHttpManager(harness.HttpManager)
-                    .WithClientClaims(certificate, extraAssertionContent, mergeWithDefaultClaims: true, sendX5C: false)
+                    .WithHttpManager(harness.HttpManager).WithCertificate(certificate, sendX5C: false)
                     .Build();
-#pragma warning restore CS0618 // Type or member is obsolete
 
                 // Checks the client assertion for x5c and for expiration
                 var handler = harness.HttpManager.AddTokenResponse(TokenResponseType.Valid_ClientCredentials);
@@ -303,6 +292,7 @@ namespace Microsoft.Identity.Test.Unit
 
                 AuthenticationResult result = await cca.AcquireTokenForClient(TestConstants.s_scope)
                     .WithSendX5C(true)
+                    .WithExtraClientAssertionClaims(JsonSerializer.Serialize(extraAssertionContent))
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -602,7 +592,7 @@ namespace Microsoft.Identity.Test.Unit
                 new JsonWebToken(new CommonCryptographyManager(),
                 TestConstants.ClientId,
                 "aud",
-                addExtraClaims ? TestConstants.AdditionalAssertionClaims : null,
+                addExtraClaims ? JsonSerializer.Serialize(TestConstants.AdditionalAssertionClaims) : null,
                 appendDefaultClaims);
 
             string assertion = msalJwtTokenObj.Sign(cert, sendX5C: sendX5C, useSha2AndPss: useSha2AndPss);
@@ -1269,14 +1259,11 @@ namespace Microsoft.Identity.Test.Unit
                     { "custom_claims", "{\"xms_foo\":[\"abc\",\"def\"],\"xms_az_foo\":\"bar\"}" }
                 };
 
-#pragma warning disable CS0618 // Type or member is obsolete
                 var cca = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
                     .WithAuthority("https://login.microsoftonline.com/tid")
-                    .WithHttpManager(harness.HttpManager)
-                    .WithClientClaims(certificate, extraAssertionContent, mergeWithDefaultClaims: true, sendX5C: true)
+                    .WithHttpManager(harness.HttpManager).WithCertificate(certificate, sendX5C: true)
                     .Build();
-#pragma warning restore CS0618 // Type or member is obsolete
 
                 var handler = harness.HttpManager.AddTokenResponse(TokenResponseType.Valid_ClientCredentials);
                 JwtSecurityToken assertion = null;
@@ -1305,7 +1292,7 @@ namespace Microsoft.Identity.Test.Unit
                     Assert.AreEqual(JsonValueKind.Object, jsonElement.ValueKind, "custom_claims claim value should be a JSON object");
                 };
 
-                AuthenticationResult result = await cca.AcquireTokenForClient(TestConstants.s_scope)
+                AuthenticationResult result = await cca.AcquireTokenForClient(TestConstants.s_scope).WithExtraClientAssertionClaims(JsonSerializer.Serialize(extraAssertionContent))
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 

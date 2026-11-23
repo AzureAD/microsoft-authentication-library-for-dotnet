@@ -9,6 +9,12 @@
 
 ## Background
 
+> **Unreleased v5:** the obsolete application-level `WithClientClaims` API
+> discussed below has been removed. Use `WithCertificate` plus request-level
+> `WithExtraClientAssertionClaims` to add signed assertion claims. This is
+> distinct from `WithClaimsFromClient`, which sends request-body claims.
+> See the [v5 migration inventory](v5-deprecated-api-migration.md).
+
 Azure Redis Cache operates in a Backing resource VM/VMSS and uses MSAL with Managed Identity credentials to acquire tokens from ESTS. The Redis team has requested that MSAL support sending NSP (Network Security Perimeter) claims to IMDS, so that the resulting tokens contain the NSP claim required to access NSP-protected resources.
 
 This document proposes a new `WithClaimsFromClient()` API to support this scenario in a consistent, safe, and harmonized way across all MSAL auth flows.
@@ -163,4 +169,3 @@ E2E testing requires the Redis Cache team's help because this feature is gated i
 - `ManagedIdentitySourceExtensions.SupportsClaimsAndCapabilities()` — `ManagedIdentitySourceExtensions.cs`
 - `CacheKeyFactory.GetAppTokenCacheItemKey()` — `CacheKeyFactory.cs`
 - POC implementation — PR #5999
-

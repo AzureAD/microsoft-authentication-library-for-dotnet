@@ -185,59 +185,6 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Sets the certificate associated with the application along with the specific claims to sign.
-        /// By default, this will merge the <paramref name="claimsToSign"/> with the default required set of claims needed for authentication.
-        /// If <paramref name="mergeWithDefaultClaims"/> is set to false, you will need to provide the required default claims. See https://aka.ms/msal-net-client-assertion
-        /// </summary>
-        /// <param name="certificate">The X509 certificate used as credentials to prove the identity of the application to Azure AD.</param>
-        /// <param name="claimsToSign">The claims to be signed by the provided certificate.</param>
-        /// <param name="mergeWithDefaultClaims">Determines whether or not to merge <paramref name="claimsToSign"/> with the default claims required for authentication.</param>
-        /// <remarks>
-        /// You should use certificates with a private key size of at least 2048 bytes. Future versions of this library might reject certificates with smaller keys.
-        /// Does not send the certificate (as x5c parameter) with the request by default.
-        /// </remarks>
-        [Obsolete("This method is obsolete. Use the WithExtraClientAssertionClaims method on AcquireTokenForClientParameterBuilder", false)]
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public ConfidentialClientApplicationBuilder WithClientClaims(X509Certificate2 certificate, IDictionary<string, string> claimsToSign, bool mergeWithDefaultClaims)
-        {
-            return WithClientClaims(certificate, claimsToSign, mergeWithDefaultClaims, false);
-        }
-
-        /// <summary>
-        /// Sets the certificate associated with the application along with the specific claims to sign.
-        /// By default, this will merge the <paramref name="claimsToSign"/> with the default required set of claims needed for authentication.
-        /// If <paramref name="mergeWithDefaultClaims"/> is set to false, you will need to provide the required default claims. See https://aka.ms/msal-net-client-assertion
-        /// </summary>
-        /// <param name="certificate">The X509 certificate used as credentials to prove the identity of the application to Azure AD.</param>
-        /// <param name="claimsToSign">The claims to be signed by the provided certificate.</param>
-        /// <param name="mergeWithDefaultClaims">Determines whether or not to merge <paramref name="claimsToSign"/> with the default claims required for authentication.</param>
-        /// <param name="sendX5C">To send X5C with every request or not.</param>
-        /// <remarks>You should use certificates with a private key size of at least 2048 bytes. Future versions of this library might reject certificates with smaller keys.</remarks>
-        [Obsolete("This method is obsolete. Use the WithExtraClientAssertionClaims method on AcquireTokenForClientParameterBuilder", false)]
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public ConfidentialClientApplicationBuilder WithClientClaims(X509Certificate2 certificate, IDictionary<string, string> claimsToSign, bool mergeWithDefaultClaims = true, bool sendX5C = false)
-        {
-            if (certificate == null)
-            {
-                throw new ArgumentNullException(nameof(certificate));
-            }
-
-            if (claimsToSign == null || !claimsToSign.Any())
-            {
-                throw new ArgumentNullException(nameof(claimsToSign));
-            }
-
-            // Wrap the static certificate in a provider delegate
-            Config.ClientCredential = new CertificateAndClaimsClientCredential(
-                certificateProvider: _ => Task.FromResult(certificate),
-                claimsToSign: claimsToSign,
-                appendDefaultClaims: mergeWithDefaultClaims,
-                certificate: certificate);
-            Config.SendX5C = sendX5C;
-            return this;
-        }
-
-        /// <summary>
         /// Sets the application secret
         /// </summary>
         /// <param name="clientSecret">Secret string previously shared with AAD at application registration to prove the identity
@@ -251,28 +198,6 @@ namespace Microsoft.Identity.Client
             }
 
             Config.ClientCredential = new ClientSecretCredential(clientSecret);
-            return this;
-        }
-
-        /// <summary>
-        /// Sets the application client assertion. See https://aka.ms/msal-net-client-assertion.
-        /// This will create an assertion that will be held within the client application's memory for the duration of the client.
-        /// You can use <see cref="WithClientAssertion(Func{string})"/> to set a delegate that will be executed for each authentication request. 
-        /// This will allow you to update the client assertion used by the client application once the assertion expires.
-        /// </summary>
-        /// <param name="signedClientAssertion">The client assertion used to prove the identity of the application to Azure AD. This is a Base-64 encoded JWT.</param>
-        /// <returns></returns>
-        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-        [Obsolete("This method is not recommended. Use overload with Func<AssertionRequestOptions, Task<string>> instead, and return a non-expired assertion, which can be a Federated Credential. See https://aka.ms/msal-net-client-assertion", false)]
-
-        public ConfidentialClientApplicationBuilder WithClientAssertion(string signedClientAssertion)
-        {
-            if (string.IsNullOrWhiteSpace(signedClientAssertion))
-            {
-                throw new ArgumentNullException(nameof(signedClientAssertion));
-            }
-
-            Config.ClientCredential = new SignedAssertionClientCredential(signedClientAssertion);
             return this;
         }
 
@@ -430,18 +355,6 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Call <see cref="WithOidcAuthority(string)"/> instead.
-        /// </summary>
-        /// <param name="authorityUri"></param>
-        /// <returns></returns>
-        [Obsolete("This method has been renamed to WithOidcAuthority.", false)]
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public ConfidentialClientApplicationBuilder WithGenericAuthority(string authorityUri)
-        {
-            return WithOidcAuthority(authorityUri);
-        }
-
-        /// <summary>
         /// Adds a known authority corresponding to a generic OpenIdConnect Identity Provider. 
         /// MSAL will append ".well-known/openid-configuration" to the authority and retrieve the OIDC 
         /// metadata from there, to figure out the endpoints.
@@ -458,16 +371,6 @@ namespace Microsoft.Identity.Client
 
             return this;
         }
-
-        /// <summary>
-        /// This method is obsolete. See https://aka.ms/msal-net-telemetry
-        /// </summary>
-        [Obsolete("Telemetry is sent automatically by MSAL.NET. See https://aka.ms/msal-net-telemetry.", true)]
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public ConfidentialClientApplicationBuilder WithTelemetryClient(params ITelemetryClient[] telemetryClients)
-        {
-            return this;           
-        }       
 
         internal ConfidentialClientApplicationBuilder WithAppTokenCacheInternalForTest(ITokenCacheInternal tokenCacheInternal)
         {

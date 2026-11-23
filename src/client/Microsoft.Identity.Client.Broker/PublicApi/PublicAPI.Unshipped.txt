@@ -1,0 +1,2 @@
+
+*REMOVED*static Microsoft.Identity.Client.Broker.BrokerExtension.WithBrokerPreview(this Microsoft.Identity.Client.PublicClientApplicationBuilder builder, bool enableBroker = true) -> Microsoft.Identity.Client.PublicClientApplicationBuilder

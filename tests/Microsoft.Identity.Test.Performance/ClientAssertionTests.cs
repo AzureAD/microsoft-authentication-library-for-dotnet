@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using System.Text.Json;
 using BenchmarkDotNet.Attributes;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
@@ -41,7 +42,7 @@ namespace Microsoft.Identity.Test.Performance
                 new JsonWebToken(new CommonCryptographyManager(),
                 TestConstants.ClientId,
                 "aud",
-                UseExtraClaims ? s_cl : null,
+                UseExtraClaims ? JsonSerializer.Serialize(s_cl) : null,
                 true);
 
 

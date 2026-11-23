@@ -16,8 +16,6 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
 {
     internal class CertificateAndClaimsClientCredential : IClientCredential
     {
-        private readonly IDictionary<string, string> _claimsToSign;
-        private readonly bool _appendDefaultClaims = true;
         private readonly Func<AssertionRequestOptions, Task<X509Certificate2>> _certificateProvider;
 
         public AssertionType AssertionType => AssertionType.CertificateWithoutSni;
@@ -33,18 +31,12 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         /// This allows both static certificates (via a simple delegate) and dynamic certificate resolution.
         /// </summary>
         /// <param name="certificateProvider">Async delegate that provides the certificate</param>
-        /// <param name="claimsToSign">Additional claims to include in the client assertion</param>
-        /// <param name="appendDefaultClaims">Whether to append default claims</param>
         /// <param name="certificate">Optional static certificate for backward compatibility</param>
         public CertificateAndClaimsClientCredential(
             Func<AssertionRequestOptions, Task<X509Certificate2>> certificateProvider,
-            IDictionary<string, string> claimsToSign,
-            bool appendDefaultClaims,
             X509Certificate2 certificate = null)
         {
             _certificateProvider = certificateProvider;
-            _claimsToSign = claimsToSign;
-            _appendDefaultClaims = appendDefaultClaims;
             Certificate = certificate;
         }
 
@@ -67,21 +59,6 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
 
             if (context.Mode == CredentialTransportProtocol.Mtls)
             {
-                // Custom client-claims credentials (WithClientClaims) are JWT-bearer only:
-                // their cert is intended to sign the assertion, not to bind the TLS transport.
-                // This guard fires for every mTLS-mode resolution path — explicit PoP
-                // (.WithMtlsProofOfPossession()) AND implicit Bearer-over-mTLS
-                // (CertificateOptions.SendCertificateOverMtls = true) — so the message must
-                // cover both transports rather than naming Proof-of-Possession alone.
-                // Subclasses (CertificateClientCredential, DynamicCertificateClientCredential)
-                // construct the base with claimsToSign: null and are unaffected by this guard.
-                if (_claimsToSign is not null)
-                {
-                    throw new MsalClientException(
-                        MsalError.MtlsCertificateNotProvided,
-                        MsalErrorMessage.MtlsNotSupportedWithClientClaimsMessage);
-                }
-
                 // mTLS path: the certificate authenticates the client at the TLS layer.
                 // No client_assertion is needed; return an empty parameter set.
                 return new CredentialMaterial(
@@ -90,25 +67,12 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             }
 
             // Regular path: build a JWT-bearer client assertion.
-            JsonWebToken jwtToken;
-            if (string.IsNullOrEmpty(context.ExtraClientAssertionClaims))
-            {
-                jwtToken = new JsonWebToken(
-                    context.CryptographyManager,
-                    context.ClientId,
-                    context.TokenEndpoint,
-                    _claimsToSign,
-                    _appendDefaultClaims);
-            }
-            else
-            {
-                jwtToken = new JsonWebToken(
-                    context.CryptographyManager,
-                    context.ClientId,
-                    context.TokenEndpoint,
-                    context.ExtraClientAssertionClaims,
-                    _appendDefaultClaims);
-            }
+            var jwtToken = new JsonWebToken(
+                context.CryptographyManager,
+                context.ClientId,
+                context.TokenEndpoint,
+                context.ExtraClientAssertionClaims,
+                appendDefaultClaims: true);
 
             string assertion = jwtToken.Sign(certificate, context.SendX5C, context.UseSha2);
 

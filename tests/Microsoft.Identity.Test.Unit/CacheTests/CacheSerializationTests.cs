@@ -496,22 +496,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
         #region DICTIONARY SERIALIZATION TESTS
 
-        [TestMethod]
-        public void TestDictionarySerialization()
-        {
-            var accessor = CreateTokenCacheAccessor();
-
-            var s1 = new TokenCacheDictionarySerializer(accessor);
-            byte[] bytes = s1.Serialize(null);
-            string json = new UTF8Encoding().GetString(bytes);
-
-            var otherAccessor = new InMemoryPartitionedUserTokenCacheAccessor(Substitute.For<ILoggerAdapter>(), null);
-            var s2 = new TokenCacheDictionarySerializer(otherAccessor);
-            s2.Deserialize(bytes, false);
-
-            AssertAccessorsAreEqual(accessor, otherAccessor);
-        }
-
         #endregion // DICTIONARY SERIALIZTION TESTS
 
         #region JSON SERIALIZATION TESTS
@@ -675,74 +659,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         #endregion // JSON SERIALIZATION TESTS
-
-        [TestMethod]
-        [DeploymentItem(@"Resources\cachecompat_dotnet_dictionary.bin")]
-        public void TestMsalNet2XCacheSerializationInterop()
-        {
-            var accessor = new InMemoryPartitionedUserTokenCacheAccessor(Substitute.For<ILoggerAdapter>(), null);
-            var s = new TokenCacheDictionarySerializer(accessor);
-            string binFilePath = ResourceHelper.GetTestResourceRelativePath("cachecompat_dotnet_dictionary.bin");
-            byte[] bytes = File.ReadAllBytes(binFilePath);
-            s.Deserialize(bytes, false);
-
-            Assert.HasCount(1, accessor.GetAllAccessTokens());
-            Assert.HasCount(1, accessor.GetAllRefreshTokens());
-            Assert.HasCount(1, accessor.GetAllIdTokens());
-            Assert.HasCount(1, accessor.GetAllAccounts());
-            Assert.IsEmpty(accessor.GetAllAppMetadata());
-
-            MsalAccessTokenCacheItem expectedAccessTokenItem = new MsalAccessTokenCacheItem(
-               "login.windows.net",
-               "b945c513-3946-4ecd-b179-6499803a2167",
-               "User.Read User.ReadBasic.All profile openid email",
-               "26039cce-489d-4002-8293-5b0c5134eacb",
-               secret: "",
-               cachedAt: DateTimeHelpers.UnixTimestampToDateTime(1548803419),
-               expiresOn: DateTimeHelpers.UnixTimestampToDateTime(1548846619),
-               extendedExpiresOn: DateTimeHelpers.UnixTimestampToDateTime(1548846619),
-               rawClientInfo: string.Empty,
-               homeAccountId: "13dd2c19-84cd-416a-ae7d-49573e425619.26039cce-489d-4002-8293-5b0c5134eacb"
-               );
-
-            expectedAccessTokenItem.AdditionalFieldsJson = "{\r\n  \"access_token_type\": \"Bearer\"\r\n}";
-
-            AssertAccessTokenCacheItemsAreEqual(expectedAccessTokenItem, accessor.GetAllAccessTokens().First());
-
-            var expectedRefreshTokenItem = new MsalRefreshTokenCacheItem
-            {
-                Environment = "login.windows.net",
-                HomeAccountId = "13dd2c19-84cd-416a-ae7d-49573e425619.26039cce-489d-4002-8293-5b0c5134eacb",
-                RawClientInfo = string.Empty,
-                ClientId = "b945c513-3946-4ecd-b179-6499803a2167",
-                OboCacheKey = string.Empty
-            };
-            AssertRefreshTokenCacheItemsAreEqual(expectedRefreshTokenItem, accessor.GetAllRefreshTokens().First());
-
-            var expectedIdTokenItem = new MsalIdTokenCacheItem
-            {
-                Environment = "login.windows.net",
-                HomeAccountId = "13dd2c19-84cd-416a-ae7d-49573e425619.26039cce-489d-4002-8293-5b0c5134eacb",
-                RawClientInfo = string.Empty,
-                ClientId = "b945c513-3946-4ecd-b179-6499803a2167",
-                TenantId = "26039cce-489d-4002-8293-5b0c5134eacb"
-            };
-            AssertIdTokenCacheItemsAreEqual(expectedIdTokenItem, accessor.GetAllIdTokens().First());
-
-            var expectedAccountItem = new MsalAccountCacheItem
-            {
-                Environment = "login.windows.net",
-                HomeAccountId = "13dd2c19-84cd-416a-ae7d-49573e425619.26039cce-489d-4002-8293-5b0c5134eacb",
-                RawClientInfo = "eyJ1aWQiOiIxM2RkMmMxOS04NGNkLTQxNmEtYWU3ZC00OTU3M2U0MjU2MTkiLCJ1dGlkIjoiMjYwMzljY2UtNDg5ZC00MDAyLTgyOTMtNWIwYzUxMzRlYWNiIn0",
-                PreferredUsername = "abhi@ddobalianoutlook.onmicrosoft.com",
-                Name = "Abhi Test",
-                GivenName = string.Empty,
-                FamilyName = string.Empty,
-                LocalAccountId = "13dd2c19-84cd-416a-ae7d-49573e425619",
-                TenantId = "26039cce-489d-4002-8293-5b0c5134eacb"
-            };
-            AssertAccountCacheItemsAreEqual(expectedAccountItem, accessor.GetAllAccounts().First());
-        }
 
         private void AssertAccessorsAreEqual(ITokenCacheAccessor expected, ITokenCacheAccessor actual)
         {

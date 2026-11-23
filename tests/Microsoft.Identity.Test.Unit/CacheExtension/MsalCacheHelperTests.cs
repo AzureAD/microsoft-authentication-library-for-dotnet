@@ -363,63 +363,6 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
             Assert.IsFalse(data.Any(), "Cache is corrupt, so it should have been deleted");
         }
 
-       
-        [DoNotRunOnLinux] // The FileSystemWatcher on Linux doesn't always fire
-        public async Task ClearCacheUsesTheLockAsync()
-        {
-            // Arrange
-            var cacheAccessor = NSubstitute.Substitute.For<ICacheAccessor>();
-            var cache = new MockTokenCache();
-            var storage = new Storage(
-                _storageCreationPropertiesBuilder.Build(),
-                cacheAccessor,
-                new TraceSourceLogger(new TraceSource("ts")));
-            var helper = new MsalCacheHelper(cache, storage, _logger);
-
-            FileSystemWatcher fileSystemWatcher = new FileSystemWatcher(
-                Path.GetDirectoryName(_cacheFilePath),
-                $"{Path.GetFileName(_cacheFilePath)}.lockfile");
-            fileSystemWatcher.EnableRaisingEvents = true;
-
-            // the events can be fired at a later time, so we need to wait for them
-            // otherwise the test might finish first
-            SemaphoreSlim semaphore1 = new SemaphoreSlim(0);
-            SemaphoreSlim semaphore2 = new SemaphoreSlim(0);
-            bool lockCreated = false, lockDeleted = false;
-
-            fileSystemWatcher.Created += (_, _) =>
-            {
-                semaphore1.Release();
-                lockCreated = true;
-            };
-
-            fileSystemWatcher.Deleted += (_, _) =>
-            {
-                semaphore2.Release();
-                lockDeleted = true;
-            };
-
-            // Act
-#pragma warning disable CS0618 // Type or member is obsolete
-            helper.Clear();
-#pragma warning restore CS0618 // Type or member is obsolete
-
-            await semaphore1.WaitAsync(5000).ConfigureAwait(false);
-            await semaphore2.WaitAsync(5000).ConfigureAwait(false);
-
-            // Assert
-            if (SharedUtilities.IsLinuxPlatform())
-            {
-                Assert.IsFalse(lockCreated, $"lockCreated {lockCreated} lockDeleted {lockDeleted}");
-                Assert.IsFalse(lockDeleted, $"lockCreated {lockDeleted} lockDeleted {lockDeleted}");
-            }
-            else
-            {
-                Assert.IsTrue(lockCreated, $"lockCreated {lockCreated} lockDeleted {lockDeleted}");
-                Assert.IsTrue(lockDeleted, $"lockCreated {lockDeleted} lockDeleted {lockDeleted}");
-            }
-        }
-
         [TestMethod]
         [DeploymentItem(@"Resources/token_cache_one_acc_seed.json")]
 

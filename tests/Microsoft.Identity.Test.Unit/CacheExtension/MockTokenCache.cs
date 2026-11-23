@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
 
-#pragma warning disable CS0618 // Type or member is obsolete (CacheData)
 namespace Microsoft.Identity.Test.Unit.CacheExtension
 {
     internal class MockTokenCache : ITokenCache, ITokenCacheSerializer
@@ -31,11 +30,6 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
             throw new NotImplementedException();
         }
 
-        public void DeserializeMsalV2(byte[] msalV2State)
-        {
-            throw new NotImplementedException();
-        }
-
         public void DeserializeMsalV3(byte[] msalV3State, bool shouldClearExistingCache = false)
         {
             LastDeserializedString = Encoding.UTF8.GetString(msalV3State);
@@ -50,11 +44,6 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
             }
         }
 
-        public void DeserializeUnifiedAndAdalCache(CacheData cacheData)
-        {
-            throw new NotImplementedException();
-        }
-
         public byte[] Serialize()
         {
             throw new NotImplementedException();
@@ -65,19 +54,9 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
             throw new NotImplementedException();
         }
 
-        public byte[] SerializeMsalV2()
-        {
-            throw new NotImplementedException();
-        }
-
         public byte[] SerializeMsalV3()
         {
             return Encoding.UTF8.GetBytes(LastDeserializedString);
-        }
-
-        public CacheData SerializeUnifiedAndAdalCache()
-        {
-            throw new NotImplementedException();
         }
 
         public void SetAfterAccess(TokenCacheCallback afterAccess)
@@ -102,4 +81,3 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
         public void SetBeforeWriteAsync(Func<TokenCacheNotificationArgs, Task> beforeWrite) => throw new NotImplementedException();
     }
 }
-#pragma warning restore CS0618 // Type or member is obsolete

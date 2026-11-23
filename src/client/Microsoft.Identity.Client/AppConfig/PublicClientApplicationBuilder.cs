@@ -4,7 +4,6 @@
 using System;
 using System.ComponentModel;
 using Microsoft.Identity.Client.Cache;
-using Microsoft.Identity.Client.Kerberos;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using System.Runtime.CompilerServices;
@@ -155,35 +154,15 @@ namespace Microsoft.Identity.Client
             Config.IsBrokerEnabled = enableBroker;
             return this;
         }
-#else
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="enableBroker"></param>
-        /// <returns></returns>
-        /// <exception cref="PlatformNotSupportedException"></exception>
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete("The desktop broker is not directly available in the MSAL package. Install the NuGet package Microsoft.Identity.Client.Broker and call the extension method .WithBroker(BrokerOptions). For details, see https://aka.ms/msal-net-wam", true)]
-        public PublicClientApplicationBuilder WithBroker(bool enableBroker = true)
-        {
-            throw new PlatformNotSupportedException(
-                  "The desktop broker is not directly available in the Microsoft.Identity.Client package. " +
-                  "\n\rTo use it, install the NuGet package named Microsoft.Identity.Client.Broker " +
-                  "and call the extension method .WithBroker(BrokerOptions) from namespace Microsoft.Identity.Client.Broker" +
-                  "\n\rFor details see https://aka.ms/msal-net-wam ");
-        }
 #endif
 
+#if __MOBILE__
         /// <summary>
         /// Allows customization of the Windows 10 Broker experience. 
         /// </summary>
 #if !SUPPORTS_BROKER || __MOBILE__
         [EditorBrowsable(EditorBrowsableState.Never)]
 #endif
-#if !__MOBILE__
-        [Obsolete("This API has been replaced with WithBroker(BrokerOptions), which can be found in Microsoft.Identity.Client.Broker package. See https://aka.ms/msal-net-wam for details.", false)]
-#endif
-
         public PublicClientApplicationBuilder WithWindowsBrokerOptions(WindowsBrokerOptions options)
         {
             WindowsBrokerOptions.ValidatePlatformAvailability();
@@ -191,6 +170,7 @@ namespace Microsoft.Identity.Client
             Config.BrokerOptions = newOptions; 
             return this;
         }
+#endif
 
         /// <summary>
         ///  Sets a reference to the ViewController (if using iOS), Activity (if using Android)
@@ -312,24 +292,7 @@ namespace Microsoft.Identity.Client
             return WithParentFunc(() => windowFunc());
         }
 #endif
-
-        /// <summary>
-        /// Sets the parameters required to get a Kerberos Ticket from Azure AD service.
-        /// </summary>
-        /// <param name="servicePrincipalName">Service principal name to get Kerberos Service Ticket.</param>
-        /// <param name="ticketContainer">Specify where the Kerberos ticket will be returned - as a claim in the ID token or as a claim in the access token. 
-        /// If the ticket is for the client application, use the ID token. If the ticket is for the downstream API, use the access token.</param>
-        /// <remarks>
-        /// The expiry of the Kerberos ticket is tied to the expiry of the token that contains it.
-        /// MSAL provides several helper APIs to read and write Kerberos tickets from the Windows Ticket Cache - see <see cref="KerberosSupplementalTicketManager"/>.
-        /// </remarks>
-        [Obsolete]
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public PublicClientApplicationBuilder WithKerberosTicketClaim(string servicePrincipalName, KerberosTicketContainer ticketContainer)
-        {
-            return this;
-        }
-
+#if !ANDROID && !iOS
         /// <summary>
         /// Returns <c>true</c> if a broker can be used.
         /// This method is only needed to be used in mobile scenarios which support Mobile Application Management. In other supported scenarios, use <c>WithBroker</c> by itself, which will fall back to use a browser if broker is unavailable.
@@ -338,18 +301,16 @@ namespace Microsoft.Identity.Client
         /// <list type="bullet">
         /// <item><description>On Windows, the broker (WAM) can be used on Windows 10 and is always installed. See https://aka.ms/msal-net-wam </description></item>
         /// <item><description>On Mac, Linux, and older versions of Windows a broker is not available.</description></item>
-        /// <item><description>In .NET classic or .NET, install Microsoft.Identity.Client.Desktop first and call <c>WithDesktopFeatures()</c>.</description></item>
+        /// <item><description>In desktop apps, install Microsoft.Identity.Client.Broker and call <c>WithBroker(BrokerOptions)</c>.</description></item>
         /// <item><description>In mobile apps, the device must be Intune joined and Authenticator or Company Portal must be installed. See https://aka.ms/msal-brokers </description></item>
         /// </list>
         /// </remarks>
-#if ANDROID || iOS
-        [Obsolete("This method is obsolete. Applications should rely on the library automatically falling back to a browser if the broker is not available. ", false)]
-#endif
         public bool IsBrokerAvailable()
         {
             return PlatformProxyFactory.CreatePlatformProxy(null)
                     .CreateBroker(Config, null).IsBrokerInstalledAndInvokable(Config.Authority?.AuthorityInfo?.AuthorityType ?? AuthorityType.Aad);
         }
+#endif
 
         /// <summary>
         /// Builds an instance of <see cref="IPublicClientApplication"/> 

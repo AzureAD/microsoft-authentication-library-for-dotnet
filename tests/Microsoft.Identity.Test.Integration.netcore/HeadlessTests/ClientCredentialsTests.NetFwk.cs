@@ -40,8 +40,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Secret,
             ClientAssertion_Wilson,
             ClientAssertion_Manual,
-            ClientClaims_MergeClaims,
-            ClientClaims_ExtraClaims
         };
 
         [TestInitialize]
@@ -141,48 +139,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             runOn.AssertFramework();
             await RunClientCredsAsync(cloud, CredentialType.ClientAssertion_Wilson).ConfigureAwait(false);
-        }
-
-        [TestMethod]
-        [DataRow(Cloud.Public, TargetFrameworks.NetCore)]
-        // [DataRow(Cloud.Arlington)] - cert not setup
-        public async Task WithClientClaims_ExtraClaims_TestAsync(Cloud cloud, TargetFrameworks runOn)
-        {
-            runOn.AssertFramework();
-            await RunClientCredsAsync(cloud, CredentialType.ClientClaims_ExtraClaims).ConfigureAwait(false);
-        }
-
-        [TestMethod]
-        [DataRow(Cloud.Public, TargetFrameworks.NetFx)]
-#if !IGNORE_FEDERATED
-        [DataRow(Cloud.Adfs, TargetFrameworks.NetCore)]
-#endif
-        // [DataRow(Cloud.Arlington)] - cert not setup
-        public async Task WithClientClaims_OverrideClaims_TestAsync(Cloud cloud, TargetFrameworks runOn)
-        {
-            runOn.AssertFramework();
-            await RunClientCredsAsync(cloud, CredentialType.ClientClaims_MergeClaims).ConfigureAwait(false);
-        }
-
-        [TestMethod]
-        [DataRow(Cloud.Public, TargetFrameworks.NetCore)]
-        // [DataRow(Cloud.Arlington)] - cert not setup
-        public async Task WithClientClaims_SendX5C_ExtraClaims_TestAsync(Cloud cloud, TargetFrameworks runOn)
-        {
-            runOn.AssertFramework();
-            await RunClientCredsAsync(cloud, CredentialType.ClientClaims_ExtraClaims, sendX5C: true).ConfigureAwait(false);
-        }
-
-        [TestMethod]
-        [DataRow(Cloud.Public, TargetFrameworks.NetFx)]
-#if !IGNORE_FEDERATED
-        [DataRow(Cloud.Adfs, TargetFrameworks.NetCore)]
-#endif
-        // [DataRow(Cloud.Arlington)] - cert not setup
-        public async Task WithClientClaims_SendX5C_OverrideClaims_TestAsync(Cloud cloud, TargetFrameworks runOn)
-        {
-            runOn.AssertFramework();
-            await RunClientCredsAsync(cloud, CredentialType.ClientClaims_MergeClaims, sendX5C: true).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -584,14 +540,6 @@ var confidentialApp = ConfidentialClientApplicationBuilder
                             adfsAud,
                             cert));
                     break;
-#pragma warning disable CS0618 // Type or member is obsolete
-                case CredentialType.ClientClaims_ExtraClaims:
-                    builder.WithClientClaims(cert, GetClaims(true), mergeWithDefaultClaims: false, sendX5C: sendX5C);
-                    break;
-                case CredentialType.ClientClaims_MergeClaims:
-                    builder.WithClientClaims(cert, GetClaims(false), mergeWithDefaultClaims: true, sendX5C: sendX5C);
-                    break;
-#pragma warning restore CS0618 // Type or member is obsolete
                 default:
                     throw new NotImplementedException();
             }
@@ -603,36 +551,6 @@ var confidentialApp = ConfidentialClientApplicationBuilder
         private string GetExpectedCacheKey(string clientId, string tenantId)
         {
             return $"{clientId}_{tenantId ?? ""}_AppTokenCache";
-        }
-
-        private static IDictionary<string, string> GetClaims(bool useDefaultClaims = true)
-        {
-            const uint JwtToAadLifetimeInSeconds = 60 * 10; // Ten minutes
-
-            if (useDefaultClaims)
-            {
-                DateTimeOffset now = DateTimeOffset.UtcNow;
-                DateTimeOffset validFrom = now; // AAD will take clock skew into consideration
-                DateTimeOffset validUntil = now.AddSeconds(JwtToAadLifetimeInSeconds);
-
-                return new Dictionary<string, string>()
-                {
-                { "aud", TestConstants.ClientCredentialAudience },
-                { "exp", validUntil.ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture) },
-                { "iss", TestConstants.PublicCloudConfidentialClientID.ToString(CultureInfo.InvariantCulture) },
-                { "jti", Guid.NewGuid().ToString() },
-                { "nbf", validFrom.ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture) },
-                { "sub", TestConstants.PublicCloudConfidentialClientID.ToString(CultureInfo.InvariantCulture) },
-                { "ip", "192.168.2.1" }
-                };
-            }
-            else
-            {
-                return new Dictionary<string, string>()
-                {
-                    { "ip", "192.168.2.1" }
-                };
-            }
         }
 
         private static string GetSignedClientAssertionUsingWilson(

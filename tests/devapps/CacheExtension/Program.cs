@@ -122,10 +122,10 @@ namespace ManualTestApp
                         case '6': // U/P and Silent in a loop
                             Console.WriteLine("CTRL-C to stop...");
 
-#pragma warning disable CS0618 // Type or member is obsolete
-                            cacheHelper.Clear();
-#pragma warning restore CS0618 // Type or member is obsolete
-
+                            foreach (var accountToRemove in await pca.GetAccountsAsync().ConfigureAwait(false))
+                            {
+                                await pca.RemoveAsync(accountToRemove).ConfigureAwait(false);
+                            }
 
                             var pca2 = CreatePublicClient("https://login.microsoftonline.com/organizations");
                             var pca3 = CreatePublicClient("https://login.microsoftonline.com/organizations");

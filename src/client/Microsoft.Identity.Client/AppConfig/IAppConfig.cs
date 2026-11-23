@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Extra query parameters that will be applied to every acquire token operation.
-        /// See <see cref="AbstractApplicationBuilder{T}.WithExtraQueryParameters(IDictionary{string, string})"/>
+        /// Configure values and cache-key participation with <c>WithExtraQueryParameters(IDictionary&lt;string, (string Value, bool IncludeInCacheKey)&gt;)</c>.
         /// </summary>
         IDictionary<string, string> ExtraQueryParameters { get; }
 
@@ -81,12 +81,6 @@ namespace Microsoft.Identity.Client
         /// The version of the calling application for telemetry purposes.
         /// </summary>
         string ClientVersion { get; }
-
-        /// <summary>
-        /// </summary>
-        [Obsolete("Telemetry is sent automatically by MSAL.NET. See https://aka.ms/msal-net-telemetry.", false)]
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        ITelemetryConfig TelemetryConfig { get; }
 
         /// <summary>
         /// Allows usage of features that are experimental and would otherwise throw a specific exception. 

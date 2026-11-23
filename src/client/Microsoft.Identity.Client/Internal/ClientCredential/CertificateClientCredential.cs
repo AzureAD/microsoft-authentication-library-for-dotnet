@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         public new X509Certificate2 Certificate { get; }
 
         public CertificateClientCredential(X509Certificate2 certificate) 
-            : base(certificateProvider: _ => Task.FromResult(certificate), claimsToSign: null, appendDefaultClaims: true, certificate: certificate) 
+            : base(certificateProvider: _ => Task.FromResult(certificate), certificate: certificate)
         { 
             Certificate = certificate;
         }

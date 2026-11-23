@@ -8,6 +8,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
@@ -206,7 +207,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             var manager = PlatformProxyFactory.CreatePlatformProxy(null).CryptographyManager;
 
-            var jwtToken = new JsonWebToken(manager, clientId, TestConstants.ClientCredentialAudience, claims);
+            var jwtToken = new JsonWebToken(manager, clientId, TestConstants.ClientCredentialAudience, JsonSerializer.Serialize(claims));
             var cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
 
             return jwtToken.Sign(cert, true, true);

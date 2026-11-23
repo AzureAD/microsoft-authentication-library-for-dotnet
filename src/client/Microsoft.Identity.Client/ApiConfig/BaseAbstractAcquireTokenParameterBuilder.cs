@@ -83,19 +83,6 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Sets Extra Query Parameters for the query string in the HTTP authentication request.
-        /// </summary>
-        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority
-        /// as a string of segments of the form <c>key=value</c> separated by an ampersand character.
-        /// The parameter can be null.</param>
-        /// <returns>The builder to chain the .With methods.</returns>
-        [Obsolete("This method is deprecated. Use the WithExtraQueryParameters(IDictionary<string, (string value, bool includeInCacheKey)>) method instead, which provides control over which parameters are included in the cache key.", false)]
-        public T WithExtraQueryParameters(Dictionary<string, string> extraQueryParameters)
-        {
-            return WithExtraQueryParameters(CoreHelpers.ConvertToTupleParameters(extraQueryParameters));
-        }
-
-        /// <summary>
         /// Sets Extra Query Parameters for the query string in the HTTP authentication request with control over which parameters are included in the cache key
         /// </summary>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority, and merged with those added to the application-level WithExtraQueryParameters API.

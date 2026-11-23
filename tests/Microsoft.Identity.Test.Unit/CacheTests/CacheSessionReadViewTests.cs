@@ -107,8 +107,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         [DataRow("SerializeAdalV3")]
         [DataRow("DeserializeAdalV3")]
-        [DataRow("SerializeMsalV2")]
-        [DataRow("DeserializeMsalV2")]
         [DataRow("SerializeMsalV3")]
         [DataRow("DeserializeMsalV3")]
         [DataRow("CreateSnapshot")]
@@ -119,20 +117,16 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             cache.SetBeforeAccess(args =>
             {
                 args.TokenCache.DeserializeMsalV3(Blob("before"), true);
-#pragma warning disable CS0618
                 switch (operation)
                 {
                     case "SerializeAdalV3": cache.SerializeAdalV3(); break;
                     case "DeserializeAdalV3": cache.DeserializeAdalV3(Array.Empty<byte>()); break;
-                    case "SerializeMsalV2": cache.SerializeMsalV2(); break;
-                    case "DeserializeMsalV2": cache.DeserializeMsalV2(Array.Empty<byte>()); break;
                     case "SerializeMsalV3": cache.SerializeMsalV3(); break;
                     case "DeserializeMsalV3": cache.DeserializeMsalV3(null, true); break;
                     case "CreateSnapshot": ((ITokenCacheSnapshotProvider)cache).CreateSnapshot(); break;
                     case "RestoreSnapshot": ((ITokenCacheSnapshotProvider)cache).RestoreSnapshot(null); break;
                     default: Assert.Fail("Unknown test operation."); break;
                 }
-#pragma warning restore CS0618
             });
             await ExpectUnsupported(() => CreateSession(cache).GetAccountsAsync(), "captured/shared").ConfigureAwait(false);
         }
@@ -370,9 +364,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             var cache = CreateCache();
             var seed = CreateCache();
             seed.DeserializeMsalV3(Blob("before"), true);
-#pragma warning disable CS0618
-            byte[] legacyBytes = seed.SerializeMsalV2();
-#pragma warning restore CS0618
+            byte[] legacyBytes = seed.SerializeAdalV3();
             cache.SetBeforeAccessAsync(async args =>
             {
                 Task hydration;
@@ -380,9 +372,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 {
                     hydration = Task.Run(() =>
                     {
-#pragma warning disable CS0618
-                        args.TokenCache.DeserializeMsalV2(legacyBytes);
-#pragma warning restore CS0618
+                        args.TokenCache.DeserializeAdalV3(legacyBytes);
                     });
                 }
                 await hydration.ConfigureAwait(false);
@@ -428,15 +418,13 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         [DataRow(false)]
         [DataRow(true)]
-        public async Task CapturedMsalV2TargetCannotSilentlyLoseTheAccount(bool isolated)
+        public async Task CapturedAdalV3TargetCannotSilentlyLoseTheAccount(bool isolated)
         {
             SetIsolation(isolated);
             var cache = CreateCache();
             cache.DeserializeMsalV3(Blob("before"), true);
-#pragma warning disable CS0618
-            var serialized = cache.SerializeMsalV2();
-            cache.SetBeforeAccess(args => cache.DeserializeMsalV2(serialized));
-#pragma warning restore CS0618
+            var serialized = cache.SerializeAdalV3();
+            cache.SetBeforeAccess(args => cache.DeserializeAdalV3(serialized));
             var session = CreateSession(cache);
             if (isolated)
                 await ExpectUnsupported(() => session.GetAccountsAsync(), "captured/shared").ConfigureAwait(false);
@@ -969,16 +957,12 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [DataRow("load-once")]
         [DataRow("after-only")]
         [DataRow("no-op")]
-        [DataRow("msal-v2")]
         [DataRow("structured")]
         public async Task OptOutPreservesExistingSerializerContracts(string shape)
         {
             AppContext.SetSwitch(Setting, true);
             var cache = CreateCache();
             cache.DeserializeMsalV3(Blob("before"), true);
-#pragma warning disable CS0618
-            byte[] v2 = cache.SerializeMsalV2();
-#pragma warning restore CS0618
             var snapshot = ((ITokenCacheSnapshotProvider)cache).CreateSnapshot();
             int calls = 0;
             TokenCacheCallback callback = args =>
@@ -994,9 +978,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                         break;
                     case "after-only": args.TokenCache.DeserializeMsalV3(Blob("before"), true); break;
                     case "no-op": break;
-#pragma warning disable CS0618
-                    case "msal-v2": args.TokenCache.DeserializeMsalV2(v2); break;
-#pragma warning restore CS0618
                     case "structured": ((ITokenCacheSnapshotProvider)args.TokenCache).RestoreSnapshot(snapshot); break;
                     default: Assert.Fail("Unknown serializer shape."); break;
                 }

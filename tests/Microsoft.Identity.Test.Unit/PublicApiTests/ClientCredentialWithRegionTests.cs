@@ -25,34 +25,6 @@ namespace Microsoft.Identity.Test.Unit
 
         [TestMethod]
         // regression for #2837
-        public async Task AuthorityOverrideAndRegionalAsync()
-        {
-            using (new EnvVariableContext())
-            {
-                const string region = "eastus";
-                Environment.SetEnvironmentVariable("REGION_NAME", region);
-
-                var app = ConfidentialClientApplicationBuilder
-                                 .Create(TestConstants.ClientId)
-                                 .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
-                                 .WithClientSecret(TestConstants.ClientSecret)
-                                 .Build();
-
-#pragma warning disable CS0618 // Type or member is obsolete
-                var ex = await AssertException.TaskThrowsAsync<MsalClientException>(() =>
-                    app
-                    .AcquireTokenForClient(TestConstants.s_scope)
-                    .WithAuthority("https://login.microsoft.com/17b189bc-2b81-4ec5-aa51-3e628cbc931b")
-#pragma warning restore CS0618 // Type or member is obsolete
-                        .ExecuteAsync())
-                    .ConfigureAwait(false);
-
-                Assert.AreEqual(MsalError.RegionalAndAuthorityOverride, ex.ErrorCode);
-            }
-        }
-
-        [TestMethod]
-        // regression for #2837
         public async Task TenantIdOverrideAndRegionalAsync()
         {
             // Arrange
@@ -648,7 +620,6 @@ namespace Microsoft.Identity.Test.Unit
                                  .WithClientSecret(TestConstants.ClientSecret)
                                  .Build();
 
-#pragma warning disable CS0618 // Type or member is obsolete
                 AuthenticationResult result = await app
                     .AcquireTokenForClient(TestConstants.s_scope)
                     .WithTenantId("17b189bc-2b81-4ec5-aa51-3e628cbc931b")
@@ -670,7 +641,6 @@ namespace Microsoft.Identity.Test.Unit
                    .WithTenantId("17b189bc-2b81-4ec5-aa51-3e628cbc931b")
                    .ExecuteAsync()
                    .ConfigureAwait(false);
-#pragma warning restore CS0618 // Type or member is obsolete
 
                 Assert.AreEqual(EastUsRegion, result.ApiEvent.RegionUsed);
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);

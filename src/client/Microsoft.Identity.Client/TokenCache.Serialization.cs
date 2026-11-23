@@ -63,20 +63,6 @@ namespace Microsoft.Identity.Client
                 LegacyCachePersistence.WriteCache(adalV3State);
         }
 
-        byte[] ITokenCacheSerializer.SerializeMsalV2()
-        {
-            ValidateSerializationTarget();
-            lock (_publicationGate)
-                return new TokenCacheDictionarySerializer(Accessor).Serialize(_unknownNodes);
-        }
-
-        void ITokenCacheSerializer.DeserializeMsalV2(byte[] msalV2State)
-        {
-            ValidateLegacyDeserialization();
-            lock (_publicationGate)
-                _unknownNodes = new TokenCacheDictionarySerializer(Accessor).Deserialize(msalV2State, false);
-        }
-
         byte[] ITokenCacheSerializer.SerializeMsalV3()
         {
             ValidateSerializationTarget();

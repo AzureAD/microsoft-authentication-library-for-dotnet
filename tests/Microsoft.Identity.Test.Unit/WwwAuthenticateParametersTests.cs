@@ -13,7 +13,6 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-#pragma warning disable CS0618 // Type or member is obsolete
 namespace Microsoft.Identity.Test.Unit
 {
     [TestClass]
@@ -212,7 +211,7 @@ namespace Microsoft.Identity.Test.Unit
             HttpResponseMessage httpResponse = CreateGraphHttpResponse(resourceHeaderKey, authorizationUriHeaderKey);
 
             // Act
-            var authParams = WwwAuthenticateParameters.CreateFromResponseHeaders(httpResponse.Headers);
+            var authParams = WwwAuthenticateParameters.CreateFromAuthenticationHeaders(httpResponse.Headers, "Bearer");
 
             // Assert
             Assert.IsTrue(authParams.RawParameters.ContainsKey(resourceHeaderKey));
@@ -236,7 +235,7 @@ namespace Microsoft.Identity.Test.Unit
             HttpResponseMessage httpResponse = CreateClaimsHttpResponse(claims);
 
             // Act
-            var authParams = WwwAuthenticateParameters.CreateFromResponseHeaders(httpResponse.Headers);
+            var authParams = WwwAuthenticateParameters.CreateFromAuthenticationHeaders(httpResponse.Headers, "Bearer");
 
             // Assert
             const string errorValue = "insufficient_claims";
@@ -271,7 +270,7 @@ namespace Microsoft.Identity.Test.Unit
             var wwwAuthenticateResponse = httpResponse.Headers.WwwAuthenticate.First().Parameter;
 
             // Act
-            var authParams = WwwAuthenticateParameters.CreateFromWwwAuthenticateHeaderValue(wwwAuthenticateResponse);
+            var authParams = WwwAuthenticateParameters.CreateFromAuthenticationHeaders(httpResponse.Headers, "Bearer");
 
             // Assert
             Assert.AreEqual(TestConstants.AuthorityCommonTenant.TrimEnd('/'), authParams.Authority);
@@ -293,7 +292,7 @@ namespace Microsoft.Identity.Test.Unit
                 ResponseMessage = CreateInvalidTokenHttpErrorResponse(tenantId)
             };
             var httpClient = new HttpClient(handler);
-            var authParams = await WwwAuthenticateParameters.CreateFromResourceResponseAsync(httpClient, resourceUri).ConfigureAwait(false);
+            var authParams = await WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(resourceUri, "Bearer", httpClient).ConfigureAwait(false);
 
             Assert.AreEqual(authParams.GetTenantId(), tenantId);
 
@@ -319,7 +318,7 @@ namespace Microsoft.Identity.Test.Unit
                 ResponseMessage = CreateInvalidTokenHttpErrorResponse(authority: TestConstants.B2CAuthority)
             };
             var httpClient = new HttpClient(handler);
-            var authParams = await WwwAuthenticateParameters.CreateFromResourceResponseAsync(httpClient, resourceUri).ConfigureAwait(false);
+            var authParams = await WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(resourceUri, "Bearer", httpClient).ConfigureAwait(false);
 
             Assert.AreEqual(tenantId, authParams.GetTenantId());
 
@@ -347,7 +346,7 @@ namespace Microsoft.Identity.Test.Unit
                 ResponseMessage = CreateInvalidTokenHttpErrorResponse(tenantId, authority)
             };
             var httpClient = new HttpClient(handler);
-            var authParams = await WwwAuthenticateParameters.CreateFromResourceResponseAsync(httpClient, resourceUri).ConfigureAwait(false);
+            var authParams = await WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(resourceUri, "Bearer", httpClient).ConfigureAwait(false);
 
             Assert.IsNull(authParams.GetTenantId());
 
@@ -366,7 +365,7 @@ namespace Microsoft.Identity.Test.Unit
             const string resourceUri = "https://example.com/";
             HttpClient client = null;
 
-            Func<Task> action = () => WwwAuthenticateParameters.CreateFromResourceResponseAsync(null, resourceUri);
+            Func<Task> action = () => WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(resourceUri, "Bearer", null);
 
             await Assert.ThrowsAsync<ArgumentNullException>(action).ConfigureAwait(false);
 
@@ -384,7 +383,7 @@ namespace Microsoft.Identity.Test.Unit
         [DataRow("")]
         public async Task CreateFromResourceResponseAsync_Incorrect_ResourceUri_Async(string resourceUri)
         {
-            Func<Task> action = () => WwwAuthenticateParameters.CreateFromResourceResponseAsync(resourceUri);
+            Func<Task> action = () => WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(resourceUri, "Bearer");
 
             await Assert.ThrowsAsync<ArgumentNullException>(action).ConfigureAwait(false);
         }
@@ -580,18 +579,6 @@ namespace Microsoft.Identity.Test.Unit
             Assert.IsEmpty(headers.WwwAuthenticateParameters);
         }
 
-        [TestMethod]
-        //Test for fix https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3026
-        public void ExtractParametersFromResponseWithScheme()
-        {
-            //arrange
-            var header = WwwAuthenticateParameters.CreateFromWwwAuthenticateHeaderValue("Bearer authorization_uri=https://login.microsoftonline.com/TenantId/oauth2/authorize, resource_id=https://endpoint/");
-
-            // Act & Assert
-            Assert.IsNotNull(header);
-            Assert.AreEqual("https://login.microsoftonline.com/TenantId", header.Authority);
-        }
-
         private static HttpResponseMessage CreateClaimsHttpResponse(string claims)
         {
             HttpResponseMessage httpResponse = new HttpResponseMessage(HttpStatusCode.Unauthorized);
@@ -693,4 +680,3 @@ namespace Microsoft.Identity.Test.Unit
         }
     }
 }
-#pragma warning restore CS0618 // Type or member is obsolete

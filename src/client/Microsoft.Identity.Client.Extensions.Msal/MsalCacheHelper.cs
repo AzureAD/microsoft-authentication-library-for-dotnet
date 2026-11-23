@@ -334,24 +334,6 @@ namespace Microsoft.Identity.Client.Extensions.Msal
         }
 
         /// <summary>
-        /// Clears the token store. Equivalent to a delete operation on the persistence layer (file delete). 
-        /// </summary>
-        /// <remarks>
-        /// Apps should use MSAL's RemoveAccount to delete accounts, which is guaranteed to remove confidential information about that account. The token
-        /// cache also contains metadata required for MSAL to operate, degrading the experience and perf when deleted.
-        /// </remarks>
-        [Obsolete(
-            "Applications should not delete the entire cache to log out all users. Instead, call app.RemoveAsync(IAccount) for each account in the cache. ",
-            false)]
-        public void Clear()
-        {
-            using (CreateCrossPlatLock(_storageCreationProperties))
-            {
-                CacheStore.Clear(ignoreExceptions: true);
-            }
-        }
-
-        /// <summary>
         /// Extracts the token cache data from the persistent store 
         /// </summary>
         /// <returns>an UTF-8 byte array of the unencrypted token cache</returns>

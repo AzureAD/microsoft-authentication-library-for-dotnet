@@ -1,8 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System.IO;
-using System.Security.Cryptography;
+using System;
 using CommonCache.Test.Common;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
@@ -10,8 +9,8 @@ using Microsoft.Identity.Client.Cache;
 namespace CommonCache.Test.MsalV2
 {
     /// <summary>
-    ///     Simple persistent cache implementation of the dual cache serialization (ADAL V3 legacy
-    ///     and unified cache format) for a desktop applications (from MSAL 2.x)
+    ///     Simple persistent cache implementation using the MSAL v3 format.
+    ///     MSAL.NET v5 no longer reads or writes the MSAL v2 format.
     /// </summary>
     public static class FileBasedTokenCacheHelper
     {
@@ -27,6 +26,11 @@ namespace CommonCache.Test.MsalV2
             string msalV2CacheFileName,
             string msalV3CacheFileName)
         {
+            if ((cacheStorageType & CacheStorageType.MsalV2) != 0)
+            {
+                throw new NotSupportedException("MSAL.NET v5 requires MSAL v3 cache storage. Migrate v2 data with MSAL.NET 4.x first.");
+            }
+
             s_cacheStorageType = cacheStorageType;
             MsalV2CacheFileName = msalV2CacheFileName;
             MsalV3CacheFileName = msalV3CacheFileName;
@@ -42,15 +46,8 @@ namespace CommonCache.Test.MsalV2
         {
             lock (s_fileLock)
             {
-                var msalv2State = CacheFileUtils.ReadFromFileIfExists(MsalV2CacheFileName);
                 var msalv3State = CacheFileUtils.ReadFromFileIfExists(MsalV3CacheFileName);
 
-                if (msalv2State != null)
-                {
-#pragma warning disable CS0618 // Type or member is obsolete
-                    args.TokenCache.DeserializeMsalV2(msalv2State);
-#pragma warning restore CS0618 // Type or member is obsolete
-                }
                 if (msalv3State != null)
                 {
                     args.TokenCache.DeserializeMsalV3(msalv3State);
@@ -65,17 +62,9 @@ namespace CommonCache.Test.MsalV2
             {
                 lock (s_fileLock)
                 {
-#pragma warning disable CS0618 // Type or member is obsolete
-                    var msalV2State = args.TokenCache.SerializeMsalV2();
-#pragma warning restore CS0618 // Type or member is obsolete
                     var msalV3State = args.TokenCache.SerializeMsalV3();
 
                     // reflect changes in the persistent store
-
-                    if ((s_cacheStorageType & CacheStorageType.MsalV2) == CacheStorageType.MsalV2)
-                    {
-                        CacheFileUtils.WriteToFileIfNotNull(MsalV2CacheFileName, msalV2State);
-                    }
 
                     if ((s_cacheStorageType & CacheStorageType.MsalV3) == CacheStorageType.MsalV3)
                     {

@@ -86,18 +86,5 @@ namespace Microsoft.Identity.Client
         /// URL of the authorization endpoint with the specified parameters.</returns>
         GetAuthorizationRequestUrlParameterBuilder GetAuthorizationRequestUrl(IEnumerable<string> scopes);
 
-        /// <summary>
-        /// In confidential client apps use <see cref="IClientApplicationBase.AcquireTokenSilent(IEnumerable{string}, IAccount)"/> instead.
-        /// </summary>
-        [Obsolete("In confidential client apps use AcquireTokenSilent(scopes, account) instead.")]
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        new AcquireTokenSilentParameterBuilder AcquireTokenSilent(IEnumerable<string> scopes, string loginHint);
-
-        /// <summary>
-        /// Use <see cref="IClientApplicationBase.GetAccountAsync(string)"/> in web apps and web APIs, and use a token cache serializer for better security and performance. See https://aka.ms/msal-net-cca-token-cache-serialization.
-        /// </summary>
-        [Obsolete("Use GetAccountAsync(identifier) in web apps and web APIs, and use a token cache serializer for better security and performance. See https://aka.ms/msal-net-cca-token-cache-serialization.")]
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        new Task<IEnumerable<IAccount>> GetAccountsAsync();
     }
 }

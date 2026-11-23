@@ -115,65 +115,6 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 
         [TestMethod]
         [DataRow("https://app.ciamlogin.com/")]
-        //[DataRow("https://app.ciamlogin.com/d57fb3d4-4b5a-4144-9328-9c1f7d58179d")]
-        //[DataRow("https://app.ciamlogin.com/aDomain")]
-        public async Task CiamWithAuthorityRequestTestAsync(string appAuthority)
-        {
-
-            using (var harness = base.CreateTestHarness())
-            {
-                await TestRequestAuthorityAsync(
-                    harness,
-                    appAuthority,
-                    requestAuthority: "https://request.ciamlogin.com/",
-                    expectedEndpoint: "https://request.ciamlogin.com/request.onmicrosoft.com/oauth2/v2.0/token"
-                    ).ConfigureAwait(false);
-
-                await TestRequestAuthorityAsync(
-                    harness,
-                    appAuthority,
-                    requestAuthority: $"https://request.ciamlogin.com/{TestConstants.TenantId2}",
-                    expectedEndpoint: $"https://request.ciamlogin.com/{TestConstants.TenantId2}/oauth2/v2.0/token"
-                    ).ConfigureAwait(false);
-
-                await TestRequestAuthorityAsync(
-                    harness,
-                    appAuthority,
-                    requestAuthority: $"https://request.ciamlogin.com/bDomain",
-                    expectedEndpoint: $"https://request.ciamlogin.com/bdomain/oauth2/v2.0/token"
-                    ).ConfigureAwait(false);
-
-                
-            }
-
-            static async Task TestRequestAuthorityAsync(MockHttpAndServiceBundle harness, string appAuthority, string requestAuthority, string expectedEndpoint)
-            {
-                var app = ConfidentialClientApplicationBuilder.Create(Guid.NewGuid().ToString())
-                                                                    .WithAuthority(appAuthority)
-                                                                    .WithClientSecret("secret")
-                                                                    .WithHttpManager(harness.HttpManager)
-                                                                    .Build();
-
-                var handler = new MockHttpMessageHandler()
-                {
-                    ExpectedUrl = expectedEndpoint,
-                    ExpectedMethod = HttpMethod.Post,
-                    ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
-                };
-
-                harness.HttpManager.AddMockHandler(handler);
-
-#pragma warning disable CS0618 // Type or member is obsolete
-                var result = await app.AcquireTokenOnBehalfOf(new[] { "someScope" }, new UserAssertion("some_assertion"))
-                     .WithAuthority(requestAuthority)
-                     .ExecuteAsync()
-                     .ConfigureAwait(false);
-#pragma warning restore CS0618 // Type or member is obsolete
-            }
-        }
-
-        [TestMethod]
-        [DataRow("https://app.ciamlogin.com/")]
         [DataRow("https://app.ciamlogin.com/d57fb3d4-4b5a-4144-9328-9c1f7d58179d")]
         [DataRow("https://app.ciamlogin.com/aDomain")]
         public async Task CiamWithTenantRequestTestAsync(string appAuthority)

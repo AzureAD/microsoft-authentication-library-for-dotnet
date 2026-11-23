@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
@@ -22,6 +23,21 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         private string _expectedParameterHash = "";
 
         string _expectedExternalCacheKey => $"{_clientId}_{_tenantId}_{_expectedParameterHash}_AppTokenCache";
+
+        [TestMethod]
+        public void WithExtraBodyParameters_RebindsToGenericExtension()
+        {
+            // Arrange
+            Expression<Func<AcquireTokenForClientParameterBuilder, AcquireTokenForClientParameterBuilder>> call =
+                builder => builder.WithExtraBodyParameters(null);
+
+            // Act
+            var selectedMethod = ((MethodCallExpression)call.Body).Method;
+
+            // Assert
+            Assert.AreEqual(typeof(AbstractConfidentialClientAcquireTokenParameterBuilderExtension), selectedMethod.DeclaringType);
+            Assert.IsTrue(selectedMethod.IsGenericMethod);
+        }
 
         [TestMethod]
         public async Task ValidateExtraBodyParameters()
@@ -78,6 +94,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 //Assert
                 Assert.IsNotNull(authResult);
                 Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
+                Assert.HasCount(1, confidentialApp.AppTokenCacheInternal.Accessor.GetAllAccessTokens());
 
                 //Ensure the extra body parameters are present in the cache key
                 authResult = await confidentialApp.AcquireTokenForClient(new[] { _scope })
@@ -89,6 +106,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 //Assert
                 Assert.IsNotNull(authResult);
                 Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource);
+                Assert.HasCount(1, confidentialApp.AppTokenCacheInternal.Accessor.GetAllAccessTokens());
 
                 //Ensure the same extra body parameters are needed get the cache key
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(
@@ -109,6 +127,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 //Assert
                 Assert.IsNotNull(authResult);
                 Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
+                Assert.HasCount(2, confidentialApp.AppTokenCacheInternal.Accessor.GetAllAccessTokens());
 
                 //Ensure the first token can still be retrieved from the cache
                 _expectedParameterHash = "CIrQtkl8Nr9NUGzgmYq6F2GfO9tfuTaNmcWjfuwD_IY";
@@ -121,6 +140,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 //Assert
                 Assert.IsNotNull(authResult);
                 Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource);
+                Assert.HasCount(2, confidentialApp.AppTokenCacheInternal.Accessor.GetAllAccessTokens());
             }
         }
 

@@ -114,26 +114,6 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Please use WithAzureRegion on the ConfidentialClientApplicationBuilder object
-        /// </summary>
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete("Use WithAzureRegion on the ConfidentialClientApplicationBuilder object", true)]
-        public AcquireTokenForClientParameterBuilder WithAzureRegion(bool useAzureRegion)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Please use WithAzureRegion on the ConfidentialClientApplicationBuilder object
-        /// </summary>        
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete("Use WithAzureRegion on the ConfidentialClientApplicationBuilder object", true)]
-        public AcquireTokenForClientParameterBuilder WithPreferredAzureRegion(bool useAzureRegion = true, string regionUsedIfAutoDetectFails = "", bool fallbackToGlobal = true)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
         /// Specifies an identity attribute to include in the token request.
         /// The attribute values will be returned as a claim in the token called "xms_attr"
         /// in the access token claims. This is typically used with FMI (Federated Managed Identity) scenarios.
