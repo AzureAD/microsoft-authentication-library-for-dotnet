@@ -8,14 +8,10 @@ namespace Microsoft.Identity.Client.Cache
 {
     internal static class TokenCacheSnapshotSizeEstimator
     {
-        // Rounded 1.5 KiB heuristic budgets, sanity-checked against synthetic retained-memory
-        // measurements, not derived from CLR layouts or intended as upper bounds.
-        // SnapshotOverhead covers the snapshot, serialization contract, and six dictionary shells.
+        // This covers  the snapshot, serialization contract, and six dictionary shells.
         private const long SnapshotOverhead = 1536;
-        // EntryOverhead covers the record's fields/header, lazy iOS-key wrapper/delegate,
-        // and a share of the containing dictionary's backing arrays and spare capacity.
-        // Variable-length strings and nested collection contents are charged separately below,
-        // deliberately overcounting some shared strings.
+        // This covers the record's fields/header a share of the containing dictionary's backing arrays and spare capacity.
+        // Variable-length strings and nested collection contents are charged separately below        
         private const long EntryOverhead = 1536;
         private const long CollectionOverhead = 128;
         private const long CollectionEntryOverhead = 128;
