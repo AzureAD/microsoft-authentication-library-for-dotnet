@@ -10,6 +10,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache.Items;
@@ -347,6 +348,103 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             // Assert
             AssertJsonEqual(source.SerializeMsalV3(), legacy.SerializeMsalV3());
             AssertJsonEqual(source.SerializeMsalV3(), destination.SerializeMsalV3());
+        }
+
+        [TestMethod]
+        [DataRow("\"\\uD800\"", "\"\\uD800\"")]
+        [DataRow("\"\\uDC00\"", "\"\\uDC00\"")]
+        [DataRow("{\"nested\":\"\\uD800\"}", "\"\\uD800\"")]
+        public void SnapshotCapturePreservesEscapedUnpairedSurrogates(string unknownJson, string expectedScalarJson)
+        {
+            // Arrange
+            var source = CreateCache(true);
+            source.DeserializeMsalV3(Encoding.UTF8.GetBytes("{\"future\":" + unknownJson + "}"), true);
+            var snapshot = ((ITokenCacheSnapshotProvider)source).CreateSnapshot();
+            var destination = CreateCache(true);
+
+            // Act
+            var restored = snapshot.Restore(destination.Accessor);
+            JsonNode node = restored["future"];
+            while (node is JsonObject obj)
+            {
+                node = obj.First().Value;
+            }
+
+            // Assert
+            Assert.AreEqual(expectedScalarJson, node.GetValue<JsonElement>().GetRawText());
+        }
+
+        [TestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task ConcurrentFirstRestoresPreserveNestedUnknownJson(bool applicationCache)
+        {
+            // Arrange
+            string unknownJson = CreateNestedUnknownJson();
+            var source = CreateCache(applicationCache);
+            source.DeserializeMsalV3(
+                Encoding.UTF8.GetBytes("{\"future\":" + unknownJson + "}"),
+                shouldClearExistingCache: true);
+            var snapshot = ((ITokenCacheSnapshotProvider)source).CreateSnapshot();
+            using var start = new ManualResetEventSlim();
+
+            // Act
+            var restores = Enumerable.Range(0, 16).Select(_ => Task.Factory.StartNew(() =>
+            {
+                start.Wait();
+                var destination = CreateCache(applicationCache);
+                ((ITokenCacheSnapshotProvider)destination).RestoreSnapshot(snapshot);
+                var result = JsonNode.Parse(destination.SerializeMsalV3());
+                JsonTestUtils.AssertJsonDeepEquals(unknownJson, result["future"].ToJsonString());
+            }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default)).ToArray();
+            start.Set();
+            await Task.WhenAll(restores).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        public async Task UnknownFieldsSurviveClientCredentialTokenWriteAfterSnapshotRestore()
+        {
+            // Arrange
+            const string UnrelatedScope = "https://unrelated-resource/.default";
+            using var httpManager = new MockHttpManager();
+            httpManager.AddInstanceDiscoveryMockHandler();
+            httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+            var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                .WithClientSecret(TestConstants.ClientSecret)
+                .WithAuthority(TestConstants.AuthorityUtidTenant)
+                .WithLegacyCacheCompatibility(false)
+                .WithHttpManager(httpManager)
+                .Build();
+            var cache = (ITokenCacheInternal)app.AppTokenCache;
+            var now = DateTimeOffset.UtcNow;
+            cache.Accessor.SaveAccessToken(new MsalAccessTokenCacheItem(
+                "login.microsoftonline.com", TestConstants.ClientId, UnrelatedScope,
+                TestConstants.Utid, "unrelated-token", now, now.AddHours(1), now.AddHours(2),
+                null, "")
+            {
+                AdditionalFieldsJson = "{\"future_item\":\"retained\"}"
+            });
+            var cacheJson = JsonNode.Parse(cache.SerializeMsalV3());
+            cacheJson["future"] = JsonNode.Parse("{\"value\":\"preserved\"}");
+            cache.DeserializeMsalV3(Encoding.UTF8.GetBytes(cacheJson.ToJsonString()), true);
+            var snapshot = ((ITokenCacheSnapshotProvider)cache).CreateSnapshot();
+            cache.Accessor.Clear();
+            ((ITokenCacheSnapshotProvider)cache).RestoreSnapshot(snapshot);
+
+            // Act
+            var acquired = await app.AcquireTokenForClient(TestConstants.s_scope)
+                .ExecuteAsync().ConfigureAwait(false);
+            var result = JsonNode.Parse(cache.SerializeMsalV3());
+            var unrelatedToken = result["AccessToken"].AsObject().Select(pair => pair.Value)
+                .Single(item => item["target"].GetValue<string>() == UnrelatedScope);
+
+            // Assert
+            Assert.AreEqual(TokenSource.IdentityProvider, acquired.AuthenticationResultMetadata.TokenSource);
+            JsonTestUtils.AssertJsonDeepEquals("{\"value\":\"preserved\"}", result["future"].ToJsonString());
+            JsonTestUtils.AssertJsonDeepEquals(
+                "\"retained\"",
+                unrelatedToken["future_item"].ToJsonString());
+            Assert.AreEqual(0, httpManager.QueueSize);
         }
 
         [TestMethod]
@@ -972,6 +1070,17 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     "environment", "local", null, "account", null, null, null, tenant, null, null,
                     new Dictionary<string, string> { ["app"] = "wam" }));
             }
+        }
+
+        private static string CreateNestedUnknownJson()
+        {
+            var values = new JsonArray();
+            for (int i = 0; i < 128; i++)
+            {
+                values.Add(new JsonArray(
+                    JsonNode.Parse($"{{\"marker\":\"value-{i}\",\"nested\":[null,true,{{\"value\":{i}}}]}}")));
+            }
+            return values.ToJsonString();
         }
 
         private static void Mutate(ITokenCache cache)

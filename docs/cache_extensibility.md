@@ -126,7 +126,7 @@ In user flows, only the access tokens will be cached by the new schema. Refresh 
 
 ## Process-local token cache snapshots
 
-Use the optional `ITokenCacheSnapshotProvider` interface to cache isolated `TokenCacheSnapshot` objects in memory, avoiding JSON serialization on each access. It works with both `AppTokenCache` and `UserTokenCache`.
+Use the optional `ITokenCacheSnapshotProvider` interface to cache isolated `TokenCacheSnapshot` objects in memory, avoiding full-cache JSON serialization on each access. It works with both `AppTokenCache` and `UserTokenCache`. During capture, unknown JSON values are copied from their source document so snapshots do not retain unrelated cache JSON.
 
 ### Example
 
@@ -154,6 +154,7 @@ app.AppTokenCache.SetAfterAccess(args =>
 
 - **Synchronization:** Call snapshot methods inside cache callbacks; they do not acquire locks. Keep MSAL's default synchronization or provide an equivalent. Partitioned providers must select snapshots by cache key and synchronize storage shared across application instances.
 - **Isolation:** Capture and restore copy mutable state. Snapshots can be reused across independent caches, but app and user snapshots are not interchangeable.
+- **Unknown fields:** Capture walks unknown JSON values to detach them from the source document; known token entries are not serialized.
 - **Restore behavior:** Matches `DeserializeMsalV3(payload, shouldClearExistingCache: true)`, including unknown fields and retained application metadata. Restoring `null` clears tokens and accounts but retains metadata and existing unknown top-level fields.
 - **Storage:** Snapshots are process-local, not a transport or cross-version format. Use `snapshot.SerializeMsalV3()` for persistent or distributed storage.
 - **Security and memory:** Snapshots contain credentials. Never log them; protect them and bound retention. They may retain more memory than JSON bytes.

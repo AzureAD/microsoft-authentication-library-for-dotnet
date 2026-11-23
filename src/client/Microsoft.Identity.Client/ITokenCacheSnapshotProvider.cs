@@ -15,7 +15,8 @@ namespace Microsoft.Identity.Client
     public interface ITokenCacheSnapshotProvider
     {
         /// <summary>
-        /// Captures an isolated snapshot of the persisted cache state without JSON serialization.
+        /// Captures an isolated snapshot of the persisted cache state without serializing known
+        /// cache entries. Unknown JSON values are copied from their source document.
         /// </summary>
         /// <returns>An immutable, process-local snapshot.</returns>
         /// <exception cref="System.PlatformNotSupportedException">Custom caching is not supported on this platform.</exception>

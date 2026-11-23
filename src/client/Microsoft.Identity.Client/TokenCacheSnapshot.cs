@@ -104,14 +104,48 @@ namespace Microsoft.Identity.Client
             {
                 foreach (var pair in nodes)
                 {
-                    // A JsonNode clone can retain the complete source document, not just this subtree.
-                    var node = detachFromOriginalDocument && pair.Value is not null
-                        ? JsonNode.Parse(pair.Value.ToJsonString(), pair.Value.Options)
+                    // Copy containers eagerly and detach each scalar from the source document.
+                    // Serializing the subtree here can reject escaped unpaired UTF-16 surrogates.
+                    var node = detachFromOriginalDocument
+                        ? CloneDetachedNode(pair.Value)
                         : CloneNode(pair.Value);
                     copy.Add(pair.Key, node);
                 }
             }
             return copy;
+        }
+
+        private static JsonNode CloneDetachedNode(JsonNode node)
+        {
+            if (node is null)
+            {
+                return null;
+            }
+
+            if (node is JsonObject obj)
+            {
+                var copy = new JsonObject(obj.Options);
+                foreach (var pair in obj)
+                {
+                    copy.Add(pair.Key, CloneDetachedNode(pair.Value));
+                }
+                return copy;
+            }
+
+            if (node is JsonArray array)
+            {
+                var copy = new JsonArray(array.Options);
+                foreach (var item in array)
+                {
+                    copy.Add(CloneDetachedNode(item));
+                }
+                return copy;
+            }
+
+            // Unknown values originate from parsed JSON. GetRawText preserves escaped
+            // strings without decoding malformed UTF-16, while parsing detaches the scalar.
+            var element = node.GetValue<JsonElement>();
+            return JsonNode.Parse(element.GetRawText(), node.Options);
         }
 
         private static JsonNode CloneNode(JsonNode node)
