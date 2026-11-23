@@ -7,7 +7,6 @@ using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using JObject = System.Text.Json.Nodes.JsonObject;
-using JToken = System.Text.Json.Nodes.JsonNode;
 
 namespace Microsoft.Identity.Client.Cache.Items
 {
@@ -40,20 +39,22 @@ namespace Microsoft.Identity.Client.Cache.Items
         public Dictionary<string, MsalAppMetadataCacheItem> AppMetadata { get; set; } =
             new Dictionary<string, MsalAppMetadataCacheItem>();
 
-        public IDictionary<string, JToken> UnknownNodes { get; }
+        public IDictionary<string, JsonElement> UnknownNodes { get; }
 
-        public CacheSerializationContract(IDictionary<string, JToken> unknownNodes)
+        public CacheSerializationContract(IDictionary<string, JsonElement> unknownNodes)
         {
-            UnknownNodes = unknownNodes ?? new Dictionary<string, JToken>();
+            UnknownNodes = unknownNodes ?? new Dictionary<string, JsonElement>();
         }
 
         internal static CacheSerializationContract FromJsonString(string json)
         {
-            var root = JsonNode.Parse(json, documentOptions: new JsonDocumentOptions
+            using var document = JsonDocument.Parse(json, new JsonDocumentOptions
             {
                 AllowTrailingCommas = true
-            }).AsObject();
-            var unknownNodes = ExtractUnknownNodes(root);
+            });
+            var rootElement = document.RootElement.Clone();
+            var root = JsonObject.Create(rootElement);
+            var unknownNodes = ExtractUnknownNodes(rootElement);
 
             var contract = new CacheSerializationContract(unknownNodes);
 
@@ -134,11 +135,11 @@ namespace Microsoft.Identity.Client.Cache.Items
             }
         }
 
-        private static IDictionary<string, JToken> ExtractUnknownNodes(JObject root)
+        private static IDictionary<string, JsonElement> ExtractUnknownNodes(JsonElement root)
         {
-            return root
-                .Where(kvp => !s_knownPropertyNames.Any(p => string.Equals(kvp.Key, p, StringComparison.OrdinalIgnoreCase)))
-                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+            return root.EnumerateObject()
+                .Where(property => !s_knownPropertyNames.Any(p => string.Equals(property.Name, p, StringComparison.OrdinalIgnoreCase)))
+                .ToDictionary(property => property.Name, property => property.Value);
         }
 
         internal string ToJsonString()
@@ -193,7 +194,10 @@ namespace Microsoft.Identity.Client.Cache.Items
             // Anything else
             foreach (var kvp in UnknownNodes)
             {
-                root[kvp.Key] = kvp.Value != null ? JToken.Parse(kvp.Value.ToJsonString()) : null;
+                root[kvp.Key] = JsonNode.Parse(kvp.Value.GetRawText(), documentOptions: new JsonDocumentOptions
+                {
+                    AllowTrailingCommas = true
+                });
             }
             return root.ToJsonString(NeverIgnoreJsonOptions);
         }

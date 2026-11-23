@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Text.Json;
-using System.Text.Json.Nodes;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Utils;
@@ -27,7 +26,7 @@ namespace Microsoft.Identity.Client
 
         internal TokenCacheSnapshot(
             ITokenCacheAccessor accessor,
-            IDictionary<string, JsonNode> unknownNodes,
+            IDictionary<string, JsonElement> unknownNodes,
             bool isApplicationCache)
         {
             IsApplicationCache = isApplicationCache;
@@ -69,7 +68,7 @@ namespace Microsoft.Identity.Client
             return _state.ToJsonString().ToByteArray();
         }
 
-        internal IDictionary<string, JsonNode> Restore(ITokenCacheAccessor accessor)
+        internal IDictionary<string, JsonElement> Restore(ITokenCacheAccessor accessor)
         {
             accessor.Clear();
             foreach (var item in _state.AccessTokens.Values)
@@ -95,87 +94,33 @@ namespace Microsoft.Identity.Client
             return CloneUnknownNodes(_state.UnknownNodes);
         }
 
-        internal static IDictionary<string, JsonNode> CloneUnknownNodes(
-            IDictionary<string, JsonNode> nodes,
+        internal static IDictionary<string, JsonElement> CloneUnknownNodes(
+            IDictionary<string, JsonElement> nodes,
             bool detachFromOriginalDocument = false)
         {
-            var copy = new Dictionary<string, JsonNode>(StringComparer.Ordinal);
+            var copy = new Dictionary<string, JsonElement>(StringComparer.Ordinal);
             if (nodes is not null)
             {
                 foreach (var pair in nodes)
                 {
-                    // Copy containers eagerly and detach each scalar from the source document.
-                    // Serializing the subtree here can reject escaped unpaired UTF-16 surrogates.
-                    var node = detachFromOriginalDocument
-                        ? CloneDetachedNode(pair.Value)
-                        : CloneNode(pair.Value);
-                    copy.Add(pair.Key, node);
+                    if (detachFromOriginalDocument)
+                    {
+                        // Clone alone can retain the complete source document. Reparse raw JSON
+                        // to detach only this subtree, preserving duplicates and escaped surrogates.
+                        using var document = JsonDocument.Parse(pair.Value.GetRawText(), new JsonDocumentOptions
+                        {
+                            AllowTrailingCommas = true
+                        });
+                        copy.Add(pair.Key, document.RootElement.Clone());
+                    }
+                    else
+                    {
+                        // Elements are immutable and their backing documents are not disposable.
+                        copy.Add(pair.Key, pair.Value);
+                    }
                 }
             }
             return copy;
-        }
-
-        private static JsonNode CloneDetachedNode(JsonNode node)
-        {
-            if (node is null)
-            {
-                return null;
-            }
-
-            if (node is JsonObject obj)
-            {
-                var copy = new JsonObject(obj.Options);
-                foreach (var pair in obj)
-                {
-                    copy.Add(pair.Key, CloneDetachedNode(pair.Value));
-                }
-                return copy;
-            }
-
-            if (node is JsonArray array)
-            {
-                var copy = new JsonArray(array.Options);
-                foreach (var item in array)
-                {
-                    copy.Add(CloneDetachedNode(item));
-                }
-                return copy;
-            }
-
-            // Unknown values originate from parsed JSON. GetRawText preserves escaped
-            // strings without decoding malformed UTF-16, while parsing detaches the scalar.
-            var element = node.GetValue<JsonElement>();
-            return JsonNode.Parse(element.GetRawText(), node.Options);
-        }
-
-        private static JsonNode CloneNode(JsonNode node)
-        {
-#if NET8_0_OR_GREATER
-            return node?.DeepClone();
-#else
-            // The legacy targets use System.Text.Json 6, before JsonNode.DeepClone.
-            if (node is JsonObject obj)
-            {
-                var copy = new JsonObject(obj.Options);
-                foreach (var pair in obj)
-                {
-                    copy.Add(pair.Key, CloneNode(pair.Value));
-                }
-                return copy;
-            }
-            if (node is JsonArray array)
-            {
-                var copy = new JsonArray(array.Options);
-                foreach (var item in array)
-                {
-                    copy.Add(CloneNode(item));
-                }
-                return copy;
-            }
-            // Unknown fields enter the cache through the JSON parser, so scalar
-            // nodes contain immutable JsonElements rather than application objects.
-            return node is null ? null : JsonValue.Create(node.GetValue<JsonElement>().Clone());
-#endif
         }
     }
 }

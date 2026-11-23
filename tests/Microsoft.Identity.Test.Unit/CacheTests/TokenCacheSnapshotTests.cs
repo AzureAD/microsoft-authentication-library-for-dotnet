@@ -351,10 +351,43 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [TestMethod]
-        [DataRow("\"\\uD800\"", "\"\\uD800\"")]
-        [DataRow("\"\\uDC00\"", "\"\\uDC00\"")]
-        [DataRow("{\"nested\":\"\\uD800\"}", "\"\\uD800\"")]
-        public void SnapshotCapturePreservesEscapedUnpairedSurrogates(string unknownJson, string expectedScalarJson)
+        [DataRow("{\"x\":1,\"x\":2}", true)]
+        [DataRow("{\"x\":1,\"x\":2}", false)]
+        [DataRow("{\"nested\":[{\"x\":1,\"x\":2}]}", true)]
+        [DataRow("[{\"x\":1,\"x\":2}]", false)]
+        public async Task DuplicateUnknownPropertiesSurviveSnapshotAndConcurrentRestores(string unknownJson, bool applicationCache)
+        {
+            // Arrange
+            var source = CreateCache(applicationCache);
+            source.DeserializeMsalV3(Encoding.UTF8.GetBytes("{\"future\":" + unknownJson + "}"), true);
+            using var start = new ManualResetEventSlim();
+
+            // Act
+            var snapshot = ((ITokenCacheSnapshotProvider)source).CreateSnapshot();
+            var restores = Enumerable.Range(0, 16).Select(_ => Task.Factory.StartNew(() =>
+            {
+                start.Wait();
+                var destination = CreateCache(applicationCache);
+                ((ITokenCacheSnapshotProvider)destination).RestoreSnapshot(snapshot);
+                using var restored = JsonDocument.Parse(destination.SerializeMsalV3());
+
+                // Assert
+                Assert.AreEqual(unknownJson, restored.RootElement.GetProperty("future").GetRawText());
+            }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default)).ToArray();
+            start.Set();
+            await Task.WhenAll(restores).ConfigureAwait(false);
+            using var serialized = JsonDocument.Parse(snapshot.SerializeMsalV3());
+            Assert.AreEqual(unknownJson, serialized.RootElement.GetProperty("future").GetRawText());
+        }
+
+        [TestMethod]
+        [DataRow("\"\\uD800\"")]
+        [DataRow("\"\\uDC00\"")]
+        [DataRow("{\"nested\":\"\\uD800\"}")]
+        [DataRow("{\"x\":\"\\uD800\",\"x\":\"\\uDC00\"}")]
+        [DataRow("[{\"x\":\"\\uD800\",\"x\":2}]")]
+        [DataRow("{\"\\uD800\":1}")]
+        public void SnapshotCapturePreservesEscapedUnpairedSurrogates(string unknownJson)
         {
             // Arrange
             var source = CreateCache(true);
@@ -364,14 +397,26 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             // Act
             var restored = snapshot.Restore(destination.Accessor);
-            JsonNode node = restored["future"];
-            while (node is JsonObject obj)
-            {
-                node = obj.First().Value;
-            }
 
             // Assert
-            Assert.AreEqual(expectedScalarJson, node.GetValue<JsonElement>().GetRawText());
+            Assert.AreEqual(unknownJson, restored["future"].GetRawText());
+        }
+
+        [TestMethod]
+        public void UnknownValuesWithTrailingCommasSurviveSnapshot()
+        {
+            // Arrange
+            var source = CreateCache(true);
+            source.DeserializeMsalV3(Encoding.UTF8.GetBytes("{\"future\":{\"values\":[1,2,],},}"), true);
+
+            // Act
+            var snapshot = ((ITokenCacheSnapshotProvider)source).CreateSnapshot();
+            var destination = CreateCache(true);
+            ((ITokenCacheSnapshotProvider)destination).RestoreSnapshot(snapshot);
+            using var restored = JsonDocument.Parse(destination.SerializeMsalV3());
+
+            // Assert
+            Assert.AreEqual("{\"values\":[1,2]}", restored.RootElement.GetProperty("future").GetRawText());
         }
 
         [TestMethod]
@@ -485,29 +530,27 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [DataRow("{\"nested\":[{\"value\":\"preserved\"}]}")]
         [DataRow("[{\"value\":\"preserved\"}]")]
         [DataRow("\"preserved\"")]
+        [DataRow("{\"x\":1,\"x\":2}")]
+        [DataRow("{\"x\":\"\\uD800\",\"x\":2}")]
         public void SnapshotUnknownNodesDoNotRetainUnrelatedJson(string unknownJson)
         {
             // Arrange
             string unrelated = new string('x', 8192);
-            var root = JsonNode.Parse("{\"known\":\"" + unrelated + "\",\"future\":" + unknownJson + "}");
-            var unknown = new Dictionary<string, JsonNode> { ["future"] = root["future"] };
+            using var sourceDocument = JsonDocument.Parse("{\"known\":\"" + unrelated + "\",\"future\":" + unknownJson + "}");
+            var root = sourceDocument.RootElement.Clone();
+            var unknown = new Dictionary<string, JsonElement> { ["future"] = root.GetProperty("future") };
 
             // Act
             var snapshot = new TokenCacheSnapshot(CreateCache(true).Accessor, unknown, true);
             var state = (CacheSerializationContract)typeof(TokenCacheSnapshot)
                 .GetField("_state", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(snapshot);
-            var node = state.UnknownNodes["future"];
-            while (node is not JsonValue)
-            {
-                node = node is JsonObject obj ? obj.First().Value : node.AsArray()[0];
-            }
-            var element = node.GetValue<JsonElement>();
+            var element = state.UnknownNodes["future"];
             var document = (JsonDocument)typeof(JsonElement)
                 .GetField("_parent", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(element);
 
             // Assert
             Assert.IsLessThan(unrelated.Length, document.RootElement.GetRawText().Length);
-            JsonTestUtils.AssertJsonDeepEquals(unknownJson, state.UnknownNodes["future"].ToJsonString());
+            Assert.AreEqual(unknownJson, element.GetRawText());
         }
 
         [TestMethod]
@@ -515,21 +558,22 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             // Arrange
             var source = CreateCache(false);
-            var nodes = new Dictionary<string, JsonNode>
+            using var document = JsonDocument.Parse("{\"nested\":[{\"value\":\"original\"},null,true,123456789012345678901234567890]}");
+            var nodes = new Dictionary<string, JsonElement>
             {
-                ["future"] = JsonNode.Parse("{\"nested\":[{\"value\":\"original\"},null,true,123456789012345678901234567890]}")
+                ["future"] = document.RootElement.Clone()
             };
             var snapshot = new TokenCacheSnapshot(source.Accessor, nodes, false);
             byte[] expected = snapshot.SerializeMsalV3();
 
             // Act
-            nodes["future"]["nested"][0]["value"] = "source changed";
+            nodes.Clear();
             var first = snapshot.Restore(CreateCache(false).Accessor);
-            first["future"]["nested"][0]["value"] = "destination changed";
+            first.Clear();
             var second = snapshot.Restore(CreateCache(false).Accessor);
 
             // Assert
-            Assert.AreEqual("original", second["future"]["nested"][0]["value"].GetValue<string>());
+            Assert.AreEqual("original", second["future"].GetProperty("nested")[0].GetProperty("value").GetString());
             AssertJsonEqual(expected, snapshot.SerializeMsalV3());
         }
 

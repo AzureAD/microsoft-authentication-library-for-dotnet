@@ -2,13 +2,13 @@
 // Licensed under the MIT License.
 
 using System.Collections.Generic;
-using JToken = System.Text.Json.Nodes.JsonNode;
+using System.Text.Json;
 
 namespace Microsoft.Identity.Client.Cache
 {
     internal interface ITokenCacheSerializable
     {
-        IDictionary<string, JToken> Deserialize(byte[] bytes, bool clearExistingCacheData);
-        byte[] Serialize(IDictionary<string, JToken> additionalNodes);
+        IDictionary<string, JsonElement> Deserialize(byte[] bytes, bool clearExistingCacheData);
+        byte[] Serialize(IDictionary<string, JsonElement> additionalNodes);
     }
 }

@@ -3,9 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Text.Json;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Utils;
-using JToken = System.Text.Json.Nodes.JsonNode;
 
 namespace Microsoft.Identity.Client.Cache
 {
@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client.Cache
             _accessor = accessor;
         }
 
-        public byte[] Serialize(IDictionary<string, JToken> unknownNodes)
+        public byte[] Serialize(IDictionary<string, JsonElement> unknownNodes)
         {
             var cache = new CacheSerializationContract(unknownNodes);
             foreach (var token in _accessor.GetAllAccessTokens())
@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Client.Cache
                         .ToByteArray();
         }
 
-        public IDictionary<string, JToken> Deserialize(byte[] bytes, bool clearExistingCacheData)
+        public IDictionary<string, JsonElement> Deserialize(byte[] bytes, bool clearExistingCacheData)
         {
             CacheSerializationContract cache;
             string cacheAsString = CoreHelpers.ByteArrayToString(bytes);

@@ -3,16 +3,16 @@
 
 using System;
 using System.Collections.Generic;
+using System.Text.Json;
 using System.Threading;
 using Microsoft.Identity.Client.Cache;
-using JToken = System.Text.Json.Nodes.JsonNode;
 
 namespace Microsoft.Identity.Client
 {
     public sealed partial class TokenCache : ITokenCacheInternal, ITokenCacheSnapshotProvider
     {
         // Unknown token cache data support for forwards compatibility.
-        private IDictionary<string, JToken> _unknownNodes;
+        private IDictionary<string, JsonElement> _unknownNodes;
         private readonly object _publicationGate = new object();
         private static readonly AsyncLocal<ReadHydrationScope> s_readHydration = new AsyncLocal<ReadHydrationScope>();
         private ReadHydrationScope _activeReadHydration;
@@ -146,8 +146,8 @@ namespace Microsoft.Identity.Client
 
         private void CopyDecodedStateTo(TokenCache target, bool replaceExisting, bool replaceUnknown)
         {
-            // Clone once before touching the destination. Immutable credential strings are shared,
-            // but mutable wrappers, nested account/claim state and unknown JSON remain independent.
+            // Clone once before touching the destination. Immutable credential strings and JSON
+            // elements are shared, but mutable wrappers and nested account/claim state remain independent.
             var accessTokens = Accessor.GetAllAccessTokens();
             for (int i = 0; i < accessTokens.Count; i++)
                 accessTokens[i] = accessTokens[i].CloneForSnapshot();
