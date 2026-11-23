@@ -52,6 +52,35 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
         }
 
         [TestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        public void UnauthenticatedProbesUseSeparateHttpClientPool(bool createProbeFirst)
+        {
+            // Arrange
+            var factory = new SimpleHttpClientFactory();
+
+            // Act
+            HttpClient firstClient = createProbeFirst
+                ? AuthenticationHeaderParser.GetHttpClient()
+                : factory.GetHttpClient();
+
+            // Assert
+            AssertHandlerPolicy(firstClient, !createProbeFirst, allowAutoRedirect: true);
+
+            // Act
+            HttpClient probeClient = AuthenticationHeaderParser.GetHttpClient();
+            HttpClient defaultClient = factory.GetHttpClient();
+
+            // Assert
+            Assert.AreNotSame(defaultClient, probeClient);
+            Assert.AreSame(probeClient, factory.GetHttpClientForUnauthenticatedRequest());
+            Assert.AreSame(probeClient, AuthenticationHeaderParser.GetHttpClient());
+            Assert.AreSame(defaultClient, factory.GetHttpClient());
+            AssertHandlerPolicy(probeClient, useDefaultCredentials: false, allowAutoRedirect: true);
+            AssertHandlerPolicy(defaultClient, useDefaultCredentials: true, allowAutoRedirect: true);
+        }
+
+        [TestMethod]
         public void RedirectConfigurationUsesSeparateHttpClientPool()
         {
             // Arrange
@@ -127,8 +156,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
             Assert.AreNotSame(authenticatedClient, anonymousClient);
             Assert.AreSame(authenticatedClient, repeatedAuthenticatedClient);
             Assert.AreSame(anonymousClient, repeatedAnonymousClient);
-            AssertWsTrustHandlerPolicy(authenticatedClient, useDefaultCredentials: true);
-            AssertWsTrustHandlerPolicy(anonymousClient, useDefaultCredentials: false);
+            AssertHandlerPolicy(authenticatedClient, useDefaultCredentials: true);
+            AssertHandlerPolicy(anonymousClient, useDefaultCredentials: false);
             logger.Received(4).Log(LogLevel.Warning, string.Empty, MsalErrorMessage.CustomHttpClientFactoryWsTrustFallback);
         }
 
@@ -189,14 +218,17 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
             factory.Received(1).GetHttpClient();
         }
 
-        private static void AssertWsTrustHandlerPolicy(HttpClient client, bool useDefaultCredentials)
+        private static void AssertHandlerPolicy(
+            HttpClient client,
+            bool useDefaultCredentials,
+            bool allowAutoRedirect = false)
         {
             FieldInfo handlerField = typeof(HttpMessageInvoker)
                 .GetFields(BindingFlags.Instance | BindingFlags.NonPublic)
                 .Single(field => field.FieldType == typeof(HttpMessageHandler));
             var handler = handlerField.GetValue(client) as HttpClientHandler;
             Assert.IsNotNull(handler);
-            Assert.IsFalse(handler.AllowAutoRedirect);
+            Assert.AreEqual(allowAutoRedirect, handler.AllowAutoRedirect);
             Assert.AreEqual(useDefaultCredentials, handler.UseDefaultCredentials);
             if (!useDefaultCredentials)
             {

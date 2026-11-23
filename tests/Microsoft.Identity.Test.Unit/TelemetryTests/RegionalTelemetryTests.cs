@@ -23,6 +23,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
     public class RegionalTelemetryTests : TestBase
     {
         private MockHttpAndServiceBundle _harness;
+        private EnvVariableContext _environmentVariables;
         private readonly TestRetryPolicyFactory _testRetryPolicyFactory = new TestRetryPolicyFactory();
 
         [TestInitialize]
@@ -30,6 +31,9 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         {
             base.TestInitialize();
 
+            _environmentVariables = new EnvVariableContext();
+            Environment.SetEnvironmentVariable(TestConstants.RegionName, null);
+            Environment.SetEnvironmentVariable("COSMIC_LOCATION", null);
             _harness = CreateTestHarness();
             _harness.ServiceBundle.Config.RetryPolicyFactory = _testRetryPolicyFactory;
         }
@@ -37,8 +41,8 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         [TestCleanup]
         public override void TestCleanup()
         {
-            Environment.SetEnvironmentVariable(TestConstants.RegionName, null);
             _harness?.Dispose();
+            _environmentVariables.Dispose();
             base.TestCleanup();
         }
 
@@ -58,9 +62,11 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         ///        Current_request = 4 | ATC_ID, 1, centralus, 2, 4 |
         /// </summary>
         [TestMethod]
-        public async Task TelemetryAcceptanceTestAsync()
+        [DataRow("REGION_NAME")]
+        [DataRow("COSMIC_LOCATION")]
+        public async Task TelemetryAcceptanceTestAsync(string variableName)
         {
-            Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
+            Environment.SetEnvironmentVariable(variableName, TestConstants.Region);
 
             Trace.WriteLine("Step 1. Acquire Token For Client with region successful");
             var result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.Success).ConfigureAwait(false);
@@ -74,7 +80,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             // we can assert telemetry here, as it will be sent to AAD. However, AAD is down, so it will not record it.
             AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenForClient,
                 RegionAutodetectionSource.Cache.ToString("D"),
-                RegionOutcome.AutodetectSuccess.ToString("D"));          
+                RegionOutcome.AutodetectSuccess.ToString("D"));
 
             // the 5xx error puts MSAL in a throttling state, so "wait" until this clears
             _harness.ServiceBundle.ThrottlingManager.SimulateTimePassing(

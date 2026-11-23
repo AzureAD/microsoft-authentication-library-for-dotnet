@@ -58,6 +58,8 @@ namespace Microsoft.Identity.Client.Utils
                 {
                     if (!allowNetwork)
                     {
+                        // Cache hits and regional requests must not fetch global metadata.
+                        // Without a cached domain-to-GUID mapping, the result TenantId remains null.
                         return null;
                     }
 

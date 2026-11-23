@@ -10,7 +10,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
 {
     internal class NullLogger : ILoggerAdapter
     {
-        internal NullLogger(bool isReducedLoggingEnabled = true)
+        internal NullLogger(bool isReducedLoggingEnabled = false)
         {
             IsReducedLoggingEnabled = isReducedLoggingEnabled;
         }

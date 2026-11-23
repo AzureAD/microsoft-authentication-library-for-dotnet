@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using BenchmarkDotNet.Columns;
 using BenchmarkDotNet.Configs;
@@ -13,20 +14,24 @@ using BenchmarkDotNet.Running;
 
 namespace Microsoft.Identity.Test.Performance
 {
-    public class Program
+    public partial class Program
     {
+        static partial void AddSnapshotBenchmarks(List<Type> benchmarks);
+
         public static void Main(string[] args)
         {
             Logger.Log("Started running performance tests.");
 
             try
             {
-                var results = BenchmarkSwitcher.FromTypes(new[] {
+                var benchmarkTypes = new List<Type> {
                     typeof(AcquireTokenForClientCacheTests),
                     typeof(AcquireTokenForOboCacheTests),
                     typeof(TokenCacheTests),
                     typeof(AcquireTokenNoCacheTests),
-                }).RunAll(
+                };
+                AddSnapshotBenchmarks(benchmarkTypes);
+                var results = BenchmarkSwitcher.FromTypes(benchmarkTypes.ToArray()).RunAll(
 #if DEBUG
                     new DebugInProcessConfig() // Allows debugging into benchmarks
                         .WithOptions(ConfigOptions.DontOverwriteResults) // When debugging locally

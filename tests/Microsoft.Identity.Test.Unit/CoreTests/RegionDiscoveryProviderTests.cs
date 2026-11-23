@@ -14,6 +14,7 @@ using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Region;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Unit.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -31,6 +32,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         private ApiEvent _apiEvent;
         private CancellationTokenSource _userCancellationTokenSource;
         private IRegionDiscoveryProvider _regionDiscoveryProvider;
+        private EnvVariableContext _environmentVariables;
         private readonly TestRetryPolicyFactory _testRetryPolicyFactory = new TestRetryPolicyFactory();
 
         [TestInitialize]
@@ -38,6 +40,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         {
             base.TestInitialize();
 
+            _environmentVariables = new EnvVariableContext();
+            Environment.SetEnvironmentVariable(TestConstants.RegionName, null);
+            Environment.SetEnvironmentVariable("COSMIC_LOCATION", null);
             _harness = base.CreateTestHarness();
             _harness.ServiceBundle.Config.RetryPolicyFactory = _testRetryPolicyFactory;
             _httpManager = _harness.HttpManager;
@@ -56,10 +61,10 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         [TestCleanup]
         public override void TestCleanup()
         {
-            Environment.SetEnvironmentVariable(TestConstants.RegionName, "");
             _harness?.Dispose();
             _regionDiscoveryProvider = new RegionAndMtlsDiscoveryProvider(_httpManager);
             _httpManager.Dispose();
+            _environmentVariables.Dispose();
             base.TestCleanup();
         }
 
@@ -108,9 +113,11 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         }
 
         [TestMethod]
-        public async Task SuccessfulResponseFromEnvironmentVariableAsync()
+        [DataRow("REGION_NAME")]
+        [DataRow("COSMIC_LOCATION")]
+        public async Task SuccessfulResponseFromEnvironmentVariableAsync(string variableName)
         {
-            Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
+            Environment.SetEnvironmentVariable(variableName, TestConstants.Region);
 
             _testRequestContext.ServiceBundle.Config.AzureRegion = null; // not configured
 
@@ -119,6 +126,74 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                 .ConfigureAwait(false);
 
             Assert.IsNull(regionalMetadata);
+        }
+
+        [TestMethod]
+        [DataRow(null, "centralus", "centralus")]
+        [DataRow("invalid`region", "centralus", "centralus")]
+        [DataRow("eastus", "centralus", "eastus")]
+        [DataRow(null, " Central US ", "centralus")]
+        public async Task CosmicLocationIsUsedAfterRegionNameWithoutCallingImdsAsync(
+            string regionName, string cosmicLocation, string expectedRegion)
+        {
+            // Arrange
+            Environment.SetEnvironmentVariable(TestConstants.RegionName, regionName);
+            Environment.SetEnvironmentVariable("COSMIC_LOCATION", cosmicLocation);
+            _testRequestContext.ServiceBundle.Config.AzureRegion = ConfidentialClientApplication.AttemptRegionDiscovery;
+
+            // Act
+            InstanceDiscoveryMetadataEntry regionalMetadata = await _regionDiscoveryProvider.GetMetadataAsync(
+                new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
+
+            // Assert
+            ValidateInstanceMetadata(regionalMetadata, expectedRegion);
+            Assert.AreEqual(expectedRegion, _apiEvent.RegionUsed);
+            Assert.AreEqual(RegionAutodetectionSource.EnvVariable, _apiEvent.RegionAutodetectionSource);
+            Assert.AreEqual(RegionOutcome.AutodetectSuccess, _apiEvent.RegionOutcome);
+            Assert.IsNull(_apiEvent.RegionDiscoveryFailureReason);
+        }
+
+        [TestMethod]
+        [DataRow(null)]
+        [DataRow("")]
+        [DataRow(" ")]
+        [DataRow("fake.com/x")]
+        [DataRow("eastus\n")]
+        [DataRow("eastus\uFF10")]
+        public async Task InvalidCosmicLocationFallsBackToImdsAsync(string cosmicLocation)
+        {
+            // Arrange
+            Environment.SetEnvironmentVariable(TestConstants.RegionName, null);
+            Environment.SetEnvironmentVariable("COSMIC_LOCATION", cosmicLocation);
+            AddMockedResponse(CreateImdsComputeResponse(TestConstants.Region));
+            _testRequestContext.ServiceBundle.Config.AzureRegion = ConfidentialClientApplication.AttemptRegionDiscovery;
+
+            // Act
+            InstanceDiscoveryMetadataEntry regionalMetadata = await _regionDiscoveryProvider.GetMetadataAsync(
+                new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
+
+            // Assert
+            ValidateInstanceMetadata(regionalMetadata);
+            Assert.AreEqual(RegionAutodetectionSource.Imds, _apiEvent.RegionAutodetectionSource);
+            Assert.AreEqual(RegionOutcome.AutodetectSuccess, _apiEvent.RegionOutcome);
+            Assert.AreEqual(0, _httpManager.QueueSize);
+        }
+
+        [TestMethod]
+        public async Task CosmicLocationDoesNotOverrideExplicitRegionAsync()
+        {
+            // Arrange
+            Environment.SetEnvironmentVariable("COSMIC_LOCATION", "eastus");
+            _testRequestContext.ServiceBundle.Config.AzureRegion = TestConstants.Region;
+
+            // Act
+            InstanceDiscoveryMetadataEntry regionalMetadata = await _regionDiscoveryProvider.GetMetadataAsync(
+                new Uri("https://login.microsoftonline.com/common/"), _testRequestContext).ConfigureAwait(false);
+
+            // Assert
+            ValidateInstanceMetadata(regionalMetadata);
+            Assert.AreEqual(RegionOutcome.UserProvided, _apiEvent.RegionOutcome);
+            Assert.AreEqual(RegionAutodetectionSource.None, _apiEvent.RegionAutodetectionSource);
         }
 
         [TestMethod]

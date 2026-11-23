@@ -133,6 +133,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
         /// </summary>
         public X509Certificate2 ResolvedCertificate { get; set; }
 
+        /// <summary>
+        /// Tenant GUID resolved from authority metadata for client-credentials authentication results.
+        /// This does not change the authority or cache realm and is null when no GUID can be resolved.
+        /// </summary>
         public string ResolvedTenantId { get; set; }
 
         /// <summary>
@@ -162,6 +166,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public IEnumerable<string> PersistedCacheParameters => _commonParameters.AdditionalCacheParameters;
 
         public SortedList<string, string> CacheKeyComponents {get; private set; }
+
+        internal X509Certificate2 CertificateForCacheAssociation { get; private set; }
+
+        internal void AssociateTokenWithCertificate(X509Certificate2 certificate)
+        {
+            CertificateForCacheAssociation = certificate;
+            CacheKeyComponents ??= new SortedList<string, string>(StringComparer.Ordinal);
+            CacheKeyComponents[Constants.CertSerialNumber] = certificate.SerialNumber;
+        }
 
         public bool PartitionRefreshToken { get; private set; }
 

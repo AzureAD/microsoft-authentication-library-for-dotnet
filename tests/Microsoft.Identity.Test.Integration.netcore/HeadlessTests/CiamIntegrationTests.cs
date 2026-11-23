@@ -82,6 +82,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [RunOn(SkipConditions.OneBranchBuild)]
+        [Ignore("Temporarily disabled while CIAM test tenant login is blocked. Re-enable after tenant access is restored.")]
         public async Task ClientCredentialCiam_WithClientCredentials_ReturnsValidTokens()
         {
             string authority;
@@ -145,6 +146,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [RunOn(SkipConditions.OneBranchBuild)]
+        [Ignore("Temporarily disabled while CIAM test tenant login is blocked. Re-enable after tenant access is restored.")]
         public async Task OBOCiam_CustomDomain_ReturnsValidTokens()
         {
             string authorityCud = "https://login.msidlabsciam.com/fe362aec-5d43-45d1-b730-9755e60dc3b9/v2.0/";
@@ -207,6 +209,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [RunOn(SkipConditions.OneBranchBuild)]
+        [Ignore("Temporarily disabled while CIAM test tenant login is blocked. Re-enable after tenant access is restored.")]
         public async Task WithOidcAuthority_ValidatesIssuerSuccessfully()
         {
             //Get lab details

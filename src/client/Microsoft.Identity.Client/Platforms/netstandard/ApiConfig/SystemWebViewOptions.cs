@@ -30,8 +30,7 @@ namespace Microsoft.Identity.Client
             string url = uri.AbsoluteUri;
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                url = url.Replace("&", "^&");
-                Process.Start(new ProcessStartInfo("cmd", $"/c start microsoft-edge:{url}") { CreateNoWindow = true });
+                OpenEdgeBrowserOnWindows(url);
             }
             else
             {
@@ -56,8 +55,7 @@ namespace Microsoft.Identity.Client
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                url = url.Replace("&", "^&");
-                Process.Start(new ProcessStartInfo("cmd", $"/c start msedge {url}") { CreateNoWindow = true });
+                OpenEdgeBrowserOnWindows(url);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {

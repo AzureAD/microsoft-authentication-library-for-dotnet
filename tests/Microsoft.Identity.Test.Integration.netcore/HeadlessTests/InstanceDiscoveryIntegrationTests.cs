@@ -122,14 +122,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         /// <summary>
         /// If this test fails, please update the <see cref="KnownMetadataProvider"/> to
         /// use whatever Evo uses (i.e. the aliases, preferred network / metadata from the url below).
-        /// login.windows-ppe.net discovery metadata is not part of the standard login.microsoftonline.com discovery response and
-        /// need to be appended after making a seperate discovery for login.windows-ppe.net
+        /// Uses the TSE tenant authority for live discovery. PPE metadata is verified by offline unit tests.
         /// </summary>
         [TestMethod]
         public async Task KnownInstanceMetadataIsUpToDateAsync()
         {
-            const string validDiscoveryUri = @"https://login.microsoftonline.com/common/discovery/instance?api-version=1.1&authorization_endpoint=https%3A%2F%2Flogin.microsoftonline.com%2Fcommon%2Foauth2%2Fv2.0%2Fauthorize";
-            const string validPpeDiscoveryUri = @"https://login.windows-ppe.net/common/discovery/instance?api-version=1.1&authorization_endpoint=https%3A%2F%2Flogin.microsoftonline.com%2Fcommon%2Foauth2%2Fv2.0%2Fauthorize";
+            const string tseTenantId = "d8d14ca6-f1fa-41c1-ae95-0db6258ec0a0";
+            string authorizationEndpoint = $"https://login.microsoftonline.com/{tseTenantId}/oauth2/v2.0/authorize";
+            string validDiscoveryUri = $"https://login.microsoftonline.com/common/discovery/instance?api-version=1.1&authorization_endpoint={Uri.EscapeDataString(authorizationEndpoint)}";
             HttpClient httpClient = new HttpClient();
             HttpResponseMessage discoveryResponse = await httpClient.SendAsync(
                 new HttpRequestMessage(
@@ -139,29 +139,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             if (!discoveryResponse.IsSuccessStatusCode)
             {
                 Assert.Fail(
-                    $"Public discovery endpoint returned {(int)discoveryResponse.StatusCode} " +
+                    $"TSE authority discovery returned {(int)discoveryResponse.StatusCode} " +
                     $"{discoveryResponse.ReasonPhrase}. Body: {Truncate(discoveryJson)}");
             }
 
-            HttpResponseMessage ppeDiscoveryResponse = await httpClient.SendAsync(
-                new HttpRequestMessage(
-                    HttpMethod.Get,
-                    validPpeDiscoveryUri)).ConfigureAwait(false);
-            string ppeDiscoveryJson = await ppeDiscoveryResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
-            if (!ppeDiscoveryResponse.IsSuccessStatusCode)
-            {
-                Assert.Inconclusive(
-                    $"PPE discovery endpoint {validPpeDiscoveryUri} returned " +
-                    $"{(int)ppeDiscoveryResponse.StatusCode} {ppeDiscoveryResponse.ReasonPhrase}. " +
-                    $"This is typically an environmental issue (login.windows-ppe.net is restricted). " +
-                    $"Body: {Truncate(ppeDiscoveryJson)}");
-            }
-
             InstanceDiscoveryMetadataEntry[] actualMetadata = JsonHelper.DeserializeFromJson<InstanceDiscoveryResponse>(discoveryJson).Metadata;
-            InstanceDiscoveryMetadataEntry[] actualPpeMetadata = JsonHelper.DeserializeFromJson<InstanceDiscoveryResponse>(ppeDiscoveryJson).Metadata;
 
             var processedMetadata = new Dictionary<string, InstanceDiscoveryMetadataEntry>();
-            foreach (InstanceDiscoveryMetadataEntry entry in actualMetadata.Concat(actualPpeMetadata))
+            foreach (InstanceDiscoveryMetadataEntry entry in actualMetadata)
             {
                 foreach (var alias in entry.Aliases)
                 {
@@ -172,17 +157,17 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             IDictionary<string, InstanceDiscoveryMetadataEntry> allKnownMetadata = 
                 KnownMetadataProvider.GetAllEntriesForTest();
 
-            // Filter out new sovereign clouds that are not part of the public discovery endpoint responses
-            // These clouds (Bleu, Delos, GovSG) rely on client-side configuration only
-            var sovereignCloudsNotInDiscovery = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            // These clouds are not returned for the TSE production authority; PPE remains covered offline.
+            var cloudsNotInDiscovery = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
             {
+                "login.windows-ppe.net",
                 "login.sovcloud-identity.fr",  // Bleu (France)
                 "login.sovcloud-identity.de",  // Delos (Germany)
                 "login.sovcloud-identity.sg"   // GovSG (Singapore)
             };
 
             IDictionary<string, InstanceDiscoveryMetadataEntry> expectedMetadata = 
-                allKnownMetadata.Where(kvp => !sovereignCloudsNotInDiscovery.Contains(kvp.Key))
+                allKnownMetadata.Where(kvp => !cloudsNotInDiscovery.Contains(kvp.Value.PreferredNetwork))
                                 .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
             CoreAssert.AssertDictionariesAreEqual(

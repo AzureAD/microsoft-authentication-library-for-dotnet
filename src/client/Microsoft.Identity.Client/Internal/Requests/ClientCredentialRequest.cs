@@ -7,10 +7,13 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.AuthScheme;
+using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.Internal.ClientCredential;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
@@ -43,6 +46,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             ILoggerAdapter logger = AuthenticationRequestParameters.RequestContext.Logger;
+
+            await ResolveCertificateAssociationAsync(cancellationToken).ConfigureAwait(false);
 
             if (AuthenticationRequestParameters.Authority is AadAuthority aadAuthority &&
                 aadAuthority.IsCommonOrOrganizationsTenant())
@@ -103,7 +108,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                             // before the async operation completes, breaking cancellation propagation and causing unbounded SemaphoreSlim convoy.
                             // See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/6053
                             using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-                            return await GetAccessTokenAsync(tokenSource.Token, logger).ConfigureAwait(false);
+                            return await GetAccessTokenAsync(tokenSource.Token, logger, isBackgroundRefresh: true).ConfigureAwait(false);
                         }, logger, ServiceBundle, AuthenticationRequestParameters.RequestContext.ApiEvent,
                         AuthenticationRequestParameters.RequestContext.ApiEvent.CallerSdkApiId,
                         AuthenticationRequestParameters.RequestContext.ApiEvent.CallerSdkVersion,
@@ -129,9 +134,53 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return authResult;
         }
 
+        private async Task ResolveCertificateAssociationAsync(
+            CancellationToken cancellationToken,
+            bool isRetry = false)
+        {
+            if (ServiceBundle.Config.CertificateOptions?.AssociateTokensWithCertificate != true
+                || ServiceBundle.Config.ClientCredential is not DynamicCertificateClientCredential certificateCredential)
+            {
+                return;
+            }
+
+            X509Certificate2 certificate = isRetry ? null : AuthenticationRequestParameters.MtlsCertificate;
+            if (certificate is null)
+            {
+                await ResolveAuthorityAsync().ConfigureAwait(false);
+                string tokenEndpoint = await AuthenticationRequestParameters.Authority.GetTokenEndpointAsync(
+                    AuthenticationRequestParameters.RequestContext).ConfigureAwait(false);
+                certificate = await certificateCredential.ResolveCertificateAsync(
+                    CredentialMaterialResolver.BuildContext(AuthenticationRequestParameters, tokenEndpoint),
+                    cancellationToken).ConfigureAwait(false);
+            }
+
+            if (isRetry && AuthenticationRequestParameters.MtlsCertificate is not null)
+            {
+                if (AuthenticationRequestParameters.IsMtlsPopRequested)
+                {
+                    if (AuthenticationRequestParameters.AuthenticationScheme is IAuthenticationOperation3 operation)
+                    {
+                        await operation.AfterCredentialEvaluationAsync(
+                            new CredentialEvaluationContext(certificate), cancellationToken).ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        AuthenticationRequestParameters.AuthenticationScheme = new MtlsPopAuthenticationOperation(certificate);
+                    }
+                }
+
+                AuthenticationRequestParameters.MtlsCertificate = certificate;
+            }
+
+            // Each attempt must authenticate with the certificate identifying its cache partition.
+            AuthenticationRequestParameters.AssociateTokenWithCertificate(certificate);
+        }
+
         private async Task<AuthenticationResult> GetAccessTokenAsync(
             CancellationToken cancellationToken, 
-            ILoggerAdapter logger)
+            ILoggerAdapter logger,
+            bool isBackgroundRefresh = false)
         {
             await ResolveAuthorityAsync().ConfigureAwait(false);
 
@@ -143,6 +192,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 try
                 {
+                    if (retryCount > 0)
+                    {
+                        await ResolveCertificateAssociationAsync(cancellationToken, isRetry: true).ConfigureAwait(false);
+                    }
+
                     // Get a token from AAD
                     if (ServiceBundle.Config.AppTokenProvider == null)
                     {
@@ -197,6 +251,19 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 {
                     // For non-service exceptions (MsalClientException, etc.), invoke OnCompletion and re-throw
                     await InvokeOnCompletionCallbackAsync(authResult: null, exception: ex, logger).ConfigureAwait(false);
+                    throw;
+                }
+                catch (OperationCanceledException ex) when (
+                    !isBackgroundRefresh &&
+                    ServiceBundle.Config.AppTokenProvider is null &&
+                    cancellationToken.IsCancellationRequested &&
+                    ReferenceEquals(ex, AuthenticationRequestParameters.RequestContext.TokenRequestCancellationException))
+                {
+                    var cancellationException = new MsalClientException(
+                        MsalError.AuthenticationCanceledError,
+                        MsalErrorMessage.AuthenticationCanceled,
+                        ex);
+                    await InvokeOnCompletionCallbackAsync(authResult: null, exception: cancellationException, logger).ConfigureAwait(false);
                     throw;
                 }
             }
@@ -311,7 +378,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 logger.Verbose(() => "[ClientCredentialRequest] Invoking OnCompletion callback.");
                 
-                var tokenEndpoint = await AuthenticationRequestParameters.Authority.GetTokenEndpointAsync(AuthenticationRequestParameters.RequestContext).ConfigureAwait(false);
+                // A canceled in-flight request already resolved its endpoint; notification must not resolve it again.
+                var tokenEndpoint = AuthenticationRequestParameters.RequestContext.ApiEvent.TokenEndpoint ??
+                    await AuthenticationRequestParameters.Authority.GetTokenEndpointAsync(AuthenticationRequestParameters.RequestContext).ConfigureAwait(false);
                 var options = new AssertionRequestOptions(
                     AuthenticationRequestParameters.AppConfig, 
                     tokenEndpoint,
@@ -484,6 +553,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 return;
             }
 
+            // After regional token issuance, use cached metadata only so global discovery cannot delay or fail the result.
+            // Check the region actually used, rather than the configured region, to allow discovery after global fallback.
             AuthenticationRequestParameters.ResolvedTenantId = await AuthorityHelpers.ResolveTenantIdAsync(
                 AuthenticationRequestParameters.AuthorityManager.OriginalAuthority.AuthorityInfo,
                 AuthenticationRequestParameters.RequestContext,

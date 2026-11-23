@@ -6,6 +6,17 @@ Fixes #
 <!-- If helpful, describe how and why the bug was fixed. -->
 <!-- If needed, describe how to review (ex. which files have the primary changes, which are nit changes, etc.) -->
 
+**Compatibility and regression risk**
+- [ ] No caller-, platform-, build-, or package-observable behavior changes
+- [ ] Observable changes are intentional and described below
+<!--
+Base behavior:
+New behavior:
+Affected scenarios, platforms, target frameworks, and consumers:
+Compatibility evidence and targeted validation:
+Missing tests mean Unknown, not Unsupported.
+-->
+
 **Testing**
 <!-- Have unit, integration, etc. tests been added? Describe any relevant testing that has been done. -->
 <!-- Mention if any and what extra manual testing is needed during the release. -->
