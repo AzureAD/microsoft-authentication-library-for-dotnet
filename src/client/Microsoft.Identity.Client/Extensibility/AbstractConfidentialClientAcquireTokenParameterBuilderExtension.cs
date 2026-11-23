@@ -161,9 +161,42 @@ namespace Microsoft.Identity.Client.Extensibility
         }
 
         /// <summary>
-        /// Add extra body parameters to the token request. These parameters are added to the cache key
+        /// Add synchronous extra body parameters to the token request. These parameters are added to the cache key
         /// to associate these parameters with the acquired token. Works for confidential client flows
         /// (AcquireTokenForClient, AcquireTokenOnBehalfOf, AcquireTokenByAuthorizationCode).
+        /// Calling WithCachePartitionKey after this method overrides the matching cache key value without changing the request body.
+        /// This method does not require experimental features to be enabled.
+        /// </summary>
+        /// <typeparam name="T">The concrete confidential client builder type.</typeparam>
+        /// <param name="builder">The builder to chain options to.</param>
+        /// <param name="extraBodyParams">List of additional body parameters.</param>
+        /// <returns>The concrete builder to chain method calls.</returns>
+        public static T WithExtraBodyParameters<T>(
+            this AbstractConfidentialClientAcquireTokenParameterBuilder<T> builder,
+            Dictionary<string, string> extraBodyParams)
+            where T : AbstractConfidentialClientAcquireTokenParameterBuilder<T>
+        {
+            if (extraBodyParams == null || extraBodyParams.Count == 0)
+            {
+                return (T)builder;
+            }
+
+            builder.CommonParameters.ExtraBodyParametersSync ??= new Dictionary<string, string>(StringComparer.Ordinal);
+            builder.CommonParameters.SyncCacheKeyComponents ??= new SortedList<string, string>();
+
+            foreach (var param in extraBodyParams)
+            {
+                builder.CommonParameters.ExtraBodyParametersSync.Add(param.Key, param.Value);
+                builder.CommonParameters.SyncCacheKeyComponents.Add(param.Key, param.Value);
+            }
+
+            return (T)builder;
+        }
+
+        /// <summary>
+        /// Add extra body parameters to the token request using asynchronous value providers.
+        /// These parameters are added to the cache key to associate them with the acquired token.
+        /// Works for confidential client flows.
         /// This method does not require experimental features to be enabled.
         /// </summary>
         /// <typeparam name="T">The concrete confidential client builder type.</typeparam>
