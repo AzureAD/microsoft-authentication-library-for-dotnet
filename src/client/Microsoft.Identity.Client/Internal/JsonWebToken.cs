@@ -67,7 +67,7 @@ namespace Microsoft.Identity.Client.Internal
 
             if (!hasClaimsFromDictionary && !hasClaimsFromJson)
             {
-                return $$"""{"aud":"{{_audience}}","iss":"{{_clientId}}","sub":"{{_clientId}}","nbf":"{{validFrom}}","exp":"{{validTo}}","jti":"{{Guid.NewGuid()}}"}""";
+                return $$"""{"aud":"{{_audience}}","iss":"{{_clientId}}","sub":"{{_clientId}}","nbf":{{validFrom}},"exp":{{validTo}},"jti":"{{Guid.NewGuid()}}"}""";
             }
 
             // extra claims
@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Client.Internal
 
             if (_appendDefaultClaims)
             {
-                string defaultClaims = $$"""{"aud":"{{_audience}}","iss":"{{_clientId}}","sub":"{{_clientId}}","nbf":"{{validFrom}}","exp":"{{validTo}}","jti":"{{Guid.NewGuid()}}",""";
+                string defaultClaims = $$"""{"aud":"{{_audience}}","iss":"{{_clientId}}","sub":"{{_clientId}}","nbf":{{validFrom}},"exp":{{validTo}},"jti":"{{Guid.NewGuid()}}",""";
                 payload.Append(defaultClaims);
             }
             else
