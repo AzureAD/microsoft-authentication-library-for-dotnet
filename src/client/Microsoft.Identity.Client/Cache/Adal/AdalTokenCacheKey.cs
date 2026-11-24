@@ -117,7 +117,7 @@ namespace Microsoft.Identity.Client.Cache
 
         private bool ClientIdEquals(string otherClientId)
         {
-            return string.Equals(otherClientId, ClientId, StringComparison.OrdinalIgnoreCase);
+            return string.Equals(otherClientId, ClientId, StringComparison.Ordinal);
         }
 
         private bool DisplayableIdEquals(string otherDisplayableId)

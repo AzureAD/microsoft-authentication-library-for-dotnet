@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Linq;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.OAuth2;
@@ -15,6 +16,38 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
     public class MsalTokenCacheKeysTests : TestBase
     {
         [TestMethod]
+        public void CaseDistinctClientKeys_SurviveSerialization()
+        {
+            // Arrange
+            var response = new MsalTokenResponse { Scope = "user.read", AccessToken = "access-token", TokenType = "Bearer" };
+            var cache = new CacheSerializationContract(null);
+            foreach (string clientId in new[] { "HighClient", "highclient" })
+            {
+                var access = new MsalAccessTokenCacheItem("issuer", clientId, response, "tenant", "user");
+                var refresh = new MsalRefreshTokenCacheItem("issuer", clientId, "refresh-token", null, null, "user");
+                var id = new MsalIdTokenCacheItem("issuer", clientId, "id-token", null, "user", "tenant");
+                var metadata = new MsalAppMetadataCacheItem(clientId, "issuer", null);
+                cache.AccessTokens.Add(access.CacheKey, access);
+                cache.RefreshTokens.Add(refresh.CacheKey, refresh);
+                cache.IdTokens.Add(id.CacheKey, id);
+                cache.AppMetadata.Add(metadata.CacheKey, metadata);
+            }
+
+            // Act
+            var restored = CacheSerializationContract.FromJsonString(cache.ToJsonString());
+
+            // Assert
+            Assert.HasCount(2, restored.AccessTokens);
+            Assert.HasCount(2, restored.RefreshTokens);
+            Assert.HasCount(2, restored.IdTokens);
+            Assert.HasCount(2, restored.AppMetadata);
+            CollectionAssert.AreEquivalent(cache.AccessTokens.Keys.ToArray(), restored.AccessTokens.Keys.ToArray());
+            CollectionAssert.AreEquivalent(cache.RefreshTokens.Keys.ToArray(), restored.RefreshTokens.Keys.ToArray());
+            CollectionAssert.AreEquivalent(cache.IdTokens.Keys.ToArray(), restored.IdTokens.Keys.ToArray());
+            CollectionAssert.AreEquivalent(cache.AppMetadata.Keys.ToArray(), restored.AppMetadata.Keys.ToArray());
+        }
+
+        [TestMethod]
         public void MsalAccessTokenCacheKey()
         {
             var tokenResponse = new MsalTokenResponse();
@@ -23,11 +56,11 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             var item = new MsalAccessTokenCacheItem("login.microsoftonline.com", "clientId", tokenResponse, "contoso.com", "uid.utid");
             var iOSKey = item.iOSCacheKey;
-            Assert.AreEqual("uid.utid-login.microsoftonline.com-accesstoken-clientid-contoso.com-user.read user.write", item.CacheKey);
+            Assert.AreEqual("uid.utid-login.microsoftonline.com-accesstoken-clientId-contoso.com-user.read user.write", item.CacheKey);
 
             Assert.AreEqual("uid.utid-login.microsoftonline.com", iOSKey.iOSAccount);
-            Assert.AreEqual("accesstoken-clientid-contoso.com-user.read user.write", iOSKey.iOSService);
-            Assert.AreEqual("accesstoken-clientid-contoso.com", iOSKey.iOSGeneric);
+            Assert.AreEqual("accesstoken-clientId-contoso.com-user.read user.write", iOSKey.iOSService);
+            Assert.AreEqual("accesstoken-clientId-contoso.com", iOSKey.iOSGeneric);
             Assert.AreEqual((int)MsalCacheKeys.iOSCredentialAttrType.AccessToken, iOSKey.iOSType);
         }
 
@@ -41,11 +74,11 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             var item = new MsalAccessTokenCacheItem("login.microsoftonline.com", "clientId", tokenResponse, "contoso.com", "uid.utid");
             var iOSKey = item.iOSCacheKey;
 
-            Assert.AreEqual("uid.utid-login.microsoftonline.com-accesstoken_with_authscheme-clientid-contoso.com-user.read user.write-pop", item.CacheKey);
+            Assert.AreEqual("uid.utid-login.microsoftonline.com-accesstoken_with_authscheme-clientId-contoso.com-user.read user.write-pop", item.CacheKey);
 
             Assert.AreEqual("uid.utid-login.microsoftonline.com", iOSKey.iOSAccount);
-            Assert.AreEqual("accesstoken_with_authscheme-clientid-contoso.com-user.read user.write-pop", iOSKey.iOSService);
-            Assert.AreEqual("accesstoken_with_authscheme-clientid-contoso.com", iOSKey.iOSGeneric);
+            Assert.AreEqual("accesstoken_with_authscheme-clientId-contoso.com-user.read user.write-pop", iOSKey.iOSService);
+            Assert.AreEqual("accesstoken_with_authscheme-clientId-contoso.com", iOSKey.iOSGeneric);
             Assert.AreEqual((int)MsalCacheKeys.iOSCredentialAttrType.AccessToken, iOSKey.iOSType);
         }
 

@@ -11,6 +11,7 @@ using Android.Content;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Platforms.Android;
 using Microsoft.Identity.Client.Utils;
@@ -28,6 +29,204 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
     {
         private const string Authority = "https://localhost/adfs";
         private static readonly string[] s_scopes = { "api.read" };
+
+        [TestMethod]
+        [DataRow(true, false, false)]
+        [DataRow(true, true, false)]
+        [DataRow(false, false, false)]
+        [DataRow(false, true, false)]
+        [DataRow(true, false, true)]
+        [DataRow(true, true, true)]
+        public async Task AndroidLowercaseClientSave_PreservesLegacyUppercaseClientTokensAsync(
+            bool genericAuthority, bool withClientInfo, bool alreadyUpgraded)
+        {
+            // Arrange
+            using var http = new MockHttpManager();
+            string clientInfo = withClientInfo ? MockHelpers.CreateClientInfo() : null;
+            var stores = new Dictionary<string, Dictionary<string, object>>(StringComparer.Ordinal);
+            var upperApp = CreateApplication(http, genericAuthority, "HighClient");
+            var upperCache = (TokenCache)upperApp.UserTokenCacheInternal;
+            upperCache.Accessor = CreateAccessor(stores);
+            var originalUpper = await SignInAsync(upperApp, http, "Member", clientInfo).ConfigureAwait(false);
+            var upperRefreshToken = upperCache.Accessor.GetAllRefreshTokens().Single();
+            SeedLegacyOidcCache(upperCache.Accessor, stores);
+            string expectedUpperRefreshToken = alreadyUpgraded ? "newer-upper-refresh-token" : upperRefreshToken.Secret;
+            if (alreadyUpgraded)
+            {
+                upperRefreshToken.Secret = expectedUpperRefreshToken;
+                string store = "com.microsoft.identity.client.refreshToken" + (withClientInfo ? "" : ".subject.v1");
+                string prefix = withClientInfo ? "" : upperRefreshToken.HomeAccountId.Length + ":" + upperRefreshToken.HomeAccountId + ":";
+                stores[store][prefix + upperRefreshToken.CacheKey] = upperRefreshToken.ToJObject().ToString();
+            }
+            var lowerApp = CreateApplication(http, genericAuthority, "highclient", discoveryAlreadyCached: true);
+            var lowerCache = (TokenCache)lowerApp.UserTokenCacheInternal;
+            lowerCache.Accessor = CreateAccessor(stores);
+            http.AddMockHandler(new MockHttpMessageHandler
+            {
+                ExpectedMethod = HttpMethod.Post,
+                ResponseMessage = CreateTokenResponse("Member", true, clientInfo: clientInfo,
+                    clientId: "highclient", refreshToken: "lower-refresh-token", accessToken: "lower-access-token")
+            });
+
+            // Act
+            var lower = await lowerApp.AcquireTokenInteractive(s_scopes).ExecuteAsync().ConfigureAwait(false);
+
+            // Assert
+            CollectionAssert.AreEquivalent(new[] { originalUpper.AccessToken, lower.AccessToken },
+                lowerCache.Accessor.GetAllAccessTokens().Select(item => item.Secret).ToArray());
+            CollectionAssert.AreEquivalent(new[] { "HighClient", "highclient" },
+                lowerCache.Accessor.GetAllRefreshTokens().Select(item => item.ClientId).ToArray());
+            Assert.AreEqual(expectedUpperRefreshToken,
+                lowerCache.Accessor.GetAllRefreshTokens().Single(item => item.ClientId == "HighClient").Secret);
+            CollectionAssert.AreEquivalent(new[] { originalUpper.IdToken, lower.IdToken },
+                lowerCache.Accessor.GetAllIdTokens().Select(item => item.Secret).ToArray());
+            upperCache.Accessor = CreateAccessor(stores);
+            var cachedUpper = await upperApp.AcquireTokenSilent(s_scopes, originalUpper.Account)
+                .ExecuteAsync().ConfigureAwait(false);
+            Assert.AreEqual(TokenSource.Cache, cachedUpper.AuthenticationResultMetadata.TokenSource);
+            Assert.AreEqual(originalUpper.AccessToken, cachedUpper.AccessToken);
+            Assert.AreEqual(originalUpper.IdToken, cachedUpper.IdToken);
+            Assert.AreEqual("Member", cachedUpper.ClaimsPrincipal.FindFirst("sub").Value);
+
+            string rotatedUpperToken = "rt-upper-refreshed";
+            http.AddMockHandler(new MockHttpMessageHandler
+            {
+                ExpectedMethod = HttpMethod.Post,
+                ExpectedPostData = new Dictionary<string, string> { ["refresh_token"] = expectedUpperRefreshToken },
+                ResponseMessage = CreateTokenResponse("Member", false, refreshed: true, clientInfo: clientInfo,
+                    refreshToken: rotatedUpperToken)
+            });
+            await upperApp.AcquireTokenSilent(s_scopes, originalUpper.Account)
+                .WithForceRefresh(true).ExecuteAsync().ConfigureAwait(false);
+            Assert.HasCount(2, upperCache.Accessor.GetAllRefreshTokens());
+            Assert.AreEqual(rotatedUpperToken,
+                upperCache.Accessor.GetAllRefreshTokens().Single(item => item.ClientId == "HighClient").Secret);
+            lowerCache.Accessor = CreateAccessor(stores);
+            var cachedLower = await lowerApp.AcquireTokenSilent(s_scopes, lower.Account)
+                .ExecuteAsync().ConfigureAwait(false);
+            Assert.AreEqual(TokenSource.Cache, cachedLower.AuthenticationResultMetadata.TokenSource);
+            Assert.AreEqual(lower.AccessToken, cachedLower.AccessToken);
+            Assert.AreEqual(lower.IdToken, cachedLower.IdToken);
+            Assert.AreEqual("lower-refresh-token",
+                lowerCache.Accessor.GetAllRefreshTokens().Single(item => item.ClientId == "highclient").Secret);
+        }
+
+        [TestMethod]
+        [DataRow(true, "HighClient", "HighClient", true)]
+        [DataRow(true, "HighClient", "highclient", false)]
+        [DataRow(true, "highclient", "highclient", true)]
+        [DataRow(true, "highclient", "HighClient", false)]
+        [DataRow(false, "HighClient", "HighClient", true)]
+        [DataRow(false, "HighClient", "highclient", false)]
+        public async Task AndroidLegacyRefresh_PreservesOnlyMatchingIdTokenAsync(
+            bool genericAuthority, string clientId, string idTokenClientId, bool expectedIdToken)
+        {
+            // Arrange
+            using var http = new MockHttpManager();
+            var app = CreateApplication(http, genericAuthority, clientId);
+            var cache = (TokenCache)app.UserTokenCacheInternal;
+            var stores = new Dictionary<string, Dictionary<string, object>>(StringComparer.Ordinal);
+            cache.Accessor = CreateAccessor(stores);
+            var signedIn = await SignInAsync(app, http, "member").ConfigureAwait(false);
+            SeedLegacyOidcCache(cache.Accessor, stores, idTokenClientId);
+            cache.Accessor = CreateAccessor(stores);
+            http.AddMockHandler(new MockHttpMessageHandler
+            {
+                ExpectedMethod = HttpMethod.Post,
+                ExpectedPostData = new Dictionary<string, string> { ["refresh_token"] = "rt-member" },
+                ResponseMessage = CreateTokenResponse("member", false, refreshed: true)
+            });
+
+            // Act
+            var refreshed = await app.AcquireTokenSilent(s_scopes, signedIn.Account)
+                .WithForceRefresh(true).ExecuteAsync().ConfigureAwait(false);
+            cache.Accessor = CreateAccessor(stores);
+            var cached = await app.AcquireTokenSilent(s_scopes, signedIn.Account)
+                .ExecuteAsync().ConfigureAwait(false);
+
+            // Assert
+            Assert.AreEqual(TokenSource.Cache, cached.AuthenticationResultMetadata.TokenSource);
+            Assert.AreEqual(refreshed.AccessToken, cached.AccessToken);
+            Assert.AreEqual(expectedIdToken ? signedIn.IdToken : null, cached.IdToken);
+            if (expectedIdToken)
+            {
+                Assert.AreEqual("member", cached.ClaimsPrincipal.FindFirst("sub").Value);
+            }
+            else
+            {
+                Assert.IsNull(cached.ClaimsPrincipal);
+            }
+        }
+
+        [TestMethod]
+        public async Task AndroidLegacyOidcRefresh_ReplacesRotatedTokenWithinItsPartitionAsync()
+        {
+            // Arrange
+            using var http = new MockHttpManager();
+            var app = CreateApplication(http, true, "HighClient");
+            var cache = (TokenCache)app.UserTokenCacheInternal;
+            var stores = new Dictionary<string, Dictionary<string, object>>(StringComparer.Ordinal);
+            cache.Accessor = CreateAccessor(stores);
+            var partition = new SortedList<string, string> { ["partition"] = "current" };
+            http.AddMockHandler(new MockHttpMessageHandler
+            {
+                ExpectedMethod = HttpMethod.Post,
+                ResponseMessage = CreateTokenResponse("member", true, clientId: "HighClient")
+            });
+            var signedIn = await app.AcquireTokenInteractive(s_scopes)
+                .WithCachePartitionKey("partition", "current", partitionRefreshToken: true)
+                .ExecuteAsync().ConfigureAwait(false);
+            SeedLegacyOidcCache(cache.Accessor, stores);
+            var unrelated = new List<MsalRefreshTokenCacheItem>
+            {
+                new MsalRefreshTokenCacheItem("localhost", "OtherClient", "other-client", null, null, "member", partition),
+                new MsalRefreshTokenCacheItem("localhost", "HighClient", "other-account", null, null, "other-member", partition),
+                new MsalRefreshTokenCacheItem("other.example", "HighClient", "other-environment", null, null, "member", partition),
+                new MsalRefreshTokenCacheItem("localhost", "HighClient", "other-partition", null, null, "member",
+                    new SortedList<string, string> { ["partition"] = "other" }),
+                new MsalRefreshTokenCacheItem("localhost", "HighClient", "unpartitioned", null, null, "member")
+            };
+            foreach (var token in unrelated)
+            {
+                cache.Accessor.SaveRefreshToken(token);
+            }
+
+            string previousToken = "rt-member";
+            for (int i = 1; i <= 2; i++)
+            {
+                string rotatedToken = "rt-rotated-" + i;
+                cache.Accessor = CreateAccessor(stores);
+                http.AddMockHandler(new MockHttpMessageHandler
+                {
+                    ExpectedMethod = HttpMethod.Post,
+                    ExpectedPostData = new Dictionary<string, string> { ["refresh_token"] = previousToken },
+                    ResponseMessage = CreateTokenResponse("member", false, refreshed: true, refreshToken: rotatedToken)
+                });
+
+                // Act
+                await app.AcquireTokenSilent(s_scopes, signedIn.Account)
+                    .WithCachePartitionKey("partition", "current", partitionRefreshToken: true)
+                    .WithForceRefresh(true).ExecuteAsync().ConfigureAwait(false);
+
+                // Assert
+                var tokens = cache.Accessor.GetAllRefreshTokens();
+                Assert.HasCount(unrelated.Count + 1, tokens);
+                Assert.IsFalse(tokens.Any(token => token.Secret == previousToken));
+                Assert.AreEqual("HighClient", tokens.Single(token => token.Secret == rotatedToken).ClientId);
+                foreach (var token in unrelated)
+                {
+                    Assert.AreEqual(token.Secret, tokens.Single(item => item.CacheKey == token.CacheKey).Secret);
+                }
+                previousToken = rotatedToken;
+                if (i == 1)
+                {
+                    var otherCase = new MsalRefreshTokenCacheItem(
+                        "localhost", "highclient", "other-case-client", null, null, "member", partition);
+                    cache.Accessor.SaveRefreshToken(otherCase);
+                    unrelated.Add(otherCase);
+                }
+            }
+        }
 
         [TestMethod]
         [DataRow(false, false, false)]
@@ -649,18 +848,57 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             });
         }
 
-        private static PublicClientApplication CreateApplication(MockHttpManager http, bool genericAuthority)
+        private static void SeedLegacyOidcCache(
+            ITokenCacheAccessor accessor, Dictionary<string, Dictionary<string, object>> stores,
+            string idTokenClientId = null)
         {
-            var builder = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+            var accessToken = accessor.GetAllAccessTokens().Single().ToJObject();
+            var refreshToken = accessor.GetAllRefreshTokens().Single();
+            var idToken = accessor.GetAllIdTokens().Single().ToJObject();
+            var account = accessor.GetAllAccounts().Single();
+            if (idTokenClientId is not null)
+            {
+                idToken[StorageJsonKeys.ClientId] = idTokenClientId;
+            }
+            accessor.Clear();
+            var access = MsalAccessTokenCacheItem.FromJObject(accessToken);
+            var id = MsalIdTokenCacheItem.FromJObject(idToken);
+            Seed("accessToken", access, access.CacheKey);
+            Seed("refreshToken", refreshToken, refreshToken.CacheKey);
+            Seed("idToken", id, id.CacheKey);
+            accessor.SaveAccount(account);
+
+            void Seed(string type, MsalCredentialCacheItemBase item, string cacheKey)
+            {
+                string store = "com.microsoft.identity.client." + type;
+                string key = cacheKey.ToLowerInvariant();
+                item.IsAndroidCacheItem = true;
+                if (item.IsAndroidSubject)
+                {
+                    store += ".subject.v1";
+                    key = item.HomeAccountId.Length + ":" + item.HomeAccountId + ":" + key;
+                }
+                stores[store][key] = item.ToJObject().ToString();
+            }
+        }
+
+        private static PublicClientApplication CreateApplication(
+            MockHttpManager http, bool genericAuthority, string clientId = TestConstants.ClientId,
+            bool discoveryAlreadyCached = false)
+        {
+            var builder = PublicClientApplicationBuilder.Create(clientId)
                 .WithHttpManager(http).WithRedirectUri(TestConstants.RedirectUri).WithInstanceDiscovery(false);
             if (genericAuthority)
             {
                 builder.WithExperimentalFeatures().WithOidcAuthority(Authority);
-                http.AddMockHandler(new MockHttpMessageHandler
+                if (!discoveryAlreadyCached)
                 {
-                    ExpectedMethod = HttpMethod.Get,
-                    ResponseMessage = MockHelpers.CreateSuccessResponseMessage(TestConstants.GetOidcResponse(Authority))
-                });
+                    http.AddMockHandler(new MockHttpMessageHandler
+                    {
+                        ExpectedMethod = HttpMethod.Get,
+                        ResponseMessage = MockHelpers.CreateSuccessResponseMessage(TestConstants.GetOidcResponse(Authority))
+                    });
+                }
             }
             else
             {
@@ -678,19 +916,20 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             http.AddMockHandler(new MockHttpMessageHandler
             {
                 ExpectedMethod = HttpMethod.Post,
-                ResponseMessage = CreateTokenResponse(subject, true, clientInfo: clientInfo, username: username)
+                ResponseMessage = CreateTokenResponse(subject, true, clientInfo: clientInfo, username: username,
+                    clientId: app.AppConfig.ClientId)
             });
             return await app.AcquireTokenInteractive(s_scopes).ExecuteAsync().ConfigureAwait(false);
         }
 
         private static HttpResponseMessage CreateTokenResponse(
             string subject, bool includeIdToken, bool refreshed = false, string clientInfo = null, bool emptyIdToken = false,
-            string username = null)
+            string username = null, string clientId = null, string refreshToken = null, string accessToken = null)
         {
             var response = new JsonObject
             {
-                ["access_token"] = (refreshed ? "at-refreshed-" : "at-") + subject,
-                ["refresh_token"] = "rt-" + subject,
+                ["access_token"] = accessToken ?? (refreshed ? "at-refreshed-" : "at-") + subject,
+                ["refresh_token"] = refreshToken ?? "rt-" + subject,
                 ["token_type"] = "Bearer",
                 ["expires_in"] = 3600,
                 ["scope"] = string.Join(" ", s_scopes)
@@ -707,7 +946,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     ["sub"] = subject,
                     ["preferred_username"] = username ?? subject + "@example.test",
                     ["iss"] = Authority,
-                    ["aud"] = TestConstants.ClientId
+                    ["aud"] = clientId ?? TestConstants.ClientId
                 };
                 response["id_token"] = Base64UrlHelpers.Encode("{\"alg\":\"none\"}") + "." +
                     Base64UrlHelpers.Encode(claims.ToJsonString()) + ".";

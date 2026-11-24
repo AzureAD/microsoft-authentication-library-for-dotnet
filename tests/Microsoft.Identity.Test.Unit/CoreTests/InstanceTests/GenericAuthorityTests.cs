@@ -8,9 +8,13 @@ using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text;
+using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
@@ -73,6 +77,134 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             }
         }
       
+        [TestMethod]
+        [DataRow("HighClient", "highclient", false)]
+        [DataRow("highclient", "HighClient", true)]
+        public async Task CaseDistinctClients_SharedUserCache_RemainsIsolatedAsync(
+            string firstClientId, string secondClientId, bool isolatedReads)
+        {
+            // Arrange
+            using var httpManager = new MockHttpManager();
+            const string authority = "https://demo.duendesoftware.com";
+            var scopes = new[] { "api" };
+            byte[] sharedCache = null;
+            var firstApp = CreateApp(firstClientId);
+            var secondApp = CreateApp(secondClientId);
+            httpManager.AddMockHandler(CreateOidcHttpHandler(authority + "/" + Constants.WellKnownOpenIdConfigurationPath));
+            AddTokenResponse(firstClientId, "authorization_code", "first-token");
+
+            // Act
+            var firstResult = await firstApp.AcquireTokenByAuthorizationCode(scopes, "first-code").ExecuteAsync().ConfigureAwait(false);
+
+            // Assert
+            AssertCache("first-token");
+            if (!isolatedReads)
+            {
+                var json = JsonNode.Parse(Encoding.UTF8.GetString(sharedCache)).AsObject();
+                foreach (string type in new[] { "AccessToken", "RefreshToken", "IdToken", "AppMetadata" })
+                {
+                    if (json[type] is JsonObject items)
+                    {
+                        foreach (var entry in items.ToArray())
+                        {
+                            items.Remove(entry.Key);
+                            items[entry.Key.ToLowerInvariant()] = entry.Value;
+                        }
+                    }
+                }
+                sharedCache = Encoding.UTF8.GetBytes(json.ToJsonString());
+            }
+
+            await Assert.ThrowsAsync<MsalUiRequiredException>(
+                () => secondApp.AcquireTokenSilent(scopes, firstResult.Account).ExecuteAsync()).ConfigureAwait(false);
+            Assert.IsNull(await secondApp.GetAccountAsync(firstResult.Account.HomeAccountId.Identifier).ConfigureAwait(false));
+            var publicApp = PublicClientApplicationBuilder.Create(secondClientId)
+                .WithExperimentalFeatures()
+                .WithHttpManager(httpManager)
+                .WithOidcAuthority(authority)
+                .Build();
+            publicApp.UserTokenCache.SetBeforeAccess(args =>
+                args.TokenCache.DeserializeMsalV3(sharedCache, shouldClearExistingCache: true));
+            Assert.IsNull(await publicApp.GetAccountAsync(firstResult.Account.HomeAccountId.Identifier).ConfigureAwait(false));
+
+            AddTokenResponse(secondClientId, "authorization_code", "second-token");
+            var secondResult = await secondApp.AcquireTokenByAuthorizationCode(scopes, "second-code").ExecuteAsync().ConfigureAwait(false);
+            AssertCache("first-token", "second-token");
+
+            var cachedFirst = await firstApp.AcquireTokenSilent(scopes, firstResult.Account).ExecuteAsync().ConfigureAwait(false);
+            var cachedSecond = await secondApp.AcquireTokenSilent(scopes, secondResult.Account).ExecuteAsync().ConfigureAwait(false);
+            Assert.AreEqual("first-token", cachedFirst.AccessToken);
+            Assert.AreEqual("second-token", cachedSecond.AccessToken);
+            Assert.AreEqual(TokenSource.Cache, cachedFirst.AuthenticationResultMetadata.TokenSource);
+            Assert.AreEqual(TokenSource.Cache, cachedSecond.AuthenticationResultMetadata.TokenSource);
+
+            var refresh = AddTokenResponse(secondClientId, "refresh_token", "refreshed-second-token");
+            refresh.ExpectedPostData["refresh_token"] = "refresh-" + secondClientId;
+            var refreshed = await secondApp.AcquireTokenSilent(scopes, secondResult.Account)
+                .WithForceRefresh(true).ExecuteAsync().ConfigureAwait(false);
+            Assert.AreEqual("refreshed-second-token", refreshed.AccessToken);
+            AssertCache("first-token", "refreshed-second-token");
+
+            var beforeRemoval = CacheSerializationContract.FromJsonString(Encoding.UTF8.GetString(sharedCache));
+            var familyToken = new MsalRefreshTokenCacheItem(new Uri(authority).Host, "family-client",
+                "family-refresh", null, "1", firstResult.Account.HomeAccountId.Identifier);
+            beforeRemoval.RefreshTokens[familyToken.CacheKey] = familyToken;
+            sharedCache = Encoding.UTF8.GetBytes(beforeRemoval.ToJsonString());
+            await secondApp.RemoveAsync(secondResult.Account).ConfigureAwait(false);
+            AssertCache("first-token");
+            Assert.AreEqual("family-refresh", CacheSerializationContract.FromJsonString(Encoding.UTF8.GetString(sharedCache))
+                .RefreshTokens.Values.Single(item => item.IsFRT).Secret);
+            cachedFirst = await firstApp.AcquireTokenSilent(scopes, firstResult.Account).ExecuteAsync().ConfigureAwait(false);
+            Assert.AreEqual("first-token", cachedFirst.AccessToken);
+            Assert.AreEqual(TokenSource.Cache, cachedFirst.AuthenticationResultMetadata.TokenSource);
+
+            IConfidentialClientApplication CreateApp(string clientId)
+            {
+                var app = ConfidentialClientApplicationBuilder.Create(clientId)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithRedirectUri("http://some_redirect_uri")
+                    .WithHttpManager(httpManager)
+                    .WithLegacyCacheCompatibility(!isolatedReads)
+                    .WithOidcAuthority(authority)
+                    .Build();
+                app.UserTokenCache.SetBeforeAccess(args =>
+                    args.TokenCache.DeserializeMsalV3(sharedCache, shouldClearExistingCache: true));
+                app.UserTokenCache.SetAfterAccess(args =>
+                {
+                    if (args.HasStateChanged)
+                    {
+                        sharedCache = args.TokenCache.SerializeMsalV3();
+                    }
+                });
+                return app;
+            }
+
+            MockHttpMessageHandler AddTokenResponse(string clientId, string grant, string accessToken)
+            {
+                var handler = CreateTokenResponseHttpHandler(authority + "/connect/token", "api",
+                    "api openid profile offline_access", grant, clientId, accessToken, "refresh-" + clientId);
+                httpManager.AddMockHandler(handler);
+                return handler;
+            }
+
+            void AssertCache(params string[] accessTokens)
+            {
+                var cache = CacheSerializationContract.FromJsonString(Encoding.UTF8.GetString(sharedCache));
+                CollectionAssert.AreEquivalent(accessTokens, cache.AccessTokens.Values.Select(item => item.Secret).ToArray());
+                var ordinaryRefreshTokens = cache.RefreshTokens.Values.Where(item => !item.IsFRT).ToArray();
+                Assert.HasCount(accessTokens.Length, ordinaryRefreshTokens);
+                Assert.HasCount(accessTokens.Length, cache.IdTokens);
+                Assert.AreEqual(firstClientId, cache.AccessTokens.Values.Single(item => item.Secret == "first-token").ClientId);
+                if (accessTokens.Length == 2)
+                {
+                    CollectionAssert.AreEquivalent(new[] { firstClientId, secondClientId },
+                        ordinaryRefreshTokens.Select(item => item.ClientId).ToArray());
+                    CollectionAssert.AreEquivalent(new[] { firstClientId, secondClientId },
+                        cache.IdTokens.Values.Select(item => item.ClientId).ToArray());
+                }
+            }
+        }
+
         [TestMethod]
         public async Task UserAuth_HappyPath_Async()
         {
@@ -473,13 +605,16 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             string tokenEndpoint,
             string scopesInRequest,
             string scopesInResponse, 
-            string grant)
+            string grant,
+            string clientId = TestConstants.ClientId,
+            string accessToken = "secret",
+            string refreshToken = "secret")
         {
             IDictionary<string, string> expectedRequestBody = new Dictionary<string, string>
             {
                 { "scope", scopesInRequest },
                 { "grant_type", grant },
-                { "client_id", TestConstants.ClientId },
+                { "client_id", clientId },
                 { "client_secret", TestConstants.ClientSecret }
             };
 
@@ -489,6 +624,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             string response = scopesInResponse != null ?
                 responseWithScopes.Replace("scope_placeholder", scopesInResponse)
                 : responseWithoutScopes;
+            response = response.Replace("\"access_token\":\"secret\"", "\"access_token\":\"" + accessToken + "\"");
 
             // user flows have ID token - inject it into the response
             if (grant != "client_credentials")
@@ -496,7 +632,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 response = response.Insert(response.Length - 1, ",\"id_token\":\"" + CreateIdToken() + "\"");
 
                 // insert a fake refresh token with key refresh_token
-                response = response.Insert(response.Length - 1, ",\"refresh_token\":\"secret\"");
+                response = response.Insert(response.Length - 1, ",\"refresh_token\":\"" + refreshToken + "\"");
 
                 expectedRequestBody["scope"] = scopesInRequest + " openid profile offline_access";
             }

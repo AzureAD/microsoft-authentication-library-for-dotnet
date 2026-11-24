@@ -52,6 +52,13 @@ namespace Microsoft.Identity.Client
 
         internal string ClientId => ServiceBundle.Config.ClientId;
 
+        private bool IsGenericAuthority => ServiceBundle.Config.Authority?.AuthorityInfo.AuthorityType == AuthorityType.Generic;
+
+        private bool MatchesClientId(MsalCredentialCacheItemBase item)
+        {
+            return string.Equals(item.ClientId, ClientId, StringComparison.Ordinal);
+        }
+
         ITokenCacheAccessor ITokenCacheInternal.Accessor => Accessor;
         ILegacyCachePersistence ITokenCacheInternal.LegacyPersistence => LegacyCachePersistence;
 
@@ -157,7 +164,7 @@ namespace Microsoft.Identity.Client
 
             foreach (var accessToken in Accessor.GetAllAccessTokens(partitionKeyFromResponse))
             {
-                if (accessToken.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase) &&
+                if (MatchesClientId(accessToken) &&
                     environmentAliases.Contains(accessToken.Environment) &&
                     string.Equals(accessToken.TokenType ?? "", tokenType ?? "", StringComparison.OrdinalIgnoreCase) &&
                     string.Equals(accessToken.TenantId ?? "", tenantId ?? "", StringComparison.OrdinalIgnoreCase) &&
@@ -233,8 +240,8 @@ namespace Microsoft.Identity.Client
             bool homeAccIdMatch = rtItem.MatchesAccountIdentity(account.HomeAccountId, account.RawClientInfo) &&
                 account.MatchesAccountIdentity(rtItem.HomeAccountId, rtItem.RawClientInfo);
             bool clientIdMatch =
-                rtItem.IsFRT || // Cannot filter by client ID if the RT can be used by multiple clients
-                rtItem.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase);
+                (!IsGenericAuthority && rtItem.IsFRT) || // Entra family tokens are shared across clients.
+                MatchesClientId(rtItem);
 
             return homeAccIdMatch && clientIdMatch;
         }

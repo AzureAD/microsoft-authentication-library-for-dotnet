@@ -42,6 +42,11 @@ namespace Microsoft.Identity.Client
         /// <param name="options">Confidential client applications configuration options</param>
         /// <returns>A <see cref="ConfidentialClientApplicationBuilder"/> from which to set more
         /// parameters, and to create a confidential client application instance</returns>
+        /// <remarks>
+        /// Client IDs are case-sensitive for all authorities, including in the token cache.
+        /// Use consistent casing across acquisitions. Upgrade applications sharing a cache
+        /// together, or isolate their caches: older MSAL versions lowercase client IDs in cache keys.
+        /// </remarks>
 #if !SUPPORTS_CONFIDENTIAL_CLIENT
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidential client on mobile
 #endif

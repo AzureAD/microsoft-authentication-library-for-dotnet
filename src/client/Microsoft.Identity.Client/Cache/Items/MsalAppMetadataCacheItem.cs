@@ -29,8 +29,8 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         private void InitCacheKey()
         {
-            CacheKey = ($"{StorageJsonKeys.AppMetadata}{MsalCacheKeys.CacheKeyDelimiter}" +
-                $"{Environment}{MsalCacheKeys.CacheKeyDelimiter}{ClientId}").ToLowerInvariant();
+            CacheKey = $"{StorageJsonKeys.AppMetadata}{MsalCacheKeys.CacheKeyDelimiter}{Environment}{MsalCacheKeys.CacheKeyDelimiter}".ToLowerInvariant() +
+                ClientId;
 
             iOSCacheKeyLazy = new Lazy<IiOSKey>(InitiOSKey);
         }
@@ -39,7 +39,8 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         private IiOSKey InitiOSKey()
         {
-            string iOSService = $"{StorageJsonValues.AppMetadata}{MsalCacheKeys.CacheKeyDelimiter}{ClientId}".ToLowerInvariant();
+            string iOSService = $"{StorageJsonValues.AppMetadata}{MsalCacheKeys.CacheKeyDelimiter}".ToLowerInvariant() +
+                ClientId;
 
             string iOSGeneric = "1";
 

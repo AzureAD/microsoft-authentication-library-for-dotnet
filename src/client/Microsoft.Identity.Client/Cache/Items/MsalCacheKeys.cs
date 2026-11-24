@@ -32,6 +32,7 @@ namespace Microsoft.Identity.Client.Cache.Keys
             stringBuilder.Append(keyDescriptor); // a constant
             stringBuilder.Append(CacheKeyDelimiter);
 
+            int clientIdOffset = stringBuilder.Length;
             stringBuilder.Append(clientId);   // guaranteed not null
             stringBuilder.Append(CacheKeyDelimiter);
 
@@ -46,7 +47,7 @@ namespace Microsoft.Identity.Client.Cache.Keys
                 stringBuilder.Append(additionalKey);
             }
 
-            return stringBuilder.ToString().ToLowerInvariant();
+            return NormalizeKey(stringBuilder, clientIdOffset, clientId);
         }
 
         public static string GetiOSAccountKey(string homeAccountId, string environment)
@@ -73,6 +74,7 @@ namespace Microsoft.Identity.Client.Cache.Keys
             stringBuilder.Append(keyDescriptor);
             stringBuilder.Append(CacheKeyDelimiter);
 
+            int clientIdOffset = stringBuilder.Length;
             stringBuilder.Append(clientId);
             stringBuilder.Append(CacheKeyDelimiter);
 
@@ -87,7 +89,7 @@ namespace Microsoft.Identity.Client.Cache.Keys
                 stringBuilder.Append(additionalKey);
             }
 
-            return stringBuilder.ToString().ToLowerInvariant();
+            return NormalizeKey(stringBuilder, clientIdOffset, clientId);
         }
 
         public static string GetiOSGenericKey(string keyDescriptor, string clientId, string tenantId)
@@ -97,12 +99,26 @@ namespace Microsoft.Identity.Client.Cache.Keys
             stringBuilder.Append(keyDescriptor);
             stringBuilder.Append(CacheKeyDelimiter);
 
+            int clientIdOffset = stringBuilder.Length;
             stringBuilder.Append(clientId);
             stringBuilder.Append(CacheKeyDelimiter);
 
             stringBuilder.Append(tenantId ?? "");
 
-            return stringBuilder.ToString().ToLowerInvariant();
+            return NormalizeKey(stringBuilder, clientIdOffset, clientId);
+        }
+
+        private static string NormalizeKey(StringBuilder key, int clientIdOffset, string clientId)
+        {
+            if (string.IsNullOrEmpty(clientId))
+            {
+                return key.ToString().ToLowerInvariant();
+            }
+
+            int suffixOffset = clientIdOffset + clientId.Length;
+            return key.ToString(0, clientIdOffset).ToLowerInvariant() +
+                clientId +
+                key.ToString(suffixOffset, key.Length - suffixOffset).ToLowerInvariant();
         }
 
         #region iOS
