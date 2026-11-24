@@ -14,7 +14,7 @@ namespace Microsoft.Identity.Client.Cache
         // This covers  the snapshot, serialization contract, and six dictionary shells.
         private const long SnapshotOverhead = 1536;
         // This covers the record's fields/header a share of the containing dictionary's backing arrays and spare capacity.
-        // Variable-length strings and nested collection contents are charged separately below        
+        // Variable-length strings and nested collection contents are charged separately below
         private const long EntryOverhead = 1536;
         private const long CollectionOverhead = 128;
         private const long CollectionEntryOverhead = 128;
