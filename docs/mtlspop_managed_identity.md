@@ -65,7 +65,7 @@ Here is what happens inside MSAL when you call `WithMtlsProofOfPossession()`:
 
 MSAL immediately validates that:
 - You are running on **Windows** (Linux is not yet supported)
-- You are on **.NET Core / .NET 5+** (not .NET Framework 4.6.2)
+- You are loading a **supported MSAL target-framework asset** (not the .NET Framework 4.6.2 or .NET Standard 2.0 asset). Running on modern .NET does not enable managed-identity mTLS when the application loads the .NET Standard 2.0 asset.
 
 If either check fails, a `MsalClientException` is thrown before any network calls are made.
 
@@ -306,7 +306,7 @@ timed-out discovery result is not cached, so a later call can retry.
 | Constraint | Detail |
 |---|---|
 | **OS** | Windows only. Throws `MtlsNotSupportedForManagedIdentity` on Linux/Mac. |
-| **Framework** | .NET Core / .NET 5+ only. Not supported on .NET Framework 4.6.2. |
+| **Framework** | Requires a supported MSAL target-framework asset. The .NET Framework 4.6.2 and .NET Standard 2.0 assets do not support managed-identity mTLS PoP or bearer-over-mTLS, even when the Standard 2.0 asset runs on modern .NET. Ordinary bearer-token acquisition remains supported. |
 | **IMDS version** | Requires IMDSv2. If the VM only has IMDSv1, throws `MtlsPopTokenNotSupportedinImdsV1`. |
 | **Key type** | KeyGuard RSA key required. Throws error code `mtls_pop_requires_keyguard` if not available (hardcoded string — not yet a constant in `MsalError`). |
 | **Mixed usage** | Non-mTLS PoP calls in a process where IMDSv2 is cached transparently use IMDSv1 for that request; subsequent PoP calls still route to IMDSv2. |
@@ -318,7 +318,7 @@ timed-out discovery result is not cached, so a later call can retry.
 
 | Error code | What it means | How to fix |
 |---|---|---|
-| `MtlsNotSupportedForManagedIdentity` | You're on a non-Windows OS or .NET 4.6.2 | Run on Windows with .NET 5+ |
+| `MtlsNotSupportedForManagedIdentity` | You're on a non-Windows OS or loading the MSAL .NET Framework 4.6.2 or .NET Standard 2.0 asset | Run on Windows and select a supported MSAL target-framework asset, such as the dedicated .NET 8 asset; upgrading the runtime alone is insufficient if the Standard 2.0 asset is still loaded |
 | `MtlsPopTokenNotSupportedinImdsV1` | Your VM only supports IMDSv1 | Ensure the VM image supports IMDSv2 |
 | `mtls_pop_requires_keyguard` | The managed identity key is not a KeyGuard key (hardcoded string — not yet a constant in `MsalError`) | Use a VM/VMSS with KeyGuard support enabled |
 | `MtlsCertificateNotProvided` | (CCA path) No certificate was found for binding | Pass a certificate via `.WithCertificate(cert, sendX5C: true)` |
