@@ -23,6 +23,9 @@ namespace Microsoft.Identity.Client.Platforms.Android
         private const string IdTokenSharedPreferenceName = "com.microsoft.identity.client.idToken";
         private const string AccountSharedPreferenceName = "com.microsoft.identity.client.Account";
 
+        // Native mutations must be atomic across accessor instances in this process.
+        private static readonly object s_cacheLock = new object();
+
         private readonly (ISharedPreferences Legacy, ISharedPreferences Subject) _accessTokenSharedPreference;
         private readonly (ISharedPreferences Legacy, ISharedPreferences Subject) _refreshTokenSharedPreference;
         private readonly (ISharedPreferences Legacy, ISharedPreferences Subject) _idTokenSharedPreference;
@@ -100,36 +103,39 @@ namespace Microsoft.Identity.Client.Platforms.Android
         private static void Save<T>(T item, Func<T, string> getCacheKey,
             (ISharedPreferences Legacy, ISharedPreferences Subject) store, Func<string, T> deserialize) where T : MsalCacheItemBase
         {
-            string cacheKey = getCacheKey(item);
-            var storage = GetStorage(item, cacheKey, store);
-            string existingPayload = storage.Preferences.GetString(storage.Key, null);
-            var existing = Read(existingPayload, deserialize);
-            if (!item.IsAndroidSubject && existing?.IsAndroidSubject == true)
+            lock (s_cacheLock)
             {
-                throw new MsalClientException(MsalError.UserMismatch,
-                    "A legacy Android subject entry conflicts with this account. Clear the cache and sign in again.");
-            }
-
-            var legacy = ReadLegacy(item, cacheKey, store, deserialize, out string legacyKey);
-            var editor = storage.Preferences.Edit();
-            if (existing is not null && existing.MatchesAccountIdentity(item.HomeAccountId, item.RawClientInfo))
-            {
-                string existingKey = getCacheKey(existing);
-                var destination = GetStorage(existing, existingKey, store);
-                if (!string.Equals(destination.Key, storage.Key, StringComparison.Ordinal) &&
-                    string.Equals(GetStorage(existing, existingKey.ToLowerInvariant(), store).Key, storage.Key, StringComparison.Ordinal) &&
-                    destination.Preferences.GetString(destination.Key, null) is null)
+                string cacheKey = getCacheKey(item);
+                var storage = GetStorage(item, cacheKey, store);
+                string existingPayload = storage.Preferences.GetString(storage.Key, null);
+                var existing = Read(existingPayload, deserialize);
+                if (!item.IsAndroidSubject && existing?.IsAndroidSubject == true)
                 {
-                    // Preserve the collided legacy entry without replacing an already-upgraded credential.
-                    editor.PutString(destination.Key, existingPayload);
+                    throw new MsalClientException(MsalError.UserMismatch,
+                        "A legacy Android subject entry conflicts with this account. Clear the cache and sign in again.");
                 }
+
+                var legacy = ReadLegacy(item, cacheKey, store, deserialize, out string legacyKey);
+                var editor = storage.Preferences.Edit();
+                if (existing is not null && existing.MatchesAccountIdentity(item.HomeAccountId, item.RawClientInfo))
+                {
+                    string existingKey = getCacheKey(existing);
+                    var destination = GetStorage(existing, existingKey, store);
+                    if (!string.Equals(destination.Key, storage.Key, StringComparison.Ordinal) &&
+                        string.Equals(GetStorage(existing, existingKey.ToLowerInvariant(), store).Key, storage.Key, StringComparison.Ordinal) &&
+                        destination.Preferences.GetString(destination.Key, null) is null)
+                    {
+                        // Preserve the collided legacy entry without replacing an already-upgraded credential.
+                        editor.PutString(destination.Key, existingPayload);
+                    }
+                }
+                editor.PutString(storage.Key, item.ToJObject().ToString());
+                if (legacy is not null)
+                {
+                    editor.Remove(legacyKey);
+                }
+                editor.Apply();
             }
-            editor.PutString(storage.Key, item.ToJObject().ToString());
-            if (legacy is not null)
-            {
-                editor.Remove(legacyKey);
-            }
-            editor.Apply();
         }
         #endregion
 
@@ -158,14 +164,17 @@ namespace Microsoft.Identity.Client.Platforms.Android
         private static void Delete<T>(T item, string cacheKey,
             (ISharedPreferences Legacy, ISharedPreferences Subject) store, Func<string, T> deserialize) where T : MsalCacheItemBase
         {
-            var storage = GetStorage(item, cacheKey, store);
-            var editor = storage.Preferences.Edit();
-            editor.Remove(storage.Key);
-            if (ReadLegacy(item, cacheKey, store, deserialize, out string legacyKey) is not null)
+            lock (s_cacheLock)
             {
-                editor.Remove(legacyKey);
+                var storage = GetStorage(item, cacheKey, store);
+                var editor = storage.Preferences.Edit();
+                editor.Remove(storage.Key);
+                if (ReadLegacy(item, cacheKey, store, deserialize, out string legacyKey) is not null)
+                {
+                    editor.Remove(legacyKey);
+                }
+                editor.Apply();
             }
-            editor.Apply();
         }
 
         private static void DeleteAll((ISharedPreferences Legacy, ISharedPreferences Subject) store)
@@ -180,10 +189,13 @@ namespace Microsoft.Identity.Client.Platforms.Android
 
         public void Clear(ILoggerAdapter requestlogger)
         {
-            DeleteAll(_accessTokenSharedPreference);
-            DeleteAll(_refreshTokenSharedPreference);
-            DeleteAll(_idTokenSharedPreference);
-            DeleteAll(_accountSharedPreference);
+            lock (s_cacheLock)
+            {
+                DeleteAll(_accessTokenSharedPreference);
+                DeleteAll(_refreshTokenSharedPreference);
+                DeleteAll(_idTokenSharedPreference);
+                DeleteAll(_accountSharedPreference);
+            }
         }
 
         #endregion

@@ -72,9 +72,13 @@
 
   <ItemGroup>
     <Folder Include="CacheExtension\" />
-    <!-- Exercise the Android accessor with a small SharedPreferences test double on desktop test hosts. -->
+    <!-- Exercise native cache accessors with small platform test doubles on desktop test hosts. -->
     <Compile Include="..\..\src\client\Microsoft.Identity.Client\Platforms\Android\AndroidTokenCacheAccessor.cs"
              Link="CacheTests\AndroidTokenCacheAccessor.cs" />
+    <Compile Include="..\..\src\client\Microsoft.Identity.Client\Platforms\iOS\iOSTokenCacheAccessor.cs"
+             Link="CacheTests\iOSTokenCacheAccessor.cs" />
+    <Compile Include="..\..\src\client\Microsoft.Identity.Client\Platforms\iOS\Broker\iOSBrokerConstants.cs"
+             Link="CacheTests\iOSBrokerConstants.cs" />
     <!-- Exercise the Android browser lifecycle with platform test doubles; also build the real Android target. -->
     <Compile Include="..\..\src\client\Microsoft.Identity.Client\Platforms\Android\SystemWebview\AuthenticationActivity.cs"
              Link="WebUITests\AuthenticationActivity.cs" />

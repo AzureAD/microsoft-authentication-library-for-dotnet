@@ -26,6 +26,9 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         private const string TeamIdKey = "DotNetTeamIDHint";
         private const string DefaultKeychainAccessGroup = "com.microsoft.adalcache";
 
+        // Native mutations must be atomic across accessor instances in this process.
+        private static readonly object s_cacheLock = new object();
+
         private string _keychainGroup;
         private readonly RequestContext _requestContext;
 
@@ -98,7 +101,10 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
         public void SaveAccount(MsalAccountCacheItem item)
         {
-            Save(item.iOSCacheKey, item.ToJsonString());
+            lock (s_cacheLock)
+            {
+                Save(item.iOSCacheKey, item.ToJsonString());
+            }
         }
 #endregion
 
@@ -136,7 +142,10 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
         public void DeleteAccount(MsalAccountCacheItem item)
         {
-            Remove(item.iOSCacheKey);
+            lock (s_cacheLock)
+            {
+                Remove(item.iOSCacheKey);
+            }
         }
 
 #endregion
@@ -258,39 +267,45 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         private void SaveCredential<T>(T item, Func<T, IiOSKey> getCacheKey, Func<string, T> deserialize)
             where T : MsalCredentialCacheItemBase
         {
-            IiOSKey key = getCacheKey(item);
-            string existingPayload = GetPayload(key);
-            var existing = deserialize(existingPayload);
-            if (existing is not null && existing.MatchesAccountIdentity(item.HomeAccountId, item.RawClientInfo))
+            lock (s_cacheLock)
             {
-                IiOSKey destination = getCacheKey(existing);
-                if (!string.Equals(destination.iOSService, key.iOSService, StringComparison.Ordinal) &&
-                    string.Equals(destination.iOSService.ToLowerInvariant(), key.iOSService, StringComparison.Ordinal) &&
-                    string.Equals(destination.iOSAccount, key.iOSAccount, StringComparison.Ordinal))
+                IiOSKey key = getCacheKey(item);
+                string existingPayload = GetPayload(key);
+                var existing = deserialize(existingPayload);
+                if (existing is not null && existing.MatchesAccountIdentity(item.HomeAccountId, item.RawClientInfo))
                 {
-                    // Add-only must succeed before overwriting the legacy key; duplicates retain the newer entry.
-                    var status = Save(destination, existingPayload, onlyIfMissing: true);
-                    if (status != SecStatusCode.Success && status != SecStatusCode.DuplicateItem)
+                    IiOSKey destination = getCacheKey(existing);
+                    if (!string.Equals(destination.iOSService, key.iOSService, StringComparison.Ordinal) &&
+                        string.Equals(destination.iOSService.ToLowerInvariant(), key.iOSService, StringComparison.Ordinal) &&
+                        string.Equals(destination.iOSAccount, key.iOSAccount, StringComparison.Ordinal))
                     {
-                        throw new InvalidOperationException(
-                            "Unable to preserve a legacy keychain credential. OSStatus: " + status);
+                        // Add-only must succeed before overwriting the legacy key; duplicates retain the newer entry.
+                        var status = Save(destination, existingPayload, onlyIfMissing: true);
+                        if (status != SecStatusCode.Success && status != SecStatusCode.DuplicateItem)
+                        {
+                            throw new InvalidOperationException(
+                                "Unable to preserve a legacy keychain credential. OSStatus: " + status);
+                        }
                     }
                 }
-            }
-            if (Save(key, item.ToJObject().ToString()) == SecStatusCode.Success &&
-                ReadLegacy(item, key, deserialize, out IiOSKey legacyKey) is not null)
-            {
-                Remove(legacyKey);
+                if (Save(key, item.ToJObject().ToString()) == SecStatusCode.Success &&
+                    ReadLegacy(item, key, deserialize, out IiOSKey legacyKey) is not null)
+                {
+                    Remove(legacyKey);
+                }
             }
         }
 
         private void DeleteCredential<T>(T item, IiOSKey key, Func<string, T> deserialize)
             where T : MsalCredentialCacheItemBase
         {
-            Remove(key);
-            if (ReadLegacy(item, key, deserialize, out IiOSKey legacyKey) is not null)
+            lock (s_cacheLock)
             {
-                Remove(legacyKey);
+                Remove(key);
+                if (ReadLegacy(item, key, deserialize, out IiOSKey legacyKey) is not null)
+                {
+                    Remove(legacyKey);
+                }
             }
         }
 
@@ -399,11 +414,14 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
         public void Clear(ILoggerAdapter requestlogger = null)
         {
-            RemoveByType((int)MsalCacheKeys.iOSCredentialAttrType.AccessToken);
-            RemoveByType((int)MsalCacheKeys.iOSCredentialAttrType.RefreshToken);
-            RemoveByType((int)MsalCacheKeys.iOSCredentialAttrType.IdToken);
+            lock (s_cacheLock)
+            {
+                RemoveByType((int)MsalCacheKeys.iOSCredentialAttrType.AccessToken);
+                RemoveByType((int)MsalCacheKeys.iOSCredentialAttrType.RefreshToken);
+                RemoveByType((int)MsalCacheKeys.iOSCredentialAttrType.IdToken);
 
-            RemoveByType(MsalCacheKeys.iOSAuthorityTypeToAttrType[CacheAuthorityType.MSSTS.ToString()]);
+                RemoveByType(MsalCacheKeys.iOSAuthorityTypeToAttrType[CacheAuthorityType.MSSTS.ToString()]);
+            }
         }
 
         /// <summary>

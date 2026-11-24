@@ -88,17 +88,18 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(originalUpper.IdToken, cachedUpper.IdToken);
             Assert.AreEqual("Member", cachedUpper.ClaimsPrincipal.FindFirst("sub").Value);
 
+            string rotatedUpperToken = "rt-upper-refreshed";
             http.AddMockHandler(new MockHttpMessageHandler
             {
                 ExpectedMethod = HttpMethod.Post,
                 ExpectedPostData = new Dictionary<string, string> { ["refresh_token"] = expectedUpperRefreshToken },
-                ResponseMessage = CreateTokenResponse("Member", false, clientInfo: clientInfo,
-                    refreshToken: "upper-refreshed-token", accessToken: "upper-refreshed-access-token")
+                ResponseMessage = CreateTokenResponse("Member", false, refreshed: true, clientInfo: clientInfo,
+                    refreshToken: rotatedUpperToken)
             });
             await upperApp.AcquireTokenSilent(s_scopes, originalUpper.Account)
                 .WithForceRefresh(true).ExecuteAsync().ConfigureAwait(false);
             Assert.HasCount(2, upperCache.Accessor.GetAllRefreshTokens());
-            Assert.AreEqual("upper-refreshed-token",
+            Assert.AreEqual(rotatedUpperToken,
                 upperCache.Accessor.GetAllRefreshTokens().Single(item => item.ClientId == "HighClient").Secret);
             lowerCache.Accessor = CreateAccessor(stores);
             var cachedLower = await lowerApp.AcquireTokenSilent(s_scopes, lower.Account)
