@@ -2,6 +2,9 @@
 // Licensed under the MIT License.
 
 using System.Collections.Generic;
+#if !NET8_0_OR_GREATER
+using System.Text.Json.Nodes;
+#endif
 using Microsoft.Identity.Client.Cache.Items;
 
 namespace Microsoft.Identity.Client.Cache
@@ -16,9 +19,27 @@ namespace Microsoft.Identity.Client.Cache
         private const long CollectionOverhead = 128;
         private const long CollectionEntryOverhead = 128;
 
-        internal static long Estimate(CacheSerializationContract state, long unknownNodesSize)
+        internal static long Estimate(CacheSerializationContract state, int unknownNodesSourceSizeInBytes)
         {
-            long size = SnapshotOverhead + unknownNodesSize;
+            long size = SnapshotOverhead;
+            bool retainsSourceDocument = false;
+            if (state.UnknownNodes.Count > 0)
+            {
+                foreach (var node in state.UnknownNodes)
+                {
+                    size += CollectionEntryOverhead + String(node.Key);
+                    retainsSourceDocument |= node.Value is not null;
+#if !NET8_0_OR_GREATER
+                    size += MaterializedUnknownNode(node.Value);
+#endif
+                }
+            }
+            if (retainsSourceDocument)
+            {
+                // Unknown nodes may retain the entire input document. Approximate its UTF-8 data
+                // and metadata from the source length without traversing or serializing the nodes.
+                size += 2L * unknownNodesSourceSizeInBytes;
+            }
             foreach (var entry in state.AccessTokens)
             {
                 var item = entry.Value;
@@ -88,48 +109,31 @@ namespace Microsoft.Identity.Client.Cache
             return size;
         }
 
-        internal static long EstimateUnknownNode(string key, string json)
+#if !NET8_0_OR_GREATER
+        private static long MaterializedUnknownNode(JsonNode node)
         {
-            long size = CollectionEntryOverhead + String(key);
-            if (json is null)
+            // Legacy snapshot cloning already materializes unknown objects and arrays.
+            if (node is JsonObject obj)
             {
+                long size = CollectionOverhead;
+                foreach (var pair in obj)
+                {
+                    size += CollectionEntryOverhead + String(pair.Key) + MaterializedUnknownNode(pair.Value);
+                }
                 return size;
             }
-
-            // Count structure outside strings without materializing the JsonNode tree. This also
-            // reserves space for lazy nodes that may be materialized by legacy snapshot restore.
-            long units = 1;
-            bool inString = false;
-            bool escaped = false;
-            foreach (char c in json)
+            if (node is JsonArray array)
             {
-                if (inString)
+                long size = CollectionOverhead;
+                foreach (var item in array)
                 {
-                    if (escaped)
-                    {
-                        escaped = false;
-                    }
-                    else if (c == '\\')
-                    {
-                        escaped = true;
-                    }
-                    else if (c == '"')
-                    {
-                        inString = false;
-                    }
+                    size += CollectionEntryOverhead + MaterializedUnknownNode(item);
                 }
-                else if (c == '"')
-                {
-                    inString = true;
-                }
-                else if (c == '{' || c == '[' || c == ':' || c == ',')
-                {
-                    units++;
-                }
+                return size;
             }
-
-            return size + CollectionOverhead + 6L * json.Length + CollectionEntryOverhead * units;
+            return 0;
         }
+#endif
 
         private static long Common(MsalCacheItemBase item)
         {

@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
@@ -425,56 +426,152 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [TestMethod]
-        public void SnapshotSizeAccountsForUnknownStructureWithoutChangingSnapshot()
+        public void SnapshotSizeAccountsForOriginalDocumentWithUnknownFields()
         {
             // Arrange
-            var source = CreateCache(true);
-            Populate(source, true);
-            var smallNodes = new Dictionary<string, JsonNode>
-            {
-                ["future"] = JsonNode.Parse("{\"value\":\"[{:,,}]\"}"),
-                ["future_null"] = null
-            };
-            var largeNodes = new Dictionary<string, JsonNode>
-            {
-                ["future"] = JsonNode.Parse("{\"value\":[" + string.Join(",", Enumerable.Repeat("{\"a\":true}", 100)) + "]}"),
-                ["future_null"] = null
-            };
-            var small = new TokenCacheSnapshot(source.Accessor, smallNodes, true);
-            var large = new TokenCacheSnapshot(source.Accessor, largeNodes, true);
-            byte[] expected = large.SerializeMsalV3();
+            var seed = CreateCache(true);
+            Populate(seed, true);
+            string knownJson = Encoding.UTF8.GetString(seed.SerializeMsalV3());
+            string prefix = "{\"future\":{\"value\":\"preserved\"},";
+            var small = CreateCache(true);
+            var large = CreateCache(true);
+            small.DeserializeMsalV3(Encoding.UTF8.GetBytes(prefix + knownJson.Substring(1)), true);
+            large.DeserializeMsalV3(Encoding.UTF8.GetBytes(prefix + new string(' ', 4096) + knownJson.Substring(1)), true);
+            var smallSnapshot = ((ITokenCacheSnapshotProvider)small).CreateSnapshot();
+            var largeSnapshot = ((ITokenCacheSnapshotProvider)large).CreateSnapshot();
+            byte[] expected = largeSnapshot.SerializeMsalV3();
 
             // Act
-            long estimatedSize = large.EstimateSizeInBytes();
-            large.Restore(CreateCache(true).Accessor);
+            long estimatedSize = largeSnapshot.EstimateSizeInBytes();
+            largeSnapshot.Restore(CreateCache(true).Accessor);
 
             // Assert
-            Assert.IsGreaterThan(small.EstimateSizeInBytes(), estimatedSize);
-            Assert.AreEqual(estimatedSize, large.EstimateSizeInBytes());
-            AssertJsonEqual(expected, large.SerializeMsalV3());
+            Assert.IsGreaterThan(smallSnapshot.EstimateSizeInBytes() + 4096, estimatedSize);
+            Assert.AreEqual(estimatedSize, largeSnapshot.EstimateSizeInBytes());
+            AssertJsonEqual(expected, largeSnapshot.SerializeMsalV3());
         }
 
         [TestMethod]
-        public void SnapshotSizeDoesNotTreatQuotedJsonCharactersAsStructure()
+        public void NullUnknownFieldsDoNotChargeForSourceDocument()
+        {
+            // Arrange
+            var empty = CreateCache(true);
+            empty.DeserializeMsalV3(Encoding.UTF8.GetBytes("{}"), true);
+            var source = CreateCache(true);
+            source.DeserializeMsalV3(Encoding.UTF8.GetBytes("{\"future\":null," + new string(' ', 8192) + "\"other\":null}"), true);
+
+            // Act
+            long emptySize = ((ITokenCacheSnapshotProvider)empty).CreateSnapshot().EstimateSizeInBytes();
+            long nullSize = ((ITokenCacheSnapshotProvider)source).CreateSnapshot().EstimateSizeInBytes();
+
+            // Assert
+            Assert.IsGreaterThan(emptySize, nullSize);
+            Assert.IsLessThan(emptySize + 1024, nullSize);
+        }
+
+#if !NET8_0_OR_GREATER
+        [TestMethod]
+        public void SnapshotSizeAccountsForMaterializedUnknownStructure()
+        {
+            // Arrange
+            string properties = string.Join(",", Enumerable.Range(0, 64).Select(i => "\"field" + i + "\":[1,null]"));
+            string structuredJson = "{\"future\":{" + properties + "}}";
+            string scalarJson = "{\"future\":\"" + new string('x', structuredJson.Length - 13) + "\"}";
+            var structured = CreateCache(true);
+            var scalar = CreateCache(true);
+            structured.DeserializeMsalV3(Encoding.UTF8.GetBytes(structuredJson), true);
+            scalar.DeserializeMsalV3(Encoding.UTF8.GetBytes(scalarJson), true);
+            var snapshot = ((ITokenCacheSnapshotProvider)structured).CreateSnapshot();
+            byte[] expected = snapshot.SerializeMsalV3();
+
+            // Act
+            long structuredSize = snapshot.EstimateSizeInBytes();
+            long scalarSize = ((ITokenCacheSnapshotProvider)scalar).CreateSnapshot().EstimateSizeInBytes();
+
+            // Assert
+            Assert.AreEqual(structuredJson.Length, scalarJson.Length);
+            Assert.IsGreaterThan(scalarSize + 4096, structuredSize);
+            AssertJsonEqual(expected, snapshot.SerializeMsalV3());
+        }
+#endif
+
+        [TestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        public void UnknownSourceSizeSurvivesRestoreAndReadViews(bool applicationCache)
+        {
+            // Arrange
+            byte[] payload = Encoding.UTF8.GetBytes("{\"future\":\"" + new string('x', 8192) + "\"}");
+            var source = CreateCache(applicationCache);
+            source.DeserializeMsalV3(payload, true);
+            var snapshot = ((ITokenCacheSnapshotProvider)source).CreateSnapshot();
+            long expectedSize = snapshot.EstimateSizeInBytes();
+            var destination = CreateCache(applicationCache);
+
+            // Act
+            ((ITokenCacheSnapshotProvider)destination).RestoreSnapshot(snapshot);
+            var restored = ((ITokenCacheSnapshotProvider)destination).CreateSnapshot();
+            var pinned = ((TokenCache)source).CreatePinnedReadView();
+            var pinnedSnapshot = ((ITokenCacheSnapshotProvider)pinned).CreateSnapshot();
+            var root = (TokenCache)CreateCache(applicationCache);
+            var view = root.CreateReadView();
+            using (view.BeginReadHydration(root))
+            {
+                ((ITokenCacheInternal)view).DeserializeMsalV3(payload, true);
+                view.PublishReadView(root);
+            }
+            var published = ((ITokenCacheSnapshotProvider)root).CreateSnapshot();
+
+            // Assert
+            Assert.AreEqual(expectedSize, restored.EstimateSizeInBytes());
+            Assert.AreEqual(expectedSize, pinnedSnapshot.EstimateSizeInBytes());
+            Assert.AreEqual(expectedSize, published.EstimateSizeInBytes());
+
+            destination.DeserializeMsalV3(Encoding.UTF8.GetBytes("{}"), true);
+            long clearedSize = ((ITokenCacheSnapshotProvider)destination).CreateSnapshot().EstimateSizeInBytes();
+            Assert.IsGreaterThan(clearedSize + payload.Length, expectedSize);
+        }
+
+        [TestMethod]
+        [DataRow("\"\\uD800\"")]
+        [DataRow("\"\\uDC00\"")]
+        public void EstimateSizePreservesEscapedUnpairedSurrogates(string unknownJson)
         {
             // Arrange
             var source = CreateCache(true);
-            var plain = new Dictionary<string, JsonNode>
-            {
-                ["future"] = new JsonObject { ["value"] = "slash\\\"aaaaaaaa" }
-            };
-            var punctuation = new Dictionary<string, JsonNode>
-            {
-                ["future"] = new JsonObject { ["value"] = "slash\\\"[{:,,}]_" }
-            };
+            source.DeserializeMsalV3(Encoding.UTF8.GetBytes("{\"future\":" + unknownJson + "}"), true);
+            var snapshot = ((ITokenCacheSnapshotProvider)source).CreateSnapshot();
 
             // Act
-            long plainSize = new TokenCacheSnapshot(source.Accessor, plain, true).EstimateSizeInBytes();
-            long punctuationSize = new TokenCacheSnapshot(source.Accessor, punctuation, true).EstimateSizeInBytes();
+            long size = snapshot.EstimateSizeInBytes();
+            var restored = snapshot.Restore(CreateCache(true).Accessor);
 
             // Assert
-            Assert.AreEqual(plainSize, punctuationSize);
+            Assert.IsGreaterThan(0, size);
+            Assert.AreEqual(unknownJson, restored["future"].GetValue<JsonElement>().GetRawText());
         }
+
+#if NET8_0_OR_GREATER
+        [TestMethod]
+        public void EstimateSizeDoesNotMaterializeDuplicateUnknownProperties()
+        {
+            // Arrange
+            var source = CreateCache(true);
+            const string UnknownJson = "{\"x\":1,\"x\":2}";
+            source.DeserializeMsalV3(Encoding.UTF8.GetBytes("{\"future\":" + UnknownJson + "}"), true);
+            var snapshot = ((ITokenCacheSnapshotProvider)source).CreateSnapshot();
+
+            // Act
+            long size = snapshot.EstimateSizeInBytes();
+            var destination = CreateCache(true);
+            ((ITokenCacheSnapshotProvider)destination).RestoreSnapshot(snapshot);
+            using var json = JsonDocument.Parse(destination.SerializeMsalV3());
+
+            // Assert
+            Assert.IsGreaterThan(0, size);
+            Assert.AreEqual(UnknownJson, json.RootElement.GetProperty("future").GetRawText());
+        }
+#endif
 
         [TestMethod]
         [DataRow("additional-fields")]

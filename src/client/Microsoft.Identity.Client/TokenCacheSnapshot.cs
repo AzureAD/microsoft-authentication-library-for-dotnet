@@ -23,15 +23,17 @@ namespace Microsoft.Identity.Client
     public sealed class TokenCacheSnapshot
     {
         private readonly CacheSerializationContract _state;
-        private readonly long _unknownNodesEstimatedSize;
+        internal int UnknownNodesSourceSizeInBytes { get; }
         internal bool IsApplicationCache { get; }
 
         internal TokenCacheSnapshot(
             ITokenCacheAccessor accessor,
             IDictionary<string, JsonNode> unknownNodes,
-            bool isApplicationCache)
+            bool isApplicationCache,
+            int unknownNodesSourceSizeInBytes = 0)
         {
             IsApplicationCache = isApplicationCache;
+            UnknownNodesSourceSizeInBytes = unknownNodesSourceSizeInBytes;
             _state = new CacheSerializationContract(CloneUnknownNodes(unknownNodes));
 
             foreach (var item in accessor.GetAllAccessTokens())
@@ -78,12 +80,14 @@ namespace Microsoft.Identity.Client
         /// memory limit. Actual memory depends on the runtime, architecture, sharing, and cache
         /// contents. It excludes cache-provider overhead, temporary allocations, and working caches.
         /// The estimate may overcount or undercount actual memory and may change between MSAL versions.
+        /// Unknown fields can retain the complete original serialized cache. Their size is estimated
+        /// from the original payload length and, on legacy targets, their materialized structure.
         /// This method examines the snapshot's entries and scopes and does not serialize the cache.
         /// </remarks>
         /// <returns>An approximate size in bytes.</returns>
         public long EstimateSizeInBytes()
         {
-            return TokenCacheSnapshotSizeEstimator.Estimate(_state, _unknownNodesEstimatedSize);
+            return TokenCacheSnapshotSizeEstimator.Estimate(_state, UnknownNodesSourceSizeInBytes);
         }
 
         internal IDictionary<string, JsonNode> Restore(ITokenCacheAccessor accessor)
