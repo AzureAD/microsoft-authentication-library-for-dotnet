@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 #if !NET8_0_OR_GREATER
 using System.Text.Json.Nodes;
@@ -11,17 +12,24 @@ namespace Microsoft.Identity.Client.Cache
 {
     internal static class TokenCacheSnapshotSizeEstimator
     {
-        // This covers  the snapshot, serialization contract, and six dictionary shells.
-        private const long SnapshotOverhead = 1536;
-        // This covers the record's fields/header a share of the containing dictionary's backing arrays and spare capacity.
-        // Variable-length strings and nested collection contents are charged separately below
-        private const long EntryOverhead = 1536;
+        // Calibrated against .NET 8 x64 inclusive heap graphs: snapshot (32), contract (64),
+        // six dictionary shells (6 * 80), and shared comparers (96). Backing arrays are separate.
+        private const long SnapshotOverhead = 672;
+        // Record shells plus each Lazy<T>, factory delegate and LazyHelper (136 bytes).
+        private const long AccessTokenOverhead = 256 + 136;
+        private const long RefreshTokenOverhead = 120 + 136;
+        private const long IdTokenOverhead = 112 + 2 * 136;
+        private const long AccountOverhead = 144 + 136;
+        private const long AppMetadataOverhead = 64 + 136;
         private const long CollectionOverhead = 128;
         private const long CollectionEntryOverhead = 128;
 
         internal static long Estimate(CacheSerializationContract state, int unknownNodesSourceSizeInBytes)
         {
-            long size = SnapshotOverhead;
+            long size = SnapshotOverhead +
+                DictionaryStorage(state.AccessTokens) + DictionaryStorage(state.RefreshTokens) +
+                DictionaryStorage(state.IdTokens) + DictionaryStorage(state.Accounts) +
+                DictionaryStorage(state.AppMetadata);
             bool retainsSourceDocument = false;
             if (state.UnknownNodes.Count > 0)
             {
@@ -43,17 +51,18 @@ namespace Microsoft.Identity.Client.Cache
             foreach (var entry in state.AccessTokens)
             {
                 var item = entry.Value;
-                size += EntryOverhead + Credential(item) +
+                size += AccessTokenOverhead + Credential(item) +
                     String(item.CacheKey) + String(item.TenantId) + String(item.OboCacheKey) +
                     String(item.KeyId) + String(item.TokenType) + String(item.ScopeString) +
                     Dictionary(item.AdditionalCacheKeyComponents) + Dictionary(item.PersistedCacheParameters);
-                foreach (string scope in item.ScopeSet)
-                {
-                    size += CollectionEntryOverhead + String(scope);
-                }
+#if NET8_0_OR_GREATER
+                // A zero-capacity request only reads existing capacity; it does not allocate or resize.
+                int scopeCapacity = item.ScopeSet.EnsureCapacity(0);
+#else
+                long scopeSlots = item.ScopeSet.Count;
                 if (!string.IsNullOrEmpty(item.ScopeString))
                 {
-                    long scopeSlots = 1;
+                    scopeSlots = 1;
                     foreach (char c in item.ScopeString)
                     {
                         if (c == ' ')
@@ -61,11 +70,16 @@ namespace Microsoft.Identity.Client.Cache
                             scopeSlots++;
                         }
                     }
-                    // Some runtimes can preallocate the set from the split scope count,
-                    // even when many scopes are duplicates.
-                    if (scopeSlots > item.ScopeSet.Count)
+                }
+                long scopeCapacity = EstimatedCapacity(scopeSlots);
+#endif
+                size += 64 + CollectionStorage(scopeCapacity, 16);
+                foreach (string scope in item.ScopeSet)
+                {
+                    // A single unsplit scope can be the same string as ScopeString.
+                    if (!ReferenceEquals(scope, item.ScopeString))
                     {
-                        size += CollectionEntryOverhead * (scopeSlots - item.ScopeSet.Count);
+                        size += String(scope);
                     }
                 }
                 if (item.AdditionalCacheKeyComponents is not null)
@@ -80,7 +94,7 @@ namespace Microsoft.Identity.Client.Cache
             foreach (var entry in state.RefreshTokens)
             {
                 var item = entry.Value;
-                size += EntryOverhead + Credential(item) +
+                size += RefreshTokenOverhead + Credential(item) +
                     String(item.CacheKey) + String(item.FamilyId) + String(item.OboCacheKey) +
                     Dictionary(item.AdditionalCacheKeyComponents);
             }
@@ -88,13 +102,13 @@ namespace Microsoft.Identity.Client.Cache
             foreach (var entry in state.IdTokens)
             {
                 var item = entry.Value;
-                size += EntryOverhead + Credential(item) + String(item.CacheKey) + String(item.TenantId);
+                size += IdTokenOverhead + Credential(item) + String(item.CacheKey) + String(item.TenantId);
             }
 
             foreach (var entry in state.Accounts)
             {
                 var item = entry.Value;
-                size += EntryOverhead + Common(item) + String(item.CacheKey) + String(item.TenantId) +
+                size += AccountOverhead + Common(item) + String(item.CacheKey) + String(item.TenantId) +
                     String(item.PreferredUsername) + String(item.Name) + String(item.GivenName) +
                     String(item.FamilyName) + String(item.LocalAccountId) + String(item.AccountSource) +
                     String(item.AuthorityType) + Dictionary(item.WamAccountIds);
@@ -103,7 +117,7 @@ namespace Microsoft.Identity.Client.Cache
             foreach (var entry in state.AppMetadata)
             {
                 var item = entry.Value;
-                size += EntryOverhead + String(item.ClientId) + String(item.Environment) +
+                size += AppMetadataOverhead + String(item.ClientId) + String(item.Environment) +
                     String(item.FamilyId) + String(item.CacheKey) + String(item.AdditionalFieldsJson);
             }
             return size;
@@ -153,17 +167,48 @@ namespace Microsoft.Identity.Client.Cache
                 return 0;
             }
 
-            long size = CollectionOverhead;
+            long size = values is Dictionary<string, string> dictionary
+                ? 80 + DictionaryStorage(dictionary)
+                : values is SortedList<string, string> sorted
+                    ? 64 + 2 * Align(24L + 8L * sorted.Capacity)
+                    : CollectionOverhead + CollectionEntryOverhead * values.Count;
             foreach (var pair in values)
             {
-                size += CollectionEntryOverhead + String(pair.Key) + String(pair.Value);
+                size += String(pair.Key) + String(pair.Value);
             }
             return size;
         }
 
+        private static long DictionaryStorage<T>(Dictionary<string, T> values)
+        {
+#if NET8_0_OR_GREATER
+            return CollectionStorage(values.EnsureCapacity(0), 24);
+#else
+            return CollectionStorage(EstimatedCapacity(values.Count), 24);
+#endif
+        }
+
+#if !NET8_0_OR_GREATER
+        private static long EstimatedCapacity(long count)
+        {
+            return count == 0 ? 0 : Math.Max(3, count + count / 2);
+        }
+#endif
+
+        private static long CollectionStorage(long capacity, int entrySize)
+        {
+            return capacity == 0 ? 0 : Align(24 + 4 * capacity) + Align(24 + entrySize * capacity);
+        }
+
+        private static long Align(long size)
+        {
+            return (size + 7) & ~7L;
+        }
+
         private static long String(string value)
         {
-            return value is null ? 0 : 32L + 2L * value.Length;
+            // Empty strings are shared globally, not retained separately by each field.
+            return string.IsNullOrEmpty(value) ? 0 : Align(22L + 2L * value.Length);
         }
     }
 }

@@ -372,6 +372,68 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             AssertJsonEqual(expected, snapshot.SerializeMsalV3());
         }
 
+#if NET8_0_OR_GREATER
+        [TestMethod]
+        [DataRow(1, 1, 1000, 4208L)]
+        [DataRow(1, 2, 1000, 7448L)]
+        [DataRow(1, 3, 1000, 10688L)]
+        [DataRow(1, 10, 1000, 33760L)]
+        [DataRow(100, 1, 1000, 395456L)]
+        [DataRow(1000, 1, 1000, 3952256L)]
+        [DataRow(100, 2, 1000, 719456L)]
+        [DataRow(1000, 2, 1000, 7192256L)]
+        [DataRow(1, 0, 1000, 672L)]
+        [DataRow(1, 100, 1000, 330400L)]
+        [DataRow(100, 1, 256, 246656L)]
+        [DataRow(100, 1, 4096, 1014656L)]
+        [DataRow(100, 2, 4096, 1957856L)]
+        public void SnapshotSizeStaysWithinMeasuredCalibrationRange(
+            int partitions, int tokens, int tokenLength, long measuredBytes)
+        {
+            // Arrange
+            // Reference sizes are unique, aligned objects reachable from these snapshots in a
+            // .NET 8 x64 heap dump, excluding the test's array. No GC timing is used in this test.
+            if (IntPtr.Size != 8)
+            {
+                Assert.Inconclusive("The reference heap measurements are for x64.");
+            }
+            var source = CreateCache(true);
+            var entries = new JsonObject();
+            for (int i = 0; i < tokens; i++)
+            {
+                entries[i.ToString(System.Globalization.CultureInfo.InvariantCulture)] = new JsonObject
+                {
+                    ["home_account_id"] = "",
+                    ["environment"] = "login.microsoftonline.com",
+                    ["credential_type"] = "AccessToken",
+                    ["client_id"] = "calibration-client",
+                    ["secret"] = new string('x', tokenLength),
+                    ["realm"] = "11111111-1111-1111-1111-111111111111",
+                    ["target"] = $"api://resource-{i}/scope-0",
+                    ["cached_at"] = "1795420800",
+                    ["expires_on"] = "1893456000",
+                    ["extended_expires_on"] = "1893542400"
+                };
+            }
+            byte[] payload = Encoding.UTF8.GetBytes(new JsonObject { ["AccessToken"] = entries }.ToJsonString());
+            var snapshots = new TokenCacheSnapshot[partitions];
+
+            // Act
+            long estimatedBytes = 0;
+            for (int i = 0; i < partitions; i++)
+            {
+                source.DeserializeMsalV3(payload, true);
+                snapshots[i] = ((ITokenCacheSnapshotProvider)source).CreateSnapshot();
+                estimatedBytes += snapshots[i].EstimateSizeInBytes();
+            }
+
+            // Assert
+            Assert.IsLessThanOrEqualTo(measuredBytes / 10, Math.Abs(estimatedBytes - measuredBytes),
+                $"Estimated {estimatedBytes} bytes versus measured {measuredBytes} bytes.");
+            GC.KeepAlive(snapshots);
+        }
+#endif
+
         [TestMethod]
         [DataRow("access")]
         [DataRow("refresh")]
@@ -629,7 +691,12 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             long repeatedSize = provider.CreateSnapshot().EstimateSizeInBytes();
 
             // Assert
-            Assert.IsGreaterThan(singleSize + ScopeCount * 32, repeatedSize);
+            Assert.IsGreaterThan(singleSize + ScopeCount * 2, repeatedSize);
+#if NET8_0_OR_GREATER
+            // Modern HashSet trims the duplicate-heavy input; charge its retained capacity,
+            // not the temporary split array or one entry for every occurrence.
+            Assert.IsLessThan(singleSize + ScopeCount * 16, repeatedSize);
+#endif
         }
 
         [TestMethod]

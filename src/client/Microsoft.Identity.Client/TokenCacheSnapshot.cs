@@ -80,6 +80,9 @@ namespace Microsoft.Identity.Client
         /// memory limit. Actual memory depends on the runtime, architecture, sharing, and cache
         /// contents. It excludes cache-provider overhead, temporary allocations, and working caches.
         /// The estimate may overcount or undercount actual memory and may change between MSAL versions.
+        /// Structural sizes are calibrated for x64. Summing estimates counts immutable objects shared
+        /// between snapshots more than once; this method does not track ownership across snapshots.
+        /// Providers should choose any additional safety margin separately from this estimate.
         /// Unknown fields can retain the complete original serialized cache. Their size is estimated
         /// from the original payload length and, on legacy targets, their materialized structure.
         /// This method examines the snapshot's entries and scopes and does not serialize the cache.
