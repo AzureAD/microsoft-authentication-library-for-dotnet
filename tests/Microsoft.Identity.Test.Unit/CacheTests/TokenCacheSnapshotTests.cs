@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
@@ -369,6 +370,333 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             // Assert
             Assert.AreEqual("original", second["future"]["nested"][0]["value"].GetValue<string>());
             AssertJsonEqual(expected, snapshot.SerializeMsalV3());
+        }
+
+#if NET8_0_OR_GREATER
+        [TestMethod]
+        [DataRow(1, 1, 1000, 4208L)]
+        [DataRow(1, 2, 1000, 7448L)]
+        [DataRow(1, 3, 1000, 10688L)]
+        [DataRow(1, 10, 1000, 33760L)]
+        [DataRow(100, 1, 1000, 395456L)]
+        [DataRow(1000, 1, 1000, 3952256L)]
+        [DataRow(100, 2, 1000, 719456L)]
+        [DataRow(1000, 2, 1000, 7192256L)]
+        [DataRow(1, 0, 1000, 672L)]
+        [DataRow(1, 100, 1000, 330400L)]
+        [DataRow(100, 1, 256, 246656L)]
+        [DataRow(100, 1, 4096, 1014656L)]
+        [DataRow(100, 2, 4096, 1957856L)]
+        public void SnapshotSizeStaysWithinMeasuredCalibrationRange(
+            int partitions, int tokens, int tokenLength, long measuredBytes)
+        {
+            // Arrange
+            // Reference sizes are unique, aligned objects reachable from these snapshots in a
+            // .NET 8 x64 heap dump, excluding the test's array. No GC timing is used in this test.
+            if (IntPtr.Size != 8)
+            {
+                Assert.Inconclusive("The reference heap measurements are for x64.");
+            }
+            var source = CreateCache(true);
+            var entries = new JsonObject();
+            for (int i = 0; i < tokens; i++)
+            {
+                entries[i.ToString(System.Globalization.CultureInfo.InvariantCulture)] = new JsonObject
+                {
+                    ["home_account_id"] = "",
+                    ["environment"] = "login.microsoftonline.com",
+                    ["credential_type"] = "AccessToken",
+                    ["client_id"] = "calibration-client",
+                    ["secret"] = new string('x', tokenLength),
+                    ["realm"] = "11111111-1111-1111-1111-111111111111",
+                    ["target"] = $"api://resource-{i}/scope-0",
+                    ["cached_at"] = "1795420800",
+                    ["expires_on"] = "1893456000",
+                    ["extended_expires_on"] = "1893542400"
+                };
+            }
+            byte[] payload = Encoding.UTF8.GetBytes(new JsonObject { ["AccessToken"] = entries }.ToJsonString());
+            var snapshots = new TokenCacheSnapshot[partitions];
+
+            // Act
+            long estimatedBytes = 0;
+            for (int i = 0; i < partitions; i++)
+            {
+                source.DeserializeMsalV3(payload, true);
+                snapshots[i] = ((ITokenCacheSnapshotProvider)source).CreateSnapshot();
+                estimatedBytes += snapshots[i].EstimateSizeInBytes();
+            }
+
+            // Assert
+            Assert.IsLessThanOrEqualTo(measuredBytes / 10, Math.Abs(estimatedBytes - measuredBytes),
+                $"Estimated {estimatedBytes} bytes versus measured {measuredBytes} bytes.");
+            GC.KeepAlive(snapshots);
+        }
+#endif
+
+        [TestMethod]
+        [DataRow("access")]
+        [DataRow("refresh")]
+        [DataRow("id")]
+        [DataRow("account")]
+        [DataRow("metadata")]
+        public void SnapshotSizeAccountsForVariableLengthEntries(string kind)
+        {
+            // Arrange
+            var source = CreateCache(false);
+            Populate(source, false);
+            var provider = (ITokenCacheSnapshotProvider)source;
+            var original = provider.CreateSnapshot();
+            long originalSize = original.EstimateSizeInBytes();
+            const int ExtraCharacters = 4096;
+            string value = new string('x', ExtraCharacters);
+
+            switch (kind)
+            {
+                case "access":
+                    var access = source.Accessor.GetAllAccessTokens().Single();
+                    access.Secret += value;
+                    source.Accessor.SaveAccessToken(access);
+                    break;
+                case "refresh":
+                    var refresh = source.Accessor.GetAllRefreshTokens().Single();
+                    refresh.Secret += value;
+                    source.Accessor.SaveRefreshToken(refresh);
+                    break;
+                case "id":
+                    var id = source.Accessor.GetAllIdTokens().Single();
+                    id.Secret += value;
+                    source.Accessor.SaveIdToken(id);
+                    break;
+                case "account":
+                    var account = source.Accessor.GetAllAccounts().Single();
+                    account.WamAccountIds["app"] += value;
+                    source.Accessor.SaveAccount(account);
+                    break;
+                case "metadata":
+                    source.Accessor.SaveAppMetadata(new MsalAppMetadataCacheItem("snapshot-tests", "environment", value));
+                    break;
+            }
+
+            // Act
+            var updated = provider.CreateSnapshot();
+
+            // Assert
+            Assert.IsGreaterThan(0, originalSize);
+            Assert.IsGreaterThanOrEqualTo(originalSize + 2 * ExtraCharacters, updated.EstimateSizeInBytes());
+            Assert.AreEqual(originalSize, original.EstimateSizeInBytes());
+        }
+
+        [TestMethod]
+        public void SnapshotSizeAccountsForOriginalDocumentWithUnknownFields()
+        {
+            // Arrange
+            var seed = CreateCache(true);
+            Populate(seed, true);
+            string knownJson = Encoding.UTF8.GetString(seed.SerializeMsalV3());
+            string prefix = "{\"future\":{\"value\":\"preserved\"},";
+            var small = CreateCache(true);
+            var large = CreateCache(true);
+            small.DeserializeMsalV3(Encoding.UTF8.GetBytes(prefix + knownJson.Substring(1)), true);
+            large.DeserializeMsalV3(Encoding.UTF8.GetBytes(prefix + new string(' ', 4096) + knownJson.Substring(1)), true);
+            var smallSnapshot = ((ITokenCacheSnapshotProvider)small).CreateSnapshot();
+            var largeSnapshot = ((ITokenCacheSnapshotProvider)large).CreateSnapshot();
+            byte[] expected = largeSnapshot.SerializeMsalV3();
+
+            // Act
+            long estimatedSize = largeSnapshot.EstimateSizeInBytes();
+            largeSnapshot.Restore(CreateCache(true).Accessor);
+
+            // Assert
+            Assert.IsGreaterThan(smallSnapshot.EstimateSizeInBytes() + 4096, estimatedSize);
+            Assert.AreEqual(estimatedSize, largeSnapshot.EstimateSizeInBytes());
+            AssertJsonEqual(expected, largeSnapshot.SerializeMsalV3());
+        }
+
+        [TestMethod]
+        public void NullUnknownFieldsDoNotChargeForSourceDocument()
+        {
+            // Arrange
+            var empty = CreateCache(true);
+            empty.DeserializeMsalV3(Encoding.UTF8.GetBytes("{}"), true);
+            var source = CreateCache(true);
+            source.DeserializeMsalV3(Encoding.UTF8.GetBytes("{\"future\":null," + new string(' ', 8192) + "\"other\":null}"), true);
+
+            // Act
+            long emptySize = ((ITokenCacheSnapshotProvider)empty).CreateSnapshot().EstimateSizeInBytes();
+            long nullSize = ((ITokenCacheSnapshotProvider)source).CreateSnapshot().EstimateSizeInBytes();
+
+            // Assert
+            Assert.IsGreaterThan(emptySize, nullSize);
+            Assert.IsLessThan(emptySize + 1024, nullSize);
+        }
+
+#if !NET8_0_OR_GREATER
+        [TestMethod]
+        public void SnapshotSizeAccountsForMaterializedUnknownStructure()
+        {
+            // Arrange
+            string properties = string.Join(",", Enumerable.Range(0, 64).Select(i => "\"field" + i + "\":[1,null]"));
+            string structuredJson = "{\"future\":{" + properties + "}}";
+            string scalarJson = "{\"future\":\"" + new string('x', structuredJson.Length - 13) + "\"}";
+            var structured = CreateCache(true);
+            var scalar = CreateCache(true);
+            structured.DeserializeMsalV3(Encoding.UTF8.GetBytes(structuredJson), true);
+            scalar.DeserializeMsalV3(Encoding.UTF8.GetBytes(scalarJson), true);
+            var snapshot = ((ITokenCacheSnapshotProvider)structured).CreateSnapshot();
+            byte[] expected = snapshot.SerializeMsalV3();
+
+            // Act
+            long structuredSize = snapshot.EstimateSizeInBytes();
+            long scalarSize = ((ITokenCacheSnapshotProvider)scalar).CreateSnapshot().EstimateSizeInBytes();
+
+            // Assert
+            Assert.AreEqual(structuredJson.Length, scalarJson.Length);
+            Assert.IsGreaterThan(scalarSize + 4096, structuredSize);
+            AssertJsonEqual(expected, snapshot.SerializeMsalV3());
+        }
+#endif
+
+        [TestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        public void UnknownSourceSizeSurvivesRestoreAndReadViews(bool applicationCache)
+        {
+            // Arrange
+            byte[] payload = Encoding.UTF8.GetBytes("{\"future\":\"" + new string('x', 8192) + "\"}");
+            var source = CreateCache(applicationCache);
+            source.DeserializeMsalV3(payload, true);
+            var snapshot = ((ITokenCacheSnapshotProvider)source).CreateSnapshot();
+            long expectedSize = snapshot.EstimateSizeInBytes();
+            var destination = CreateCache(applicationCache);
+
+            // Act
+            ((ITokenCacheSnapshotProvider)destination).RestoreSnapshot(snapshot);
+            var restored = ((ITokenCacheSnapshotProvider)destination).CreateSnapshot();
+            var pinned = ((TokenCache)source).CreatePinnedReadView();
+            var pinnedSnapshot = ((ITokenCacheSnapshotProvider)pinned).CreateSnapshot();
+            var root = (TokenCache)CreateCache(applicationCache);
+            var view = root.CreateReadView();
+            using (view.BeginReadHydration(root))
+            {
+                ((ITokenCacheInternal)view).DeserializeMsalV3(payload, true);
+                view.PublishReadView(root);
+            }
+            var published = ((ITokenCacheSnapshotProvider)root).CreateSnapshot();
+
+            // Assert
+            Assert.AreEqual(expectedSize, restored.EstimateSizeInBytes());
+            Assert.AreEqual(expectedSize, pinnedSnapshot.EstimateSizeInBytes());
+            Assert.AreEqual(expectedSize, published.EstimateSizeInBytes());
+
+            destination.DeserializeMsalV3(Encoding.UTF8.GetBytes("{}"), true);
+            long clearedSize = ((ITokenCacheSnapshotProvider)destination).CreateSnapshot().EstimateSizeInBytes();
+            Assert.IsGreaterThan(clearedSize + payload.Length, expectedSize);
+        }
+
+        [TestMethod]
+        [DataRow("\"\\uD800\"")]
+        [DataRow("\"\\uDC00\"")]
+        public void EstimateSizePreservesEscapedUnpairedSurrogates(string unknownJson)
+        {
+            // Arrange
+            var source = CreateCache(true);
+            source.DeserializeMsalV3(Encoding.UTF8.GetBytes("{\"future\":" + unknownJson + "}"), true);
+            var snapshot = ((ITokenCacheSnapshotProvider)source).CreateSnapshot();
+
+            // Act
+            long size = snapshot.EstimateSizeInBytes();
+            var restored = snapshot.Restore(CreateCache(true).Accessor);
+
+            // Assert
+            Assert.IsGreaterThan(0, size);
+            Assert.AreEqual(unknownJson, restored["future"].GetValue<JsonElement>().GetRawText());
+        }
+
+#if NET8_0_OR_GREATER
+        [TestMethod]
+        public void EstimateSizeDoesNotMaterializeDuplicateUnknownProperties()
+        {
+            // Arrange
+            var source = CreateCache(true);
+            const string UnknownJson = "{\"x\":1,\"x\":2}";
+            source.DeserializeMsalV3(Encoding.UTF8.GetBytes("{\"future\":" + UnknownJson + "}"), true);
+            var snapshot = ((ITokenCacheSnapshotProvider)source).CreateSnapshot();
+
+            // Act
+            long size = snapshot.EstimateSizeInBytes();
+            var destination = CreateCache(true);
+            ((ITokenCacheSnapshotProvider)destination).RestoreSnapshot(snapshot);
+            using var json = JsonDocument.Parse(destination.SerializeMsalV3());
+
+            // Assert
+            Assert.IsGreaterThan(0, size);
+            Assert.AreEqual(UnknownJson, json.RootElement.GetProperty("future").GetRawText());
+        }
+#endif
+
+        [TestMethod]
+        [DataRow("additional-fields")]
+        [DataRow("key-extensions")]
+        [DataRow("persisted-parameters")]
+        public void SnapshotSizeAccountsForVariableAccessTokenMetadata(string kind)
+        {
+            // Arrange
+            var source = CreateCache(true);
+            Populate(source, true);
+            var provider = (ITokenCacheSnapshotProvider)source;
+            long originalSize = provider.CreateSnapshot().EstimateSizeInBytes();
+            var access = source.Accessor.GetAllAccessTokens().Single();
+            string value = new string('x', 4096);
+            switch (kind)
+            {
+                case "additional-fields":
+                    access.AdditionalFieldsJson = "{\"future\":\"" + value + "\"}";
+                    break;
+                case "key-extensions":
+                    access.AdditionalCacheKeyComponents["partition"] += value;
+                    break;
+                case "persisted-parameters":
+                    access.PersistedCacheParameters["extra"] += value;
+                    break;
+            }
+
+            // Act
+            long updatedSize = provider.CreateSnapshot().EstimateSizeInBytes();
+
+            // Assert
+            Assert.IsGreaterThan(originalSize + 4096, updatedSize);
+        }
+
+        [TestMethod]
+        public void SnapshotSizeAccountsForRepeatedScopes()
+        {
+            // Arrange
+            const int ScopeCount = 512;
+            var time = DateTimeOffset.FromUnixTimeSeconds(1800000000);
+            var source = CreateCache(true);
+            var single = new MsalAccessTokenCacheItem(
+                "environment", "snapshot-tests", "x", "tenant", "token",
+                time, time.AddHours(1), time.AddHours(1), null, "account");
+            source.Accessor.SaveAccessToken(single);
+            var provider = (ITokenCacheSnapshotProvider)source;
+            long singleSize = provider.CreateSnapshot().EstimateSizeInBytes();
+            source.Accessor.Clear();
+            var repeated = new MsalAccessTokenCacheItem(
+                "environment", "snapshot-tests", string.Join(" ", Enumerable.Repeat("x", ScopeCount)),
+                "tenant", "token", time, time.AddHours(1), time.AddHours(1), null, "account");
+            source.Accessor.SaveAccessToken(repeated);
+
+            // Act
+            long repeatedSize = provider.CreateSnapshot().EstimateSizeInBytes();
+
+            // Assert
+            Assert.IsGreaterThan(singleSize + ScopeCount * 2, repeatedSize);
+#if NET8_0_OR_GREATER
+            // Modern HashSet trims the duplicate-heavy input; charge its retained capacity,
+            // not the temporary split array or one entry for every occurrence.
+            Assert.IsLessThan(singleSize + ScopeCount * 16, repeatedSize);
+#endif
         }
 
         [TestMethod]

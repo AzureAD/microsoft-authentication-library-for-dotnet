@@ -157,6 +157,7 @@ app.AppTokenCache.SetAfterAccess(args =>
 - **Restore behavior:** Matches `DeserializeMsalV3(payload, shouldClearExistingCache: true)`, including unknown fields and retained application metadata. Restoring `null` clears tokens and accounts but retains metadata and existing unknown top-level fields.
 - **Storage:** Snapshots are process-local, not a transport or cross-version format. Use `snapshot.SerializeMsalV3()` for persistent or distributed storage.
 - **Security and memory:** Snapshots contain credentials. Never log them; protect them and bound retention. They may retain more memory than JSON bytes.
+- **Sizing:** `snapshot.EstimateSizeInBytes()` provides an approximation for cache admission or eviction accounting, with structural sizes calibrated against x64 heap graphs. It is not a hard memory limit: runtime, sharing and provider overhead can make actual usage different. Summing estimates counts immutable data shared across snapshots repeatedly; there is no cross-snapshot ownership tracking. Choose any additional safety margin in the provider rather than assuming one is built into the estimate. Unknown fields can retain the complete original serialized cache; the estimate uses its payload length and, on legacy targets, the materialized structure without serializing those fields, so these estimates are less precise.
 - **Limitations:** Unsupported on mobile or with internal cache options such as shared caching.
 
 ### Benchmarks
