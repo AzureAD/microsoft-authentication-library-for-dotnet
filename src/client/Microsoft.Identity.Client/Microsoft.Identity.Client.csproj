@@ -84,6 +84,7 @@
     <PackageReference Include="System.Diagnostics.DiagnosticSource" />
     <PackageReference Include="System.Formats.Asn1" />
     <PackageReference Include="System.Security.Cryptography.Cng" />
+    <PackageReference Include="System.Management" />
     <PackageReference Include="System.Text.Json" />
   </ItemGroup>
 
@@ -94,6 +95,7 @@
     <Compile Include="$(PathToMsalSources)\Platforms\Features\OpenTelemetry\**\*.cs" />
 
     <PackageReference Include="System.Diagnostics.DiagnosticSource" />
+    <PackageReference Include="System.Management" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop462)' or '$(TargetFramework)' == '$(TargetFrameworkNetDesktop472)'">
@@ -113,6 +115,7 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.IdentityModel" />
+    <Reference Include="System.Management" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />

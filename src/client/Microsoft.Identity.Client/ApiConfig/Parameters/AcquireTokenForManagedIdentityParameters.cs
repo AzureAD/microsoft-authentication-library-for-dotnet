@@ -42,12 +42,19 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
 
         internal X509Certificate2 MtlsCertificate { get; set; }
 
+        internal bool UseRdpCertificate { get; set; }
+
         /// <summary>
         /// Optional delegate for obtaining attestation JWT for Credential Guard keys.
         /// Set by the KeyAttestation package via .WithAttestationSupport().
         /// Signature: (endpoint, keyHandle, clientIdMetadata, keyId, logger, cancellationToken) → JWT or null.
         /// </summary>
         public Func<string, SafeHandle, string, string, ILoggerAdapter, CancellationToken, Task<string>> AttestationTokenProvider { get; set; }
+
+        internal AcquireTokenForManagedIdentityParameters Clone()
+        {
+            return (AcquireTokenForManagedIdentityParameters)MemberwiseClone();
+        }
 
         public void LogParameters(ILoggerAdapter logger)
         {

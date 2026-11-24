@@ -22,6 +22,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
     internal class ManagedIdentityAuthRequest : RequestBase
     {
         private readonly AcquireTokenForManagedIdentityParameters _managedIdentityParameters;
+        private readonly bool _useRdpCertificate;
+        private X509Certificate2 _bindingCertificate;
+        private X509Certificate2 _endorsementCertificate;
         private readonly ManagedIdentityClient _managedIdentityClient;
         private static readonly SemaphoreSlim s_semaphoreSlim = new SemaphoreSlim(1, 1);
         private readonly ICryptographyManager _cryptoManager;
@@ -34,7 +37,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
             ManagedIdentityClient managedIdentityClient)
             : base(serviceBundle, authenticationRequestParameters, managedIdentityParameters)
         {
-            _managedIdentityParameters = managedIdentityParameters;
+            // A completed builder can be reused while this execution's proactive refresh is pending.
+            _managedIdentityParameters = managedIdentityParameters.Clone();
+            _useRdpCertificate = _managedIdentityParameters.UseRdpCertificate;
             _managedIdentityClient = managedIdentityClient;
             _cryptoManager = serviceBundle.PlatformProxy.CryptographyManager;
             _managedIdentityKeyProvider = serviceBundle.PlatformProxy.ManagedIdentityKeyProvider;
@@ -44,9 +49,39 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             AuthenticationResult authResult = null;
             ILoggerAdapter logger = AuthenticationRequestParameters.RequestContext.Logger;
+
+            if (_useRdpCertificate)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                EndorsedUnattestedManagedIdentitySource.ValidateRequestOptions(
+                    AuthenticationRequestParameters, _managedIdentityParameters);
+                try
+                {
+                    _endorsementCertificate = await ServiceBundle.PlatformProxy
+                        .GetRdpBindingCertificateAsync(logger, cancellationToken).ConfigureAwait(false);
+                    EndorsedUnattestedManagedIdentitySource.ValidateCertificate(_endorsementCertificate);
+                }
+                catch (MsalClientException ex) when (ex.ErrorCode == EndorsedUnattestedManagedIdentitySource.RdpCertificateNotFound)
+                {
+                    logger.Info("[ManagedIdentity] No RDP certificate found; using unendorsed workload binding.");
+                }
+                cancellationToken.ThrowIfCancellationRequested();
+                _bindingCertificate = _managedIdentityClient.GetOrCreateUnattestedBindingCertificate(cancellationToken);
+                string endorsementId = _endorsementCertificate?.ComputeX5tS256KeyId() ?? "none";
+                AuthenticationRequestParameters.CacheKeyComponents["mi_endorsement"] = endorsementId;
+            }
+
+            X509Certificate2 bindingCertificate = _bindingCertificate;
+            if (bindingCertificate is not null &&
+                (AuthenticationRequestParameters.IsMtlsPopRequested || AuthenticationRequestParameters.PreferMsiV2))
+            {
+                EndorsedUnattestedManagedIdentitySource.ValidateRequest(
+                    AuthenticationRequestParameters, _managedIdentityParameters, bindingCertificate);
+                AuthenticationRequestParameters.AuthenticationScheme = new MtlsPopAuthenticationOperation(bindingCertificate);
+            }
             
             // Prime the scheme before any cache lookup if we already have a binding cert from a prior mint
-            if (AuthenticationRequestParameters.IsMtlsPopRequested)
+            if (AuthenticationRequestParameters.IsMtlsPopRequested && bindingCertificate is null)
             {
                 if (_managedIdentityClient.RuntimeMtlsBindingCertificate != null)
                 {
@@ -223,6 +258,18 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             _managedIdentityParameters.IsMtlsPopRequested = AuthenticationRequestParameters.IsMtlsPopRequested;
             _managedIdentityParameters.PreferMsiV2 = AuthenticationRequestParameters.PreferMsiV2;
+
+            if (AuthenticationRequestParameters.IsMtlsPopRequested &&
+                _bindingCertificate is not null)
+            {
+                var bindingResponse = await EndorsedUnattestedManagedIdentitySource
+                    .AcquireTokenAsync(AuthenticationRequestParameters, _managedIdentityParameters,
+                        _bindingCertificate, _endorsementCertificate, cancellationToken)
+                    .ConfigureAwait(false);
+                bindingResponse.Scope = AuthenticationRequestParameters.Scope.AsSingleString();
+                return await CacheTokenResponseAndCreateAuthenticationResultAsync(
+                    bindingResponse, cancellationToken).ConfigureAwait(false);
+            }
 
             // mTLS PoP and mTLS Bearer are both served exclusively by IMDSv2. Mint the binding certificate, then delegate the
             // token leg to MSAL's internal TokenClient exchange (the same path CCA uses) so client-capability

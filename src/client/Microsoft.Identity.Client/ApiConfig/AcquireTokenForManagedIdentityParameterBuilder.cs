@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.ManagedIdentity;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 
@@ -29,7 +30,7 @@ namespace Microsoft.Identity.Client
         private static readonly Task<string> s_att0 = Task.FromResult("0");
         private static readonly Task<string> s_att1 = Task.FromResult("1");
 
-        private AcquireTokenForManagedIdentityParameters Parameters { get; } = new AcquireTokenForManagedIdentityParameters();
+        internal AcquireTokenForManagedIdentityParameters Parameters { get; } = new AcquireTokenForManagedIdentityParameters();
 
         /// <inheritdoc/>
         internal AcquireTokenForManagedIdentityParameterBuilder(IManagedIdentityApplicationExecutor managedIdentityApplicationExecutor)
@@ -88,6 +89,24 @@ namespace Microsoft.Identity.Client
         internal override Task<AuthenticationResult> ExecuteInternalAsync(CancellationToken cancellationToken)
         {
             ApplyMtlsPopAndAttestation(acquireTokenForManagedIdentityParameters: Parameters, acquireTokenCommonParameters: CommonParameters);
+            if (CommonParameters.IsMtlsPopRequested && Parameters.AttestationTokenProvider is not null &&
+                !DesktopOsHelper.IsWindows())
+            {
+                throw new MsalClientException(MsalError.MtlsNotSupportedForManagedIdentity,
+                    "Attested managed identity mTLS PoP requires Windows. Linux supports only the endorsed unattested flow.");
+            }
+
+            Parameters.UseRdpCertificate = CommonParameters.IsMtlsPopRequested &&
+                Parameters.AttestationTokenProvider is null;
+            if (Parameters.UseRdpCertificate)
+            {
+                CommonParameters.CacheKeyComponents["mi_binding_protocol"] = _ => Task.FromResult("workload_endorsement_v2");
+            }
+            else
+            {
+                CommonParameters.CacheKeyComponents?.Remove("mi_binding_protocol");
+            }
+
             return ManagedIdentityApplicationExecutor.ExecuteAsync(CommonParameters, Parameters, cancellationToken);
         }
 

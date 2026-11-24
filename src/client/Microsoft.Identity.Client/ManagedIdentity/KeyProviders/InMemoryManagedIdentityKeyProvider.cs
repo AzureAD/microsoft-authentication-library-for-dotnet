@@ -102,8 +102,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
         /// </remarks>
         public static RSA CreateRsaKeyPair()
         {
-#if NET462 || NET472 || NET8_0
-            // Windows-only TFMs (Framework or -windows TFMs): compile CNG path
+#if NET462 || NET472
+            // .NET Framework runs on Windows; portable targets choose at runtime.
             return CreateWindowsPersistedRsa();
 
 #else

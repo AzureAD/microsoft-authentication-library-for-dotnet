@@ -3,6 +3,8 @@
 
 using System;
 using System.IO;
+using System.Security.Cryptography.X509Certificates;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Cache;
@@ -249,6 +251,16 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         public virtual bool LegacyCacheRequiresSerialization => true;
 
         public IManagedIdentityKeyProvider ManagedIdentityKeyProvider => _miKeyProvider.Value;
+
+        public virtual Task<X509Certificate2> GetRdpBindingCertificateAsync(
+            ILoggerAdapter logger, CancellationToken cancellationToken)
+        {
+#if SUPPORTS_CONFIDENTIAL_CLIENT
+            return Task.Run(() => RdpCertificateReader.Read(logger, cancellationToken), cancellationToken);
+#else
+            throw new MsalClientException(MsalError.MtlsNotSupportedForManagedIdentity,
+                "Automatic RDP certificate selection is available only on Windows desktop.");
+#endif
+        }
     }
 }
-
