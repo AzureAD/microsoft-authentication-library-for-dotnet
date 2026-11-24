@@ -83,17 +83,17 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 #region SaveItem
         public void SaveAccessToken(MsalAccessTokenCacheItem item)
         {
-            SaveCredential(item, item.iOSCacheKey, MsalAccessTokenCacheItem.FromJsonString);
+            SaveCredential(item, cached => cached.iOSCacheKey, MsalAccessTokenCacheItem.FromJsonString);
         }
 
         public void SaveRefreshToken(MsalRefreshTokenCacheItem item)
         {
-            SaveCredential(item, item.iOSCacheKey, MsalRefreshTokenCacheItem.FromJsonString);
+            SaveCredential(item, cached => cached.iOSCacheKey, MsalRefreshTokenCacheItem.FromJsonString);
         }
 
         public void SaveIdToken(MsalIdTokenCacheItem item)
         {
-            SaveCredential(item, item.iOSCacheKey, MsalIdTokenCacheItem.FromJsonString);
+            SaveCredential(item, cached => cached.iOSCacheKey, MsalIdTokenCacheItem.FromJsonString);
         }
 
         public void SaveAccount(MsalAccountCacheItem item)
@@ -255,9 +255,28 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                 ? item : null;
         }
 
-        private void SaveCredential<T>(T item, IiOSKey key, Func<string, T> deserialize)
+        private void SaveCredential<T>(T item, Func<T, IiOSKey> getCacheKey, Func<string, T> deserialize)
             where T : MsalCredentialCacheItemBase
         {
+            IiOSKey key = getCacheKey(item);
+            string existingPayload = GetPayload(key);
+            var existing = deserialize(existingPayload);
+            if (existing is not null && existing.MatchesAccountIdentity(item.HomeAccountId, item.RawClientInfo))
+            {
+                IiOSKey destination = getCacheKey(existing);
+                if (!string.Equals(destination.iOSService, key.iOSService, StringComparison.Ordinal) &&
+                    string.Equals(destination.iOSService.ToLowerInvariant(), key.iOSService, StringComparison.Ordinal) &&
+                    string.Equals(destination.iOSAccount, key.iOSAccount, StringComparison.Ordinal))
+                {
+                    // Add-only must succeed before overwriting the legacy key; duplicates retain the newer entry.
+                    var status = Save(destination, existingPayload, onlyIfMissing: true);
+                    if (status != SecStatusCode.Success && status != SecStatusCode.DuplicateItem)
+                    {
+                        throw new InvalidOperationException(
+                            "Unable to preserve a legacy keychain credential. OSStatus: " + status);
+                    }
+                }
+            }
             if (Save(key, item.ToJObject().ToString()) == SecStatusCode.Success &&
                 ReadLegacy(item, key, deserialize, out IiOSKey legacyKey) is not null)
             {
@@ -275,7 +294,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             }
         }
 
-        private SecStatusCode Save(IiOSKey key, string payload)
+        private SecStatusCode Save(IiOSKey key, string payload, bool onlyIfMissing = false)
         {
             var recordToSave = new SecRecord(SecKind.GenericPassword)
             {
@@ -289,9 +308,9 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                 Synchronizable = _defaultSyncSetting,
             };
 
-            var secStatusCode = Update(recordToSave);
+            var secStatusCode = onlyIfMissing ? SecKeyChain.Add(recordToSave) : Update(recordToSave);
 
-            if (secStatusCode == SecStatusCode.ItemNotFound)
+            if (!onlyIfMissing && secStatusCode == SecStatusCode.ItemNotFound)
             {
                 secStatusCode = SecKeyChain.Add(recordToSave);
             }

@@ -69,22 +69,22 @@ namespace Microsoft.Identity.Client.Platforms.Android
         #region SaveItem
         public void SaveAccessToken(MsalAccessTokenCacheItem item)
         {
-            Save(item, item.CacheKey, _accessTokenSharedPreference, MsalAccessTokenCacheItem.FromJsonString);
+            Save(item, cached => cached.CacheKey, _accessTokenSharedPreference, MsalAccessTokenCacheItem.FromJsonString);
         }
 
         public void SaveRefreshToken(MsalRefreshTokenCacheItem item)
         {
-            Save(item, item.CacheKey, _refreshTokenSharedPreference, MsalRefreshTokenCacheItem.FromJsonString);
+            Save(item, cached => cached.CacheKey, _refreshTokenSharedPreference, MsalRefreshTokenCacheItem.FromJsonString);
         }
 
         public void SaveIdToken(MsalIdTokenCacheItem item)
         {
-            Save(item, item.CacheKey, _idTokenSharedPreference, MsalIdTokenCacheItem.FromJsonString);
+            Save(item, cached => cached.CacheKey, _idTokenSharedPreference, MsalIdTokenCacheItem.FromJsonString);
         }
 
         public void SaveAccount(MsalAccountCacheItem item)
         {
-            Save(item, item.CacheKey, _accountSharedPreference, MsalAccountCacheItem.FromJsonString);
+            Save(item, cached => cached.CacheKey, _accountSharedPreference, MsalAccountCacheItem.FromJsonString);
         }
 
         private static (ISharedPreferences Preferences, string Key) GetStorage(
@@ -97,20 +97,35 @@ namespace Microsoft.Identity.Client.Platforms.Android
                 : (store.Legacy, cacheKey);
         }
 
-        private static void Save<T>(T item, string cacheKey,
+        private static void Save<T>(T item, Func<T, string> getCacheKey,
             (ISharedPreferences Legacy, ISharedPreferences Subject) store, Func<string, T> deserialize) where T : MsalCacheItemBase
         {
+            string cacheKey = getCacheKey(item);
             var storage = GetStorage(item, cacheKey, store);
-            if (!item.IsAndroidSubject &&
-                Read(store.Legacy.GetString(storage.Key, null), deserialize)?.IsAndroidSubject == true)
+            string existingPayload = storage.Preferences.GetString(storage.Key, null);
+            var existing = Read(existingPayload, deserialize);
+            if (!item.IsAndroidSubject && existing?.IsAndroidSubject == true)
             {
                 throw new MsalClientException(MsalError.UserMismatch,
                     "A legacy Android subject entry conflicts with this account. Clear the cache and sign in again.");
             }
 
+            var legacy = ReadLegacy(item, cacheKey, store, deserialize, out string legacyKey);
             var editor = storage.Preferences.Edit();
+            if (existing is not null && existing.MatchesAccountIdentity(item.HomeAccountId, item.RawClientInfo))
+            {
+                string existingKey = getCacheKey(existing);
+                var destination = GetStorage(existing, existingKey, store);
+                if (!string.Equals(destination.Key, storage.Key, StringComparison.Ordinal) &&
+                    string.Equals(GetStorage(existing, existingKey.ToLowerInvariant(), store).Key, storage.Key, StringComparison.Ordinal) &&
+                    destination.Preferences.GetString(destination.Key, null) is null)
+                {
+                    // Preserve the collided legacy entry without replacing an already-upgraded credential.
+                    editor.PutString(destination.Key, existingPayload);
+                }
+            }
             editor.PutString(storage.Key, item.ToJObject().ToString());
-            if (ReadLegacy(item, cacheKey, store, deserialize, out string legacyKey) is not null)
+            if (legacy is not null)
             {
                 editor.Remove(legacyKey);
             }

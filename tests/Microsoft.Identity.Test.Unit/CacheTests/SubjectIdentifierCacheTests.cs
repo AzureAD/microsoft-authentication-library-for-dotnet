@@ -31,6 +31,86 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         private static readonly string[] s_scopes = { "api.read" };
 
         [TestMethod]
+        [DataRow(true, false, false)]
+        [DataRow(true, true, false)]
+        [DataRow(false, false, false)]
+        [DataRow(false, true, false)]
+        [DataRow(true, false, true)]
+        [DataRow(true, true, true)]
+        public async Task AndroidLowercaseClientSave_PreservesLegacyUppercaseClientTokensAsync(
+            bool genericAuthority, bool withClientInfo, bool alreadyUpgraded)
+        {
+            // Arrange
+            using var http = new MockHttpManager();
+            string clientInfo = withClientInfo ? MockHelpers.CreateClientInfo() : null;
+            var stores = new Dictionary<string, Dictionary<string, object>>(StringComparer.Ordinal);
+            var upperApp = CreateApplication(http, genericAuthority, "HighClient");
+            var upperCache = (TokenCache)upperApp.UserTokenCacheInternal;
+            upperCache.Accessor = CreateAccessor(stores);
+            var originalUpper = await SignInAsync(upperApp, http, "Member", clientInfo).ConfigureAwait(false);
+            var upperRefreshToken = upperCache.Accessor.GetAllRefreshTokens().Single();
+            SeedLegacyOidcCache(upperCache.Accessor, stores);
+            string expectedUpperRefreshToken = alreadyUpgraded ? "newer-upper-refresh-token" : upperRefreshToken.Secret;
+            if (alreadyUpgraded)
+            {
+                upperRefreshToken.Secret = expectedUpperRefreshToken;
+                string store = "com.microsoft.identity.client.refreshToken" + (withClientInfo ? "" : ".subject.v1");
+                string prefix = withClientInfo ? "" : upperRefreshToken.HomeAccountId.Length + ":" + upperRefreshToken.HomeAccountId + ":";
+                stores[store][prefix + upperRefreshToken.CacheKey] = upperRefreshToken.ToJObject().ToString();
+            }
+            var lowerApp = CreateApplication(http, genericAuthority, "highclient", discoveryAlreadyCached: true);
+            var lowerCache = (TokenCache)lowerApp.UserTokenCacheInternal;
+            lowerCache.Accessor = CreateAccessor(stores);
+            http.AddMockHandler(new MockHttpMessageHandler
+            {
+                ExpectedMethod = HttpMethod.Post,
+                ResponseMessage = CreateTokenResponse("Member", true, clientInfo: clientInfo,
+                    clientId: "highclient", refreshToken: "lower-refresh-token", accessToken: "lower-access-token")
+            });
+
+            // Act
+            var lower = await lowerApp.AcquireTokenInteractive(s_scopes).ExecuteAsync().ConfigureAwait(false);
+
+            // Assert
+            CollectionAssert.AreEquivalent(new[] { originalUpper.AccessToken, lower.AccessToken },
+                lowerCache.Accessor.GetAllAccessTokens().Select(item => item.Secret).ToArray());
+            CollectionAssert.AreEquivalent(new[] { "HighClient", "highclient" },
+                lowerCache.Accessor.GetAllRefreshTokens().Select(item => item.ClientId).ToArray());
+            Assert.AreEqual(expectedUpperRefreshToken,
+                lowerCache.Accessor.GetAllRefreshTokens().Single(item => item.ClientId == "HighClient").Secret);
+            CollectionAssert.AreEquivalent(new[] { originalUpper.IdToken, lower.IdToken },
+                lowerCache.Accessor.GetAllIdTokens().Select(item => item.Secret).ToArray());
+            upperCache.Accessor = CreateAccessor(stores);
+            var cachedUpper = await upperApp.AcquireTokenSilent(s_scopes, originalUpper.Account)
+                .ExecuteAsync().ConfigureAwait(false);
+            Assert.AreEqual(TokenSource.Cache, cachedUpper.AuthenticationResultMetadata.TokenSource);
+            Assert.AreEqual(originalUpper.AccessToken, cachedUpper.AccessToken);
+            Assert.AreEqual(originalUpper.IdToken, cachedUpper.IdToken);
+            Assert.AreEqual("Member", cachedUpper.ClaimsPrincipal.FindFirst("sub").Value);
+
+            http.AddMockHandler(new MockHttpMessageHandler
+            {
+                ExpectedMethod = HttpMethod.Post,
+                ExpectedPostData = new Dictionary<string, string> { ["refresh_token"] = expectedUpperRefreshToken },
+                ResponseMessage = CreateTokenResponse("Member", false, clientInfo: clientInfo,
+                    refreshToken: "upper-refreshed-token", accessToken: "upper-refreshed-access-token")
+            });
+            await upperApp.AcquireTokenSilent(s_scopes, originalUpper.Account)
+                .WithForceRefresh(true).ExecuteAsync().ConfigureAwait(false);
+            Assert.HasCount(2, upperCache.Accessor.GetAllRefreshTokens());
+            Assert.AreEqual("upper-refreshed-token",
+                upperCache.Accessor.GetAllRefreshTokens().Single(item => item.ClientId == "HighClient").Secret);
+            lowerCache.Accessor = CreateAccessor(stores);
+            var cachedLower = await lowerApp.AcquireTokenSilent(s_scopes, lower.Account)
+                .ExecuteAsync().ConfigureAwait(false);
+            Assert.AreEqual(TokenSource.Cache, cachedLower.AuthenticationResultMetadata.TokenSource);
+            Assert.AreEqual(lower.AccessToken, cachedLower.AccessToken);
+            Assert.AreEqual(lower.IdToken, cachedLower.IdToken);
+            Assert.AreEqual("lower-refresh-token",
+                lowerCache.Accessor.GetAllRefreshTokens().Single(item => item.ClientId == "highclient").Secret);
+        }
+
+        [TestMethod]
         [DataRow(true, "HighClient", "HighClient", true)]
         [DataRow(true, "HighClient", "highclient", false)]
         [DataRow(true, "highclient", "highclient", true)]
@@ -843,11 +923,11 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
         private static HttpResponseMessage CreateTokenResponse(
             string subject, bool includeIdToken, bool refreshed = false, string clientInfo = null, bool emptyIdToken = false,
-            string username = null, string clientId = null, string refreshToken = null)
+            string username = null, string clientId = null, string refreshToken = null, string accessToken = null)
         {
             var response = new JsonObject
             {
-                ["access_token"] = (refreshed ? "at-refreshed-" : "at-") + subject,
+                ["access_token"] = accessToken ?? (refreshed ? "at-refreshed-" : "at-") + subject,
                 ["refresh_token"] = refreshToken ?? "rt-" + subject,
                 ["token_type"] = "Bearer",
                 ["expires_in"] = 3600,
