@@ -149,6 +149,85 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
+        [DataRow("incorrect_state", false)]
+        [DataRow("", false)]
+        [DataRow("incorrect_state", true)]
+        [DataRow("", true)]
+        public async Task TestInteractiveWithCustomWebUi_ErrorCallback_ValidatesStateAsync(
+            string state, bool serverCancellation)
+        {
+            string query = "error=access_denied&error_description=local_callback_probe";
+            if (!string.IsNullOrEmpty(state))
+            {
+                query += "&state=" + Uri.EscapeDataString(state);
+            }
+
+            if (serverCancellation)
+            {
+                query += "&error_subcode=cancel";
+            }
+
+            await ExecuteTestAsync(
+                false,
+                ui => ui.AcquireAuthorizationCodeAsync(Arg.Any<Uri>(), Arg.Any<Uri>(), CancellationToken.None)
+                    .Returns(Task.FromResult(new Uri(ExpectedRedirectUri + "?" + query))),
+                async request =>
+                {
+                    var ex = await AssertException.TaskThrowsAsync<MsalClientException>(
+                        () => request.RunAsync(CancellationToken.None)).ConfigureAwait(false);
+                    Assert.AreEqual(MsalError.StateMismatchError, ex.ErrorCode);
+                }).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task TestInteractiveWithCustomWebUi_CorrelatedError_PreservesBehaviorAsync(bool serverCancellation)
+        {
+            await ExecuteTestAsync(
+                false,
+                ui => ui.AcquireAuthorizationCodeAsync(Arg.Any<Uri>(), Arg.Any<Uri>(), CancellationToken.None)
+                    .Returns(call =>
+                    {
+                        Uri authorizationUri = call.ArgAt<Uri>(0);
+                        string state = CoreHelpers.ParseKeyValueList(
+                            authorizationUri.Query.TrimStart('?'), '&', true, false, null)["state"];
+                        string query = "error=access_denied&error_description=local_callback_probe&state=" +
+                            Uri.EscapeDataString(state);
+                        if (serverCancellation)
+                        {
+                            query += "&error_subcode=cancel";
+                        }
+
+                        return Task.FromResult(new Uri(ExpectedRedirectUri + "?" + query));
+                    }),
+                async request =>
+                {
+                    var ex = await AssertException.TaskThrowsAsync<MsalException>(
+                        () => request.RunAsync(CancellationToken.None), allowDerived: true).ConfigureAwait(false);
+                    Assert.AreEqual(
+                        serverCancellation ? MsalError.AuthenticationCanceledError : "access_denied", ex.ErrorCode);
+                    Assert.IsInstanceOfType(
+                        ex, serverCancellation ? typeof(MsalClientException) : typeof(MsalServiceException));
+                }).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        public async Task TestInteractiveWithCustomWebUi_LocalCancellation_PreservesBehaviorAsync()
+        {
+            await ExecuteTestAsync(
+                false,
+                ui => ui.AcquireAuthorizationCodeAsync(null, null, CancellationToken.None)
+                    .ReturnsForAnyArgs<Uri>(_ => { throw new OperationCanceledException(); }),
+                async request =>
+                {
+                    var ex = await AssertException.TaskThrowsAsync<MsalClientException>(
+                        () => request.RunAsync(CancellationToken.None)).ConfigureAwait(false);
+                    Assert.AreEqual(MsalError.AuthenticationCanceledError, ex.ErrorCode);
+                }).ConfigureAwait(false);
+        }
+
+        [TestMethod]
         public async Task TestInteractiveWithCustomWebUi_IncorrectStateAsync()
         {
             // The CustomWebUi is only going to return the Uri value here with no additional data to parse to get the code, so we'll expect to fail.

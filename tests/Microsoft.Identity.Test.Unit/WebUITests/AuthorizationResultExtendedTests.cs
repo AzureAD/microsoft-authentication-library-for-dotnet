@@ -46,18 +46,20 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         public void FromUri_ErrorWithSubcodeCancel_ReturnsUserCancel()
         {
             var result = AuthorizationResult.FromUri(
-                "https://example.com?error=access_denied&error_subcode=cancel");
+                "https://example.com?error=access_denied&error_subcode=cancel&state=mystate");
             Assert.AreEqual(AuthorizationStatus.UserCancel, result.Status);
+            Assert.AreEqual("mystate", result.State);
         }
 
         [TestMethod]
         public void FromUri_ErrorWithDescription_ReturnsProtocolError()
         {
             var result = AuthorizationResult.FromUri(
-                "https://example.com?error=invalid_request&error_description=bad+request");
+                "https://example.com?error=invalid_request&error_description=bad+request&state=mystate");
             Assert.AreEqual(AuthorizationStatus.ProtocolError, result.Status);
             Assert.AreEqual("invalid_request", result.Error);
             Assert.AreEqual("bad request", result.ErrorDescription);
+            Assert.AreEqual("mystate", result.State);
         }
 
         [TestMethod]
@@ -121,10 +123,11 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         [TestMethod]
         public void FromPostData_WithError_ReturnsProtocolError()
         {
-            var postData = System.Text.Encoding.UTF8.GetBytes("error=invalid_grant&error_description=expired+token");
+            var postData = System.Text.Encoding.UTF8.GetBytes("error=invalid_grant&error_description=expired+token&state=mystate");
             var result = AuthorizationResult.FromPostData(postData);
             Assert.AreEqual(AuthorizationStatus.ProtocolError, result.Status);
             Assert.AreEqual("invalid_grant", result.Error);
+            Assert.AreEqual("mystate", result.State);
         }
 
         [TestMethod]
