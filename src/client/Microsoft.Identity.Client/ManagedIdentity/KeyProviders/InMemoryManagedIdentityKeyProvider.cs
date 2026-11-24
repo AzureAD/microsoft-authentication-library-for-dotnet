@@ -91,23 +91,22 @@ namespace Microsoft.Identity.Client.ManagedIdentity.KeyProviders
 
         /// <summary>
         /// Creates a new RSA key pair with 2048-bit key size for cryptographic operations.
-        /// Uses platform-specific RSA implementations: RSACng on .NET Framework and RSA.Create() on other platforms.
+        /// Uses platform-specific RSA implementations: persisted RSACng on Windows and RSA.Create() on other platforms.
         /// </summary>
         /// <returns>
         /// An <see cref="RSA"/> instance configured with a 2048-bit key size.
-        /// On .NET Framework, returns <see cref="RSACng"/>; on other platforms, returns the default RSA implementation.
+        /// On Windows, returns persisted <see cref="RSACng"/>; on other platforms, returns the default RSA implementation.
         /// </returns>
         /// <remarks>
         /// This method is public instead of private because it is used in unit tests
         /// </remarks>
         public static RSA CreateRsaKeyPair()
         {
-#if NET462 || NET472 || NET8_0
-            // Windows-only TFMs (Framework or -windows TFMs): compile CNG path
+#if NET462 || NET472
             return CreateWindowsPersistedRsa();
 
 #else
-            // netstandard2.0 can run anywhere; pick at runtime
+            // Both modern .NET and netstandard2.0 can run on non-Windows hosts.
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 return CreateWindowsPersistedRsa(); // requires CNG package in csproj
