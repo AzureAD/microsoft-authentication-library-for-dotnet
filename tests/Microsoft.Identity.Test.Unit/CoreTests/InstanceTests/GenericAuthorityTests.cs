@@ -11,6 +11,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
@@ -70,9 +71,279 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 Assert.IsNotNull(result);
                 Assert.IsNotNull(result.AccessToken);
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+                var cachedToken = ((ConfidentialClientApplication)app)
+                    .AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single();
+                Assert.AreEqual("demo.duendesoftware.com", cachedToken.Environment);
+                Assert.AreEqual(string.Empty, cachedToken.TenantId);
+                Assert.AreEqual(
+                    $"-demo.duendesoftware.com-accesstoken-{TestConstants.ClientId}--api",
+                    cachedToken.CacheKey);
             }
         }
       
+        [TestMethod]
+        [DataRow(true, "https://identity.example/realm-b")]
+        [DataRow(false, "https://identity.example/realm-b")]
+        [DataRow(true, "https://other-identity.example/realm-b")]
+        [DataRow(false, "https://other-identity.example/realm-b")]
+        public async Task ClientCredential_DifferentOidcRealms_DoNotShareTokens_Async(
+            bool useSharedCache,
+            string authorityB)
+        {
+            // Arrange
+            using (var httpManager = new MockHttpManager())
+            {
+                const string AuthorityA = "https://identity.example/realm-a";
+                const string TokenA = "synthetic-token-from-realm-a";
+                const string TokenB = "synthetic-token-from-realm-b";
+                var scopes = new[] { "api" };
+                byte[] serializedCache = null;
+
+                ConfidentialClientApplication CreateApp(string authority, string clientSecret, string realm)
+                {
+                    var builder = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                        .WithHttpManager(httpManager)
+                        .WithOidcAuthority(authority)
+                        .WithClientSecret(clientSecret);
+
+                    if (useSharedCache)
+                    {
+                        builder.WithCacheOptions(CacheOptions.EnableSharedCacheOptions);
+                    }
+
+                    var app = builder.BuildConcrete();
+                    if (!useSharedCache)
+                    {
+                        app.AppTokenCache.SetBeforeAccess(args =>
+                        {
+                            Assert.AreEqual($"{TestConstants.ClientId}_{realm}_AppTokenCache", args.SuggestedCacheKey);
+                            args.TokenCache.DeserializeMsalV3(serializedCache, shouldClearExistingCache: true);
+                        });
+                        app.AppTokenCache.SetAfterAccess(args =>
+                        {
+                            if (args.HasStateChanged)
+                            {
+                                serializedCache = args.TokenCache.SerializeMsalV3();
+                            }
+                        });
+                    }
+
+                    return app;
+                }
+
+                void AddIssuerResponses(string authority, string clientSecret, string token)
+                {
+                    httpManager.AddMockHandler(CreateOidcHttpHandler(
+                        $"{authority}/{Constants.WellKnownOpenIdConfigurationPath}", authority));
+                    httpManager.AddMockHandler(new MockHttpMessageHandler
+                    {
+                        ExpectedMethod = HttpMethod.Post,
+                        ExpectedUrl = $"{authority}/connect/token",
+                        ExpectedPostData = new Dictionary<string, string>
+                        {
+                            { "client_id", TestConstants.ClientId },
+                            { "client_secret", clientSecret },
+                            { "grant_type", "client_credentials" },
+                            { "scope", "api" }
+                        },
+                        ResponseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage(token)
+                    });
+                }
+
+                var appA = CreateApp(AuthorityA, "synthetic-secret-a", "realm-a");
+                var appB = CreateApp(authorityB, "synthetic-secret-b", "realm-b");
+
+                try
+                {
+                    // Act
+                    AddIssuerResponses(AuthorityA, "synthetic-secret-a", TokenA);
+                    var resultA = await appA.AcquireTokenForClient(scopes).ExecuteAsync().ConfigureAwait(false);
+
+                    // Assert
+                    Assert.AreEqual(TokenA, resultA.AccessToken);
+                    Assert.AreEqual(TokenSource.IdentityProvider, resultA.AuthenticationResultMetadata.TokenSource);
+                    Assert.HasCount(1, appA.AppTokenCacheInternal.Accessor.GetAllAccessTokens());
+                    Assert.AreEqual(TokenA, appA.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().Secret);
+                    var entryA = appA.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single();
+                    Assert.AreEqual("identity.example", entryA.Environment);
+                    Assert.AreEqual("realm-a", entryA.TenantId);
+                    Assert.AreEqual("realm-a", resultA.TenantId);
+                    Assert.AreEqual(
+                        $"-identity.example-accesstoken-{TestConstants.ClientId}-realm-a-api",
+                        entryA.CacheKey);
+                    Assert.AreEqual(0, httpManager.QueueSize);
+
+                    // Act
+                    AddIssuerResponses(authorityB, "synthetic-secret-b", TokenB);
+                    var resultB = await appB.AcquireTokenForClient(scopes).ExecuteAsync().ConfigureAwait(false);
+
+                    // Assert
+                    Assert.AreEqual(TokenB, resultB.AccessToken,
+                        "A request for issuer B must not return issuer A's cached token.");
+                    Assert.AreEqual(TokenSource.IdentityProvider, resultB.AuthenticationResultMetadata.TokenSource);
+                    Assert.AreEqual(0, httpManager.QueueSize, "Issuer B's discovery and token responses must be consumed.");
+                    Assert.IsTrue(appB.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Any(item => item.Secret == TokenB));
+                    Assert.HasCount(2, appB.AppTokenCacheInternal.Accessor.GetAllAccessTokens());
+                    var entryB = appB.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single(item => item.Secret == TokenB);
+                    Assert.AreEqual(new Uri(authorityB).Host, entryB.Environment);
+                    Assert.AreEqual("realm-b", entryB.TenantId);
+                    Assert.AreEqual("realm-b", resultB.TenantId);
+                    Assert.AreEqual(
+                        $"-{new Uri(authorityB).Host}-accesstoken-{TestConstants.ClientId}-realm-b-api",
+                        entryB.CacheKey);
+                    entryA = appB.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single(item => item.Secret == TokenA);
+                    Assert.AreEqual("identity.example", entryA.Environment);
+                    Assert.AreEqual("realm-a", entryA.TenantId);
+
+                    // Act
+                    var cachedA = await appA.AcquireTokenForClient(scopes).ExecuteAsync().ConfigureAwait(false);
+
+                    // Assert
+                    Assert.AreEqual(TokenA, cachedA.AccessToken);
+                    Assert.AreEqual(TokenSource.Cache, cachedA.AuthenticationResultMetadata.TokenSource,
+                        "Saving B's token must not evict A's token.");
+                    Assert.IsTrue(appA.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Any(item => item.Secret == TokenA));
+                    Assert.HasCount(2, appA.AppTokenCacheInternal.Accessor.GetAllAccessTokens());
+
+                    // Act
+                    var cachedB = await appB.AcquireTokenForClient(scopes).ExecuteAsync().ConfigureAwait(false);
+
+                    // Assert
+                    Assert.AreEqual(TokenB, cachedB.AccessToken);
+                    Assert.AreEqual(TokenSource.Cache, cachedB.AuthenticationResultMetadata.TokenSource);
+                    Assert.IsTrue(appB.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Any(item => item.Secret == TokenB));
+                    Assert.HasCount(2, appB.AppTokenCacheInternal.Accessor.GetAllAccessTokens());
+                }
+                finally
+                {
+                    // Preserve the isolation assertion if the defect leaves B's HTTP responses unused.
+                    httpManager.ClearQueue();
+                }
+            }
+        }
+
+        [TestMethod]
+        [DataRow("identity.example", null)]
+        [DataRow("identity.example", "realm-b")]
+        [DataRow("other-identity.example", "realm-a")]
+        [DataRow("https://identity.example/realm-a", null)]
+        public async Task ClientCredential_LegacyOrDifferentRealmToken_IsNotReused_Async(
+            string cachedEnvironment, string cachedRealm)
+        {
+            // Arrange
+            const string Authority = "https://identity.example/realm-a";
+            using (var httpManager = new MockHttpManager())
+            {
+                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithHttpManager(httpManager)
+                    .WithOidcAuthority(Authority)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .BuildConcrete();
+                var scopes = new[] { "api" };
+                httpManager.AddMockHandler(CreateOidcHttpHandler(
+                    $"{Authority}/{Constants.WellKnownOpenIdConfigurationPath}", Authority));
+                httpManager.AddMockHandler(CreateTokenResponseHttpHandler(
+                    $"{Authority}/connect/token", "api", "api", "client_credentials"));
+                await app.AcquireTokenForClient(scopes).ExecuteAsync().ConfigureAwait(false);
+
+                var cachedToken = app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single();
+                app.AppTokenCacheInternal.Accessor.Clear();
+                cachedToken = new MsalAccessTokenCacheItem(
+                    cachedEnvironment,
+                    cachedToken.ClientId,
+                    cachedToken.ScopeString,
+                    cachedRealm,
+                    cachedToken.Secret,
+                    cachedToken.CachedAt,
+                    cachedToken.ExpiresOn,
+                    cachedToken.ExtendedExpiresOn,
+                    cachedToken.RawClientInfo,
+                    cachedToken.HomeAccountId);
+                app.AppTokenCacheInternal.Accessor.SaveAccessToken(
+                    MsalAccessTokenCacheItem.FromJsonString(cachedToken.ToJsonString()));
+                httpManager.AddMockHandler(new MockHttpMessageHandler
+                {
+                    ExpectedMethod = HttpMethod.Post,
+                    ExpectedUrl = $"{Authority}/connect/token",
+                    ResponseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage("synthetic-refreshed-token")
+                });
+
+                // Act
+                var refreshed = await app.AcquireTokenForClient(scopes).ExecuteAsync().ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual(TokenSource.IdentityProvider, refreshed.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual("synthetic-refreshed-token", refreshed.AccessToken);
+                var refreshedEntry = app.AppTokenCacheInternal.Accessor.GetAllAccessTokens()
+                    .Single(item => item.Secret == refreshed.AccessToken);
+                Assert.AreEqual("identity.example", refreshedEntry.Environment);
+                Assert.AreEqual("realm-a", refreshedEntry.TenantId);
+                Assert.AreEqual(
+                    $"-identity.example-accesstoken-{TestConstants.ClientId}-realm-a-api",
+                    refreshedEntry.CacheKey);
+
+                // Act
+                var cached = await app.AcquireTokenForClient(scopes).ExecuteAsync().ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual(TokenSource.Cache, cached.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(refreshed.AccessToken, cached.AccessToken);
+            }
+        }
+
+        [TestMethod]
+        [DataRow("https://IDENTITY.example:443/realm-a/")]
+        [DataRow("https://identity.example/realm-a")]
+        [DataRow("https://identity.example/Realm-A")]
+        [DataRow("https://identity.example/realm-a/nested")]
+        [DataRow("https://identity.example:8443/realm-a")]
+        public async Task ClientCredential_SameOidcCacheIdentity_ReuseToken_Async(string equivalentAuthority)
+        {
+            // Arrange
+            const string Authority = "https://identity.example/realm-a";
+            using (var httpManager = new MockHttpManager())
+            {
+                ConfidentialClientApplication CreateApp(string authority) =>
+                    ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                        .WithHttpManager(httpManager)
+                        .WithOidcAuthority(authority)
+                        .WithClientSecret(TestConstants.ClientSecret)
+                        .WithCacheOptions(CacheOptions.EnableSharedCacheOptions)
+                        .BuildConcrete();
+
+                var app = CreateApp(Authority);
+                var equivalentApp = CreateApp(equivalentAuthority);
+                var scopes = new[] { "api" };
+                httpManager.AddMockHandler(CreateOidcHttpHandler(
+                    $"{Authority}/{Constants.WellKnownOpenIdConfigurationPath}", Authority));
+                httpManager.AddMockHandler(new MockHttpMessageHandler
+                {
+                    ExpectedMethod = HttpMethod.Post,
+                    ExpectedUrl = $"{Authority}/connect/token",
+                    ResponseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseWithClientInfoMessage()
+                });
+                var first = await app.AcquireTokenForClient(scopes).ExecuteAsync().ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual(TokenSource.IdentityProvider, first.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual("identity.example", first.Account.Environment);
+                Assert.HasCount(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens());
+                Assert.AreEqual("identity.example", app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().Environment);
+                Assert.AreEqual("realm-a", app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().TenantId);
+                Assert.AreEqual("realm-a", first.TenantId);
+
+                // Act
+                var cached = await equivalentApp.AcquireTokenForClient(scopes).ExecuteAsync().ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual(TokenSource.Cache, cached.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(first.AccessToken, cached.AccessToken);
+                Assert.AreEqual("identity.example", cached.Account.Environment);
+                Assert.AreEqual("realm-a", cached.TenantId);
+                Assert.HasCount(1, equivalentApp.AppTokenCacheInternal.Accessor.GetAllAccessTokens());
+            }
+        }
+
         [TestMethod]
         public async Task UserAuth_HappyPath_Async()
         {

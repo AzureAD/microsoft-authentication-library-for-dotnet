@@ -52,6 +52,25 @@ used through Microsoft.Identity.Web or MISE. It applies to MSAL applications in
 the process, not just one consuming SDK, and does not change logs emitted by
 those other libraries. Enable Verbose/Debug to see the demoted diagnostics.
 
+### Generic OIDC application-token caching
+
+For `WithOidcAuthority` and `AcquireTokenForClient`, the cached access token's
+`environment` remains the hostname. The first authority-path segment is stored
+as the lowercase `realm`, after the client ID in the token-entry key. For
+example, `https://identity.example/realm-a` produces
+`-identity.example-accesstoken-my-client-realm-a-api` for client `my-client`
+and scope `api`. Authorities without a path retain an empty realm.
+
+The realm also appears in `AuthenticationResult.TenantId` and the external
+`SuggestedCacheKey`, so existing path-based authorities require token
+reacquisition. `Account.Environment` remains the hostname; user flows are
+unchanged. Upgrade all shared-cache readers; downgrading loses realm isolation.
+
+This first-segment identity does not distinguish path case, different ports,
+queries, or deeper paths sharing the same first segment. For example,
+`/realms/realm-a` and `/realms/realm-b` both use realm `realms`. Do not share a
+client ID, scopes, and cache between independent issuers with these identities.
+
 ## Support SLA
 
 MSAL.NET became Generally Available with MSAL.NET 3.0.8. Since MSAL.NET moved to version 4:

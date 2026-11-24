@@ -82,13 +82,32 @@ namespace Microsoft.Identity.Client.Cache
                 requestParameters.ApiId == ApiEvent.ApiIds.AcquireTokenForSystemAssignedManagedIdentity ||
                 requestParameters.ApiId == ApiEvent.ApiIds.AcquireTokenForUserAssignedManagedIdentity)
             {
-                string tenantId = requestParameters.Authority.TenantId ?? "";
+                string tenantId = GetGenericOidcAppRealm(requestParameters) ?? requestParameters.Authority.TenantId ?? "";
                 key = GetAppTokenCacheItemKey(requestParameters.AppConfig.ClientId, tenantId, requestParameters.AuthenticationScheme?.KeyId, requestParameters.CacheKeyComponents);
                 return true;
             }
 
             key = null;
             return false;
+        }
+
+        internal static string GetGenericOidcAppRealm(AuthenticationRequestParameters requestParameters)
+        {
+            if (requestParameters.ApiId != ApiEvent.ApiIds.AcquireTokenForClient)
+            {
+                return null;
+            }
+
+            var authorityInfo = requestParameters.AuthorityManager.OriginalAuthority.AuthorityInfo;
+            if (authorityInfo.AuthorityType != AuthorityType.Generic)
+            {
+                return null;
+            }
+
+            var authority = authorityInfo.CanonicalAuthority;
+            return authority.Segments.Length >= 2
+                ? AuthorityInfo.GetFirstPathSegment(authority).ToLowerInvariant()
+                : null;
         }
 
         public static string GetAppTokenCacheItemKey(
