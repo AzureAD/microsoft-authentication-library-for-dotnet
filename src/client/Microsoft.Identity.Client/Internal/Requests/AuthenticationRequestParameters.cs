@@ -136,6 +136,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public X509Certificate2 ResolvedCertificate { get; set; }
 
         /// <summary>
+        /// Tenant GUID resolved from authority metadata for client-credentials authentication results.
+        /// This does not change the authority or cache realm and is null when no GUID can be resolved.
+        /// </summary>
+        public string ResolvedTenantId { get; set; }
+
+        /// <summary>
         /// Indicates if the user configured claims via .WithClaims. Not affected by Client Capabilities
         /// </summary>
         /// <remarks>If user configured claims, request should bypass cache</remarks>
