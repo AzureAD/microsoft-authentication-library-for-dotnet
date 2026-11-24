@@ -382,7 +382,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             MsalException exception,
             ILoggerAdapter logger)
         {
-            AuthenticationRequestParameters.ReleaseCoalescingAdmission?.Invoke(exception);
+            AuthenticationRequestParameters.Coalescer?.ReleaseAdmission(exception);
             if (AuthenticationRequestParameters.AppConfig.OnCompletion == null)
             {
                 return;

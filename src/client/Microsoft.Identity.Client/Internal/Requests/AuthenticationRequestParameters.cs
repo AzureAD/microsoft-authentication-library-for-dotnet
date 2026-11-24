@@ -107,8 +107,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         #endregion
 
         public ICacheSessionManager CacheSessionManager { get; }
-        internal MsalServiceException LastTokenEndpointServiceException { get; set; }
-        internal Action<MsalException> ReleaseCoalescingAdmission { get; set; }
+        internal TokenRequestCoalescer Coalescer { get; set; }
         public HashSet<string> Scope { get; }
         public Uri RedirectUri { get; set; }
 

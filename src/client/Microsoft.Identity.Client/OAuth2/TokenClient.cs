@@ -83,9 +83,10 @@ namespace Microsoft.Identity.Client.OAuth2
                 }
                 catch (MsalServiceException e)
                 {
-                    if (ReferenceEquals(e, _oAuth2Client.LastHttpServiceException))
+                    var coalescer = _requestParams.Coalescer;
+                    if (coalescer is not null && ReferenceEquals(e, _oAuth2Client.LastHttpServiceException))
                     {
-                        _requestParams.LastTokenEndpointServiceException = e;
+                        coalescer.LastTokenEndpointServiceException = e;
                     }
                     _serviceBundle.ThrottlingManager.RecordException(_requestParams, _oAuth2Client.GetBodyParameters(), e);
                     throw;

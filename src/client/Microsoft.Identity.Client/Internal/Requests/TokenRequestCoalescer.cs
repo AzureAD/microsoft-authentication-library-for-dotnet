@@ -37,6 +37,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private readonly CacheRefreshReason _initialRefreshReason;
         private readonly Func<Task<MsalAccessTokenCacheItem>> _findToken;
         private readonly Func<MsalAccessTokenCacheItem, CancellationToken, Task<AuthenticationResult>> _createResult;
+        private GatePool.Lease _admission;
+        private CancellationToken _cancellationToken;
 
         internal TokenRequestCoalescer(
             AuthenticationRequestParameters parameters,
@@ -63,6 +65,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
             s_failureCaches.GetValue(serviceBundle, _ => new ThrottlingCache());
 
         internal RequestContext RequestContext => _parameters.RequestContext;
+
+        internal MsalServiceException LastTokenEndpointServiceException { get; set; }
 
         internal async Task<AuthenticationResult> ExecuteAsync(
             Func<Task<AuthenticationResult>> acquire,
@@ -97,24 +101,30 @@ namespace Microsoft.Identity.Client.Internal.Requests
             CancellationToken cancellationToken,
             GatePool.Lease admission = null)
         {
-            _parameters.ReleaseCoalescingAdmission = exception =>
-            {
-                // Publish a final eligible failure before observers can start another acquisition.
-                if (exception is MsalServiceException serviceException)
-                {
-                    RecordServiceFailure(serviceException, cancellationToken);
-                    _parameters.LastTokenEndpointServiceException = null;
-                }
-                admission?.Dispose();
-            };
+            _admission = admission;
+            _cancellationToken = cancellationToken;
+            _parameters.Coalescer = this;
             try
             {
                 return await ExecuteCoreAsync(acquire, observedToken, cancellationToken).ConfigureAwait(false);
             }
             finally
             {
-                _parameters.ReleaseCoalescingAdmission = null;
+                _parameters.Coalescer = null;
+                _admission = null;
+                _cancellationToken = default;
             }
+        }
+
+        internal void ReleaseAdmission(MsalException exception)
+        {
+            // Publish a final eligible failure before observers can start another acquisition.
+            if (exception is MsalServiceException serviceException)
+            {
+                RecordServiceFailure(serviceException, _cancellationToken);
+                LastTokenEndpointServiceException = null;
+            }
+            _admission?.Dispose();
         }
 
         private async Task<AuthenticationResult> ExecuteCoreAsync(
@@ -134,7 +144,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                  !SilentRequestHelper.NeedsRefresh(cachedToken)))
             {
                 // Validation is coordinated; formatting an accepted token is caller-local.
-                _parameters.ReleaseCoalescingAdmission?.Invoke(null);
+                ReleaseAdmission(null);
                 var result = observedToken is null
                     ? await _createResult(cachedToken, cancellationToken).ConfigureAwait(false)
                     : null;
@@ -159,7 +169,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 ThrottleCommon.TryThrowServiceException(_key, _failureCache, logger, nameof(TokenRequestCoalescer));
             }
             AuthenticationResult acquired;
-            _parameters.LastTokenEndpointServiceException = null;
+            LastTokenEndpointServiceException = null;
             try
             {
                 acquired = await acquire().ConfigureAwait(false);
@@ -171,7 +181,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
             finally
             {
-                _parameters.LastTokenEndpointServiceException = null;
+                LastTokenEndpointServiceException = null;
             }
             if (acquired.AuthenticationResultMetadata.TokenSource == TokenSource.IdentityProvider)
             {
@@ -183,7 +193,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private void RecordServiceFailure(MsalServiceException ex, CancellationToken cancellationToken)
         {
             if (_parameters.AppConfig.IsConfidentialClient &&
-                ReferenceEquals(ex, _parameters.LastTokenEndpointServiceException) &&
+                ReferenceEquals(ex, LastTokenEndpointServiceException) &&
                 !cancellationToken.IsCancellationRequested &&
                 (ex.StatusCode == 429 || (ex.StatusCode >= 500 && ex.StatusCode < 600)) &&
                 ex is not MsalUiRequiredException &&

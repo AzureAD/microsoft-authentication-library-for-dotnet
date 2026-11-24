@@ -509,7 +509,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             atItem?.AddAdditionalCacheParameters(clientInfoFromServer?.AdditionalResponseParameters);
 #endif
             // The token is published; result formatting is caller-local.
-            AuthenticationRequestParameters.ReleaseCoalescingAdmission?.Invoke(null);
+            AuthenticationRequestParameters.Coalescer?.ReleaseAdmission(null);
             var authResult = await AuthenticationResult.CreateAsync(
                 atItem,
                 idtItem,
