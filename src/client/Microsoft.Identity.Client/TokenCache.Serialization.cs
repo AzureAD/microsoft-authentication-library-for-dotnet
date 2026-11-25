@@ -17,8 +17,11 @@ namespace Microsoft.Identity.Client
         private readonly object _publicationGate = new object();
         private static readonly AsyncLocal<ReadHydrationScope> s_readHydration = new AsyncLocal<ReadHydrationScope>();
         private ReadHydrationScope _activeReadHydration;
-        private const string ReadIsolationOptOutHint = " Set AppContext switch '" +
-            DisableCacheReadIsolationSwitch + "' to true before constructing the application to restore the previous cache behavior.";
+        private string ReadIsolationOptOutHint => IsAppTokenCache
+            ? " Set AppContext switch '" + EnableAppCacheReadIsolationSwitch +
+                "' to false before constructing the application to restore the previous cache behavior."
+            : " Set AppContext switch '" + DisableCacheReadIsolationSwitch +
+                "' to true before constructing the application to restore the previous cache behavior.";
 
         TokenCacheSnapshot ITokenCacheSnapshotProvider.CreateSnapshot()
         {

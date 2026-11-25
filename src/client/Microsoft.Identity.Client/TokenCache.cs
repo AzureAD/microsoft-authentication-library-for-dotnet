@@ -36,13 +36,16 @@ namespace Microsoft.Identity.Client
     /// read callbacks may overlap; lifecycles with synchronous read callbacks remain sequential.
     /// To restore the previous read behavior, set the AppContext
     /// switch <c>Microsoft.Identity.Client.DisableCacheReadIsolation</c> to <c>true</c> before
-    /// constructing the application. Other cache configurations retain their existing behavior.
+    /// constructing the application. Application-token caches can opt in to operation-owned
+    /// read views by setting <c>Microsoft.Identity.Client.EnableAppCacheReadIsolation</c> to
+    /// <c>true</c> before constructing the application.
     /// </remarks>
     public sealed partial class TokenCache : ITokenCacheInternal
 #pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
     {
         internal const int ExpirationTooLongInDays = 10 * 365;
         internal const string DisableCacheReadIsolationSwitch = "Microsoft.Identity.Client.DisableCacheReadIsolation";
+        internal const string EnableAppCacheReadIsolationSwitch = "Microsoft.Identity.Client.EnableAppCacheReadIsolation";
 
         private readonly IFeatureFlags _featureFlags;
         internal ITokenCacheAccessor Accessor { get; set; }
@@ -84,7 +87,9 @@ namespace Microsoft.Identity.Client
 
             // useRealSemaphore= false for MyApps and potentially for all apps when using non-singleton MSAL
             // Capture once so the read path and its coordinator cannot disagree.
-            UseIsolatedCacheReads = !isReadView && !isApplicationTokenCache &&
+            UseIsolatedCacheReads = !isReadView &&
+                (!isApplicationTokenCache ||
+                    (AppContext.TryGetSwitch(EnableAppCacheReadIsolationSwitch, out bool enabled) && enabled)) &&
                 serviceBundle.Config.IsConfidentialClient &&
                 serviceBundle.Config.CacheSynchronizationEnabled &&
                 !serviceBundle.Config.LegacyCacheCompatibilityEnabled &&
@@ -94,7 +99,12 @@ namespace Microsoft.Identity.Client
                 allowSharedReaders: UseIsolatedCacheReads);
 
             var proxy = serviceBundle?.PlatformProxy ?? PlatformProxyFactory.CreatePlatformProxy(null);
-            Accessor = proxy.CreateTokenCacheAccessor(serviceBundle.Config.AccessorOptions, isApplicationTokenCache);
+            // A reused builder can change its options after the root cache was constructed.
+            var accessorOptions = isReadView && isApplicationTokenCache &&
+                serviceBundle.Config.AccessorOptions?.UseSharedCache == true
+                    ? null
+                    : serviceBundle.Config.AccessorOptions;
+            Accessor = proxy.CreateTokenCacheAccessor(accessorOptions, isApplicationTokenCache);
             _featureFlags = proxy.GetFeatureFlags();
 
             LegacyCachePersistence = legacyCachePersistenceForTest ?? proxy.CreateLegacyCachePersistence();
