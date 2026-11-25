@@ -107,6 +107,17 @@ namespace Microsoft.Identity.Client.Extensibility
                 throw new ArgumentNullException(nameof(value));
             }
 
+            if (builder.CommonParameters.SyncCacheKeyComponents?.ContainsKey(key) == true)
+            {
+                if (builder.CommonParameters.CacheKeyComponents?.ContainsKey(key) == true)
+                {
+                    throw new ArgumentException("Cannot override a key shared by synchronous body parameters and other cache key components.", nameof(key));
+                }
+
+                // Move only this explicit override to the shared cache-key collection; keep the request body intact.
+                builder.CommonParameters.SyncCacheKeyComponents.Remove(key);
+            }
+
             builder.CommonParameters.CacheKeyComponents ??= new SortedList<string, Func<CancellationToken, Task<string>>>();
             string capturedValue = value;
             builder.CommonParameters.CacheKeyComponents[key] = (CancellationToken _) => Task.FromResult(capturedValue);

@@ -163,6 +163,10 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
             bool isBrokerConfigured,
             CancellationToken cancellationToken)
         {
+            var requestParameters = CoreHelpers.ParseKeyValueList(
+                authorizationUri.Query.TrimStart('?'), '&', true, null);
+            requestParameters.TryGetValue(OAuth2Parameter.State, out string expectedState);
+
             Func<Uri, Task> defaultBrowserAction = (Uri u) => _platformProxy.StartDefaultOsBrowserAsync(u.AbsoluteUri, isBrokerConfigured);
             Func<Uri, Task> openBrowserAction = _webViewOptions?.OpenBrowserAsync ?? defaultBrowserAction;
 
@@ -173,12 +177,14 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
             return await _uriInterceptor.ListenToSingleRequestAndRespondAsync(
                 redirectUri.Port,
                 redirectUri.AbsolutePath,
-                GetResponseMessage,
+                response => GetResponseMessage(response, expectedState),
                 cancellationToken)
             .ConfigureAwait(false);
         }
 
-        internal /* internal for testing only */ MessageAndHttpCode GetResponseMessage(AuthorizationResponse authResponse)
+        internal /* internal for testing only */ MessageAndHttpCode GetResponseMessage(
+            AuthorizationResponse authResponse,
+            string expectedState)
         {
             // Parse the response to understand if an error was returned. This is done just to show the user a nice error message in the browser.
             AuthorizationResult authorizationResult;
@@ -194,6 +200,13 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
                 authorizationResult = AuthorizationResult.FromUri(authResponse.RequestUri.OriginalString);
             }
 
+            if (string.IsNullOrEmpty(expectedState) ||
+                !expectedState.Equals(authorizationResult.State, StringComparison.OrdinalIgnoreCase))
+            {
+                _logger.Warning("Ignoring a loopback response with a missing or mismatched state.");
+                return new MessageAndHttpCode(HttpStatusCode.BadRequest, string.Empty);
+            }
+
             if (!string.IsNullOrEmpty(authorizationResult.Error))
             {
                 _logger.Warning($"Default OS Browser intercepted an Uri with an error: " +
@@ -202,8 +215,8 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
                 string errorMessage = string.Format(
                         CultureInfo.InvariantCulture,
                         _webViewOptions?.HtmlMessageError ?? DefaultFailureHtml,
-                        authorizationResult.Error,
-                        authorizationResult.ErrorDescription);
+                        WebUtility.HtmlEncode(authorizationResult.Error),
+                        WebUtility.HtmlEncode(authorizationResult.ErrorDescription));
 
                 return GetMessage(_webViewOptions?.BrowserRedirectError, errorMessage);
             }

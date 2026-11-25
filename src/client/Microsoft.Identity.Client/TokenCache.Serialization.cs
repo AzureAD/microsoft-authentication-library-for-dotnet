@@ -13,6 +13,7 @@ namespace Microsoft.Identity.Client
     {
         // Unknown token cache data support for forwards compatibility.
         private IDictionary<string, JToken> _unknownNodes;
+        private int _unknownNodesSourceSizeInBytes;
         private readonly object _publicationGate = new object();
         private static readonly AsyncLocal<ReadHydrationScope> s_readHydration = new AsyncLocal<ReadHydrationScope>();
         private ReadHydrationScope _activeReadHydration;
@@ -24,7 +25,7 @@ namespace Microsoft.Identity.Client
             Validate();
             ValidateSerializationTarget();
             lock (_publicationGate)
-                return new TokenCacheSnapshot(Accessor, _unknownNodes, IsAppTokenCache);
+                return new TokenCacheSnapshot(Accessor, _unknownNodes, IsAppTokenCache, _unknownNodesSourceSizeInBytes);
         }
 
         void ITokenCacheSnapshotProvider.RestoreSnapshot(TokenCacheSnapshot snapshot)
@@ -37,13 +38,17 @@ namespace Microsoft.Identity.Client
                 {
                     Accessor.Clear();
                     if (UseIsolatedCacheReads || Volatile.Read(ref _activeReadHydration) != null)
+                    {
                         _unknownNodes = null;
+                        _unknownNodesSourceSizeInBytes = 0;
+                    }
                 }
                 else
                 {
                     if (snapshot.IsApplicationCache != IsAppTokenCache)
                         throw new System.ArgumentException("The snapshot belongs to a different cache type.", nameof(snapshot));
                     _unknownNodes = snapshot.Restore(Accessor);
+                    _unknownNodesSourceSizeInBytes = snapshot.UnknownNodesSourceSizeInBytes;
                 }
                 RecordCompleteHydration(replaceExisting: true, replaceUnknown: true);
             }
@@ -74,7 +79,10 @@ namespace Microsoft.Identity.Client
         {
             ValidateLegacyDeserialization();
             lock (_publicationGate)
+            {
                 _unknownNodes = new TokenCacheDictionarySerializer(Accessor).Deserialize(msalV2State, false);
+                _unknownNodesSourceSizeInBytes = 0;
+            }
         }
 
         byte[] ITokenCacheSerializer.SerializeMsalV3()
@@ -95,12 +103,16 @@ namespace Microsoft.Identity.Client
                     {
                         Accessor.Clear();
                         if (UseIsolatedCacheReads || Volatile.Read(ref _activeReadHydration) != null)
+                        {
                             _unknownNodes = null;
+                            _unknownNodesSourceSizeInBytes = 0;
+                        }
                     }
                     RecordCompleteHydration(shouldClearExistingCache, shouldClearExistingCache);
                     return;
                 }
                 _unknownNodes = new TokenCacheJsonSerializer(Accessor).Deserialize(msalV3State, shouldClearExistingCache);
+                _unknownNodesSourceSizeInBytes = msalV3State.Length;
                 RecordCompleteHydration(shouldClearExistingCache, replaceUnknown: true);
             }
         }
@@ -123,6 +135,7 @@ namespace Microsoft.Identity.Client
             // Failed callbacks can leave partial entries and unknown JSON in this operation's target.
             Accessor.Clear();
             _unknownNodes = null;
+            _unknownNodesSourceSizeInBytes = 0;
             var scope = new ReadHydrationScope(this, source, s_readHydration.Value);
             Volatile.Write(ref _activeReadHydration, scope);
             s_readHydration.Value = scope;
@@ -182,7 +195,10 @@ namespace Microsoft.Identity.Client
                 foreach (var item in metadata)
                     target.Accessor.SaveAppMetadata(item);
                 if (replaceUnknown)
+                {
                     target._unknownNodes = unknownNodes;
+                    target._unknownNodesSourceSizeInBytes = _unknownNodesSourceSizeInBytes;
+                }
             }
         }
 

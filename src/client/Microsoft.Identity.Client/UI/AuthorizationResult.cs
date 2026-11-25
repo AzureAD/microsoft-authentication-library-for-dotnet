@@ -72,19 +72,25 @@ namespace Microsoft.Identity.Client.UI
         {
             if (parameters.TryGetValue(TokenResponseClaim.Error, out string error))
             {
-                if (parameters.TryGetValue(TokenResponseClaim.ErrorSubcode, out string subcode))
+                AuthorizationResult errorResult;
+                if (parameters.TryGetValue(TokenResponseClaim.ErrorSubcode, out string subcode) &&
+                    TokenResponseClaim.ErrorSubcodeCancel.Equals(subcode, StringComparison.OrdinalIgnoreCase))
                 {
-                    if (TokenResponseClaim.ErrorSubcodeCancel.Equals(subcode, StringComparison.OrdinalIgnoreCase))
-                    {
-                        return FromStatus(AuthorizationStatus.UserCancel);
-                    }
+                    errorResult = FromStatus(AuthorizationStatus.UserCancel);
+                }
+                else
+                {
+                    errorResult = FromStatus(AuthorizationStatus.ProtocolError,
+                        error,
+                        parameters.TryGetValue(TokenResponseClaim.ErrorDescription, out string errorDescription)
+                            ? errorDescription
+                            : null);
                 }
 
-                return FromStatus(AuthorizationStatus.ProtocolError,
-                    error,
-                    parameters.TryGetValue(TokenResponseClaim.ErrorDescription, out string errorDescription)
-                            ? errorDescription
-                        : null);
+                parameters.TryGetValue(OAuth2Parameter.State, out string errorState);
+                errorResult.State = errorState;
+                errorResult.IsErrorResponse = true;
+                return errorResult;
             }
 
             var authResult = new AuthorizationResult
@@ -164,6 +170,9 @@ namespace Microsoft.Identity.Client.UI
         }
 
         public AuthorizationStatus Status { get; private set; }
+
+        // Server-side cancellation is an error response, unlike cancellation originating in the local UI.
+        public bool IsErrorResponse { get; private set; }
 
         public string Code { get; set; }
 

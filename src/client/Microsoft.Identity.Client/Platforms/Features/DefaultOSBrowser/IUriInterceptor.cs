@@ -9,21 +9,21 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
 {
     /// <summary>
     /// An abstraction over objects that are able to listen to localhost url (e.g. http://localhost:1234)
-    /// and to retrieve the authorization response via GET (query params) or POST (form data)
+    /// and to retrieve the authorization response via POST (form data).
     /// </summary>
     internal interface IUriInterceptor
     {
         /// <summary>
-        /// Listens to http://localhost:{port} and retrieve the authorization response.
-        /// For GET requests, the response is in query params. For POST (form_post), the response is in the body.
-        /// Then push back a response such as a display message or a redirect.
+        /// Listens to http://localhost:{port} until an authorization response is accepted.
+        /// Rejects requests without a form_post body and responses rejected by the response producer.
+        /// Sends a display message or redirect for the accepted response.
         /// </summary>
         /// <remarks>Cancellation is very important as this is typically a long running unmonitored operation</remarks>
         /// <param name="port">the port to listen to</param>
         /// <param name="path">the path to listen in</param>
-        /// <param name="responseProducer">The message to be displayed, or url to be redirected to will be created by this callback</param>
+        /// <param name="responseProducer">Creates the browser response. A BadRequest response rejects the callback without ending the listener.</param>
         /// <param name="cancellationToken">Cancellation token</param>
-        /// <returns>Authorization response containing either URI with query params or POST data</returns>
+        /// <returns>The accepted authorization response containing POST data.</returns>
         Task<AuthorizationResponse> ListenToSingleRequestAndRespondAsync(
             int port,
             string path,

@@ -23,14 +23,17 @@ namespace Microsoft.Identity.Client
     public sealed class TokenCacheSnapshot
     {
         private readonly CacheSerializationContract _state;
+        internal int UnknownNodesSourceSizeInBytes { get; }
         internal bool IsApplicationCache { get; }
 
         internal TokenCacheSnapshot(
             ITokenCacheAccessor accessor,
             IDictionary<string, JsonNode> unknownNodes,
-            bool isApplicationCache)
+            bool isApplicationCache,
+            int unknownNodesSourceSizeInBytes = 0)
         {
             IsApplicationCache = isApplicationCache;
+            UnknownNodesSourceSizeInBytes = unknownNodesSourceSizeInBytes;
             _state = new CacheSerializationContract(CloneUnknownNodes(unknownNodes));
 
             foreach (var item in accessor.GetAllAccessTokens())
@@ -67,6 +70,27 @@ namespace Microsoft.Identity.Client
         public byte[] SerializeMsalV3()
         {
             return _state.ToJsonString().ToByteArray();
+        }
+
+        /// <summary>
+        /// Estimates the managed memory retained by this snapshot, in bytes.
+        /// </summary>
+        /// <remarks>
+        /// This estimate is intended for cache admission and eviction accounting, not as a hard
+        /// memory limit. Actual memory depends on the runtime, architecture, sharing, and cache
+        /// contents. It excludes cache-provider overhead, temporary allocations, and working caches.
+        /// The estimate may overcount or undercount actual memory and may change between MSAL versions.
+        /// Structural sizes are calibrated for x64. Summing estimates counts immutable objects shared
+        /// between snapshots more than once; this method does not track ownership across snapshots.
+        /// Providers should choose any additional safety margin separately from this estimate.
+        /// Unknown fields can retain the complete original serialized cache. Their size is estimated
+        /// from the original payload length and, on legacy targets, their materialized structure.
+        /// This method examines the snapshot's entries and scopes and does not serialize the cache.
+        /// </remarks>
+        /// <returns>An approximate size in bytes.</returns>
+        public long EstimateSizeInBytes()
+        {
+            return TokenCacheSnapshotSizeEstimator.Estimate(_state, UnknownNodesSourceSizeInBytes);
         }
 
         internal IDictionary<string, JsonNode> Restore(ITokenCacheAccessor accessor)

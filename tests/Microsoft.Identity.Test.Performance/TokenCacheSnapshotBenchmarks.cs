@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Test.Performance
         [Params(1, 10, 100)]
         public int TokensPerPartition { get; set; }
 
-        [GlobalSetup(Targets = new[] { nameof(JsonPartitionRead), nameof(SnapshotPartitionRead), nameof(JsonPartitionWrite), nameof(SnapshotPartitionWrite) })]
+        [GlobalSetup(Targets = new[] { nameof(JsonPartitionRead), nameof(SnapshotPartitionRead), nameof(JsonPartitionWrite), nameof(SnapshotPartitionWrite), nameof(SnapshotPartitionWriteWithSize), nameof(SnapshotEstimateSize) })]
         public void Setup()
         {
             var cache = ConfidentialClientApplicationBuilder.Create(ClientId).Build().AppTokenCache;
@@ -131,6 +131,20 @@ namespace Microsoft.Identity.Test.Performance
         public TokenCacheSnapshot SnapshotPartitionWrite()
         {
             return _provider.CreateSnapshot();
+        }
+
+        [Benchmark]
+        [BenchmarkCategory("Write")]
+        public long SnapshotPartitionWriteWithSize()
+        {
+            return _provider.CreateSnapshot().EstimateSizeInBytes();
+        }
+
+        [Benchmark]
+        [BenchmarkCategory("Estimate")]
+        public long SnapshotEstimateSize()
+        {
+            return _snapshots[_next++ & 1].EstimateSizeInBytes();
         }
 
         [Benchmark(Baseline = true)]

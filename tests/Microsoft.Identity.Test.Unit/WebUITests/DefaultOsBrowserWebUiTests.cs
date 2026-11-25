@@ -340,18 +340,43 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
 
         }
 
+        [TestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public void DefaultOsBrowserWebUi_ErrorCallback_EncodesHtml(bool customTemplate)
+        {
+            const string Error = "<b>local_error_probe</b>";
+            const string Description = "<i title=\"local & 'description'\">local_description_probe</i>";
+            SystemWebViewOptions options = customTemplate
+                ? new SystemWebViewOptions { HtmlMessageError = "<html><p>{0} {1}</p></html>" }
+                : null;
+            var webUi = CreateTestWebUI(options);
+            byte[] postData = System.Text.Encoding.UTF8.GetBytes(
+                $"error={Uri.EscapeDataString(Error)}&error_description={Uri.EscapeDataString(Description)}&state=expected_state");
+
+            MessageAndHttpCode response = webUi.GetResponseMessage(
+                new AuthorizationResponse(new Uri(TestRedirectUri), postData), "expected_state");
+
+            Assert.AreEqual(HttpStatusCode.OK, response.HttpCode);
+            Assert.StartsWith("<html>", response.Message);
+            StringAssert.Contains(response.Message, WebUtility.HtmlEncode(Error));
+            StringAssert.Contains(response.Message, WebUtility.HtmlEncode(Description));
+        }
+
         private void ValidateResponse(SystemWebViewOptions options, bool successResponse, string expectedMessage, string expectedRedirect)
         {
             // Arrange
             var tcpInterceptor = Substitute.For<IUriInterceptor>();
             var webUi = new DefaultOsBrowserWebUi(_platformProxy, _logger, options, tcpInterceptor);
 
+            string expectedState = AuthorizationResult.FromUri(TestAuthorizationResponseUri).State;
             Uri successAuthCodeUri = successResponse ?
                 new Uri(TestAuthorizationResponseUri) :
-                new Uri(TestErrorAuthorizationResponseUri);
+                new Uri(TestErrorAuthorizationResponseUri + "&state=" + Uri.EscapeDataString(expectedState));
 
             // Act
-            MessageAndHttpCode messageAndCode = webUi.GetResponseMessage(new AuthorizationResponse(successAuthCodeUri, null));
+            MessageAndHttpCode messageAndCode = webUi.GetResponseMessage(
+                new AuthorizationResponse(successAuthCodeUri, null), expectedState);
 
             // Assert
             if (expectedMessage != null)
