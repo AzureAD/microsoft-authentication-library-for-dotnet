@@ -100,21 +100,42 @@ namespace Microsoft.Identity.Client.Internal
             ApiEvent apiEvent,
             string callerSdkId,
             string callerSdkVersion,
-            Action<ExecutionResult, IList<KeyValuePair<string, object>>> tagsEnricher = null)
+            Action<ExecutionResult, IList<KeyValuePair<string, object>>> tagsEnricher = null,
+            TokenRequestCoalescer coalescer = null,
+            CancellationToken cancellationToken = default)
         {
+            var admission = coalescer?.TryEnter();
+            if (coalescer is not null && admission is null)
+            {
+                return;
+            }
+
+            var backgroundApiEvent = coalescer is null ? apiEvent : apiEvent.CreateBackgroundEvent();
             _ = Task.Run(async () =>
             {
+                using var telemetryScope = coalescer?.RequestContext.UseApiEvent(backgroundApiEvent);
                 try
                 {
                     var stopwatch = Stopwatch.StartNew();
-                    var authResult = await fetchAction().ConfigureAwait(false);
+                    AuthenticationResult authResult;
+                    using (admission)
+                    {
+                        authResult = coalescer is null
+                            ? await fetchAction().ConfigureAwait(false)
+                            : await coalescer.ExecuteUnderGateAsync(fetchAction, oldAccessToken, cancellationToken, admission).ConfigureAwait(false);
+                    }
                     stopwatch.Stop();
 
+                    if (coalescer is not null && authResult is null)
+                    {
+                        return;
+                    }
+
                     // Proactive refresh runs outside RequestBase.RunAsync, so backfill the result's telemetry
-                    // from the shared apiEvent using this operation's own elapsed time.
+                    // from this operation's event and elapsed time.
                     RequestBase.PopulateSuccessMetadata(
                         authResult.AuthenticationResultMetadata,
-                        apiEvent,
+                        backgroundApiEvent,
                         stopwatch.ElapsedMilliseconds,
                         Cache.CacheLevel.None);
 
@@ -129,30 +150,30 @@ namespace Microsoft.Identity.Client.Internal
 
                     serviceBundle.PlatformProxy.OtelInstrumentation.IncrementSuccessCounter(
                         serviceBundle.PlatformProxy.GetProductName(),
-                        apiEvent.ApiId,
+                        backgroundApiEvent.ApiId,
                         callerSdkId,
                         callerSdkVersion,
                         TokenSource.IdentityProvider,
                         CacheRefreshReason.ProactivelyRefreshed,
                         Cache.CacheLevel.None,
                         logger,
-                        apiEvent.TokenType,
+                        backgroundApiEvent.TokenType,
                         extraTags);
 
                     serviceBundle.PlatformProxy.OtelInstrumentation.LogRemainingTokenLifetime(
                         serviceBundle.PlatformProxy.GetProductName(),
-                        apiEvent.ApiId,
+                        backgroundApiEvent.ApiId,
                         TokenSource.IdentityProvider,
                         Cache.CacheLevel.None,
                         CacheRefreshReason.ProactivelyRefreshed,
-                        apiEvent.TokenType,
+                        backgroundApiEvent.TokenType,
                         authResult.ExpiresOn,
                         logger,
                         extraTags);
 
                     serviceBundle.PlatformProxy.OtelInstrumentation.LogSuccessHttpDuration(
                         serviceBundle.PlatformProxy.GetProductName(),
-                        apiEvent.ApiId,
+                        backgroundApiEvent.ApiId,
                         authResult.AuthenticationResultMetadata,
                         logger,
                         extraTags);
@@ -164,7 +185,7 @@ namespace Microsoft.Identity.Client.Internal
                     string logMsg = $"{ProactiveRefreshServiceError} Is exception retryable? {ex.IsRetryable}";
                     logger.ErrorPiiWithPrefix(ex, logMsg);
 
-                    LogBackgroundFailureTelemetry(serviceBundle, apiEvent, callerSdkId, callerSdkVersion,
+                    LogBackgroundFailureTelemetry(serviceBundle, backgroundApiEvent, callerSdkId, callerSdkVersion,
                         ex.ErrorCode, ex.StatusCode, ex.ErrorCodesForLogging?.FirstOrDefault(), ex, tagsEnricher, logger);
 
                     // Background refresh doesn't go through RunAsync, so the exception isn't carrying metadata yet.
@@ -172,7 +193,7 @@ namespace Microsoft.Identity.Client.Internal
                     // Total duration stays 0 on purpose - the caller already got a token from the cache.
                     if (ex.AuthenticationResultMetadata == null)
                     {
-                        ex.AuthenticationResultMetadata = RequestBase.CreateFailureMetadata(apiEvent, totalDurationInMs: 0);
+                        ex.AuthenticationResultMetadata = RequestBase.CreateFailureMetadata(backgroundApiEvent, totalDurationInMs: 0);
                     }
 
                     await InvokeBackgroundRefreshCallbackAsync(serviceBundle, new ExecutionResult { Successful = false, Exception = ex }, logger).ConfigureAwait(false);
@@ -180,7 +201,7 @@ namespace Microsoft.Identity.Client.Internal
                 catch (OperationCanceledException ex)
                 {
                     logger.WarningPiiWithPrefix(ex, ProactiveRefreshCancellationError);
-                    LogBackgroundFailureTelemetry(serviceBundle, apiEvent, callerSdkId, callerSdkVersion,
+                    LogBackgroundFailureTelemetry(serviceBundle, backgroundApiEvent, callerSdkId, callerSdkVersion,
                         ex.GetType().Name, httpStatusCode: 0, tagsEnricher: tagsEnricher, logger: logger);
 
                     // Proactive refresh was canceled (e.g., the linked token source was disposed on shutdown).
@@ -190,7 +211,7 @@ namespace Microsoft.Identity.Client.Internal
                 catch (Exception ex)
                 {
                     logger.ErrorPiiWithPrefix(ex, ProactiveRefreshGeneralError);
-                    LogBackgroundFailureTelemetry(serviceBundle, apiEvent, callerSdkId, callerSdkVersion,
+                    LogBackgroundFailureTelemetry(serviceBundle, backgroundApiEvent, callerSdkId, callerSdkVersion,
                         ex.GetType().Name, httpStatusCode: 0, tagsEnricher: tagsEnricher, logger: logger);
 
                     // ExecutionResult.Exception is typed as MsalException and the callback contract guarantees
@@ -201,7 +222,7 @@ namespace Microsoft.Identity.Client.Internal
 
                     if (msalException.AuthenticationResultMetadata == null)
                     {
-                        msalException.AuthenticationResultMetadata = RequestBase.CreateFailureMetadata(apiEvent, totalDurationInMs: 0);
+                        msalException.AuthenticationResultMetadata = RequestBase.CreateFailureMetadata(backgroundApiEvent, totalDurationInMs: 0);
                     }
 
                     await InvokeBackgroundRefreshCallbackAsync(serviceBundle, new ExecutionResult { Successful = false, Exception = msalException }, logger).ConfigureAwait(false);

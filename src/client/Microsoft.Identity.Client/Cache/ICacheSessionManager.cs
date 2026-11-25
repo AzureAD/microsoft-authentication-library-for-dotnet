@@ -17,6 +17,13 @@ namespace Microsoft.Identity.Client.Cache
     {
         RequestContext RequestContext { get; }
         ITokenCacheInternal TokenCacheInternal { get; }
+
+        /// <summary>
+        /// Discards an isolated read view at an acquisition boundary, when no cache reads are in progress.
+        /// Shared-root sessions are unchanged; subsequent lookups hydrate and pin a new private view.
+        /// </summary>
+        void ResetReadView();
+
         Task<MsalAccessTokenCacheItem> FindAccessTokenAsync();
         Task<Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem, Account>> SaveTokenResponseAsync(MsalTokenResponse tokenResponse);
         Task<MsalIdTokenCacheItem> GetIdTokenCacheItemAsync(MsalAccessTokenCacheItem accessTokenCacheItem);

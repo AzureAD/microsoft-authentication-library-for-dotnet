@@ -99,24 +99,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 {
                     var cachedIdToken = await CacheManager.GetIdTokenCacheItemAsync(cachedAccessToken).ConfigureAwait(false);
                     var account = await CacheManager.GetAccountAssociatedWithAccessTokenAsync(cachedAccessToken).ConfigureAwait(false);
-
-                    logger.Info(
-                        () => "[OBO Request] Found a valid access token in the cache. ID token also found? " + (cachedIdToken != null));
-
-                    AuthenticationRequestParameters.RequestContext.ApiEvent.IsAccessTokenCacheHit = true;
-
-                    Metrics.IncrementTotalAccessTokensFromCache();
-                    authResult = await AuthenticationResult.CreateAsync(
-                                                            cachedAccessToken,
-                                                            cachedIdToken,
-                                                            AuthenticationRequestParameters.AuthenticationScheme,
-                                                            AuthenticationRequestParameters.RequestContext.CorrelationId,
-                                                            TokenSource.Cache,
-                                                            AuthenticationRequestParameters.RequestContext.ApiEvent,
-                                                            account, 
-                                                            spaAuthCode: null,
-                                                            additionalResponseParameters: null,
-                                                            cancellationToken: cancellationToken).ConfigureAwait(false);
+                    authResult = await CreateAuthenticationResultFromCacheAsync(
+                        cachedAccessToken, cachedIdToken, account, cancellationToken).ConfigureAwait(false);
                 }
                 else
                 {
@@ -142,7 +126,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 if (cachedAccessToken == null)
                 {
-                    authResult = await RefreshRtOrFetchNewAccessTokenAsync(cancellationToken).ConfigureAwait(false);
+                    var coalescer = CreateCoalescer();
+                    authResult = coalescer is null
+                        ? await RefreshRtOrFetchNewAccessTokenAsync(cancellationToken).ConfigureAwait(false)
+                        : await coalescer.ExecuteAsync(
+                            () => RefreshRtOrFetchNewAccessTokenAsync(cancellationToken), cancellationToken).ConfigureAwait(false);
                 }
                 else
                 {
@@ -166,7 +154,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         }, logger, ServiceBundle, AuthenticationRequestParameters.RequestContext.ApiEvent,
                         AuthenticationRequestParameters.RequestContext.ApiEvent.CallerSdkApiId,
                         AuthenticationRequestParameters.RequestContext.ApiEvent.CallerSdkVersion,
-                        AuthenticationRequestParameters.OtelTagsEnricher);
+                        AuthenticationRequestParameters.OtelTagsEnricher,
+                        CreateCoalescer(),
+                        cancellationToken);
                     }
                 }
 
@@ -176,6 +166,46 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 return await HandleTokenRefreshErrorAsync(e, cachedAccessToken, cancellationToken).ConfigureAwait(false);
             }
+        }
+
+        private TokenRequestCoalescer CreateCoalescer()
+        {
+            if (_onBehalfOfParameters.ForceRefresh || !string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
+            {
+                return null;
+            }
+
+            return new TokenRequestCoalescer(
+                AuthenticationRequestParameters,
+                ApiEvent.IsLongRunningObo(AuthenticationRequestParameters.ApiId) ? "LongRunningObo" : nameof(OnBehalfOfRequest),
+                CacheManager.FindAccessTokenAsync,
+                CreateAuthenticationResultFromCacheAsync);
+        }
+
+        private async Task<AuthenticationResult> CreateAuthenticationResultFromCacheAsync(
+            MsalAccessTokenCacheItem cachedAccessToken, CancellationToken cancellationToken)
+        {
+            var cachedIdToken = await CacheManager.GetIdTokenCacheItemAsync(cachedAccessToken).ConfigureAwait(false);
+            var account = await CacheManager.GetAccountAssociatedWithAccessTokenAsync(cachedAccessToken).ConfigureAwait(false);
+            return await CreateAuthenticationResultFromCacheAsync(
+                cachedAccessToken, cachedIdToken, account, cancellationToken).ConfigureAwait(false);
+        }
+
+        private Task<AuthenticationResult> CreateAuthenticationResultFromCacheAsync(
+            MsalAccessTokenCacheItem cachedAccessToken, MsalIdTokenCacheItem cachedIdToken,
+            Account account, CancellationToken cancellationToken)
+        {
+            AuthenticationRequestParameters.RequestContext.Logger.Info(
+                () => "[OBO Request] Found a valid access token in the cache. ID token also found? " + (cachedIdToken != null));
+            AuthenticationRequestParameters.RequestContext.ApiEvent.IsAccessTokenCacheHit = true;
+            Metrics.IncrementTotalAccessTokensFromCache();
+            return AuthenticationResult.CreateAsync(
+                cachedAccessToken, cachedIdToken,
+                AuthenticationRequestParameters.AuthenticationScheme,
+                AuthenticationRequestParameters.RequestContext.CorrelationId,
+                TokenSource.Cache, AuthenticationRequestParameters.RequestContext.ApiEvent, account,
+                spaAuthCode: null, additionalResponseParameters: null,
+                cancellationToken: cancellationToken);
         }
 
         private async Task<AuthenticationResult> RefreshRtOrFetchNewAccessTokenAsync(CancellationToken cancellationToken)
