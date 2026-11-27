@@ -7,6 +7,8 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AuthScheme.Bearer;
+using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -197,6 +199,51 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual("", extMap["null_extension"]);
 
             }
+        }
+
+        /// <summary>
+        /// App-only tokens have no home account. A deserialized cache item reads the
+        /// missing home_account_id as an empty string, which must not produce an Account.
+        /// </summary>
+        [TestMethod]
+        [DataRow(null)]
+        [DataRow("")]
+        public async Task CreateAsync_NoHomeAccountId_AccountIsNullAsync(string homeAccountId)
+        {
+            MsalAccessTokenCacheItem atItem = TokenCacheHelper.CreateAccessTokenItem(homeAccountId: homeAccountId);
+
+            AuthenticationResult result = await AuthenticationResult.CreateAsync(
+                atItem,
+                msalIdTokenCacheItem: null,
+                new BearerAuthenticationOperation(),
+                Guid.NewGuid(),
+                TokenSource.Cache,
+                apiEvent: null,
+                account: null,
+                spaAuthCode: null,
+                additionalResponseParameters: null).ConfigureAwait(false);
+
+            Assert.IsNull(result.Account);
+        }
+
+        [TestMethod]
+        public async Task CreateAsync_WithHomeAccountId_AccountIsSetAsync()
+        {
+            MsalAccessTokenCacheItem atItem = TokenCacheHelper.CreateAccessTokenItem(homeAccountId: TestConstants.HomeAccountId);
+
+            AuthenticationResult result = await AuthenticationResult.CreateAsync(
+                atItem,
+                msalIdTokenCacheItem: null,
+                new BearerAuthenticationOperation(),
+                Guid.NewGuid(),
+                TokenSource.Cache,
+                apiEvent: null,
+                account: null,
+                spaAuthCode: null,
+                additionalResponseParameters: null).ConfigureAwait(false);
+
+            Assert.IsNotNull(result.Account);
+            Assert.AreEqual(TestConstants.HomeAccountId, result.Account.HomeAccountId.Identifier);
         }
 
         /// <summary>
