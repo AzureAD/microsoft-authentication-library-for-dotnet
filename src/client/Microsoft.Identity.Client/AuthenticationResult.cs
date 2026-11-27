@@ -209,7 +209,7 @@ namespace Microsoft.Identity.Client
             {
                 Account = account;
             }
-            else if (homeAccountId != null)
+            else if (!string.IsNullOrEmpty(homeAccountId))
             {
                 Account = new Account(
                     homeAccountId,
